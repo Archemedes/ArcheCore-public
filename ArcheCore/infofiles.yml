@@ -1,0 +1,7 @@
+basic-info:
+  topic: Plugin Info
+  content: '&4&lI am a Sneaky Info file!
+  
+  &3I came from the config file &oinfofiles.yml &3which is automatically read when the ArcheCore plugin starts up. I work like the Help File, except I am invisible!
+  
+  &9People can still reach me if they provide my topic name into the help command, or if they click the right info link! Weehee'
