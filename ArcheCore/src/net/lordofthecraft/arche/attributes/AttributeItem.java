@@ -1,8 +1,10 @@
 package net.lordofthecraft.arche.attributes;
 
+import org.bukkit.craftbukkit.v1_8_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.*;
 import org.bukkit.*;
 import org.bukkit.inventory.meta.*;
+
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -36,7 +38,7 @@ public class AttributeItem
     
     public static ItemStack addModifier(final AttributeModifier m, final ItemStack is) {
         try {
-            final Object nmsItemStack = toNMSStack(is);
+            final net.minecraft.server.v1_8_R1.ItemStack nmsItemStack = (net.minecraft.server.v1_8_R1.ItemStack) toNMSStack(is);
             final Object compound = AttributeItem.compoundConstructor.newInstance(new Object[0]);
             final long least = m.getUUID().getLeastSignificantBits();
             final long most = m.getUUID().getMostSignificantBits();
@@ -46,12 +48,13 @@ public class AttributeItem
             AttributeItem.setString.invoke(compound, "Name", m.getName());
             AttributeItem.setDouble.invoke(compound, "Amount", m.getValue());
             AttributeItem.setInt.invoke(compound, "Operation", m.getOperation());
-            final Field tagField = nmsItemStack.getClass().getField("tag");
-            Object tag = tagField.get(nmsItemStack);
+           // nmsItemStack.getClass().getDeclaredField("tag").setAccessible(true);
+           // final Field tagField = nmsItemStack.getClass().getDeclaredField("tag");
+            Object tag = nmsItemStack.getTag();
             Object listNBT;
             if (tag == null) {
                 tag = AttributeItem.compoundConstructor.newInstance(new Object[0]);
-                tagField.set(nmsItemStack, tag);
+                nmsItemStack.setTag((net.minecraft.server.v1_8_R1.NBTTagCompound) tag);
                 listNBT = createAttributeModifierList(tag);
             }
             else if (!NBTCompoundHasKey(tag, "AttributeModifiers")) {
@@ -80,7 +83,8 @@ public class AttributeItem
     public static ItemStack removeModifier(final AttributeModifier m, final ItemStack is) {
         try {
             final Object nmsItemStack = toNMSStack(is);
-            final Object tag = nmsItemStack.getClass().getField("tag").get(nmsItemStack);
+            //nmsItemStack.getClass().getDeclaredField("tag").setAccessible(true);
+            final Object tag = nmsItemStack.getClass().getDeclaredField("tag").get(nmsItemStack);
             if (tag == null) {
                 return is;
             }
@@ -98,15 +102,17 @@ public class AttributeItem
     }
     
     private static Object toNMSStack(final ItemStack stack) throws NoSuchMethodException, SecurityException, ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        final Method convert = Class.forName(Bukkit.getItemFactory().getClass().getPackage().getName() + ".CraftItemStack").getMethod("asNMSCopy", ItemStack.class);
+        /*final Method convert = Class.forName(Bukkit.getItemFactory().getClass().getPackage().getName() + ".CraftItemStack").getMethod("asNMSCopy", ItemStack.class);
         final Object result = convert.invoke(null, stack);
-        return result;
+        return result;*/
+    	return CraftItemStack.asNMSCopy(stack);
     }
     
     private static ItemStack toBukkitStack(final Object nmsItemStack) throws NoSuchMethodException, SecurityException, ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        final Method convert = Class.forName(Bukkit.getItemFactory().getClass().getPackage().getName() + ".CraftItemStack").getMethod("asCraftMirror", nmsItemStack.getClass());
+        /*final Method convert = Class.forName(Bukkit.getItemFactory().getClass().getPackage().getName() + ".CraftItemStack").getMethod("asCraftMirror", nmsItemStack.getClass());
         final ItemStack result = (ItemStack)convert.invoke(null, nmsItemStack);
-        return result;
+        return result;*/
+    	return CraftItemStack.asCraftMirror((net.minecraft.server.v1_8_R1.ItemStack) nmsItemStack);
     }
     
     private static boolean NBTCompoundHasKey(final Object compound, final String key) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
