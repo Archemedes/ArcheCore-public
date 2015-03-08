@@ -1,40 +1,44 @@
 package net.lordofthecraft.arche.skill;
 
-import java.util.concurrent.*;
-import net.lordofthecraft.arche.persona.*;
-import net.lordofthecraft.arche.SQL.*;
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.concurrent.Callable;
 
-public class SkillDataCallable implements Callable<SkillData>
-{
-    private final ArchePersona persona;
-    private final String skill;
-    private final SQLHandler handler;
-    
-    public SkillDataCallable(final ArchePersona persona, final String skill, final SQLHandler handler) {
-        super();
-        this.persona = persona;
-        this.skill = skill;
-        this.handler = handler;
-    }
-    
-    @Override
-    public SkillData call() throws SQLException {
-        final String query = "SELECT xp,visible FROM sk_" + this.skill + " WHERE player='" + this.persona.getPlayerUUID().toString() + "' AND id=" + this.persona.getId() + ";";
-        SkillData data;
-        synchronized (this.handler) {
-            final ResultSet res = this.handler.query(query);
-            if (res.next()) {
-                final double xp = res.getDouble(1);
-                final boolean visible = res.getBoolean(2);
-                data = new SkillData(xp, visible);
-            }
-            else {
-                data = null;
-            }
-            res.close();
-            res.getStatement().close();
-        }
-        return data;
-    }
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.persona.ArchePersona;
+
+public class SkillDataCallable implements Callable<SkillData> {
+	private final ArchePersona persona;
+	private final String skill;
+	private final SQLHandler handler;
+	
+	public SkillDataCallable(ArchePersona persona, String skill, SQLHandler handler){
+		this.persona = persona;
+		this.skill = skill;
+		this.handler = handler;
+	}
+	
+	@Override
+	public SkillData call() throws SQLException {
+		String query = "SELECT xp,visible FROM sk_" + skill + " WHERE player='" + persona.getPlayerUUID().toString() + "' AND id=" + persona.getId() +";"; 
+		SkillData data;
+		
+		synchronized(handler){
+			ResultSet res = handler.query(query);
+			
+			if(res.next()){
+				double xp = res.getDouble(1);
+				boolean visible = res.getBoolean(2);
+				data = new SkillData(xp, visible);
+			} else {
+				data = null;
+			}
+			
+			res.close();
+			res.getStatement().close();
+		}
+		
+		return data;
+	}
+
 }

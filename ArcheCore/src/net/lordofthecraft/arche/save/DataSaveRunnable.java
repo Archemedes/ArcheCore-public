@@ -1,62 +1,50 @@
 package net.lordofthecraft.arche.save;
 
-import net.lordofthecraft.arche.*;
-import net.lordofthecraft.arche.SQL.*;
-import org.bukkit.*;
-import net.lordofthecraft.arche.save.tasks.*;
+import org.bukkit.Bukkit;
 
-public class DataSaveRunnable implements Runnable
-{
-    private final SaveHandler queue;
-    private final ArcheTimer timer;
-    private final SQLHandler handle;
-    
-    public DataSaveRunnable(final SaveHandler queue, final ArcheTimer timer, final SQLHandler handle) {
-        super();
-        this.queue = queue;
-        this.timer = timer;
-        this.handle = handle;
-    }
-    
-    @Override
-    public void run() {
-        while (true) {
-            try {
-            Block_4:
-                while (true) {
-                    ArcheTask task = this.queue.take();
-                    int i = 0;
-                    this.handle.execute("BEGIN");
-                    if (this.timer != null) {
-                        Bukkit.getLogger().info("[ArcheCore][Debug] Starting an ArcheCore SaveHandler transaction now.");
-                    }
-                    do {
-                        if (this.timer != null) {
-                            this.timer.startTiming(task.getClass().getSimpleName());
-                        }
-                        task.run();
-                        if (this.timer != null) {
-                            this.timer.stopTiming(task.getClass().getSimpleName());
-                        }
-                        if (task instanceof EndOfStreamTask) {
-                            break Block_4;
-                        }
-                        if (i++ >= 1000) {
-                            task = null;
-                        }
-                        else {
-                            task = this.queue.poll();
-                        }
-                    } while (task != null);
-                    this.handle.execute("END TRANSACTION");
-                }
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                this.handle.execute("END TRANSACTION");
-                continue;
-            }
-            break;
-        }
-    }
+import net.lordofthecraft.arche.ArcheTimer;
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.save.tasks.ArcheTask;
+import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
+
+public class DataSaveRunnable implements Runnable{	
+	private final SaveHandler queue;
+	private final ArcheTimer timer;
+	private final SQLHandler handle;
+			
+	public DataSaveRunnable(SaveHandler queue, ArcheTimer timer, SQLHandler handle){
+		this.queue  = queue  ;
+		this.timer  = timer  ;
+		this.handle = handle ;
+	}
+	
+	@Override
+	public void run() {
+		while(true){
+			try{
+				ArcheTask task = queue.take(); //This waits until a task is found.
+				
+				int i = 0;
+				handle.execute("BEGIN");
+				if(timer != null) Bukkit.getLogger().info("[ArcheCore][Debug] Starting an ArcheCore SaveHandler transaction now.");
+				do{
+					if(timer != null) timer.startTiming(task.getClass().getSimpleName());
+					task.run();
+					if(timer != null) timer.stopTiming(task.getClass().getSimpleName());
+
+					if(task instanceof EndOfStreamTask){ //Task Kills the consumer	
+						return; //Transaction already ended by the EOStask.run()
+					}
+					
+					if(i++ >= 1000) task = null;
+					else task = queue.poll();
+				}while(task != null);
+				handle.execute("END TRANSACTION");
+			}catch(Exception e){	  				//Report possible errors from executing tasks
+				e.printStackTrace() 			  ; //Provide nature of the error
+				handle.execute("END TRANSACTION") ; //Ends transaction
+				continue						  ; //Try to continue as normal
+			}
+		}
+	}
 }

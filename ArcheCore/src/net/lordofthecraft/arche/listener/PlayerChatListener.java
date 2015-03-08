@@ -1,23 +1,23 @@
 package net.lordofthecraft.arche.listener;
 
-import org.bukkit.event.player.*;
-import net.lordofthecraft.arche.persona.*;
-import org.bukkit.event.*;
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 
-public class PlayerChatListener implements Listener
-{
-    private final ArchePersonaHandler handler;
-    
-    public PlayerChatListener() {
-        super();
-        this.handler = ArchePersonaHandler.getInstance();
-    }
-    
-    @EventHandler
-    public void onChat(final AsyncPlayerChatEvent e) {
-        final ArchePersona pers = this.handler.getPersona(e.getPlayer());
-        if (pers != null) {
-            pers.addCharactersSpoken(e.getMessage().length());
-        }
-    }
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+
+public class PlayerChatListener implements Listener {
+	private final ArchePersonaHandler handler;
+	
+	public PlayerChatListener(){
+		handler = ArchePersonaHandler.getInstance();
+	}
+	
+	@EventHandler
+	public void onChat(AsyncPlayerChatEvent e){
+		ArchePersona pers = handler.getPersona(e.getPlayer());
+		if(pers != null)
+			pers.addCharactersSpoken(e.getMessage().length());
+	}
 }

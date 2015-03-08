@@ -1,38 +1,38 @@
 package net.lordofthecraft.arche.save.tasks;
 
-import java.util.*;
-import org.bukkit.entity.*;
-import org.bukkit.plugin.*;
-import net.lordofthecraft.arche.*;
-import org.bukkit.*;
-import net.lordofthecraft.arche.event.*;
-import org.bukkit.event.*;
-import net.lordofthecraft.arche.persona.*;
+import java.util.UUID;
 
-public class UnloadTask extends ArcheTask
-{
-    private final String name;
-    private final UUID uuid;
-    
-    public UnloadTask(final Player who) {
-        super();
-        this.name = who.getName();
-        this.uuid = who.getUniqueId();
-    }
-    
-    @Override
-    public void run() {
-        final Plugin plugin = (Plugin)ArcheCore.getControls();
-        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, (Runnable)new UnloadRunnable());
-        Bukkit.getPluginManager().callEvent((Event)new AsyncPlayerUnloadEvent(this.name, this.uuid));
-    }
-    
-    private class UnloadRunnable implements Runnable
-    {
-        @Override
-        public void run() {
-            final ArchePersonaHandler h = (ArchePersonaHandler)ArcheCore.getControls().getPersonaHandler();
-            h.unload(UnloadTask.this.uuid);
-        }
-    }
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.event.AsyncPlayerUnloadEvent;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+
+public class UnloadTask extends ArcheTask {
+	private final String name;
+	private final UUID uuid;
+	
+	public UnloadTask(Player who) {
+		super();
+		this.name = who.getName();
+		this.uuid = who.getUniqueId();
+	}
+	
+	
+	public void run(){
+		Plugin plugin = (Plugin) ArcheCore.getControls();
+		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new UnloadRunnable());
+		Bukkit.getPluginManager().callEvent(new AsyncPlayerUnloadEvent(name, uuid));
+	}
+	
+	private class UnloadRunnable implements Runnable{
+		
+		@Override
+		public void run(){
+			ArchePersonaHandler h = (ArchePersonaHandler) ArcheCore.getControls().getPersonaHandler();
+			h.unload(uuid);
+		}
+	}
 }

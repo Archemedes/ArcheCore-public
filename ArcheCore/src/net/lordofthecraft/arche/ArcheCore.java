@@ -1,458 +1,590 @@
 package net.lordofthecraft.arche;
 
-import org.bukkit.plugin.java.*;
-import net.lordofthecraft.arche.SQL.*;
-import net.lordofthecraft.arche.save.tasks.*;
-import org.bukkit.entity.*;
-import com.google.common.collect.*;
-import net.lordofthecraft.arche.save.*;
-import java.util.*;
-import java.sql.*;
-import net.lordofthecraft.arche.skill.*;
-import org.bukkit.command.*;
-import net.lordofthecraft.arche.commands.*;
-import org.bukkit.event.*;
-import net.lordofthecraft.arche.listener.*;
-import org.bukkit.plugin.*;
-import org.bukkit.*;
-import java.io.*;
-import org.bukkit.configuration.file.*;
-import org.bukkit.configuration.*;
-import net.lordofthecraft.arche.persona.*;
-import org.bukkit.block.*;
-import net.lordofthecraft.arche.help.*;
-import org.bukkit.inventory.*;
-import net.lordofthecraft.arche.interfaces.*;
+import java.io.File;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.UUID;
 
-public class ArcheCore extends JavaPlugin implements IArcheCore
-{
-    private static ArcheCore instance;
-    private SQLHandler sqlHandler;
-    private SaveHandler saveHandler;
-    private BlockRegistry blockRegistry;
-    private ArchePersonaHandler personaHandler;
-    private HelpDesk helpdesk;
-    private ArcheTimer timer;
-    private UsernameLogger usernameLogger;
-    private Economy economy;
-    private boolean helpOverriden;
-    private boolean legacyCommands;
-    private boolean showXpToPlayers;
-    private boolean racialBonuses;
-    private int nameChangeDelay;
-    private int personaChangeDelay;
-    private boolean enablePrefixes;
-    private boolean modifyDisplayNames;
-    private boolean debugMode;
-    private int cachePersonas;
-    private int newbieDelay;
-    private int newbieProtectDelay;
-    private boolean protectiveTeleport;
-    private boolean teleportNewbies;
-    private UUID newbieWorldUUID;
-    private boolean useWiki;
-    private Thread saverThread;
-    
-    public ArcheCore() {
-        super();
-        this.saverThread = null;
-    }
-    
-    public void onDisable() {
-        this.saveHandler.put(new EndOfStreamTask());
-        for (final Player p : Bukkit.getOnlinePlayers()) {
-            p.closeInventory();
-            RaceBonusHandler.reset(p);
-        }
-        if (this.saverThread != null) {
-            try {
-                this.saverThread.join();
-            }
-            catch (InterruptedException e) {
-                this.getLogger().severe("ArcheCore was interrupted prematurely while waiting for its saver thread to resolve.");
-                e.printStackTrace();
-            }
-        }
-        this.sqlHandler.close();
-    }
-    
-    public void onLoad() {
-        TreasureChest.init((Plugin)(ArcheCore.instance = this));
-    }
-    
-    public void onEnable() {
-        this.initConfig();
-        this.sqlHandler = new SQLHandler((Plugin)this, "ArcheCore");
-        this.saveHandler = SaveHandler.getInstance();
-        this.blockRegistry = new BlockRegistry();
-        this.personaHandler = ArchePersonaHandler.getInstance();
-        this.helpdesk = HelpDesk.getInstance();
-        this.timer = (this.debugMode ? new ArcheTimer((Plugin)this) : null);
-        this.personaHandler.setModifyDisplayNames(this.modifyDisplayNames);
-        this.usernameLogger = new UsernameLogger();
-        LinkedHashMap<String, String> cols = Maps.newLinkedHashMap();
-        cols.put("player", "TEXT");
-        cols.put("id", "INT");
-        cols.put("name", "TEXT");
-        cols.put("age", "INT");
-        cols.put("race", "TEXT");
-        cols.put("rheader", "TEXT");
-        cols.put("gender", "INT");
-        cols.put("desc", "TEXT");
-        cols.put("prefix", "TEXT");
-        cols.put("current", "INT DEFAULT 1");
-        cols.put("autoage", "INT DEFAULT 1");
-        cols.put("stat_played", "INT DEFAULT 0");
-        cols.put("stat_chars", "INT DEFAULT 0");
-        cols.put("stat_renamed", "INT DEFAULT 0");
-        cols.put("skill_xpgain", "INT DEFAULT 1");
-        cols.put("skill_selected", "TEXT");
-        cols.put("world", "TEXT");
-        cols.put("x", "INT");
-        cols.put("y", "INT");
-        cols.put("z", "INT");
-        cols.put("inv", "TEXT");
-        cols.put("money", "REAL DEFAULT 0");
-        cols.put("skill_primary", "TEXT");
-        cols.put("skill_secondary", "TEXT");
-        cols.put("skill_tertiary", "TEXT");
-        cols.put("PRIMARY KEY (player, id)", "ON CONFLICT REPLACE");
-        this.sqlHandler.createTable("persona", cols);
-        cols = Maps.newLinkedHashMap();
-        cols.put("player", "TEXT NOT NULL");
-        cols.put("id", "INT NOT NULL");
-        cols.put("name", "TEXT NOT NULL");
-        cols.put("UNIQUE (player, id, name)", "ON CONFLICT IGNORE");
-        this.sqlHandler.createTable("persona_names", cols);
-        cols = Maps.newLinkedHashMap();
-        cols.put("world", "TEXT NOT NULL");
-        cols.put("x", "INT");
-        cols.put("y", "INT");
-        cols.put("z", "INT");
-        cols.put("UNIQUE (world, x, y, z)", "ON CONFLICT IGNORE");
-        this.sqlHandler.createTable("blockregistry", cols);
-        this.sqlHandler.execute("DELETE FROM blockregistry WHERE ROWID IN (SELECT ROWID FROM blockregistry ORDER BY ROWID DESC LIMIT -1 OFFSET 5000)");
-        try {
-            final ResultSet res = this.sqlHandler.query("SELECT * FROM blockregistry");
-            while (res.next()) {
-                final String world = res.getString(1);
-                final int x = res.getInt(2);
-                final int y = res.getInt(3);
-                final int z = res.getInt(4);
-                final WeakBlock wb = new WeakBlock(world, x, y, z);
-                this.blockRegistry.playerPlaced.add(wb);
-            }
-            res.getStatement().close();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
-        Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin)this, (Runnable)new Runnable() {
-            @Override
-            public void run() {
-                if (ArcheCore.this.willCachePersonas()) {
-                    final long time = System.currentTimeMillis();
-                    ArcheCore.this.getLogger().info("Preloading Personas as far back as " + ArcheCore.this.cachePersonas + " days");
-                    ArcheCore.this.personaHandler.initPreload(ArcheCore.this.cachePersonas);
-                    ArcheCore.this.getLogger().info("Personas were loaded in " + (System.currentTimeMillis() - time) + "ms.");
-                }
-                for (final Player p : Bukkit.getOnlinePlayers()) {
-                    ArcheCore.this.personaHandler.initPlayer(p);
-                }
-                ArcheCore.this.saverThread = new Thread(new DataSaveRunnable(ArcheCore.this.saveHandler, ArcheCore.this.timer, ArcheCore.this.sqlHandler), "ArcheCore SQL Consumer");
-                ArcheCore.this.saverThread.start();
-            }
-        });
-        new TimeTrackerRunnable(this.personaHandler).runTaskTimer((Plugin)this, 2400L, 1200L);
-        this.initHelp();
-        this.initCommands();
-        this.initListeners();
-    }
-    
-    private void initConfig() {
-        final FileConfiguration config = this.getConfig();
-        this.saveDefaultConfig();
-        this.helpOverriden = config.getBoolean("override.help.command");
-        this.legacyCommands = config.getBoolean("enable.legacy.commands");
-        this.nameChangeDelay = config.getInt("name.change.delay");
-        this.personaChangeDelay = config.getInt("persona.change.delay");
-        this.showXpToPlayers = config.getBoolean("show.exp.values");
-        this.racialBonuses = config.getBoolean("enable.racial.bonuses");
-        this.enablePrefixes = config.getBoolean("enable.persona.prefix");
-        this.modifyDisplayNames = config.getBoolean("modify.player.displayname");
-        this.newbieProtectDelay = config.getInt("persona.newbie.protect");
-        this.debugMode = config.getBoolean("enable.debug.mode");
-        this.newbieDelay = config.getInt("newbie.notification");
-        this.useWiki = config.getBoolean("enable.wiki.lookup");
-        this.cachePersonas = config.getInt("persona.cache.time");
-        this.protectiveTeleport = config.getBoolean("teleport.to.rescue");
-        this.teleportNewbies = config.getBoolean("new.persona.to.spawn");
-        if (config.getBoolean("bonus.xp.racial")) {
-            ArcheSkillFactory.activateXpMod(ExpModifier.RACIAL);
-        }
-        if (config.getBoolean("bonus.xp.playtime")) {
-            ArcheSkillFactory.activateXpMod(ExpModifier.PLAYTIME);
-        }
-        if (config.getBoolean("bonus.xp.autoage")) {
-            ArcheSkillFactory.activateXpMod(ExpModifier.AUTOAGE);
-        }
-        if (this.teleportNewbies) {
-            final World w = Bukkit.getWorld(config.getString("preferred.spawn.world"));
-            if (w != null) {
-                this.newbieWorldUUID = w.getUID();
-            }
-            else {
-                this.getLogger().info("Could not find config-specified world. Will use default world instead.");
-            }
-        }
-        if (config.getBoolean("enable.economy")) {
-            this.economy = new ArcheEconomy(config);
-        }
-    }
-    
-    private void initCommands() {
-        this.getCommand("archehelp").setExecutor((CommandExecutor)new CommandArchehelp(this.helpdesk, this.helpOverriden));
-        this.getCommand("helpmenu").setExecutor((CommandExecutor)new CommandHelpMenu(this.helpdesk));
-        this.getCommand("persona").setExecutor((CommandExecutor)new CommandPersona(this.helpdesk, this.personaHandler, this.nameChangeDelay, this.enablePrefixes));
-        this.getCommand("skill").setExecutor((CommandExecutor)new CommandSkill(this.helpdesk, this.showXpToPlayers));
-        this.getCommand("beaconme").setExecutor((CommandExecutor)new CommandBeaconme());
-        this.getCommand("treasurechest").setExecutor((CommandExecutor)new CommandTreasurechest());
-        this.getCommand("realname").setExecutor((CommandExecutor)new CommandRealname(this));
-        this.getCommand("autoage").setExecutor((CommandExecutor)new CommandAutoage(this));
-        this.getCommand("money").setExecutor((CommandExecutor)new CommandMoney(this.helpdesk, this.economy));
-        this.getCommand("namelog").setExecutor((CommandExecutor)new CommandNamelog());
-        this.getCommand("arsql").setExecutor((CommandExecutor)new CommandSql());
-    }
-    
-    private void initListeners() {
-        final PluginManager pm = Bukkit.getPluginManager();
-        pm.registerEvents((Listener)new PlayerJoinListener(this.personaHandler), (Plugin)this);
-        pm.registerEvents((Listener)new PlayerInteractListener(this), (Plugin)this);
-        pm.registerEvents((Listener)new BeaconMenuListener(this, this.personaChangeDelay), (Plugin)this);
-        pm.registerEvents((Listener)new HelpMenuListener((Plugin)this, this.helpdesk), (Plugin)this);
-        pm.registerEvents((Listener)new PlayerChatListener(), (Plugin)this);
-        pm.registerEvents((Listener)new TreasureChestListener(), (Plugin)this);
-        pm.registerEvents((Listener)new BlockRegistryListener(this.blockRegistry), (Plugin)this);
-        if (this.helpOverriden) {
-            pm.registerEvents((Listener)new HelpOverrideListener(), (Plugin)this);
-        }
-        if (this.legacyCommands) {
-            pm.registerEvents((Listener)new LegacyCommandsListener(), (Plugin)this);
-        }
-        if (this.racialBonuses) {
-            pm.registerEvents((Listener)new RacialBonusListener(this, this.getPersonaHandler()), (Plugin)this);
-        }
-        if (this.newbieProtectDelay > 0) {
-            pm.registerEvents((Listener)new NewbieProtectListener(this.personaHandler, this.newbieProtectDelay), (Plugin)this);
-        }
-        if (this.usesEconomy() && this.economy.getFractionLostOnDeath() > 0.0) {
-            pm.registerEvents((Listener)new EconomyListener(this.economy), (Plugin)this);
-        }
-    }
-    
-    private void initHelp() {
-        final String div = ChatColor.LIGHT_PURPLE + "\n--------------------------------------------------\n";
-        final String persHelp = ChatColor.YELLOW + "Your " + ChatColor.ITALIC + "Persona" + ChatColor.YELLOW + " is an uncouth sailor, fair Elven maiden or parent-slaying Orc. " + "in Lord of the Craft, you speak and act as your current Persona, and know only what they know." + div + ChatColor.GREEN + "Once accepted, creating your Persona is the first step of your adventure." + " You can later remove or create new Personas, by finding a " + ChatColor.ITALIC + "@Beacon@" + ChatColor.GREEN + " and right-clicking it.";
-        final String commandHelp = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Your essential commands are as follows: " + div + ChatColor.GRAY + "" + ChatColor.ITALIC + (this.helpOverriden ? "$/help$" : "$/archehelp$") + ChatColor.GRAY + ": Provides a useful database of help topics.\n" + ChatColor.GOLD + "" + ChatColor.ITALIC + "$/helpmenu$" + ChatColor.GOLD + ": The same help topics, provided in a menu form.\n" + ChatColor.BLUE + "" + ChatColor.ITALIC + "$/persona$" + ChatColor.BLUE + ": See others' Personas and modify your own.\n" + ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "$/skill$" + ChatColor.LIGHT_PURPLE + ": See the Skills your Persona can learn";
-        final String beaconInfo = "A " + ChatColor.ITALIC + "Beacon" + ChatColor.RESET + " lets you control most Persona-related tasks. Finding and right-clicking a beacon" + " grants access to, among other things, Persona modification and the plugin help files (which are also accessible via @commands@). Knowing where Beacons are located will be crucial for " + " orienting yourself with the ArcheCore plugin.";
-        final String profession = ChatColor.GRAY + "/sk [skill] select {main/second/bonus}: " + ChatColor.GOLD + "Select a profession.\n" + ChatColor.GREEN + "You have to select a profession to raise that skill to the maximum possible tier. You can, however, experiment with any skill before committing to a profession.\n" + ChatColor.BLUE + "Depending on your Persona's race, you might also have a Racial Skill. Racial skills can be freelly leveled and do not need to be selected.\n" + ChatColor.GRAY + "Normally, you can be Adequate in any non-selected skill. If you pick a primary profession, this cap is tightened down to let you be Clumsy. If you also pick a secondary, your other skills will be locked at the Inept tier.";
-        this.addHelp("Persona", persHelp, Material.REDSTONE_COMPARATOR);
-        this.addHelp("Commands", commandHelp, Material.COMMAND);
-        this.addHelp("Professions", profession, Material.BEDROCK);
-        this.addInfo("Beacon", beaconInfo);
-        if (!new File(this.getDataFolder(), "helpfiles.yml").exists()) {
-            this.saveResource("helpfiles.yml", false);
-        }
-        FileConfiguration c = (FileConfiguration)YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "helpfiles.yml"));
-        for (final String key : c.getKeys(false)) {
-            if (c.isConfigurationSection(key)) {
-                final ConfigurationSection section = c.getConfigurationSection(key);
-                final String name = section.isString("topic") ? section.getString("topic") : key;
-                String desc = null;
-                if (!section.isString("content")) {
-                    continue;
-                }
-                desc = section.getString("content").replace('&', '§');
-                if (section.isString("icon")) {
-                    try {
-                        final Material m = Material.valueOf(section.getString("icon"));
-                        this.addHelp(name, desc, m);
-                    }
-                    catch (IllegalArgumentException e) {
-                        this.addHelp(name, desc);
-                    }
-                }
-                else {
-                    this.addHelp(name, desc);
-                }
-            }
-        }
-        if (!new File(this.getDataFolder(), "infofiles.yml").exists()) {
-            this.saveResource("infofiles.yml", false);
-        }
-        c = (FileConfiguration)YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "infofiles.yml"));
-        for (final String key : c.getKeys(false)) {
-            if (c.isConfigurationSection(key)) {
-                final ConfigurationSection section = c.getConfigurationSection(key);
-                final String name = section.isString("topic") ? section.getString("topic") : key;
-                String desc = null;
-                if (!section.isString("content")) {
-                    continue;
-                }
-                desc = section.getString("content").replace('&', '§');
-                this.addInfo(name, desc);
-            }
-        }
-    }
-    
-    public PersonaKey composePersonaKey(final UUID uuid, final int pid) {
-        return getPersonaKey(uuid, pid);
-    }
-    
-    public static PersonaKey getPersonaKey(final UUID uuid, final int pid) {
-        return new ArchePersonaKey(uuid, pid);
-    }
-    
-    public static Player getPlayer(final UUID uuid) {
-        return Bukkit.getPlayer(uuid);
-    }
-    
-    public static ArcheCore getPlugin() {
-        return ArcheCore.instance;
-    }
-    
-    public static IArcheCore getControls() {
-        return ArcheCore.instance;
-    }
-    
-    public boolean willLogUsernames() {
-        return true;
-    }
-    
-    public UsernameLogger getUsernameLogger() {
-        return this.usernameLogger;
-    }
-    
-    public boolean debugMode() {
-        return this.debugMode;
-    }
-    
-    public ArcheTimer getMethodTimer() {
-        return this.timer;
-    }
-    
-    public BlockRegistry getBlockRegistry() {
-        return this.blockRegistry;
-    }
-    
-    public boolean isBlockPlayerPlaced(final Block b) {
-        return this.blockRegistry.isPlayerPlaced(b);
-    }
-    
-    public ArchePersonaHandler getPersonaHandler() {
-        return this.personaHandler;
-    }
-    
-    public SQLHandler getSQLHandler() {
-        return this.sqlHandler;
-    }
-    
-    public void addHelp(final HelpFile helpfile) {
-        this.helpdesk.addTopic(helpfile);
-    }
-    
-    public void addHelp(final String topic, final String output) {
-        this.helpdesk.addTopic(topic, output);
-    }
-    
-    public void addHelp(final String topic, final String output, final Material icon) {
-        this.helpdesk.addTopic(topic, output, icon);
-    }
-    
-    public void addInfo(final String topic, final String output) {
-        this.helpdesk.addInfoTopic(topic, output);
-    }
-    
-    public Skill getSkill(final String skillName) {
-        return ArcheSkillFactory.getSkill(skillName);
-    }
-    
-    public Skill createSkill(final String skillName) {
-        try {
-            return ArcheSkillFactory.createSkill(skillName);
-        }
-        catch (ArcheSkillFactory.DuplicateSkillException e) {
-            this.getLogger().severe("Duplicate skill detected: " + skillName);
-            return ArcheSkillFactory.getSkill(skillName);
-        }
-    }
-    
-    public SkillFactory registerNewSkill(final String skillName) {
-        try {
-            return ArcheSkillFactory.registerNewSkill(skillName);
-        }
-        catch (ArcheSkillFactory.DuplicateSkillException e) {
-            this.getLogger().severe("Duplicate skill detected: " + skillName);
-            return null;
-        }
-    }
-    
-    public ItemStack giveSkillTome(final Skill skill) {
-        return SkillTome.giveTome(skill);
-    }
-    
-    public ItemStack giveTreasureChest() {
-        return TreasureChest.giveChest();
-    }
-    
-    public boolean areRacialBonusesEnabled() {
-        return this.racialBonuses;
-    }
-    
-    public boolean arePrefixesEnabled() {
-        return this.enablePrefixes;
-    }
-    
-    public int getNewbieProtectDelay() {
-        return this.newbieProtectDelay;
-    }
-    
-    public int getNewbieNotificationDelay() {
-        return this.newbieDelay;
-    }
-    
-    public boolean getWikiUsage() {
-        return this.useWiki;
-    }
-    
-    public boolean willCachePersonas() {
-        return this.cachePersonas > 0;
-    }
-    
-    public boolean willModifyDisplayNames() {
-        return this.personaHandler.willModifyDisplayNames();
-    }
-    
-    public boolean usesEconomy() {
-        return this.economy != null;
-    }
-    
-    public Economy getEconomy() {
-        return this.economy;
-    }
-    
-    public boolean teleportNewPersonas() {
-        return this.teleportNewbies;
-    }
-    
-    public World getNewPersonaWorld() {
-        if (this.newbieWorldUUID != null) {
-            return Bukkit.getWorld(this.newbieWorldUUID);
-        }
-        return null;
-    }
-    
-    public boolean teleportProtectively() {
-        return this.protectiveTeleport;
-    }
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.commands.CommandArchehelp;
+import net.lordofthecraft.arche.commands.CommandAutoage;
+import net.lordofthecraft.arche.commands.CommandBeaconme;
+import net.lordofthecraft.arche.commands.CommandHelpMenu;
+import net.lordofthecraft.arche.commands.CommandMoney;
+import net.lordofthecraft.arche.commands.CommandNamelog;
+import net.lordofthecraft.arche.commands.CommandPersona;
+import net.lordofthecraft.arche.commands.CommandRealname;
+import net.lordofthecraft.arche.commands.CommandSkill;
+import net.lordofthecraft.arche.commands.CommandSql;
+import net.lordofthecraft.arche.commands.CommandTreasurechest;
+import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.help.HelpFile;
+import net.lordofthecraft.arche.interfaces.Economy;
+import net.lordofthecraft.arche.interfaces.IArcheCore;
+import net.lordofthecraft.arche.interfaces.PersonaKey;
+import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.interfaces.SkillFactory;
+import net.lordofthecraft.arche.listener.ArmorPreventionListener;
+import net.lordofthecraft.arche.listener.BeaconMenuListener;
+import net.lordofthecraft.arche.listener.BlockRegistryListener;
+import net.lordofthecraft.arche.listener.EconomyListener;
+import net.lordofthecraft.arche.listener.HelpMenuListener;
+import net.lordofthecraft.arche.listener.HelpOverrideListener;
+import net.lordofthecraft.arche.listener.LegacyCommandsListener;
+import net.lordofthecraft.arche.listener.NewbieProtectListener;
+import net.lordofthecraft.arche.listener.PlayerChatListener;
+import net.lordofthecraft.arche.listener.PlayerInteractListener;
+import net.lordofthecraft.arche.listener.PlayerJoinListener;
+import net.lordofthecraft.arche.listener.RacialBonusListener;
+import net.lordofthecraft.arche.listener.TreasureChestListener;
+import net.lordofthecraft.arche.persona.ArcheEconomy;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.ArchePersonaKey;
+import net.lordofthecraft.arche.persona.RaceBonusHandler;
+import net.lordofthecraft.arche.save.DataSaveRunnable;
+import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
+import net.lordofthecraft.arche.skill.ExpModifier;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import com.google.common.collect.Maps;
+
+public class ArcheCore extends JavaPlugin implements IArcheCore {
+	private static ArcheCore instance;
+	
+	private SQLHandler sqlHandler;
+	private SaveHandler saveHandler;
+	private BlockRegistry blockRegistry;
+	private ArchePersonaHandler personaHandler;
+	private HelpDesk helpdesk;
+	private ArcheTimer timer;
+	private Economy economy;
+
+	//Config settings
+	private boolean helpOverriden;
+	private boolean legacyCommands;
+	private boolean showXpToPlayers;
+	private boolean racialBonuses;
+	private int nameChangeDelay;
+	private int personaChangeDelay;
+	private boolean enablePrefixes;
+	private boolean modifyDisplayNames;
+	private boolean debugMode;
+	private int cachePersonas;
+	private int newbieDelay;
+	private int newbieProtectDelay;
+	private boolean protectiveTeleport;
+	private boolean teleportNewbies;
+	private UUID newbieWorldUUID;
+	private boolean useWiki;
+	
+	private Thread saverThread = null;
+	
+	public void onDisable() {
+		
+		saveHandler.put(new EndOfStreamTask());
+		
+		for(Player p : Bukkit.getOnlinePlayers()){
+			//This part must be done for safety reasons.
+			//Disables are messy, and in the brief period of Bukkit downtime
+			//Players may shift inventories around and dupe items they shouldn't dupe
+			p.closeInventory();
+			
+			//Attribute Bonuses stick around forever. To prevent lingering ones, just in
+			//case the plugin is to be removed, we perform this method.
+			RaceBonusHandler.reset(p);
+		}
+		
+		if(saverThread != null){
+			try {saverThread.join();} 
+			catch (InterruptedException e) {
+				getLogger().severe("ArcheCore was interrupted prematurely while waiting for its saver thread to resolve.");
+				e.printStackTrace();
+			}
+		}
+		sqlHandler.close();
+	}
+
+	@Override
+	public void onLoad(){
+		instance = this;
+
+		TreasureChest.init(this);
+	}
+	
+	@Override
+	public void onEnable() { 
+		
+		//Initialize our config file
+		initConfig();
+		
+		
+		//Find our Singletons and assign them.
+		sqlHandler = new SQLHandler(this, "ArcheCore");
+		saveHandler = SaveHandler.getInstance();
+		blockRegistry = new BlockRegistry();
+		personaHandler = ArchePersonaHandler.getInstance();
+		helpdesk = HelpDesk.getInstance();
+		
+		timer = debugMode? new ArcheTimer(this) : null;
+		personaHandler.setModifyDisplayNames(modifyDisplayNames);
+		
+		//Create the Persona table
+		Map<String,String> cols = Maps.newLinkedHashMap();
+		cols.put("player", "TEXT"); //1
+		cols.put("id", "INT");
+		cols.put("name", "TEXT");
+		cols.put("age", "INT");
+		cols.put("race", "TEXT"); //5
+		cols.put("rheader", "TEXT");
+		cols.put("gender", "INT");
+		cols.put("desc", "TEXT");
+		cols.put("prefix", "TEXT");
+		cols.put("current", "INT DEFAULT 1"); //10
+		cols.put("autoage", "INT DEFAULT 1");
+		cols.put("stat_played", "INT DEFAULT 0");
+		cols.put("stat_chars", "INT DEFAULT 0");
+		cols.put("stat_renamed", "INT DEFAULT 0");
+		cols.put("skill_xpgain", "INT DEFAULT 1"); //15
+		cols.put("skill_selected", "TEXT");
+		cols.put("world", "TEXT");
+		cols.put("x", "INT");
+		cols.put("y", "INT");
+		cols.put("z", "INT"); //20
+		//cols.put("health", "REAL");
+		//cols.put("hunger", "REAL");
+		//cols.put("saturation", "REAL");
+		cols.put("inv", "TEXT");
+		cols.put("money", "REAL DEFAULT 0");
+		cols.put("skill_primary", "TEXT");
+		cols.put("skill_secondary", "TEXT");
+		cols.put("skill_tertiary", "TEXT");
+		cols.put("PRIMARY KEY (player, id)", "ON CONFLICT REPLACE");
+		sqlHandler.createTable("persona", cols);
+		
+/*		cols = Maps.newLinkedHashMap();
+		cols.put("player", "TEXT NOT NULL");
+		cols.put("id", "INT NOT NULL");
+		cols.put("wastaught", "INT");
+		cols.put("hastaught", "INT");
+		cols.put("boosted", "INT");
+		cols.put("xplimit", "INT");
+		cols.put("UNIQUE (player, id)", "ON CONFLICT IGNORE");
+		cols.put("FOREIGN KEY (player, id)", "REFERENCES persona(player, id) ON DELETE CASCADE");
+		sqlHandler.createTable("persona_ext", cols);*/
+		
+		cols = Maps.newLinkedHashMap();
+		cols.put("player", "TEXT NOT NULL");
+		cols.put("id", "INT NOT NULL");
+		cols.put("name", "TEXT NOT NULL");
+		//cols.put("FOREIGN KEY (player, id)", "REFERENCES persona(player, id) ON DELETE CASCADE");
+		cols.put("UNIQUE (player, id, name)", "ON CONFLICT IGNORE");
+		sqlHandler.createTable("persona_names", cols);
+		
+		//Blockregistry persistence stuff
+		cols = Maps.newLinkedHashMap();
+		cols.put("world", "TEXT NOT NULL");
+		cols.put("x", "INT");
+		cols.put("y", "INT");
+		cols.put("z", "INT");
+		cols.put("UNIQUE (world, x, y, z)", "ON CONFLICT IGNORE");
+		sqlHandler.createTable("blockregistry", cols);
+		
+		sqlHandler.execute("DELETE FROM blockregistry WHERE ROWID IN (SELECT ROWID FROM blockregistry ORDER BY ROWID DESC LIMIT -1 OFFSET 5000)");
+		
+		try{
+			ResultSet res = sqlHandler.query("SELECT * FROM blockregistry");
+			while(res.next()){
+				String world = res.getString(1);
+				int x = res.getInt(2);
+				int y = res.getInt(3);
+				int z = res.getInt(4);
+				WeakBlock wb = new WeakBlock(world, x, y, z);
+				blockRegistry.playerPlaced.add(wb);
+			}
+			res.getStatement().close();
+		}catch(SQLException e){e.printStackTrace();}
+		
+		
+		Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
+			@Override
+			public void run(){
+				if(willCachePersonas()){
+					long time = System.currentTimeMillis();
+					getLogger().info("Preloading Personas as far back as " + cachePersonas + " days");
+					personaHandler.initPreload(cachePersonas);
+					getLogger().info("Personas were loaded in " + (System.currentTimeMillis() - time) + "ms.");
+				}
+				
+				//Incase of a reload, load all Personas for currently logged in players
+				//People that still reload deserve to be dunked in acid, though.
+				for(Player p : Bukkit.getOnlinePlayers()){
+					personaHandler.initPlayer(p);
+				}
+				
+				//Start saving our data
+				saverThread = new Thread(new DataSaveRunnable(saveHandler, timer, sqlHandler), "ArcheCore SQL Consumer");
+				saverThread.start();
+				
+			}});
+
+		//Start tracking Personas and their playtime.
+		new TimeTrackerRunnable(personaHandler).runTaskTimer(this, 2400, 1200);
+		
+		//Some racial bonus stuff
+/*		if(this.areRacialBonusesEnabled())
+			new RacialBonusRunnable().runTaskTimer(this, 2400, 100);*/
+		
+		//Initialize some essential help topics
+		initHelp();
+		
+		//Redirect Plugin commands
+		initCommands();
+		
+		//Start all our Event listeners
+		initListeners();
+		
+		//Create internally handled skill that holds Xp given from skill resets
+		registerNewSkill("internal_drainxp")
+			.withVisibilityType(Skill.VISIBILITY_HIDDEN)
+			.withXpGainWhileHidden(true)
+			.register();
+	}
+	
+	private void initConfig(){
+		//Initialize from config
+		FileConfiguration config = getConfig(); // Get the config file either out of our .jar our datafolder
+		saveDefaultConfig(); //Save the config file to disk if it doesn't exist yet.
+		
+		helpOverriden = config.getBoolean("override.help.command");
+		legacyCommands = config.getBoolean("enable.legacy.commands");
+		nameChangeDelay = config.getInt("name.change.delay");
+		personaChangeDelay = config.getInt("persona.change.delay");
+		showXpToPlayers = config.getBoolean("show.exp.values");
+		racialBonuses = config.getBoolean("enable.racial.bonuses");
+		enablePrefixes = config.getBoolean("enable.persona.prefix");
+		modifyDisplayNames = config.getBoolean("modify.player.displayname");
+		newbieProtectDelay = config.getInt("persona.newbie.protect");
+		debugMode = config.getBoolean("enable.debug.mode");
+		newbieDelay = config.getInt("newbie.notification");
+		useWiki = config.getBoolean("enable.wiki.lookup");
+		cachePersonas = config.getInt("persona.cache.time");
+		protectiveTeleport = config.getBoolean("teleport.to.rescue");
+		teleportNewbies = config.getBoolean("new.persona.to.spawn");
+		
+		if(config.getBoolean("bonus.xp.racial"))
+			ArcheSkillFactory.activateXpMod(ExpModifier.RACIAL);
+		if(config.getBoolean("bonus.xp.playtime"))
+			ArcheSkillFactory.activateXpMod(ExpModifier.PLAYTIME);
+		if(config.getBoolean("bonus.xp.autoage"))
+			ArcheSkillFactory.activateXpMod(ExpModifier.AUTOAGE);
+		
+		if(teleportNewbies){
+			World w = Bukkit.getWorld(config.getString("preferred.spawn.world"));
+			if(w != null) this.newbieWorldUUID = w.getUID();
+			else getLogger().info("Could not find config-specified world. Will use default world instead.");
+		}
+			
+		if(config.getBoolean("enable.economy"))
+			economy = new ArcheEconomy(config);
+	}
+	
+	private void initCommands(){
+		getCommand("archehelp").setExecutor(new CommandArchehelp(helpdesk, helpOverriden));
+		getCommand("helpmenu").setExecutor(new CommandHelpMenu(helpdesk));
+		getCommand("persona").setExecutor(new CommandPersona(helpdesk, personaHandler, nameChangeDelay, enablePrefixes));
+		getCommand("skill").setExecutor(new CommandSkill(helpdesk, showXpToPlayers));
+		getCommand("beaconme").setExecutor(new CommandBeaconme());
+		getCommand("treasurechest").setExecutor(new CommandTreasurechest());
+		getCommand("realname").setExecutor(new CommandRealname(this));
+		getCommand("autoage").setExecutor(new CommandAutoage(this));
+		getCommand("money").setExecutor(new CommandMoney(helpdesk, economy));
+		getCommand("namelog").setExecutor(new CommandNamelog());
+		getCommand("arsql").setExecutor(new CommandSql());
+	}
+	
+	private void initListeners(){
+		PluginManager pm = Bukkit.getPluginManager();
+		
+		pm.registerEvents(new PlayerJoinListener(personaHandler), this);
+		pm.registerEvents(new PlayerInteractListener(this), this);
+		pm.registerEvents(new BeaconMenuListener(this, personaChangeDelay), this);
+		pm.registerEvents(new HelpMenuListener(this, helpdesk), this);
+		pm.registerEvents(new PlayerChatListener(), this);
+		pm.registerEvents(new TreasureChestListener(), this);
+		pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
+		
+		if(helpOverriden)
+			pm.registerEvents(new HelpOverrideListener(), this);
+		
+		if(legacyCommands)
+			pm.registerEvents(new LegacyCommandsListener(), this);
+		
+		if(racialBonuses){
+			pm.registerEvents(new RacialBonusListener(this,getPersonaHandler()), this);
+			pm.registerEvents(new ArmorPreventionListener(), this);
+		}
+		
+		if(newbieProtectDelay > 0)
+			pm.registerEvents(new NewbieProtectListener(personaHandler, newbieProtectDelay), this);
+		
+		if(usesEconomy() && economy.getFractionLostOnDeath() > 0.0d)
+			pm.registerEvents(new EconomyListener(economy), this);
+	}
+	
+	private void initHelp(){
+		
+		//Set the essential Help files
+		
+		final String div = ChatColor.LIGHT_PURPLE +  "\n--------------------------------------------------\n";
+		
+		String persHelp = ChatColor.YELLOW + "Your " + ChatColor.ITALIC + "Persona" + ChatColor.YELLOW + " is an uncouth sailor, fair Elven maiden or parent-slaying Orc. " + 
+		"in Lord of the Craft, you speak and act as your current Persona, and know only what they know." +
+				div + ChatColor.GREEN + "Once accepted, creating your Persona is the first step of your adventure."
+				+ " You can later remove or create new Personas, by finding a " + ChatColor.ITALIC + "@Beacon@" 
+				+ ChatColor.GREEN + " and right-clicking it.";
+		
+		String commandHelp = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Your essential commands are as follows: " 
+				+ div + ChatColor.GRAY + "" + ChatColor.ITALIC +  (helpOverriden? "$/help$":"$/archehelp$") + ChatColor.GRAY + ": Provides a useful database of help topics.\n"
+				+ ChatColor.GOLD + "" + ChatColor.ITALIC + "$/helpmenu$" + ChatColor.GOLD + ": The same help topics, provided in a menu form.\n" 
+				+ ChatColor.BLUE + "" + ChatColor.ITALIC + "$/persona$" + ChatColor.BLUE + ": See others' Personas and modify your own.\n"
+				+ ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "$/skill$" + ChatColor.LIGHT_PURPLE + ": See the Skills your Persona can learn";
+
+		String beaconInfo = "A " + ChatColor.ITALIC + "Beacon" + ChatColor.RESET + " lets you control most Persona-related tasks. Finding and right-clicking a beacon"
+				+ " grants access to, among other things, Persona modification and the plugin help files (which are also accessible via @commands@). Knowing where Beacons are located will be crucial for "
+				+ " orienting yourself with the ArcheCore plugin.";
+		
+		String profession = ChatColor.GRAY + "/sk [skill] select {main/second/bonus}: " + ChatColor.GOLD + "Select a profession.\n"
+				+ ChatColor.GREEN + "You have to select a profession to raise that skill to the maximum possible tier. You can, however, experiment with any skill before committing to a profession.\n"
+				+ ChatColor.BLUE  + "Depending on your Persona's race, you might also have a Racial Skill. Racial skills can be freelly leveled and do not need to be selected.\n"
+				+ ChatColor.GRAY  + "Normally, you can be Adequate in any non-selected skill. If you pick a primary profession, this cap is tightened down to let you be Clumsy. If you also pick a secondary, your other skills will be locked at the Inept tier.";
+		
+		addHelp("Persona", persHelp, Material.REDSTONE_COMPARATOR);
+		addHelp("Commands", commandHelp, Material.COMMAND);
+		addHelp("Professions", profession, Material.BEDROCK);
+		addInfo("Beacon", beaconInfo);
+		
+		//Create config-set Help Files
+		if(!(new File(getDataFolder(), "helpfiles.yml").exists()))
+			saveResource("helpfiles.yml", false);
+		FileConfiguration c = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "helpfiles.yml"));
+		for(String key : c.getKeys(false)){
+			if(c.isConfigurationSection(key)){
+				ConfigurationSection section = c.getConfigurationSection(key);
+				String name = section.isString("topic")? section.getString("topic") : key;
+				
+				String desc = null;
+				if(section.isString("content")) desc = section.getString("content").replace('&', ChatColor.COLOR_CHAR); 
+				else continue;
+				
+				if(section.isString("icon")){
+					try{ 
+						Material m = Material.valueOf(section.getString("icon"));
+						addHelp(name, desc, m);
+					}catch(IllegalArgumentException e){
+						addHelp(name, desc);
+					}
+				} else addHelp(name, desc);
+			}
+		}
+		
+		//Create config-set info Files
+		if(!(new File(getDataFolder(), "infofiles.yml").exists()))
+			saveResource("infofiles.yml", false);
+		c = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "infofiles.yml"));
+		for(String key : c.getKeys(false)){
+			if(c.isConfigurationSection(key)){
+				ConfigurationSection section = c.getConfigurationSection(key);
+				String name = section.isString("topic")? section.getString("topic") : key;
+				
+				String desc = null;
+				if(section.isString("content")) desc = section.getString("content").replace('&', ChatColor.COLOR_CHAR); 
+				else continue;
+				
+				addInfo(name, desc);
+			}
+		}
+		
+	}
+	
+	@Override
+	public PersonaKey composePersonaKey(UUID uuid, int pid){
+		return getPersonaKey(uuid, pid);
+	}
+	
+	public static PersonaKey getPersonaKey(UUID uuid, int pid){
+		return new ArchePersonaKey(uuid, pid);
+	}
+	
+	public static Player getPlayer(UUID uuid){
+		return Bukkit.getPlayer(uuid);
+	}
+	
+	
+	public static ArcheCore getPlugin(){
+		return instance;
+	}
+
+	/**
+	 * Fetch the current instance of the ArcheCore plugin
+	 * @return The ArcheCore singleton
+	 */
+	public static IArcheCore getControls(){
+		return instance;
+	}
+
+	public boolean debugMode(){
+		return debugMode;
+	}
+	
+	public ArcheTimer getMethodTimer(){
+		return timer;
+	}
+	
+	@Override
+	public BlockRegistry getBlockRegistry() {
+		return blockRegistry;
+	}
+	
+	@Override
+	public boolean isBlockPlayerPlaced(Block b){
+		return blockRegistry.isPlayerPlaced(b);
+	}
+	
+	@Override
+	public ArchePersonaHandler getPersonaHandler(){
+		return personaHandler;
+	}
+
+	@Override
+	public SQLHandler getSQLHandler(){
+		return sqlHandler;
+	}
+
+	@Override
+	public void addHelp(HelpFile helpfile){
+		helpdesk.addTopic(helpfile);
+	}
+
+	@Override
+	public void addHelp(String topic, String output){
+		helpdesk.addTopic(topic, output);
+	}
+
+	@Override
+	public void addHelp(String topic, String output, Material icon){
+		helpdesk.addTopic(topic, output, icon);
+	}
+
+	@Override
+	public void addInfo(String topic, String output){
+		helpdesk.addInfoTopic(topic, output);
+	}	
+	
+	@Override
+	public Skill getSkill(String skillName){
+		return ArcheSkillFactory.getSkill(skillName);
+	}
+
+	@Override
+	public Skill createSkill(String skillName){
+		try {
+			return ArcheSkillFactory.createSkill(skillName);
+		} catch (DuplicateSkillException e) {
+			getLogger().severe("Duplicate skill detected: " + skillName);
+			return ArcheSkillFactory.getSkill(skillName);
+		}
+	}
+
+	@Override
+	public SkillFactory registerNewSkill(String skillName){
+		try {
+			return ArcheSkillFactory.registerNewSkill(skillName);
+		} catch (DuplicateSkillException e) {
+			getLogger().severe("Duplicate skill detected: " + skillName);
+			return null;
+		}
+	}
+
+	@Override
+	public ItemStack giveSkillTome(Skill skill){
+		return SkillTome.giveTome(skill);
+	}
+
+	@Override
+	public ItemStack giveTreasureChest(){
+		return TreasureChest.giveChest();
+	}
+
+	@Override
+	public boolean areRacialBonusesEnabled(){
+		return racialBonuses;
+	}
+
+	@Override
+	public boolean arePrefixesEnabled(){
+		return enablePrefixes;
+	}
+
+	@Override
+	public int getNewbieProtectDelay(){
+		return newbieProtectDelay;
+	}	
+	
+	public int getNewbieNotificationDelay(){
+		return newbieDelay;
+	}
+	
+	public boolean getWikiUsage(){
+		return useWiki;
+	}
+	
+	public boolean willCachePersonas(){
+		return cachePersonas > 0;
+	}
+
+	@Override
+	public boolean willModifyDisplayNames(){
+		return personaHandler.willModifyDisplayNames();
+	}
+
+	@Override
+	public boolean usesEconomy() {
+		return economy != null;
+	}
+
+	@Override
+	public Economy getEconomy() {
+		return economy;
+	}
+	
+	@Override
+	public boolean teleportNewPersonas() {
+		return teleportNewbies;
+	}
+
+	@Override
+	public World getNewPersonaWorld() {
+		if(newbieWorldUUID != null) return Bukkit.getWorld(newbieWorldUUID);
+		else return null;
+	}
+	
+	public boolean teleportProtectively(){
+		return protectiveTeleport;
+	}
 }

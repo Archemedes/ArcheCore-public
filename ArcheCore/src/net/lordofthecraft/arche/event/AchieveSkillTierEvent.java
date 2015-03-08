@@ -1,38 +1,31 @@
 package net.lordofthecraft.arche.event;
 
-import net.lordofthecraft.arche.enums.*;
-import org.bukkit.event.*;
-import net.lordofthecraft.arche.interfaces.*;
+import net.lordofthecraft.arche.enums.SkillTier;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Skill;
 
-public class AchieveSkillTierEvent extends SkillEvent
-{
-    private final SkillTier old;
-    private final SkillTier now;
-    private static final HandlerList handlers;
-    
-    public AchieveSkillTierEvent(final Persona persona, final Skill skill, final SkillTier old, final SkillTier now) {
-        super(persona, skill);
-        this.old = old;
-        this.now = now;
-    }
-    
-    public SkillTier getFormerTier() {
-        return this.old;
-    }
-    
-    public SkillTier getAchievedTier() {
-        return this.now;
-    }
-    
-    public HandlerList getHandlers() {
-        return AchieveSkillTierEvent.handlers;
-    }
-    
-    public static HandlerList getHandlerList() {
-        return AchieveSkillTierEvent.handlers;
-    }
-    
-    static {
-        handlers = new HandlerList();
-    }
+import org.bukkit.event.HandlerList;
+
+public class AchieveSkillTierEvent extends SkillEvent {
+	private final SkillTier old, now;
+	
+	public AchieveSkillTierEvent(Persona persona, Skill skill, SkillTier old, SkillTier now) {
+		super(persona, skill);
+		this.old = old;
+		this.now = now;
+	}
+	
+	public SkillTier getFormerTier(){
+		return old;
+	}
+
+	public SkillTier getAchievedTier(){
+		return now;
+	}
+	
+	//HandlerList Boilerplate
+	private static final HandlerList handlers = new HandlerList();
+	@Override public HandlerList getHandlers() { return handlers ; }
+	public static HandlerList getHandlerList() { return handlers ; }
+
 }

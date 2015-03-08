@@ -1,8 +1,7 @@
 package net.lordofthecraft.arche.skill;
 
-public enum ExpModifier
-{
-    RACIAL, 
-    AUTOAGE, 
-    PLAYTIME;
+public enum ExpModifier {
+	RACIAL,
+	AUTOAGE,
+	PLAYTIME;
 }

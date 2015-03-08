@@ -1,8 +1,8 @@
-name: ArcheCore
+name: ${project.name}
 main: net.lordofthecraft.arche.ArcheCore
 author: Arche
-version: 1.80
-description: The Core component of the Archetypes system
+version: ${project.version}
+description: ${project.description}
 
 commands:
    archehelp:
@@ -14,12 +14,12 @@ commands:
       description: Manage your Persona or Roleplay Character
       usage: Invalid syntax! Use /<command> help for a list of commands
       permission: archecore.mayuse
-      permission-message: Â§4Insufficient Permission for this command
+      permission-message: §4Insufficient Permission for this command
       aliases: [pers,prs,p]
    beaconme:
       description: Open the ArcheCore Beacon menu
       permission: archecore.command.beaconme
-      permission-message: Â§4Insufficient Permission for this command
+      permission-message: §4Insufficient Permission for this command
       aliases: [bme, me]    
    arsql:
       description: Execute SQL statements from ingame
@@ -27,31 +27,31 @@ commands:
       description: Manage your Skills or teach others.
       usage: Invalid syntax! Use /<command> help for a list of commands
       permission: archecore.mayuse
-      permission-message: Â§4Insufficient Permission for this command
+      permission-message: §4Insufficient Permission for this command
       aliases: sk
    treasurechest:
       description: Handle the loot obtainable from the Treasure Chest items
       permission: archecore.command.treasurechest
-      permission-message: Â§4Insufficient Permission for this command
+      permission-message: §4Insufficient Permission for this command
       aliases: trch
    realname:
       description: get the current Minecraft Username from a Persona name.
       permission: archecore.mayuse
-      permission-message: Â§4Insufficient Permission for this command
+      permission-message: §4Insufficient Permission for this command
       aliases: [name, nick]
    autoage:
       description: Age all eligible (auto-aging) personas by 1 year
       permission: archecore.admin
-      permission-message: Â§4Insufficient Permission for this command
+      permission-message: §4Insufficient Permission for this command
    money:
       description: interact with the Persona-based money balance
       permission: archecore.money
-      permission-message: Â§4Insufficient Permission for this command
+      permission-message: §4Insufficient Permission for this command
       aliases: mn
       usage: Invalid syntax! Use /<command> help for a list of commands
    namelog:
       usage: /<command> [player name/uuid]
       description: interact with the Persona-based money balance
       permission: archecore.mod.persona
-      permission-message: Â§4Insufficient Permission for this command
+      permission-message: §4Insufficient Permission for this command
       

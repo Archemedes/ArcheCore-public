@@ -1,212 +1,286 @@
 package net.lordofthecraft.arche.listener;
 
-import net.lordofthecraft.arche.*;
-import com.google.common.collect.*;
-import net.lordofthecraft.arche.enums.*;
-import net.lordofthecraft.arche.attributes.*;
-import net.lordofthecraft.arche.interfaces.*;
-import net.lordofthecraft.arche.persona.*;
-import org.bukkit.event.*;
-import org.bukkit.event.player.*;
-import org.bukkit.scheduler.*;
-import org.bukkit.plugin.*;
-import org.bukkit.potion.*;
-import org.bukkit.*;
-import org.bukkit.entity.*;
-import java.util.*;
-import org.bukkit.event.entity.*;
+import java.util.List;
+import java.util.Random;
 
-public class RacialBonusListener implements Listener
-{
-    private final Random rnd;
-    private final ArchePersonaHandler handler;
-    private final ArcheCore plugin;
-    private final List<String> sneakAttempts;
-    private final List<String> sneakers;
-    
-    public RacialBonusListener(final ArcheCore plugin, final ArchePersonaHandler handler) {
-        super();
-        this.rnd = new Random();
-        this.sneakAttempts = Lists.newArrayList();
-        this.sneakers = Lists.newArrayList();
-        this.plugin = plugin;
-        this.handler = handler;
-    }
-    
-    private boolean hasTogglePower(final Race race) {
-        switch (race) {
-            case DARK_ELF:
-            case KHARAJYR:
-            case KHA_CHEETRAH:
-            case KHA_PANTERA:
-            case KHA_LEPARDA:
-            case KHA_TIGRASI: {
-                return true;
-            }
-            default: {
-                return false;
-            }
-        }
-    }
-    
-    @EventHandler
-    public void onRespawn(final PlayerRespawnEvent e) {
-        final Player p = e.getPlayer();
-        AttributeBase.clearModifiers((LivingEntity)p, AttributeType.MOVEMENT_SPEED);
-        AttributeBase.clearModifiers((LivingEntity)p, AttributeType.ATTACK_DAMAGE);
-        final Persona ps = this.handler.getPersona(p);
-        if (ps == null) {
-            RaceBonusHandler.reset(p);
-        }
-        else {
-            RaceBonusHandler.apply(p, ps.getRace());
-        }
-    }
-    
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
-    public void onHunger(final FoodLevelChangeEvent e) {
-        final Player p = (Player)e.getEntity();
-        if (p.getFoodLevel() - e.getFoodLevel() == 1) {
-            final ArchePersona pers = this.handler.getPersona(p);
-            if (pers != null) {
-                final Race race = pers.getRace();
-                if (race == Race.ORC || race == Race.OLOG) {
-                    p.removePotionEffect(PotionEffectType.HUNGER);
-                    if (race == Race.OLOG && p.isSprinting()) {
-                        e.setFoodLevel(Math.max(0, e.getFoodLevel() - 3));
-                    }
-                }
-                else if (this.rnd.nextBoolean()) {
-                    e.setCancelled(true);
-                }
-            }
-        }
-    }
-    
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    public void onSneak(final PlayerToggleSneakEvent e) {
-        final Player p = e.getPlayer();
-        if (e.isSneaking()) {
-            final ArchePersona pers = this.handler.getPersona(p);
-            if (pers != null && this.hasTogglePower(pers.getRace()) && !this.sneakers.contains(p.getName())) {
-                if (!this.sneakAttempts.contains(p.getName())) {
-                    this.sneakAttempts.add(p.getName());
-                    new BukkitRunnable() {
-                        public void run() {
-                            RacialBonusListener.this.sneakAttempts.remove(p.getName());
-                        }
-                    }.runTaskLater((Plugin)this.plugin, 12L);
-                }
-                else {
-                    if (pers.getRace() == Race.DARK_ELF) {
-                        p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 120, 1, true), true);
-                    }
-                    else {
-                        p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 450, 2, true), true);
-                        p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 120, 1, true), true);
-                    }
-                    p.playSound(p.getLocation(), Sound.AMBIENCE_CAVE, 0.8f, 2.0f);
-                    this.sneakers.add(p.getName());
-                    new BukkitRunnable() {
-                        public void run() {
-                            RacialBonusListener.this.sneakers.remove(p.getName());
-                            p.playSound(p.getLocation(), Sound.ORB_PICKUP, 1.0f, 1.0f);
-                        }
-                    }.runTaskLater((Plugin)this.plugin, 600L);
-                }
-            }
-        }
-    }
-    
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onDamage(final EntityDamageByEntityEvent e) {
-        if (e.getDamager() instanceof Arrow) {
-            if (((Arrow)e.getDamager()).getShooter() instanceof Player) {
-                final Player p = (Player)((Arrow)e.getDamager()).getShooter();
-                final ArchePersona pers = this.handler.getPersona(p);
-                if (pers != null && pers.getRace() == Race.WOOD_ELF) {
-                    double dmg = e.getDamage();
-                    dmg *= 1.2;
-                    e.setDamage(dmg);
-                }
-            }
-        }
-        else if (e.getDamager() instanceof Player) {
-            final Player p = (Player)e.getDamager();
-            final ArchePersona pers = this.handler.getPersona(p);
-            if (pers != null) {
-                double dmg = e.getDamage();
-                final Race r = pers.getRace();
-                switch (r) {
-                    case ORC: {
-                        final double fract = p.getHealth() / p.getMaxHealth();
-                        if (fract < 0.2) {
-                            dmg *= 1.25;
-                        }
-                        else if (fract < 0.5) {
-                            dmg *= 1.1;
-                        }
-                        e.setDamage(dmg);
-                        break;
-                    }
-                    case HUMAN:
-                    case SOUTHERON:
-                    case NORTHENER: {
-                        if (e.getEntity() instanceof Player) {
-                            int count = 0;
-                            for (final Entity ent : p.getNearbyEntities(6.0, 3.0, 6.0)) {
-                                if (ent instanceof Player) {
-                                    final ArchePersona x = this.handler.getPersona((Player)ent);
-                                    if (x != null && (x.getRace() == Race.HUMAN || x.getRace() == Race.NORTHENER || x.getRace() == Race.SOUTHERON) && ++count >= 4) {
-                                        dmg *= 1.15;
-                                        e.setDamage(dmg);
-                                        break;
-                                    }
-                                    continue;
-                                }
-                            }
-                            break;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onDamage(final EntityDamageEvent e) {
-        if (e.getEntity() instanceof Player) {
-            final EntityDamageEvent.DamageCause c = e.getCause();
-            if (c == EntityDamageEvent.DamageCause.MAGIC) {
-                double dmg = e.getDamage();
-                final ArchePersona pers = this.handler.getPersona((Player)e.getEntity());
-                if (pers != null && pers.getRace() == Race.HIGH_ELF) {
-                    dmg *= 0.75;
-                    e.setDamage(dmg);
-                }
-            }
-            else if (c == EntityDamageEvent.DamageCause.FALL) {
-                double dmg = e.getDamage();
-                final ArchePersona pers = this.handler.getPersona((Player)e.getEntity());
-                if (pers != null) {
-                    switch (pers.getRace()) {
-                        case KHARAJYR:
-                        case KHA_CHEETRAH:
-                        case KHA_PANTERA:
-                        case KHA_LEPARDA:
-                        case KHA_TIGRASI: {
-                            dmg -= 4.0;
-                            if (dmg <= 0.0) {
-                                e.setCancelled(true);
-                                break;
-                            }
-                            e.setDamage(dmg);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.attributes.AttributeBase;
+import net.lordofthecraft.arche.attributes.AttributeType;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.RaceBonusHandler;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Sound;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Damageable;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import com.google.common.collect.Lists;
+
+public class RacialBonusListener implements Listener {
+	private final Random rnd = new Random();
+	private final ArchePersonaHandler handler;
+	private final ArcheCore plugin;
+	
+	private final List<String> sneakAttempts = Lists.newArrayList();
+	private final List<String> sneakers = Lists.newArrayList();
+	
+	public RacialBonusListener(ArcheCore plugin, ArchePersonaHandler handler){
+		this.plugin = plugin;
+		this.handler = handler;
+	}
+	
+	private boolean hasTogglePower(Race race){
+		switch(race){
+		case DARK_ELF: case KHARAJYR: case KHA_CHEETRAH: case KHA_PANTERA: case KHA_LEPARDA: case KHA_TIGRASI:
+			return true;
+		default: return false;
+		}
+	}
+	
+	@EventHandler
+	public void onRespawn(PlayerRespawnEvent e){
+		Player p = e.getPlayer();
+		AttributeBase.clearModifiers(p, AttributeType.MOVEMENT_SPEED);
+		AttributeBase.clearModifiers(p, AttributeType.ATTACK_DAMAGE);
+		
+		Persona ps = handler.getPersona(p);
+		if(ps == null) RaceBonusHandler.reset(p);
+		else RaceBonusHandler.apply(p, ps.getRace());
+	}
+	
+	@EventHandler(ignoreCancelled = true)
+	public void onSprint(PlayerToggleSprintEvent e){
+		Player p = e.getPlayer();
+
+		if(!e.isSprinting()) return;
+		
+		Persona ps = handler.getPersona(p);
+		if(ps != null){
+			if(ps.getRace() == Race.CONSTRUCT && p.getGameMode() != GameMode.CREATIVE){
+				p.sendMessage(ChatColor.RED + "You are moving too fast!");
+				p.damage(4);
+				e.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+	public void onHunger(FoodLevelChangeEvent e){
+		Player p = (Player) e.getEntity();
+		
+		if(p.getFoodLevel() - e.getFoodLevel() == 1){ //Exactly 1 point drain, normal decay
+			ArchePersona pers = handler.getPersona(p);
+			if(pers != null){
+				Race race = pers.getRace();
+				
+				if(race == Race.SPECTRE || race == Race.CONSTRUCT || race == Race.NECROLYTE){
+					e.setCancelled(true);
+					e.setFoodLevel(20);
+				} else if(race == Race.ORC || race == Race.OLOG){
+					p.removePotionEffect(PotionEffectType.HUNGER);
+					
+					if(race == Race.OLOG && p.isSprinting()){
+						e.setFoodLevel( Math.max(0, e.getFoodLevel() - 3)); 
+					}
+				}  else {
+					if(rnd.nextBoolean())
+						e.setCancelled(true);
+				}
+			}
+		}
+	}
+	
+	@EventHandler(ignoreCancelled = true, priority= EventPriority.MONITOR)
+	public void onSneak(PlayerToggleSneakEvent e){
+		//Dark Elf Speed Boost on Sneak
+		final Player p = e.getPlayer();
+		if(e.isSneaking()){
+			ArchePersona pers = handler.getPersona(p);
+			if(pers != null && hasTogglePower(pers.getRace())){
+				if(!sneakers.contains(p.getName())){
+					if(!sneakAttempts.contains(p.getName())){ //Shift pressed down once.
+						sneakAttempts.add(p.getName());
+						new BukkitRunnable(){public void run(){sneakAttempts.remove(p.getName());}}.runTaskLater(plugin, 12);
+					} else { //Shift pressed down twice in short time
+						if(pers.getRace() == Race.DARK_ELF){ 
+							p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 120, 1, true), true);
+						}else {
+							p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 450, 2, true), true);
+							p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 120, 1, true), true);
+						}
+						
+						p.playSound(p.getLocation(), Sound.AMBIENCE_CAVE, 0.8f, 2f);
+						sneakers.add(p.getName());
+						new BukkitRunnable(){public void run(){
+							sneakers.remove(p.getName());
+							p.playSound(p.getLocation(), Sound.ORB_PICKUP, 1f, 1f);
+						}}.runTaskLater(plugin, 600);
+					}
+				}
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onDamage(EntityDamageByEntityEvent e){
+		if(e.getEntity() instanceof Player){
+			Player p = (Player) e.getEntity();
+			Persona pers = handler.getPersona(p);
+			if(pers != null){
+				Race r = pers.getRace();
+				if(r == Race.NECROLYTE || r == Race.SPECTRE){
+					if(holdsGoldenWeapon(e.getDamager())){
+						double factor = r == Race.SPECTRE? 3 : 1.5;
+						e.setDamage(e.getDamage()*factor);
+					}
+				}
+			}
+		}
+		
+		if(e.getDamager() instanceof Arrow){ //Wood Elf arrow bonus
+			if(((Arrow) e.getDamager()).getShooter() instanceof Player){
+				Player p =  (Player) ((Arrow) e.getDamager()).getShooter();
+				Persona pers = handler.getPersona(p);
+				if(pers != null && pers.getRace() == Race.WOOD_ELF){
+					double dmg = e.getDamage();
+					dmg *= 1.2;
+					e.setDamage(dmg);
+				}
+			}
+		}else if(e.getDamager() instanceof Player){ //Racial Damage bonuses
+			Player p = (Player) e.getDamager();
+			Persona pers = handler.getPersona(p);
+			if(pers != null){
+				double dmg = e.getDamage();
+				Race r = pers.getRace();
+				switch(r){
+				default: break;
+				case ORC:
+					/*
+					double fract = p.getHealth() / p.getMaxHealth();
+					
+					if(fract < 0.20){
+						dmg *= 1.25;
+					} else if (fract < 0.50){
+						dmg *= 1.10;
+					}
+					*/
+					e.setDamage(dmg+1);
+					break;
+				case HUMAN: case SOUTHERON: case NORTHENER: case HEARTLANDER: //Troop Morale
+					if(e.getEntity() instanceof Player){
+						int count = 0;
+						for(Entity ent : p.getNearbyEntities(6, 3, 6)){
+							if(ent instanceof Player){
+								ArchePersona x = handler.getPersona((Player) ent);
+								if(x != null && (x.getRace() ==  Race.HUMAN || x.getRace() == Race.NORTHENER || x.getRace() == Race.SOUTHERON)){
+									if(++count >= 4){
+										dmg *= 1.15;
+										e.setDamage(dmg);
+										break;
+									}
+								}	
+							}
+						}
+					}
+					break;
+				case SPECTRE:
+					if(e.getCause() != DamageCause.MAGIC){
+						e.setCancelled(true);
+						EntityDamageByEntityEvent newEvent = new EntityDamageByEntityEvent(e.getDamager(), e.getEntity(),
+								DamageCause.MAGIC, null, null);
+						Bukkit.getPluginManager().callEvent(newEvent);
+						if(!newEvent.isCancelled() && e.getEntity() instanceof Damageable){
+							Damageable d = (Damageable) e.getEntity();
+							d.damage(e.getDamage());
+						}
+					}
+					break;
+//				case KHARAJYR: case KHA_TIGRASI: case KHA_PANTERA: case KHA_LEPARDA: case KHA_CHEETRAH:
+//					//Kitty got claws
+//					if(p.getItemInHand().getType() == Material.AIR)
+//						e.setDamage(dmg + 2);
+//					
+//					break;
+				}
+			}
+		} 
+	}
+	
+	private boolean holdsGoldenWeapon(Entity e){
+		if(e instanceof LivingEntity){
+			LivingEntity le = (LivingEntity) e;
+			ItemStack is = le.getEquipment().getItemInHand();
+			if(is != null){
+				switch(is.getType()){
+				case GOLD_SWORD: case GOLD_AXE: case GOLD_PICKAXE: case GOLD_SPADE: case GOLD_HOE:
+				case GOLD_INGOT: case GOLD_BLOCK: case GOLD_NUGGET:
+					return true;
+				default: break;
+				}
+			}
+		}
+		return false;
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onDamage(EntityDamageEvent e){
+		
+		if(e.getEntity() instanceof Player){
+			ArchePersona pers = handler.getPersona((Player) e.getEntity());
+			DamageCause c = e.getCause();
+			if(pers == null) return;
+
+			Race r = pers.getRace();
+			if(r == Race.SPECTRE || r == Race.CONSTRUCT){
+				if(e.getCause() == DamageCause.POISON){
+					e.setCancelled(true);
+				} else if( !(c == DamageCause.SUICIDE || c == DamageCause.VOID) ){
+					double factor = r == Race.SPECTRE? 0.5:0.4;
+					e.setDamage(e.getDamage() * factor);
+				}
+			}
+
+			if(c == DamageCause.MAGIC){
+				double dmg = e.getDamage();
+				if(pers.getRace() == Race.HIGH_ELF){
+					dmg *= 0.75;
+					e.setDamage(dmg);
+				}
+			} else if (c == DamageCause.FALL){
+				double dmg = e.getDamage();
+				switch(pers.getRace()){
+				case KHARAJYR: case KHA_CHEETRAH: case KHA_LEPARDA: case KHA_TIGRASI: case KHA_PANTERA:
+					dmg -= 4;
+					if(dmg <= 0) e.setCancelled(true);
+					else e.setDamage(dmg);
+				default: break;
+				}
+			}
+		}
+	}
+	
+	
 }

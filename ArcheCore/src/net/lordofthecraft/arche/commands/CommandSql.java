@@ -1,30 +1,34 @@
 package net.lordofthecraft.arche.commands;
 
-import org.bukkit.command.*;
-import org.bukkit.entity.*;
-import java.util.*;
-import org.apache.commons.lang.*;
-import net.lordofthecraft.arche.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.UUID;
 
-public class CommandSql implements CommandExecutor
-{
-    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
-        if (args.length == 0 || !(sender instanceof Player)) {
-            return false;
-        }
-        final Player p = (Player)sender;
-        if (p.getUniqueId().equals(UUID.fromString("eab9533c-9961-4e7d-aa0a-cc3e21fe8d48"))) {
-            final String statement = StringUtils.join((Object[])args, ' ', 0, args.length);
-            try {
-                final Connection c = ArcheCore.getControls().getSQLHandler().getSQL().getConnection();
-                final boolean result = c.createStatement().execute(statement);
-                sender.sendMessage("Returned boolean: " + result);
-            }
-            catch (SQLException e) {
-                sender.sendMessage("SQLException: " + e);
-            }
-        }
-        return true;
-    }
+import net.lordofthecraft.arche.ArcheCore;
+
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+public class CommandSql implements CommandExecutor {
+
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if(args.length == 0 || !(sender instanceof Player)) return false;
+		
+		Player p = (Player) sender;
+		if(p.getUniqueId().equals(UUID.fromString("eab9533c-9961-4e7d-aa0a-cc3e21fe8d48"))){
+			String statement = StringUtils.join(args, ' ', 0, args.length);
+			try{
+				Connection c = ArcheCore.getControls().getSQLHandler().getSQL().getConnection();
+				boolean result = c.createStatement().execute(statement);
+				sender.sendMessage("Returned boolean: " + result);
+			} catch(SQLException e){sender.sendMessage("SQLException: " + e);}
+		}
+		
+		return true;
+	}
+	
 }

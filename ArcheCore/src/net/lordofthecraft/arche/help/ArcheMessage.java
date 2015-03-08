@@ -1,373 +1,332 @@
 package net.lordofthecraft.arche.help;
 
-import net.lordofthecraft.arche.interfaces.*;
-import com.google.common.collect.*;
-import org.bukkit.*;
-import net.lordofthecraft.arche.enums.*;
-import net.md_5.bungee.api.chat.*;
-import java.util.*;
-import org.bukkit.entity.*;
-import java.io.*;
+import java.util.List;
 
-public class ArcheMessage extends ChatMessage
-{
-    List<BaseComponent> parts;
-    BaseComponent current;
-    
-    private ArcheMessage() {
-        super();
-        this.parts = Lists.newArrayList();
-        this.current = null;
-    }
-    
-    public ArcheMessage(final String text) {
-        super();
-        this.parts = Lists.newArrayList();
-        this.addLine(text);
-    }
-    
-    public ArcheMessage(final BaseComponent component) {
-        super();
-        (this.parts = Lists.newArrayList()).add(component);
-    }
-    
-    @Override
-    public ChatMessage addLine(final String line) {
-        if (this.current != null) {
-            this.parts.add(this.current);
-        }
-        final BaseComponent[] constructed = TextComponent.fromLegacyText(line);
-        if (constructed.length == 1) {
-            this.current = constructed[0];
-        }
-        else {
-            this.current = (BaseComponent)new TextComponent();
-            for (final BaseComponent extra : constructed) {
-                this.current.addExtra(extra);
-            }
-        }
-        return this;
-    }
-    
-    @Override
-    public ChatMessage select(final int i) {
-        if (i < 0) {
-            throw new IllegalArgumentException();
-        }
-        if (i > this.parts.size()) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
-        return new ArcheMessage(this.parts.get(i));
-    }
-    
-    @Override
-    public int size() {
-        final int andCurrent = (this.current != null) ? 1 : 0;
-        return this.parts.size() + andCurrent;
-    }
-    
-    @Override
-    public ChatMessage applyChatColor(final ChatColor color) {
-        if (color.isColor()) {
-            final net.md_5.bungee.api.ChatColor convertedColor = convertChatColor(color);
-            this.current.setColor(convertedColor);
-        }
-        else {
-            switch (color) {
-                case ITALIC: {
-                    this.setItalic();
-                    break;
-                }
-                case BOLD: {
-                    this.setBold();
-                    break;
-                }
-                case MAGIC: {
-                    this.setObfuscated();
-                    break;
-                }
-                case UNDERLINE: {
-                    this.setUnderlined();
-                    break;
-                }
-                case STRIKETHROUGH: {
-                    this.setStrikethrough();
-                    break;
-                }
-            }
-        }
-        return this;
-    }
-    
-    @Override
-    public ChatMessage setBold() {
-        this.current.setBold(true);
-        return this;
-    }
-    
-    @Override
-    public ChatMessage setUnderlined() {
-        this.current.setUnderlined(true);
-        return this;
-    }
-    
-    @Override
-    public ChatMessage setItalic() {
-        this.current.setItalic(true);
-        return this;
-    }
-    
-    @Override
-    public ChatMessage setStrikethrough() {
-        this.current.setStrikethrough(true);
-        return this;
-    }
-    
-    @Override
-    public ChatMessage setObfuscated() {
-        this.current.setObfuscated(true);
-        return this;
-    }
-    
-    @Override
-    public ChatMessage setClickEvent(final ChatBoxAction action, final String value) {
-        ClickEvent.Action act = null;
-        switch (action) {
-            case RUN_COMMAND: {
-                act = ClickEvent.Action.RUN_COMMAND;
-                break;
-            }
-            case SUGGEST_COMMAND: {
-                act = ClickEvent.Action.SUGGEST_COMMAND;
-                break;
-            }
-            case OPEN_URL: {
-                act = ClickEvent.Action.OPEN_URL;
-                break;
-            }
-            case OPEN_FILE: {
-                act = ClickEvent.Action.OPEN_FILE;
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException("Not all actions supported for ClickEvent");
-            }
-        }
-        final ClickEvent event = new ClickEvent(act, value);
-        this.current.setClickEvent(event);
-        return this;
-    }
-    
-    public ChatMessage setClickEvent(final ClickEvent event) {
-        this.current.setClickEvent(event);
-        return this;
-    }
-    
-    @Override
-    public ChatMessage setHoverEvent(final ChatBoxAction action, final String value) {
-        HoverEvent.Action act = null;
-        switch (action) {
-            case SHOW_ACHIEVEMENT: {
-                act = HoverEvent.Action.SHOW_ACHIEVEMENT;
-                break;
-            }
-            case SHOW_TEXT: {
-                act = HoverEvent.Action.SHOW_TEXT;
-                break;
-            }
-            case SHOW_ITEM: {
-                act = HoverEvent.Action.SHOW_ITEM;
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException("Not all actions supported for HoverEvent");
-            }
-        }
-        final HoverEvent event = new HoverEvent(act, new BaseComponent[] { new TextComponent(value) });
-        this.current.setHoverEvent(event);
-        return this;
-    }
-    
-    public ChatMessage setHoverEvent(final HoverEvent event) {
-        this.current.setHoverEvent(event);
-        return this;
-    }
-    
-    @Override
-    public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        for (final BaseComponent comp : this.parts) {
-            builder.append(comp.toPlainText());
-        }
-        if (this.current != null) {
-            builder.append(this.current);
-        }
-        if (builder.length() == 0) {
-            return "ChatMessage:null";
-        }
-        return builder.toString();
-    }
-    
-    @Override
-    public void sendTo(final Player p) {
-        final int length = this.parts.size();
-        final BaseComponent[] comps = new BaseComponent[length + 1];
-        this.parts.toArray(comps);
-        comps[length] = this.current;
-        p.spigot().sendMessage(comps);
-    }
-    
-    private static net.md_5.bungee.api.ChatColor convertChatColor(final ChatColor color) {
-        switch (color) {
-            case AQUA: {
-                return net.md_5.bungee.api.ChatColor.AQUA;
-            }
-            case BLACK: {
-                return net.md_5.bungee.api.ChatColor.BLACK;
-            }
-            case BLUE: {
-                return net.md_5.bungee.api.ChatColor.BLUE;
-            }
-            case BOLD: {
-                return net.md_5.bungee.api.ChatColor.BOLD;
-            }
-            case DARK_AQUA: {
-                return net.md_5.bungee.api.ChatColor.DARK_AQUA;
-            }
-            case DARK_BLUE: {
-                return net.md_5.bungee.api.ChatColor.DARK_BLUE;
-            }
-            case DARK_GRAY: {
-                return net.md_5.bungee.api.ChatColor.DARK_GRAY;
-            }
-            case DARK_GREEN: {
-                return net.md_5.bungee.api.ChatColor.DARK_GREEN;
-            }
-            case DARK_PURPLE: {
-                return net.md_5.bungee.api.ChatColor.DARK_PURPLE;
-            }
-            case DARK_RED: {
-                return net.md_5.bungee.api.ChatColor.DARK_RED;
-            }
-            case GOLD: {
-                return net.md_5.bungee.api.ChatColor.GOLD;
-            }
-            case GRAY: {
-                return net.md_5.bungee.api.ChatColor.GRAY;
-            }
-            case GREEN: {
-                return net.md_5.bungee.api.ChatColor.GREEN;
-            }
-            case ITALIC: {
-                return net.md_5.bungee.api.ChatColor.ITALIC;
-            }
-            case LIGHT_PURPLE: {
-                return net.md_5.bungee.api.ChatColor.LIGHT_PURPLE;
-            }
-            case MAGIC: {
-                return net.md_5.bungee.api.ChatColor.MAGIC;
-            }
-            case RED: {
-                return net.md_5.bungee.api.ChatColor.RED;
-            }
-            case RESET: {
-                return net.md_5.bungee.api.ChatColor.RESET;
-            }
-            case STRIKETHROUGH: {
-                return net.md_5.bungee.api.ChatColor.STRIKETHROUGH;
-            }
-            case UNDERLINE: {
-                return net.md_5.bungee.api.ChatColor.UNDERLINE;
-            }
-            case WHITE: {
-                return net.md_5.bungee.api.ChatColor.WHITE;
-            }
-            case YELLOW: {
-                return net.md_5.bungee.api.ChatColor.YELLOW;
-            }
-            default: {
-                throw new IllegalArgumentException();
-            }
-        }
-    }
-    
-    public static ChatMessage[] createMultiple(final String text) {
-        final String[] segments = text.split("\n");
-        final ChatMessage[] result = new ChatMessage[segments.length];
-        int i = 0;
-        String colorCode = "";
-        for (final String segment : segments) {
-            result[i++] = create(colorCode + segment);
-            colorCode = ChatColor.getLastColors(segment);
-        }
-        return result;
-    }
-    
-    public static ChatMessage create(final String text) {
-        final ArcheMessage message = new ArcheMessage();
-        boolean link = text.startsWith("@");
-        for (final String segment : text.split("@")) {
-            if (link) {
-                final StringPair sp = StringPair.parseSyntax(segment);
-                message.addLine(sp.vis);
-                message.setUnderlined();
-                final HoverEvent hEv = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText("Link to Topic: " + net.md_5.bungee.api.ChatColor.ITALIC + sp.url.replace('+', ' ')));
-                final ClickEvent cEv = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/archehelp " + sp.url);
-                message.setHoverEvent(hEv);
-                message.setClickEvent(cEv);
-            }
-            else {
-                boolean sugg = segment.startsWith("$");
-                for (final String miniSegment : segment.split("\\$")) {
-                    if (sugg) {
-                        final StringPair sp2 = StringPair.parseSyntax(miniSegment);
-                        final BaseComponent[] cmp = { new TextComponent("Run Command") };
-                        message.addLine(sp2.vis);
-                        final HoverEvent hEv2 = new HoverEvent(HoverEvent.Action.SHOW_TEXT, cmp);
-                        final ClickEvent cEv2 = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, sp2.url);
-                        message.setHoverEvent(hEv2);
-                        message.setClickEvent(cEv2);
-                    }
-                    else {
-                        message.addLine(miniSegment);
-                    }
-                    sugg = !sugg;
-                }
-            }
-            link = !link;
-        }
-        return message;
-    }
-    
-    private static class StringPair
-    {
-        private String url;
-        private String vis;
-        
-        private static StringPair parseSyntax(final String segment) {
-            String url;
-            String vis;
-            if (segment.startsWith("<") && segment.contains(">")) {
-                final int index = segment.lastIndexOf(62);
-                if (index == segment.length() - 1) {
-                    vis = (url = segment.replace('<', ' ').replace('>', ' '));
-                }
-                else {
-                    url = segment.substring(1, index);
-                    vis = segment.substring(index + 1);
-                }
-            }
-            else {
-                vis = segment;
-                url = segment;
-            }
-            return new StringPair(url, vis);
-        }
-        
-        private StringPair(final String url, final String vis) {
-            super();
-            this.url = url;
-            this.vis = vis;
-        }
-    }
+import net.lordofthecraft.arche.enums.ChatBoxAction;
+import net.lordofthecraft.arche.interfaces.ChatMessage;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.TranslatableComponent;
+
+import org.bukkit.entity.Player;
+
+import com.google.common.collect.Lists;
+
+public class ArcheMessage implements ChatMessage {
+	List<BaseComponent> parts = Lists.newArrayList();
+	BaseComponent current;
+
+	private ArcheMessage(){
+		current = null;
+	}
+	
+	public ArcheMessage(String text){
+		addLine(text);
+	}
+	
+	public ArcheMessage(BaseComponent component){
+		parts.add(component);
+	}
+
+	@Override
+	public ArcheMessage addLine(String line){
+		if(current != null) parts.add(current);
+		
+		BaseComponent[] constructed = TextComponent.fromLegacyText(line);
+		
+		if(constructed.length == 1){ //Length always at least one
+			current = constructed[0];
+		} else {
+			current = new TextComponent("");
+			for(BaseComponent extra : constructed)
+				current.addExtra(extra);	
+		}
+		
+		return this;
+	}
+	
+	@Override
+	public ArcheMessage addTranslation(String translate, String... with){
+		if(current != null) parts.add(current);
+		
+		TranslatableComponent comp = new TranslatableComponent();
+		comp.setTranslate(translate);
+		current = comp;
+		
+		for(String w : with){
+			comp.addWith(w);
+		}
+		
+		return this;
+	}
+
+	@Override
+	public ArcheMessage select(int i){
+		if(i < 0) throw new IllegalArgumentException();
+		if(i > parts.size()) throw new ArrayIndexOutOfBoundsException();
+		return new ArcheMessage(parts.get(i));
+	}
+
+	@Override
+	public int size(){
+		int andCurrent = current == null? 0 : 1;
+		return parts.size() + andCurrent;
+	}
+
+	@Override
+	public ChatMessage applyChatColor(org.bukkit.ChatColor color){
+		if(color.isColor()){
+			ChatColor convertedColor = convertChatColor(color);
+			current.setColor(convertedColor);
+		} else {
+			switch(color){
+			default: break;
+			case ITALIC: setItalic(); break;
+			case BOLD: setBold(); break;
+			case MAGIC: setObfuscated(); break;
+			case UNDERLINE: setUnderlined(); break;
+			case STRIKETHROUGH: setStrikethrough(); break;
+			}
+		}
+		
+		return this;
+	}
+
+	@Override
+	public ChatMessage setBold(){
+		current.setBold(true);
+		return this;
+	}
+
+	@Override
+	public ChatMessage setUnderlined(){
+		current.setUnderlined(true);
+		return this;
+	}
+
+	@Override
+	public ChatMessage setItalic(){
+		current.setItalic(true);
+		return this;
+	}
+
+	@Override
+	public ChatMessage setStrikethrough(){
+		current.setStrikethrough(true);
+		return this;
+	}
+
+	@Override
+	public ChatMessage setObfuscated(){
+		current.setObfuscated(true);
+		return this;
+	}
+
+	@Override
+	public ChatMessage setClickEvent(ChatBoxAction action, String value){
+		ClickEvent.Action act;
+		switch(action){
+		
+		case RUN_COMMAND: act = Action.RUN_COMMAND; break;
+		case SUGGEST_COMMAND: act = Action.SUGGEST_COMMAND; break;
+		case OPEN_URL: act = Action.OPEN_URL; break; 
+		case OPEN_FILE: act = Action.OPEN_FILE; break;
+		default: throw new IllegalArgumentException("Not all actions supported for ClickEvent");
+		}
+		
+		ClickEvent event = new ClickEvent(act, value);
+		current.setClickEvent(event);
+		return this;
+	}
+
+	@Override
+	public ChatMessage setClickEvent(ClickEvent event){
+		current.setClickEvent(event);
+		return this;
+	}
+
+	@Override
+	public ChatMessage setHoverEvent(ChatBoxAction action, String value){
+		HoverEvent.Action act;
+		switch(action){
+		case SHOW_ACHIEVEMENT: act = HoverEvent.Action.SHOW_ACHIEVEMENT; break;
+		case SHOW_TEXT: act = HoverEvent.Action.SHOW_TEXT; break;
+		case SHOW_ITEM: act = HoverEvent.Action.SHOW_ITEM; break; 
+		default: throw new IllegalArgumentException("Not all actions supported for HoverEvent");
+		}
+		
+		HoverEvent event = new HoverEvent(act, new BaseComponent[]{new TextComponent(value)});
+		current.setHoverEvent(event);
+		return this;
+	}
+
+	@Override
+	public ChatMessage setHoverEvent(HoverEvent event){
+		current.setHoverEvent(event);
+		return this;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		for(BaseComponent comp : parts)
+			builder.append(comp.toString());
+		if(current != null) builder.append(current);
+		
+		if(builder.length() == 0) return "ChatMessage:null";
+		
+		return builder.toString();
+	}
+	
+	public String toText() {
+		StringBuilder builder = new StringBuilder();
+		for(BaseComponent comp : parts)
+			builder.append(comp.toPlainText());
+		if(current != null) builder.append(current.toPlainText());
+		
+		if(builder.length() == 0) return "ChatMessage:null";
+		
+		return builder.toString();
+	}
+
+	@Override
+	public void sendTo(Player p){	
+		int length = parts.size();
+		BaseComponent[] comps = new BaseComponent[length + 1];
+		parts.toArray(comps);
+		comps[length] = current;
+		p.spigot().sendMessage(comps);
+	}
+
+	private static ChatColor convertChatColor(org.bukkit.ChatColor color){
+		switch(color){
+		case AQUA: return ChatColor.AQUA;
+		case BLACK: return ChatColor.BLACK;
+		case BLUE: return ChatColor.BLUE;
+		case BOLD: return ChatColor.BOLD;
+		case DARK_AQUA: return ChatColor.DARK_AQUA;
+		case DARK_BLUE: return ChatColor.DARK_BLUE;
+		case DARK_GRAY: return ChatColor.DARK_GRAY;
+		case DARK_GREEN: return ChatColor.DARK_GREEN;
+		case DARK_PURPLE: return ChatColor.DARK_PURPLE;
+		case DARK_RED: return ChatColor.DARK_RED;
+		case GOLD: return ChatColor.GOLD;
+		case GRAY: return ChatColor.GRAY;
+		case GREEN: return ChatColor.GREEN;
+		case ITALIC: return ChatColor.ITALIC;
+		case LIGHT_PURPLE: return ChatColor.LIGHT_PURPLE;
+		case MAGIC: return ChatColor.MAGIC;
+		case RED: return ChatColor.RED;
+		case RESET: return ChatColor.RESET;
+		case STRIKETHROUGH: return ChatColor.STRIKETHROUGH;
+		case UNDERLINE: return ChatColor.UNDERLINE;
+		case WHITE: return ChatColor.WHITE;
+		case YELLOW: return ChatColor.YELLOW;
+		default: throw new IllegalArgumentException();
+		}
+	}
+	
+	public static ChatMessage[] createMultiple(String text){
+		
+		String[] segments = text.split("\n");
+		ChatMessage[] result = new ChatMessage[segments.length];
+		
+		int i = 0;
+		String colorCode = "";
+		for(String segment : segments){
+			result[i++] = create(colorCode + segment);
+			colorCode = org.bukkit.ChatColor.getLastColors(segment);
+		}
+		
+		return result;
+	}
+	
+	public static ChatMessage create(String text){
+		ChatMessage message = new ArcheMessage();
+		
+		boolean link = text.startsWith("@");
+		
+		for(String segment : text.split("@")){
+			
+			if(link){ // You're a link
+				StringPair sp = StringPair.parseSyntax(segment);
+				
+				//Format the link into the chatmessage
+				message.addLine(sp.vis);
+				
+				message.setUnderlined();
+				//message.setItalic();
+				
+				HoverEvent hEv = new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
+						TextComponent.fromLegacyText("Link to Topic: " 
+						+ ChatColor.ITALIC + sp.url.replace('+', ' ')));
+				ClickEvent cEv = new ClickEvent(Action.RUN_COMMAND, "/archehelp " + sp.url);
+				
+				message.setHoverEvent(hEv);
+				message.setClickEvent(cEv);
+				
+			}else {//Not a link, maybe a command suggest?
+				boolean sugg = segment.startsWith("$");
+				
+				for(String miniSegment : segment.split("\\$")){ // Let's split up into commandables
+					
+					if(sugg){ //Is a command, clicking it inserts command in chatbox
+						StringPair sp = StringPair.parseSyntax(miniSegment);
+						
+						BaseComponent[] cmp = new BaseComponent[]{new TextComponent("Run Command")};
+						
+						message.addLine(sp.vis);
+						HoverEvent hEv = new HoverEvent(HoverEvent.Action.SHOW_TEXT, cmp);
+						ClickEvent cEv = new ClickEvent(Action.SUGGEST_COMMAND, sp.url);
+						
+						message.setHoverEvent(hEv);
+						message.setClickEvent(cEv);
+					}else{
+						message.addLine(miniSegment);
+					}
+					
+					sugg = !sugg;
+				}
+			}
+			
+			link = !link;
+		}
+		
+		return message;
+	}
+	
+	private static class StringPair{
+		private String url,vis;
+		
+		private static StringPair parseSyntax(String segment){
+			String url,vis;
+			//Possible to have a topic link with a different Body text. 
+			//Syntax: @<Human>Men@. Links to 'Human' but says 'Men'
+			//We now see if this functionality was used
+			if(segment.startsWith("<") && segment.contains(">")){
+				int index = segment.lastIndexOf('>');
+				
+				if(index == segment.length() - 1){
+					url=vis= segment.replace('<', ' ').replace('>', ' ');
+				} else {
+					url = segment.substring(1, index);
+					vis = segment.substring(index+1);
+				}
+			} else {
+				url=vis=segment;
+			}
+		
+			return new StringPair(url, vis);
+		}
+		
+		private StringPair(String url, String vis){
+			this.url = url;
+			this.vis = vis;
+		}
+	}
+	
 }

@@ -1,38 +1,28 @@
 package net.lordofthecraft.arche.event;
 
-import org.bukkit.event.*;
-import net.lordofthecraft.arche.interfaces.*;
+import net.lordofthecraft.arche.interfaces.Persona;
 
-public class PersonaDeactivateEvent extends PersonaEvent
-{
-    private final Reason reason;
-    private static final HandlerList handlers;
-    
-    public PersonaDeactivateEvent(final Persona persona, final Reason reason) {
-        super(persona);
-        this.reason = reason;
-    }
-    
-    public Reason getReason() {
-        return this.reason;
-    }
-    
-    public HandlerList getHandlers() {
-        return PersonaDeactivateEvent.handlers;
-    }
-    
-    public static HandlerList getHandlerList() {
-        return PersonaDeactivateEvent.handlers;
-    }
-    
-    static {
-        handlers = new HandlerList();
-    }
-    
-    public enum Reason
-    {
-        LOGOUT, 
-        SWITCH, 
-        REMOVE;
-    }
+import org.bukkit.event.HandlerList;
+
+public class PersonaDeactivateEvent extends PersonaEvent {
+	private final Reason reason;
+	
+	public enum Reason { LOGOUT, SWITCH, REMOVE; }
+	
+	public PersonaDeactivateEvent(Persona persona, Reason reason) {
+		super(persona);
+		this.reason = reason;
+	}
+	
+	public Reason getReason(){
+		return reason;
+	}
+
+	//HandlerList Boilerplate
+	private static final HandlerList handlers = new HandlerList();
+	@Override public HandlerList getHandlers() { return handlers ; }
+	public static HandlerList getHandlerList() { return handlers ; }
+	
 }
+
+

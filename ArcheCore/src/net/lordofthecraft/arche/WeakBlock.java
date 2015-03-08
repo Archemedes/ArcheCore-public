@@ -1,75 +1,66 @@
 package net.lordofthecraft.arche;
 
-import org.bukkit.block.*;
-import org.bukkit.*;
-import org.apache.commons.lang.*;
+import org.apache.commons.lang.ObjectUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 
-public class WeakBlock
-{
-    private final String world;
-    private final int x;
-    private final int y;
-    private final int z;
-    
-    public WeakBlock(final World world, final int x, final int y, final int z) {
-        super();
-        this.world = world.getName();
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
-    
-    public WeakBlock(final String world, final int x, final int y, final int z) {
-        super();
-        this.world = world;
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
-    
-    public WeakBlock(final Block b) {
-        this(b.getWorld(), b.getX(), b.getY(), b.getZ());
-    }
-    
-    public WeakBlock(final Location location) {
-        this(location.getBlock());
-    }
-    
-    public String getWorld() {
-        return this.world;
-    }
-    
-    public int getX() {
-        return this.x;
-    }
-    
-    public int getY() {
-        return this.y;
-    }
-    
-    public int getZ() {
-        return this.z;
-    }
-    
-    @Override
-    public int hashCode() {
-        return (this.y << 24 ^ this.x ^ this.z) + ((this.world == null) ? 0 : (31 * this.world.hashCode()));
-    }
-    
-    public Location toLocation() {
-        final World w = Bukkit.getWorld(this.getWorld());
-        final int x = this.getX();
-        final int y = this.getY();
-        final int z = this.getZ();
-        return new Location(w, (double)x, (double)y, (double)z);
-    }
-    
-    @Override
-    public boolean equals(final Object o) {
-        if (!(o instanceof WeakBlock)) {
-            return false;
-        }
-        final WeakBlock other = (WeakBlock)o;
-        return this.x == other.x && this.y == other.y && this.z == other.z && ObjectUtils.equals((Object)this.world, (Object)other.world);
-    }
+/**
+ * Represents a block that does not keep strong references to any CraftBukkit or Minecraft objects, allowing for
+ * worry-free storage of them into Collections.
+ */
+public class WeakBlock {
+	private final String world;
+	private final int x,y,z;
+	
+	public WeakBlock(World world, int x, int y, int z){
+		this.world = world.getName();
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+	
+	public WeakBlock(String world, int x, int y, int z){
+		this.world = world;
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+	
+	public WeakBlock(Block b){
+		this(b.getWorld(), b.getX(), b.getY(), b.getZ());
+	}
+	
+	public WeakBlock(Location location) {
+		this(location.getBlock());
+	}
+
+	public String getWorld(){return world;}
+	public int getX(){return x;}
+	public int getY(){return y;}
+	public int getZ(){return z;}
+	
+	@Override
+	public int hashCode(){
+		return (this.y << 24 ^ this.x ^ this.z) + (world == null? 0 : 31 * world.hashCode());
+	}
+	
+	public Location toLocation(){
+		World w = Bukkit.getWorld(getWorld());
+		int x = getX();
+		int y = getY();
+		int z = getZ();
+		return new Location(w, x, y, z);
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(!(o instanceof WeakBlock)) return false;
+		WeakBlock other = (WeakBlock) o;
+		
+		return this.x == other.x && this.y == other.y && this.z == other.z && ObjectUtils.equals(this.world, other.world);
+	}
+	
+	
 }
