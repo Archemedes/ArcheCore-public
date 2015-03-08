@@ -16,6 +16,7 @@ import org.bukkit.command.CommandSender;
 
 public class CommandNamelog implements CommandExecutor {
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onCommand(final CommandSender sender, Command command, String label, String[] args) {
 		

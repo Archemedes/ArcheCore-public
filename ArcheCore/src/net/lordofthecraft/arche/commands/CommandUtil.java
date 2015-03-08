@@ -8,9 +8,9 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
+@SuppressWarnings("deprecation")
 public class CommandUtil {
 
-	
 	
 	public static Persona personaFromArg(String a){
 		int c = StringUtils.countMatches(a, "@");

@@ -14,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 public class TreasureChestListener implements Listener {
 
 	
-	@SuppressWarnings("deprecation")
 	private void update(Player p){
 		p.updateInventory();
 	}
