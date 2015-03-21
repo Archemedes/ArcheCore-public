@@ -95,7 +95,7 @@ public class NewbieProtectListener implements Listener {
 	}
 	
 	private void barrier(Player target, Player damager){
-		Location l = target.getLocation();
+		/*Location l = target.getLocation();
 		Vector v = damager.getLocation().subtract(l).getDirection().multiply(0.5);
 		l.add(v);
 		double x = l.getX();
@@ -103,6 +103,6 @@ public class NewbieProtectListener implements Listener {
 		double z = l.getZ();
 		
 		String cmd = String.format("particle barrier %.1f %.1f %.1f 0 0 0 1", x, y, z);
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);*/
 	}
 }

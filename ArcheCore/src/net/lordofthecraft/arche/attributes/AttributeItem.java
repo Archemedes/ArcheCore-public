@@ -118,7 +118,7 @@ public class AttributeItem {
 	 */
 	public static ItemStack addModifier(AttributeModifier m, ItemStack is){
 		try{
-			Object nmsItemStack = toNMSStack(is);
+			net.minecraft.server.v1_8_R1.ItemStack nmsItemStack = (net.minecraft.server.v1_8_R1.ItemStack) toNMSStack(is);
 			Object compound = compoundConstructor.newInstance();
 			
 			//Setting the compound with the required values from the Wrapped Modifier.
@@ -134,15 +134,17 @@ public class AttributeItem {
 			setInt.invoke(compound, "Operation", m.getOperation());
 			
 			//Find the correct place in the NBT Item Hierarchy to put the data
-			if(getTagMethod == null) getTagMethod = nmsItemStack.getClass().getMethod("getTag");
-			Object tag = getTagMethod.invoke(nmsItemStack);
+			//if(getTagMethod == null) getTagMethod = nmsItemStack.getClass().getMethod("getTag");
+			//Object tag = getTagMethod.invoke(nmsItemStack);
+			Object tag = nmsItemStack.getTag();
 			Object listNBT;
 			
 			//no tag means no ItemMeta, which in turn means the modifier does not exist
 			if(tag == null){
 				tag = compoundConstructor.newInstance();
-				if(setTagMethod == null) setTagMethod = nmsItemStack.getClass().getMethod("setTag");
-				setTagMethod.invoke(nmsItemStack, tag);
+				//if(setTagMethod == null) setTagMethod = nmsItemStack.getClass().getMethod("setTag");
+				//setTagMethod.invoke(nmsItemStack, tag);
+				nmsItemStack.setTag((net.minecraft.server.v1_8_R1.NBTTagCompound) tag);
 				listNBT = createAttributeModifierList(tag);
 			} else if(!NBTCompoundHasKey(tag, "AttributeModifiers")) {
 				listNBT = createAttributeModifierList(tag);

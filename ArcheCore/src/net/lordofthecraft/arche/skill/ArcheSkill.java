@@ -256,7 +256,7 @@ public class ArcheSkill implements Skill {
 	public SkillTier getCapTier(Persona p){
 		if(this.isInert()) return SkillTier.AENGULIC;
 		
-		if(this.isProfessionFor(p.getRace()) || p.getTimePlayed() > 2000*60 ) return SkillTier.AENGULIC;
+		if(this.isProfessionFor(p.getRace()) || p.getTimePlayed() > 2000*60) return SkillTier.AENGULIC;
 		
 		for(ProfessionSlot slot : ProfessionSlot.values()){
 			if(p.getProfession(slot) == this) return SkillTier.AENGULIC;

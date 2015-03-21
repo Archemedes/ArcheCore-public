@@ -26,7 +26,7 @@ import org.bukkit.entity.Player;
 import com.google.common.collect.Sets;
 
 public class CommandSkill implements CommandExecutor {
-	private static final int XP_TRESHOLD_BEFORE_WARNING = 30000; 
+	private static final int XP_TRESHOLD_BEFORE_WARNING = 25000; 
 	private final HelpDesk helpdesk;
 	private final boolean showXp;
 	
@@ -88,20 +88,23 @@ public class CommandSkill implements CommandExecutor {
 					sender.sendMessage(ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + "Free XP (assign with /sk [skill] assign [xp]): " + (int) bonusXp);
 				}
 				
-				sender.sendMessage(ChatColor.GRAY + "(Color Index: " + ChatColor.GREEN + "Selected Profession" + ChatColor.GRAY + " | " + ChatColor.BLUE + "Racial Skill" + ChatColor.GRAY + " )");
+				sender.sendMessage(ChatColor.GRAY + "(Color Index: " + ChatColor.DARK_GREEN + "Main Profession" + ChatColor.GRAY + ", " + ChatColor.GREEN + "Second Profession"  + ChatColor.GRAY + ", "
+						+ ChatColor.BLUE + "Racial Profession" + ChatColor.GRAY + ", " + ChatColor.AQUA + "Bonus Profession" + ChatColor.GRAY + " )");
 				for(Skill s : ArcheSkillFactory.getSkills().values()){
 					//SkillAttachment att = who.getSkill(i++);
 					if(s.isVisible(who)){
 						SkillTier tier = s.getSkillTier(who);
 						
 						ChatColor color = ChatColor.YELLOW;
-						if(s.isProfessionFor(who.getRace())) color = ChatColor.BLUE;
-						else{
-							for(ProfessionSlot slot : ProfessionSlot.values()){
-								if(who.getProfession(slot) == s){
-									color = ChatColor.GREEN;
-									break;
-								}
+						if(s.isProfessionFor(who.getRace())) 
+							color = ChatColor.BLUE;
+						else {
+							if(who.getProfession(ProfessionSlot.PRIMARY) == s){
+								color = ChatColor.DARK_GREEN;
+							} else if(who.getProfession(ProfessionSlot.SECONDARY) == s){
+								color = ChatColor.GREEN;
+							} else if(who.getProfession(ProfessionSlot.ADDITIONAL) == s){
+								color = ChatColor.AQUA;
 							}
 						}
 						
@@ -194,7 +197,7 @@ public class CommandSkill implements CommandExecutor {
 					if(skill.isProfessionFor(r)){
 						sender.sendMessage(ChatColor.LIGHT_PURPLE + "You do not need to select this profession.");
 						sender.sendMessage(ChatColor.LIGHT_PURPLE + "You inherit it for free from your Persona's race.");
-					}else if(args[2].equalsIgnoreCase("primary") || args[2].equalsIgnoreCase("main")){
+					}else if(args[2].equalsIgnoreCase("primary") || args[2].equalsIgnoreCase("main") || args[2].equalsIgnoreCase("first")){
 						if (pers.getProfession(ProfessionSlot.ADDITIONAL) == skill || pers.getProfession(ProfessionSlot.SECONDARY) == skill){
 							sender.sendMessage(ChatColor.RED + "You already have this profession selected!");
 						}else{	
@@ -202,13 +205,13 @@ public class CommandSkill implements CommandExecutor {
 						}
 					} else if(args[2].equalsIgnoreCase("secondary") || args[2].equalsIgnoreCase("second")){
 						if(pers.getProfession(ProfessionSlot.PRIMARY) == null){
-							sender.sendMessage(ChatColor.RED + "You should select a primary profession first!");
+							sender.sendMessage(ChatColor.RED + "You should select a main profession first!");
 						} else if (pers.getProfession(ProfessionSlot.PRIMARY).isIntensiveProfession()){
-							sender.sendMessage(ChatColor.RED + "Your primary profession is too intensive for you to also take up a secondary profession.");
+							sender.sendMessage(ChatColor.RED + "Your main profession is too intensive for you to also take up a second profession.");
 						} else if (pers.getProfession(ProfessionSlot.PRIMARY) == skill || pers.getProfession(ProfessionSlot.ADDITIONAL) == skill){
 							sender.sendMessage(ChatColor.RED + "You already have this profession selected!");
 						} else if (skill.isIntensiveProfession()){
-							sender.sendMessage(ChatColor.RED + "You may only select this skill as your Primary profession");
+							sender.sendMessage(ChatColor.RED + "You may only select this skill as your main profession");
 						} else {
 							slot = ProfessionSlot.SECONDARY;
 						}
@@ -216,7 +219,7 @@ public class CommandSkill implements CommandExecutor {
 						if (pers.getProfession(ProfessionSlot.PRIMARY) == skill || pers.getProfession(ProfessionSlot.SECONDARY) == skill){
 							sender.sendMessage(ChatColor.RED + "You already have this profession selected!");
 						} else if (skill.isIntensiveProfession()){
-							sender.sendMessage(ChatColor.RED + "You may only select this skill as your Primary profession");
+							sender.sendMessage(ChatColor.RED + "You may only select this skill as your main profession");
 						}else{	
 							long hours = 250 - pers.getTimePlayed()/60;
 							if(hours <= 0) slot = ProfessionSlot.ADDITIONAL;
@@ -238,25 +241,25 @@ public class CommandSkill implements CommandExecutor {
 						
 						if(pers.getProfession(slot) == skill){
 							if(slot == ProfessionSlot.PRIMARY && pers.getProfession(ProfessionSlot.SECONDARY) != null)
-								messageToSend = ChatColor.RED + "Clear your secondary profession before resetting your primary.";
+								messageToSend = ChatColor.RED + "Clear your second profession before resetting your main profession.";
 							else{
 								newProfs[slot.getSlot()] = null;
-								messageToSend = ChatColor.YELLOW + "You have reset your " + slot.toString().toLowerCase() + " profession";	
+								messageToSend = ChatColor.YELLOW + "You have reset your " + slot.toSimpleString().toLowerCase() + " profession";	
 							}
 						} else {
 							newProfs[slot.getSlot()] = skill;
 							if(skill.isIntensiveProfession() && pers.getProfession(ProfessionSlot.SECONDARY) != null)
 								newProfs[1] = null;
 							
-							messageToSend = ChatColor.GOLD + "Set your " + slot.toString().toLowerCase() + " profession as " + ChatColor.WHITE + skill.getName() + "\n"
+							messageToSend = ChatColor.GOLD + "Your " + slot.toSimpleString().toLowerCase() + " prfession is now " + ChatColor.WHITE + skill.getName() + "\n"
 										+ ChatColor.YELLOW + "Your ability to train this profession has improved." + "\n"
 										+ ChatColor.YELLOW + "You can undo this selection by rerunning the command:" + "\n"
-										+ ChatColor.GRAY + "" + ChatColor.ITALIC + "/sk " + skill.getName() + " select " + slot.toString().toLowerCase();
+										+ ChatColor.GRAY + "" + ChatColor.ITALIC + "/sk " + skill.getName() + " select " + slot.toSimpleString().toLowerCase();
 						}
 						
 						if(!this.skillResets.contains(apers.getPlayerUUID())){
 							apers.professions = newProfs;
-							if(apers.getXpLost() > XP_TRESHOLD_BEFORE_WARNING){
+							if(apers.getXpLost() > XP_TRESHOLD_BEFORE_WARNING){ // buggy still?
 								skillResets.add(apers.getPlayerUUID());
 								sender.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "WARNING: " + ChatColor.RED + "Rearranging professions this way will effect new level caps that will drain this Persona's total experience significantly.");
 								sender.sendMessage(ChatColor.DARK_RED + "Experience lost this way cannot be recovered!");
