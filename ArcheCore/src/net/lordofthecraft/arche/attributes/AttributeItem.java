@@ -35,7 +35,7 @@ public class AttributeItem {
 	
 	private static Method hasAttributes;
 	private static Method getTagMethod;
-	private static Method setTagMethod;
+	//private static Method setTagMethod;
 	
 	private static Method saveMethod;
 	private static Method itemNameMethod;
