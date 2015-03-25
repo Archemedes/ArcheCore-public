@@ -36,7 +36,8 @@ public class CommandPersona implements CommandExecutor {
 				+ i + "$</persona age >age [new age]$: " + a + "Set your character's age.\n"
 				+ i + "$</persona autoage>autoage$: " + a + "Toggle automatic aging for this persona.\n"
 				+ i + "$</persona addbio >addbio$: " + a + "Add a line of text to your Persona's bio!.\n"
-				+ i + "$</persona clearbio>clearbio$: " + a + "Clear your Persona's  bio completely.\n";
+				+ i + "$</persona clearbio>clearbio$: " + a + "Clear your Persona's  bio completely.\n"
+				+ i + "$</persona time>time$: " + a + "View the hours spent playing your Persona.\n";
 		
 		helpdesk.addInfoTopic("Persona Command", output);
 	}
@@ -93,6 +94,9 @@ public class CommandPersona implements CommandExecutor {
 					pers.setAutoAge(!auto);
 				}
 				
+				return true;
+			} else if (args[0].equalsIgnoreCase("time")){
+					sender.sendMessage(ChatColor.AQUA + "You have spent " + ChatColor.GOLD +""+ ChatColor.BOLD + Math.floor(pers.getAge()/60) + ChatColor.AQUA + " on this persona.");
 				return true;
 			} else if (args[0].equalsIgnoreCase("clearprefix") && prefix){
 				pers.clearPrefix();

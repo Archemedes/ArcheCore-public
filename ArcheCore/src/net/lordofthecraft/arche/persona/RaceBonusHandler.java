@@ -64,9 +64,9 @@ public class RaceBonusHandler {
 			AttributeBase.addModifier(p, b);
 			AttributeBase.removeModifier(p, c);
 			break;
-		/*case HIGH_ELF: case WOOD_ELF:
+		case HIGH_ELF: case WOOD_ELF: case DARK_ELF :
 			a = new AttributeModifier(UUID_ARCHE, AttributeType.MAX_HEALTH);
-			b = new AttributeModifier(UUID_ARCHE,"arche_speed", 0.04, Operation.MULTIPLY, AttributeType.MOVEMENT_SPEED);
+			b = new AttributeModifier(UUID_ARCHE,"arche_speed", 0.10, Operation.MULTIPLY, AttributeType.MOVEMENT_SPEED);
 			c = new AttributeModifier(UUID_ARCHE, AttributeType.KNOCKBACK_RESISTANCE);
 			//d = new AttributeModifier(UUID_ARCHE, AttributeType.ATTACK_DAMAGE);
 			AttributeBase.removeModifier(p, a);
@@ -74,7 +74,7 @@ public class RaceBonusHandler {
 			AttributeBase.removeModifier(p, c);
 			//AttributeBase.removeModifier(p, d);
 			break;
-		*/
+		
 		case FOREST_DWARF:
 			a = new AttributeModifier(UUID_ARCHE, AttributeType.MAX_HEALTH);
 			b = new AttributeModifier(UUID_ARCHE, AttributeType.MOVEMENT_SPEED);
@@ -125,18 +125,18 @@ public class RaceBonusHandler {
 			AttributeBase.removeModifier(p, c);
 			//AttributeBase.removeModifier(p, d);
 			break;
-		/*case KHA_LEPARDA: case KHA_CHEETRAH: case KHA_PANTERA: case KHA_TIGRASI:
+		case KHARAJYR : case KHA_LEPARDA: case KHA_CHEETRAH: case KHA_PANTERA: case KHA_TIGRASI:
 			a = new AttributeModifier(UUID_ARCHE, "arche_speed", 0.12, Operation.MULTIPLY, AttributeType.MOVEMENT_SPEED);
 			b = new AttributeModifier(UUID_ARCHE, "arche_lesshealth", -2, Operation.INCREMENT, AttributeType.MAX_HEALTH);
-			//c = new AttributeModifier(UUID_ARCHE, AttributeType.KNOCKBACK_RESISTANCE);
-			d = new AttributeModifier(UUID_ARCHE, "arche_sharp", 0.25, Operation.MULTIPLY, AttributeType.ATTACK_DAMAGE);
+			c = new AttributeModifier(UUID_ARCHE, AttributeType.KNOCKBACK_RESISTANCE);
+			//d = new AttributeModifier(UUID_ARCHE, "arche_sharp", 0.25, Operation.MULTIPLY, AttributeType.ATTACK_DAMAGE);
 			
 			AttributeBase.addModifier(p, a);
 			AttributeBase.addModifier(p, b);
-			//AttributeBase.removeModifier(p, c);
-			AttributeBase.addModifier(p, d);
-			break;*/
-		default: //Basic Humans, Kha, Orc, Default/Unset, Dark Elves
+			AttributeBase.removeModifier(p, c);
+			//AttributeBase.addModifier(p, d);
+			break;
+		default: //Basic Humans, Orc, Default/Unset
 			reset(p);
 			break;
 		}

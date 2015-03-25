@@ -15,6 +15,7 @@ import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Damageable;
@@ -98,7 +99,7 @@ public class RacialBonusListener implements Listener {
 				if(race == Race.SPECTRE || race == Race.CONSTRUCT || race == Race.NECROLYTE){
 					e.setCancelled(true);
 					e.setFoodLevel(20);
-				} else if(race == Race.ORC || race == Race.OLOG){
+				} else if(race == Race.ORC || race == Race.OLOG || race == Race.GOBLIN){
 					p.removePotionEffect(PotionEffectType.HUNGER);
 					
 					if(race == Race.OLOG && p.isSprinting()){
@@ -176,8 +177,11 @@ public class RacialBonusListener implements Listener {
 				double dmg = e.getDamage();
 				Race r = pers.getRace();
 				switch(r){
-				default: break;
-				case ORC:
+				case HIGH_ELF :
+					if(e.getCause() == DamageCause.MAGIC) {
+						e.setDamage(dmg*1.3);
+					}
+				case ORC: case OLOG :
 					/*
 					double fract = p.getHealth() / p.getMaxHealth();
 					
@@ -187,17 +191,17 @@ public class RacialBonusListener implements Listener {
 						dmg *= 1.10;
 					}
 					*/
-					e.setDamage(dmg+1);
+					e.setDamage(dmg+2);
 					break;
 				case HUMAN: case SOUTHERON: case NORTHENER: case HEARTLANDER: //Troop Morale
 					if(e.getEntity() instanceof Player){
 						int count = 0;
-						for(Entity ent : p.getNearbyEntities(6, 3, 6)){
+						for(Entity ent : p.getNearbyEntities(10, 3, 10)){
 							if(ent instanceof Player){
 								ArchePersona x = handler.getPersona((Player) ent);
-								if(x != null && (x.getRace() ==  Race.HUMAN || x.getRace() == Race.NORTHENER || x.getRace() == Race.SOUTHERON)){
-									if(++count >= 4){
-										dmg *= 1.15;
+								if(x != null && (x.getRace() ==  Race.HUMAN || x.getRace() == Race.NORTHENER || x.getRace() == Race.SOUTHERON || x.getRace() == Race.HEARTLANDER)){
+									if(++count >= 5){
+										dmg *= 1.25;
 										e.setDamage(dmg);
 										break;
 									}
@@ -218,12 +222,14 @@ public class RacialBonusListener implements Listener {
 						}
 					}
 					break;
-//				case KHARAJYR: case KHA_TIGRASI: case KHA_PANTERA: case KHA_LEPARDA: case KHA_CHEETRAH:
-//					//Kitty got claws
-//					if(p.getItemInHand().getType() == Material.AIR)
-//						e.setDamage(dmg + 2);
-//					
-//					break;
+				case KHARAJYR: case KHA_TIGRASI: case KHA_PANTERA: case KHA_LEPARDA: case KHA_CHEETRAH:
+					//Kitty got claws
+				if(p.getItemInHand().getType() == Material.AIR)
+						e.setDamage(dmg + 4);
+					
+					break;
+				default:
+					break;
 				}
 			}
 		} 
@@ -266,14 +272,14 @@ public class RacialBonusListener implements Listener {
 			if(c == DamageCause.MAGIC){
 				double dmg = e.getDamage();
 				if(pers.getRace() == Race.HIGH_ELF){
-					dmg *= 0.75;
+					dmg *= 0.7;
 					e.setDamage(dmg);
 				}
 			} else if (c == DamageCause.FALL){
 				double dmg = e.getDamage();
 				switch(pers.getRace()){
 				case KHARAJYR: case KHA_CHEETRAH: case KHA_LEPARDA: case KHA_TIGRASI: case KHA_PANTERA:
-					dmg -= 4;
+					dmg -= 6;
 					if(dmg <= 0) e.setCancelled(true);
 					else e.setDamage(dmg);
 				default: break;
