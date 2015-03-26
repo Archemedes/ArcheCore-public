@@ -80,6 +80,9 @@ public final class ArchePersona implements Persona {
 	double money = 0;
 
 	private int hash = 0;
+	
+	private int food = 0;
+	private double health = 0;
 
 	private final List<SkillAttachment> profs = Lists.newArrayList();
 	boolean gainsXP = true;
@@ -238,6 +241,7 @@ public final class ArchePersona implements Persona {
 
 	void setCurrent(boolean current){
 		if(this.current != current){
+			
 			this.current = current;
 
 			buffer.put(new UpdateTask(this, PersonaField.CURRENT, current));
@@ -246,7 +250,7 @@ public final class ArchePersona implements Persona {
 				Player p = Bukkit.getPlayer(getPlayerUUID());
 				if(p != null){ 
 					updateDisplayName(p);
-
+					
 					//Apply Racial bonuses
 					if(ArcheCore.getControls().areRacialBonusesEnabled())
 						RaceBonusHandler.apply(p, race);
@@ -467,6 +471,8 @@ public final class ArchePersona implements Persona {
 
 	void saveMinecraftSpecifics(final Player p){
 		//Store and switch Persona-related specifics: Location and Inventory.
+		food = p.getFoodLevel();
+		health = p.getHealth();
 		inv = PersonaInventory.store(p);
 		location = new WeakBlock(p.getLocation());
 
@@ -496,8 +502,14 @@ public final class ArchePersona implements Persona {
 		}
 
 		//Heal them so their Persona is fresh
-		p.setHealth(p.getMaxHealth());
-		p.setFoodLevel(20);
+		if (health == 0) {
+			health = p.getMaxHealth();
+		}
+		if (food == 0) {
+			food = 20;
+		}
+		p.setHealth(health);
+		p.setFoodLevel(food);
 		//for(PotionEffectType pet : PotionEffectType.values())
 		//	if(p.hasPotionEffect(pet)) p.removePotionEffect(pet);
 	}
