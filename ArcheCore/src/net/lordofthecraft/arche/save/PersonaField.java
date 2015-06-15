@@ -8,6 +8,7 @@ public enum PersonaField {
 	PREFIX("prefix"),
 	NAME("name"),
 	RACE("rheader"),
+	RACE_REAL("race"),
 	DESCRIPTION("desc"),
 	SKILL_SELECTED("skill_selected"),
 	AGE("age"),
@@ -20,7 +21,8 @@ public enum PersonaField {
 	SKILL_PRIMARY("skill_primary"),
 	SKILL_SECONDARY("skill_secondary"),
 	SKILL_ADDITIONAL("skill_tertiary"),
-	MONEY("money");
+	MONEY("money"),
+	SKIN("skin");
 	
 	private static final String STATEMENT_PREFIX = "UPDATE persona SET ";
 	private static final String STATEMENT_SUFFIX = " = ? WHERE player = ? AND id = ?";

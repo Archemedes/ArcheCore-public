@@ -1,6 +1,10 @@
 package net.lordofthecraft.arche.persona;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -20,6 +24,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
+import net.lordofthecraft.arche.listener.PersonaSkinListener;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.DataTask;
@@ -40,7 +45,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.craftbukkit.v1_8_R1.entity.CraftPlayer;
 
+import com.comphenix.packetwrapper.WrapperPlayServerNamedEntitySpawn;
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
+import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction;
+import com.comphenix.protocol.wrappers.PlayerInfoData;
+import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -54,7 +70,7 @@ public final class ArchePersona implements Persona {
 
 	private final ArchePersonaKey key;
 
-	private final Race race;
+	private Race race;
 	private final int gender;
 
 	int age;
@@ -77,6 +93,7 @@ public final class ArchePersona implements Persona {
 
 	WeakBlock location = null;
 	PersonaInventory inv = null;
+	PersonaSkin skin = null;
 	double money = 0;
 
 	private int hash = 0;
@@ -122,6 +139,153 @@ public final class ArchePersona implements Persona {
 
 	public SkillAttachment getSkill(int skillId){
 		return profs.get(skillId);
+	}
+	
+	public void setRace(Race r) {
+		this.race = r;
+		if(ArcheCore.getControls().areRacialBonusesEnabled()) {
+			Player p = getPlayer();
+			if (p != null) {
+				RaceBonusHandler.reset(p);
+				RaceBonusHandler.apply(p, race);
+				p.setHealth(p.getMaxHealth());
+			}
+		}
+		buffer.put(new UpdateTask(this, PersonaField.RACE_REAL, race));
+		this.raceHeader = null;
+	}
+	
+	public void setSkin(PersonaSkin skin) {
+		this.skin = skin;
+		buffer.put(new UpdateTask(this, PersonaField.SKIN, skin.getCombined()));
+		if (this.getPlayer() != null) PersonaSkinListener.updatePlayerSkin(this.getPlayer());
+	}
+	
+	public PersonaSkin getSkin() {
+		return skin;
+	}
+	/*
+	@SuppressWarnings("deprecation")
+	public void broadcastSkinChange() {
+		// TODO
+		Player p = this.getPlayer();
+		final ProtocolManager man = ProtocolLibrary.getProtocolManager();
+		final List<Player> tracked = Lists.newArrayList();
+		for (Player x : p.getWorld().getPlayers()) {
+			if (x == p) continue;
+			if (p.getLocation().distance(x.getLocation()) < 96) {
+				tracked.add(x);
+			}
+		}
+		PacketContainer remove = man.createPacket(PacketType.Play.Server.ENTITY_DESTROY);
+		remove.getIntegerArrays().write(0, new int[]{p.getEntityId()});
+
+		for (Player x : tracked) {
+			try {
+				man.sendServerPacket(x, remove);
+			} catch (InvocationTargetException e) {
+				e.printStackTrace();
+			}
+		}
+
+		PacketContainer update = man.createPacket(PacketType.Play.Server.PLAYER_INFO);
+		List<PlayerInfoData> pfile = Arrays.asList(new PlayerInfoData(
+				WrappedGameProfile.fromPlayer(p),
+				0,
+				NativeGameMode.SURVIVAL,
+				null));
+		update.getPlayerInfoDataLists().write(0, pfile); 
+		update.getPlayerInfoAction().write(0, PlayerInfoAction.REMOVE_PLAYER);
+		man.broadcastServerPacket(update);
+		update.getPlayerInfoAction().write(0, PlayerInfoAction.ADD_PLAYER);
+		man.broadcastServerPacket(update);
+
+		WrapperPlayServerNamedEntitySpawn add = new WrapperPlayServerNamedEntitySpawn();
+		add.setEntityId(p.getEntityId());
+		add.setPlayerUuid(p.getUniqueId());
+		add.setPosition(p.getLocation().toVector());
+		add.setCurrentItem(p.getItemInHand().getTypeId());
+
+		Location head = p.getEyeLocation();
+		add.setPitch(head.getPitch());
+		add.setYaw(head.getYaw());
+
+		WrappedDataWatcher watcher = new WrappedDataWatcher();
+		watcher.setObject(10, ((CraftPlayer)p).getHandle().getDataWatcher().getByte(10));
+		watcher.setObject(6, (float)p.getHealth());
+		add.setMetadata(watcher);
+
+		for (Player x : tracked) {
+			add.sendPacket(x);
+		}
+	}*/
+
+	public double reskillRacialReassignment() {
+		List<Skill> skills = getOrderedProfessions();
+		boolean canHaveBonus = this.getTimePlayed()/60 >= 250;
+		double lostXP = 0;
+		boolean main = false;
+		boolean second = false;
+		boolean bonus = false;
+		this.professions = new Skill[3];
+		for (Skill sk : skills) {
+			System.out.println(sk.getName() + " " + sk.getXp(this));
+			if (sk.getXp(this) <= 0) {
+				//System.out.println("inept");
+				continue;
+			}
+			else if (sk.isProfessionFor(race)) {
+				System.out.println("racial");
+				continue;
+			}
+			else if (sk.getXp(this) <= sk.getCapTier(this).getXp()) {
+				//System.out.println("fits");
+				continue;
+			}
+			else if (!bonus && canHaveBonus) {
+				this.setProfession(ProfessionSlot.ADDITIONAL, sk);
+				//System.out.println("setting bonus");
+				bonus = true;
+				continue;
+			}
+			else if (!main) {
+				this.setProfession(ProfessionSlot.PRIMARY, sk);
+				main = true;
+				//System.out.println("setting main");
+				continue;
+			}
+			else if (!second) {
+				this.setProfession(ProfessionSlot.SECONDARY, sk);
+				//System.out.println("setting second");
+				second = true;
+				continue;
+			}
+			
+			else {
+				lostXP += sk.getXp(this);
+				//System.out.println("adding to pool");
+			}
+		}
+		this.handleProfessionSelection();
+		return lostXP;
+	}
+
+	public List<Skill> getOrderedProfessions() {
+		List<Skill> skills = Lists.newArrayList();
+		for (SkillAttachment sk : profs) if (sk.skill.isVisible(this)) skills.add(sk.skill);
+		Collections.sort(skills, new SkillComparator(this));
+		return skills;
+	}
+	
+	private class SkillComparator implements Comparator<Skill> {
+		Persona p;
+		public SkillComparator(Persona p){
+			this.p = p;
+		}
+		@Override
+		public int compare(Skill o1, Skill o2) {
+			return Double.compare(o2.getXp(p), o1.getXp(p));
+		}
 	}
 
 	@Override
@@ -174,6 +338,8 @@ public final class ArchePersona implements Persona {
 	public void handleProfessionSelection(){
 		for(SkillAttachment att : profs){
 			if(!att.isInitialized()) att.initialize();
+			
+			if (att.skill.getName().equalsIgnoreCase("internal_drainxp")) continue;
 
 			SkillTier tier = att.skill.getCapTier(this);
 
@@ -508,7 +674,8 @@ public final class ArchePersona implements Persona {
 		if (food == 0) {
 			food = 20;
 		}
-		p.setHealth(health);
+		if (p.getMaxHealth() < health) p.setHealth(p.getMaxHealth()); 
+		else p.setHealth(health);
 		p.setFoodLevel(food);
 		//for(PotionEffectType pet : PotionEffectType.values())
 		//	if(p.hasPotionEffect(pet)) p.removePotionEffect(pet);

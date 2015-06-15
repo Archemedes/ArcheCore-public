@@ -32,6 +32,8 @@ public enum Race {
 	CONSTRUCT("Construct","Special", 10000, 0.5),
 	SPECTRE("Spectre","Special", 10000, 0.0),
 	NECROLYTE("Necrolyte","Special",10000),
+	UNDEAD("Undead", "Special", 10000),
+	ASCENDED("Ascended", "Special", 10000),
 	
 	UNSET("Unset", "Unset", 1000);
 	

@@ -30,7 +30,11 @@ public enum SkillTier {
 	VETERAN(9, 70000,"Veteran"),
 	MASTERFUL(10, 150000,"Masterful"),
 	LEGENDARY(11, 350000,"Legendary"),
-	AENGULIC(12, 1000000,"Aengulic");
+	AENGULIC(12, 1000000,"Aengulic"),
+	DAEMONIC(13, 2000000, "Daemonic"),
+	ILLUMINATED(14, 3000000, "Illuminated"),
+	GODSENT(15, 4000000, "Godsent"),
+	SUPER(16, 5000000, "Supercalifragilistic");
 	
 	final int xp;
 	final int tier;

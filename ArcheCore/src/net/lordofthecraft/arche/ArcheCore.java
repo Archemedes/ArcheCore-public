@@ -29,6 +29,7 @@ import net.lordofthecraft.arche.listener.ArmorPreventionListener;
 import net.lordofthecraft.arche.listener.BeaconMenuListener;
 import net.lordofthecraft.arche.listener.BlockRegistryListener;
 import net.lordofthecraft.arche.listener.EconomyListener;
+import net.lordofthecraft.arche.listener.ExperienceOrbListener;
 import net.lordofthecraft.arche.listener.HelpMenuListener;
 import net.lordofthecraft.arche.listener.HelpOverrideListener;
 import net.lordofthecraft.arche.listener.LegacyCommandsListener;
@@ -328,6 +329,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		pm.registerEvents(new PlayerChatListener(), this);
 		pm.registerEvents(new TreasureChestListener(), this);
 		pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
+		
+		if (showXpToPlayers) {
+			pm.registerEvents(new ExperienceOrbListener(), this);
+		}
 		
 		if(helpOverriden)
 			pm.registerEvents(new HelpOverrideListener(), this);

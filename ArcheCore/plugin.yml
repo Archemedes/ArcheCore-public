@@ -1,7 +1,7 @@
 name: ArcheCore
 main: net.lordofthecraft.arche.ArcheCore
-author: Arche
-version: 1.8
+authors: [Arche, Kowaman]
+version: 1.82
 
 commands:
    archehelp:

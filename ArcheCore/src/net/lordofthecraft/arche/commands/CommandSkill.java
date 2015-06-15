@@ -26,7 +26,7 @@ import org.bukkit.entity.Player;
 import com.google.common.collect.Sets;
 
 public class CommandSkill implements CommandExecutor {
-	private static final int XP_TRESHOLD_BEFORE_WARNING = 25000; 
+	private static final int XP_TRESHOLD_BEFORE_WARNING = 5000; 
 	private final HelpDesk helpdesk;
 	private final boolean showXp;
 	
@@ -84,13 +84,13 @@ public class CommandSkill implements CommandExecutor {
 				sender.sendMessage(ChatColor.LIGHT_PURPLE + who.getName() + ChatColor.AQUA + " has the following proficiencies: ");
 				
 				double bonusXp = ArcheSkillFactory.getSkill("internal_drainxp").getXp(who);
-				if(bonusXp > 0){
+				if(bonusXp >= 1){
 					sender.sendMessage(ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + "Free XP (assign with /sk [skill] assign [xp]): " + (int) bonusXp);
 				}
 				
 				sender.sendMessage(ChatColor.GRAY + "(Color Index: " + ChatColor.DARK_GREEN + "Main Profession" + ChatColor.GRAY + ", " + ChatColor.GREEN + "Second Profession"  + ChatColor.GRAY + ", "
 						+ ChatColor.BLUE + "Racial Profession" + ChatColor.GRAY + ", " + ChatColor.AQUA + "Bonus Profession" + ChatColor.GRAY + " )");
-				for(Skill s : ArcheSkillFactory.getSkills().values()){
+				for(Skill s : ((ArchePersona) who).getOrderedProfessions()){
 					//SkillAttachment att = who.getSkill(i++);
 					if(s.isVisible(who)){
 						SkillTier tier = s.getSkillTier(who);
@@ -114,7 +114,7 @@ public class CommandSkill implements CommandExecutor {
 							SkillTier max = s.getCapTier(who);
 							String xp;
 							if(s.achievedTier(who, max)){
-								if(max == SkillTier.AENGULIC) xp = ""; 
+								if(max == SkillTier.SUPER) xp = ""; 
 								else xp = ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + " (Maxed)";
 							} else {
 								xp = ChatColor.GRAY + "" + ChatColor.ITALIC + " (" + ((int) s.getXp(who)) + "/" + tier.getNext().getXp() + ")";
@@ -205,7 +205,11 @@ public class CommandSkill implements CommandExecutor {
 						}
 					} else if(args[2].equalsIgnoreCase("secondary") || args[2].equalsIgnoreCase("second")){
 						if(pers.getProfession(ProfessionSlot.PRIMARY) == null){
-							sender.sendMessage(ChatColor.RED + "You should select a main profession first!");
+							if (pers.getProfession(ProfessionSlot.ADDITIONAL) == skill || pers.getProfession(ProfessionSlot.SECONDARY) == skill){
+								sender.sendMessage(ChatColor.RED + "You already have this profession selected!");
+							}else{	
+								slot = ProfessionSlot.PRIMARY;
+							}
 						} else if (pers.getProfession(ProfessionSlot.PRIMARY).isIntensiveProfession()){
 							sender.sendMessage(ChatColor.RED + "Your main profession is too intensive for you to also take up a second profession.");
 						} else if (pers.getProfession(ProfessionSlot.PRIMARY) == skill || pers.getProfession(ProfessionSlot.ADDITIONAL) == skill){
@@ -224,10 +228,10 @@ public class CommandSkill implements CommandExecutor {
 							long hours = 250 - pers.getTimePlayed()/60;
 							if(hours <= 0) slot = ProfessionSlot.ADDITIONAL;
 							else{
-								String amount = hours > 150? "much, much" :
-									hours > 100? "much" : hours > 50? "" : 
-										hours > 10? "a little" : "a tiny bit";
-										sender.sendMessage(ChatColor.RED + "You must attune your Persona " + amount + " further.");
+								String amount = hours > 150? "much, much " :
+									hours > 100? "much " : hours > 50? "" : 
+										hours > 10? "a little " : "a tiny bit ";
+										sender.sendMessage(ChatColor.RED + "You must attune your Persona " + amount + "further.");
 							}
 						}
 					} else return false;
@@ -240,9 +244,11 @@ public class CommandSkill implements CommandExecutor {
 						String messageToSend = null;
 						
 						if(pers.getProfession(slot) == skill){
-							if(slot == ProfessionSlot.PRIMARY && pers.getProfession(ProfessionSlot.SECONDARY) != null)
-								messageToSend = ChatColor.RED + "Clear your second profession before resetting your main profession.";
-							else{
+							if(slot == ProfessionSlot.PRIMARY && pers.getProfession(ProfessionSlot.SECONDARY) != null) {
+								messageToSend = ChatColor.YELLOW + "Cleared your main profession. Your second profession has been transfered to the main slot.";
+								newProfs[slot.getSlot()] = pers.getProfession(ProfessionSlot.SECONDARY);
+								newProfs[ProfessionSlot.SECONDARY.getSlot()] = null;
+							}else{
 								newProfs[slot.getSlot()] = null;
 								messageToSend = ChatColor.YELLOW + "You have reset your " + slot.toSimpleString().toLowerCase() + " profession";	
 							}
@@ -259,10 +265,11 @@ public class CommandSkill implements CommandExecutor {
 						
 						if(!this.skillResets.contains(apers.getPlayerUUID())){
 							apers.professions = newProfs;
-							if(apers.getXpLost() > XP_TRESHOLD_BEFORE_WARNING){ // buggy still?
+							double xplost = apers.getXpLost();
+							if(xplost > XP_TRESHOLD_BEFORE_WARNING){ // buggy still?
 								skillResets.add(apers.getPlayerUUID());
-								sender.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "WARNING: " + ChatColor.RED + "Rearranging professions this way will effect new level caps that will drain this Persona's total experience significantly.");
-								sender.sendMessage(ChatColor.DARK_RED + "Experience lost this way cannot be recovered!");
+								sender.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "WARNING: " + ChatColor.RED + "Rearranging professions will effect new level caps that will drain this Persona's total experience significantly.");
+								sender.sendMessage(ChatColor.DARK_RED + "You will lose " + ChatColor.GOLD + ChatColor.BOLD + xplost + ChatColor.DARK_RED + " experience that can not be recovered.");
 								sender.sendMessage(ChatColor.LIGHT_PURPLE + "If you are okay with this, repeat the command and accept the experience penalty.");
 								
 								apers.professions = oldProfs;
@@ -304,13 +311,21 @@ public class CommandSkill implements CommandExecutor {
 					}
 				}
 				return true;
-			} else if (args[1].equalsIgnoreCase("assign") && args.length > 2){
+			} else if (args[1].equalsIgnoreCase("assign") && args.length > 1){
 				try{
 					Persona send = findSenderPersona(sender);
 					Skill drainXp = ArcheSkillFactory.getSkill("internal_drainxp");
-					double xp = Double.parseDouble(args[2]);
+					double xp;
+					if (args.length > 2) {
+						xp = Double.parseDouble(args[2]);
+					} else {
+						xp = drainXp.getXp(send);
+					}
 					if(send != null){
-						xp = Math.min((double) skill.getCapTier(send).getXp() - skill.getXp(send), xp);
+						
+						SkillTier cap = (skill.getCapTier(send).getTier() > 12) ? SkillTier.AENGULIC : skill.getCapTier(send);
+						
+						xp = Math.min((double) cap.getXp() - skill.getXp(send), xp);
 						if(xp > drainXp.getXp(send)){
 							sender.sendMessage(ChatColor.RED + "Error: Insuffcicient Free XP available");
 						} else {

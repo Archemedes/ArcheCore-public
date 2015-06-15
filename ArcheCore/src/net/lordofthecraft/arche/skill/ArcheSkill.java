@@ -222,7 +222,9 @@ public class ArcheSkill implements Skill {
 	}
 	
 	private double getXPModifier(Persona p, SkillAttachment att){
-		if(xpMods.isEmpty()) return 1;
+		
+		
+		if(xpMods.isEmpty() || this.getName().equalsIgnoreCase("internal_drainxp")) return 1;
 		
 		double mod = att.getModifier(); 
 		if(mod > 0) return mod; //Cached value
@@ -254,12 +256,12 @@ public class ArcheSkill implements Skill {
 	
 	@Override
 	public SkillTier getCapTier(Persona p){
-		if(this.isInert()) return SkillTier.AENGULIC;
+		if(this.isInert()) return SkillTier.SUPER;
 		
-		if(this.isProfessionFor(p.getRace()) || p.getTimePlayed() > 2000*60) return SkillTier.AENGULIC;
+		if(this.isProfessionFor(p.getRace()) || p.getTimePlayed() > 2500*60) return SkillTier.SUPER;
 		
 		for(ProfessionSlot slot : ProfessionSlot.values()){
-			if(p.getProfession(slot) == this) return SkillTier.AENGULIC;
+			if(p.getProfession(slot) == this) return SkillTier.SUPER;
 		}
 		
 		SkillTier t = p.getProfession(ProfessionSlot.PRIMARY) == null? SkillTier.ADEQUATE :

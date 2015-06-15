@@ -177,10 +177,10 @@ public class RacialBonusListener implements Listener {
 				double dmg = e.getDamage();
 				Race r = pers.getRace();
 				switch(r){
-				case HIGH_ELF :
+				/*case HIGH_ELF :
 					if(e.getCause() == DamageCause.MAGIC) {
 						e.setDamage(dmg*1.3);
-					}
+					}*/
 				case ORC: case OLOG :
 					/*
 					double fract = p.getHealth() / p.getMaxHealth();
@@ -191,7 +191,7 @@ public class RacialBonusListener implements Listener {
 						dmg *= 1.10;
 					}
 					*/
-					e.setDamage(dmg+2);
+					e.setDamage(dmg+4);
 					break;
 				case HUMAN: case SOUTHERON: case NORTHENER: case HEARTLANDER: //Troop Morale
 					if(e.getEntity() instanceof Player){
@@ -225,7 +225,7 @@ public class RacialBonusListener implements Listener {
 				case KHARAJYR: case KHA_TIGRASI: case KHA_PANTERA: case KHA_LEPARDA: case KHA_CHEETRAH:
 					//Kitty got claws
 				if(p.getItemInHand().getType() == Material.AIR)
-						e.setDamage(dmg + 4);
+						e.setDamage(dmg + 6);
 					
 					break;
 				default:

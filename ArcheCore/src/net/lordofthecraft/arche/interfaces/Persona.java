@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import net.lordofthecraft.arche.enums.ProfessionSlot;
 import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.persona.PersonaSkin;
 
 import org.bukkit.entity.Player;
 
@@ -205,19 +206,19 @@ public interface Persona {
 	public String getGender();
 
 	/**
-	 * Get the current Age of this Persona
+	 * Get the current Age of this Persona.
 	 * @return the Persona's age
 	 */
 	public int getAge();
 
 	/**
-	 * Set the current age of this Persona
+	 * Set the current age of this Persona.
 	 * @param age the age to set.
 	 */
 	public void setAge(int age);
 
 	/**
-	 * Get whether or not this Persona's age is set to
+	 * Get whether or not this Persona's age is set to.
 	 * automatically increase (with ingame years).
 	 * @return If the Persona automatically ages
 	 */
@@ -230,9 +231,23 @@ public interface Persona {
 	public void setAutoAge(boolean autoAge);
 
 	/**
+	 * Set the current skin of this Persona.
+	 * @param skin the skin to set.
+	 */
+	public void setSkin(PersonaSkin skin);
+	
+	/**
+	 * Get the associated skin of this Persona.
+	 * @return The Persona's skin.
+	 */
+	
+	public PersonaSkin getSkin();
+	
+	/**
 	 * Delete the Persona from the Plugin records.
 	 * @return whether or not the removal was successful.
 	 */
+	
 	public boolean remove();
 
 }

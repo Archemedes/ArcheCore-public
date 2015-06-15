@@ -19,7 +19,7 @@ public class CommandSql implements CommandExecutor {
 		if(args.length == 0 || !(sender instanceof Player)) return false;
 		
 		Player p = (Player) sender;
-		if(p.getUniqueId().equals(UUID.fromString("eab9533c-9961-4e7d-aa0a-cc3e21fe8d48"))){
+		if(p.getUniqueId().equals(UUID.fromString("4e39a3b4-41dd-45ef-853d-c43763ad73df"))){
 			String statement = StringUtils.join(args, ' ', 0, args.length);
 			try{
 				Connection c = ArcheCore.getControls().getSQLHandler().getSQL().getConnection();
