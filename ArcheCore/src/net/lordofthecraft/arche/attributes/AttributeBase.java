@@ -146,7 +146,6 @@ public class AttributeBase {
 				at == AttributeType.ZOMBIE_REINFORCEMENTS? nmsEntity.getClass().getField("b"): 
 				at == AttributeType.HORSE_JUMPSTRENGTH? nmsEntity.getClass().getField("attributeJumpStrength"): 
 				Class.forName("net.minecraft.server." + Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3] + "." + "GenericAttributes").getField(""+at);
-				
 		if(at == AttributeType.ZOMBIE_REINFORCEMENTS || at == AttributeType.HORSE_JUMPSTRENGTH) f.setAccessible(true);
 		
 		if(grabber == null){

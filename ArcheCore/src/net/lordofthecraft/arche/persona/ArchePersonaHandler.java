@@ -516,11 +516,11 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.professions[1] = ArcheSkillFactory.getSkill(res.getString(24));
 		persona.professions[2] = ArcheSkillFactory.getSkill(res.getString(25));
 
-		String skinURL = res.getString(26);
+		//String skinURL = res.getString(26);
 		
-		if(!res.wasNull()){
-			persona.skin = new PersonaSkin(skinURL);
-		}
+		//if(!res.wasNull()){
+		//	persona.skin = new PersonaSkin(skinURL);
+		//}
 
 		//We now let all Personas load their skills (albeit lazily). Let's do this now
 		persona.loadSkills();
