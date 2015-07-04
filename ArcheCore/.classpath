@@ -16,8 +16,8 @@
 	<classpathentry kind="var" path="M2_REPO/net/md-5/bungeecord-event/1.8-SNAPSHOT/bungeecord-event-1.8-SNAPSHOT.jar"/>
 	<classpathentry kind="var" path="M2_REPO/net/md-5/bungeecord-protocol/1.8-SNAPSHOT/bungeecord-protocol-1.8-SNAPSHOT.jar"/>
 	<classpathentry kind="var" path="M2_REPO/net/sf/trove4j/trove4j/3.0.3/trove4j-3.0.3.jar"/>
-	<classpathentry kind="lib" path="C:/Obelisk/spigot.jar"/>
-	<classpathentry kind="lib" path="C:/Obelisk/ProtocolLib.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Maxim.ITSAFE/Documents/LotC Ready/PacketWrapper.jar"/>
+	<classpathentry kind="lib" path="/Nexus-Core/jars/PacketWrapper.jar"/>
+	<classpathentry kind="lib" path="/Nexus-Core/jars/ProtocolLib.jar"/>
+	<classpathentry kind="lib" path="/Nexus-Core/jars/spigot.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
