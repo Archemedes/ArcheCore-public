@@ -1,6 +1,8 @@
 package net.lordofthecraft.arche.listener;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import net.lordofthecraft.arche.ArcheCore;
@@ -28,6 +30,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
@@ -37,7 +40,9 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class RacialBonusListener implements Listener {
 	private final Random rnd = new Random();
@@ -214,7 +219,7 @@ public class RacialBonusListener implements Listener {
 					if(e.getCause() != DamageCause.MAGIC){
 						e.setCancelled(true);
 						EntityDamageByEntityEvent newEvent = new EntityDamageByEntityEvent(e.getDamager(), e.getEntity(),
-								DamageCause.MAGIC, null, null);
+								DamageCause.MAGIC, getDamageModifierMap(e), getDamageFunctionMap(e));
 						Bukkit.getPluginManager().callEvent(newEvent);
 						if(!newEvent.isCancelled() && e.getEntity() instanceof Damageable){
 							Damageable d = (Damageable) e.getEntity();
@@ -233,6 +238,30 @@ public class RacialBonusListener implements Listener {
 				}
 			}
 		} 
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <E extends EntityDamageEvent> Map<EntityDamageEvent.DamageModifier, Double> getDamageModifierMap(E e) {
+		try {
+			Field f = Class.forName("org.bukkit.event.entity.EntityDamageEvent").getDeclaredField("modifiers");
+			f.setAccessible(true);
+			return (Map<EntityDamageEvent.DamageModifier, Double>) f.get(e);
+		} catch(Exception exc) {
+			exc.printStackTrace();
+			return null;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <E extends EntityDamageEvent> Map<DamageModifier, ? extends Function<? super Double, Double>> getDamageFunctionMap(E e) {
+		try {
+			Field f = Class.forName("org.bukkit.event.entity.EntityDamageEvent").getDeclaredField("modifiers");
+			f.setAccessible(true);
+			return (Map<DamageModifier, ? extends Function<? super Double, Double>>) f.get(e);
+		} catch(Exception exc) {
+			exc.printStackTrace();
+			return null;
+		}
 	}
 	
 	private boolean holdsGoldenWeapon(Entity e){
@@ -261,7 +290,7 @@ public class RacialBonusListener implements Listener {
 
 			Race r = pers.getRace();
 			if(r == Race.SPECTRE || r == Race.CONSTRUCT){
-				if(e.getCause() == DamageCause.POISON){
+				if(e.getCause() == DamageCause.POISON || e.getCause() == DamageCause.DROWNING){
 					e.setCancelled(true);
 				} else if( !(c == DamageCause.SUICIDE || c == DamageCause.VOID) ){
 					double factor = r == Race.SPECTRE? 0.5:0.4;

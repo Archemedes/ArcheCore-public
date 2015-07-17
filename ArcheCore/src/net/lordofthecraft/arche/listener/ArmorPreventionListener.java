@@ -31,6 +31,8 @@ public class ArmorPreventionListener implements Listener {
 		switch (e.getAction()) {
 		case PLACE_ALL: case PLACE_SOME: case PLACE_ONE: case SWAP_WITH_CURSOR:
 			ItemStack armor = e.getCursor();
+			if (!isArmor(armor.getType()))
+				return;
 			if(!canEquip(p, armor) && e.getSlotType() == InventoryType.SlotType.ARMOR){
 				e.setCancelled(true);
 				return;
@@ -39,6 +41,8 @@ public class ArmorPreventionListener implements Listener {
 		case HOTBAR_SWAP:
 			int b = e.getHotbarButton();
 			ItemStack armor3 = p.getInventory().getItem(b);
+			if (!isArmor(armor3.getType()))
+				return;
 			if(!canEquip(p, armor3) && e.getSlotType() == InventoryType.SlotType.ARMOR){
 				e.setCancelled(true);
 				return;
@@ -46,6 +50,8 @@ public class ArmorPreventionListener implements Listener {
 			break;
 		case MOVE_TO_OTHER_INVENTORY:
 			ItemStack armor2 = e.getCurrentItem();
+			if (!isArmor(armor2.getType()))
+				return;
 			if(!canEquip(p, armor2) && e.getSlotType() != InventoryType.SlotType.ARMOR){
 				e.setCancelled(true);
 				return;
