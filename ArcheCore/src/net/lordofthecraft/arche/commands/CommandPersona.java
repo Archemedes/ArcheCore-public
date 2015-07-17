@@ -53,11 +53,18 @@ public class CommandPersona implements CommandExecutor {
 			if(sender instanceof Player) helpdesk.outputHelp("persona command", (Player) sender);
 			else sender.sendMessage(helpdesk.getHelpText("persona command"));
 
-			if(sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.persona")){
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] Force a permakill with 'permakill [persona]'. Default on your current Persona");
+			if(sender.hasPermission("archecore.mod.persona")){
 				sender.sendMessage(ChatColor.DARK_AQUA + "[M] Change apparant race with 'setrace'. This changes visible race, but not the underlying race.");
 				sender.sendMessage(ChatColor.DARK_AQUA + "[M] View the real race of a persona with 'realrace' and reset the apparent race with 'wiperace.");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] Reassign the underlying race with 'assignrace'. Will trigger a professions reshuffle.");
+				sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can add the flag '-p {player}' to the end of the command to modify someone's current Persona.");
+				sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can use [player]@[personaid] to modify a different Persona");
+			}
+			
+			if (sender.hasPermission("archecore.admin")){
+				sender.sendMessage(ChatColor.DARK_AQUA + "["+ChatColor.DARK_RED+"A"+ChatColor.DARK_AQUA+"] Force a permakill with 'permakill [persona]'. Default on your current Persona");
+				sender.sendMessage(ChatColor.DARK_AQUA + "[M] Change apparant race with 'setrace'. This changes visible race, but not the underlying race.");
+				sender.sendMessage(ChatColor.DARK_AQUA + "[M] View the real race of a persona with 'realrace' and reset the apparent race with 'wiperace.");
+				sender.sendMessage(ChatColor.DARK_AQUA + "["+ChatColor.DARK_RED+"A"+ChatColor.DARK_AQUA+"] Reassign the underlying race with 'assignrace'. Will trigger a professions reshuffle.");
 				sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can add the flag '-p {player}' to the end of the command to modify someone's current Persona.");
 				sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can use [player]@[personaid] to modify a different Persona");
 			}
@@ -66,7 +73,17 @@ public class CommandPersona implements CommandExecutor {
 
 			//Go through process to find the Persona we want
 			Persona pers = null;
-			if( ( args[0].equalsIgnoreCase("view") || args[0].equalsIgnoreCase("permakill") )&& args.length > 1){
+			if( ( args[0].equalsIgnoreCase("view") 
+					|| args[0].equalsIgnoreCase("permakill") 
+					|| args[0].equalsIgnoreCase("time") 
+					|| args[0].equalsIgnoreCase("construct")
+					|| args[0].equalsIgnoreCase("spectre")
+					|| args[0].equalsIgnoreCase("necrolyte")
+					|| args[0].equalsIgnoreCase("golem")
+					|| args[0].equalsIgnoreCase("spectral")
+					|| args[0].equalsIgnoreCase("specter")
+					|| args[0].equalsIgnoreCase("necro"))
+					&& args.length > 1){
 				pers = CommandUtil.personaFromArg(args[1]);
 			} else if(args.length > 3 && args[args.length - 2].equals("-p") && (sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.persona")) ){
 				pers = CommandUtil.personaFromArg(args[args.length - 1]);
@@ -268,34 +285,55 @@ public class CommandPersona implements CommandExecutor {
 						} else if (pers.getRace() == race) {
 							sender.sendMessage(ChatColor.RED + "Race already equals " + race.getName());
 						} else {
-							ArchePersona apers = (ArchePersona) pers;
-							apers.setRace(race);
-							sender.sendMessage(ChatColor.AQUA + "Underlying race changed to " + race.getName() + " for: " + ChatColor.WHITE + pers.getName());
-							int lost = (int) apers.reskillRacialReassignment();
-							if (lost > 0) {
-								ArcheSkillFactory.getSkill("internal_drainxp").addRawXp(pers, lost);
-								sender.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + lost + ChatColor.AQUA + " XP was lost and granted for personal redistribution.");
-								sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Free XP can be assigned with /sk [skill] assign [xp]");
-							}
-							Player p = pers.getPlayer();
-							if (sender != p) {
-								sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "To purge this value, type /sk internal_drainxp give [who] -[amount]");
-								if (p != null) {
-									p.sendMessage(ChatColor.AQUA + "Underlying race changed to " + race.getName() + " for this persona.");
-									if (lost > 0) {
-										p.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + lost + ChatColor.AQUA + " XP was lost and granted for personal redistribution.");
-										p.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Free XP can be assigned with /sk [skill] assign [xp]");
-									}
-								}
-							}
+							doRaceChange(sender, pers, race);
 						}
 					}
 					return true;
-				} 
+				} else if (args[0].equalsIgnoreCase("construct") || args[0].equalsIgnoreCase("golem")){
+					if (!sender.hasPermission("archecore.command.construct") && !sender.hasPermission("archecore.admin")){
+						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
+					}
+					doRaceChange(sender, pers, Race.CONSTRUCT);
+				} else if (args[0].equalsIgnoreCase("spectre") || args[0].equalsIgnoreCase("spectral") || args[0].equalsIgnoreCase("specter")){
+					if (!sender.hasPermission("archecore.command.spectre") && !sender.hasPermission("archecore.admin")){
+						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
+					}
+					doRaceChange(sender, pers, Race.SPECTRE);
+				} else if (args[0].equalsIgnoreCase("necrolyte") || args[0].equalsIgnoreCase("necro")){
+					if (!sender.hasPermission("archecore.command.necrolyte") && !sender.hasPermission("archecore.admin")){
+						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
+					}
+					doRaceChange(sender, pers, Race.NECROLYTE);
+				}
 			}		
 		}
 		return false;
 	}
+	
+	private boolean doRaceChange(CommandSender sender, Persona pers, Race race){
+		ArchePersona apers = (ArchePersona) pers;
+		apers.setRace(race);
+		sender.sendMessage(ChatColor.AQUA + "Underlying race changed to " + race.getName() + " for: " + ChatColor.WHITE + pers.getName());
+		int lost = (int) apers.reskillRacialReassignment();
+		if (lost > 0) {
+			ArcheSkillFactory.getSkill("internal_drainxp").addRawXp(pers, lost);
+			sender.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + lost + ChatColor.AQUA + " XP was lost and granted for personal redistribution.");
+			sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Free XP can be assigned with /sk [skill] assign [xp]");
+		}
+		Player p = pers.getPlayer();
+		if (sender != p) {
+			sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "To purge this value, type /sk internal_drainxp give [who] -[amount]");
+			if (p != null) {
+				p.sendMessage(ChatColor.AQUA + "Underlying race changed to " + race.getName() + " for this persona.");
+				if (lost > 0) {
+					p.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + lost + ChatColor.AQUA + " XP was lost and granted for personal redistribution.");
+					p.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Free XP can be assigned with /sk [skill] assign [xp]");
+				}
+			}
+		}
+		return true;
+	}
+	
 	private Race findRace(String s){
 		s = s.replace('\'', ' ');
 		for(Race r : Race.values()){
