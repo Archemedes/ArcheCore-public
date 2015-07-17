@@ -61,12 +61,8 @@ public class CommandPersona implements CommandExecutor {
 			}
 			
 			if (sender.hasPermission("archecore.admin")){
-				sender.sendMessage(ChatColor.DARK_AQUA + "["+ChatColor.DARK_RED+"A"+ChatColor.DARK_AQUA+"] Force a permakill with 'permakill [persona]'. Default on your current Persona");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] Change apparant race with 'setrace'. This changes visible race, but not the underlying race.");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] View the real race of a persona with 'realrace' and reset the apparent race with 'wiperace.");
-				sender.sendMessage(ChatColor.DARK_AQUA + "["+ChatColor.DARK_RED+"A"+ChatColor.DARK_AQUA+"] Reassign the underlying race with 'assignrace'. Will trigger a professions reshuffle.");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can add the flag '-p {player}' to the end of the command to modify someone's current Persona.");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can use [player]@[personaid] to modify a different Persona");
+				sender.sendMessage(ChatColor.DARK_AQUA + "["+ChatColor.DARK_RED+""+ChatColor.BOLD+"A"+ChatColor.DARK_AQUA+"] Force a permakill with 'permakill [persona]'. Default on your current Persona");
+				sender.sendMessage(ChatColor.DARK_AQUA + "["+ChatColor.DARK_RED+""+ChatColor.BOLD+"A"+ChatColor.DARK_AQUA+"] Reassign the underlying race with 'assignrace'. Will trigger a professions reshuffle.");
 			}
 			return true;
 		} else {
@@ -293,17 +289,17 @@ public class CommandPersona implements CommandExecutor {
 					if (!sender.hasPermission("archecore.command.construct") && !sender.hasPermission("archecore.admin")){
 						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
 					}
-					doRaceChange(sender, pers, Race.CONSTRUCT);
+					return doRaceChange(sender, pers, Race.CONSTRUCT);
 				} else if (args[0].equalsIgnoreCase("spectre") || args[0].equalsIgnoreCase("spectral") || args[0].equalsIgnoreCase("specter")){
 					if (!sender.hasPermission("archecore.command.spectre") && !sender.hasPermission("archecore.admin")){
 						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
 					}
-					doRaceChange(sender, pers, Race.SPECTRE);
+					return doRaceChange(sender, pers, Race.SPECTRE);
 				} else if (args[0].equalsIgnoreCase("necrolyte") || args[0].equalsIgnoreCase("necro")){
 					if (!sender.hasPermission("archecore.command.necrolyte") && !sender.hasPermission("archecore.admin")){
 						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
 					}
-					doRaceChange(sender, pers, Race.NECROLYTE);
+					return doRaceChange(sender, pers, Race.NECROLYTE);
 				}
 			}		
 		}
