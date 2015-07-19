@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.ChatBoxAction;
@@ -214,7 +216,7 @@ public class CreationDialog {
 			
 			if(p.hasPermission("archecore.longname")) return true;
 			
-			return input.length() <= 32;
+			return input.length() <= 32 && !containsSpecialChars(input);
 		}
 		
 		@Override
@@ -486,5 +488,13 @@ public class CreationDialog {
 		}
 		
 		
-	}	
+	}
+	
+	Pattern p = Pattern.compile("\\W");
+
+	boolean containsSpecialChars(String string)
+	{
+	    Matcher m = p.matcher(string);
+	    return m.find();
+	}
 }
