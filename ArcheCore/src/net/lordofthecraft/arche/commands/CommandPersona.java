@@ -87,7 +87,9 @@ public class CommandPersona implements CommandExecutor {
 					|| args[0].equalsIgnoreCase("golem")
 					|| args[0].equalsIgnoreCase("spectral")
 					|| args[0].equalsIgnoreCase("specter")
-					|| args[0].equalsIgnoreCase("necro"))
+					|| args[0].equalsIgnoreCase("necro")
+					|| args[0].equalsIgnoreCase("realrace")
+					|| args[0].equalsIgnoreCase("wiperace"))
 					&& args.length > 1){
 				pers = CommandUtil.personaFromArg(args[1]);
 			} else if(args.length > 3 && args[args.length - 2].equals("-p") && (sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.persona")) ){
