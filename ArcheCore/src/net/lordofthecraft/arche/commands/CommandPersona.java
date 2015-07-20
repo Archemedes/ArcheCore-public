@@ -52,12 +52,6 @@ public class CommandPersona implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		for (String string : args){
-			if (containsSpecialChars(string)){
-				sender.sendMessage(ChatColor.RED+"You cannot use special characters!");
-				return true;
-			}
-		}
 		if(args.length == 0 || args[0].equalsIgnoreCase("help")){
 			if(sender instanceof Player) helpdesk.outputHelp("persona command", (Player) sender);
 			else sender.sendMessage(helpdesk.getHelpText("persona command"));
@@ -347,13 +341,5 @@ public class CommandPersona implements CommandExecutor {
 			if(s.equalsIgnoreCase(r.getName().replace('\'', ' '))) return r;
 		}
 		return null;
-	}
-	
-	Pattern p = Pattern.compile("\\W");
-
-	boolean containsSpecialChars(String string)
-	{
-	    Matcher m = p.matcher(string);
-	    return m.find();
 	}
 }
