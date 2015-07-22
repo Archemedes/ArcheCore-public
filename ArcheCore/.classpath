@@ -1,23 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="var" path="M2_REPO/javax/persistence/persistence-api/1.0/persistence-api-1.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="var" path="M2_REPO/commons-lang/commons-lang/2.6/commons-lang-2.6.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/junit/junit/4.10/junit-4.10.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/google/guava/guava/17.0/guava-17.0.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/avaje/ebean/2.8.1/ebean-2.8.1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/yaml/snakeyaml/1.14/snakeyaml-1.14.jar"/>
-	<classpathentry kind="var" path="M2_REPO/net/md-5/bungeecord-chat/1.8-SNAPSHOT/bungeecord-chat-1.8-SNAPSHOT.jar"/>
-	<classpathentry kind="var" path="M2_REPO/net/md-5/bungeecord-api/1.8-SNAPSHOT/bungeecord-api-1.8-SNAPSHOT.jar"/>
-	<classpathentry kind="var" path="M2_REPO/net/md-5/bungeecord-config/1.8-SNAPSHOT/bungeecord-config-1.8-SNAPSHOT.jar"/>
-	<classpathentry kind="var" path="M2_REPO/net/md-5/bungeecord-event/1.8-SNAPSHOT/bungeecord-event-1.8-SNAPSHOT.jar"/>
-	<classpathentry kind="var" path="M2_REPO/net/md-5/bungeecord-protocol/1.8-SNAPSHOT/bungeecord-protocol-1.8-SNAPSHOT.jar"/>
-	<classpathentry kind="var" path="M2_REPO/net/sf/trove4j/trove4j/3.0.3/trove4j-3.0.3.jar"/>
 	<classpathentry kind="lib" path="/Nexus-Core/jars/PacketWrapper.jar"/>
 	<classpathentry kind="lib" path="/Nexus-Core/jars/ProtocolLib.jar"/>
 	<classpathentry kind="lib" path="/Nexus-Core/jars/spigot.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Sean/Desktop/Developer/CustomItem.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
