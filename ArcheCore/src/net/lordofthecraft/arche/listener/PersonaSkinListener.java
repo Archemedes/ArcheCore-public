@@ -14,9 +14,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
+import org.bukkit.event.EventPriority;*/
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerKickEvent;
+/*import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import net.lordofthecraft.arche.ArcheCore;
@@ -41,9 +41,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.google.common.collect.Table;
+import com.google.common.collect.Table;*/
 
-public class PersonaSkinListener extends PacketAdapter implements Listener {
+public class PersonaSkinListener /*extends PacketAdapter*/ implements Listener {
 
 	/*ProtocolManager manager = ProtocolLibrary.getProtocolManager();
 
@@ -323,6 +323,6 @@ public class PersonaSkinListener extends PacketAdapter implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerKick(PlayerKickEvent event) {
 		removeCachedDisplayNames(event.getPlayer().getUniqueId());
-	}
+	}*/
 	
-}*/
+}

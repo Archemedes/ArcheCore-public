@@ -1,8 +1,5 @@
 package net.lordofthecraft.arche.commands;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
