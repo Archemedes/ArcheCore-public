@@ -1,6 +1,6 @@
 package net.lordofthecraft.arche.listener;
 
-import java.lang.reflect.Field;
+/*import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,7 +45,7 @@ import com.google.common.collect.Table;
 
 public class PersonaSkinListener extends PacketAdapter implements Listener {
 
-	ProtocolManager manager = ProtocolLibrary.getProtocolManager();
+	/*ProtocolManager manager = ProtocolLibrary.getProtocolManager();
 
 	/*public void listen(){
 		manager.getAsynchronousManager().registerAsyncHandler(
@@ -74,7 +74,7 @@ public class PersonaSkinListener extends PacketAdapter implements Listener {
 				}).start();
 	}*/
 	
-	public static final Supplier<List<WrappedSignedProperty>> ARRAY_LIST_SUPPLIER = new Supplier<List<WrappedSignedProperty>>() {
+	/*public static final Supplier<List<WrappedSignedProperty>> ARRAY_LIST_SUPPLIER = new Supplier<List<WrappedSignedProperty>>() {
 		@Override
 		public List<WrappedSignedProperty> get() {
 			return Lists.newArrayList();
@@ -325,4 +325,4 @@ public class PersonaSkinListener extends PacketAdapter implements Listener {
 		removeCachedDisplayNames(event.getPlayer().getUniqueId());
 	}
 	
-}
+}*/

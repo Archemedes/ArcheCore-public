@@ -24,7 +24,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
-import net.lordofthecraft.arche.listener.PersonaSkinListener;
+//import net.lordofthecraft.arche.listener.PersonaSkinListener;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.DataTask;
@@ -158,7 +158,7 @@ public final class ArchePersona implements Persona {
 	public void setSkin(PersonaSkin skin) {
 		this.skin = skin;
 		buffer.put(new UpdateTask(this, PersonaField.SKIN, skin.getCombined()));
-		if (this.getPlayer() != null) PersonaSkinListener.updatePlayerSkin(this.getPlayer());
+		//if (this.getPlayer() != null) PersonaSkinListener.updatePlayerSkin(this.getPlayer());
 	}
 	
 	public PersonaSkin getSkin() {
