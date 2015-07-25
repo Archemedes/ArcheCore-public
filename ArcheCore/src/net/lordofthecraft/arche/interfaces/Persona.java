@@ -250,4 +250,9 @@ public interface Persona {
 	
 	public boolean remove();
 
+	/**
+	 * @return if the player is below the new persona timer
+	 */
+	public boolean isNewbie();
+	
 }

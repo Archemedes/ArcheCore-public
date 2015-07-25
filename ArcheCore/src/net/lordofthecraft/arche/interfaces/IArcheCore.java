@@ -174,4 +174,9 @@ public interface IArcheCore {
 	 */
 	public World getNewPersonaWorld();
 
+	/**
+	 * @return The new persona shield delay, if larger than 0
+	 */
+	public int getNewbieDelay();
+	
 }

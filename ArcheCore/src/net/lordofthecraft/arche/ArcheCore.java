@@ -592,4 +592,13 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	public boolean teleportProtectively(){
 		return protectiveTeleport;
 	}
+	
+	public ArcheCore getInstance(){
+		return instance;
+	}
+
+	@Override
+	public int getNewbieDelay() {
+		return newbieProtectDelay;
+	}
 }

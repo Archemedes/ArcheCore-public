@@ -1,8 +1,6 @@
 package net.lordofthecraft.arche.persona;
 
 import java.lang.ref.WeakReference;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -752,5 +750,10 @@ public final class ArchePersona implements Persona {
 		if(!(object instanceof ArchePersona)) return false;
 		ArchePersona p = (ArchePersona) object;
 		return this.player.equals(p.player) && this.getId() == p.getId();
+	}
+
+	@Override
+	public boolean isNewbie() {
+		return getTimePlayed() < ArcheCore.getControls().getNewbieDelay();
 	}
 }
