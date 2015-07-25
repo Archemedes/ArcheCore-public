@@ -87,6 +87,7 @@ public class RacialBonusListener implements Listener {
 			if(ps.getRace() == Race.CONSTRUCT && p.getGameMode() != GameMode.CREATIVE){
 				p.sendMessage(ChatColor.RED + "You are moving too fast!");
 				p.damage(4);
+				p.setSprinting(false);
 				e.setCancelled(true);
 			}
 		}
