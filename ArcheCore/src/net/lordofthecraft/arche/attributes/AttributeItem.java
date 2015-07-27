@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import net.md_5.bungee.api.chat.TranslatableComponent;
 
 import org.bukkit.Bukkit;
@@ -46,7 +47,7 @@ public class AttributeItem {
 	private static Method setDouble;
 	private static Method hasKey;
 
-	private static Method hasAttributes;
+	private static Field attributeList;
 	private static Method getTagMethod;
 	//private static Method setTagMethod;
 
@@ -200,11 +201,13 @@ public class AttributeItem {
 	public static boolean hasAttributes(ItemStack is){
 		try{
 			ItemMeta m = is.getItemMeta();
-			if(hasAttributes == null){ 
-				hasAttributes = Class.forName(Bukkit.getServer().getClass().getPackage().getName()+ ".inventory.CraftMetaItem").getDeclaredMethod("hasAttributes");
-				hasAttributes.setAccessible(true);
+			if(attributeList == null){
+				Field tags = Class.forName(Bukkit.getServer().getClass().getPackage().getName()+ ".inventory.CraftMetaItem").getDeclaredField("unhandledTags");
+				tags.setAccessible(true);
+				attributeList = tags;
 			}
-			return (Boolean) hasAttributes.invoke(m);
+			List<?> l = (List<?>) attributeList.get(m);
+			return l.isEmpty();
 		}catch(Throwable t){t.printStackTrace(); return false;}
 	}
 
