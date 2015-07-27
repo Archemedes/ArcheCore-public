@@ -206,7 +206,7 @@ public class AttributeItem {
 				tags.setAccessible(true);
 				attributeList = tags;
 			}
-			List<?> l = (List<?>) attributeList.get(m);
+			HashMap<?,?> l = (HashMap<?,?>) attributeList.get(m);
 			return l.isEmpty();
 		}catch(Throwable t){t.printStackTrace(); return false;}
 	}
@@ -217,7 +217,6 @@ public class AttributeItem {
 	 * @param is The base ItemStack to apply a modifier to
 	 * @return The ItemStack with the modifier applied 
 	 */
-
 	public static ItemStack addModifier(AttributeModifier m, ItemStack is){
 		try{
 
