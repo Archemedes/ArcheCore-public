@@ -90,6 +90,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		return 1;
 	}
 
+	@Override
 	public Collection<ArchePersona[]> getPersonas(){
 		return Collections.unmodifiableCollection(personas.values());
 	}
@@ -614,6 +615,17 @@ public class ArchePersonaHandler implements PersonaHandler {
 				}
 			}
 		}
+	}
+
+	@Override
+	public List<Persona> getAllActivePersonas() {
+		List<Persona> pers = Lists.newArrayList();
+		for (Player p : Bukkit.getServer().getOnlinePlayers()){
+			if (hasPersona(p)){
+				pers.add(getPersona(p));
+			}
+		}
+		return pers;
 	}
 
 }
