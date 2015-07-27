@@ -1,9 +1,11 @@
 package net.lordofthecraft.arche.interfaces;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.persona.ArchePersona;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -35,6 +37,8 @@ public interface PersonaHandler {
 	 * @return Amount of Personas Player may have, based on Permission Nodes
 	 */
 	public int getAllowedPersonas(Player p);
+	
+	public Collection<ArchePersona[]> getPersonas();
 
 	/**
 	 * Attempts to find a Persona uniquely corresponding to a Persona Key. Persona may not exist or may not be loaded
@@ -98,6 +102,12 @@ public interface PersonaHandler {
 	 * @return The amount of registered Personas
 	 */
 	public int countPersonas(UUID uuid);
+	
+	/**
+	 * @return all currently active personas in game
+	 */
+	
+	public List<Persona> getAllActivePersonas();
 	
 	/**
 	 * Gives the amount of Personas the current player possesses. This only counts
