@@ -207,7 +207,7 @@ public class AttributeItem {
 				attributeList = tags;
 			}
 			HashMap<?,?> l = (HashMap<?,?>) attributeList.get(m);
-			return l.isEmpty();
+			return !l.isEmpty();
 		}catch(Throwable t){t.printStackTrace(); return false;}
 	}
 
