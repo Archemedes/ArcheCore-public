@@ -290,17 +290,18 @@ public class CommandPersona implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("construct") || args[0].equalsIgnoreCase("golem")){
 					if (!sender.hasPermission("archecore.command.construct") && !sender.hasPermission("archecore.admin")){
 						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-					}
+					} else
 					return doRaceChange(sender, pers, Race.CONSTRUCT);
 				} else if (args[0].equalsIgnoreCase("spectre") || args[0].equalsIgnoreCase("spectral") || args[0].equalsIgnoreCase("specter")){
 					if (!sender.hasPermission("archecore.command.spectre") && !sender.hasPermission("archecore.admin")){
 						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-					}
+						
+					} else
 					return doRaceChange(sender, pers, Race.SPECTRE);
 				} else if (args[0].equalsIgnoreCase("necrolyte") || args[0].equalsIgnoreCase("necro")){
 					if (!sender.hasPermission("archecore.command.necrolyte") && !sender.hasPermission("archecore.admin")){
 						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-					}
+					} else
 					return doRaceChange(sender, pers, Race.NECROLYTE);
 				}
 			}		
