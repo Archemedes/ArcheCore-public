@@ -29,13 +29,13 @@ public class CommandSkill implements CommandExecutor {
 	private static final int XP_TRESHOLD_BEFORE_WARNING = 5000; 
 	private final HelpDesk helpdesk;
 	private final boolean showXp;
-	
+
 	private final Set<UUID> skillResets = Sets.newHashSet();
-	
+
 	public CommandSkill(HelpDesk helpdesk, boolean showXp){
 		this.helpdesk = helpdesk;
 		this.showXp = showXp;
-		
+
 		String i = ChatColor.DARK_GREEN + "" + ChatColor.ITALIC;
 		String a = ChatColor.AQUA+ "";
 		String output = ChatColor.DARK_AQUA +""+ ChatColor.BOLD + "Using the command: " + i + "/skill (or /sk)\n"
@@ -44,16 +44,16 @@ public class CommandSkill implements CommandExecutor {
 				+ i + "$/sk [skill] teach [who]$: " + a + "Teach [who] this skill.\n"
 				+ i + "$/sk [skill] display$: " + a + "Show this skill on Persona card.\n"
 				+ i + "$/sk [skill] select$ {main/second/bonus}: " + a + " Select a profession for your Persona, allowing for further levelling in that skill.\n";
-				
+
 		helpdesk.addInfoTopic("Skill Command", output);
 	}
-	
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if(args.length == 0 || args[0].equalsIgnoreCase("help")){
 			if(sender instanceof Player) helpdesk.outputHelp("skill command", (Player) sender);
 			else sender.sendMessage(helpdesk.getHelpText("skill command"));
-			
+
 			if(sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.skill")){
 				sender.sendMessage(ChatColor.DARK_AQUA + "[M] /sk [skill] tome : Gives experience tome");
 				sender.sendMessage(ChatColor.DARK_AQUA + "[M] /sk [skill] reveal [who]: Reveal a skill to [who]");
@@ -62,13 +62,13 @@ public class CommandSkill implements CommandExecutor {
 				sender.sendMessage(ChatColor.DARK_AQUA + "[M] /sk drainall [return] [who]: Drain all xp and returns a factor for their personal redistribution");
 				sender.sendMessage(ChatColor.BLUE + "[M] See someone else's skills with " + ChatColor.ITALIC +  "/sk list [who]");
 			}
-			
+
 			if( (sender instanceof Player) && ArchePersonaHandler.getInstance().hasPersona((Player) sender)
 					&& ArcheCore.getControls().getSkill("internal_drainxp").getXp((Player) sender) > 0 ){
 				sender.sendMessage(ChatColor.BLUE + "/sk [skill] assign [xp]: Assign instant XP to this skill");
 			}
-			
-			
+
+
 			return true;
 		} else if(args[0].equalsIgnoreCase("list")){
 			Persona who = null;
@@ -77,24 +77,24 @@ public class CommandSkill implements CommandExecutor {
 			} else if (sender instanceof Player){
 				who = ArchePersonaHandler.getInstance().getPersona((Player) sender);
 			}
-			
+
 			if(who == null){
 				sender.sendMessage(ChatColor.RED + "Error: No Persona found.");
 			} else {
 				sender.sendMessage(ChatColor.LIGHT_PURPLE + who.getName() + ChatColor.AQUA + " has the following proficiencies: ");
-				
+
 				double bonusXp = ArcheSkillFactory.getSkill("internal_drainxp").getXp(who);
 				if(bonusXp >= 1){
 					sender.sendMessage(ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + "Free XP (assign with /sk [skill] assign [xp]): " + (int) bonusXp);
 				}
-				
+
 				sender.sendMessage(ChatColor.GRAY + "(Color Index: " + ChatColor.DARK_GREEN + "Main Profession" + ChatColor.GRAY + ", " + ChatColor.GREEN + "Second Profession"  + ChatColor.GRAY + ", "
 						+ ChatColor.BLUE + "Racial Profession" + ChatColor.GRAY + ", " + ChatColor.AQUA + "Bonus Profession" + ChatColor.GRAY + " )");
 				for(Skill s : ((ArchePersona) who).getOrderedProfessions()){
 					//SkillAttachment att = who.getSkill(i++);
 					if(s.isVisible(who)){
 						SkillTier tier = s.getSkillTier(who);
-						
+
 						ChatColor color = ChatColor.YELLOW;
 						if(s.isProfessionFor(who.getRace())) 
 							color = ChatColor.BLUE;
@@ -107,9 +107,9 @@ public class CommandSkill implements CommandExecutor {
 								color = ChatColor.AQUA;
 							}
 						}
-						
+
 						String txt = color.toString() + tier.getTitle() + " " + WordUtils.capitalize(s.getName());
-						
+
 						if(showXp || sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.skill")){
 							SkillTier max = s.getCapTier(who);
 							String xp;
@@ -126,16 +126,16 @@ public class CommandSkill implements CommandExecutor {
 			}
 			return true;
 		} else if(args.length == 1){
-			
+
 			if(sender instanceof Player)
 				helpdesk.outputSkillHelp(args[0], (Player) sender);
 			else{
 				String help = helpdesk.getSkillHelpText(args[0]);
-			
+
 				if(help == null) sender.sendMessage(ChatColor.RED + "No info found for profession: " + ChatColor.GRAY + args[0]);
 				else sender.sendMessage(help);
 			}
-			
+
 			return true;
 		} else if(args[0].equalsIgnoreCase("drainall")){
 			if(sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.skill")){
@@ -144,7 +144,7 @@ public class CommandSkill implements CommandExecutor {
 					sender.sendMessage(ChatColor.RED + "Error: No Persona found.");
 					return true;
 				}
-				
+
 				double xp = 0;
 				try{
 					double factor = Double.parseDouble(args[1]);
@@ -155,7 +155,7 @@ public class CommandSkill implements CommandExecutor {
 							sender.sendMessage(ChatColor.DARK_GREEN + "Draining profession " + ChatColor.GOLD + s.getName() + ChatColor.DARK_GREEN + " for " + ChatColor.GOLD + (int) val);
 						}
 					}
-					
+
 					sender.sendMessage(ChatColor.DARK_AQUA + "XP returned in total: " + (int) xp);
 					ArcheSkillFactory.getSkill("internal_drainxp").addRawXp(pers, xp, false);
 				}catch(NumberFormatException e){return false;}
@@ -165,12 +165,12 @@ public class CommandSkill implements CommandExecutor {
 			return true;
 		}else{
 			Skill skill = ArcheSkillFactory.getSkill(args[0]);
-			
+
 			if(skill == null){
 				sender.sendMessage(ChatColor.RED + "Error: Invalid skill " + ChatColor.ITALIC + args[0]);
 				return true;
 			}
-			
+
 			Persona pers;
 			if(args[1].equalsIgnoreCase("display")){
 				pers = findSenderPersona(sender);
@@ -235,14 +235,14 @@ public class CommandSkill implements CommandExecutor {
 							}
 						}
 					} else return false;
-					
+
 					if(slot != null){
 						ArchePersona apers = (ArchePersona) pers;
 						Skill[] oldProfs = apers.professions;
 						Skill[] newProfs = oldProfs.clone();
-						
+
 						String messageToSend = null;
-						
+
 						if(pers.getProfession(slot) == skill){
 							if(slot == ProfessionSlot.PRIMARY && pers.getProfession(ProfessionSlot.SECONDARY) != null) {
 								messageToSend = ChatColor.YELLOW + "Cleared your main profession. Your second profession has been transfered to the main slot.";
@@ -256,13 +256,13 @@ public class CommandSkill implements CommandExecutor {
 							newProfs[slot.getSlot()] = skill;
 							if(skill.isIntensiveProfession() && pers.getProfession(ProfessionSlot.SECONDARY) != null)
 								newProfs[1] = null;
-							
+
 							messageToSend = ChatColor.GOLD + "Your " + slot.toSimpleString().toLowerCase() + " prfession is now " + ChatColor.WHITE + skill.getName() + "\n"
-										+ ChatColor.YELLOW + "Your ability to train this profession has improved." + "\n"
-										+ ChatColor.YELLOW + "You can undo this selection by rerunning the command:" + "\n"
-										+ ChatColor.GRAY + "" + ChatColor.ITALIC + "/sk " + skill.getName() + " select " + slot.toSimpleString().toLowerCase();
+									+ ChatColor.YELLOW + "Your ability to train this profession has improved." + "\n"
+									+ ChatColor.YELLOW + "You can undo this selection by rerunning the command:" + "\n"
+									+ ChatColor.GRAY + "" + ChatColor.ITALIC + "/sk " + skill.getName() + " select " + slot.toSimpleString().toLowerCase();
 						}
-						
+
 						if(!this.skillResets.contains(apers.getPlayerUUID())){
 							apers.professions = newProfs;
 							double xplost = apers.getXpLost();
@@ -271,14 +271,14 @@ public class CommandSkill implements CommandExecutor {
 								sender.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "WARNING: " + ChatColor.RED + "Rearranging professions will effect new level caps that will drain this Persona's total experience significantly.");
 								sender.sendMessage(ChatColor.DARK_RED + "You will lose " + ChatColor.GOLD + ChatColor.BOLD + xplost + ChatColor.DARK_RED + " experience that can not be recovered.");
 								sender.sendMessage(ChatColor.LIGHT_PURPLE + "If you are okay with this, repeat the command and accept the experience penalty.");
-								
+
 								apers.professions = oldProfs;
 								return true;
 							} else {
 								apers.professions = oldProfs;
 							}
 						}
-						
+
 						sender.sendMessage(messageToSend);
 						for(ProfessionSlot s: ProfessionSlot.values()){
 							apers.setProfession(s, newProfs[s.getSlot()]);
@@ -294,11 +294,11 @@ public class CommandSkill implements CommandExecutor {
 				if(pers != null){
 					Persona send = findSenderPersona(sender);
 					if(send != null && skill.getXp(send) >= skill.getXp(pers) && sender.hasPermission("archecore.teachskill." + skill.getName() + (send == pers? ".self" : ""))){
-						
+
 						//Via teaching, reveal any skill of Grantable visibility or less
 						if(skill.getVisibility() != Skill.VISIBILITY_HIDDEN) 
 							skill.reveal(pers);
-						
+
 						if(skill.canGainXp(pers)){ //The skill was made visible, but in some cases the Pupil still cannot gain XP.
 							String msg = ChatColor.GOLD + (send == pers? "Your learnings have paid off..." : "Your learnings with " + send.getName() + " have paid off...");  
 							Bukkit.getPlayer(pers.getPlayerUUID()).sendMessage(msg);
@@ -322,16 +322,19 @@ public class CommandSkill implements CommandExecutor {
 						xp = drainXp.getXp(send);
 					}
 					if(send != null){
-						
 						SkillTier cap = (skill.getCapTier(send).getTier() > 12) ? SkillTier.AENGULIC : skill.getCapTier(send);
-						
+
 						xp = Math.min((double) cap.getXp() - skill.getXp(send), xp);
 						if(xp > drainXp.getXp(send)){
 							sender.sendMessage(ChatColor.RED + "Error: Insuffcicient Free XP available");
 						} else {
-							drainXp.addRawXp(send, -1*xp, false);
-							sender.sendMessage(ChatColor.DARK_GREEN + "Giving " + ChatColor.GOLD + xp + " " + skill.getName() + ChatColor.DARK_GREEN + " xp.");
-							skill.addRawXp(send, xp, false);
+							if (skill.getXp(send)+xp >= 0){
+								drainXp.addRawXp(send, -1*xp, false);
+								sender.sendMessage(ChatColor.DARK_GREEN + "Giving " + ChatColor.GOLD + xp + " " + skill.getName() + ChatColor.DARK_GREEN + " xp.");
+								skill.addRawXp(send, xp, false);
+							} else {
+								sender.sendMessage(ChatColor.RED+"Error: Not enough experience in the skill for this action!");
+							}
 						}
 					} else {
 						sender.sendMessage(ChatColor.RED + "Error: No Persona found.");
@@ -346,12 +349,12 @@ public class CommandSkill implements CommandExecutor {
 				} else if(args[1].equalsIgnoreCase("reveal")){
 					sender.sendMessage(ChatColor.DARK_GREEN + "Attempting to reveal skill: " + ChatColor.GOLD + args[0]);
 					pers = findTargetPersona(sender, args);
-					
+
 					if(pers != null)
 						skill.reveal(pers);
 					return true;
 				} else if(args[1].equalsIgnoreCase("give") && args.length >= 4){
-					
+
 					try{
 						pers = findTargetPersona(sender, args);
 						double xp = Double.parseDouble(args[3]); 
@@ -377,10 +380,10 @@ public class CommandSkill implements CommandExecutor {
 		}
 		return false;
 	}
-	
-	
-	
-	
+
+
+
+
 	private Persona findSenderPersona(CommandSender sender){
 		ArchePersona result = null;
 		if(sender instanceof Player){
@@ -390,7 +393,7 @@ public class CommandSkill implements CommandExecutor {
 		if(result == null) sender.sendMessage(ChatColor.RED + "Error: No persona found");
 		return result;
 	}
-	
+
 	private Persona findTargetPersona(CommandSender sender, String[] args){
 		Persona result;
 		if(args.length >= 3){
