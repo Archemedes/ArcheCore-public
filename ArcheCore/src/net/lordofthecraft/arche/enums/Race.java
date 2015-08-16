@@ -72,4 +72,12 @@ public enum Race {
 	public double getBaseXpMultiplier(){
 		return baseXpMultiplier;
 	}
+	
+	public boolean hasChildren(){
+		for (Race race : Race.values()){
+			if (race.getParentRace().toUpperCase().equals(toString()))
+				return true;
+		}
+		return false;
+	}
 }

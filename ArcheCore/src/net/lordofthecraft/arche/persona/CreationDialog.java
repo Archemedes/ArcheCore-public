@@ -37,17 +37,17 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class CreationDialog {
-	
+
 	private static final String DIVIDER = ChatColor.LIGHT_PURPLE + 
 			"\n--------------------------------------------------\n" + ChatColor.YELLOW;
 	private static final String NOTE = ChatColor.DARK_RED + "" + ChatColor.BOLD + 
 			"NB:" + ChatColor.YELLOW;
-	
+
 	private final ConversationFactory factory;
 	private final Plugin plugin;
-	
+
 	private static long lastAnnounce = -1;
-	
+
 	public CreationDialog(){
 		plugin = ArcheCore.getPlugin();
 		factory = new ConversationFactory(plugin)
@@ -55,67 +55,67 @@ public class CreationDialog {
 		.withPrefix(new Prefix())
 		.withModality(true);
 	}
-	
+
 	public void makeFirstPersona(Player p){
 
 		Map<Object, Object> data = Maps.newHashMap();
 		data.put("slot", 0);
 		data.put("first", new Object());
-		
-		
+
+
 		factory.withFirstPrompt(new WelcomePrompt())
-			.withInitialSessionData(data)
-			.addConversationAbandonedListener(new PersonaCreationAbandonedListener())
-			.buildConversation(p)
-			.begin();
-		
+		.withInitialSessionData(data)
+		.addConversationAbandonedListener(new PersonaCreationAbandonedListener())
+		.buildConversation(p)
+		.begin();
+
 		Collection<PotionEffect> e = Lists.newArrayList();
 		e.add(new PotionEffect(PotionEffectType.SLOW, 40000, 10));
 		e.add(new PotionEffect(PotionEffectType.WEAKNESS, 40000, 10));
 		p.addPotionEffects(e);
 	}
-	
+
 	public void addPersona(Player p, int slot){
 		if(!mayConverse(p)){
 			p.sendRawMessage(ChatColor.RED + "ERROR: " + ChatColor.DARK_RED + "You are already in a dialog!");
 			p.sendRawMessage(ChatColor.RED + "Type 'cancel' to abandon your current dialog.");
 			return;
 		}
-		
+
 		addAbandoners();
 		Map<Object, Object> data = Maps.newHashMap();
 		data.put("slot", slot);
-		
+
 		factory.withInitialSessionData(data)
 		.withFirstPrompt(new RedoCharacterPrompt())
 		.buildConversation(p)
 		.begin();
 	}
-	
+
 	public void removePersona(ArchePersona pers){
 		Player p = Bukkit.getPlayer(pers.getPlayerUUID());
 		if(p == null){
 			plugin.getLogger().severe("We tried to engage Persona removal Dialog while owning player was offline!");
 			return;
 		}
-		
+
 		if(!mayConverse(p)){
 			p.sendRawMessage(ChatColor.RED + "ERROR: " + ChatColor.DARK_RED + "You are already in a dialog!");
 			p.sendRawMessage(ChatColor.RED + "Type 'cancel' to abandon your current dialog.");
 			return;
 		}
-			
+
 		addAbandoners();
-		
+
 		Map<Object, Object> data = Maps.newHashMap();
 		data.put("persona", pers);
-		
+
 		factory.withInitialSessionData(data)
-			.withFirstPrompt(new ConfirmRemovalPrompt())
-			.buildConversation(p)
-			.begin();
+		.withFirstPrompt(new ConfirmRemovalPrompt())
+		.buildConversation(p)
+		.begin();
 	}
-	
+
 	private void addAbandoners(){
 		factory
 		.withEscapeSequence("quit")
@@ -130,15 +130,15 @@ public class CreationDialog {
 		.withEscapeSequence("/beaconme")
 		.withEscapeSequence("/bme");
 	}
-	
-	
+
+
 	private class ConfirmRemovalPrompt extends BooleanPrompt{
-		
+
 		@Override
 		public String getPromptText(ConversationContext context) {
 			String name = ((ArchePersona) context.getSessionData("persona")).getName();
 			return "Are you sure you wish to permakill poor " + 
-					ChatColor.GREEN + name + ChatColor.YELLOW + "?";
+			ChatColor.GREEN + name + ChatColor.YELLOW + "?";
 		}
 
 		@Override
@@ -147,7 +147,7 @@ public class CreationDialog {
 			else return Prompt.END_OF_CONVERSATION;
 		}
 	}
-	
+
 	private class RemoveExecutedPrompt extends MessagePrompt{
 		@Override
 		public String getPromptText(ConversationContext context) {
@@ -161,7 +161,7 @@ public class CreationDialog {
 			return Prompt.END_OF_CONVERSATION;
 		}
 	}
-	
+
 	private class RedoCharacterPrompt extends MessagePrompt{
 
 		@Override
@@ -174,21 +174,21 @@ public class CreationDialog {
 			return new PickNamePrompt();
 		}	
 	}
-	
+
 	private class WelcomePrompt extends MessagePrompt{
 
 		@Override
 		public String getPromptText(ConversationContext arg0) {
-			
+
 			String welcome = ChatColor.AQUA + "~ " + ChatColor.GREEN + "~ " + ChatColor.RED + "~ " 
-			+ ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "Welcome to The Lord of the Craft!"
-			+ ChatColor.RED + " ~" + ChatColor.GREEN + " ~" + ChatColor.AQUA + " ~";
-			
+					+ ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "Welcome to The Lord of the Craft!"
+					+ ChatColor.RED + " ~" + ChatColor.GREEN + " ~" + ChatColor.AQUA + " ~";
+
 			String tx = ChatColor.AQUA + "Get ready, your adventure is about to unfold...\n";
-			
+
 			String ta = ChatColor.GRAY + "Before you can start, you must register "
 					+ "your Persona or Character. We will do this now.";
-			
+
 			return welcome + DIVIDER + tx + ta + DIVIDER;
 		}
 
@@ -197,8 +197,8 @@ public class CreationDialog {
 			return new PickNamePrompt();
 		}
 	}
-	
-	
+
+
 	private class PickNamePrompt extends ValidatingPrompt{
 
 		@Override
@@ -206,38 +206,38 @@ public class CreationDialog {
 			Player p = (Player) context.getForWhom();
 			String pretext = "Please type a name for your RP Persona!";
 			String affix = "\n" + NOTE + "You may only change your Persona's name every 2 days.";
-			
+
 			return pretext + (p.hasPermission("archecore.quickrename")? "" : affix) + DIVIDER;
 		}
 
 		@Override
 		protected boolean isInputValid(ConversationContext context, String input) {
 			Player p = (Player) context.getForWhom();
-			
+
 			if(p.hasPermission("archecore.longname")) return true;
-			
+
 			return input.length() <= 32 && !containsSpecialChars(input);
 		}
-		
+
 		@Override
 		public Prompt acceptValidatedInput(ConversationContext context, String input) {
 			context.setSessionData("name", input);
 			return new PickSexPrompt();
 		}
 	}
-	
+
 	private class PickSexPrompt extends FixedSetPrompt {
-		
+
 		private PickSexPrompt(){
 			super("female", "male", "other");
 		}
-		
+
 		@Override
 		public String getPromptText(ConversationContext context) {
 			Player p = (Player) context.getForWhom();
 			new ArcheMessage("Please type the desired Gender of your Persona.").applyChatColor(ChatColor.YELLOW).sendTo(p);
 			ChatMessage mains = new ArcheMessage("Available Options: ").applyChatColor(ChatColor.YELLOW);
-			
+
 			for(String s : new String[]{"female", "male", "other"}){
 				mains.addLine(s)
 				.setUnderlined()
@@ -246,29 +246,29 @@ public class CreationDialog {
 				.setClickEvent(ChatBoxAction.RUN_COMMAND, s)
 				.addLine(",  ");
 			}
-			
+
 			mains.sendTo(p);
 			return DIVIDER;
 		}
-		
+
 		@Override
 		public Prompt acceptValidatedInput(ConversationContext context, String input) {
 			int gender = input.equals("female")? 0 : input.equals("male")? 1:2;
 			context.setSessionData("gender", gender);
 			return new PickRacePrompt();
 		}
-		
-		
+
+
 	}
-	
+
 	private class PickRacePrompt extends ValidatingPrompt {
 
 		@Override
 		public String getPromptText(ConversationContext context) {
 			Player p = (Player) context.getForWhom();
-			
+
 			ChatMessage mains = new ArcheMessage("Main Races: ").applyChatColor(ChatColor.YELLOW);
-				
+
 			for(int i = 0; i < 5; i++){
 				Race race = Race.values()[i];
 				if(p.hasPermission("archecore.race." + race.toString().toLowerCase())){
@@ -280,18 +280,18 @@ public class CreationDialog {
 					.addLine(",  ");
 				}
 			}
-			
+
 			mains.addLine("more...")
-				.setItalic()
-				.applyChatColor(ChatColor.GRAY)
-				.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click for more races")
-				.setClickEvent(ChatBoxAction.RUN_COMMAND, "more");
-						
+			.setItalic()
+			.applyChatColor(ChatColor.GRAY)
+			.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click for more races")
+			.setClickEvent(ChatBoxAction.RUN_COMMAND, "more");
+
 			mains.sendTo(p);
-			
+
 			String pretext = ChatColor.YELLOW + "Please type your Persona's race, or type " + ChatColor.WHITE + "more" 
 					+ ChatColor.YELLOW + " to see all available races.";
-			
+
 			return pretext + DIVIDER;
 		}
 
@@ -299,9 +299,9 @@ public class CreationDialog {
 		@Override
 		protected boolean isInputValid(ConversationContext context, String input) {
 			if(input.equalsIgnoreCase("more")) return true;
-			
+
 			Race r = findRace(input);
-			
+
 			Player p = (Player) context.getForWhom();
 			if(r==null || !p.hasPermission("archecore.race." + r.toString().toLowerCase())){
 				return false;
@@ -310,10 +310,12 @@ public class CreationDialog {
 				return true;
 			}
 		}
-		
+
 		@Override
 		protected Prompt acceptValidatedInput(ConversationContext context, String input) {
 			if(input.equalsIgnoreCase("more")) return new PickMoreRacePrompt();
+			System.out.println("[RacePrompt] Does "+findRace(input)+" have children? "+findRace(input).hasChildren());
+			if(findRace(input).hasChildren()) return new PickSubRacePrompt(input);
 			else return new SetAgePrompt();
 		}
 
@@ -325,16 +327,89 @@ public class CreationDialog {
 			return null;
 		}
 	}
-	
+
+	private class PickSubRacePrompt extends ValidatingPrompt {
+		String string;
+
+		private PickSubRacePrompt(String string){
+			this.string = string;
+		}
+
+		@Override
+		public String getPromptText(ConversationContext context) {
+			Player p = (Player) context.getForWhom();
+
+			Race selected = findRace(string);
+
+			ChatMessage subraces = new ArcheMessage("Sub Race Options: ").applyChatColor(ChatColor.YELLOW);
+			subraces.addLine(selected.getName())
+				.setUnderlined()
+				.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
+				.setClickEvent(ChatBoxAction.RUN_COMMAND, selected.getName())
+				.addLine(", ");
+
+			for (Race race : Race.values()){
+				if (race.getParentRace() == selected.getName()
+						&& race != selected){
+					subraces.addLine(race.getName())
+					.setUnderlined()
+					.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
+					.setClickEvent(ChatBoxAction.RUN_COMMAND, race.getName())
+					.addLine(", ");
+				}
+			}
+			
+			subraces.addLine("back...")
+				.setItalic()
+				.applyChatColor(ChatColor.GRAY)
+				.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Go back to Race selection")
+				.setClickEvent(ChatBoxAction.RUN_COMMAND, "back");
+			
+			subraces.sendTo(p);
+			
+			String pretext = "You have selected "+ChatColor.WHITE+selected.getName()+ChatColor.YELLOW+". These are the available subraces to you, should you choose them. Type the name of the subrace or click to select.";
+			
+			return pretext + DIVIDER;
+		}
+
+		@Override
+		protected boolean isInputValid(ConversationContext context, String input) {
+			if ("back".equalsIgnoreCase(input)) return true;
+			Race r = findRace(input);
+
+			Player p = (Player) context.getForWhom();
+			if(r==null || !p.hasPermission("archecore.race." + r.toString().toLowerCase()) || !r.getParentRace().equals(string)){
+				return false;
+			} else {
+				context.setSessionData("race", r);
+				return true;
+			}
+		}
+
+		@Override
+		protected Prompt acceptValidatedInput(ConversationContext context, String input) {
+			if ("back".equalsIgnoreCase(input)) return new PickRacePrompt();
+			return new SetAgePrompt();
+		}
+
+		private Race findRace(String s){
+			s = s.replace('\'', ' ');
+			for(Race r : Race.values()){
+				if(s.equalsIgnoreCase(r.getName().replace('\'', ' '))) return r;
+			}
+			return null;
+		}
+	}
+
 	private class PickMoreRacePrompt extends ValidatingPrompt {
 
 		@Override
 		public String getPromptText(ConversationContext context) {
-			
+
 			ChatMessage m = new ArcheMessage("Available Races: ").applyChatColor(ChatColor.YELLOW);
-			
+
 			Player p = (Player) context.getForWhom();
-			
+
 			for(Race race : Race.values()){
 				if(p.hasPermission("archecore.race." + race.toString().toLowerCase())){
 					m.addLine(race.getName())
@@ -344,7 +419,7 @@ public class CreationDialog {
 					.addLine(",  ");
 				}
 			}
-			
+
 			m.sendTo(p);
 			return DIVIDER;
 		}
@@ -352,9 +427,9 @@ public class CreationDialog {
 
 		@Override
 		protected boolean isInputValid(ConversationContext context, String input) {
-			
+
 			Race r = findRace(input);
-			
+
 			Player p = (Player) context.getForWhom();
 			if(r==null || !p.hasPermission("archecore.race." + r.toString().toLowerCase())){
 				return false;
@@ -363,7 +438,7 @@ public class CreationDialog {
 				return true;
 			}
 		}
-		
+
 		@Override
 		protected Prompt acceptValidatedInput(ConversationContext context, String input) {
 			return new SetAgePrompt();
@@ -377,7 +452,7 @@ public class CreationDialog {
 			return null;
 		}	
 	}
-	
+
 	private class SetAgePrompt extends NumericPrompt{
 
 		@Override
@@ -387,16 +462,16 @@ public class CreationDialog {
 			String pretext = "Please specify the age of your Persona.\n";
 			String affix = "\n" + NOTE + "Age must be between 5 and "+nr+" and "
 					+ "make sense with the lore of your chosen race.";
-			
+
 			return pretext + (p.hasPermission("archecore.ageless")? "" : affix) + DIVIDER;
 		}
-		
+
 		@Override
 		public boolean isNumberValid(ConversationContext context, Number input){
 			Player p = (Player) context.getForWhom();
-			
+
 			if(p.hasPermission("archecore.ageless")) return true;
-			
+
 			int nr = ((Race) context.getSessionData("race")).getMaximumAge();
 			int age = input.intValue();
 			return (age >= 5 && age <= nr);
@@ -408,7 +483,7 @@ public class CreationDialog {
 			return new AutoAgePrompt();
 		}
 	}
-	
+
 	private class AutoAgePrompt extends BooleanPrompt{
 
 		@Override
@@ -422,19 +497,19 @@ public class CreationDialog {
 			return new PersonaConfirmPrompt();
 		}
 	}
-	
+
 	private class PersonaConfirmPrompt extends MessagePrompt{
-		
+
 		@Override
 		public String getPromptText(ConversationContext context) {
 			String name = (String) context.getSessionData("name");
 			return ChatColor.GOLD + "" + ChatColor.UNDERLINE + "Created your new Persona: " + ChatColor.GREEN + name;
 		}
-		
+
 		@Override
 		protected Prompt getNextPrompt(ConversationContext context) {
 			Player p = (Player) context.getForWhom();
-			
+
 			int id = (Integer) context.getSessionData("slot");
 			String name = (String) context.getSessionData("name");
 			int gender = (Integer) context.getSessionData("gender");
@@ -442,32 +517,32 @@ public class CreationDialog {
 			int age = (Integer) context.getSessionData("age");
 			boolean autoAge = (Boolean) context.getSessionData("autoage");
 			Persona pers = ArchePersonaHandler.getInstance().createPersona(p, id, name, race, gender, age, autoAge);
-			
+
 			if(pers != null && context.getSessionData("first") != null){
 				Economy econ = ArcheCore.getControls().getEconomy();
 				if(econ != null) econ.setPersona(pers, econ.getBeginnerAllowance());
 				if(ArcheCore.getControls().getPersonaHandler().willModifyDisplayNames()) p.setDisplayName(name);
-				
+
 				long treshold = System.currentTimeMillis() - (1000*90);
 				if(lastAnnounce < treshold){
 					lastAnnounce = System.currentTimeMillis();
 					String message = ChatColor.DARK_GREEN + "Please welcome " + ChatColor.GOLD + name + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + " (" + p.getName() + ") " + ChatColor.DARK_GREEN + "the " + ChatColor.GOLD + race.getName() + ChatColor.DARK_GREEN + " to Lord of the Craft."; 
 					for(Player x : Bukkit.getOnlinePlayers()) if (x != p) x.sendMessage(message);
 				}
-				
+
 			}
-			
+
 			return Prompt.END_OF_CONVERSATION;
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static boolean mayConverse(Player p){
 		try{
 			Field f = p.getClass().getDeclaredField("conversationTracker");
 			f.setAccessible(true);
 			Object conversationTracker = f.get(p);
-			
+
 			Field f2 = conversationTracker.getClass().getDeclaredField("conversationQueue");
 			f2.setAccessible(true);
 			LinkedList<Conversation> list = (LinkedList<Conversation>) f2.get(conversationTracker);
@@ -476,25 +551,25 @@ public class CreationDialog {
 			t.printStackTrace();
 			return false;
 		}
-		
+
 	}
-	
-	
+
+
 	private class Prefix implements ConversationPrefix{
 
 		@Override
 		public String getPrefix(ConversationContext context) {
 			return ""+ChatColor.YELLOW;
 		}
-		
-		
+
+
 	}
-	
+
 	Pattern p = Pattern.compile("\\W");
 
 	boolean containsSpecialChars(String string)
 	{
-	    Matcher m = p.matcher(string);
-	    return m.find();
+		Matcher m = p.matcher(string);
+		return m.find();
 	}
 }
