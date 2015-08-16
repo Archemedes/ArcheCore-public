@@ -4,7 +4,7 @@ public enum Race {
 	HUMAN("Human", "Human", 100, 1.05),
 	ELF("Elf", "Elf", 1000),
 	DWARF("Dwarf", "Dwarf"),
-	ORC("Uruk", "Orc"),
+	ORC("Orc", "Orc"),
 	KHARAJYR("Kharajyr","Kharajyr"),
 	
 	NORTHENER("Highlander", "Human", 100, 1.05),
