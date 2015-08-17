@@ -1,5 +1,7 @@
 package net.lordofthecraft.arche;
 
+import io.github.archemedes.customitem.Customizer;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -44,7 +46,15 @@ public class TreasureChest {
 		if(c.isConfigurationSection("index")){
 			for(Entry<String, Object> entry : ((Map<String, Object>) c.getConfigurationSection("index").getValues(false)).entrySet()){
 				Integer in = (Integer) entry.getValue();
-				loot.put(c.getItemStack(entry.getKey()), in);
+				//Customizer.deserialize(entry.);
+				ItemStack item = c.getItemStack(entry.getKey());
+				if (item.getType() != Material.MAP)
+					loot.put(item, in);
+				else {
+					String tag = "nexusrecipe#"+item.getItemMeta().getDisplayName();
+					Customizer.giveCustomTag(item, tag);
+					loot.put(item, in);
+				}
 			}
 		}
 		
