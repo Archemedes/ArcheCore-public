@@ -52,8 +52,7 @@ public class TreasureChest {
 					loot.put(item, in);
 				else {
 					String tag = "nexusrecipe#"+item.getItemMeta().getDisplayName();
-					Customizer.giveCustomTag(item, tag);
-					loot.put(item, in);
+					loot.put(Customizer.giveCustomTag(item, tag), in);
 				}
 			}
 		}
