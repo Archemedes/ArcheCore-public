@@ -20,41 +20,47 @@ import org.bukkit.inventory.ItemStack;
 
 public class ArmorPreventionListener implements Listener {
 	private final PersonaHandler handler;
-	
+
 	public ArmorPreventionListener(){
 		handler = ArchePersonaHandler.getInstance();
 	}
-	
+
 	@EventHandler(ignoreCancelled = true)
 	public void onInventoryClick(InventoryClickEvent e){
 		Player p = (Player) e.getWhoClicked();
 		switch (e.getAction()) {
 		case PLACE_ALL: case PLACE_SOME: case PLACE_ONE: case SWAP_WITH_CURSOR:
 			ItemStack armor = e.getCursor();
-			if (!isArmor(armor.getType()))
-				return;
-			if(!canEquip(p, armor) && e.getSlotType() == InventoryType.SlotType.ARMOR){
-				e.setCancelled(true);
-				return;
+			if (armor != null){
+				if (!isArmor(armor.getType()))
+					return;
+				if(!canEquip(p, armor) && e.getSlotType() == InventoryType.SlotType.ARMOR){
+					e.setCancelled(true);
+					return;
+				}
 			}
 			break;
 		case HOTBAR_SWAP:
 			int b = e.getHotbarButton();
 			ItemStack armor3 = p.getInventory().getItem(b);
-			if (!isArmor(armor3.getType()))
-				return;
-			if(!canEquip(p, armor3) && e.getSlotType() == InventoryType.SlotType.ARMOR){
-				e.setCancelled(true);
-				return;
+			if (armor3 != null){
+				if (!isArmor(armor3.getType()))
+					return;
+				if(!canEquip(p, armor3) && e.getSlotType() == InventoryType.SlotType.ARMOR){
+					e.setCancelled(true);
+					return;
+				}
 			}
 			break;
 		case MOVE_TO_OTHER_INVENTORY:
 			ItemStack armor2 = e.getCurrentItem();
-			if (!isArmor(armor2.getType()))
-				return;
-			if(!canEquip(p, armor2) && e.getSlotType() != InventoryType.SlotType.ARMOR){
-				e.setCancelled(true);
-				return;
+			if (armor2 != null){
+				if (!isArmor(armor2.getType()))
+					return;
+				if(!canEquip(p, armor2) && e.getSlotType() != InventoryType.SlotType.ARMOR){
+					e.setCancelled(true);
+					return;
+				}
 			}
 			break;
 		default:
@@ -62,7 +68,7 @@ public class ArmorPreventionListener implements Listener {
 		}
 		return;
 	}
-	
+
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerInteract(PlayerInteractEvent e){
 		Player p = e.getPlayer();
@@ -74,8 +80,8 @@ public class ArmorPreventionListener implements Listener {
 			return;
 		}
 	}
-	
-/*	@EventHandler
+
+	/*	@EventHandler
 	public void onInventoryDrag(InventoryDragEvent e){
 		ItemStack armor = e.getOldCursor();
 		Player p = (Player) e.getWhoClicked();
@@ -93,7 +99,7 @@ public class ArmorPreventionListener implements Listener {
 			}
 		}
 	}*/
-	
+
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent e){
 		Player p = (Player) e.getPlayer();
@@ -108,13 +114,13 @@ public class ArmorPreventionListener implements Listener {
 			}
 		}
 	}
-	
+
 	private boolean canEquip(Player p, ItemStack armor) {
-		 Persona ps = handler.getPersona(p);
-		 return !(ps != null && (ps.getRace() == Race.CONSTRUCT || ps.getRace() == Race.SPECTRE));
+		Persona ps = handler.getPersona(p);
+		return !(ps != null && (ps.getRace() == Race.CONSTRUCT || ps.getRace() == Race.SPECTRE));
 	}
-	
-	
+
+
 	private boolean isArmor(Material m){
 		switch(m){
 		case JACK_O_LANTERN: case GOLD_HELMET: case GOLD_BOOTS: case GOLD_CHESTPLATE: case GOLD_LEGGINGS: 
@@ -126,6 +132,6 @@ public class ArmorPreventionListener implements Listener {
 		default: return false;
 		}
 	}
-	
-	
+
+
 }
