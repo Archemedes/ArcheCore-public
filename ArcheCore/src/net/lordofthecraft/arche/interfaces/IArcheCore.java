@@ -179,4 +179,10 @@ public interface IArcheCore {
 	 */
 	public int getNewbieDelay();
 	
+	/**
+	 * @return The current name of the world of LotC
+	 */
+	
+	public String getServerWorldName();
+	
 }
