@@ -322,19 +322,23 @@ public class CommandSkill implements CommandExecutor {
 						xp = drainXp.getXp(send);
 					}
 					if(send != null){
-						SkillTier cap = (skill.getCapTier(send).getTier() > 12) ? SkillTier.AENGULIC : skill.getCapTier(send);
+						if (xp > 0){
+							SkillTier cap = (skill.getCapTier(send).getTier() > 12) ? SkillTier.AENGULIC : skill.getCapTier(send);
 
-						xp = Math.min((double) cap.getXp() - skill.getXp(send), xp);
-						if(xp > drainXp.getXp(send)){
-							sender.sendMessage(ChatColor.RED + "Error: Insuffcicient Free XP available");
-						} else {
-							if (skill.getXp(send)+xp >= 0){
-								drainXp.addRawXp(send, -1*xp, false);
-								sender.sendMessage(ChatColor.DARK_GREEN + "Giving " + ChatColor.GOLD + xp + " " + skill.getName() + ChatColor.DARK_GREEN + " xp.");
-								skill.addRawXp(send, xp, false);
+							xp = Math.min((double) cap.getXp() - skill.getXp(send), xp);
+							if(xp > drainXp.getXp(send)){
+								sender.sendMessage(ChatColor.RED + "Error: Insuffcicient Free XP available");
 							} else {
-								sender.sendMessage(ChatColor.RED+"Error: Not enough experience in the skill for this action!");
+								if (xp != 0){
+									drainXp.addRawXp(send, -1*xp, false);
+									sender.sendMessage(ChatColor.DARK_GREEN + "Giving " + ChatColor.GOLD + xp + " " + skill.getName() + ChatColor.DARK_GREEN + " xp.");
+									skill.addRawXp(send, xp, false);
+								} else {
+									sender.sendMessage(ChatColor.RED+"Error: You cannot go over "+cap.getXp()+" experience.");
+								}
 							}
+						} else {
+							sender.sendMessage(ChatColor.RED+"Error: Exp must be over 0");
 						}
 					} else {
 						sender.sendMessage(ChatColor.RED + "Error: No Persona found.");
