@@ -216,7 +216,7 @@ public class CreationDialog {
 
 			if(p.hasPermission("archecore.longname")) return true;
 
-			return input.length() <= 32 && !containsSpecialChars(input);
+			return input.length() <= 32;
 		}
 
 		@Override
@@ -563,13 +563,5 @@ public class CreationDialog {
 		}
 
 
-	}
-
-	Pattern p = Pattern.compile("\\W");
-
-	boolean containsSpecialChars(String string)
-	{
-		Matcher m = p.matcher(string);
-		return m.find();
 	}
 }
