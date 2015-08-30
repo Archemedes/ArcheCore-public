@@ -4,8 +4,6 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.ChatBoxAction;
