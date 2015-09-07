@@ -42,21 +42,20 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 public class RacialBonusListener implements Listener {
 	private final Random rnd = new Random();
 	private final ArchePersonaHandler handler;
 	private final ArcheCore plugin;
-	
+
 	private final List<String> sneakAttempts = Lists.newArrayList();
 	private final List<String> sneakers = Lists.newArrayList();
-	
+
 	public RacialBonusListener(ArcheCore plugin, ArchePersonaHandler handler){
 		this.plugin = plugin;
 		this.handler = handler;
 	}
-	
+
 	private boolean hasTogglePower(Race race){
 		switch(race){
 		case DARK_ELF: case KHARAJYR: case KHA_CHEETRAH: case KHA_PANTERA: case KHA_LEPARDA: case KHA_TIGRASI:
@@ -64,24 +63,24 @@ public class RacialBonusListener implements Listener {
 		default: return false;
 		}
 	}
-	
+
 	@EventHandler
 	public void onRespawn(PlayerRespawnEvent e){
 		Player p = e.getPlayer();
 		AttributeBase.clearModifiers(p, AttributeType.MOVEMENT_SPEED);
 		AttributeBase.clearModifiers(p, AttributeType.ATTACK_DAMAGE);
-		
+
 		Persona ps = handler.getPersona(p);
 		if(ps == null) RaceBonusHandler.reset(p);
 		else RaceBonusHandler.apply(p, ps.getRace());
 	}
-	
+
 	@EventHandler(ignoreCancelled = true)
 	public void onSprint(PlayerToggleSprintEvent e){
 		Player p = e.getPlayer();
 
 		if(!e.isSprinting()) return;
-		
+
 		Persona ps = handler.getPersona(p);
 		if(ps != null){
 			if(ps.getRace() == Race.CONSTRUCT && p.getGameMode() != GameMode.CREATIVE){
@@ -92,22 +91,22 @@ public class RacialBonusListener implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
 	public void onHunger(FoodLevelChangeEvent e){
 		Player p = (Player) e.getEntity();
-		
+
 		if(p.getFoodLevel() - e.getFoodLevel() == 1){ //Exactly 1 point drain, normal decay
 			ArchePersona pers = handler.getPersona(p);
 			if(pers != null){
 				Race race = pers.getRace();
-				
+
 				if(race == Race.SPECTRE || race == Race.CONSTRUCT || race == Race.NECROLYTE){
 					e.setCancelled(true);
 					e.setFoodLevel(20);
 				} else if(race == Race.ORC || race == Race.OLOG || race == Race.GOBLIN){
 					p.removePotionEffect(PotionEffectType.HUNGER);
-					
+
 					if(race == Race.OLOG && p.isSprinting()){
 						e.setFoodLevel( Math.max(0, e.getFoodLevel() - 3)); 
 					}
@@ -118,7 +117,7 @@ public class RacialBonusListener implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler(ignoreCancelled = true, priority= EventPriority.MONITOR)
 	public void onSneak(PlayerToggleSneakEvent e){
 		//Dark Elf Speed Boost on Sneak
@@ -137,7 +136,7 @@ public class RacialBonusListener implements Listener {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 450, 2, true), true);
 							p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 120, 1, true), true);
 						}
-						
+
 						p.playSound(p.getLocation(), Sound.AMBIENCE_CAVE, 0.8f, 2f);
 						sneakers.add(p.getName());
 						new BukkitRunnable(){public void run(){
@@ -149,7 +148,7 @@ public class RacialBonusListener implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onDamage(EntityDamageByEntityEvent e){
 		if(e.getEntity() instanceof Player){
@@ -165,7 +164,7 @@ public class RacialBonusListener implements Listener {
 				}
 			}
 		}
-		
+
 		if(e.getDamager() instanceof Arrow){ //Wood Elf arrow bonus
 			if(((Arrow) e.getDamager()).getShooter() instanceof Player){
 				Player p =  (Player) ((Arrow) e.getDamager()).getShooter();
@@ -190,13 +189,13 @@ public class RacialBonusListener implements Listener {
 				case ORC: case OLOG :
 					/*
 					double fract = p.getHealth() / p.getMaxHealth();
-					
+
 					if(fract < 0.20){
 						dmg *= 1.25;
 					} else if (fract < 0.50){
 						dmg *= 1.10;
 					}
-					*/
+					 */
 					e.setDamage(dmg+4);
 					break;
 				case HUMAN: case SOUTHERON: case NORTHENER: case HEARTLANDER: //Troop Morale
@@ -218,10 +217,10 @@ public class RacialBonusListener implements Listener {
 					break;
 				case SPECTRE:
 					if(e.getCause() != DamageCause.MAGIC){
-						e.setCancelled(true);
 						EntityDamageByEntityEvent newEvent = new EntityDamageByEntityEvent(e.getDamager(), e.getEntity(),
 								DamageCause.MAGIC, getDamageModifierMap(e), getDamageFunctionMap(e));
 						Bukkit.getPluginManager().callEvent(newEvent);
+						e.setDamage(0);
 						if(!newEvent.isCancelled() && e.getEntity() instanceof Damageable){
 							Damageable d = (Damageable) e.getEntity();
 							d.damage(e.getDamage());
@@ -230,9 +229,9 @@ public class RacialBonusListener implements Listener {
 					break;
 				case KHARAJYR: case KHA_TIGRASI: case KHA_PANTERA: case KHA_LEPARDA: case KHA_CHEETRAH:
 					//Kitty got claws
-				if(p.getItemInHand().getType() == Material.AIR)
+					if(p.getItemInHand().getType() == Material.AIR)
 						e.setDamage(dmg + 6);
-					
+
 					break;
 				default:
 					break;
@@ -240,7 +239,7 @@ public class RacialBonusListener implements Listener {
 			}
 		} 
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private <E extends EntityDamageEvent> Map<EntityDamageEvent.DamageModifier, Double> getDamageModifierMap(E e) {
 		try {
@@ -252,7 +251,7 @@ public class RacialBonusListener implements Listener {
 			return null;
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private <E extends EntityDamageEvent> Map<DamageModifier, ? extends Function<? super Double, Double>> getDamageFunctionMap(E e) {
 		try {
@@ -264,7 +263,7 @@ public class RacialBonusListener implements Listener {
 			return null;
 		}
 	}
-	
+
 	private boolean holdsGoldenWeapon(Entity e){
 		if(e instanceof LivingEntity){
 			LivingEntity le = (LivingEntity) e;
@@ -280,16 +279,16 @@ public class RacialBonusListener implements Listener {
 		}
 		return false;
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onDamage(EntityDamageEvent e){
-		
+
 		if(e.getEntity() instanceof Player){
 			ArchePersona pers = handler.getPersona((Player) e.getEntity());
 			DamageCause c = e.getCause();
 			if(pers == null) return;
 
-			Race r = pers.getRace();
+			final Race r = pers.getRace();
 			if(r == Race.SPECTRE || r == Race.CONSTRUCT){
 				if(e.getCause() == DamageCause.POISON || e.getCause() == DamageCause.DROWNING){
 					e.setCancelled(true);
@@ -298,16 +297,18 @@ public class RacialBonusListener implements Listener {
 					e.setDamage(e.getDamage() * factor);
 				}
 			}
-
 			if(c == DamageCause.MAGIC){
 				double dmg = e.getDamage();
-				if(pers.getRace() == Race.HIGH_ELF){
+				if(r == Race.HIGH_ELF){
 					dmg *= 0.7;
+					e.setDamage(dmg);
+				} else if (r == Race.CONSTRUCT){
+					dmg *=0.2;
 					e.setDamage(dmg);
 				}
 			} else if (c == DamageCause.FALL){
 				double dmg = e.getDamage();
-				switch(pers.getRace()){
+				switch(r){
 				case KHARAJYR: case KHA_CHEETRAH: case KHA_LEPARDA: case KHA_TIGRASI: case KHA_PANTERA:
 					dmg -= 6;
 					if(dmg <= 0) e.setCancelled(true);
@@ -317,6 +318,4 @@ public class RacialBonusListener implements Listener {
 			}
 		}
 	}
-	
-	
 }
