@@ -43,7 +43,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+/*import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 
 import com.comphenix.packetwrapper.WrapperPlayServerNamedEntitySpawn;
 import com.comphenix.protocol.PacketType;
@@ -54,7 +54,7 @@ import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
 import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction;
 import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.comphenix.protocol.wrappers.WrappedGameProfile;*/
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -143,7 +143,7 @@ public final class ArchePersona implements Persona {
 		this.race = r;
 		if(ArcheCore.getControls().areRacialBonusesEnabled()) {
 			Player p = getPlayer();
-			if (p != null) {
+			if (p != null && this.isCurrent()) {
 				RaceBonusHandler.reset(p);
 				RaceBonusHandler.apply(p, race);
 				p.setHealth(p.getMaxHealth());
@@ -151,6 +151,12 @@ public final class ArchePersona implements Persona {
 		}
 		buffer.put(new UpdateTask(this, PersonaField.RACE_REAL, race));
 		this.raceHeader = null;
+	}
+	
+	@Override
+	public void racialReassign(Race r){
+		setRace(r);
+		this.reskillRacialReassignment();
 	}
 	
 	public void setSkin(PersonaSkin skin) {

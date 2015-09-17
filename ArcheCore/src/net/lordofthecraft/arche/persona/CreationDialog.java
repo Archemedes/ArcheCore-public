@@ -376,7 +376,7 @@ public class CreationDialog {
 			Race r = findRace(input);
 
 			Player p = (Player) context.getForWhom();
-			if(r==null || !p.hasPermission("archecore.race." + r.toString().toLowerCase()) || !r.getParentRace().equals(string)){
+			if(r==null || !p.hasPermission("archecore.race." + r.toString().toLowerCase())){
 				return false;
 			} else {
 				context.setSessionData("race", r);

@@ -11,6 +11,12 @@ import org.bukkit.entity.Player;
 public interface Persona {
 
 	/**
+	 * Assign a persona's race to the specified race as well as resets the user's racial skill in raw experience for distribution.
+	 * @param r The new persona's race.
+	 */
+	public void racialReassign(Race r);
+	
+	/**
 	 * A method that retrieves the Persona's 'main' skill or profession, which they can set for their Persona's RP professions
 	 * @param slot The chosen slot to query
 	 * @return A player's self-set 'main' skill.
