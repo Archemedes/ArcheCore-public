@@ -223,7 +223,7 @@ public class RacialBonusListener implements Listener {
 						e.setDamage(0);
 						if(!newEvent.isCancelled() && e.getEntity() instanceof Damageable){
 							Damageable d = (Damageable) e.getEntity();
-							d.damage(e.getDamage());
+							d.damage(newEvent.getDamage());
 						}
 					}
 					break;
