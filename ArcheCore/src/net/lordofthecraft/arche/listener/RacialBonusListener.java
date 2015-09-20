@@ -255,7 +255,7 @@ public class RacialBonusListener implements Listener {
 	@SuppressWarnings("unchecked")
 	private <E extends EntityDamageEvent> Map<DamageModifier, ? extends Function<? super Double, Double>> getDamageFunctionMap(E e) {
 		try {
-			Field f = Class.forName("org.bukkit.event.entity.EntityDamageEvent").getDeclaredField("modifiers");
+			Field f = Class.forName("org.bukkit.event.entity.EntityDamageEvent").getDeclaredField("modifierFunctions");
 			f.setAccessible(true);
 			return (Map<DamageModifier, ? extends Function<? super Double, Double>>) f.get(e);
 		} catch(Exception exc) {
