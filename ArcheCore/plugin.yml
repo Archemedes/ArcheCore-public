@@ -1,6 +1,7 @@
 name: ArcheCore
 main: net.lordofthecraft.arche.ArcheCore
 authors: [Arche, Kowaman]
+soft-depend: [PermissionsEx]
 version: 1.83
 
 commands:

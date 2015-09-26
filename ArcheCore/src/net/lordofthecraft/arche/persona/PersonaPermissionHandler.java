@@ -20,8 +20,8 @@ public class PersonaPermissionHandler implements WhyPermissionHandler{
 
 	public PersonaPermissionHandler(){
 		this.handler = ArcheCore.getControls().getSQLHandler();
-		this.permHandler = PermissionsEx.getPermissionManager();
-
+		if (ArcheCore.getControls().willUsePermissions()) this.permHandler = PermissionsEx.getPermissionManager();
+		else permHandler = null;
 		Map<String, String> cols = Maps.newLinkedHashMap();
 
 		cols.put("player", "TEXT");
@@ -54,7 +54,7 @@ public class PersonaPermissionHandler implements WhyPermissionHandler{
 
 	@Override
 	public boolean addPermission(Persona target, String permission){
-		if (target.isCurrent()){
+		if (target.isCurrent() && permHandler != null){
 			permHandler.getUser(target.getPlayer()).addPermission(permission);
 		}
 
@@ -80,7 +80,7 @@ public class PersonaPermissionHandler implements WhyPermissionHandler{
 
 	@Override
 	public boolean removePermission(Persona target, String permission){
-		if (target.isCurrent()){
+		if (target.isCurrent() && permHandler != null){
 			permHandler.getUser(target.getPlayer()).removePermission(permission);
 		}
 

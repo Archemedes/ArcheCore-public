@@ -77,6 +77,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private HelpDesk helpdesk;
 	private ArcheTimer timer;
 	private Economy economy;
+	
+	private boolean permissions;
 
 	//Config settings
 	private boolean helpOverriden;
@@ -137,6 +139,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		//Initialize our config file
 		initConfig();
 		
+		permissions = ((getServer().getPluginManager()).getPlugin("PermissionsEx") != null);
 		
 		//Find our Singletons and assign them.
 		sqlHandler = new SQLHandler(this, "ArcheCore");
@@ -313,7 +316,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("archehelp").setExecutor(new CommandArchehelp(helpdesk, helpOverriden));
 		getCommand("helpmenu").setExecutor(new CommandHelpMenu(helpdesk));
 		getCommand("persona").setExecutor(new CommandPersona(helpdesk, personaHandler, nameChangeDelay, enablePrefixes));
-		getCommand("perspex").setExecutor(new CommandPersonaPermissions(personaHandler.getPermHandler()));
+		if (permissions) getCommand("perspex").setExecutor(new CommandPersonaPermissions(personaHandler.getPermHandler()));
 		getCommand("skill").setExecutor(new CommandSkill(helpdesk, showXpToPlayers));
 		getCommand("beaconme").setExecutor(new CommandBeaconme());
 		getCommand("treasurechest").setExecutor(new CommandTreasurechest());
@@ -334,7 +337,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		pm.registerEvents(new PlayerChatListener(), this);
 		pm.registerEvents(new TreasureChestListener(), this);
 		pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
-		pm.registerEvents(new PersonaPermissionListener(personaHandler.getPermHandler()), this);
+		if (permissions) pm.registerEvents(new PersonaPermissionListener(personaHandler.getPermHandler()), this);
 		
 		if (showXpToPlayers) {
 			pm.registerEvents(new ExperienceOrbListener(), this);
@@ -567,6 +570,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	
 	public boolean willCachePersonas(){
 		return cachePersonas > 0;
+	}
+	
+	@Override
+	public boolean willUsePermissions(){
+		return permissions;
 	}
 
 	@Override

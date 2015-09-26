@@ -153,6 +153,13 @@ public interface IArcheCore {
 	public boolean willCachePersonas();
 	
 	/**
+	 * Checks if ArcheCore can use PermissionsEx
+	 * @return If ArcheCore is using PermissionsEx
+	 */
+	
+	public boolean willUsePermissions();
+	
+	/**
 	 * ArcheCore optionally has functionality for money tied to specific Personas. This boolean tells you if it is used 
 	 * @return Whether Economy is enabled
 	 */
