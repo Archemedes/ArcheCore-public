@@ -14,6 +14,7 @@ import net.lordofthecraft.arche.commands.CommandHelpMenu;
 import net.lordofthecraft.arche.commands.CommandMoney;
 import net.lordofthecraft.arche.commands.CommandNamelog;
 import net.lordofthecraft.arche.commands.CommandPersona;
+import net.lordofthecraft.arche.commands.CommandPersonaPermissions;
 import net.lordofthecraft.arche.commands.CommandRealname;
 import net.lordofthecraft.arche.commands.CommandSkill;
 import net.lordofthecraft.arche.commands.CommandSql;
@@ -34,6 +35,7 @@ import net.lordofthecraft.arche.listener.HelpMenuListener;
 import net.lordofthecraft.arche.listener.HelpOverrideListener;
 import net.lordofthecraft.arche.listener.LegacyCommandsListener;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
+import net.lordofthecraft.arche.listener.PersonaPermissionListener;
 import net.lordofthecraft.arche.listener.PlayerChatListener;
 import net.lordofthecraft.arche.listener.PlayerInteractListener;
 import net.lordofthecraft.arche.listener.PlayerJoinListener;
@@ -311,6 +313,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("archehelp").setExecutor(new CommandArchehelp(helpdesk, helpOverriden));
 		getCommand("helpmenu").setExecutor(new CommandHelpMenu(helpdesk));
 		getCommand("persona").setExecutor(new CommandPersona(helpdesk, personaHandler, nameChangeDelay, enablePrefixes));
+		getCommand("perspex").setExecutor(new CommandPersonaPermissions(personaHandler.getPermHandler()));
 		getCommand("skill").setExecutor(new CommandSkill(helpdesk, showXpToPlayers));
 		getCommand("beaconme").setExecutor(new CommandBeaconme());
 		getCommand("treasurechest").setExecutor(new CommandTreasurechest());
@@ -331,6 +334,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		pm.registerEvents(new PlayerChatListener(), this);
 		pm.registerEvents(new TreasureChestListener(), this);
 		pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
+		pm.registerEvents(new PersonaPermissionListener(personaHandler.getPermHandler()), this);
 		
 		if (showXpToPlayers) {
 			pm.registerEvents(new ExperienceOrbListener(), this);

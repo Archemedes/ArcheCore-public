@@ -1,7 +1,7 @@
 name: ArcheCore
 main: net.lordofthecraft.arche.ArcheCore
 authors: [Arche, Kowaman]
-version: 1.82
+version: 1.83
 
 commands:
    archehelp:
@@ -15,6 +15,12 @@ commands:
       permission: archecore.mayuse
       permission-message: §4Insufficient Permission for this command
       aliases: [pers,prs,p]
+   perspex:
+      description: Manage individual Persona or Roleplay Character permissions
+      usage: Invalid syntax! Use /<command> for a list of commands
+      permission: archecore.admin
+      permission-message: §4Insufficient Permission for this command
+      aliases: [ppex, pperm, persp]
    beaconme:
       description: Open the ArcheCore Beacon menu
       permission: archecore.command.beaconme

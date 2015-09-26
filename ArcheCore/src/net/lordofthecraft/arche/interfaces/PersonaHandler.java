@@ -13,6 +13,14 @@ import org.bukkit.entity.Player;
 public interface PersonaHandler {
 
 	/**
+	 * Permission handler is used to assign and remove permissions from individual personas
+	 * that will be added and removed when the user switches to and from said persona
+	 * @return the handler for individual persona permission sets
+	 */
+	
+	public WhyPermissionHandler getPermHandler();
+	
+	/**
 	 * Set whether or not ArcheCore should continue to modify Bukkit Display Names to reflect Persona names
 	 * @param will the value to set to
 	 */

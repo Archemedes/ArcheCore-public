@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="/Nexus-Core/jars/ProtocolLib.jar"/>
 	<classpathentry kind="lib" path="/Nexus-Core/jars/spigot.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Sean/Desktop/Developer/Customizer.jar"/>
+	<classpathentry kind="lib" path="/Nexus-Core/jars/PermissionsEx-1.23.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

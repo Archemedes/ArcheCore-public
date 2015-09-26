@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.event;
 
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 
 import org.bukkit.event.Cancellable;
@@ -11,7 +12,9 @@ import org.bukkit.event.HandlerList;
  */
 public class PersonaSwitchEvent extends PersonaEvent implements Cancellable {
 private static final HandlerList handlers = new HandlerList();
-	
+
+	private Persona before;
+
 	public HandlerList getHandlers() {
 		return handlers;
 	}
@@ -22,7 +25,14 @@ private static final HandlerList handlers = new HandlerList();
 	
 	public PersonaSwitchEvent(Persona persona) {
 		super(persona);
+		before = ArcheCore.getControls().getPersonaHandler().getPersona(persona.getPlayer());
 	}
+	
+	/**
+	 * @return The persona the player is switching from. Can return a null value.
+	 */
+	
+	public Persona getOriginPersona(){ return before; }
 
 	//Generic Cancellable implementation
 	private boolean cancelled = false;

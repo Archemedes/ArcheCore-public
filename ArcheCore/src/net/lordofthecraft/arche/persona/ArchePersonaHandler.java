@@ -20,6 +20,7 @@ import net.lordofthecraft.arche.event.PersonaCreateEvent;
 import net.lordofthecraft.arche.event.PersonaDeactivateEvent;
 import net.lordofthecraft.arche.event.PersonaRemoveEvent;
 import net.lordofthecraft.arche.event.PersonaSwitchEvent;
+import net.lordofthecraft.arche.interfaces.WhyPermissionHandler;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
@@ -52,7 +53,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
 	private final Map<UUID, ArchePersona[]> personas = new HashMap<UUID, ArchePersona[]>(Bukkit.getServer().getMaxPlayers());
-
+	private static final PersonaPermissionHandler perminstance = new PersonaPermissionHandler();
+	
+	
 	private PreparedStatement selectStatement = null;
 
 	public static ArchePersonaHandler getInstance(){
@@ -62,6 +65,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 	private ArchePersonaHandler(){
 		//Do nothing
 	}
+	
+	@Override
+	public WhyPermissionHandler getPermHandler(){ return perminstance; }
 
 	@Override
 	public void setModifyDisplayNames(boolean will){
