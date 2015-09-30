@@ -80,20 +80,24 @@ public class CommandPersonaPermissions implements CommandExecutor{
 	}
 
 	private boolean addPermission(CommandSender sender, Persona pers, String string) {
-		sender.sendMessage(ChatColor.DARK_AQUA+"Successfully added "+ChatColor.GOLD
-				+string+ChatColor.DARK_AQUA+" to "+ChatColor.GOLD
-				+pers.getPlayerName()+ChatColor.DARK_AQUA
-				+" on persona # "+ChatColor.GOLD+(pers.getId()+1));
-		handler.addPermission(pers, string);
+		if (handler.addPermission(pers, string)){
+			sender.sendMessage(ChatColor.DARK_AQUA+"Successfully added "+ChatColor.GOLD
+					+string+ChatColor.DARK_AQUA+" to "+ChatColor.GOLD
+					+pers.getPlayerName()+ChatColor.DARK_AQUA
+					+" on persona # "+ChatColor.GOLD+(pers.getId()+1));
+		} else
+			sender.sendMessage(ChatColor.RED+"Error: "+pers.getPlayerName()+" already has permission "+string);
 		return true;
 	}
 
 	private boolean removePermission(CommandSender sender, Persona pers, String string) {
-		sender.sendMessage(ChatColor.DARK_AQUA+"Successfully removed "+ChatColor.GOLD
-				+string+ChatColor.DARK_AQUA+" from "+ChatColor.GOLD
-				+pers.getPlayerName()+ChatColor.DARK_AQUA+" on persona # "+ChatColor.GOLD
-				+(pers.getId()+1));
-		handler.removePermission(pers, string);
+		if (handler.removePermission(pers, string)){
+			sender.sendMessage(ChatColor.DARK_AQUA+"Successfully removed "+ChatColor.GOLD
+					+string+ChatColor.DARK_AQUA+" from "+ChatColor.GOLD
+					+pers.getPlayerName()+ChatColor.DARK_AQUA+" on persona # "+ChatColor.GOLD
+					+(pers.getId()+1));
+		} else
+			sender.sendMessage(ChatColor.RED+"Error: "+pers.getPlayerName()+" doesn't have permision "+string);
 		return true;
 	}
 

@@ -31,6 +31,15 @@ public interface WhyPermissionHandler {
 	public boolean removePermission(Persona target, String permission);
 	
 	/**
+	 * Checks to see if the persona has a permission node
+	 * @param target The targetted persona
+	 * @param permission The permission to check for
+	 * @return true if found, false if not.
+	 */
+	
+	public boolean hasPermission(Persona target, String permission);
+	
+	/**
 	 * Method to handle the .remove() of a persona with permissions attached to it.
 	 * @param killed The persona being removed
 	 * @return If the SQL statement succeeded.

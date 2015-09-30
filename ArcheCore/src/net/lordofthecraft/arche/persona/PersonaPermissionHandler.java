@@ -58,6 +58,8 @@ public class PersonaPermissionHandler implements WhyPermissionHandler{
 
 	@Override
 	public boolean addPermission(Persona target, String permission){
+		if (hasPermission(target, permission)) return false;
+		
 		if (target.isCurrent() && permHandler){
 			PermissionsEx.getUser(target.getPlayer()).addPermission(permission);
 		}
@@ -96,6 +98,8 @@ public class PersonaPermissionHandler implements WhyPermissionHandler{
 
 	@Override
 	public boolean removePermission(Persona target, String permission){
+		if (!hasPermission(target, permission)) return false;
+		
 		if (target.isCurrent() && permHandler){
 			PermissionsEx.getUser(target.getPlayer()).removePermission(permission);
 		}
@@ -121,6 +125,19 @@ public class PersonaPermissionHandler implements WhyPermissionHandler{
 			return false;
 	}
 
+	@Override
+	public boolean hasPermission(Persona target, String permission){
+		try {
+			for (String ss : this.getPermissions(target)){
+				if (ss.equalsIgnoreCase(permission))
+					return true;
+			}
+			return false;
+		} catch (NullPointerException e){
+			return false;
+		}
+	}
+	
 	@Override
 	public boolean handlePerma(Persona killed){
 		handler.execute("DELETE FROM persona_permissions WHERE player = '"+killed.getPlayerUUID().toString()+"' AND id = "+killed.getId());
