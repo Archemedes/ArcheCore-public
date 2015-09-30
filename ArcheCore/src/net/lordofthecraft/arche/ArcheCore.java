@@ -316,7 +316,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("archehelp").setExecutor(new CommandArchehelp(helpdesk, helpOverriden));
 		getCommand("helpmenu").setExecutor(new CommandHelpMenu(helpdesk));
 		getCommand("persona").setExecutor(new CommandPersona(helpdesk, personaHandler, nameChangeDelay, enablePrefixes));
-		if (permissions) getCommand("perspex").setExecutor(new CommandPersonaPermissions(personaHandler.getPermHandler()));
 		getCommand("skill").setExecutor(new CommandSkill(helpdesk, showXpToPlayers));
 		getCommand("beaconme").setExecutor(new CommandBeaconme());
 		getCommand("treasurechest").setExecutor(new CommandTreasurechest());
@@ -325,6 +324,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("money").setExecutor(new CommandMoney(helpdesk, economy));
 		getCommand("namelog").setExecutor(new CommandNamelog());
 		getCommand("arsql").setExecutor(new CommandSql());
+		if (permissions) getCommand("perspex").setExecutor(new CommandPersonaPermissions(personaHandler.getPermHandler()));
 	}
 	
 	private void initListeners(){

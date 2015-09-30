@@ -12,42 +12,47 @@ import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 public class PersonaPermissionListener implements Listener{
-	
+
 	private WhyPermissionHandler handle;
 
 	public PersonaPermissionListener(WhyPermissionHandler handler){
 		handle = handler;
 	}
-	
+
 	@EventHandler(ignoreCancelled = true)
 	public void onPersonaSwitch(PersonaSwitchEvent e){
-		final PermissionUser user = PermissionsEx.getPermissionManager().getUser(e.getPlayer());
-		for (String ss : handle.getPermissions(e.getOriginPersona()))
-			user.removePermission(ss);
-		
-		for (String ss : handle.getPermissions(e.getPersona()))
-			user.addPermission(ss);
+		final PermissionUser user = PermissionsEx.getUser(e.getPlayer());
+		String[] holder = handle.getPermissions(e.getOriginPersona());
+		if (holder != null)
+			for (String ss : holder)
+				user.removePermission(ss);
+
+		holder = handle.getPermissions(e.getPersona());
+		if (holder != null)
+			for (String ss : holder)
+				user.addPermission(ss);
 	}
-	
+
 	@EventHandler(ignoreCancelled = true)
 	public void onPersonaPerma(PersonaRemoveEvent e){
 		if (e.getReason() == Reason.REMOVE){
 			handle.handlePerma(e.getPersona());
 			if (e.getPersona().isCurrent()){
-				final PermissionUser user = handle.getPexManager().getUser(e.getPlayer());
-				for (String ss : handle.getPermissions(e.getPersona()))
-					user.removePermission(ss);
+				final PermissionUser user = PermissionsEx.getUser(e.getPlayer());
+				final String[] holder = handle.getPermissions(e.getPersona());
+				if (holder != null)
+					for (String ss : holder)
+						user.removePermission(ss);
 			}
 		}
 	}
-	
+
 	@EventHandler(ignoreCancelled = true)
 	public void onPersonaActivate(PersonaActivateEvent e){
-		final PermissionUser user = handle.getPexManager().getUser(e.getPlayer());
-		if (e.getPersona().isCurrent()){
-			for (String ss : handle.getPermissions(e.getPersona()))
+		final PermissionUser user = PermissionsEx.getUser(e.getPlayer());
+		final String[] holder = handle.getPermissions(e.getPersona());
+		if (holder != null)
+			for (String ss : holder)
 				user.addPermission(ss);
-		}
 	}
-	
 }

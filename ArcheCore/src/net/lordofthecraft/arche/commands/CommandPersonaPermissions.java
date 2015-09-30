@@ -23,7 +23,7 @@ public class CommandPersonaPermissions implements CommandExecutor{
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (args.length == 0)
 			return sendUsage(sender);
-		
+
 		Persona pers = null;
 		if (args[0].equalsIgnoreCase("view")
 				|| args[0].equalsIgnoreCase("add")
@@ -31,7 +31,7 @@ public class CommandPersonaPermissions implements CommandExecutor{
 				&& args.length > 1){
 			pers = CommandUtil.personaFromArg(args[1]);
 		}
-		
+
 		switch (args[0].toLowerCase()){
 		case "info":
 			return whyInfo(sender);
@@ -63,29 +63,36 @@ public class CommandPersonaPermissions implements CommandExecutor{
 		final Persona[] personas = ArcheCore.getControls().getPersonaHandler().getAllPersonas(p);
 		sender.sendMessage(p.getName()+"'s permissions");
 		Persona holder;
+		String[] perms;
 		for (int i = 0; i < personas.length; ++i){
 			holder = personas[i];
-			sender.sendMessage(ChatColor.BLUE+"- "+i+" - "+holder.getChatName()+"\n\n");
-			for (String ss : handler.getPermissions(holder))
-				sender.sendMessage(ChatColor.DARK_AQUA+" * "+ss);
+			if (holder != null){
+				sender.sendMessage(ChatColor.BLUE+"- "+i+" - "+holder.getChatName()+"\n\n");
+				perms = handler.getPermissions(holder);
+				if (perms != null)
+					for (String ss : perms)
+						sender.sendMessage(ChatColor.DARK_AQUA+" * "+ss);
+				else
+					sender.sendMessage(ChatColor.RED+"None!");
+			}
 		}
 		return true;
 	}
-	
+
 	private boolean addPermission(CommandSender sender, Persona pers, String string) {
 		sender.sendMessage(ChatColor.DARK_AQUA+"Successfully added "+ChatColor.GOLD
-				+string+" to "+ChatColor.GOLD
+				+string+ChatColor.DARK_AQUA+" to "+ChatColor.GOLD
 				+pers.getPlayerName()+ChatColor.DARK_AQUA
-				+" on persona # "+ChatColor.GOLD+pers.getId()+1);
+				+" on persona # "+ChatColor.GOLD+(pers.getId()+1));
 		handler.addPermission(pers, string);
 		return true;
 	}
-	
+
 	private boolean removePermission(CommandSender sender, Persona pers, String string) {
 		sender.sendMessage(ChatColor.DARK_AQUA+"Successfully removed "+ChatColor.GOLD
 				+string+ChatColor.DARK_AQUA+" from "+ChatColor.GOLD
 				+pers.getPlayerName()+ChatColor.DARK_AQUA+" on persona # "+ChatColor.GOLD
-				+pers.getId()+1);
+				+(pers.getId()+1));
 		handler.removePermission(pers, string);
 		return true;
 	}
@@ -104,7 +111,7 @@ public class CommandPersonaPermissions implements CommandExecutor{
 	}
 
 	private boolean whyInfo(CommandSender sender) {
-		if (!(sender instanceof Player)){
+		if (sender instanceof Player){
 			ArcheMessage message = new ArcheMessage("");
 			message.addLine("Welcome to Why's Persona Permisisons.\n").applyChatColor(ChatColor.DARK_AQUA);
 			message.addLine("What is it? ").applyChatColor(ChatColor.GOLD).setBold();
@@ -116,7 +123,7 @@ public class CommandPersonaPermissions implements CommandExecutor{
 			message.addLine("When a player is assigned a permission node via this plugin if they are currently on "
 					+ "the specific persona then they will have the nodes applied to them directly. Otherwise, when "
 					+ "they switch to said persona they will gain the nodes. When the persona is permakilled the nodes "
-					+ "are deleted.\n").applyChatColor(ChatColor.DARK_AQUA);
+					+ "are deleted.").applyChatColor(ChatColor.DARK_AQUA);
 			message.sendTo((Player) sender); 
 		} else {
 			sender.sendMessage("Error: This can only be performed from ingame.");

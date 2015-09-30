@@ -1,7 +1,5 @@
 package net.lordofthecraft.arche.interfaces;
 
-import ru.tehkode.permissions.PermissionManager;
-
 public interface WhyPermissionHandler {
 
 	/**
@@ -39,12 +37,5 @@ public interface WhyPermissionHandler {
 	 */
 	
 	public boolean handlePerma(Persona killed);
-	
-	/**
-	 * A short hand method to return PermissionsEx's PermissionManager
-	 * @return The instance of PermissionsEx's PermissionManager
-	 */
-	
-	public PermissionManager getPexManager();
 	
 }

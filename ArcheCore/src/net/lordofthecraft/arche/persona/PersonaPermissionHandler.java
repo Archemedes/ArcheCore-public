@@ -9,27 +9,29 @@ import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.interfaces.WhyPermissionHandler;
-import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 import net.lordofthecraft.arche.interfaces.Persona;
 
 public class PersonaPermissionHandler implements WhyPermissionHandler{
 
 	private SQLHandler handler;
-	private PermissionManager permHandler;
+	private boolean permHandler;
 
 	public PersonaPermissionHandler(){
-		this.handler = ArcheCore.getControls().getSQLHandler();
-		if (ArcheCore.getControls().willUsePermissions()) this.permHandler = PermissionsEx.getPermissionManager();
-		else permHandler = null;
-		Map<String, String> cols = Maps.newLinkedHashMap();
+		try {
+			this.handler = ArcheCore.getControls().getSQLHandler();
+			this.permHandler = ArcheCore.getControls().willUsePermissions();
+			Map<String, String> cols = Maps.newLinkedHashMap();
 
-		cols.put("player", "TEXT");
-		cols.put("id", "INT");
-		cols.put("perms", "TEXT");
-		cols.put("UNIQUE (player, id)", "ON CONFLICT REPLACE");
+			cols.put("player", "TEXT");
+			cols.put("id", "INT");
+			cols.put("perms", "TEXT");
+			cols.put("UNIQUE (player, id)", "ON CONFLICT REPLACE");
 
-		handler.createTable("persona_permissions", cols);
+			handler.createTable("persona_permissions", cols);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -44,8 +46,10 @@ public class PersonaPermissionHandler implements WhyPermissionHandler{
 	public String getRawPermissions(Persona target){
 		ResultSet rs;
 		try {
-			rs = handler.query("SELECT perms FROM persona_permissions WHERE player = '"+target.getPlayerUUID().toString()+"' AND id = "+target.getId());
-			return rs.getString(2);
+			rs = handler.query("SELECT * FROM persona_permissions WHERE player = '"+target.getPlayerUUID().toString()+"' AND id = "+target.getId());
+			if (rs.getString(3).length() > 1)
+				return rs.getString(3);
+			else return null;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
@@ -54,34 +58,46 @@ public class PersonaPermissionHandler implements WhyPermissionHandler{
 
 	@Override
 	public boolean addPermission(Persona target, String permission){
-		if (target.isCurrent() && permHandler != null){
-			permHandler.getUser(target.getPlayer()).addPermission(permission);
+		if (target.isCurrent() && permHandler){
+			PermissionsEx.getUser(target.getPlayer()).addPermission(permission);
 		}
 
-		String formatted = getRawPermissions(target);
+		String[] formatted = getPermissions(target);
+		StringBuilder builder = new StringBuilder();
+		String tag = "";
+
+		if (formatted != null){
+			for (String ss : formatted){
+				if (!ss.equalsIgnoreCase(permission)){
+					builder.append(tag);
+					tag = "@";
+					builder.append(ss);
+				}
+			}
+		}
 
 		if (formatted == null)
-			formatted = permission;
+			builder.append(permission);
 		else
-			formatted += "@"+permission;
+			builder.append(tag+permission);
+		if (formatted == null){
+			Map<String, Object> cols = Maps.newLinkedHashMap();
 
-		Map<String, Object> cols = Maps.newLinkedHashMap();
+			cols.put("player", target.getPlayerUUID().toString());
+			cols.put("id", target.getId());
+			cols.put("perms", builder.toString());
 
-		cols.put("player", target.getPlayerUUID().toString());
-		cols.put("id", target.getId());
-		cols.put("perms", formatted);
-
-		final int hold = handler.insert("persona_permissions", cols);
-		if (hold < 0)
-			return false;
-		else
-			return true;
+			handler.insert("persona_permissions", cols);
+		} else {
+			handler.execute("UPDATE persona_permissions SET perms = '"+builder.toString()+"' WHERE player = '"+target.getPlayerUUID().toString()+"' AND id = "+target.getId());
+		}
+		return true;
 	}
 
 	@Override
 	public boolean removePermission(Persona target, String permission){
-		if (target.isCurrent() && permHandler != null){
-			permHandler.getUser(target.getPlayer()).removePermission(permission);
+		if (target.isCurrent() && permHandler){
+			PermissionsEx.getUser(target.getPlayer()).removePermission(permission);
 		}
 
 		String raw = getRawPermissions(target);
@@ -110,8 +126,5 @@ public class PersonaPermissionHandler implements WhyPermissionHandler{
 		handler.execute("DELETE FROM persona_permissions WHERE player = '"+killed.getPlayerUUID().toString()+"' AND id = "+killed.getId());
 		return true;
 	}
-
-	@Override
-	public PermissionManager getPexManager(){ return permHandler; }
 
 }
