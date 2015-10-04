@@ -95,7 +95,7 @@ public final class ArchePersona implements Persona {
 	double money = 0;
 
 	private int hash = 0;
-	
+
 	private int food = 0;
 	private double health = 0;
 
@@ -138,7 +138,7 @@ public final class ArchePersona implements Persona {
 	public SkillAttachment getSkill(int skillId){
 		return profs.get(skillId);
 	}
-	
+
 	public void setRace(Race r) {
 		this.race = r;
 		if(ArcheCore.getControls().areRacialBonusesEnabled()) {
@@ -152,19 +152,32 @@ public final class ArchePersona implements Persona {
 		buffer.put(new UpdateTask(this, PersonaField.RACE_REAL, race));
 		this.raceHeader = null;
 	}
-	
+
+	@Override
+	public double resetSkills(){
+		double xp = 0;
+		for(Skill s : ArcheSkillFactory.getSkills().values()){
+			if(s.isVisible(this)){
+				final double val = s.reset(this);
+				xp += val;
+			}
+		}
+		ArcheSkillFactory.getSkill("internal_drainxp").addRawXp(this, xp, false);
+		return xp;
+	}
+
 	@Override
 	public void racialReassign(Race r){
 		setRace(r);
 		this.reskillRacialReassignment();
 	}
-	
+
 	public void setSkin(PersonaSkin skin) {
 		this.skin = skin;
 		buffer.put(new UpdateTask(this, PersonaField.SKIN, skin.getCombined()));
 		//if (this.getPlayer() != null) PersonaSkinListener.updatePlayerSkin(this.getPlayer());
 	}
-	
+
 	public PersonaSkin getSkin() {
 		return skin;
 	}
@@ -264,7 +277,7 @@ public final class ArchePersona implements Persona {
 				second = true;
 				continue;
 			}
-			
+
 			else {
 				lostXP += sk.getXp(this);
 				//System.out.println("adding to pool");
@@ -280,7 +293,7 @@ public final class ArchePersona implements Persona {
 		Collections.sort(skills, new SkillComparator(this));
 		return skills;
 	}
-	
+
 	private class SkillComparator implements Comparator<Skill> {
 		Persona p;
 		public SkillComparator(Persona p){
@@ -342,7 +355,7 @@ public final class ArchePersona implements Persona {
 	public void handleProfessionSelection(){
 		for(SkillAttachment att : profs){
 			if(!att.isInitialized()) att.initialize();
-			
+
 			if (att.skill.getName().equalsIgnoreCase("internal_drainxp")) continue;
 
 			SkillTier tier = att.skill.getCapTier(this);
@@ -411,7 +424,7 @@ public final class ArchePersona implements Persona {
 
 	void setCurrent(boolean current){
 		if(this.current != current){
-			
+
 			this.current = current;
 
 			buffer.put(new UpdateTask(this, PersonaField.CURRENT, current));
@@ -420,7 +433,7 @@ public final class ArchePersona implements Persona {
 				Player p = Bukkit.getPlayer(getPlayerUUID());
 				if(p != null){ 
 					updateDisplayName(p);
-					
+
 					//Apply Racial bonuses
 					if(ArcheCore.getControls().areRacialBonusesEnabled())
 						RaceBonusHandler.apply(p, race);

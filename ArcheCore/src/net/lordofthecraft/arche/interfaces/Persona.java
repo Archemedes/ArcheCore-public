@@ -11,6 +11,13 @@ import org.bukkit.entity.Player;
 public interface Persona {
 
 	/**
+	 * Reset a persona's visible skills (drainXp and Magic skills not effected) to 0 and allow it to be redistributed
+	 * @return The amount of Xp now open to be assigned
+	 */
+	
+	public double resetSkills();
+	
+	/**
 	 * Assign a persona's race to the specified race as well as resets the user's racial skill in raw experience for distribution.
 	 * @param r The new persona's race.
 	 */
