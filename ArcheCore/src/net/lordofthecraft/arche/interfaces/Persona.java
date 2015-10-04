@@ -12,10 +12,11 @@ public interface Persona {
 
 	/**
 	 * Reset a persona's visible skills (drainXp and Magic skills not effected) to 0 and allow it to be redistributed
+	 * @param mod The amount to return. 1 for 100% of experience, 0.50 for 50% of experience returned, etc.
 	 * @return The amount of Xp now open to be assigned
 	 */
 	
-	public double resetSkills();
+	public double resetSkills(float mod);
 	
 	/**
 	 * Assign a persona's race to the specified race as well as resets the user's racial skill in raw experience for distribution.

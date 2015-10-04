@@ -154,7 +154,8 @@ public final class ArchePersona implements Persona {
 	}
 
 	@Override
-	public double resetSkills(){
+	public double resetSkills(float mod){
+		if (mod > 1) mod = 1f;
 		double xp = 0;
 		for(Skill s : ArcheSkillFactory.getSkills().values()){
 			if(s.isVisible(this)){
@@ -162,6 +163,7 @@ public final class ArchePersona implements Persona {
 				xp += val;
 			}
 		}
+		xp = xp*mod;
 		ArcheSkillFactory.getSkill("internal_drainxp").addRawXp(this, xp, false);
 		return xp;
 	}
