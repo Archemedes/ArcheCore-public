@@ -198,7 +198,10 @@ public class ArcheSkill implements Skill {
 		if(player != null){
 			SkillTier now = this.getSkillTier(p);
 			
-			if(now != SkillTier.RUSTY && !(now == SkillTier.INEXPERIENCED && newXp < 0)){
+			if(now != SkillTier.RUSTY 
+					&& !(now == SkillTier.INEXPERIENCED 
+					&& newXp < 0)
+					&& !p.getPlayer().hasMetadata("magic")){
 				int nxp = now == SkillTier.INEXPERIENCED? 0 : now.getXp();
 				player.setExp(now == cap? 0f : (float) ( (newXp - nxp) / (now.getNext().getXp() - nxp) ));
 				player.setLevel(now == cap? 0 : (int) (now.getNext().getXp() - newXp));
