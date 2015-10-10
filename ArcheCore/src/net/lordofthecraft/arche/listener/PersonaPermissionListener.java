@@ -30,7 +30,8 @@ public class PersonaPermissionListener implements Listener{
 		holder = handle.getPermissions(e.getPersona());
 		if (holder != null)
 			for (String ss : holder)
-				user.addPermission(ss);
+				if (!user.has(ss))
+					user.addPermission(ss);
 	}
 
 	@EventHandler(ignoreCancelled = true)
@@ -53,6 +54,7 @@ public class PersonaPermissionListener implements Listener{
 		final String[] holder = handle.getPermissions(e.getPersona());
 		if (holder != null)
 			for (String ss : holder)
-				user.addPermission(ss);
+				if (!user.has(ss))
+					user.addPermission(ss);
 	}
 }

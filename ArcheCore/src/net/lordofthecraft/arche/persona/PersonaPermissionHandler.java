@@ -47,11 +47,17 @@ public class PersonaPermissionHandler implements WhyPermissionHandler{
 		ResultSet rs;
 		try {
 			rs = handler.query("SELECT * FROM persona_permissions WHERE player = '"+target.getPlayerUUID().toString()+"' AND id = "+target.getId());
-			if (rs.getString(3).length() > 1)
-				return rs.getString(3);
-			else return null;
+			final String string = rs.getString(3);
+			if (!rs.wasNull()){
+				if (string == null){
+					return null;
+				} else if (string.length() < 1)
+					return null;
+				else
+					return string;
+			}
+			return null;
 		} catch (SQLException e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
