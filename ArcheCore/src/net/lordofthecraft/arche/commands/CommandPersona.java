@@ -79,6 +79,9 @@ public class CommandPersona implements CommandExecutor {
 					|| args[0].equalsIgnoreCase("spectral")
 					|| args[0].equalsIgnoreCase("specter")
 					|| args[0].equalsIgnoreCase("necro")
+					|| args[0].equalsIgnoreCase("ascended")
+					|| args[0].equalsIgnoreCase("aengulbound")
+					|| args[0].equalsIgnoreCase("keeper")
 					|| args[0].equalsIgnoreCase("realrace")
 					|| args[0].equalsIgnoreCase("wiperace"))
 					&& args.length > 1){
@@ -290,19 +293,29 @@ public class CommandPersona implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("construct") || args[0].equalsIgnoreCase("golem")){
 					if (!sender.hasPermission("archecore.command.construct") && !sender.hasPermission("archecore.admin")){
 						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
+						return true;
 					} else
 					return doRaceChange(sender, pers, Race.CONSTRUCT);
 				} else if (args[0].equalsIgnoreCase("spectre") || args[0].equalsIgnoreCase("spectral") || args[0].equalsIgnoreCase("specter")){
 					if (!sender.hasPermission("archecore.command.spectre") && !sender.hasPermission("archecore.admin")){
 						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-						
+						return true;
 					} else
 					return doRaceChange(sender, pers, Race.SPECTRE);
 				} else if (args[0].equalsIgnoreCase("necrolyte") || args[0].equalsIgnoreCase("necro")){
 					if (!sender.hasPermission("archecore.command.necrolyte") && !sender.hasPermission("archecore.admin")){
 						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
+						return true;
 					} else
 					return doRaceChange(sender, pers, Race.NECROLYTE);
+				} else if (args[0].equalsIgnoreCase("aengulbound") 
+						|| args[0].equalsIgnoreCase("keeper") 
+						|| args[0].equalsIgnoreCase("ascended")){
+					if (!sender.hasPermission("archecore.command.ascended") && !sender.hasPermission("archecore.admin")){
+						sender.sendMessage(ChatColor.RED + "Error: Permission denied");
+						return true;
+					} else
+						return doRaceChange(sender, pers, Race.ASCENDED);
 				}
 			}		
 		}
