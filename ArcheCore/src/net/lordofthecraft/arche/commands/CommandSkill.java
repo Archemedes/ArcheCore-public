@@ -5,9 +5,11 @@ import java.util.UUID;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SkillTome;
+import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.enums.ProfessionSlot;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.enums.SkillTier;
+import net.lordofthecraft.arche.help.ArcheMessage;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
@@ -119,10 +121,18 @@ public class CommandSkill implements CommandExecutor {
 							} else {
 								xp = ChatColor.GRAY + "" + ChatColor.ITALIC + " (" + ((int) s.getXp(who)) + "/" + tier.getNext().getXp() + ")";
 							}
-							sender.sendMessage(txt + xp);
+							if (!s.achievedTier(who, max) 
+									&& max != SkillTier.SUPER 
+									&& sender instanceof Player){
+								new ArcheMessage(txt + xp)
+								.setHoverEvent(ChatBoxAction.SHOW_TEXT,"Next tier: "+s.getSkillTier(who).getNext().getTitle()+" "+WordUtils.capitalize(s.getName())+"\n")
+								.sendTo((Player) sender);
+							} else
+								sender.sendMessage(txt + xp);
 						}else sender.sendMessage(txt);
 					}
 				}
+				if (sender instanceof Player) sender.sendMessage(ChatColor.GRAY+"(Hover over a non-maxed skill to see the next level)");
 			}
 			return true;
 		} else if(args.length == 1){

@@ -377,7 +377,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 				+ div + ChatColor.GRAY + "" + ChatColor.ITALIC +  (helpOverriden? "$/help$":"$/archehelp$") + ChatColor.GRAY + ": Provides a useful database of help topics.\n"
 				+ ChatColor.GOLD + "" + ChatColor.ITALIC + "$/helpmenu$" + ChatColor.GOLD + ": The same help topics, provided in a menu form.\n" 
 				+ ChatColor.BLUE + "" + ChatColor.ITALIC + "$/persona$" + ChatColor.BLUE + ": See others' Personas and modify your own.\n"
-				+ ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "$/skill$" + ChatColor.LIGHT_PURPLE + ": See the Skills your Persona can learn";
+				+ ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "$/skill$" + ChatColor.LIGHT_PURPLE + ": See the Skills your Persona can learn"
+				+ ChatColor.DARK_GREEN+ "" + ChatColor.ITALIC + "$/me$"+ChatColor.DARK_GREEN+": Opens the nexus-menu";
 
 		String beaconInfo = "A " + ChatColor.ITALIC + "Beacon" + ChatColor.RESET + " lets you control most Persona-related tasks. Finding and right-clicking a beacon"
 				+ " grants access to, among other things, Persona modification and the plugin help files (which are also accessible via @commands@). Knowing where Beacons are located will be crucial for "
