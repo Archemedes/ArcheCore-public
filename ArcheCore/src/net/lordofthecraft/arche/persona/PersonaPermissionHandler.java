@@ -50,12 +50,17 @@ public class PersonaPermissionHandler implements WhyPermissionHandler{
 			final String string = rs.getString(3);
 			if (!rs.wasNull()){
 				if (string == null){
+					rs.close();
 					return null;
-				} else if (string.length() < 1)
+				} else if (string.length() < 1){
+					rs.close();
 					return null;
-				else
+				}else{
+					rs.close();
 					return string;
+				}
 			}
+			rs.close();
 			return null;
 		} catch (SQLException e) {
 			return null;
