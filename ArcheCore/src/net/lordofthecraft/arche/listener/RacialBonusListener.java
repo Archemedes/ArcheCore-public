@@ -1,8 +1,6 @@
 package net.lordofthecraft.arche.listener;
 
-import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import net.lordofthecraft.arche.ArcheCore;
@@ -14,13 +12,11 @@ import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -40,7 +36,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 public class RacialBonusListener implements Listener {
@@ -217,14 +212,9 @@ public class RacialBonusListener implements Listener {
 					break;
 				case SPECTRE:
 					if(e.getCause() != DamageCause.MAGIC){
-						EntityDamageByEntityEvent newEvent = new EntityDamageByEntityEvent(e.getDamager(), e.getEntity(),
-								DamageCause.MAGIC, getDamageModifierMap(e), getDamageFunctionMap(e));
-						Bukkit.getPluginManager().callEvent(newEvent);
+						final double dmg1 = e.getDamage();
 						e.setDamage(0);
-						if(!newEvent.isCancelled() && e.getEntity() instanceof Damageable){
-							Damageable d = (Damageable) e.getEntity();
-							d.damage(newEvent.getDamage());
-						}
+						e.setDamage(DamageModifier.MAGIC, dmg1);
 					}
 					break;
 				case KHARAJYR: case KHA_TIGRASI: case KHA_PANTERA: case KHA_LEPARDA: case KHA_CHEETRAH:
@@ -238,30 +228,6 @@ public class RacialBonusListener implements Listener {
 				}
 			}
 		} 
-	}
-
-	@SuppressWarnings("unchecked")
-	private <E extends EntityDamageEvent> Map<EntityDamageEvent.DamageModifier, Double> getDamageModifierMap(E e) {
-		try {
-			Field f = Class.forName("org.bukkit.event.entity.EntityDamageEvent").getDeclaredField("modifiers");
-			f.setAccessible(true);
-			return (Map<EntityDamageEvent.DamageModifier, Double>) f.get(e);
-		} catch(Exception exc) {
-			exc.printStackTrace();
-			return null;
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private <E extends EntityDamageEvent> Map<DamageModifier, ? extends Function<? super Double, Double>> getDamageFunctionMap(E e) {
-		try {
-			Field f = Class.forName("org.bukkit.event.entity.EntityDamageEvent").getDeclaredField("modifierFunctions");
-			f.setAccessible(true);
-			return (Map<DamageModifier, ? extends Function<? super Double, Double>>) f.get(e);
-		} catch(Exception exc) {
-			exc.printStackTrace();
-			return null;
-		}
 	}
 
 	private boolean holdsGoldenWeapon(Entity e){
