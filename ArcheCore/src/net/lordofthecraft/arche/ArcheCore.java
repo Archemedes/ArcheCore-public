@@ -324,7 +324,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("money").setExecutor(new CommandMoney(helpdesk, economy));
 		getCommand("namelog").setExecutor(new CommandNamelog());
 		getCommand("arsql").setExecutor(new CommandSql());
-		if (permissions) getCommand("perspex").setExecutor(new CommandPersonaPermissions(personaHandler.getPermHandler()));
+		//if (permissions) getCommand("perspex").setExecutor(new CommandPersonaPermissions(personaHandler.getPermHandler()));
 	}
 	
 	private void initListeners(){
@@ -337,7 +337,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		pm.registerEvents(new PlayerChatListener(), this);
 		pm.registerEvents(new TreasureChestListener(), this);
 		pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
-		if (permissions) pm.registerEvents(new PersonaPermissionListener(personaHandler.getPermHandler()), this);
+		//if (permissions) pm.registerEvents(new PersonaPermissionListener(personaHandler.getPermHandler()), this);
 		
 		if (showXpToPlayers) {
 			pm.registerEvents(new ExperienceOrbListener(), this);
