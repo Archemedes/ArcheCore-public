@@ -133,14 +133,14 @@ public class BeaconMenuListener implements Listener {
 									new BukkitRunnable(){@Override public void run(){switchCooldowns.remove(pname);}}.runTaskLater(plugin, switchCooldownMinutes * 60 * 20);
 								}
 								
-								handler.switchPersona(p, t);
+								final boolean suc = handler.switchPersona(p, t);
 								/* Move this within the scope of switchPersona
 								p.setHealth(p.getMaxHealth());
 								p.setFoodLevel(20);
 								for(PotionEffectType pet : PotionEffectType.values()) p.removePotionEffect(pet);
 								*/
 								
-								p.sendMessage(ChatColor.AQUA + "You are now Roleplaying as: " + ChatColor.YELLOW + "" + ChatColor.ITALIC + prs[t].getName());
+								if (suc) p.sendMessage(ChatColor.AQUA + "You are now Roleplaying as: " + ChatColor.YELLOW + "" + ChatColor.ITALIC + prs[t].getName());
 							}
 							new BukkitRunnable(){@Override public void run(){ p.closeInventory();}}.runTask(plugin);
 						}

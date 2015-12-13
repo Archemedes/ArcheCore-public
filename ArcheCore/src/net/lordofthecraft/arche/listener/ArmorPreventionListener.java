@@ -1,10 +1,12 @@
 package net.lordofthecraft.arche.listener;
 
 import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.event.PersonaSwitchEvent;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,6 +25,21 @@ public class ArmorPreventionListener implements Listener {
 
 	public ArmorPreventionListener(){
 		handler = ArchePersonaHandler.getInstance();
+	}
+	
+	@EventHandler(ignoreCancelled = true)
+	public void onPersonaSwitch(PersonaSwitchEvent e) {
+		if (e.getPersona().getRace() == Race.SPECTRE) {
+			boolean flag = false;
+			for (final ItemStack is : e.getPlayer().getInventory().getArmorContents())
+				if (is.getType() != Material.AIR) { flag = true; break; }
+			
+			if (flag) {
+				e.getPlayer().sendMessage(ChatColor.RED+"Error; Please remove your armor before switching to this persona.");
+				e.setCancelled(true);
+			}
+			return;
+		}
 	}
 
 	@EventHandler(ignoreCancelled = true)

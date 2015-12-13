@@ -129,8 +129,9 @@ public interface PersonaHandler {
 	 * Make a Player switch his current Persona. Players may have 4 personas contained in an array of length 4
 	 * @param p Player in question
 	 * @param id the ID of the persona, between 0-3, corresponding to the Persona array index
+	 * @return If the switch was successful
 	 */
-	public void switchPersona(Player p, int id);
+	public boolean switchPersona(Player p, int id);
 
 	/**
 	 * Creates a Persona for a Player, removing any Persona previously existing

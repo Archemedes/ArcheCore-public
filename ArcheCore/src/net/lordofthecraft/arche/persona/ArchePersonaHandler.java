@@ -196,7 +196,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	@Override
-	public void switchPersona(final Player p, int id){
+	public boolean switchPersona(final Player p, int id){
 		if(id < 0 || id > 3) throw new IllegalArgumentException("Only Persona IDs 0-3 are allowed.");
 
 		ArchePersona before=null;
@@ -206,7 +206,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		PersonaSwitchEvent event = new PersonaSwitchEvent(prs[id]);
 		Bukkit.getPluginManager().callEvent(event);
 
-		if(event.isCancelled()) return;
+		if(event.isCancelled()) return false;
 
 		for(int i = 0; i < prs.length; i++){
 			if(prs[i] != null){
@@ -225,6 +225,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		}
 
 		after.restoreMinecraftSpecifics(p);
+		return true;
 	}
 
 
