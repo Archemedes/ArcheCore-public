@@ -22,6 +22,7 @@ import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.help.HelpFile;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.IArcheCore;
+import net.lordofthecraft.arche.interfaces.JMisc;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.interfaces.SkillFactory;
@@ -32,6 +33,7 @@ import net.lordofthecraft.arche.listener.EconomyListener;
 import net.lordofthecraft.arche.listener.ExperienceOrbListener;
 import net.lordofthecraft.arche.listener.HelpMenuListener;
 import net.lordofthecraft.arche.listener.HelpOverrideListener;
+import net.lordofthecraft.arche.listener.JistumaCollectionListener;
 import net.lordofthecraft.arche.listener.LegacyCommandsListener;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
 import net.lordofthecraft.arche.listener.PlayerChatListener;
@@ -75,6 +77,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private HelpDesk helpdesk;
 	private ArcheTimer timer;
 	private Economy economy;
+	private JistumaCollection jcoll;
 	
 	private boolean permissions;
 
@@ -145,6 +148,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		blockRegistry = new BlockRegistry();
 		personaHandler = ArchePersonaHandler.getInstance();
 		helpdesk = HelpDesk.getInstance();
+		jcoll = new JistumaCollection(personaHandler);
 		
 		timer = debugMode? new ArcheTimer(this) : null;
 		personaHandler.setModifyDisplayNames(modifyDisplayNames);
@@ -335,6 +339,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		pm.registerEvents(new PlayerChatListener(), this);
 		pm.registerEvents(new TreasureChestListener(), this);
 		pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
+		pm.registerEvents(new JistumaCollectionListener(), this);
 		//if (permissions) pm.registerEvents(new PersonaPermissionListener(personaHandler.getPermHandler()), this);
 		
 		if (showXpToPlayers) {
@@ -590,6 +595,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	public Economy getEconomy() {
 		return economy;
 	}
+	
+	@Override
+	public JMisc getMisc() { return jcoll; }
 	
 	@Override
 	public boolean teleportNewPersonas() {
