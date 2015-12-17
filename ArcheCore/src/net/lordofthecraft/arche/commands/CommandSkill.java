@@ -121,11 +121,10 @@ public class CommandSkill implements CommandExecutor {
 							} else {
 								xp = ChatColor.GRAY + "" + ChatColor.ITALIC + " (" + ((int) s.getXp(who)) + "/" + tier.getNext().getXp() + ")";
 							}
-							if (!s.achievedTier(who, max) 
-									&& max != SkillTier.SUPER 
+							if (!s.achievedTier(who, max)
 									&& sender instanceof Player){
 								new ArcheMessage(txt + xp)
-								.setHoverEvent(ChatBoxAction.SHOW_TEXT,"Next tier: "+s.getSkillTier(who).getNext().getTitle()+" "+WordUtils.capitalize(s.getName())+"\n")
+								.setHoverEvent(ChatBoxAction.SHOW_TEXT,"Next tier: "+s.getSkillTier(who).getNext().getTitle()+" "+WordUtils.capitalize(s.getName()))
 								.sendTo((Player) sender);
 							} else
 								sender.sendMessage(txt + xp);
