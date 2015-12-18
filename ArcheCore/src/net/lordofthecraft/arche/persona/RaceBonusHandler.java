@@ -78,7 +78,7 @@ public class RaceBonusHandler {
 		case FOREST_DWARF:
 			a = new AttributeModifier(UUID_ARCHE, AttributeType.MAX_HEALTH);
 			b = new AttributeModifier(UUID_ARCHE, AttributeType.MOVEMENT_SPEED);
-			c = new AttributeModifier(UUID_ARCHE, "arche_stalwart", 0.30, Operation.INCREMENT, AttributeType.KNOCKBACK_RESISTANCE);
+			c = new AttributeModifier(UUID_ARCHE, "arche_stalwart", 0.15, Operation.INCREMENT, AttributeType.KNOCKBACK_RESISTANCE);
 			//d = new AttributeModifier(UUID_ARCHE, AttributeType.ATTACK_DAMAGE);
 			AttributeBase.removeModifier(p, a);
 			AttributeBase.removeModifier(p, b);
@@ -88,7 +88,8 @@ public class RaceBonusHandler {
 		case CAVE_DWARF: case DWARF: case MOUNTAIN_DWARF: case DARK_DWARF:
 			a = new AttributeModifier(UUID_ARCHE, "arche_lessspeed", -0.10, Operation.MULTIPLY, AttributeType.MOVEMENT_SPEED);
 			b = new AttributeModifier(UUID_ARCHE, "arche_healthboost", 0.2, Operation.MULTIPLY_ALL, AttributeType.MAX_HEALTH);
-			c = new AttributeModifier(UUID_ARCHE, "arche_stalwart", 0.30, Operation.INCREMENT, AttributeType.KNOCKBACK_RESISTANCE);
+			c = new AttributeModifier(UUID_ARCHE, "arche_stalwart", 0.15, Operation.INCREMENT, AttributeType.KNOCKBACK_RESISTANCE);
+			//501warhead - Lowering KBR to 0.15 from 0.30 12/17/2015
 			//d = new AttributeModifier(UUID_ARCHE, AttributeType.ATTACK_DAMAGE);
 			AttributeBase.addModifier(p, a);
 			AttributeBase.addModifier(p, b);
