@@ -177,10 +177,16 @@ public class RacialBonusListener implements Listener {
 				double dmg = e.getDamage();
 				Race r = pers.getRace();
 				switch(r){
-				/*case HIGH_ELF :
-					if(e.getCause() == DamageCause.MAGIC) {
-						e.setDamage(dmg*1.3);
-					}*/
+				//Magical Affinity. A portion of damage a high elf does is converted to Magic damage. Increases if using a gold weapon.
+				case HIGH_ELF :
+					if (holdsGoldenWeapon(e.getDamager())) {
+						e.setDamage(dmg*0.5);
+						e.setDamage(DamageModifier.MAGIC, dmg*0.5);
+					} else {
+						e.setDamage(dmg*0.8);
+						e.setDamage(DamageModifier.MAGIC, dmg*0.20);
+					}
+					break;
 				case ORC: case OLOG :
 					/*
 					double fract = p.getHealth() / p.getMaxHealth();
@@ -196,7 +202,7 @@ public class RacialBonusListener implements Listener {
 				case HUMAN: case SOUTHERON: case NORTHENER: case HEARTLANDER: //Troop Morale
 					if(e.getEntity() instanceof Player){
 						int count = 0;
-						for(Entity ent : p.getNearbyEntities(10, 3, 10)){
+						for(Entity ent : p.getNearbyEntities(10, 5, 10)){
 							if(ent instanceof Player){
 								ArchePersona x = handler.getPersona((Player) ent);
 								if(x != null && (x.getRace() ==  Race.HUMAN || x.getRace() == Race.NORTHENER || x.getRace() == Race.SOUTHERON || x.getRace() == Race.HEARTLANDER)){
