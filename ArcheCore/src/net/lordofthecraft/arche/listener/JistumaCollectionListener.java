@@ -29,7 +29,8 @@ public class JistumaCollectionListener implements Listener{
 		}
 		if (s.hasItemMeta() && p.isInsideVehicle()){
 			String name = s.getItemMeta().getDisplayName();
-			if (name.equalsIgnoreCase("Stoneskin Potion") && p.getVehicle().getType() == EntityType.HORSE){
+			if (name == null) return;
+			if (ChatColor.stripColor(name).equalsIgnoreCase("Stoneskin Potion") && p.getVehicle().getType() == EntityType.HORSE){
 				p.leaveVehicle();
 				p.sendMessage(ChatColor.RED + "The potion you drank makes your movements sluggish, you fall off your horse");
 			}
