@@ -215,9 +215,9 @@ public class CommandSkill implements CommandExecutor {
 						sender.sendMessage(
 								p+(count+1)+". "/*number in list*/
 								+ChatColor.AQUA+holder.getName()/*MC name*/
-								+" ("+holder.getPlayerName()+"@"+holder.getId()+") " /*(persona id/persona rp name),*/
+								+ChatColor.ITALIC+" ("+holder.getPlayerName()+"@"+holder.getId()+") " /*(persona id/persona rp name),*/
 								+t.getTitle()+" "+WordUtils.capitalize(skill.getName())+"; " /*skilltier skill (aengulic woodworker)*/
-								+ChatColor.GOLD+"("+skill.getXp(holder)+")"); /*Total experience*/
+								+ChatColor.RESET+""+ChatColor.GOLD+"("+Math.round(skill.getXp(holder))+")"); /*Total experience*/
 						++count;
 					}
 				} else {
@@ -433,7 +433,7 @@ public class CommandSkill implements CommandExecutor {
 			Persona hold;
 			while (rs.next() && count < 10) {
 				if (rs.getInt(3) > 0) {
-					if (!Bukkit.getOfflinePlayer(UUID.fromString(rs.getString(1))).isOp()){
+					if (!Bukkit.getOfflinePlayer(UUID.fromString(rs.getString(1))).isOp() || ArcheCore.getPlugin().debugMode()){
 						hold = ArcheCore.getControls().getPersonaHandler().getPersona(UUID.fromString(rs.getString(1)), rs.getInt(2));
 						if (hold != null) {
 							top.put(hold, (double) rs.getInt(3));

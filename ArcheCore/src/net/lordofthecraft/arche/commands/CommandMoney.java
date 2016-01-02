@@ -5,11 +5,19 @@ import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
+import java.util.UUID;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import com.google.common.collect.Maps;
 
 public class CommandMoney implements CommandExecutor {
 	private final static double PAYMENT_PROXIMITY = 8;
@@ -25,7 +33,8 @@ public class CommandMoney implements CommandExecutor {
 			String a = ChatColor.AQUA+ "";
 			String output = ChatColor.DARK_AQUA +""+ ChatColor.BOLD + "Using the command: " + i + "/money (or /mn)\n"
 					+ i + "$/mn help$: " + a + "Show this help file\n"
-					+ i + "$/mn $: " + a + "Display the amount of " + econ.currencyNamePlural() +   " your Persona has.\n"
+					+ i + "$/mn$: " + a + "Display the amount of " + econ.currencyNamePlural() +   " your Persona has.\n"
+					+ i + "$/mn top$: " + a + "Show the people with the most " + econ.currencyNamePlural() +"\n"
 					+ i + "$/mn [player]$: " + a + "See how much " + econ.currencyNamePlural() +   " [player]'s Persona has.\n"
 					+ i + "$/mn pay [player] [amt]$: " + a + "Pay [amt] to [player]'s current Persona, provided that they are nearby.\n";
 					
@@ -45,6 +54,30 @@ public class CommandMoney implements CommandExecutor {
 				Persona p = ArcheCore.getControls().getPersonaHandler().getPersona((Player) sender);
 				sender.sendMessage(displayMoney(p));
 			}else sendHelp(sender);
+			return true;
+		} else if (args[0].equalsIgnoreCase("top")) {
+			LinkedHashMap<Persona, Double> top = getTop();
+			
+			sender.sendMessage(ChatColor.BLUE+""+ChatColor.BOLD+".:: Money Top ::.");
+			if (!top.isEmpty()) {
+				Persona t;
+				double total;
+				String pr;
+				int count = 0;
+				for (Entry<Persona, Double> e : top.entrySet()) {
+					pr = count == 0 ? ChatColor.GOLD+""+ChatColor.BOLD : ChatColor.DARK_GREEN+"";
+					t = e.getKey();
+					total = e.getValue();
+					sender.sendMessage(pr+(count+1)+". "
+							+ ChatColor.AQUA + t.getName()
+							+ ChatColor.ITALIC + " ("+t.getPlayerName()+"@"+t.getId()+") "
+							+ ChatColor.RESET + "" + ChatColor.GOLD + "" + total + " " + (total == 1 ? econ.currencyNameSingular() : econ.currencyNamePlural()));
+					++count;
+				}
+			} else {
+				sender.sendMessage(ChatColor.RED+"Everyone is poor! How unfortunate.");
+			}
+			
 			return true;
 		} else if(args[0].equalsIgnoreCase("pay") && args.length == 3){
 			if(!(sender instanceof Player)){ sendHelp(sender); return true;}
@@ -106,6 +139,31 @@ public class CommandMoney implements CommandExecutor {
 			return true;
 			
 		}
+	}
+	
+	private LinkedHashMap<Persona, Double> getTop() {
+		LinkedHashMap<Persona, Double> top = Maps.newLinkedHashMap();
+		ResultSet rs;
+		
+		try {
+			rs = ArcheCore.getControls().getSQLHandler().query("SELECT * FROM accs ORDER BY money DESC");
+			int count = 0;
+			Persona pers;
+			while (rs.next() && count < 10) {
+				pers = ArcheCore.getControls().getPersonaHandler().getPersona(UUID.fromString(rs.getString(1)), rs.getInt(2));
+				if (pers != null) {
+					if (!isMod(pers.getPlayer()) || ArcheCore.getPlugin().debugMode()) {
+						++count;
+						top.put(pers, rs.getDouble(3));
+					}
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		
+		return top;
 	}
 	
 	private void sendHelp(CommandSender sender){
