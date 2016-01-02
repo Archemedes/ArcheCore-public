@@ -216,8 +216,8 @@ public class CommandSkill implements CommandExecutor {
 								p+(count+1)+". "/*number in list*/
 								+ChatColor.AQUA+holder.getName()/*MC name*/
 								+ChatColor.ITALIC+" ("+holder.getPlayerName()+"@"+holder.getId()+") " /*(persona id/persona rp name),*/
-								+t.getTitle()+" "+WordUtils.capitalize(skill.getName())+"; " /*skilltier skill (aengulic woodworker)*/
-								+ChatColor.RESET+""+ChatColor.GOLD+"("+Math.round(skill.getXp(holder))+")"); /*Total experience*/
+								+t.getTitle()+" "+WordUtils.capitalize(skill.getName()) /*skilltier skill (aengulic woodworker)*/
+								+(t == SkillTier.SUPER ? "" : "; " +ChatColor.RESET+""+ChatColor.GOLD+"("+Math.round(skill.getXp(holder))+")")); /*Total experience*/
 						++count;
 					}
 				} else {
