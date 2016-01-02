@@ -1,5 +1,9 @@
 package net.lordofthecraft.arche.commands;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,6 +29,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 public class CommandSkill implements CommandExecutor {
@@ -45,6 +50,7 @@ public class CommandSkill implements CommandExecutor {
 				+ i + "$/sk [skill]$: " + a + "Get info on a skill, if available.\n"
 				+ i + "$/sk [skill] teach [who]$: " + a + "Teach [who] this skill.\n"
 				+ i + "$/sk [skill] display$: " + a + "Show this skill on Persona card.\n"
+				+ i + "$/sk [skill] top$: " + a + "Show the current leaderboard for this skill.\n"
 				+ i + "$/sk [skill] select$ {main/second/bonus}: " + a + " Select a profession for your Persona, allowing for further levelling in that skill.\n";
 
 		helpdesk.addInfoTopic("Skill Command", output);
@@ -192,6 +198,30 @@ public class CommandSkill implements CommandExecutor {
 						sender.sendMessage(ChatColor.YELLOW + "" + ChatColor.ITALIC + "Use command again to clear.");
 						pers.setMainSkill(skill);
 					}
+				}
+				return true;
+			} else if (args[1].equalsIgnoreCase("top")) {
+				LinkedHashMap<Persona, Double> top = getTopSkills(skill);
+				sender.sendMessage(ChatColor.DARK_AQUA+""+ChatColor.BOLD+".:: Top "+WordUtils.capitalize(skill.getName())+" ::.");
+				if (!top.isEmpty()) {
+					Persona holder;
+					SkillTier t;
+					int count = 0;
+					String p;
+					for (Entry<Persona, Double> ent : top.entrySet()) {
+						holder = ent.getKey();
+						t = tierFromInt(ent.getValue());
+						p = count==0?ChatColor.GOLD+""+ChatColor.BOLD : ChatColor.DARK_GREEN+"";
+						sender.sendMessage(
+								p+(count+1)+". "/*number in list*/
+								+ChatColor.AQUA+holder.getName()/*MC name*/
+								+" ("+holder.getPlayerName()+"@"+holder.getId()+") " /*(persona id/persona rp name),*/
+								+t.getTitle()+" "+WordUtils.capitalize(skill.getName())+"; " /*skilltier skill (aengulic woodworker)*/
+								+ChatColor.GOLD+"("+skill.getXp(holder)+")"); /*Total experience*/
+						++count;
+					}
+				} else {
+					sender.sendMessage(ChatColor.RED+"None! Everyone sucks. This is very likely an error, please post a bug report.");
 				}
 				return true;
 			}else if(args[1].equalsIgnoreCase("select") && args.length > 2){
@@ -393,9 +423,41 @@ public class CommandSkill implements CommandExecutor {
 		}
 		return false;
 	}
-
-
-
+	
+	private LinkedHashMap<Persona, Double> getTopSkills(Skill sk) {
+		ResultSet rs;
+		LinkedHashMap<Persona, Double> top = Maps.newLinkedHashMap();
+		try {
+			rs = ArcheCore.getControls().getSQLHandler().query("SELECT * FROM sk_"+sk.getName().toLowerCase()+" ORDER BY xp DESC");
+			int count = 0;
+			Persona hold;
+			while (rs.next() && count < 10) {
+				if (rs.getInt(3) > 0) {
+					if (!Bukkit.getOfflinePlayer(UUID.fromString(rs.getString(1))).isOp()){
+						hold = ArcheCore.getControls().getPersonaHandler().getPersona(UUID.fromString(rs.getString(1)), rs.getInt(2));
+						if (hold != null) {
+							top.put(hold, (double) rs.getInt(3));
+							++count;
+						}
+					}
+				}
+			}
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return top;
+	}
+	
+	private SkillTier tierFromInt(double d) {
+		SkillTier result = SkillTier.RUSTY;
+		for(SkillTier st : SkillTier.values()){
+			if(st.getXp() <= d) result = st;
+			else return result;
+		}
+		return result;
+	}
 
 	private Persona findSenderPersona(CommandSender sender){
 		ArchePersona result = null;
