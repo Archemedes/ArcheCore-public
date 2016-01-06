@@ -18,6 +18,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,6 +29,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
@@ -35,6 +37,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.spigotmc.event.entity.EntityMountEvent;
 
 import com.google.common.collect.Lists;
 
@@ -236,6 +239,32 @@ public class RacialBonusListener implements Listener {
 		} 
 	}
 
+	@EventHandler(priority=EventPriority.LOWEST)
+	public void onEntityMount(EntityMountEvent e) {
+		if (e.getMount() instanceof Horse && e.getEntity() instanceof Player) {
+			Player p = (Player) e.getEntity();
+			if (handler.hasPersona(p)) {
+				if (handler.getPersona(p).getRace() == Race.CONSTRUCT) {
+					e.setCancelled(true);
+				}
+			}
+		}
+	}
+	
+	@EventHandler(priority=EventPriority.LOWEST)
+	public void onPotionDrink(PlayerItemConsumeEvent e) {
+		if (e.getItem().getType() == Material.POTION) {
+			if (handler.hasPersona(e.getPlayer())){
+				if (handler.getPersona(e.getPlayer()).getRace() == Race.CONSTRUCT
+						|| handler.getPersona(e.getPlayer()).getRace() == Race.SPECTRE
+						|| handler.getPersona(e.getPlayer()).getRace() == Race.NECROLYTE) {
+					e.setCancelled(true);
+					e.getPlayer().setItemInHand(new ItemStack(Material.GLASS_BOTTLE,1));
+				}
+			}
+		}
+	}
+	
 	private boolean holdsGoldenWeapon(Entity e){
 		if(e instanceof LivingEntity){
 			LivingEntity le = (LivingEntity) e;
