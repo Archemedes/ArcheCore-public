@@ -58,7 +58,7 @@ public class RaceBonusHandler {
 			break;
 		case NECROLYTE: 
 			a = new AttributeModifier(UUID_ARCHE, "arche_healthboost", 0.2, Operation.MULTIPLY_ALL, AttributeType.MAX_HEALTH);
-			b = new AttributeModifier(UUID_ARCHE,"arche_speed", 0.20, Operation.MULTIPLY, AttributeType.MOVEMENT_SPEED);
+			b = new AttributeModifier(UUID_ARCHE,"arche_speed", 0.15, Operation.MULTIPLY, AttributeType.MOVEMENT_SPEED);
 			c = new AttributeModifier(UUID_ARCHE, AttributeType.KNOCKBACK_RESISTANCE);
 			AttributeBase.addModifier(p, a);
 			AttributeBase.addModifier(p, b);
