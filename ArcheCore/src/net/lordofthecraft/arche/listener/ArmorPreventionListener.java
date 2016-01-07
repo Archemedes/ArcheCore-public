@@ -8,6 +8,7 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -19,6 +20,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.spigotmc.event.entity.EntityMountEvent;
 
 public class ArmorPreventionListener implements Listener {
 	private final PersonaHandler handler;
@@ -131,12 +133,47 @@ public class ArmorPreventionListener implements Listener {
 			}
 		}
 	}
+	
+	@EventHandler
+	public void onEntityMount(EntityMountEvent e) {
+		if (e.getEntity() instanceof Player && e.getMount() instanceof Horse) {
+			final Player p = (Player) e.getEntity();
+			if (isWearingIron(p.getInventory().getArmorContents())) {
+				e.setCancelled(true);
+				p.sendMessage(ChatColor.RED+"You struggle and eventually fail to mount your steed in your heavy, clunky armor");
+			}
+		}
+	}
 
 	private boolean canEquip(Player p, ItemStack armor) {
 		Persona ps = handler.getPersona(p);
+		if (p.isInsideVehicle()) {
+			if (p.getVehicle() instanceof Horse && armor != null) {
+				if (armor.getType()==Material.IRON_HELMET
+						|| armor.getType()==Material.IRON_CHESTPLATE
+						|| armor.getType()==Material.IRON_LEGGINGS
+						|| armor.getType()==Material.IRON_BOOTS) {
+					return false;
+				}
+			}
+		}
 		return !(ps != null && (ps.getRace() == Race.CONSTRUCT || ps.getRace() == Race.SPECTRE));
 	}
 
+	
+	private boolean isWearingIron(ItemStack[] armor) {
+		for (int i = 0; i < armor.length; i++) {
+			if (armor[i] != null) {
+				if (armor[i].getType() == Material.IRON_HELMET 
+						|| armor[i].getType() == Material.IRON_CHESTPLATE
+						|| armor[i].getType() == Material.IRON_LEGGINGS
+						|| armor[i].getType() == Material.IRON_BOOTS) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	private boolean isArmor(Material m){
 		switch(m){
