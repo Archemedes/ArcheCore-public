@@ -214,10 +214,10 @@ public class CommandSkill implements CommandExecutor {
 						p = count==0?ChatColor.GOLD+""+ChatColor.BOLD : ChatColor.DARK_GREEN+"";
 						sender.sendMessage(
 								p+(count+1)+". "/*number in list*/
-								+ChatColor.AQUA+holder.getName()/*MC name*/
+								+ChatColor.AQUA+""+holder.getName()/*MC name*/
 								+ChatColor.ITALIC+" ("+holder.getPlayerName()+"@"+holder.getId()+") " /*(persona id/persona rp name),*/
-								+t.getTitle()+" "+WordUtils.capitalize(skill.getName()) /*skilltier skill (aengulic woodworker)*/
-								+(t == SkillTier.SUPER ? "" : "; " +ChatColor.RESET+""+ChatColor.GOLD+"("+Math.round(skill.getXp(holder))+")")); /*Total experience*/
+								+ChatColor.RESET+ChatColor.BLUE+t.getTitle()+"" /*skilltier skill (aengulic woodworker)*/
+								+(t == SkillTier.SUPER ? "" : ChatColor.GOLD+"; " +ChatColor.RESET+""+ChatColor.GOLD+"("+Math.round(skill.getXp(holder))+")")); /*Total experience*/
 						++count;
 					}
 				} else {

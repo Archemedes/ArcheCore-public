@@ -69,8 +69,8 @@ public class CommandMoney implements CommandExecutor {
 					t = e.getKey();
 					total = e.getValue();
 					sender.sendMessage(pr+(count+1)+". "
-							+ ChatColor.AQUA + t.getName()
-							+ ChatColor.ITALIC + " ("+t.getPlayerName()+"@"+t.getId()+") "
+							+ ChatColor.BLUE + t.getName()
+							+ ChatColor.AQUA + ChatColor.ITALIC + " ("+t.getPlayerName()+"@"+t.getId()+") "
 							+ ChatColor.RESET + "" + ChatColor.GOLD + "" + total + " " + (total == 1 ? econ.currencyNameSingular() : econ.currencyNamePlural()));
 					++count;
 				}
@@ -151,7 +151,7 @@ public class CommandMoney implements CommandExecutor {
 			Persona pers;
 			while (rs.next() && count < 10) {
 				pers = ArcheCore.getControls().getPersonaHandler().getPersona(UUID.fromString(rs.getString(1)), rs.getInt(2));
-				if (pers != null) {
+				if (pers != null && pers.getPlayer() != null) {
 					if (!isMod(pers.getPlayer()) || ArcheCore.getPlugin().debugMode()) {
 						++count;
 						top.put(pers, rs.getDouble(3));
