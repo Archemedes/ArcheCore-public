@@ -16,6 +16,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
@@ -220,7 +221,7 @@ public class RacialBonusListener implements Listener {
 					}
 					break;
 				case SPECTRE:
-					if(e.getCause() != DamageCause.MAGIC){
+					if(e.getCause() != DamageCause.MAGIC && !(e.getEntity() instanceof ArmorStand)){
 						final double dmg1 = e.getDamage();
 						e.setDamage(0);
 						e.setDamage(DamageModifier.MAGIC, dmg1);
