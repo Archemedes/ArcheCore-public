@@ -79,5 +79,4 @@ public class ArcheEconomy implements Economy {
 	public boolean requirePaymentProximity() {
 		return proximity;
 	}
-	
 }

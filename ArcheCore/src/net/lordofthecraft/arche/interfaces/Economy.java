@@ -64,5 +64,4 @@ public interface Economy {
 	 */
 	public boolean requirePaymentProximity();
 	
-	
 }

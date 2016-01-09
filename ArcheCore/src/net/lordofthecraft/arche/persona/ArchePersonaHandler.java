@@ -31,6 +31,7 @@ import net.lordofthecraft.arche.save.tasks.DataTask;
 import net.lordofthecraft.arche.save.tasks.InsertTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.skill.TopData;
 
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -53,8 +54,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
 	private final Map<UUID, ArchePersona[]> personas = new HashMap<UUID, ArchePersona[]>(Bukkit.getServer().getMaxPlayers());
-	private static final PersonaPermissionHandler perminstance = new PersonaPermissionHandler();
-	
+	private static TopData topData;
 	
 	private PreparedStatement selectStatement = null;
 
@@ -67,7 +67,10 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 	
 	@Override
-	public WhyPermissionHandler getPermHandler(){ return perminstance; }
+	public TopData getTopHandler() { return topData; }
+	
+	@Override
+	public WhyPermissionHandler getPermHandler(){ return null; }
 
 	@Override
 	public void setModifyDisplayNames(boolean will){
@@ -590,8 +593,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 					}
 				}
 			}
-
-
+			topData = new TopData();
 		}
 	}
 

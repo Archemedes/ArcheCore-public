@@ -1,9 +1,6 @@
 package net.lordofthecraft.arche.commands;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,7 +26,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 public class CommandSkill implements CommandExecutor {
@@ -201,16 +197,16 @@ public class CommandSkill implements CommandExecutor {
 				}
 				return true;
 			} else if (args[1].equalsIgnoreCase("top")) {
-				LinkedHashMap<Persona, Double> top = getTopSkills(skill);
+				List<Persona> top = ArcheCore.getControls().getPersonaHandler().getTopHandler().getTopList(skill);
 				sender.sendMessage(ChatColor.DARK_AQUA+""+ChatColor.BOLD+".:: Top "+WordUtils.capitalize(skill.getName())+" ::.");
 				if (!top.isEmpty()) {
 					Persona holder;
 					SkillTier t;
 					int count = 0;
 					String p;
-					for (Entry<Persona, Double> ent : top.entrySet()) {
-						holder = ent.getKey();
-						t = tierFromInt(ent.getValue());
+					for (Persona ent : top) {
+						holder = ent;
+						t = skill.getSkillTier(ent);
 						p = count==0?ChatColor.GOLD+""+ChatColor.BOLD : ChatColor.DARK_GREEN+"";
 						sender.sendMessage(
 								p+(count+1)+". "/*number in list*/
@@ -422,41 +418,6 @@ public class CommandSkill implements CommandExecutor {
 			}
 		}
 		return false;
-	}
-	
-	private LinkedHashMap<Persona, Double> getTopSkills(Skill sk) {
-		ResultSet rs;
-		LinkedHashMap<Persona, Double> top = Maps.newLinkedHashMap();
-		try {
-			rs = ArcheCore.getControls().getSQLHandler().query("SELECT * FROM sk_"+sk.getName().toLowerCase()+" ORDER BY xp DESC");
-			int count = 0;
-			Persona hold;
-			while (rs.next() && count < 10) {
-				if (rs.getInt(3) > 0) {
-					if (!Bukkit.getOfflinePlayer(UUID.fromString(rs.getString(1))).isOp() || ArcheCore.getPlugin().debugMode()){
-						hold = ArcheCore.getControls().getPersonaHandler().getPersona(UUID.fromString(rs.getString(1)), rs.getInt(2));
-						if (hold != null) {
-							top.put(hold, (double) rs.getInt(3));
-							++count;
-						}
-					}
-				}
-			}
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		return top;
-	}
-	
-	private SkillTier tierFromInt(double d) {
-		SkillTier result = SkillTier.RUSTY;
-		for(SkillTier st : SkillTier.values()){
-			if(st.getXp() <= d) result = st;
-			else return result;
-		}
-		return result;
 	}
 
 	private Persona findSenderPersona(CommandSender sender){

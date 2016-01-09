@@ -191,6 +191,8 @@ public class ArcheSkillFactory implements SkillFactory {
 					}
 				}
 			}
+			
+			//ArcheCore.getPlugin().getSktop().registerTop(skill);
 			return skill;
 			
 		} catch (SQLException e) {

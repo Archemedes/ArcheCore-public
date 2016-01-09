@@ -5,19 +5,14 @@ import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import com.google.common.collect.Maps;
 
 public class CommandMoney implements CommandExecutor {
 	private final static double PAYMENT_PROXIMITY = 8;
@@ -56,7 +51,7 @@ public class CommandMoney implements CommandExecutor {
 			}else sendHelp(sender);
 			return true;
 		} else if (args[0].equalsIgnoreCase("top")) {
-			LinkedHashMap<Persona, Double> top = getTop();
+			LinkedHashMap<Persona, Double> top = ArcheCore.getControls().getPersonaHandler().getTopHandler().getTopMoney();
 			
 			sender.sendMessage(ChatColor.BLUE+""+ChatColor.BOLD+".:: Money Top ::.");
 			if (!top.isEmpty()) {
@@ -139,31 +134,6 @@ public class CommandMoney implements CommandExecutor {
 			return true;
 			
 		}
-	}
-	
-	private LinkedHashMap<Persona, Double> getTop() {
-		LinkedHashMap<Persona, Double> top = Maps.newLinkedHashMap();
-		ResultSet rs;
-		
-		try {
-			rs = ArcheCore.getControls().getSQLHandler().query("SELECT * FROM accs ORDER BY money DESC");
-			int count = 0;
-			Persona pers;
-			while (rs.next() && count < 10) {
-				pers = ArcheCore.getControls().getPersonaHandler().getPersona(UUID.fromString(rs.getString(1)), rs.getInt(2));
-				if (pers != null && pers.getPlayer() != null) {
-					if (!isMod(pers.getPlayer()) || ArcheCore.getPlugin().debugMode()) {
-						++count;
-						top.put(pers, rs.getDouble(3));
-					}
-				}
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		
-		return top;
 	}
 	
 	private void sendHelp(CommandSender sender){

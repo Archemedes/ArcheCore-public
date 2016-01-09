@@ -6,12 +6,19 @@ import java.util.UUID;
 
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.skill.TopData;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public interface PersonaHandler {
 
+	/**
+	 * @return A handler to obtain data
+	 */
+	
+	public TopData getTopHandler();
+	
 	/**
 	 * Permission handler is used to assign and remove permissions from individual personas
 	 * that will be added and removed when the user switches to and from said persona
