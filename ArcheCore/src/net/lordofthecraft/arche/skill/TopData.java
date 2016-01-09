@@ -22,7 +22,6 @@ public class TopData {
 
 	private static LinkedHashMap<Skill, List<Persona>> topList;
 	private static LinkedHashMap<Persona, Double> topMoney;
-	private static final String tag = "[ArcheCoreTop] ";
 	
 	public TopData() {
 		if (topList != null) {
@@ -77,23 +76,17 @@ public class TopData {
 	}
 	
 	private List<Persona> getTopSkills(ArcheSkill sk) {
-		System.out.println(tag+"Getting top for "+sk.getName());
 		ResultSet rs;
 		List<Persona> top = Lists.newArrayList();
 		try {
-			System.out.println(tag+"Statement is "+"SELECT * FROM sk_"+sk.getName().toLowerCase()+" ORDER BY xp DESC");
 			rs = ArcheCore.getControls().getSQLHandler().query("SELECT * FROM sk_"+sk.getName().toLowerCase()+" ORDER BY xp DESC");
 			int count = 0;
 			Persona hold;
 			while (rs.next() && count < 10) {
-				System.out.println(tag+"Count is "+count);
 				if (rs.getInt(3) > 0) {
-					System.out.println(tag+"Xp is not 0");
 					if (!Bukkit.getOfflinePlayer(UUID.fromString(rs.getString(1))).isOp() || ArcheCore.getPlugin().debugMode()){
-						System.out.println(tag+"The UUID "+rs.getString(1)+" is not opped");
 						hold = ArcheCore.getControls().getPersonaHandler().getPersona(UUID.fromString(rs.getString(1)), rs.getInt(2));
 						if (hold != null) {
-							System.out.println(tag+"The persona for "+hold.getPlayerName()+" was not null. adding it with the xp "+rs.getInt(3));
 							top.add(hold);
 							++count;
 						}
