@@ -207,13 +207,12 @@ public class CommandSkill implements CommandExecutor {
 					for (Persona ent : top) {
 						holder = ent;
 						t = skill.getSkillTier(ent);
-						p = count==0?ChatColor.GOLD+""+ChatColor.BOLD : ChatColor.DARK_GREEN+"";
+						p = count==0?ChatColor.GOLD+""+ChatColor.BOLD : ChatColor.BLUE+"";
 						sender.sendMessage(
 								p+(count+1)+". "/*number in list*/
-								+ChatColor.AQUA+""+holder.getName()/*MC name*/
-								+ChatColor.ITALIC+" ("+holder.getPlayerName()+"@"+holder.getId()+") " /*(persona id/persona rp name),*/
-								+ChatColor.RESET+ChatColor.BLUE+t.getTitle()+"" /*skilltier skill (aengulic woodworker)*/
-								+(t == SkillTier.SUPER ? "" : ChatColor.GOLD+"; " +ChatColor.RESET+""+ChatColor.GOLD+"("+Math.round(skill.getXp(holder))+")")); /*Total experience*/
+								+" "+holder.getPlayerName()+"@"+holder.getId()+" " /*(persona id/persona rp name),*/
+								+ChatColor.RESET+ChatColor.BLUE+t.getTitle()+";" /*skilltier skill (aengulic woodworker)*/
+								+(t == SkillTier.SUPER ? "" : ChatColor.GOLD+" " +ChatColor.RESET+""+ChatColor.GOLD+"("+Math.round(skill.getXp(holder))+")")); /*Total experience*/
 						++count;
 					}
 				} else {
