@@ -210,8 +210,8 @@ public class CommandSkill implements CommandExecutor {
 						p = count==0?ChatColor.GOLD+""+ChatColor.BOLD : ChatColor.BLUE+"";
 						sender.sendMessage(
 								p+(count+1)+". "/*number in list*/
-								+" "+holder.getPlayerName()+"@"+holder.getId()+" " /*(persona id/persona rp name),*/
-								+ChatColor.RESET+ChatColor.BLUE+t.getTitle()+";" /*skilltier skill (aengulic woodworker)*/
+								+ChatColor.AQUA+holder.getPlayerName()+"@"+holder.getId()+" " /*(persona id/persona rp name),*/
+								+t.getTitle()+";" /*skilltier skill (aengulic woodworker)*/
 								+(t == SkillTier.SUPER ? "" : ChatColor.GOLD+" " +ChatColor.RESET+""+ChatColor.GOLD+"("+Math.round(skill.getXp(holder))+")")); /*Total experience*/
 						++count;
 					}

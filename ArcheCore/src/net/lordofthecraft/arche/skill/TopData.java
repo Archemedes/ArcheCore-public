@@ -58,7 +58,6 @@ public class TopData {
 			while (rs.next() && count < 10) {
 				pers = ArcheCore.getControls().getPersonaHandler().getPersona(UUID.fromString(rs.getString(1)), rs.getInt(2));
 				if (pers != null
-						&& pers.getPlayer() != null
 						&& rs.getDouble(3) > 0) {
 					++count;
 					top.put(pers, rs.getDouble(3));
