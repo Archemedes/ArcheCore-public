@@ -13,6 +13,7 @@ import net.lordofthecraft.arche.commands.CommandBeaconme;
 import net.lordofthecraft.arche.commands.CommandHelpMenu;
 import net.lordofthecraft.arche.commands.CommandMoney;
 import net.lordofthecraft.arche.commands.CommandNamelog;
+import net.lordofthecraft.arche.commands.CommandNewbies;
 import net.lordofthecraft.arche.commands.CommandPersona;
 import net.lordofthecraft.arche.commands.CommandRealname;
 import net.lordofthecraft.arche.commands.CommandSkill;
@@ -268,6 +269,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		//Start all our Event listeners
 		initListeners();
 		
+		//Init skilltome logging
+		SkillTome.init(sqlHandler);
+		
 		//Create internally handled skill that holds Xp given from skill resets
 		registerNewSkill("internal_drainxp")
 			.withVisibilityType(Skill.VISIBILITY_HIDDEN)
@@ -326,7 +330,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("money").setExecutor(new CommandMoney(helpdesk, economy));
 		getCommand("namelog").setExecutor(new CommandNamelog());
 		getCommand("arsql").setExecutor(new CommandSql());
-		//if (permissions) getCommand("perspex").setExecutor(new CommandPersonaPermissions(personaHandler.getPermHandler()));
+		//501 added this
+		getCommand("newbies").setExecutor(new CommandNewbies(personaHandler));
 	}
 	
 	private void initListeners(){

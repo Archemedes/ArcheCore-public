@@ -16,12 +16,12 @@ commands:
       permission: archecore.mayuse
       permission-message: §4Insufficient Permission for this command
       aliases: [pers,prs,p]
-   perspex:
-      description: Manage individual Persona or Roleplay Character permissions
-      usage: Invalid syntax! Use /<command> for a list of commands
-      permission: archecore.admin
-      permission-message: §4Insufficient Permission for this command
-      aliases: [ppex, pperm, persp]
+   newbies:
+     description: Allows you to scan for nearby new personas
+     usage: This command can only be run from ingame.
+     permission: archecore.command.newbies
+     permission-messaage: §4Insufficient Permission for this command
+     aliases: [newbie, new, n, ne]
    beaconme:
       description: Open the ArcheCore Beacon menu
       permission: archecore.command.beaconme
