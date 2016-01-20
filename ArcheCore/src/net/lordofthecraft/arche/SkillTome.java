@@ -1,8 +1,11 @@
 package net.lordofthecraft.arche;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
+import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.enums.SkillTier;
+import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
@@ -17,9 +20,22 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class SkillTome {
 
+	public static void init(SQLHandler handle) {
+		if (ArcheCore.getControls().getSQLHandler() == handle) {
+			LinkedHashMap<String,String> cols = Maps.newLinkedHashMap();
+			cols.put("time", "INT");
+			cols.put("player", "TEXT");
+			cols.put("id", "INT");
+			cols.put("xp", "REAL");
+			cols.put("skill", "TEXT");
+			handle.createTable("sktome_log", cols);
+		}
+	}
+	
 	public static double getXpBoost(double currentXp){
 		//Find amount of XP below the bungling tier. Save from infinite Rusty
 		double defecit = SkillTier.BUNGLING.getXp() - currentXp;
@@ -91,6 +107,7 @@ public class SkillTome {
 									double xp = amt*getXpBoost(skill.getXp(pers));
 									skill.addRawXp(pers, xp);
 									hasTome = true;
+									log(skill, pers, xp);
 								}
 							}
 						}
@@ -104,6 +121,25 @@ public class SkillTome {
 				p.sendMessage(ChatColor.LIGHT_PURPLE + "You have no experience tomes on your person.");
 			}
 		}
+	}
+	
+	/*
+	 * 			cols.put("time", "INT");
+			cols.put("player", "TEXT");
+			cols.put("id", "INT");
+			cols.put("amount", "REAL");
+			cols.put("skill", "TEXT");
+	 */
+	
+	private static void log(Skill skill, Persona pers, double xp) {
+		LinkedHashMap<String,Object> vals = Maps.newLinkedHashMap();
+		vals.put("time", System.currentTimeMillis());
+		vals.put("player", pers.getPlayerUUID().toString());
+		vals.put("id", pers.getId());
+		vals.put("xp", xp);
+		vals.put("skill", skill.getName());
+		
+		ArcheCore.getControls().getSQLHandler().insert("sktome_log", vals);
 	}
 	
 /*	private static void deduct(ItemStack is){
