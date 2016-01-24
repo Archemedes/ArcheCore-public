@@ -149,7 +149,7 @@ public class RacialBonusListener implements Listener {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.LOW)
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onDamage(EntityDamageByEntityEvent e){
 		if(e.getEntity() instanceof Player){
 			Player p = (Player) e.getEntity();
