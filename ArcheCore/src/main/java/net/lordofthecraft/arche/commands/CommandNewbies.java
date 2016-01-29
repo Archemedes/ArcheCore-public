@@ -11,12 +11,17 @@ import org.bukkit.entity.Player;
 import com.google.common.collect.Lists;
 
 import lombok.RequiredArgsConstructor;
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 
 @RequiredArgsConstructor
 public class CommandNewbies implements CommandExecutor{
 	private final PersonaHandler handler;
+	
+	public CommandNewbies(PersonaHandler handler) {
+		this.handler = handler;
+	}
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String command, String[] args) {
