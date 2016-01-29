@@ -18,6 +18,10 @@ import net.lordofthecraft.arche.interfaces.PersonaHandler;
 public class CommandNewbies implements CommandExecutor{
 	private final PersonaHandler handler;
 	
+	public CommandNewbies(PersonaHandler handler) {
+		this.handler = handler;
+	}
+	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String command, String[] args) {
 		if (!(sender instanceof Player)) {
