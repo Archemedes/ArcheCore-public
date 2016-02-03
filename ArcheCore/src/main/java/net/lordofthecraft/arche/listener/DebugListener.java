@@ -18,7 +18,8 @@ public class DebugListener implements Listener{
 			if (p.getItemInHand().getType() == Material.STICK) {
 				ItemStack is = p.getItemInHand();
 				if (Customizer.isCustom(is)) {
-					if (Customizer.getCustomTag(is).equalsIgnoreCase("entitydebugger")) {
+					if (Customizer.getCustomTag(is).equalsIgnoreCase("entitydebugger")
+							&& p.hasPermission("archecore.admin")) {
 						p.sendMessage(e.getRightClicked().toString());
 					}
 				}
