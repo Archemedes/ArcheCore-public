@@ -70,8 +70,9 @@ public class CommandPersona implements CommandExecutor {
 
 			//Go through process to find the Persona we want
 			Persona pers = null;
-			if( ( args[0].equalsIgnoreCase("view") 
-					|| args[0].equalsIgnoreCase("permakill") 
+			if( ( args[0].equalsIgnoreCase("view") && args.length > 1)){
+				pers = CommandUtil.personaFromArg(args[1]);
+			} else if ((args[0].equalsIgnoreCase("permakill") 
 					|| args[0].equalsIgnoreCase("time") 
 					|| args[0].equalsIgnoreCase("construct")
 					|| args[0].equalsIgnoreCase("spectre")
@@ -85,7 +86,8 @@ public class CommandPersona implements CommandExecutor {
 					|| args[0].equalsIgnoreCase("keeper")
 					|| args[0].equalsIgnoreCase("realrace")
 					|| args[0].equalsIgnoreCase("wiperace"))
-					&& args.length > 1){
+					&& args.length > 1
+					&& sender.hasPermission("archecore.mod.persona")) {
 				pers = CommandUtil.personaFromArg(args[1]);
 			} else if(args.length > 3 && args[args.length - 2].equals("-p") && (sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.persona")) ){
 				pers = CommandUtil.personaFromArg(args[args.length - 1]);

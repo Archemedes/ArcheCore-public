@@ -104,6 +104,27 @@ public final class ArchePersona implements Persona {
 	Skill profession = null; /*professionPrimary = null, professionSecondary = null, professionAdditional = null;*/
 
 	public Skill[] professions = new Skill[3];
+	
+	public static ArchePersona buildTestPersona() {
+		return new ArchePersona(0, "test", Race.UNSET, 0, 0);
+	}
+	
+	private ArchePersona(int id, String name, Race race, int gender, int age) {
+		key = new ArchePersonaKey(UUID.randomUUID(),id);
+		player = name;
+		this.race = race;
+		this.name = name;
+		this.gender = gender;
+		this.age = age;
+
+		timePlayed = new AtomicInteger();
+		charactersSpoken = new AtomicInteger();
+		lastRenamed = 0;
+
+		sqlCriteria = Maps.newHashMap();
+		sqlCriteria.put("player", getPlayerUUID().toString());
+		sqlCriteria.put("id", id);
+	}
 
 	ArchePersona(OfflinePlayer p, int id, String name, Race race, int gender, int age){
 		this.key = new ArchePersonaKey(p.getUniqueId(), id);
