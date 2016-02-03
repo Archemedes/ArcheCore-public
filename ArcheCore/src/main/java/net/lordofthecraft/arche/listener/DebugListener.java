@@ -20,7 +20,7 @@ public class DebugListener implements Listener{
 				if (Customizer.isCustom(is)) {
 					if (Customizer.getCustomTag(is).equalsIgnoreCase("entitydebugger")
 							&& p.hasPermission("archecore.admin")) {
-						p.sendMessage(e.getRightClicked().toString());
+						p.sendMessage(String.valueOf(e.getRightClicked()));
 					}
 				}
 			}
