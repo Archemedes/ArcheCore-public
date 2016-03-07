@@ -2,7 +2,6 @@ package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.enums.SkillTier;
-
 import org.bukkit.entity.Player;
 
 public interface Skill {
@@ -94,8 +93,9 @@ public interface Skill {
 	 * have xp added, unless adding xp reveals this skill (Discoverable)
 	 * @param p The Player in question
 	 * @param xp Amount of XP to add
+	 * @return the amount added
 	 */
-	public void addRawXp(Player p, double xp);
+	public double addRawXp(Player p, double xp);
 
 	/**
 	 * Method to add XP to a Persona. This method will add XP whether or not XP gain
@@ -103,10 +103,11 @@ public interface Skill {
 	 * have xp added, unless adding xp reveals this skill (Discoverable)
 	 * @param p The Persona in question
 	 * @param xp Amount of XP to add
+     * @return the amount added
 	 */
-	public void addRawXp(Player p, double xp, boolean modify);
+	public double addRawXp(Player p, double xp, boolean modify);
 
-	public void addRawXp(Persona p, double xp);
+	public double addRawXp(Persona p, double xp);
 
 	/**
 	 * Method to add XP to a Persona. This method will add XP whether or not XP gain
@@ -115,8 +116,9 @@ public interface Skill {
 	 * @param p The Persona in question
 	 * @param xp Amount of XP to add
 	 * @param modify whether or not to apply XP modifiers (such as Racial bonuses)
+     * @return the amount added
 	 */
-	public void addRawXp(Persona p, double xp, boolean modify);
+	public double addRawXp(Persona p, double xp, boolean modify);
 
 	/**
 	 * Method to retrieve the xp in this skill for the Player's current Persona

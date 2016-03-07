@@ -1,9 +1,5 @@
 package net.lordofthecraft.arche.skill;
 
-import java.sql.PreparedStatement;
-import java.util.Map;
-import java.util.Set;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.enums.ProfessionSlot;
@@ -15,12 +11,15 @@ import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.SkillAttachment;
-
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+
+import java.sql.PreparedStatement;
+import java.util.Map;
+import java.util.Set;
 
 public class ArcheSkill implements Skill {
 	
@@ -152,35 +151,32 @@ public class ArcheSkill implements Skill {
 	}
 	
 	@Override
-	public void addRawXp(Player p, double xp){
-		addRawXp(getPersona(p), xp);
+	public double addRawXp(Player p, double xp){
+		return addRawXp(getPersona(p), xp);
 	}
 	
 	@Override
-	public void addRawXp(Player p, double xp, boolean modify){
-		addRawXp(getPersona(p), xp, modify);
+	public double addRawXp(Player p, double xp, boolean modify){
+		return addRawXp(getPersona(p), xp, modify);
 	}
 	
 	@Override
-	public void addRawXp(Persona p, double xp){
-		addRawXp(p, xp, true);
+	public double addRawXp(Persona p, double xp){
+		return addRawXp(p, xp, true);
 	}
 	
 	@Override
-	public void addRawXp(Persona p, double xp, boolean modify){
+	public double addRawXp(Persona p, double xp, boolean modify){
 		SkillAttachment attach = getAttachment(p);
-		
 		if(modify){ //Add xp modifiers
-				double mod = getXPModifier(p, attach);
-				if(mod > 0) xp *=  xp > 0?  mod : 1/mod; 
+            double mod = getXPModifier(p, attach);
+            if(mod > 0) xp *=  xp > 0?  mod : 1/mod;
 		}
-		
 		GainXPEvent event = new GainXPEvent(p, this, xp); 
 		Bukkit.getPluginManager().callEvent(event);
-		if(event.isCancelled()) return;
+		if(event.isCancelled()) return 0;
 		
 		xp = event.getAmountGained();
-		
 		double oldXp = attach.getXp();
 		final SkillTier cap = this.getCapTier(p);
 		double newXp = Math.min(cap.getXp(), oldXp + xp);
@@ -188,11 +184,11 @@ public class ArcheSkill implements Skill {
 		if(getVisibility() == VISIBILITY_DISCOVERABLE)
 			attach.reveal();
 		
-		if(newXp == oldXp) return;
+		if(newXp == oldXp) return 0;
 		attach.setXp(newXp);
 		
 		if(!attach.isVisible())
-			return;
+			return 0;
 		
 		Player player = p.getPlayer();
 		if(player != null){
@@ -222,22 +218,16 @@ public class ArcheSkill implements Skill {
 				}
 			}
 		}
+		return xp;
 	}
 	
 	private double getXPModifier(Persona p, SkillAttachment att){
-		
-		
 		if(xpMods.isEmpty() || this.getName().equalsIgnoreCase("internal_drainxp")) return 1;
-		
-		double mod = att.getModifier(); 
+		double mod = att.getModifier();
 		if(mod > 0) return mod; //Cached value
-		
-		
 		Race r = p.getRace();
-		
-		mod = xpMods.contains(ExpModifier.RACIAL)? (raceMods.containsKey(r)? raceMods.get(p.getRace()) : r.getBaseXpMultiplier()) : 1 ;
-		
-		if(xpMods.contains(ExpModifier.PLAYTIME)){
+		mod = xpMods.contains(ExpModifier.RACIAL)? (raceMods.containsKey(r)? raceMods.get(p.getRace()) : r.getBaseXpMultiplier()) : 1;
+		if(xpMods.contains(ExpModifier.PLAYTIME) && mod > 0){
 			int mins = p.getTimePlayed();
 			if(mins >= 1200){ 
 				double f = 0.05 * (mins / 12000 + Math.pow(mins, 1.5) / 700000);
@@ -245,14 +235,12 @@ public class ArcheSkill implements Skill {
 				mod += dmod;
 			}
 		}
-		
 		if(xpMods.contains(ExpModifier.AUTOAGE)){
 			if(p.doesAutoAge()){
 				if(r == Race.HUMAN || r == Race.HALFLING || r == Race.NORTHENER || r == Race.SOUTHERON || r == Race.HEARTLANDER)
 					mod += 0.10;
 			}
 		}
-
 		att.setModifier(mod);
 		return mod;
 	}

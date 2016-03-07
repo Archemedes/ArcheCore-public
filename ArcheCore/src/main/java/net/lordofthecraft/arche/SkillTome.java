@@ -1,16 +1,16 @@
 package net.lordofthecraft.arche;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.enums.SkillTier;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.StatementTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -19,8 +19,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class SkillTome {
 
@@ -85,17 +86,14 @@ public class SkillTome {
 			
 			int i = 0;
 			for(ItemStack is : p.getInventory()){
-				
 				if(is != null){
 					if(is.getType() == Material.ENCHANTED_BOOK && is.hasItemMeta()){
-						
 						ItemMeta meta = is.getItemMeta();
 						if(meta.hasDisplayName() && meta.hasLore()){
 						
 							String name = meta.getDisplayName();
 							if(name.startsWith(ChatColor.GOLD + "Tome of the") &&
 									meta.getLore().get(0).equals(ChatColor.DARK_GRAY + "Brimming with raw knowledge.")){
-								
 								int amt = is.getAmount();
 								is.setType(Material.AIR);
 								p.getInventory().setItem(i, is);
@@ -105,9 +103,9 @@ public class SkillTome {
 								Skill skill = ArcheSkillFactory.getSkill(sname);
 								if(skill != null){ 
 									double xp = amt*getXpBoost(skill.getXp(pers));
-									skill.addRawXp(pers, xp);
+									double newxp = Math.round(skill.addRawXp(pers, xp, true));
 									hasTome = true;
-									log(skill, pers, xp);
+                                    SaveHandler.getInstance().put(new SkillTomeStatementTask(skill, pers, newxp));
 								}
 							}
 						}
@@ -123,25 +121,6 @@ public class SkillTome {
 		}
 	}
 	
-	/*
-	 * 			cols.put("time", "INT");
-			cols.put("player", "TEXT");
-			cols.put("id", "INT");
-			cols.put("amount", "REAL");
-			cols.put("skill", "TEXT");
-	 */
-	
-	private static void log(Skill skill, Persona pers, double xp) {
-		LinkedHashMap<String,Object> vals = Maps.newLinkedHashMap();
-		vals.put("time", System.currentTimeMillis());
-		vals.put("player", pers.getPlayerUUID().toString());
-		vals.put("id", pers.getId());
-		vals.put("xp", xp);
-		vals.put("skill", skill.getName());
-		
-		ArcheCore.getControls().getSQLHandler().insert("sktome_log", vals);
-	}
-	
 /*	private static void deduct(ItemStack is){
 		if(is.getAmount() == 1)
 			is.setType(Material.AIR);
@@ -150,4 +129,34 @@ public class SkillTome {
 	}*/
 	
 	private SkillTome(){}
+
+	public static class SkillTomeStatementTask extends StatementTask {
+
+        private final long time;
+        private final Persona pers;
+        private final double amt;
+        private final Skill skill;
+
+		public SkillTomeStatementTask(Skill skill, Persona pers, double xp) {
+            time = System.currentTimeMillis();
+            this.pers = pers;
+            this.amt = xp;
+            this.skill = skill;
+		}
+
+		@Override
+		protected void setValues() throws SQLException {
+            stat.setLong(1, time);
+            stat.setString(2, pers.getPlayerUUID().toString());
+            stat.setInt(3, pers.getId());
+            stat.setDouble(4, amt);
+            stat.setString(5, skill.getName());
+		}
+
+		@Override
+		protected String getQuery() {
+			return "INSERT INTO sktome_log VALUES (?,?,?,?,?)";
+		}
+
+	}
 }
