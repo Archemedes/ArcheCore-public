@@ -1,48 +1,12 @@
 package net.lordofthecraft.arche;
 
-import java.io.File;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.UUID;
-
+import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.commands.CommandArchehelp;
-import net.lordofthecraft.arche.commands.CommandAutoage;
-import net.lordofthecraft.arche.commands.CommandBeaconme;
-import net.lordofthecraft.arche.commands.CommandHelpMenu;
-import net.lordofthecraft.arche.commands.CommandMoney;
-import net.lordofthecraft.arche.commands.CommandNamelog;
-import net.lordofthecraft.arche.commands.CommandNewbies;
-import net.lordofthecraft.arche.commands.CommandPersona;
-import net.lordofthecraft.arche.commands.CommandRealname;
-import net.lordofthecraft.arche.commands.CommandSkill;
-import net.lordofthecraft.arche.commands.CommandSql;
-import net.lordofthecraft.arche.commands.CommandTreasurechest;
+import net.lordofthecraft.arche.commands.*;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.help.HelpFile;
-import net.lordofthecraft.arche.interfaces.Economy;
-import net.lordofthecraft.arche.interfaces.IArcheCore;
-import net.lordofthecraft.arche.interfaces.JMisc;
-import net.lordofthecraft.arche.interfaces.PersonaKey;
-import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.interfaces.SkillFactory;
-import net.lordofthecraft.arche.listener.ArmorPreventionListener;
-import net.lordofthecraft.arche.listener.BeaconMenuListener;
-import net.lordofthecraft.arche.listener.BlockRegistryListener;
-import net.lordofthecraft.arche.listener.DebugListener;
-import net.lordofthecraft.arche.listener.EconomyListener;
-import net.lordofthecraft.arche.listener.ExperienceOrbListener;
-import net.lordofthecraft.arche.listener.HelpMenuListener;
-import net.lordofthecraft.arche.listener.HelpOverrideListener;
-import net.lordofthecraft.arche.listener.JistumaCollectionListener;
-import net.lordofthecraft.arche.listener.LegacyCommandsListener;
-import net.lordofthecraft.arche.listener.NewbieProtectListener;
-import net.lordofthecraft.arche.listener.PlayerChatListener;
-import net.lordofthecraft.arche.listener.PlayerInteractListener;
-import net.lordofthecraft.arche.listener.PlayerJoinListener;
-import net.lordofthecraft.arche.listener.RacialBonusListener;
-import net.lordofthecraft.arche.listener.TreasureChestListener;
+import net.lordofthecraft.arche.interfaces.*;
+import net.lordofthecraft.arche.listener.*;
 import net.lordofthecraft.arche.persona.ArcheEconomy;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.ArchePersonaKey;
@@ -53,7 +17,6 @@ import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
 import net.lordofthecraft.arche.skill.ExpModifier;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -67,7 +30,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.google.common.collect.Maps;
+import java.io.File;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.UUID;
 
 public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private static ArcheCore instance;
@@ -103,131 +70,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private String worldName;
 
 	private Thread saverThread = null;
-
-	public void setupForTesting() {
-		sqlHandler = new SQLHandler(this, "ArcheCore");
-		saveHandler = SaveHandler.getInstance();
-		blockRegistry = new BlockRegistry();
-		personaHandler = ArchePersonaHandler.getInstance();
-		helpdesk = HelpDesk.getInstance();
-		jcoll = new JistumaCollection(personaHandler);
-
-		timer = debugMode? new ArcheTimer(this) : null;
-		personaHandler.setModifyDisplayNames(modifyDisplayNames);
-
-		//Create the Persona table
-		Map<String,String> cols = Maps.newLinkedHashMap();
-		cols.put("player", "TEXT"); //1
-		cols.put("id", "INT");
-		cols.put("name", "TEXT");
-		cols.put("age", "INT");
-		cols.put("race", "TEXT"); //5
-		cols.put("rheader", "TEXT");
-		cols.put("gender", "INT");
-		cols.put("desc", "TEXT");
-		cols.put("prefix", "TEXT");
-		cols.put("current", "INT DEFAULT 1"); //10
-		cols.put("autoage", "INT DEFAULT 1");
-		cols.put("stat_played", "INT DEFAULT 0");
-		cols.put("stat_chars", "INT DEFAULT 0");
-		cols.put("stat_renamed", "INT DEFAULT 0");
-		cols.put("skill_xpgain", "INT DEFAULT 1"); //15
-		cols.put("skill_selected", "TEXT");
-		cols.put("world", "TEXT");
-		cols.put("x", "INT");
-		cols.put("y", "INT");
-		cols.put("z", "INT"); //20
-		//cols.put("health", "REAL");
-		//cols.put("hunger", "REAL");
-		//cols.put("saturation", "REAL");
-		cols.put("inv", "TEXT");
-		cols.put("money", "REAL DEFAULT 0");
-		cols.put("skill_primary", "TEXT");
-		cols.put("skill_secondary", "TEXT");
-		cols.put("skill_tertiary", "TEXT");
-		cols.put("PRIMARY KEY (player, id)", "ON CONFLICT REPLACE");
-		sqlHandler.createTable("persona", cols);
-
-		cols = Maps.newLinkedHashMap();
-		cols.put("player", "TEXT NOT NULL");
-		cols.put("id", "INT NOT NULL");
-		cols.put("name", "TEXT NOT NULL");
-		//cols.put("FOREIGN KEY (player, id)", "REFERENCES persona(player, id) ON DELETE CASCADE");
-		cols.put("UNIQUE (player, id, name)", "ON CONFLICT IGNORE");
-		sqlHandler.createTable("persona_names", cols);
-
-		//Blockregistry persistence stuff
-		cols = Maps.newLinkedHashMap();
-		cols.put("world", "TEXT NOT NULL");
-		cols.put("x", "INT");
-		cols.put("y", "INT");
-		cols.put("z", "INT");
-		cols.put("UNIQUE (world, x, y, z)", "ON CONFLICT IGNORE");
-		sqlHandler.createTable("blockregistry", cols);
-
-		sqlHandler.execute("DELETE FROM blockregistry WHERE ROWID IN (SELECT ROWID FROM blockregistry ORDER BY ROWID DESC LIMIT -1 OFFSET 5000)");
-
-		try{
-			ResultSet res = sqlHandler.query("SELECT * FROM blockregistry");
-			while(res.next()){
-				String world = res.getString(1);
-				int x = res.getInt(2);
-				int y = res.getInt(3);
-				int z = res.getInt(4);
-				WeakBlock wb = new WeakBlock(world, x, y, z);
-				blockRegistry.playerPlaced.add(wb);
-			}
-			res.getStatement().close();
-		}catch(SQLException e){e.printStackTrace();}
-
-
-		Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
-			@Override
-			public void run(){
-				if(willCachePersonas()){
-					long time = System.currentTimeMillis();
-					getLogger().info("Preloading Personas as far back as " + cachePersonas + " days");
-					personaHandler.initPreload(cachePersonas);
-					getLogger().info("Personas were loaded in " + (System.currentTimeMillis() - time) + "ms.");
-				}
-
-				//Incase of a reload, load all Personas for currently logged in players
-				//People that still reload deserve to be dunked in acid, though.
-				/*for(Player p : Bukkit.getOnlinePlayers()){
-					personaHandler.initPlayer(p);
-				}*/
-
-				//Start saving our data
-				saverThread = new Thread(new DataSaveRunnable(saveHandler, timer, sqlHandler), "ArcheCore SQL Consumer");
-				saverThread.start();
-
-			}});
-
-		//Start tracking Personas and their playtime.
-		new TimeTrackerRunnable(personaHandler).runTaskTimer(this, 2400, 1200);
-
-		//Some racial bonus stuff
-		/*		if(this.areRacialBonusesEnabled())
-			new RacialBonusRunnable().runTaskTimer(this, 2400, 100);*/
-
-		//Initialize some essential help topics
-		initHelp();
-
-		//Redirect Plugin commands
-		initCommands();
-
-		//Start all our Event listeners
-		initListeners();
-
-		//Init skilltome logging
-		SkillTome.init(sqlHandler);
-
-		//Create internally handled skill that holds Xp given from skill resets
-		registerNewSkill("internal_drainxp")
-		.withVisibilityType(Skill.VISIBILITY_HIDDEN)
-		.withXpGainWhileHidden(true)
-		.register();
-	}
 
 	public void onDisable() {
 
@@ -357,27 +199,25 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		}catch(SQLException e){e.printStackTrace();}
 
 
-		Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
-			@Override
-			public void run(){
-				if(willCachePersonas()){
-					long time = System.currentTimeMillis();
-					getLogger().info("Preloading Personas as far back as " + cachePersonas + " days");
-					personaHandler.initPreload(cachePersonas);
-					getLogger().info("Personas were loaded in " + (System.currentTimeMillis() - time) + "ms.");
-				}
+		Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+            if(willCachePersonas()){
+                long time = System.currentTimeMillis();
+                getLogger().info("Preloading Personas as far back as " + cachePersonas + " days");
+                personaHandler.initPreload(cachePersonas);
+                getLogger().info("Personas were loaded in " + (System.currentTimeMillis() - time) + "ms.");
+            }
 
-				//Incase of a reload, load all Personas for currently logged in players
-				//People that still reload deserve to be dunked in acid, though.
-				for(Player p : Bukkit.getOnlinePlayers()){
-					personaHandler.initPlayer(p);
-				}
+            //Incase of a reload, load all Personas for currently logged in players
+            //People that still reload deserve to be dunked in acid, though.
+            for(Player p : Bukkit.getOnlinePlayers()){
+                personaHandler.initPlayer(p);
+            }
 
-				//Start saving our data
-				saverThread = new Thread(new DataSaveRunnable(saveHandler, timer, sqlHandler), "ArcheCore SQL Consumer");
-				saverThread.start();
+            //Start saving our data
+            saverThread = new Thread(new DataSaveRunnable(saveHandler, timer, sqlHandler), "ArcheCore SQL Consumer");
+            saverThread.start();
 
-			}});
+        });
 
 		//Start tracking Personas and their playtime.
 		new TimeTrackerRunnable(personaHandler).runTaskTimer(this, 2400, 1200);

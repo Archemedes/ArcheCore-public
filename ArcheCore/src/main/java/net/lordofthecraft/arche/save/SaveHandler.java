@@ -1,9 +1,9 @@
 package net.lordofthecraft.arche.save;
 
+import net.lordofthecraft.arche.save.tasks.ArcheTask;
+
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
-
-import net.lordofthecraft.arche.save.tasks.ArcheTask;
 
 public class SaveHandler {
 
@@ -28,7 +28,11 @@ public class SaveHandler {
 		
 		return null;
 	}
-	
+
+	public boolean contains(ArcheTask task) {
+        return saveQueue.contains(task);
+    }
+
 	public ArcheTask poll(){
 		return saveQueue.poll();
 	}

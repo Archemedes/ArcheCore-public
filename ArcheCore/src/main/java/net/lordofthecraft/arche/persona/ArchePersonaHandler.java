@@ -1,25 +1,13 @@
 package net.lordofthecraft.arche.persona;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.Syntax;
+import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.event.PersonaActivateEvent;
-import net.lordofthecraft.arche.event.PersonaCreateEvent;
-import net.lordofthecraft.arche.event.PersonaDeactivateEvent;
-import net.lordofthecraft.arche.event.PersonaRemoveEvent;
-import net.lordofthecraft.arche.event.PersonaSwitchEvent;
+import net.lordofthecraft.arche.event.*;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
@@ -31,20 +19,17 @@ import net.lordofthecraft.arche.save.tasks.InsertTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.TopData;
-
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 public class ArchePersonaHandler implements PersonaHandler {
 	//private final ArchePersonaExtender extender = new ArchePersonaExtender();
@@ -52,10 +37,16 @@ public class ArchePersonaHandler implements PersonaHandler {
 	private boolean displayName = false;
 
 	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
-	private final Map<UUID, ArchePersona[]> personas = new HashMap<UUID, ArchePersona[]>(Bukkit.getServer().getMaxPlayers());
+	private final Map<UUID, ArchePersona[]> personas = new HashMap<>(Bukkit.getServer().getMaxPlayers());
 	private static TopData topData;
 	
 	private PreparedStatement selectStatement = null;
+
+	private boolean preloading = false;
+
+    public boolean isPreloading() {
+        return preloading;
+    }
 
 	public static ArchePersonaHandler getInstance(){
 		return instance;
@@ -128,6 +119,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		for(int i = 0; i < prs.length; i++){
 			if(prs[i] != null && prs[i].isCurrent()) return prs[i];
 		}
+
 
 		//ArcheCore.getPlugin().getLogger().warning("Found Player without a current Persona: " + p.getName());
 		return null;
@@ -469,12 +461,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 						Location l = w == null? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
 						p.teleport(l);
 					}
-					Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), new Runnable(){
-						@Override
-						public void run(){
-							new CreationDialog().makeFirstPersona(p);
-						}
-					}, 30L);
+					Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> new CreationDialog().makeFirstPersona(p), 30L);
 				}
 			}
 		}else if(!hasCurrent){
@@ -525,8 +512,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 				int x = res.getInt(18);
 				int y = res.getInt(19);
 				int z = res.getInt(20);
-				WeakBlock loc = new WeakBlock(w, x, y, z);
-				persona.location = loc;
+				persona.location = new WeakBlock(w, x, y, z);
 			}
 		}
 
@@ -556,7 +542,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public void initPreload(int range){
 		SQLHandler handler = ArcheCore.getPlugin().getSQLHandler();
 		long time = System.currentTimeMillis();
-
+        preloading = true;
 		try{
 			ResultSet res = handler.query("SELECT * FROM persona");
 			while(res.next()){
@@ -608,6 +594,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 				}
 			}
 			topData = new TopData();
+            preloading = false;
 		}
 	}
 

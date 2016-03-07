@@ -9,7 +9,6 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.UnloadTask;
-
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,6 +30,10 @@ public class PlayerJoinListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onJoin(PlayerJoinEvent e){
+		if (ArcheCore.getControls().getPersonaHandler().isPreloading()) {
+            e.getPlayer().kickPlayer("ArcheCore is currently loading personas, please wait before logging in.");
+            return;
+        }
 		if(timer != null) timer.startTiming("login");
 		Player p = e.getPlayer();
 		handler.initPlayer(p);

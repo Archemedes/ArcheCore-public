@@ -1,58 +1,63 @@
 package net.lordofthecraft.arche.interfaces;
 
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.skill.TopData;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.skill.TopData;
-
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-
 public interface PersonaHandler {
+
+    /**
+     * @return If archecore is currently preloading personas
+     */
+
+	boolean isPreloading();
 
 	/**
 	 * @return A handler to obtain data
 	 */
 	
-	public TopData getTopHandler();
+	TopData getTopHandler();
 	
 	/**
 	 * Set whether or not ArcheCore should continue to modify Bukkit Display Names to reflect Persona names
 	 * @param will the value to set to
 	 */
-	public void setModifyDisplayNames(boolean will);
+	void setModifyDisplayNames(boolean will);
 
 	/**
 	 * If true, ArcheCore will modify display names of Players to fit their current Persona's name
 	 * @return If display names are to be modified by ArcheCore
 	 */
-	public boolean willModifyDisplayNames();
+	boolean willModifyDisplayNames();
 
 	/**
 	 * See if Player is allowed to use the ArcheCore persona system
 	 * @param p Player to check for
 	 * @return Player has permission node archecore.mayuse
 	 */
-	public boolean mayUse(Player p);
+	boolean mayUse(Player p);
 
 	/**
 	 * Check the maximum amount of Personas a Player is allowed to have. Between 0-4
 	 * @param p Player to check for
 	 * @return Amount of Personas Player may have, based on Permission Nodes
 	 */
-	public int getAllowedPersonas(Player p);
+	int getAllowedPersonas(Player p);
 	
-	public Collection<ArchePersona[]> getPersonas();
+	Collection<ArchePersona[]> getPersonas();
 
 	/**
 	 * Attempts to find a Persona uniquely corresponding to a Persona Key. Persona may not exist or may not be loaded
 	 * @param key The PersonaKey to look with
 	 * @return the Persona (null if not found)
 	 */
-	public Persona getPersona(PersonaKey key);
+	Persona getPersona(PersonaKey key);
 	
 	/**
 	 * Attempts to find a Persona corresponding to a Player UUID and id. Persona may not exist or may not be loaded
@@ -60,21 +65,21 @@ public interface PersonaHandler {
 	 * @param id The internal persona id 0-3
 	 * @return The found Persona (null if not found)
 	 */
-	public Persona getPersona(UUID uuid, int id);
+	Persona getPersona(UUID uuid, int id);
 	
 	/**
 	 * Fetch a Player's current Persona
 	 * @param p Player in question
 	 * @return Current Persona, or 'null' if not found.
 	 */
-	public Persona getPersona(OfflinePlayer p);
+	Persona getPersona(OfflinePlayer p);
 
 	/**
 	 * Fetch a Player's current Persona
 	 * @param p Player in question
 	 * @return Current Persona, or 'null' if not found.
 	 */
-	public Persona getPersona(Player p);
+	Persona getPersona(Player p);
 	
 	
 	/**
@@ -84,7 +89,7 @@ public interface PersonaHandler {
 	 * @param p The Player in question
 	 * @return If the Player has a current Persona
 	 */
-	public boolean hasPersona(Player p);
+	boolean hasPersona(Player p);
 
 	/**
 	 * Returns all of the Player's current Personas. Each persona's ID should correspond
@@ -92,7 +97,7 @@ public interface PersonaHandler {
 	 * @param p The Player in question
 	 * @return An array of the Player's persona.
 	 */
-	public Persona[] getAllPersonas(OfflinePlayer p);
+	Persona[] getAllPersonas(OfflinePlayer p);
 	
 	/**
 	 * Returns all of the Player's current Personas. Each persona's ID should correspond
@@ -100,21 +105,21 @@ public interface PersonaHandler {
 	 * @param uuid The UUID of the Player in question
 	 * @return An array of the Player's persona.
 	 */
-	public Persona[] getAllPersonas(UUID uuid);
+	Persona[] getAllPersonas(UUID uuid);
 	
 	/**
 	 * Gives the amount of Personas the current player possesses. This only counts
 	 * Personas that are currently registered and selectable, not previous (killed) personas.
-	 * @param p UUID of the player in question
+	 * @param uuid UUID of the player in question
 	 * @return The amount of registered Personas
 	 */
-	public int countPersonas(UUID uuid);
+	int countPersonas(UUID uuid);
 	
 	/**
 	 * @return all currently active personas in game
 	 */
-	
-	public List<Persona> getAllActivePersonas();
+
+	List<Persona> getAllActivePersonas();
 	
 	/**
 	 * Gives the amount of Personas the current player possesses. This only counts
@@ -122,7 +127,7 @@ public interface PersonaHandler {
 	 * @param p Player in question
 	 * @return The amount of registered Personas
 	 */
-	public int countPersonas(Player p);
+	int countPersonas(Player p);
 
 	/**
 	 * Make a Player switch his current Persona. Players may have 4 personas contained in an array of length 4
@@ -130,7 +135,7 @@ public interface PersonaHandler {
 	 * @param id the ID of the persona, between 0-3, corresponding to the Persona array index
 	 * @return If the switch was successful
 	 */
-	public boolean switchPersona(Player p, int id);
+	boolean switchPersona(Player p, int id);
 
 	/**
 	 * Creates a Persona for a Player, removing any Persona previously existing
@@ -144,15 +149,15 @@ public interface PersonaHandler {
 	 * @param age The Age of the RP persona
 	 * @param autoAge Whether or not this Persona's age should automatically increase
 	 */
-	public Persona createPersona(Player p, int id, String name, Race race,
-			int gender, int age, boolean autoAge);
+	Persona createPersona(Player p, int id, String name, Race race,
+						  int gender, int age, boolean autoAge);
 
 	/**
 	 * Method that provides a human-readable list of information about a Persona, to be used in prints
 	 * @param p the Persona to be looked up
 	 * @return A list of initialised stats of the given Persona
 	 */
-	public List<String> whois(Persona p);
+	List<String> whois(Persona p);
 
 	/**
 	 * Method that provides a human-readable list of information about a 
@@ -160,11 +165,11 @@ public interface PersonaHandler {
 	 * @param p the Player to be looked up
 	 * @return A list of initialised stats of the given Persona
 	 */
-	public List<String> whois(Player p);
+	List<String> whois(Player p);
 
 	/**
 	 * Call to the SQLite database to age all Personas by one year.
 	 */
-	public void ageUs();
+	void ageUs();
 
 }
