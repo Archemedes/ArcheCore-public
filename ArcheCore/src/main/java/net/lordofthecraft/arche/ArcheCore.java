@@ -71,6 +71,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 	private Thread saverThread = null;
 
+	private boolean shouldClone = false;
+
 	public void onDisable() {
 
 		saveHandler.put(new EndOfStreamTask());
@@ -94,6 +96,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			}
 		}
 		sqlHandler.close();
+        if (shouldClone) {
+            sqlHandler.cloneDB();
+        }
 	}
 
 	@Override
@@ -296,6 +301,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("money").setExecutor(new CommandMoney(helpdesk, economy));
 		getCommand("namelog").setExecutor(new CommandNamelog());
 		getCommand("arsql").setExecutor(new CommandSql());
+        getCommand("arclone").setExecutor(new CommandSqlClone());
 		//501 added this
 		getCommand("newbies").setExecutor(new CommandNewbies(personaHandler));
 	}
@@ -510,6 +516,12 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			return null;
 		}
 	}
+
+    @Override
+	public void setShouldClone(boolean val) { this.shouldClone = val; }
+
+    @Override
+    public boolean isCloning() { return shouldClone; }
 
 	@Override
 	public ItemStack giveSkillTome(Skill skill){

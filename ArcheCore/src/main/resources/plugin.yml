@@ -29,6 +29,11 @@ commands:
       aliases: [bme, me]    
    arsql:
       description: Execute SQL statements from ingame
+   arclone:
+      description: Queue a database clone
+      usage: /<command> [true/false]
+      permission: archecore.admin
+      permission-message: §4Insufficient Permission for this command
    skill:
       description: Manage your Skills or teach others.
       usage: Invalid syntax! Use /<command> help for a list of commands

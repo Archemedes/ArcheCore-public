@@ -1,15 +1,14 @@
 package net.lordofthecraft.arche.interfaces;
 
-import java.util.UUID;
-
 import net.lordofthecraft.arche.BlockRegistry;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.help.HelpFile;
-
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.UUID;
 
 public interface IArcheCore {
 
@@ -17,7 +16,7 @@ public interface IArcheCore {
 	 * Persona retrieval and loading methods are done by the PersonaHandler.
 	 * @return The PersonaHandler singleton
 	 */
-	public PersonaHandler getPersonaHandler();
+	PersonaHandler getPersonaHandler();
 	
 	/**
 	 * Each Persona is uniquely identified with a composite key that consists of
@@ -27,14 +26,14 @@ public interface IArcheCore {
 	 * @param pid
 	 * @return A Persona Key constructed on the criteria
 	 */
-	public PersonaKey composePersonaKey(UUID uuid, int pid);
+	PersonaKey composePersonaKey(UUID uuid, int pid);
 	
 	/**
 	 * ArcheCore maintains a temporary non-persistent registry of all player-placed blocks.
 	 * Use it to keep track of which blocks have been placed by players and should not provide Skill Xp for this reason.
 	 * @return The active Block Registry
 	 */
-	public BlockRegistry getBlockRegistry();
+	BlockRegistry getBlockRegistry();
 	
 
 	/**
@@ -42,7 +41,7 @@ public interface IArcheCore {
 	 * underlying SQLite database
 	 * @return The sqlHandler object used by ArcheCore and its plugins
 	 */
-	public SQLHandler getSQLHandler();
+	SQLHandler getSQLHandler();
 
 	/**
 	 * Adds a Topic to the HelpDesk, revealing it to all players via the GUI and command
@@ -50,14 +49,14 @@ public interface IArcheCore {
 	 * rather than have the HelpDesk construct it. 
 	 * @param helpfile the HelpFile object that you want to add
 	 */
-	public void addHelp(HelpFile helpfile);
+	void addHelp(HelpFile helpfile);
 
 	/**
 	 * Adds a Topic to the HelpDesk, revealing it to all players via the GUI and command
 	 * @param topic the topic to add
 	 * @param output the text provided to the player when this topic is accessed
 	 */
-	public void addHelp(String topic, String output);
+	void addHelp(String topic, String output);
 
 	/**
 	 * Adds a Topic to the HelpDesk, revealing it to all players via the GUI and command
@@ -65,21 +64,21 @@ public interface IArcheCore {
 	 * @param output the text provided
 	 * @param icon the clickable item to display on the help GUI
 	 */
-	public void addHelp(String topic, String output, Material icon);
+	void addHelp(String topic, String output, Material icon);
 
 	/**
 	 * Adds a Topic to the HelpDesk as an info topic, allowing linking to the topic but not revealing it
 	 * @param topic the info topic to add
 	 * @param output the text provided
 	 */
-	public void addInfo(String topic, String output);
+	void addInfo(String topic, String output);
 
 	/**
 	 * Method to retrieve an existing Skill object
 	 * @param skillName The skill you want to retrieve
 	 * @return The skill associated with the given name, or null if not found
 	 */
-	public Skill getSkill(String skillName);
+	Skill getSkill(String skillName);
 
 	/**
 	 * Method to create and register a new Skill with the default settings. This
@@ -87,7 +86,7 @@ public interface IArcheCore {
 	 * @param skillName The name of the Skill to be created.
 	 * @return the Created Skill
 	 */
-	public Skill createSkill(String skillName);
+	Skill createSkill(String skillName);
 
 	/**
 	 * Method to create a Skill with arbitrary settings, each of them initialised
@@ -95,7 +94,20 @@ public interface IArcheCore {
 	 * @param skillName The name of the Skill to be created.
 	 * @return the constructed SkillFactory object
 	 */
-	public SkillFactory registerNewSkill(String skillName);
+	SkillFactory registerNewSkill(String skillName);
+
+    /**
+     * Sets if ArcheCore will attempt to clone it's database on a restart
+     * @param val The flag to clone or not
+     */
+
+	void setShouldClone(boolean val);
+
+    /**
+     * @return If ArcheCore has a DB clone scheduled
+     */
+
+	boolean isCloning();
 
 	/**
 	 * Convenience method to create a Skill Tome for the specified skill.
@@ -103,7 +115,7 @@ public interface IArcheCore {
 	 * @param skill the skill for which you want this Skill Tome to work.
 	 * @return The Skill Tome itemstack
 	 */
-	public ItemStack giveSkillTome(Skill skill);
+	ItemStack giveSkillTome(Skill skill);
 
 	/**
 	 * Convenience method to Create a Treasure Chest which draws from a predefined Loot
@@ -111,91 +123,91 @@ public interface IArcheCore {
 	 * retrieve an item reward (1-2 items)
 	 * @return The Treasure Chest item
 	 */
-	public ItemStack giveTreasureChest();
+	ItemStack giveTreasureChest();
 
 	/** 
 	 * If enabled, ArcheCore gives each of the races defined in its Method some 
 	 * unique stat bonuses to make each race unique.
 	 * @return Whether or not racial bonuses are enabled.
 	 */
-	public boolean areRacialBonusesEnabled();
+	boolean areRacialBonusesEnabled();
 
 	/**
 	 * If enabled, ArcheCore lets Players set a modifiable prefix before their Persona Name
 	 * This prefix is unique per Persona and immediately modifiable.
 	 * @return Whether or not prefixes are enabled.
 	 */
-	public boolean arePrefixesEnabled();
+	boolean arePrefixesEnabled();
 
 	/**
 	 * If enabled, new Personas receive Newbie protection which exempts them from mechanical PvP for a set period of playtime
 	 * @return Minutes of PvP invulnerability time, in minutes 
 	 */
-	public int getNewbieProtectDelay();
+	int getNewbieProtectDelay();
 
 	/**
 	 * If true, ArcheCore will modify display names of Players to fit their current Persona's name
 	 * @return If display names are to be modified by ArcheCore
 	 */
-	public boolean willModifyDisplayNames();
+	boolean willModifyDisplayNames();
 
 	/**
 	 * Check with the Block Registry if the player placed a certain (watched) block this server session
 	 * @param b The block to check
 	 * @return If the called block was placed by a player this session.
 	 */
-	public boolean isBlockPlayerPlaced(Block b);
+	boolean isBlockPlayerPlaced(Block b);
 	
 	/**
 	 * Checks if ArcheCore is instructed to preload Personas of players that logged in within a certain time.
 	 * @return If ArcheCore is instructed to preload Personas
 	 */
-	public boolean willCachePersonas();
+	boolean willCachePersonas();
 	
 	/**
 	 * Checks if ArcheCore can use PermissionsEx
 	 * @return If ArcheCore is using PermissionsEx
 	 */
-	
-	public boolean willUsePermissions();
+
+	boolean willUsePermissions();
 	
 	/**
 	 * ArcheCore optionally has functionality for money tied to specific Personas. This boolean tells you if it is used 
 	 * @return Whether Economy is enabled
 	 */
-	public boolean usesEconomy();
+	boolean usesEconomy();
 	
 	/**
 	 * the Economy objects holds some of the customizable settings of the ArcheCore economy
 	 * @return The Economy object
 	 */
-	public Economy getEconomy();
+	Economy getEconomy();
 	
 	/**
 	 * JMisc holds a set of methods and values for the LotC coder Jistuma, implemented here for easy access.
 	 * @return the JMisc object
 	 */
-	public JMisc getMisc();
+	JMisc getMisc();
 	
 	/**
 	 * @return If new Personas will be teleported to spawn after creation
 	 */
-	public boolean teleportNewPersonas();
+	boolean teleportNewPersonas();
 	
 	/**
 	 * @return A preferred world for new Personas to end up in, if available
 	 */
-	public World getNewPersonaWorld();
+	World getNewPersonaWorld();
 
 	/**
 	 * @return The new persona shield delay, if larger than 0
 	 */
-	public int getNewbieDelay();
+	int getNewbieDelay();
 	
 	/**
 	 * @return The current name of the world of LotC
 	 */
-	
-	public String getServerWorldName();
+
+	String getServerWorldName();
 	
 }
