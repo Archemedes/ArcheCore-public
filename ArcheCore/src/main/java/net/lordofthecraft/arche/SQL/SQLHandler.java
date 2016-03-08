@@ -23,7 +23,7 @@ import java.util.logging.Level;
 
 public class SQLHandler {
 	private final SQLite sqlite;
-    private final Plugin plugin;
+    private final File folder;
     private final String name;
 	
 	/**
@@ -33,7 +33,7 @@ public class SQLHandler {
 	 */
 	public SQLHandler(Plugin plugin, String identifier){
 		sqlite = new SQLite(plugin.getLogger(), identifier, plugin.getDataFolder().getAbsolutePath(), identifier);
-        this.plugin = plugin;
+        this.folder = plugin.getDataFolder();
         name = identifier;
 	    try 
 	    {
@@ -54,10 +54,10 @@ public class SQLHandler {
     public void cloneDB() {
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH");
         String time = format.format(new Date());
-        File file = new File(plugin.getDataFolder(), name+".db");
+        File file = new File(folder, name+".db");
         if (file.exists()) {
             Path path = file.getAbsoluteFile().toPath();
-            File dir = new File(plugin.getDataFolder(), name+"_logs");
+            File dir = new File(folder, name+"_logs");
             if (!dir.exists()) {
                 dir.mkdirs();
             }
