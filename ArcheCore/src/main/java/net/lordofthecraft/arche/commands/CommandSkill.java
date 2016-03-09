@@ -356,7 +356,7 @@ public class CommandSkill implements CommandExecutor {
 					if(send != null){
 						if (xp > 0){
 							SkillTier cap = (skill.getCapTier(send).getTier() > 12) ? SkillTier.AENGULIC : skill.getCapTier(send);
-							if (skill.getSkillTier(send).getTier() > cap.getTier()) {
+							if (skill.getSkillTier(send).getTier() >= cap.getTier()) {
                                 sender.sendMessage(ChatColor.RED+"You cannot assign experience over Aengulic (1,000,000 experience)");
                                 return true;
                             }
