@@ -22,10 +22,14 @@ import net.lordofthecraft.arche.skill.TopData;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.*;
+import org.bukkit.attribute.Attributable;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 
+import javax.annotation.Nonnull;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -637,5 +641,16 @@ public class ArchePersonaHandler implements PersonaHandler {
 		}
 		return pers;
 	}
+
+    @Override
+	public double getLuck(@Nonnull Player p) {
+        Attributable att = (Attributable) p;
+        AttributeInstance instance = att.getAttribute(Attribute.GENERIC_LUCK);
+        if (instance != null) {
+            return instance.getValue();
+        } else {
+            return 0.0d;
+        }
+    }
 
 }

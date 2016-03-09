@@ -1,14 +1,8 @@
 package net.lordofthecraft.arche;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.github.archemedes.customitem.Customizer;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-
 import org.apache.commons.lang.RandomStringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -19,8 +13,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
 
 /**
  * A treasure chest is an item that players can click to pry open. 
@@ -108,7 +106,7 @@ public class TreasureChest {
 	 * @param p the player to award
 	 */
 	public static void giveLoot(Player p){
-		ItemStack[] items = rollItems();
+		ItemStack[] items = rollItems(ArcheCore.getControls().getPersonaHandler().getLuck(p));
 		if(items == null) return;
 		
 		//Give items to player, drop what's left
@@ -120,7 +118,11 @@ public class TreasureChest {
 	 * Generate treasure items randomly as part of the loot gained from a Treasure Chest
 	 * @return An array containing all the items randomly picked from the TreasureChest drop table
 	 */
-	public static ItemStack[] rollItems(){
+	public static ItemStack[] rollItems(Double luck){
+        //501 edit - added luck
+        luck = Math.min(luck, 5);
+        luck = Math.max(luck, -5);
+        //Capping luck to avoid badness
 		if(loot.isEmpty()) return null;
 		
 		int t = 0;
@@ -128,12 +130,14 @@ public class TreasureChest {
 		
 		Random rnd = new Random();
 		
-		int times = rnd.nextDouble() < 0.3? 2:1;
+		int times = rnd.nextDouble() < 0.3+(0.1*luck)? 2:1;
 		ItemStack[] items = new ItemStack[times];
 		
 		//Pick items from drop table
 		for(int i=0; i < times; i++){
 			int roll = rnd.nextInt(t);
+            roll += luck*10;
+            roll = Math.max(roll, 0); //avoiding negatives which could cause issues and increase the drop chances
 			for(Entry<ItemStack, Integer> entry : loot.entrySet()){
 				roll -= entry.getValue();
 				if(roll < 0){

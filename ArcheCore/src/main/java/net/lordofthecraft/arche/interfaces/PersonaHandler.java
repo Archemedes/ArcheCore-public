@@ -6,6 +6,7 @@ import net.lordofthecraft.arche.skill.TopData;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -171,5 +172,13 @@ public interface PersonaHandler {
 	 * Call to the SQLite database to age all Personas by one year.
 	 */
 	void ageUs();
+
+	/**
+	 * Gets the value of the luck attribute for a player
+	 * @param p The player to check
+	 * @return The double value of the attribute, 0.0 if none found or none assigned
+     */
+
+	double getLuck(@Nonnull Player p);
 
 }
