@@ -25,9 +25,7 @@ public class ExperienceOrbListener implements Listener{
       @EventHandler(priority=EventPriority.HIGH)
       public void EntityEvent(CreatureSpawnEvent e) {
               if (e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING) {
-                      for (Entity t : e.getEntity().getNearbyEntities(2, 2, 2)) {
-                    	  if (t.getType() == EntityType.EXPERIENCE_ORB) t.remove();
-                      }
+                  e.getEntity().getNearbyEntities(2, 2, 2).stream().filter(t -> t.getType() == EntityType.EXPERIENCE_ORB).forEach(Entity::remove);
               }
       }
       //not broke

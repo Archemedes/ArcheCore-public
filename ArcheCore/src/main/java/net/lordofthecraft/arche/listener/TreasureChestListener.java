@@ -1,7 +1,6 @@
 package net.lordofthecraft.arche.listener;
 
 import net.lordofthecraft.arche.TreasureChest;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -22,14 +21,14 @@ public class TreasureChestListener implements Listener {
 	public void onClick(PlayerInteractEvent e){
 		if(e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK){
 			Player p = e.getPlayer();
-			ItemStack is = p.getItemInHand();
+			ItemStack is = p.getEquipment().getItemInMainHand();
 			if(is.isSimilar(TreasureChest.giveChest())){
 				e.setCancelled(true);
 				
 				//Deduct an item
 				if(is.getAmount() == 1) is.setType(Material.AIR);
 				else is.setAmount(is.getAmount() - 1);
-				p.setItemInHand(is);
+				p.getEquipment().setItemInMainHand(is);
 				
 				//Give message
 				p.sendMessage(ChatColor.GREEN + "You manage to pry open the casket...");

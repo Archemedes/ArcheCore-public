@@ -1,15 +1,14 @@
 package net.lordofthecraft.arche.persona;
 
-import java.util.LinkedHashMap;
-import java.util.List;
+import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.attributes.AttributeItem;
-
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.google.common.collect.Lists;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class PersonaInventory {
 	private final ItemStack[] armor;
@@ -20,7 +19,7 @@ public class PersonaInventory {
 		YamlConfiguration config = new YamlConfiguration();
 
 		config.loadFromString(str);
-		if ((config.getList("armor").size() > 0) ? config.getList("armor").get(0) instanceof ItemStack : ((config.getList("contents").size() > 0) ? config.getList("contents").get(0) instanceof ItemStack : false)) { // Load old way without NBT @Deprecated
+		if ((config.getList("armor").size() > 0) ? config.getList("armor").get(0) instanceof ItemStack : ((config.getList("contents").size() > 0) && config.getList("contents").get(0) instanceof ItemStack)) { // Load old way without NBT @Deprecated
 			ItemStack[] armor = (ItemStack[]) config.getList("armor").toArray(new ItemStack[0]);
 			ItemStack[] contents = (ItemStack[]) config.getList("contents").toArray(new ItemStack[0]);
 			return new PersonaInventory(armor, contents);

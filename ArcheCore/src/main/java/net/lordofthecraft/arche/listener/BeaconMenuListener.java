@@ -1,7 +1,6 @@
 package net.lordofthecraft.arche.listener;
 
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheBeacon;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SkillTome;
@@ -9,7 +8,6 @@ import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.CreationDialog;
-
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,7 +18,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.google.common.collect.Lists;
+import java.util.List;
 
 public class BeaconMenuListener implements Listener {
 	private final List<String> switchCooldowns = Lists.newArrayList();
@@ -42,7 +40,7 @@ public class BeaconMenuListener implements Listener {
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
 	public void onClick(InventoryClickEvent e){
 		Inventory inv = e.getInventory();
-		if(inv.getTitle() == ArcheBeacon.BEACON_HEADER){
+		if(ArcheBeacon.BEACON_HEADER.equals(inv.getTitle())){
 			e.setCancelled(true);
 			final Player p = (Player) e.getWhoClicked();
 			final int s = e.getRawSlot();
@@ -157,7 +155,7 @@ public class BeaconMenuListener implements Listener {
 	@EventHandler(ignoreCancelled = true)
 	public void onDrag(InventoryDragEvent e){
 		Inventory inv = e.getInventory();
-		if(inv.getTitle() == ArcheBeacon.BEACON_HEADER){
+		if(ArcheBeacon.BEACON_HEADER.equals(inv.getTitle())){
 			e.setCancelled(true);
 		}
 	}

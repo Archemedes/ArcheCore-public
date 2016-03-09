@@ -1,15 +1,7 @@
 package net.lordofthecraft.arche.persona;
 
-import java.lang.ref.WeakReference;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.enums.ProfessionSlot;
@@ -22,7 +14,6 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
-//import net.lordofthecraft.arche.listener.PersonaSkinListener;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.DataTask;
@@ -32,7 +23,6 @@ import net.lordofthecraft.arche.save.tasks.UpdateTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.SkillData;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -43,6 +33,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.lang.ref.WeakReference;
+import java.util.*;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
+
+//import net.lordofthecraft.arche.listener.PersonaSkinListener;
 /*import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 
 import com.comphenix.packetwrapper.WrapperPlayServerNamedEntitySpawn;
@@ -55,8 +53,6 @@ import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction;
 import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;*/
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 public final class ArchePersona implements Persona {
 	private static final String TABLE = "persona";
@@ -743,14 +739,14 @@ public final class ArchePersona implements Persona {
 
 		if(isCurrent()){
 			boolean success = false;
-			for(int i = 0 ; i < prs.length; i++){
-				if(prs[i] != null){
-					PersonaSwitchEvent ev2 = new PersonaSwitchEvent(prs[i]);
+			for (ArchePersona pr : prs) {
+				if (pr != null) {
+					PersonaSwitchEvent ev2 = new PersonaSwitchEvent(pr);
 					Bukkit.getPluginManager().callEvent(ev2);
-					if(ev2.isCancelled()) continue;
+					if (ev2.isCancelled()) continue;
 
-					prs[i].setCurrent(true);
-					prs[i].restoreMinecraftSpecifics(p);
+					pr.setCurrent(true);
+					pr.restoreMinecraftSpecifics(p);
 					success = true;
 					break;
 				}

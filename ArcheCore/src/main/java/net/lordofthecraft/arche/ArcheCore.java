@@ -68,6 +68,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private UUID newbieWorldUUID;
 	private boolean useWiki;
 	private String worldName;
+    private boolean racialSwingTimer;
 
 	private Thread saverThread = null;
 
@@ -271,6 +272,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		protectiveTeleport = config.getBoolean("teleport.to.rescue");
 		teleportNewbies = config.getBoolean("new.persona.to.spawn");
 		worldName = config.getString("server.world.name");
+        racialSwingTimer = config.getBoolean("racial.swing.timer");
 
 		if(config.getBoolean("bonus.xp.racial"))
 			ArcheSkillFactory.activateXpMod(ExpModifier.RACIAL);
@@ -611,4 +613,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	public String getServerWorldName() {
 		return worldName;
 	}
+
+    @Override
+    public boolean isRacialSwingEnabled() {return racialSwingTimer;}
 }

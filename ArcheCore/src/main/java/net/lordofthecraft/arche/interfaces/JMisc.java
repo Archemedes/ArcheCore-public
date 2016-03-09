@@ -4,6 +4,6 @@ import org.bukkit.entity.Player;
 
 public interface JMisc {
 
-    public void noEvent(final Player p, final int time, final String name);
+    void noEvent(final Player p, final int time, final String name);
 
 }

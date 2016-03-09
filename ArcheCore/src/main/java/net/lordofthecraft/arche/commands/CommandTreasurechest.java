@@ -1,7 +1,6 @@
 package net.lordofthecraft.arche.commands;
 
 import net.lordofthecraft.arche.TreasureChest;
-
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -32,7 +31,7 @@ public class CommandTreasurechest implements CommandExecutor {
 				p.sendMessage(b + "Gave you a treasure chest. Enjoy!");
 				return true;
 			} else if (args[0].equalsIgnoreCase("add") && args.length >= 2 && StringUtils.isNumeric(args[1])){
-				ItemStack is = p.getItemInHand();
+				ItemStack is = p.getEquipment().getItemInMainHand();
 				if(is.getType() == Material.AIR){
 					p.sendMessage(ChatColor.RED + "Not holding an itemstack.");
 				} else {

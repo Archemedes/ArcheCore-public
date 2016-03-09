@@ -82,7 +82,7 @@ public class SkillTome {
 		} else {
 			p.sendMessage(ChatColor.GOLD + "You absorb all Tomes in your inventory.");
 			boolean hasTome = false;
-			p.playSound(p.getLocation(), Sound.ORB_PICKUP, 2f, 1f);
+			p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 2f, 1f);
 			
 			int i = 0;
 			for(ItemStack is : p.getInventory()){

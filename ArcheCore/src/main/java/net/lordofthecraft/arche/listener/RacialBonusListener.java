@@ -1,8 +1,6 @@
 package net.lordofthecraft.arche.listener;
 
-import java.util.List;
-import java.util.Random;
-
+import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.attributes.AttributeBase;
 import net.lordofthecraft.arche.attributes.AttributeType;
@@ -11,18 +9,11 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
-
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Horse;
-import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -41,7 +32,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.spigotmc.event.entity.EntityMountEvent;
 
-import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Random;
 
 public class RacialBonusListener implements Listener {
 	private final Random rnd = new Random();
@@ -137,11 +129,11 @@ public class RacialBonusListener implements Listener {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 120, 1, true), true);
 						}
 
-						p.playSound(p.getLocation(), Sound.AMBIENCE_CAVE, 0.8f, 2f);
+						p.playSound(p.getLocation(), Sound.AMBIENT_CAVE, 0.8f, 2f);
 						sneakers.add(p.getName());
 						new BukkitRunnable(){public void run(){
 							sneakers.remove(p.getName());
-							p.playSound(p.getLocation(), Sound.ORB_PICKUP, 1f, 1f);
+							p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
 						}}.runTaskLater(plugin, 600);
 					}
 				}
@@ -233,7 +225,7 @@ public class RacialBonusListener implements Listener {
 					break;
 				case KHARAJYR: case KHA_TIGRASI: case KHA_PANTERA: case KHA_LEPARDA: case KHA_CHEETRAH:
 					//Kitty got claws
-					if(p.getItemInHand().getType() == Material.AIR)
+					if(p.getEquipment().getItemInMainHand().getType() == Material.AIR)
 						e.setDamage(dmg + 6);
 
 					break;
@@ -264,7 +256,7 @@ public class RacialBonusListener implements Listener {
 						|| handler.getPersona(e.getPlayer()).getRace() == Race.SPECTRE
 						|| handler.getPersona(e.getPlayer()).getRace() == Race.NECROLYTE) {
 					e.setCancelled(true);
-					e.getPlayer().setItemInHand(new ItemStack(Material.GLASS_BOTTLE,1));
+					e.getPlayer().getEquipment().setItemInMainHand(new ItemStack(Material.GLASS_BOTTLE,1));
 				}
 			}
 		}
@@ -273,7 +265,7 @@ public class RacialBonusListener implements Listener {
 	private boolean holdsGoldenWeapon(Entity e){
 		if(e instanceof LivingEntity){
 			LivingEntity le = (LivingEntity) e;
-			ItemStack is = le.getEquipment().getItemInHand();
+			ItemStack is = le.getEquipment().getItemInMainHand();
 			if(is != null){
 				switch(is.getType()){
 				case GOLD_SWORD: case GOLD_AXE: case GOLD_PICKAXE: case GOLD_SPADE: case GOLD_HOE:

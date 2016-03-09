@@ -209,5 +209,9 @@ public interface IArcheCore {
 	 */
 
 	String getServerWorldName();
-	
+
+    /**
+     * @return If the racial swing timers are enabled
+     */
+    boolean isRacialSwingEnabled();
 }

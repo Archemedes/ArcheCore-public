@@ -6,14 +6,14 @@ import java.util.Map;
 public interface Button {
 
 	
-	public Map<String, Object> getContext();
+	Map<String, Object> getContext();
 	
-	public void onClick();
+	void onClick();
 	
-	public String getName();
+	String getName();
 	
-	public String setName();
+	String setName();
 	
-	public List<String> getDescription();
-	public void setDescription();
+	List<String> getDescription();
+	void setDescription();
 }

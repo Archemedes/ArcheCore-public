@@ -214,7 +214,7 @@ public class ArcheSkill implements Skill {
 					char n = this.getName().charAt(0);
 					String an = (n == 'e' || n == 'o' || n == 'i' || n == 'a')? "an" : "a";
 					player.sendMessage(ChatColor.BOLD + "" + ChatColor.GOLD + "You have improved your skill as " + an + " " + ChatColor.AQUA + WordUtils.capitalize(this.getName()));
-					player.playSound(player.getLocation(), Sound.LEVEL_UP, 3f, 1f);
+					player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 3f, 1f);
 				}
 			}
 		}

@@ -9,59 +9,59 @@ public interface Skill {
 	/**
 	 * Skill is Visible
 	 */
-	public final static int VISIBILITY_VISIBLE = 1;
+	int VISIBILITY_VISIBLE = 1;
 	/**
 	 * Skill is invisible until the Perona gains XP in it.
 	 */
-	public final static int VISIBILITY_DISCOVERABLE = 2;
+	int VISIBILITY_DISCOVERABLE = 2;
 	/**
 	 * Skill is invisible until the Persona applied a Teacher or Tome.
 	 */
-	public final static int VISIBILITY_GRANTABLE = 3;
+	int VISIBILITY_GRANTABLE = 3;
 	/**
 	 * Skill is always invisible (unless forcibly revealed via command)
 	 */
-	public final static int VISIBILITY_HIDDEN = 4;
+	int VISIBILITY_HIDDEN = 4;
 
 	/**
 	 * Fetch the Name of the Skill
 	 * @return name of the Skill
 	 */
-	public String getName();
+	String getName();
 
 	/**
 	 * Gain the session-dependent internal id of the skill
 	 * @return id of the skill
 	 */
-	public int getId();
+	int getId();
 
 	/**
 	 * Retrieves the Visbility strategy of this skill, as defined by the static constants in this class.
 	 * Skills can me made visible or kept invisible to Personas, or 'revealed' based on certain conditions.
 	 * @return The visibility strategy of the skill
 	 */
-	public int getVisibility();
+	int getVisibility();
 
 	/**
 	 * An inert skill can be trained (Xp is gained, provided all other conditions for xp gain are met),
 	 * whether or not the skill is currently visible to a Persona.
 	 * @return whether or not this skill is inert.
 	 */
-	public boolean isInert();
+	boolean isInert();
 
 	/**
 	 * Test if this skill is currently visible to the Player's current persona. 
 	 * @param p The Player to test for
 	 * @return Visibility of the skill.
 	 */
-	public boolean isVisible(Player p);
+	boolean isVisible(Player p);
 
 	/**
 	 * Test if this skill is currently visible to the given Persona. 
 	 * @param p The Persona to test for
 	 * @return Visibility of the skill.
 	 */
-	public boolean isVisible(Persona p);
+	boolean isVisible(Persona p);
 
 	/**
 	 * Force to reveal the skill to the given Persona, after which 
@@ -69,7 +69,7 @@ public interface Skill {
 	 * @param p The Persona to reveal for.
 	 * @return whether or not this skill was already visible.
 	 */
-	public boolean reveal(Persona p);
+	boolean reveal(Persona p);
 
 	/**
 	 * Method to add XP to a Player's current Persona, provided the Player is able to gain XP in this skill.
@@ -77,7 +77,7 @@ public interface Skill {
 	 * @param p The Player in question
 	 * @param xp Amount of XP to add
 	 */
-	public void addXp(Player p, double xp);
+	void addXp(Player p, double xp);
 
 	/**
 	 * Method to add XP to a Persona, provided the Player is able to gain XP in this skill.
@@ -85,7 +85,7 @@ public interface Skill {
 	 * @param p The Persona in question
 	 * @param xp Amount of XP to add
 	 */
-	public void addXp(Persona p, double xp);
+	void addXp(Persona p, double xp);
 
 	/**
 	 * Method to add XP to a Persona. This method will add XP whether or not XP gain
@@ -95,7 +95,7 @@ public interface Skill {
 	 * @param xp Amount of XP to add
 	 * @return the amount added
 	 */
-	public double addRawXp(Player p, double xp);
+	double addRawXp(Player p, double xp);
 
 	/**
 	 * Method to add XP to a Persona. This method will add XP whether or not XP gain
@@ -105,9 +105,9 @@ public interface Skill {
 	 * @param xp Amount of XP to add
      * @return the amount added
 	 */
-	public double addRawXp(Player p, double xp, boolean modify);
+	double addRawXp(Player p, double xp, boolean modify);
 
-	public double addRawXp(Persona p, double xp);
+	double addRawXp(Persona p, double xp);
 
 	/**
 	 * Method to add XP to a Persona. This method will add XP whether or not XP gain
@@ -118,21 +118,21 @@ public interface Skill {
 	 * @param modify whether or not to apply XP modifiers (such as Racial bonuses)
      * @return the amount added
 	 */
-	public double addRawXp(Persona p, double xp, boolean modify);
+	double addRawXp(Persona p, double xp, boolean modify);
 
 	/**
 	 * Method to retrieve the xp in this skill for the Player's current Persona
 	 * @param p The Player in question
 	 * @return the amount of XP the Persona has accumulated in a skill
 	 */
-	public double getXp(Player p);
+	double getXp(Player p);
 
 	/**
 	 * Method to retrieve the xp in this skill for the Persona
 	 * @param p The Persona in question
 	 * @return the amount of XP the Persona has accumulated in a skill
 	 */
-	public double getXp(Persona p);
+	double getXp(Persona p);
 
 	/**
 	 * See whether or not the tier of the Player's current Persona is AT LEAST the provided tier
@@ -140,7 +140,7 @@ public interface Skill {
 	 * @param tier The tier the Persona must have or exceed
 	 * @return Whether or not the Persona has at least this tier in this skill.
 	 */
-	public boolean achievedTier(Player p, SkillTier tier);
+	boolean achievedTier(Player p, SkillTier tier);
 
 	/**
 	 * See whether or not the tier of the Persona is AT LEAST the provided tier
@@ -148,21 +148,21 @@ public interface Skill {
 	 * @param tier The tier the Persona must have or exceed
 	 * @return Whether or not the Persona has at least this tier in this skill.
 	 */
-	public boolean achievedTier(Persona p, SkillTier tier);
+	boolean achievedTier(Persona p, SkillTier tier);
 
 	/**
 	 * Retrieve the tier the Player's current Persona is on.
 	 * @param p The Player in question
 	 * @return The Skill Tier of the Persona
 	 */
-	public SkillTier getSkillTier(Player p);
+	SkillTier getSkillTier(Player p);
 
 	/**
 	 * Retrieve the tier the Persona is on.
 	 * @param p The Persona in question
 	 * @return The Skill Tier of the Persona
 	 */
-	public SkillTier getSkillTier(Persona p);
+	SkillTier getSkillTier(Persona p);
 
 	/**
 	 * See if the Persona can gain XP in this skill.
@@ -170,7 +170,7 @@ public interface Skill {
 	 * @param p The Persona in question
 	 * @return If the Player can currently gain XP in this skill.
 	 */
-	public boolean canGainXp(Persona p);
+	boolean canGainXp(Persona p);
 
 	/**
 	 * A main profession can always be levelled to max by players of this race

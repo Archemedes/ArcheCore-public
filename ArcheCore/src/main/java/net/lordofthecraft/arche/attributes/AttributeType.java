@@ -7,7 +7,10 @@ public enum AttributeType {
 	MOVEMENT_SPEED ("MOVEMENT_SPEED", "generic.movementSpeed"),
 	ATTACK_DAMAGE ("ATTACK_DAMAGE", "generic.attackDamage"),
 	ZOMBIE_REINFORCEMENTS("x", "zombie.spawnReinforcements"),
-	HORSE_JUMPSTRENGTH("y", "horse.jumpStrength");
+	HORSE_JUMPSTRENGTH("y", "horse.jumpStrength"),
+	ATTACK_SPEED ("f", "generic.attackSpeed"),
+	ARMOR ("g", "generic.Armor"),
+	LUCK ("h", "generic.luck"); //1.9
 	
 	final String field;
 	final String name;

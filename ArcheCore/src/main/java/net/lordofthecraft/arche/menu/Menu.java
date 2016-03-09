@@ -1,15 +1,15 @@
 package net.lordofthecraft.arche.menu;
 
-import java.util.Map;
-
 import org.bukkit.entity.Player;
+
+import java.util.Map;
 
 public interface Menu {
 
 	
-	public Player getOwner();
+	Player getOwner();
 	
-	public Map<String, Object> getContext();
+	Map<String, Object> getContext();
 	
 	
 }

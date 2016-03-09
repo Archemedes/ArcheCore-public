@@ -1,7 +1,5 @@
 package net.lordofthecraft.arche.listener;
 
-import java.util.List;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -14,6 +12,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.spigotmc.event.entity.EntityMountEvent;
 
+import java.util.List;
+
 public class JistumaCollectionListener implements Listener{
 
 	@EventHandler
@@ -24,7 +24,7 @@ public class JistumaCollectionListener implements Listener{
 			List<?> lore = s.getItemMeta().getLore();
 			if (lore==null && !p.hasPermission("potions.mayuse")){
 				e.setCancelled(true);
-				p.setItemInHand(new ItemStack(Material.GLASS_BOTTLE,1));
+				p.getEquipment().setItemInMainHand(new ItemStack(Material.GLASS_BOTTLE,1));
 			}
 		}
 		if (s.hasItemMeta() && p.isInsideVehicle()){

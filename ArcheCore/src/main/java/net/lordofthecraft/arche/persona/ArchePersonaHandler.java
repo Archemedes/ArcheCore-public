@@ -116,8 +116,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		if(prs == null) return null;
 
-		for(int i = 0; i < prs.length; i++){
-			if(prs[i] != null && prs[i].isCurrent()) return prs[i];
+		for (ArchePersona pr : prs) {
+			if (pr != null && pr.isCurrent()) return pr;
 		}
 
 
@@ -144,8 +144,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		if(prs == null) return null;
 
-		for(int i = 0; i < prs.length; i++){
-			if(prs[i] != null && prs[i].isCurrent()) return prs[i];
+		for (ArchePersona pr : prs) {
+			if (pr != null && pr.isCurrent()) return pr;
 		}
 
 		//ArcheCore.getPlugin().getLogger().warning("Found Player without a current Persona: " + p.getName());
@@ -197,8 +197,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	private int countPersonas(ArchePersona[] prs){
 		int result = 0;
-		for(int i = 0; i < prs.length; i++){
-			if(prs[i] != null) result++;
+		for (ArchePersona pr : prs) {
+			if (pr != null) result++;
 		}
 
 		return result;
@@ -217,11 +217,11 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		if(event.isCancelled()) return false;
 
-		for(int i = 0; i < prs.length; i++){
-			if(prs[i] != null){
-				boolean setAs = prs[i].getId() == id;
-				if(before == null && prs[i].current && !setAs) before = prs[i];
-				prs[i].setCurrent(setAs);
+		for (ArchePersona pr : prs) {
+			if (pr != null) {
+				boolean setAs = pr.getId() == id;
+				if (before == null && pr.current && !setAs) before = pr;
+				pr.setCurrent(setAs);
 			}
 		}
 
@@ -466,10 +466,10 @@ public class ArchePersonaHandler implements PersonaHandler {
 			}
 		}else if(!hasCurrent){
 			ArcheCore.getPlugin().getLogger().warning("Player " + p.getName() + " logged in with no Persona set as current. Fixing now.");
-			for(int i = 0 ; i < prs.length; i++){
-				if(prs[i] != null){
-					prs[i].setCurrent(true);
-					if(!ArcheCore.getPlugin().areRacialBonusesEnabled())
+			for (ArchePersona pr : prs) {
+				if (pr != null) {
+					pr.setCurrent(true);
+					if (!ArcheCore.getPlugin().areRacialBonusesEnabled())
 						RaceBonusHandler.reset(p);
 					//p.setDisplayName(prs[i].getName()); <--Already done within setCurrent
 					break;

@@ -51,6 +51,9 @@ persona.cache.time: 0
 #The current roleplay name of the world we are in
 server.world.name: world
 
+#Whether or not to adjust the swing timer for races
+racial.swing.timer: true
+
 #########################
 ## New Persona Options ##
 #########################

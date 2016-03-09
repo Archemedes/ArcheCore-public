@@ -1,7 +1,6 @@
 package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.enums.Race;
-
 import org.bukkit.Material;
 
 public interface SkillFactory {
@@ -13,7 +12,7 @@ public interface SkillFactory {
 	 * Skills can me made visible or kept invisible to Personas, or 'revealed' based on certain conditions.
 	 * @return itself
 	 */
-	public SkillFactory withVisibilityType(int visibility);
+	SkillFactory withVisibilityType(int visibility);
 
 	/**
 	 * Set this skill as inert (false by default).
@@ -23,14 +22,14 @@ public interface SkillFactory {
 	 * @param inert 
 	 * @return itself
 	 */
-	public SkillFactory withXpGainWhileHidden(boolean inert);
+	SkillFactory withXpGainWhileHidden(boolean inert);
 
 	/**
 	 * A racial profession will allow players of this race to level the skill to maximum level no matter what. This method can be chained multiple times.
 	 * @param race The race to set this profession for.
 	 * @return itself
 	 */
-	public SkillFactory asRacialProfession(Race race);
+	SkillFactory asRacialProfession(Race race);
 	
 	/**
 	 * Add an XP modifier that is dependent on the Persona's race. All XP gained will be multiplied by this provided factor.
@@ -39,7 +38,7 @@ public interface SkillFactory {
 	 * @param modifier The factor to modify by
 	 * @return itself
 	 */
-	public SkillFactory withRacialModifier(Race race, double modifier);
+	SkillFactory withRacialModifier(Race race, double modifier);
 
 	/**
 	 * Lets you provide an accessible help file with your skill, to teach players how to use your skill.
@@ -48,7 +47,7 @@ public interface SkillFactory {
 	 * @param helpIcon The Item icon to display in the Help Inventory Menu.
 	 * @return itself
 	 */
-	public SkillFactory withHelpFile(String helpText, Material helpIcon);
+	SkillFactory withHelpFile(String helpText, Material helpIcon);
 	
 	/**
 	 * Defaults to false.
@@ -67,7 +66,7 @@ public interface SkillFactory {
 	 * immediately accessible and usable as per your used settings.
 	 * @return The new Skill object, registered with your provided settings.
 	 */
-	public Skill register();
+	Skill register();
 
 
 

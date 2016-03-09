@@ -4,7 +4,6 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.md_5.bungee.api.ChatColor;
-
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -34,12 +33,10 @@ public class EconomyListener implements Listener {
 		if (e.getRightClicked() instanceof Villager){
 			e.setCancelled(true);
 			Player pl = e.getPlayer();
-			for (Player p : Bukkit.getOnlinePlayers()){
-				if (p.hasPermission("archecore.mod") || p.hasPermission("archecore.admin")
-						&& !pl.hasPermission("archecore.mod") && !p.hasPermission("archecore.admin")){
-					p.sendMessage(ChatColor.RED+""+ChatColor.BOLD+"[WARNING] "+ChatColor.RESET+""+ChatColor.DARK_RED+pl.getName()+" attempted to trade with a villager!");
-				}
-			}
+			Bukkit.getOnlinePlayers().stream().filter(p -> p.hasPermission("archecore.mod") || p.hasPermission("archecore.admin")
+					&& !pl.hasPermission("archecore.mod") && !p.hasPermission("archecore.admin")).forEach(p -> {
+				p.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "[WARNING] " + ChatColor.RESET + "" + ChatColor.DARK_RED + pl.getName() + " attempted to trade with a villager!");
+			});
 		}
 	}
 }

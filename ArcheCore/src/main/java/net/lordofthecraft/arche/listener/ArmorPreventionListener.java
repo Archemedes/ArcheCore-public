@@ -5,7 +5,6 @@ import net.lordofthecraft.arche.event.PersonaSwitchEvent;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Horse;
@@ -20,7 +19,6 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.spigotmc.event.entity.EntityMountEvent;
 
 public class ArmorPreventionListener implements Listener {
 	private final PersonaHandler handler;
@@ -91,7 +89,7 @@ public class ArmorPreventionListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerInteract(PlayerInteractEvent e){
 		Player p = e.getPlayer();
-		ItemStack armor = p.getItemInHand();
+		ItemStack armor = p.getEquipment().getItemInMainHand();
 		if ((e.getAction()==Action.RIGHT_CLICK_AIR || e.getAction()==Action.RIGHT_CLICK_BLOCK) 
 				&& isArmor(armor.getType()) && !canEquip(p, armor)){
 			e.setCancelled(true);
@@ -134,7 +132,7 @@ public class ArmorPreventionListener implements Listener {
 		}
 	}
 	
-	@EventHandler
+	/*@EventHandler
 	public void onEntityMount(EntityMountEvent e) {
 		if (e.getEntity() instanceof Player && e.getMount() instanceof Horse) {
 			final Player p = (Player) e.getEntity();
@@ -143,7 +141,7 @@ public class ArmorPreventionListener implements Listener {
 				p.sendMessage(ChatColor.RED+"You struggle and eventually fail to mount your steed in your heavy, clunky armor");
 			}
 		}
-	}
+	}*/
 
 	private boolean canEquip(Player p, ItemStack armor) {
 		Persona ps = handler.getPersona(p);
