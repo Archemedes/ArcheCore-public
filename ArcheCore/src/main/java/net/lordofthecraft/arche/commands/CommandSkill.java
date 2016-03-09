@@ -1,9 +1,6 @@
 package net.lordofthecraft.arche.commands;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
+import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SkillTome;
 import net.lordofthecraft.arche.enums.ChatBoxAction;
@@ -17,7 +14,6 @@ import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -26,7 +22,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.google.common.collect.Sets;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class CommandSkill implements CommandExecutor {
 	private static final int XP_TRESHOLD_BEFORE_WARNING = 5000; 
@@ -358,7 +356,10 @@ public class CommandSkill implements CommandExecutor {
 					if(send != null){
 						if (xp > 0){
 							SkillTier cap = (skill.getCapTier(send).getTier() > 12) ? SkillTier.AENGULIC : skill.getCapTier(send);
-
+							if (skill.getSkillTier(send).getTier() > cap.getTier()) {
+                                sender.sendMessage(ChatColor.RED+"You cannot assign experience over Aengulic (1,000,000 experience)");
+                                return true;
+                            }
 							xp = Math.min((double) cap.getXp() - skill.getXp(send), xp);
 							if(xp > drainXp.getXp(send)){
 								sender.sendMessage(ChatColor.RED + "Error: Insuffcicient Free XP available");
