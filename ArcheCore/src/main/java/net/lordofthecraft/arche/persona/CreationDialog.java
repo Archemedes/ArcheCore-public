@@ -1,10 +1,7 @@
 package net.lordofthecraft.arche.persona;
 
-import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Map;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.enums.Race;
@@ -13,26 +10,19 @@ import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.conversations.BooleanPrompt;
-import org.bukkit.conversations.Conversation;
-import org.bukkit.conversations.ConversationContext;
-import org.bukkit.conversations.ConversationFactory;
-import org.bukkit.conversations.ConversationPrefix;
-import org.bukkit.conversations.FixedSetPrompt;
-import org.bukkit.conversations.MessagePrompt;
-import org.bukkit.conversations.NumericPrompt;
-import org.bukkit.conversations.Prompt;
-import org.bukkit.conversations.ValidatingPrompt;
+import org.bukkit.conversations.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Objects;
 
 public class CreationDialog {
 
@@ -212,9 +202,7 @@ public class CreationDialog {
 		protected boolean isInputValid(ConversationContext context, String input) {
 			Player p = (Player) context.getForWhom();
 
-			if(p.hasPermission("archecore.longname")) return true;
-
-			return input.length() <= 32;
+			return p.hasPermission("archecore.longname") || input.length() <= 32;
 		}
 
 		@Override
@@ -312,7 +300,6 @@ public class CreationDialog {
 		@Override
 		protected Prompt acceptValidatedInput(ConversationContext context, String input) {
 			if(input.equalsIgnoreCase("more")) return new PickMoreRacePrompt();
-			System.out.println("[RacePrompt] Does "+findRace(input)+" have children? "+findRace(input).hasChildren());
 			if(findRace(input).hasChildren()) return new PickSubRacePrompt(input);
 			else return new SetAgePrompt();
 		}
@@ -347,7 +334,7 @@ public class CreationDialog {
 				.addLine(", ");
 
 			for (Race race : Race.values()){
-				if (race.getParentRace() == selected.getName()
+				if (Objects.equals(race.getParentRace(), selected.getName())
 						&& race != selected){
 					subraces.addLine(race.getName())
 					.setUnderlined()

@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PersonaInventory {
 	private final ItemStack[] armor;
@@ -19,30 +20,41 @@ public class PersonaInventory {
 		YamlConfiguration config = new YamlConfiguration();
 
 		config.loadFromString(str);
-		if ((config.getList("armor").size() > 0) ? config.getList("armor").get(0) instanceof ItemStack : ((config.getList("contents").size() > 0) && config.getList("contents").get(0) instanceof ItemStack)) { // Load old way without NBT @Deprecated
-			ItemStack[] armor = (ItemStack[]) config.getList("armor").toArray(new ItemStack[0]);
-			ItemStack[] contents = (ItemStack[]) config.getList("contents").toArray(new ItemStack[0]);
-			return new PersonaInventory(armor, contents);
-		}
-		List<ItemStack> armorlist = Lists.newArrayList();
-		for (LinkedHashMap<String,Object> map : (List<LinkedHashMap<String,Object>>)config.getList("armor")) {
-			armorlist.add(AttributeItem.deserialize(map));
-		}
-		ItemStack[] armor = armorlist.toArray(new ItemStack[0]);
-		
-		List<ItemStack> contentslist = Lists.newArrayList();
-		for (LinkedHashMap<String,Object> map : (List<LinkedHashMap<String,Object>>)config.getList("contents")) {
-			contentslist.add(AttributeItem.deserialize(map));
-		}
-		ItemStack[] contents = contentslist.toArray(new ItemStack[0]);
+        if (config.getKeys(false).contains("armor")) {
+            if ((config.getList("armor").size() > 0) ? config.getList("armor").get(0) instanceof ItemStack : ((config.getList("contents").size() > 0) && config.getList("contents").get(0) instanceof ItemStack)) { // Load old way without NBT @Deprecated
+                List<?> result = config.getList("armor");
+                ItemStack[] armor = (ItemStack[]) result.toArray(new ItemStack[result.size()]);
+                result = config.getList("contents");
+                ItemStack[] contents = (ItemStack[]) result.toArray(new ItemStack[result.size()]);
+                return new PersonaInventory(armor, contents);
+            }
+        } else if (config.getList("contents").size() > 0 && config.getList("contents").get(0) instanceof ItemStack) {
+            List<?> result = config.getList("contents");
+            ItemStack[] contents = (ItemStack[]) result.toArray(new ItemStack[result.size()]);
+            return new PersonaInventory(contents);
+        }
 
-		return new PersonaInventory(armor, contents);
+        if (config.getKeys(false).contains("armor")) {
+            List<ItemStack> armorlist = Lists.newArrayList();
+            armorlist.addAll(((List<LinkedHashMap<String, Object>>) config.getList("armor")).stream().map(AttributeItem::deserialize).collect(Collectors.toList()));
+            ItemStack[] armor = armorlist.toArray(new ItemStack[armorlist.size()]);
 
+            List<ItemStack> contentslist = Lists.newArrayList();
+            contentslist.addAll(((List<LinkedHashMap<String, Object>>) config.getList("contents")).stream().map(AttributeItem::deserialize).collect(Collectors.toList()));
+            ItemStack[] contents = contentslist.toArray(new ItemStack[contentslist.size()]);
+
+            return new PersonaInventory(armor, contents);
+        } else {
+            List<ItemStack> contentslist = Lists.newArrayList();
+            contentslist.addAll(((List<LinkedHashMap<String, Object>>) config.getList("contents")).stream().map(AttributeItem::deserialize).collect(Collectors.toList()));
+            ItemStack[] contents = contentslist.toArray(new ItemStack[contentslist.size()]);
+
+            return new PersonaInventory(contents);
+        }
 	}
 
 	public static PersonaInventory store(Player p){
-		PersonaInventory result = new PersonaInventory(p.getInventory().getArmorContents(), p.getInventory().getContents());
-		return result;
+		return new PersonaInventory(p.getInventory().getContents());
 	}
 
 	private PersonaInventory(ItemStack[] armor, ItemStack[] contents){
@@ -50,21 +62,27 @@ public class PersonaInventory {
 		this.contents = contents;
 	}
 
+	private PersonaInventory(ItemStack[] contents) {
+		this.contents = contents;
+		armor = null;
+	}
+
 	public ItemStack[] getContents(){
 		return contents;
 	}
 
+    @Deprecated
 	public ItemStack[] getArmorContents(){
 		return armor;
 	}
 
 	public String getAsString(){
 		YamlConfiguration config = new YamlConfiguration();
-		List<LinkedHashMap<String, Object>> armorlist = Lists.newArrayList();
+		/*List<LinkedHashMap<String, Object>> armorlist = Lists.newArrayList();
 		for (ItemStack i : armor) {
 			armorlist.add(AttributeItem.serialize(i));
 		}
-		config.set("armor", armorlist);
+		config.set("armor", armorlist);*/
 		List<LinkedHashMap<String, Object>> contentslist = Lists.newArrayList();
 		for (ItemStack i : contents) {
 			contentslist.add(AttributeItem.serialize(i));

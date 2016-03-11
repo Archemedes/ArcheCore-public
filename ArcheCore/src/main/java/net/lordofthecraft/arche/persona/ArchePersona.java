@@ -268,33 +268,25 @@ public final class ArchePersona implements Persona {
 			System.out.println(sk.getName() + " " + sk.getXp(this));
 			if (sk.getXp(this) <= 0) {
 				//System.out.println("inept");
-				continue;
 			}
 			else if (sk.isProfessionFor(race)) {
 				System.out.println("racial");
-				continue;
 			}
 			else if (sk.getXp(this) <= sk.getCapTier(this).getXp()) {
-				//System.out.println("fits");
-				continue;
 			}
 			else if (!bonus && canHaveBonus) {
 				this.setProfession(ProfessionSlot.ADDITIONAL, sk);
 				//System.out.println("setting bonus");
 				bonus = true;
-				continue;
 			}
 			else if (!main) {
 				this.setProfession(ProfessionSlot.PRIMARY, sk);
 				main = true;
-				//System.out.println("setting main");
-				continue;
 			}
 			else if (!second) {
 				this.setProfession(ProfessionSlot.SECONDARY, sk);
 				//System.out.println("setting second");
 				second = true;
-				continue;
 			}
 
 			else {
@@ -544,7 +536,7 @@ public final class ArchePersona implements Persona {
 				return null;
 			}
 
-			playerObject = new WeakReference<Player>(play);
+			playerObject = new WeakReference<>(play);
 
 		} 
 
@@ -614,9 +606,7 @@ public final class ArchePersona implements Persona {
 
 	@Override
 	public void clearDescription(){
-		description = null;
-
-		buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
+		buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, null));
 	}
 
 	@Override
@@ -696,7 +686,7 @@ public final class ArchePersona implements Persona {
 		PlayerInventory pinv = p.getInventory();
 		if(inv != null){ //Grab inv from Persona file
 			pinv.setContents(inv.getContents());
-			pinv.setArmorContents(inv.getArmorContents());
+			if (inv.getArmorContents() != null) { pinv.setArmorContents(inv.getArmorContents()); }
 			inv = null; //Protect against dupes just in case
 		} else { //Clears the inv
 			pinv.clear();

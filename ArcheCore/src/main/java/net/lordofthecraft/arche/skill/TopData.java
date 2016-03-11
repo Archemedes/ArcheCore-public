@@ -1,21 +1,19 @@
 package net.lordofthecraft.arche.skill;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Skill;
+import org.bukkit.Bukkit;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.UUID;
 import java.util.Map.Entry;
-
-import org.bukkit.Bukkit;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.Skill;
+import java.util.UUID;
 
 public class TopData {
 
@@ -50,6 +48,9 @@ public class TopData {
 
 	private LinkedHashMap<Persona, Double> getTop() {
 		LinkedHashMap<Persona, Double> top = Maps.newLinkedHashMap();
+		if (Bukkit.getPluginManager().getPlugin("ShowAndSell") == null) {
+			return top;
+		}
 		ResultSet rs;
 		try {
 			rs = ArcheCore.getControls().getSQLHandler().query("SELECT * FROM accs ORDER BY money DESC");

@@ -56,7 +56,9 @@ public class TreasureChest {
 				}
 			}
 		}
+	}
 
+    public static void initSQL() {
         Map<String,String> cols = Maps.newLinkedHashMap();
         cols.put("time", "REAL NOT NULL");
         cols.put("player", "TEXT NOT NULL");
@@ -65,7 +67,7 @@ public class TreasureChest {
         cols.put("rewards", "TEXT NOT NULL");
         cols.put("UNIQUE (time,player,id,rewards)", "ON CONFLICT REPLACE");
         ArcheCore.getControls().getSQLHandler().createTable("casket_log", cols);
-	}
+    }
 	
 	/**
 	 * Amount of items in the drop table

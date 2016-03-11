@@ -9,7 +9,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
-import org.bukkit.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -76,9 +76,12 @@ public class RacialBonusListener implements Listener {
 		Persona ps = handler.getPersona(p);
 		if(ps != null){
 			if(ps.getRace() == Race.CONSTRUCT && p.getGameMode() != GameMode.CREATIVE){
-				p.sendMessage(ChatColor.RED + "You are moving too fast!");
-				p.damage(4);
-				p.setSprinting(false);
+				//p.sendMessage(ChatColor.RED + "You are moving too fast!");
+				//p.damage(4);
+                int hunger = p.getFoodLevel();
+                p.setFoodLevel(4); //Ghetto but works.
+                Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> p.setFoodLevel(hunger), 6);
+                p.setSprinting(false);
 				e.setCancelled(true);
 			}
 		}

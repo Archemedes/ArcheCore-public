@@ -244,6 +244,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		//Init skilltome logging
 		SkillTome.init(sqlHandler);
 
+        //Init treasurechest logging
+		TreasureChest.initSQL();
+
 		//Create internally handled skill that holds Xp given from skill resets
 		registerNewSkill("internal_drainxp")
 		.withVisibilityType(Skill.VISIBILITY_HIDDEN)

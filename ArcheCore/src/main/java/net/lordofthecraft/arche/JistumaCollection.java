@@ -1,11 +1,10 @@
 package net.lordofthecraft.arche;
 
+import net.lordofthecraft.arche.interfaces.JMisc;
+import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
-
-import net.lordofthecraft.arche.interfaces.JMisc;
-import net.lordofthecraft.arche.interfaces.PersonaHandler;
 
 public class JistumaCollection implements JMisc{
 
@@ -22,12 +21,9 @@ public class JistumaCollection implements JMisc{
             persona = ph.getPersona(p).getName();
         }
         p.setMetadata(name, new FixedMetadataValue(ArcheCore.getPlugin(),persona));
-        Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), new Runnable(){
-            @Override
-            public void run() {
-                if (p.hasMetadata(name)){
-                    p.removeMetadata(name, ArcheCore.getPlugin());
-                }
+        Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> {
+            if (p.hasMetadata(name)){
+                p.removeMetadata(name, ArcheCore.getPlugin());
             }
         }, time);
     }
