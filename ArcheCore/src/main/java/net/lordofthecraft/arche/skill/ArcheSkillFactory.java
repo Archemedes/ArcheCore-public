@@ -1,29 +1,23 @@
 package net.lordofthecraft.arche.skill;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.FutureTask;
-
+import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.interfaces.SkillFactory;
 import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.interfaces.SkillFactory;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.SelectSkillTask;
-
 import org.bukkit.Material;
 
-import com.google.common.collect.Maps;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.concurrent.FutureTask;
 
 public class ArcheSkillFactory implements SkillFactory {
 	private static final Map<String, String> VALS;
@@ -157,7 +151,7 @@ public class ArcheSkillFactory implements SkillFactory {
 		
 		try {
 			SQLHandler handler = ArcheCore.getControls().getSQLHandler();
-			Connection con = handler.getSQL().getConnection();
+			Connection con = handler.getConnection();
 			
 			//Creates the underlying SQL table, if necessary
 			ArcheCore.getPlugin().getSQLHandler().createTable("sk_" + name, VALS);
@@ -205,8 +199,9 @@ public class ArcheSkillFactory implements SkillFactory {
 	
 	public static class DuplicateSkillException extends RuntimeException{
 		private static final long serialVersionUID = -6769690779325926399L;
-		private DuplicateSkillException() {super();};
-		private DuplicateSkillException(String message) {super(message);};
+		private DuplicateSkillException() {super();}
+
+		private DuplicateSkillException(String message) {super(message);}
 	}
 	
 }

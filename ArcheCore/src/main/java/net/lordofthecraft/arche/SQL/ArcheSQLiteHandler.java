@@ -7,6 +7,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -213,5 +214,10 @@ public class ArcheSQLiteHandler extends SQLHandler {
 		try{res = sqlite.query(query);}
 		catch(SQLException e){e.printStackTrace();}
 		finally{SQLUtils.closeStatement(res);}
+	}
+
+	@Override
+	public Connection getConnection() {
+		return sqlite.getConnection();
 	}
 }

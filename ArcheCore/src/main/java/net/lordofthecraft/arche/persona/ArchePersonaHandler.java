@@ -409,7 +409,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		boolean hasCurrent = false;
 		ResultSet res = null;
 		try {
-			if(selectStatement == null) selectStatement = handler.getSQL().getConnection().prepareStatement("SELECT * FROM persona WHERE player = ?");
+			if(selectStatement == null) selectStatement = handler.getConnection().prepareStatement("SELECT * FROM persona WHERE player = ?");
 			selectStatement.setString(1, p.getUniqueId().toString());
 			res = selectStatement.executeQuery();
 
@@ -644,7 +644,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
     @Override
 	public double getLuck(@Nonnull Player p) {
-        Attributable att = (Attributable) p;
+        Attributable att = p;
         AttributeInstance instance = att.getAttribute(Attribute.GENERIC_LUCK);
         if (instance != null) {
             return instance.getValue();

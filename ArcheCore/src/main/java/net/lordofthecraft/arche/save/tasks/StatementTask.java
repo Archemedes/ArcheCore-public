@@ -1,11 +1,11 @@
 package net.lordofthecraft.arche.save.tasks;
 
+import com.google.common.collect.Maps;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
-
-import com.google.common.collect.Maps;
 
 public abstract class StatementTask extends ArcheTask {
 	private static Map<String, PreparedStatement> stats = Maps.newHashMap();
@@ -18,7 +18,7 @@ public abstract class StatementTask extends ArcheTask {
 	@Override
 	public void run(){
 		try{
-			Connection conn = handle.getSQL().getConnection();
+			Connection conn = handle.getConnection();
 			String n = simpleName();
 			stat = stats.get(n);
 			if(stat == null /*|| stat.isClosed()*/){

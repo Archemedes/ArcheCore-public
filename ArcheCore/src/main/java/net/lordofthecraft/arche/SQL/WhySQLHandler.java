@@ -4,10 +4,12 @@ import net.lordofthecraft.arche.ArcheCore;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.Closeable;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Represents an SQLHandler affiliated with MySQL
@@ -185,5 +187,15 @@ public class WhySQLHandler extends SQLHandler {
         try{res = query(query);}
         catch(SQLException e){e.printStackTrace();}
         finally{SQLUtils.closeStatement(res);}
+    }
+
+    @Override
+    public Connection getConnection() {
+        try {
+            return pool.getConnection();
+        } catch (SQLException e) {
+            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Failed to get the MySQL connection!", e);
+            return null;
+        }
     }
 }

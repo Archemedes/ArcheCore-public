@@ -1,11 +1,11 @@
 package net.lordofthecraft.arche.save.tasks;
 
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.save.PersonaField;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.save.PersonaField;
 
 public class UpdateTask extends ArcheTask {
 	private final Persona persona;
@@ -21,7 +21,7 @@ public class UpdateTask extends ArcheTask {
 	@Override
 	public void run(){
 		try{
-			Connection c = handle.getSQL().getConnection();
+			Connection c = handle.getConnection();
 			PreparedStatement stat = field.getStatement(c);
 			
 				 if(value instanceof String)  stat.setString(1, (String) value); 

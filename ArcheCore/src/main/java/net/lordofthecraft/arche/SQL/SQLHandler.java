@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.io.Closeable;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -184,6 +185,11 @@ public abstract class SQLHandler {
      * @param query The formatted string to create the statement with
      */
 	public abstract void execute(String query);
+
+    /**
+     * @return The connection to the SQL database
+     */
+    public abstract Connection getConnection();
 
     /**
      * @return If this is an instance of a MySQLHandler
