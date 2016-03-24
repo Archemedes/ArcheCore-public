@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import javax.annotation.Nonnull;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -137,7 +138,7 @@ public class SkillTome {
         private final double amt;
         private final Skill skill;
 
-		public SkillTomeStatementTask(Skill skill, Persona pers, double xp) {
+		public SkillTomeStatementTask(@Nonnull Skill skill, @Nonnull Persona pers, @Nonnull double xp) {
             time = System.currentTimeMillis();
             this.pers = pers;
             this.amt = xp;

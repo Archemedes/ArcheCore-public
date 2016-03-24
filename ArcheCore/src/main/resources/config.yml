@@ -90,8 +90,24 @@ fraction.lost.on.death: 0
 #NB: Beginner allowance is for the first Persona of a new player only, not for every new persona
 first.persona.money: 100
 
-#This will require Players to be close to one another before they are able to use '/money pay'  
+#This will require Players to be close to one another before they are able to use '/money pay'
 require.pay.proximity: true
+
+#########################
+##   Saving Settings   ##
+#########################
+
+#Checking this to true will force ArcheCore to use MySQL for it's SQLHandler, making all saving mechanisms save into
+#a MySQL database. If false ArcheCore will use a SQLite instance
+enable.mysql: false
+
+#login info for the MySQL instance, required if the above is true
+mysql:
+  user: user
+  port: 3306
+  password: password
+  host: localhost
+  database: archecore
 
 #########################
 ##   Other Settings    ##

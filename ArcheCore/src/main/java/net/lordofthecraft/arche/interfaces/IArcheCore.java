@@ -37,7 +37,7 @@ public interface IArcheCore {
 	
 
 	/**
-	 * the SQLHandler provides a series of synchronized methods for communicating with the
+	 * the ArcheSQLiteHandler provides a series of synchronized methods for communicating with the
 	 * underlying SQLite database
 	 * @return The sqlHandler object used by ArcheCore and its plugins
 	 */
@@ -163,13 +163,6 @@ public interface IArcheCore {
 	 * @return If ArcheCore is instructed to preload Personas
 	 */
 	boolean willCachePersonas();
-	
-	/**
-	 * Checks if ArcheCore can use PermissionsEx
-	 * @return If ArcheCore is using PermissionsEx
-	 */
-
-	boolean willUsePermissions();
 	
 	/**
 	 * ArcheCore optionally has functionality for money tied to specific Personas. This boolean tells you if it is used 

@@ -1,11 +1,10 @@
 package net.lordofthecraft.arche.save;
 
-import org.bukkit.Bukkit;
-
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
 import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
+import org.bukkit.Bukkit;
 
 public class DataSaveRunnable implements Runnable{	
 	private final SaveHandler queue;

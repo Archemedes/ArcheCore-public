@@ -2,7 +2,7 @@ package net.lordofthecraft.arche.SQL;
 
 /**
  * Represents an object that will be treated as syntax, not string, by
- * the SQLHandler object, meaning it will not wrap the string in single quotes.
+ * the ArcheSQLiteHandler object, meaning it will not wrap the string in single quotes.
  */
 public class Syntax {
 	private final String syntax;

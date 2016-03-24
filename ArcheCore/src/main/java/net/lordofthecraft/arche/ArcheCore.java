@@ -1,7 +1,9 @@
 package net.lordofthecraft.arche;
 
 import com.google.common.collect.Maps;
+import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.commands.*;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.help.HelpFile;
@@ -35,6 +37,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private static ArcheCore instance;
@@ -47,8 +50,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private ArcheTimer timer;
 	private Economy economy;
 	private JistumaCollection jcoll;
-
-	private boolean permissions;
 
 	//Config settings
 	private boolean helpOverriden;
@@ -69,6 +70,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private boolean useWiki;
 	private String worldName;
     private boolean racialSwingTimer;
+    private boolean usingMySQL;
 
 	private Thread saverThread = null;
 
@@ -78,16 +80,16 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		saveHandler.put(new EndOfStreamTask());
 
-		for(Player p : Bukkit.getOnlinePlayers()){
-			//This part must be done for safety reasons.
-			//Disables are messy, and in the brief period of Bukkit downtime
-			//Players may shift inventories around and dupe items they shouldn't dupe
-			p.closeInventory();
+		Bukkit.getOnlinePlayers().stream().forEach(p -> {
+            //This part must be done for safety reasons.
+            //Disables are messy, and in the brief period of Bukkit downtime
+            //Players may shift inventories around and dupe items they shouldn't dupe
+            p.closeInventory();
 
-			//Attribute Bonuses stick around forever. To prevent lingering ones, just in
-			//case the plugin is to be removed, we perform this method.
-			RaceBonusHandler.reset(p);
-		}
+            //Attribute Bonuses stick around forever. To prevent lingering ones, just in
+            //case the plugin is to be removed, we perform this method.
+            RaceBonusHandler.reset(p);
+        });
 
 		if(saverThread != null){
 			try {saverThread.join();} 
@@ -97,8 +99,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			}
 		}
 		sqlHandler.close();
-        if (shouldClone) {
-            sqlHandler.cloneDB();
+        if (shouldClone && sqlHandler instanceof ArcheSQLiteHandler) {
+			((ArcheSQLiteHandler) sqlHandler).cloneDB();
         }
 	}
 
@@ -115,10 +117,21 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		//Initialize our config file
 		initConfig();
 
-		permissions = ((getServer().getPluginManager()).getPlugin("PermissionsEx") != null);
-
 		//Find our Singletons and assign them.
-		sqlHandler = new SQLHandler(this, "ArcheCore");
+        getLogger().info("Loading "+(usingMySQL ? "MySQL" : "SQLite")+" handler now.");
+        if (usingMySQL) {
+            String username = getConfig().getString("mysql.user");
+            String password = getConfig().getString("mysql.password");
+            try {
+                getLogger().info("Logging into MySQL at "+WhySQLHandler.getUrl()+", Username: "+username);
+                sqlHandler = new WhySQLHandler(username, password);
+            } catch (Exception e) {
+                getLogger().log(Level.SEVERE, "Failed to initialize MySQL DB on url "+WhySQLHandler.getUrl()+" with username "+username+" and password "+password, e);
+                sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
+            }
+        } else {
+            sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
+        }
 		saveHandler = SaveHandler.getInstance();
 		blockRegistry = new BlockRegistry();
 		personaHandler = ArchePersonaHandler.getInstance();
@@ -276,6 +289,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		teleportNewbies = config.getBoolean("new.persona.to.spawn");
 		worldName = config.getString("server.world.name");
         racialSwingTimer = config.getBoolean("racial.swing.timer");
+        usingMySQL = config.getBoolean("enable.mysql");
+
 
 		if(config.getBoolean("bonus.xp.racial"))
 			ArcheSkillFactory.activateXpMod(ExpModifier.RACIAL);
@@ -563,11 +578,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 	public boolean willCachePersonas(){
 		return cachePersonas > 0;
-	}
-
-	@Override
-	public boolean willUsePermissions(){
-		return permissions;
 	}
 
 	@Override

@@ -4,7 +4,7 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 
 public abstract class ArcheTask implements Runnable {
-	protected static SQLHandler handle = null; 
+	protected static SQLHandler handle = null;
 	
 	protected ArcheTask(){
 		if(handle == null)
