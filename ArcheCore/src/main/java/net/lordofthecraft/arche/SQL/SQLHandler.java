@@ -56,7 +56,7 @@ public abstract class SQLHandler {
      * query the database and returns a ResultSet object
      * @param sql The SQL syntax to use in the query
      * @return the ResultSet from the executed statement.
-     * @throws SQLException
+     * @throws SQLException if the query throws an exception
      */
 	public abstract ResultSet query(String sql) throws SQLException;
 

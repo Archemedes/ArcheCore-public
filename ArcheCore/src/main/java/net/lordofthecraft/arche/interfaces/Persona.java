@@ -2,8 +2,10 @@ package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.enums.ProfessionSlot;
 import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.persona.PersonaInventory;
 import net.lordofthecraft.arche.persona.PersonaSkin;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
 import java.util.UUID;
 
@@ -63,17 +65,17 @@ public interface Persona {
 	boolean isCurrent();
 
 	/**
+	 * Gets a Personas prefix.
+	 * @return the Persona's current Prefix
+	 */
+	String getPrefix();
+
+	/**
 	 * Sets a Personas prefix. If Prefixes are disabled, calling this will change
 	 * the prefix, but not display it anywhere in the current session.
 	 * @param prefix The prefix to set
 	 */
 	void setPrefix(String prefix);
-
-	/**
-	 * Gets a Personas prefix.
-	 * @return the Persona's current Prefix
-	 */
-	String getPrefix();
 
 	/**
 	 * Does Persona have a prefix
@@ -88,18 +90,18 @@ public interface Persona {
 	void clearPrefix();
 
 	/**
-	 * Sets whether or not this Player should gain XP.
-	 * @param gainsXP Whether or not to gain XP
-	 */
-	void setXPGain(boolean gainsXP);
-
-	/**
 	 * Retrieve if this Player is gaining skill experience. If false, skill experience is
 	 * not gained by the player for normal actions, but can still be retrieved through teaching
 	 * or skill tomes.
 	 * @return If the player gains XP.
 	 */
 	boolean getXPGain();
+
+	/**
+	 * Sets whether or not this Player should gain XP.
+	 * @param gainsXP Whether or not to gain XP
+	 */
+	void setXPGain(boolean gainsXP);
 
 	/**
 	 * Retrieve the total Playtime this Persona has seen since its creation.
@@ -157,15 +159,21 @@ public interface Persona {
 	String getName();
 
 	/**
+	 * Set the new RP name of this Persona. This also updates the time at which this Persona was last renamed
+	 * @param name The new RP name.
+	 */
+	void setName(String name);
+
+	/**
 	 * Retrieve the immutable Race of this Persona.
 	 * @return Race of the Persona.
 	 */
 	Race getRace();
 
 	/**
-	 * Retrieves the Human-readable Race of this Persona. This String may have been 
+	 * Retrieves the Human-readable Race of this Persona. This String may have been
 	 * custom-set and overrides the actual visible Race of the Persona, but not the
-	 * underlying (Enum-based) race. 
+	 * underlying (Enum-based) race.
 	 * @return The Race of the Persona, or the Custom-set Race if applicable
 	 */
 	String getRaceString();
@@ -184,21 +192,9 @@ public interface Persona {
 	long getRenamed();
 
 	/**
-	 * Set the new RP name of this Persona. This also updates the time at which this Persona was last renamed
-	 * @param name The new RP name.
-	 */
-	void setName(String name);
-
-	/**
 	 * Clear the biopgraphy of this Persona.
 	 */
 	void clearDescription();
-
-	/**
-	 * Set the biography of this new Persona to the given String.
-	 * @param description The new biography of the Persona.
-	 */
-	void setDescription(String description);
 
 	/**
 	 * Adds a line to this Persona's biography, separated from the standing biography with a space.
@@ -211,6 +207,12 @@ public interface Persona {
 	 * @return The Persona's biography string, or null if unset.
 	 */
 	String getDescription();
+
+	/**
+	 * Set the biography of this new Persona to the given String.
+	 * @param description The new biography of the Persona.
+	 */
+	void setDescription(String description);
 
 	/**
 	 * Get the human-readable Gender of this Persona
@@ -244,18 +246,18 @@ public interface Persona {
 	void setAutoAge(boolean autoAge);
 
 	/**
-	 * Set the current skin of this Persona.
-	 * @param skin the skin to set.
-	 */
-	void setSkin(PersonaSkin skin);
-	
-	/**
 	 * Get the associated skin of this Persona.
 	 * @return The Persona's skin.
 	 */
 
 	PersonaSkin getSkin();
 	
+	/**
+	 * Set the current skin of this Persona.
+	 * @param skin the skin to set.
+	 */
+	void setSkin(PersonaSkin skin);
+
 	/**
 	 * Delete the Persona from the Plugin records.
 	 * @return whether or not the removal was successful.
@@ -267,5 +269,15 @@ public interface Persona {
 	 * @return if the player is below the new persona timer
 	 */
 	boolean isNewbie();
+
+	/**
+	 * @return The PersonaInventory for this persona
+	 */
+	PersonaInventory getPInv();
+
+	/**
+	 * @return the inventory of this persona as an Inventory object
+	 */
+	Inventory getInventory();
 	
 }

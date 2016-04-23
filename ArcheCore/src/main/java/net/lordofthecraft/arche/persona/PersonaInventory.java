@@ -13,7 +13,17 @@ import java.util.stream.Collectors;
 
 public class PersonaInventory {
 	private final ItemStack[] armor;
-	private final ItemStack[] contents;
+	private ItemStack[] contents;
+
+	private PersonaInventory(ItemStack[] armor, ItemStack[] contents) {
+		this.armor = armor;
+		this.contents = contents;
+	}
+
+	private PersonaInventory(ItemStack[] contents) {
+		this.contents = contents;
+		armor = null;
+	}
 
 	@SuppressWarnings("unchecked")
 	public static PersonaInventory restore(String str) throws InvalidConfigurationException{
@@ -23,15 +33,15 @@ public class PersonaInventory {
         if (config.getKeys(false).contains("armor")) {
             if ((config.getList("armor").size() > 0) ? config.getList("armor").get(0) instanceof ItemStack : ((config.getList("contents").size() > 0) && config.getList("contents").get(0) instanceof ItemStack)) { // Load old way without NBT @Deprecated
                 List<?> result = config.getList("armor");
-                ItemStack[] armor = (ItemStack[]) result.toArray(new ItemStack[result.size()]);
-                result = config.getList("contents");
-                ItemStack[] contents = (ItemStack[]) result.toArray(new ItemStack[result.size()]);
-                return new PersonaInventory(armor, contents);
+				ItemStack[] armor = result.toArray(new ItemStack[result.size()]);
+				result = config.getList("contents");
+				ItemStack[] contents = result.toArray(new ItemStack[result.size()]);
+				return new PersonaInventory(armor, contents);
             }
         } else if (config.getList("contents").size() > 0 && config.getList("contents").get(0) instanceof ItemStack) {
             List<?> result = config.getList("contents");
-            ItemStack[] contents = (ItemStack[]) result.toArray(new ItemStack[result.size()]);
-            return new PersonaInventory(contents);
+			ItemStack[] contents = result.toArray(new ItemStack[result.size()]);
+			return new PersonaInventory(contents);
         }
 
         if (config.getKeys(false).contains("armor")) {
@@ -57,18 +67,13 @@ public class PersonaInventory {
 		return new PersonaInventory(p.getInventory().getContents());
 	}
 
-	private PersonaInventory(ItemStack[] armor, ItemStack[] contents){
-		this.armor = armor;
-		this.contents = contents;
-	}
-
-	private PersonaInventory(ItemStack[] contents) {
-		this.contents = contents;
-		armor = null;
-	}
-
 	public ItemStack[] getContents(){
 		return contents;
+	}
+
+	public PersonaInventory setContents(ItemStack[] contents) {
+		this.contents = contents;
+		return this;
 	}
 
     @Deprecated
@@ -91,5 +96,4 @@ public class PersonaInventory {
 
 		return config.saveToString();
 	}
-
 }

@@ -1,12 +1,11 @@
 package net.lordofthecraft.arche.save.tasks;
 
-import java.sql.SQLException;
-import java.util.UUID;
-
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.PersonaInventory;
-
 import org.bukkit.Location;
+
+import java.sql.SQLException;
+import java.util.UUID;
 
 public class PersonaSwitchTask extends StatementTask {
 	private final UUID uuid;
@@ -18,7 +17,7 @@ public class PersonaSwitchTask extends StatementTask {
 		this.uuid = p.getPlayerUUID();
 		this.id = p.getId();
 		this.l = p.getLocation();
-		this.inv = p.getInventory();
+		this.inv = p.getPInv();
 	}
 	
 	@Override

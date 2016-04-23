@@ -149,6 +149,7 @@ public interface PersonaHandler {
 	 * @param gender Gender, with 0 = female, 1 = male, any other value counts as 'unset', immutable
 	 * @param age The Age of the RP persona
 	 * @param autoAge Whether or not this Persona's age should automatically increase
+	 * @return The resulting persona
 	 */
 	Persona createPersona(Player p, int id, String name, Race race,
 						  int gender, int age, boolean autoAge);

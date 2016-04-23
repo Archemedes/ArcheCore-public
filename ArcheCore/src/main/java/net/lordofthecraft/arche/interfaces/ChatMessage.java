@@ -74,10 +74,10 @@ public interface ChatMessage {
 
 	/**
 	 * Apply to the current section an event to be executed on Click. Note that only the following are valid for a ClickEvent:
-	 * {@link package net.lordofthecraft.arche.enums.ChatBoxAction#RUN_COMMAND}
-	 * {@link package net.lordofthecraft.arche.enums.ChatBoxAction#SUGGEST_COMMAND}
-	 * {@link package net.lordofthecraft.arche.enums.ChatBoxAction#OPEN_URL}
-	 * {@link package net.lordofthecraft.arche.enums.ChatBoxAction#OPEN_FILE}
+	 * {@link net.lordofthecraft.arche.enums.ChatBoxAction#RUN_COMMAND RUN_COMMAND}
+	 * {@link net.lordofthecraft.arche.enums.ChatBoxAction#SUGGEST_COMMAND SUGGEST_COMMAND}
+	 * {@link net.lordofthecraft.arche.enums.ChatBoxAction#OPEN_URL OPEN_URL}
+	 * {@link net.lordofthecraft.arche.enums.ChatBoxAction#OPEN_FILE OPEN_FILE}
 	 * @param action The action to be taken on clicking
 	 * @param value String value to use, which functions based on the chosen action
 	 * @return itself
@@ -93,9 +93,9 @@ public interface ChatMessage {
 
 	/**
 	 * Apply to the current section an event to be executed on Click. Note that only the following are valid for a ClickEvent:
-	 * {@link package net.lordofthecraft.arche.enums.ChatBoxAction#SHOW_ACHIEVEMENT}
-	 * {@link package net.lordofthecraft.arche.enums.ChatBoxAction#SHOW_TEXT}
-	 * {@link package net.lordofthecraft.arche.enums.ChatBoxAction#SHOW_ITEM}
+	 * {@link net.lordofthecraft.arche.enums.ChatBoxAction#SHOW_ACHIEVEMENT SHOW_ACHIEVEMENT}
+	 * {@link net.lordofthecraft.arche.enums.ChatBoxAction#SHOW_TEXT SHOW_TEXT}
+	 * {@link net.lordofthecraft.arche.enums.ChatBoxAction#SHOW_ITEM SHOW_ITEM}
 	 * @param action The action to be taken on hovering
 	 * @param value String value to use, which functions based on the chosen action
 	 * @return itself

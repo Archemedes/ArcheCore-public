@@ -39,8 +39,8 @@ public enum SkillTier {
 	final int xp;
 	final int tier;
 	final String title;
-	
-	private SkillTier(int tier, int xp, String title){
+
+	SkillTier(int tier, int xp, String title) {
 		this.xp = xp;
 		this.tier = tier;
 		this.title = title;
@@ -57,7 +57,7 @@ public enum SkillTier {
 	/**
 	 * See if a persona, being of this particular skill tier, has achieved a certain provided tier.
 	 * @param other the SkillTier to compare to
-	 * @return this.compareTo(other) >= 0;
+	 * @return this.compareTo(other) greater than or equal to 0;
 	 */
 	public boolean achieved(SkillTier other){
 		return this.compareTo(other) >= 0;

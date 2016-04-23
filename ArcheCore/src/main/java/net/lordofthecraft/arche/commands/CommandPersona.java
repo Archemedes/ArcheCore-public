@@ -54,6 +54,7 @@ public class CommandPersona implements CommandExecutor {
             if (sender.hasPermission("archecore.mod.persona")) {
                 sender.sendMessage(ChatColor.DARK_AQUA + "[M] Change apparant race with 'setrace'. This changes visible race, but not the underlying race.");
                 sender.sendMessage(ChatColor.DARK_AQUA + "[M] View the real race of a persona with 'realrace' and reset the apparent race with 'wiperace.");
+                sender.sendMessage(ChatColor.DARK_AQUA + "[M] Open the inventory of a persona with openinv [player]@[personaid]");
                 sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can add the flag '-p {player}' to the end of the command to modify someone's current Persona.");
                 sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can use [player]@[personaid] to modify a different Persona");
             }
@@ -82,7 +83,8 @@ public class CommandPersona implements CommandExecutor {
                     || args[0].equalsIgnoreCase("aengulbound")
                     || args[0].equalsIgnoreCase("keeper")
                     || args[0].equalsIgnoreCase("realrace")
-                    || args[0].equalsIgnoreCase("wiperace"))
+                    || args[0].equalsIgnoreCase("wiperace")
+                    || args[0].equalsIgnoreCase("openinv"))
                     && args.length > 1
                     && (sender.hasPermission("archecore.mod.persona") || sender.hasPermission("archecore.mod.other"))) {
                 pers = CommandUtil.personaFromArg(args[1]);
@@ -286,6 +288,19 @@ public class CommandPersona implements CommandExecutor {
                             sender.sendMessage(ChatColor.RED + "Race already equals " + race.getName());
                         } else {
                             doRaceChange(sender, pers, race);
+                        }
+                    }
+                    return true;
+                } else if (args[0].equalsIgnoreCase("openinv")) {
+                    if (!sender.hasPermission("archecore.mod.persona")) {
+                        sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
+                    } else {
+                        if (sender instanceof Player) {
+                            Player pl = (Player) sender;
+                            pl.closeInventory();
+                            pl.openInventory(pers.getInventory());
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "This command can only be run from in game");
                         }
                     }
                     return true;

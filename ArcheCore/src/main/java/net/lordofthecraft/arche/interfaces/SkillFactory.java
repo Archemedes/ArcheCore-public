@@ -10,6 +10,7 @@ public interface SkillFactory {
 	 * This value is set as VISIBLE (1) by default
 	 * <p>
 	 * Skills can me made visible or kept invisible to Personas, or 'revealed' based on certain conditions.
+	 * @param visibility The level of visibility
 	 * @return itself
 	 */
 	SkillFactory withVisibilityType(int visibility);
@@ -19,7 +20,7 @@ public interface SkillFactory {
 	 * <p>
 	 * An inert skill can be trained (Xp is gained, provided all other conditions for xp gain are met),
 	 * whether or not the skill is currently visible to a Persona.
-	 * @param inert 
+	 * @param inert If the skill can have experience added
 	 * @return itself
 	 */
 	SkillFactory withXpGainWhileHidden(boolean inert);
@@ -54,8 +55,8 @@ public interface SkillFactory {
 	 * An intensive skill can only be set as the primary profession and selecting it will act as if
 	 * both a primary and secondary profession are set, capping xp accordingly and disallowing a secondary profession
 	 * an additional profession can still be set, however.
-	 * 
-	 * @param intensive
+	 *
+	 * @param intensive If the profession will be intensive (take two skill slots instead of one)
 	 * @return itself
 	 */
 	SkillFactory setIntensiveProfession(boolean intensive);

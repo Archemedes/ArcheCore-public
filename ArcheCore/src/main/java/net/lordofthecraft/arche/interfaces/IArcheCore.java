@@ -22,8 +22,8 @@ public interface IArcheCore {
 	 * Each Persona is uniquely identified with a composite key that consists of
 	 * the Mojang Player UUID and a integer that refers to the Persona of the player.
 	 * The PersonaKey pairs these two objects, and can be used to compare Personas and as keys in HashMaps.
-	 * @param uuid
-	 * @param pid
+	 * @param uuid UUID of the player
+	 * @param pid Id of the persona
 	 * @return A Persona Key constructed on the criteria
 	 */
 	PersonaKey composePersonaKey(UUID uuid, int pid);

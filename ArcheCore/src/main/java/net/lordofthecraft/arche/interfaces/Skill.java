@@ -103,7 +103,8 @@ public interface Skill {
 	 * have xp added, unless adding xp reveals this skill (Discoverable)
 	 * @param p The Persona in question
 	 * @param xp Amount of XP to add
-     * @return the amount added
+	 * @param modify Whether or not to modify experience with modifiers
+	 * @return the amount added
 	 */
 	double addRawXp(Player p, double xp, boolean modify);
 

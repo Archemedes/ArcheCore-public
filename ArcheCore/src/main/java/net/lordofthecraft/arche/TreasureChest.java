@@ -31,20 +31,23 @@ public class TreasureChest {
 
 	private static Map<ItemStack, Integer> loot;
 	private static File file;
-	
+
+	private TreasureChest() {
+	}
+
 	/**
 	 * Used by ArcheCore. Do not call.
 	 * @param plugin Plugin to initialize for.
 	 */
 	public static void init(Plugin plugin){
-		
+
 		file = new File(plugin.getDataFolder(), "chestloot.yml");
 		FileConfiguration c = YamlConfiguration.loadConfiguration(file);
-		
+
 		loot = Maps.newHashMap();
-		
+
 		if(c.isConfigurationSection("index")){
-			for(Entry<String, Object> entry : ((Map<String, Object>) c.getConfigurationSection("index").getValues(false)).entrySet()){
+			for (Entry<String, Object> entry : c.getConfigurationSection("index").getValues(false).entrySet()) {
 				Integer in = (Integer) entry.getValue();
 				//Customizer.deserialize(entry.);
 				ItemStack item = c.getItemStack(entry.getKey());
@@ -58,7 +61,7 @@ public class TreasureChest {
 		}
 	}
 
-    public static void initSQL() {
+	public static void initSQL() {
         Map<String,String> cols = Maps.newLinkedHashMap();
         cols.put("time", "REAL NOT NULL");
         cols.put("player", "TEXT NOT NULL");
@@ -88,7 +91,7 @@ public class TreasureChest {
 		List<String> lore = Lists.newArrayList();
 		lore.add(ChatColor.DARK_GRAY + "What boons lie within?");
 		meta.setLore(lore);
-		
+
 		result.setItemMeta(meta);
 		return result;
 	}
@@ -100,15 +103,15 @@ public class TreasureChest {
 	 */
 	public static void addItem(ItemStack i, int j){
 		loot.put(i, j);
-		
+
 		FileConfiguration c = YamlConfiguration.loadConfiguration(file);
 		String path = RandomStringUtils.randomAlphanumeric(10);
-		
+
 		if(!c.isConfigurationSection("index")) c.createSection("index");
-		
+
 		c.getConfigurationSection("index").set(path, j);
 		c.set(path, i);
-		
+
 		try {c.save(file);} catch (IOException e) {e.printStackTrace();}
 	}
 	
@@ -128,6 +131,7 @@ public class TreasureChest {
 	
 	/**
 	 * Generate treasure items randomly as part of the loot gained from a Treasure Chest
+	 * @param luck The luck value to modify the loot by, usually based off of player luck attribute
 	 * @return An array containing all the items randomly picked from the TreasureChest drop table
 	 */
 	public static ItemStack[] rollItems(Double luck){
@@ -136,15 +140,15 @@ public class TreasureChest {
         luck = Math.max(luck, -5);
         //Capping luck to avoid badness
 		if(loot.isEmpty()) return null;
-		
+
 		int t = 0;
 		for(int i : loot.values()) t+=i;
-		
+
 		Random rnd = new Random();
-		
+
 		int times = rnd.nextDouble() < 0.3+(0.1*luck)? 2:1;
 		ItemStack[] items = new ItemStack[times];
-		
+
 		//Pick items from drop table
 		for(int i=0; i < times; i++){
 			int roll = rnd.nextInt(t);
@@ -158,9 +162,7 @@ public class TreasureChest {
 				}
 			}
 		}
-		
+
 		return items;
 	}
-	
-	private TreasureChest(){}
 }

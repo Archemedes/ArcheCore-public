@@ -4,7 +4,9 @@ import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheBeacon;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SkillTome;
+import net.lordofthecraft.arche.executables.OpenEnderRunnable;
 import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.CreationDialog;
@@ -54,13 +56,18 @@ public class BeaconMenuListener implements Listener {
 				break;
 			case 2:
 					new BukkitRunnable(){
-						@Override 
-						public void run(){ 
+						@Override
+						public void run() {
 							p.closeInventory();
-							if(p.hasPermission("archecore.enderchest"))
-								p.openInventory(p.getEnderChest()); 
-							else
-								p.sendMessage(ChatColor.RED + "You do not have access to your Ender Chest.");
+							Persona pers = handler.getPersona(p);
+							if (pers != null) {
+								if (p.hasPermission("archecore.enderchest") && pers.getTimePlayed() >= 15000)
+									OpenEnderRunnable.begin(pers);
+								else
+									p.sendMessage(ChatColor.RED + "You do not have access to your Ender Chest.");
+							} else {
+								p.sendMessage(ChatColor.RED + "You must be attuned to a persona to use your enderchest.");
+							}
 						}
 					}.runTask(plugin);
 				break;

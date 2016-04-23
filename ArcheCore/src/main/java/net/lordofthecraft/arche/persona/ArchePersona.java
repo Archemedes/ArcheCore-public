@@ -29,6 +29,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
@@ -54,56 +56,43 @@ import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;*/
 
-public final class ArchePersona implements Persona {
+public final class ArchePersona implements Persona, InventoryHolder {
 	private static final String TABLE = "persona";
 
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
 	private static final SaveHandler buffer = SaveHandler.getInstance();
 
 	final Map<String,Object> sqlCriteria;
-
+	final AtomicInteger timePlayed;
+	final AtomicInteger charactersSpoken;
 	private final ArchePersonaKey key;
-
-	private Race race;
 	private final int gender;
-
+	private final List<SkillAttachment> profs = Lists.newArrayList();
+	public Skill[] professions = new Skill[3];
 	int age;
-	private volatile String name;
 	String description = null;
 	volatile String prefix = null;
 	boolean current = true;
 	boolean autoAge;
 	String raceHeader = null;
-	final AtomicInteger timePlayed;
-	final AtomicInteger charactersSpoken;
 	long lastRenamed;
 
 	//Player name no longer final or private
 	//We must be able to change it in case of relogs/preloads
 	//Where the player has changed their username with Mojang
 	String player;
-
-	private WeakReference<Player> playerObject;
-
 	WeakBlock location = null;
 	PersonaInventory inv = null;
 	PersonaSkin skin = null;
 	double money = 0;
-
-	private int hash = 0;
-
-	private int food = 0;
-	private double health = 0;
-
-	private final List<SkillAttachment> profs = Lists.newArrayList();
 	boolean gainsXP = true;
 	Skill profession = null; /*professionPrimary = null, professionSecondary = null, professionAdditional = null;*/
-
-	public Skill[] professions = new Skill[3];
-	
-	public static ArchePersona buildTestPersona() {
-		return new ArchePersona(0, "test", Race.UNSET, 0, 0);
-	}
+	private Race race;
+	private volatile String name;
+	private WeakReference<Player> playerObject;
+	private int hash = 0;
+	private int food = 0;
+	private double health = 0;
 	
 	private ArchePersona(int id, String name, Race race, int gender, int age) {
 		key = new ArchePersonaKey(UUID.randomUUID(),id);
@@ -140,6 +129,10 @@ public final class ArchePersona implements Persona {
 		sqlCriteria.put("id", id);
 	}
 
+	public static ArchePersona buildTestPersona() {
+		return new ArchePersona(0, "test", Race.UNSET, 0, 0);
+	}
+
 	public void addSkill(ArcheSkill skill, FutureTask<SkillData> future){
 		if(profs.size() != skill.getId()){
 			Logger log = ArcheCore.getPlugin().getLogger();
@@ -154,20 +147,6 @@ public final class ArchePersona implements Persona {
 
 	public SkillAttachment getSkill(int skillId){
 		return profs.get(skillId);
-	}
-
-	public void setRace(Race r) {
-		this.race = r;
-		if(ArcheCore.getControls().areRacialBonusesEnabled()) {
-			Player p = getPlayer();
-			if (p != null && this.isCurrent()) {
-				RaceBonusHandler.reset(p);
-				RaceBonusHandler.apply(p, race);
-				p.setHealth(p.getMaxHealth());
-			}
-		}
-		buffer.put(new UpdateTask(this, PersonaField.RACE_REAL, race));
-		this.raceHeader = null;
 	}
 
 	@Override
@@ -191,14 +170,49 @@ public final class ArchePersona implements Persona {
 		this.reskillRacialReassignment();
 	}
 
+	public PersonaSkin getSkin() {
+		return skin;
+	}
+
 	public void setSkin(PersonaSkin skin) {
 		this.skin = skin;
 		buffer.put(new UpdateTask(this, PersonaField.SKIN, skin.getCombined()));
 		//if (this.getPlayer() != null) PersonaSkinListener.updatePlayerSkin(this.getPlayer());
 	}
 
-	public PersonaSkin getSkin() {
-		return skin;
+	public double reskillRacialReassignment() {
+		List<Skill> skills = getOrderedProfessions();
+		boolean canHaveBonus = this.getTimePlayed() / 60 >= 250;
+		double lostXP = 0;
+		boolean main = false;
+		boolean second = false;
+		boolean bonus = false;
+		this.professions = new Skill[3];
+		for (Skill sk : skills) {
+			System.out.println(sk.getName() + " " + sk.getXp(this));
+			if (sk.getXp(this) <= 0) {
+				//System.out.println("inept");
+			} else if (sk.isProfessionFor(race)) {
+				System.out.println("racial");
+			} else if (sk.getXp(this) <= sk.getCapTier(this).getXp()) {
+			} else if (!bonus && canHaveBonus) {
+				this.setProfession(ProfessionSlot.ADDITIONAL, sk);
+				//System.out.println("setting bonus");
+				bonus = true;
+			} else if (!main) {
+				this.setProfession(ProfessionSlot.PRIMARY, sk);
+				main = true;
+			} else if (!second) {
+				this.setProfession(ProfessionSlot.SECONDARY, sk);
+				//System.out.println("setting second");
+				second = true;
+			} else {
+				lostXP += sk.getXp(this);
+				//System.out.println("adding to pool");
+			}
+		}
+		this.handleProfessionSelection();
+		return lostXP;
 	}
 	/*
 	@SuppressWarnings("deprecation")
@@ -256,64 +270,11 @@ public final class ArchePersona implements Persona {
 		}
 	}*/
 
-	public double reskillRacialReassignment() {
-		List<Skill> skills = getOrderedProfessions();
-		boolean canHaveBonus = this.getTimePlayed()/60 >= 250;
-		double lostXP = 0;
-		boolean main = false;
-		boolean second = false;
-		boolean bonus = false;
-		this.professions = new Skill[3];
-		for (Skill sk : skills) {
-			System.out.println(sk.getName() + " " + sk.getXp(this));
-			if (sk.getXp(this) <= 0) {
-				//System.out.println("inept");
-			}
-			else if (sk.isProfessionFor(race)) {
-				System.out.println("racial");
-			}
-			else if (sk.getXp(this) <= sk.getCapTier(this).getXp()) {
-			}
-			else if (!bonus && canHaveBonus) {
-				this.setProfession(ProfessionSlot.ADDITIONAL, sk);
-				//System.out.println("setting bonus");
-				bonus = true;
-			}
-			else if (!main) {
-				this.setProfession(ProfessionSlot.PRIMARY, sk);
-				main = true;
-			}
-			else if (!second) {
-				this.setProfession(ProfessionSlot.SECONDARY, sk);
-				//System.out.println("setting second");
-				second = true;
-			}
-
-			else {
-				lostXP += sk.getXp(this);
-				//System.out.println("adding to pool");
-			}
-		}
-		this.handleProfessionSelection();
-		return lostXP;
-	}
-
 	public List<Skill> getOrderedProfessions() {
 		List<Skill> skills = Lists.newArrayList();
 		for (SkillAttachment sk : profs) if (sk.skill.isVisible(this)) skills.add(sk.skill);
 		Collections.sort(skills, new SkillComparator(this));
 		return skills;
-	}
-
-	private class SkillComparator implements Comparator<Skill> {
-		Persona p;
-		public SkillComparator(Persona p){
-			this.p = p;
-		}
-		@Override
-		public int compare(Skill o1, Skill o2) {
-			return Double.compare(o2.getXp(p), o1.getXp(p));
-		}
 	}
 
 	@Override
@@ -327,7 +288,6 @@ public final class ArchePersona implements Persona {
 		String name = profession == null? null : profession.getName();
 		buffer.put(new UpdateTask(this,PersonaField.SKILL_SELECTED, name));
 	}
-
 
 	@Override
 	public Skill getProfession(ProfessionSlot slot){
@@ -346,7 +306,7 @@ public final class ArchePersona implements Persona {
 
 		String name = profession == null? null : profession.getName();
 		buffer.put(new UpdateTask(this, slot.getPersonaField(), name));
-	}	
+	}
 
 	public double getXpLost(){
 		double xp = 0;
@@ -371,7 +331,7 @@ public final class ArchePersona implements Persona {
 
 			SkillTier tier = att.skill.getCapTier(this);
 
-			if(att.getXp() > tier.getXp()) 
+			if (att.getXp() > tier.getXp())
 				att.setXp(tier.getXp());
 			else if(att.getXp() < 0 && tier != SkillTier.RUSTY)
 				att.setXp(0);
@@ -388,65 +348,20 @@ public final class ArchePersona implements Persona {
 		return current;
 	}
 
-	void loadSkills(){
-		for(ArcheSkill s : ArcheSkillFactory.getSkills().values()){
-
-			//Start loading this Persona's Skill data for this one particular skill
-			SelectSkillTask task = new SelectSkillTask(this, s);
-			FutureTask<SkillData> fut = task.getFuture();
-			buffer.put(task);
-
-			addSkill(s, fut);
-		}
-	}	
-
-	@Override
-	public void setPrefix(String prefix){
-		this.prefix = prefix;
-		updateDisplayName(Bukkit.getPlayer(this.getPlayerUUID()));
-		buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
-	}
-
-	@Override
-	public String getPrefix(){
-		return prefix;
-	}	
-
-	@Override
-	public boolean hasPrefix(){
-		return prefix != null && !prefix.isEmpty();
-	}
-
-	@Override
-	public void clearPrefix(){
-		prefix = null;
-		updateDisplayName(Bukkit.getPlayer(this.getPlayerUUID()));
-		buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
-	}
-
-	void updateDisplayName(Player p){
-		if(handler.willModifyDisplayNames() && p != null){
-			if(hasPrefix() && ArcheCore.getPlugin().arePrefixesEnabled())
-				p.setDisplayName("[" + getPrefix() + "] " + name);
-			else
-				p.setDisplayName(name);
-		} 
-	}
-
-	void setCurrent(boolean current){
-		if(this.current != current){
+	void setCurrent(boolean current) {
+		if (this.current != current) {
 
 			this.current = current;
 
 			buffer.put(new UpdateTask(this, PersonaField.CURRENT, current));
 
-			if(current){ // Persona becoming Player's current Persona.
+			if (current) { // Persona becoming Player's current Persona.
 				Player p = Bukkit.getPlayer(getPlayerUUID());
-				if(p != null){ 
+				if (p != null) {
 					updateDisplayName(p);
 
 					//Apply Racial bonuses
-					if(ArcheCore.getControls().areRacialBonusesEnabled())
+					if (ArcheCore.getControls().areRacialBonusesEnabled())
 						RaceBonusHandler.apply(p, race);
 
 
@@ -471,6 +386,56 @@ public final class ArchePersona implements Persona {
 		}
 	}
 
+	void loadSkills(){
+		for(ArcheSkill s : ArcheSkillFactory.getSkills().values()){
+
+			//Start loading this Persona's Skill data for this one particular skill
+			SelectSkillTask task = new SelectSkillTask(this, s);
+			FutureTask<SkillData> fut = task.getFuture();
+			buffer.put(task);
+
+			addSkill(s, fut);
+		}
+	}
+
+	@Override
+	public String getPrefix() {
+		return prefix;
+	}
+
+	@Override
+	public void setPrefix(String prefix){
+		this.prefix = prefix;
+		updateDisplayName(Bukkit.getPlayer(this.getPlayerUUID()));
+		buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
+	}
+
+	@Override
+	public boolean hasPrefix(){
+		return prefix != null && !prefix.isEmpty();
+	}
+
+	@Override
+	public void clearPrefix(){
+		prefix = null;
+		updateDisplayName(Bukkit.getPlayer(this.getPlayerUUID()));
+		buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
+	}
+
+	void updateDisplayName(Player p){
+		if(handler.willModifyDisplayNames() && p != null){
+			if(hasPrefix() && ArcheCore.getPlugin().arePrefixesEnabled())
+				p.setDisplayName("[" + getPrefix() + "] " + name);
+			else
+				p.setDisplayName(name);
+		}
+	}
+
+	@Override
+	public boolean getXPGain() {
+		return gainsXP;
+	}
+
 	@Override
 	public void setXPGain(boolean gainsXP){
 		if(this.gainsXP != gainsXP){
@@ -478,11 +443,6 @@ public final class ArchePersona implements Persona {
 
 			buffer.put(new UpdateTask(this, PersonaField.XP_GAIN, gainsXP));
 		}
-	}
-
-	@Override
-	public boolean getXPGain(){
-		return gainsXP;
 	}
 
 	@Override
@@ -538,7 +498,7 @@ public final class ArchePersona implements Persona {
 
 			playerObject = new WeakReference<>(play);
 
-		} 
+		}
 
 		return play;
 	}
@@ -563,8 +523,40 @@ public final class ArchePersona implements Persona {
 	}
 
 	@Override
+	public void setName(String name) {
+		PersonaRenameEvent event = new PersonaRenameEvent(this, name);
+		Bukkit.getPluginManager().callEvent(event);
+		if (event.isCancelled()) return;
+
+		this.name = name;
+		lastRenamed = System.currentTimeMillis();
+
+		buffer.put(new UpdateTask(this, PersonaField.NAME, name));
+		buffer.put(new UpdateTask(this, PersonaField.STAT_RENAMED, lastRenamed));
+
+		if (current) {
+			Player p = Bukkit.getPlayer(getPlayerUUID());
+			updateDisplayName(p);
+		}
+	}
+
+	@Override
 	public Race getRace(){
 		return race;
+	}
+
+	public void setRace(Race r) {
+		this.race = r;
+		if (ArcheCore.getControls().areRacialBonusesEnabled()) {
+			Player p = getPlayer();
+			if (p != null && this.isCurrent()) {
+				RaceBonusHandler.reset(p);
+				RaceBonusHandler.apply(p, race);
+				p.setHealth(p.getMaxHealth());
+			}
+		}
+		buffer.put(new UpdateTask(this, PersonaField.RACE_REAL, race));
+		this.raceHeader = null;
 	}
 
 	@Override
@@ -587,33 +579,8 @@ public final class ArchePersona implements Persona {
 	}
 
 	@Override
-	public void setName(String name){
-		PersonaRenameEvent event = new PersonaRenameEvent(this, name);
-		Bukkit.getPluginManager().callEvent(event);
-		if(event.isCancelled()) return;
-
-		this.name = name;
-		lastRenamed = System.currentTimeMillis();
-
-		buffer.put(new UpdateTask(this, PersonaField.NAME, name));
-		buffer.put(new UpdateTask(this, PersonaField.STAT_RENAMED, lastRenamed));
-
-		if(current){
-			Player p = Bukkit.getPlayer(getPlayerUUID());
-			updateDisplayName(p);
-		}
-	}	
-
-	@Override
 	public void clearDescription(){
 		buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, null));
-	}
-
-	@Override
-	public void setDescription(String description){
-		this.description = description;	
-
-		buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
 	}
 
 	@Override
@@ -627,6 +594,13 @@ public final class ArchePersona implements Persona {
 	@Override
 	public String getDescription(){
 		return description;
+	}
+
+	@Override
+	public void setDescription(String description) {
+		this.description = description;
+
+		buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
 	}
 
 	@Override
@@ -648,7 +622,7 @@ public final class ArchePersona implements Persona {
 		this.age = age;
 
 		buffer.put(new UpdateTask(this, PersonaField.AGE, age));
-	}	
+	}
 
 	@Override
 	public boolean doesAutoAge(){
@@ -677,7 +651,7 @@ public final class ArchePersona implements Persona {
 		if(location != null) p.teleport(location.toLocation().add(0.5, 0.5, 0.5));
 
 		//Do we protect incase of bad teleport?
-		if(ArcheCore.getPlugin().teleportProtectively()){ 
+		if (ArcheCore.getPlugin().teleportProtectively()) {
 			NewbieProtectListener.bonusProtects.add(p.getUniqueId());
 			new BukkitRunnable(){public void run(){NewbieProtectListener.bonusProtects.remove(p.getUniqueId());}};
 		}
@@ -700,13 +674,12 @@ public final class ArchePersona implements Persona {
 		if (food == 0) {
 			food = 20;
 		}
-		if (p.getMaxHealth() < health) p.setHealth(p.getMaxHealth()); 
+		if (p.getMaxHealth() < health) p.setHealth(p.getMaxHealth());
 		else p.setHealth(health);
 		p.setFoodLevel(food);
 		//for(PotionEffectType pet : PotionEffectType.values())
 		//	if(p.hasPotionEffect(pet)) p.removePotionEffect(pet);
 	}
-
 
 	@Override
 	public boolean remove(){
@@ -715,16 +688,16 @@ public final class ArchePersona implements Persona {
 		//We enforce Player is online to do this right now
 		Validate.notNull(p);
 
-		PersonaRemoveEvent event = new PersonaRemoveEvent(this, false); 
+		PersonaRemoveEvent event = new PersonaRemoveEvent(this, false);
 		Bukkit.getPluginManager().callEvent(event);
 		if(event.isCancelled()) return false;
 
 		buffer.put(new DataTask(DataTask.DELETE, TABLE, null, sqlCriteria));
 		//		Both could be commented out once cascading db is setup!
 		buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, sqlCriteria));
-		handler.deleteSkills(this); 
+		handler.deleteSkills(this);
 
-		ArchePersona[] prs = (ArchePersona[]) handler.getAllPersonas(this.getPlayerUUID());
+		ArchePersona[] prs = handler.getAllPersonas(this.getPlayerUUID());
 		prs[getId()] = null;
 
 		if(isCurrent()){
@@ -740,7 +713,7 @@ public final class ArchePersona implements Persona {
 					success = true;
 					break;
 				}
-			}	
+			}
 
 			if(!success){
 				Plugin plugin = ArcheCore.getPlugin();
@@ -755,7 +728,21 @@ public final class ArchePersona implements Persona {
 		return true;
 	}
 
-	public PersonaInventory getInventory(){
+	@Override
+	public Inventory getInventory() {
+		if (current && getPlayer() != null) {
+			return getPlayer().getInventory();
+		} else {
+			Inventory binv = Bukkit.createInventory(this, 45, "Persona Inventory: " + key.toString());
+			ItemStack[] contents = inv.getContents();
+			for (int i = 0; i < binv.getSize(); i++) {
+				binv.setItem(i, contents[i]);
+			}
+			return binv;
+		}
+	}
+
+	public PersonaInventory getPInv() {
 		return inv;
 	}
 
@@ -783,5 +770,18 @@ public final class ArchePersona implements Persona {
 	@Override
 	public boolean isNewbie() {
 		return getTimePlayed() < ArcheCore.getControls().getNewbieDelay();
+	}
+
+	private class SkillComparator implements Comparator<Skill> {
+		Persona p;
+
+		public SkillComparator(Persona p) {
+			this.p = p;
+		}
+
+		@Override
+		public int compare(Skill o1, Skill o2) {
+			return Double.compare(o2.getXp(p), o1.getXp(p));
+		}
 	}
 }

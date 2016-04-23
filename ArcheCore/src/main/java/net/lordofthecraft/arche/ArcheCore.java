@@ -76,6 +76,27 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 	private boolean shouldClone = false;
 
+	public static PersonaKey getPersonaKey(UUID uuid, int pid) {
+		return new ArchePersonaKey(uuid, pid);
+	}
+
+	public static Player getPlayer(UUID uuid) {
+		return Bukkit.getPlayer(uuid);
+	}
+
+	public static ArcheCore getPlugin() {
+		return instance;
+	}
+
+	/**
+	 * Fetch the current instance of the ArcheCore plugin
+	 *
+	 * @return The ArcheCore singleton
+	 */
+	public static IArcheCore getControls() {
+		return instance;
+	}
+
 	public void onDisable() {
 
 		saveHandler.put(new EndOfStreamTask());
@@ -91,8 +112,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             RaceBonusHandler.reset(p);
         });
 
-		if(saverThread != null){
-			try {saverThread.join();} 
+		if(saverThread != null) {
+			try {
+				saverThread.join();}
 			catch (InterruptedException e) {
 				getLogger().severe("ArcheCore was interrupted prematurely while waiting for its saver thread to resolve.");
 				e.printStackTrace();
@@ -112,7 +134,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	}
 
 	@Override
-	public void onEnable() { 
+	public void onEnable() {
 
 		//Initialize our config file
 		initConfig();
@@ -338,6 +360,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
 		pm.registerEvents(new JistumaCollectionListener(), this);
 		pm.registerEvents(new DebugListener(), this);
+		pm.registerEvents(new PersonaInventoryListener(), this);
 		//if (permissions) pm.registerEvents(new PersonaPermissionListener(personaHandler.getPermHandler()), this);
 
 		if (showXpToPlayers) {
@@ -368,15 +391,15 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		final String div = ChatColor.LIGHT_PURPLE +  "\n--------------------------------------------------\n";
 
-		String persHelp = ChatColor.YELLOW + "Your " + ChatColor.ITALIC + "Persona" + ChatColor.YELLOW + " is an uncouth sailor, fair Elven maiden or parent-slaying Orc. " + 
+		String persHelp = ChatColor.YELLOW + "Your " + ChatColor.ITALIC + "Persona" + ChatColor.YELLOW + " is an uncouth sailor, fair Elven maiden or parent-slaying Orc. " +
 				"in Lord of the Craft, you speak and act as your current Persona, and know only what they know." +
 				div + ChatColor.GREEN + "Once accepted, creating your Persona is the first step of your adventure."
-				+ " You can later remove or create new Personas, by finding a " + ChatColor.ITALIC + "@Beacon@" 
+				+ " You can later remove or create new Personas, by finding a " + ChatColor.ITALIC + "@Beacon@"
 				+ ChatColor.GREEN + " and right-clicking it.";
 
-		String commandHelp = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Your essential commands are as follows: " 
+		String commandHelp = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Your essential commands are as follows: "
 				+ div + ChatColor.GRAY + "" + ChatColor.ITALIC +  (helpOverriden? "$/help$":"$/archehelp$") + ChatColor.GRAY + ": Provides a useful database of help topics.\n"
-				+ ChatColor.GOLD + "" + ChatColor.ITALIC + "$/helpmenu$" + ChatColor.GOLD + ": The same help topics, provided in a menu form.\n" 
+				+ ChatColor.GOLD + "" + ChatColor.ITALIC + "$/helpmenu$" + ChatColor.GOLD + ": The same help topics, provided in a menu form.\n"
 				+ ChatColor.BLUE + "" + ChatColor.ITALIC + "$/persona$" + ChatColor.BLUE + ": See others' Personas and modify your own.\n"
 				+ ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "$/skill$" + ChatColor.LIGHT_PURPLE + ": See the Skills your Persona can learn"
 				+ ChatColor.DARK_GREEN+ "" + ChatColor.ITALIC + "$/me$"+ChatColor.DARK_GREEN+": Opens the nexus-menu";
@@ -405,11 +428,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 				String name = section.isString("topic")? section.getString("topic") : key;
 
 				String desc = null;
-				if(section.isString("content")) desc = section.getString("content").replace('&', ChatColor.COLOR_CHAR); 
+				if (section.isString("content")) desc = section.getString("content").replace('&', ChatColor.COLOR_CHAR);
 				else continue;
 
 				if(section.isString("icon")){
-					try{ 
+					try{
 						Material m = Material.valueOf(section.getString("icon"));
 						addHelp(name, desc, m);
 					}catch(IllegalArgumentException e){
@@ -429,7 +452,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 				String name = section.isString("topic")? section.getString("topic") : key;
 
 				String desc = null;
-				if(section.isString("content")) desc = section.getString("content").replace('&', ChatColor.COLOR_CHAR); 
+				if (section.isString("content")) desc = section.getString("content").replace('&', ChatColor.COLOR_CHAR);
 				else continue;
 
 				addInfo(name, desc);
@@ -441,27 +464,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	@Override
 	public PersonaKey composePersonaKey(UUID uuid, int pid){
 		return getPersonaKey(uuid, pid);
-	}
-
-	public static PersonaKey getPersonaKey(UUID uuid, int pid){
-		return new ArchePersonaKey(uuid, pid);
-	}
-
-	public static Player getPlayer(UUID uuid){
-		return Bukkit.getPlayer(uuid);
-	}
-
-
-	public static ArcheCore getPlugin(){
-		return instance;
-	}
-
-	/**
-	 * Fetch the current instance of the ArcheCore plugin
-	 * @return The ArcheCore singleton
-	 */
-	public static IArcheCore getControls(){
-		return instance;
 	}
 
 	public boolean debugMode(){
