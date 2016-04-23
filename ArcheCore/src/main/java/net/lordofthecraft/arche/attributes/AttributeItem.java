@@ -229,6 +229,10 @@ public class AttributeItem {
 			setDouble.invoke(compound, "Amount", m.getValue());
 			setInt.invoke(compound, "Operation", m.getOperation());
 
+			if (!m.getSlots().isEmpty()) {
+				setString.invoke(compound, "Slot", m.getFormattedSlots());
+			}
+
 			//Find the correct place in the NBT Item Hierarchy to put the data
 			/*if(getTagMethod == null) getTagMethod = nmsItemStack.getClass().getMethod("getTag");
 			Object tag = getTagMethod.invoke(nmsItemStack);*/
