@@ -107,6 +107,7 @@ public class AttributeItem {
 						modmap.put("Operation", mod.getInt("Operation"));
 						modmap.put("UUIDMost", mod.getLong("UUIDMost"));
 						modmap.put("UUIDLeast", mod.getLong("UUIDLeast"));
+						modmap.put("Slot", mod.getString("Slot"));
 						atts.add(modmap);
 					}
 					if (atts.size() > 0) result.put("att", atts);
@@ -153,6 +154,11 @@ public class AttributeItem {
 
 					setDouble.invoke(compound, "Amount", att.get("Amount"));
 					setInt.invoke(compound, "Operation", att.get("Operation"));
+					if (att.get("Slot") != null) {
+						if (!((String) att.get("Slot")).isEmpty()) {
+							setString.invoke(compound, "Slot", att.get("Slot"));
+						}
+					}
 					result = addModifier(least,most,compound,result);
 				} catch(Exception e) {
 					e.printStackTrace();
@@ -228,9 +234,8 @@ public class AttributeItem {
 
 			setDouble.invoke(compound, "Amount", m.getValue());
 			setInt.invoke(compound, "Operation", m.getOperation());
-
-			if (!m.getSlots().isEmpty()) {
-				setString.invoke(compound, "Slot", m.getFormattedSlots());
+			if (m.getSlot() != null) {
+				setString.invoke(compound, "Slot", m.getSlot());
 			}
 
 			//Find the correct place in the NBT Item Hierarchy to put the data

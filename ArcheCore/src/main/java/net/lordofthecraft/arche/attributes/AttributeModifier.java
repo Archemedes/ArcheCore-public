@@ -1,11 +1,8 @@
 package net.lordofthecraft.arche.attributes;
 
-import com.google.common.collect.Sets;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Collections;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -18,7 +15,7 @@ public class AttributeModifier {
 	private final Operation operation;
 	private final AttributeType ga;
 	private double value;
-	private Set<AttributeSlot> slots;
+	private AttributeSlot slot;
 
 	/**
 	 * Constructs an AttributeModifier
@@ -34,7 +31,7 @@ public class AttributeModifier {
 		this.value = value;
 		this.operation = operation;
 		this.ga = ga;
-		this.slots = Sets.newHashSet();
+		this.slot = null;
 	}
 	
 	/**
@@ -54,24 +51,24 @@ public class AttributeModifier {
 	 * @param value     The value by which to modify
 	 * @param operation The type of modification this AttributeModifier should apply
 	 * @param ga        The Attribute to modify
-	 * @param slots     The slots to apply this modifier to
+	 * @param slot     The slot to apply this modifier to
 	 */
 
-	public AttributeModifier(UUID uuid, String name, double value, Operation operation, AttributeType ga, AttributeSlot[] slots) {
+	public AttributeModifier(UUID uuid, String name, double value, Operation operation, AttributeType ga, AttributeSlot slot) {
 		this.id = uuid;
 		this.name = name;
 		this.value = value;
 		this.operation = operation;
 		this.ga = ga;
-		this.slots = Sets.newHashSet();
-		Collections.addAll(this.slots, slots);
+		this.slot = slot;
 	}
 
 	/**
 	 * Gives the human-readable name of the modifier as it will be stored by Minecraft
 	 * @return the Name of the modifier
 	 */
-	public String getName(){return name;
+	public String getName() {
+		return name;
 	}
 
 	public double getValue() {
@@ -87,49 +84,22 @@ public class AttributeModifier {
 	}
 
 	/**
-	 * Gets the slots this attribute modifier will apply to
+	 * Gets the slot this attribute modifier will apply to
 	 *
-	 * @return The Set of slots
+	 * @return The slot
 	 */
-	public Set<AttributeSlot> getSlots() {
-		return slots;
+	public AttributeSlot getSlot() {
+		return slot;
 	}
 
 	/**
-	 * Set the slots of the item
+	 * Set the slot of the attribute modifier
 	 *
-	 * @param slots The set of slots
+	 * @param slot The slots
 	 * @return The set of slots
 	 */
-	public AttributeModifier setSlots(Set<AttributeSlot> slots) {
-		this.slots = slots;
-		return this;
-	}
-
-	/**
-	 * Returns a string which is used in the attribute modifier to define slots
-	 *
-	 * @return The string in the format of [value1],[value2],[value3],...
-	 */
-	public String getFormattedSlots() {
-		StringBuilder sb = new StringBuilder();
-		String b = "";
-		for (AttributeSlot slot : slots) {
-			sb.append(b);
-			sb.append(slot);
-			b = ",";
-		}
-		return sb.toString();
-	}
-
-	/**
-	 * Add a slot which this item will apply to
-	 *
-	 * @param slot The slot to add
-	 * @return The updated attribute modifier
-	 */
-	public AttributeModifier addSlot(AttributeSlot slot) {
-		slots.add(slot);
+	public AttributeModifier setSlot(AttributeSlot slot) {
+		this.slot = slot;
 		return this;
 	}
 
