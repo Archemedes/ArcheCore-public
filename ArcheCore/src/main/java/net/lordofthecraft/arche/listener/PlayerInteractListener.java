@@ -3,7 +3,6 @@ package net.lordofthecraft.arche.listener;
 import net.lordofthecraft.arche.ArcheBeacon;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -26,13 +25,12 @@ public class PlayerInteractListener implements Listener {
 		Player p = e.getPlayer();
 		if(e.getRightClicked() instanceof Player && p.isSneaking()){
 			Player target = (Player) e.getRightClicked();
-			for(String x : handler.whois(target))
-				p.sendMessage(x);
+			handler.whois(target).forEach(p::sendMessage);
 		}
 		
 	}
-	
-	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onClickBeacon(PlayerInteractEvent e){
 		if(e.getAction() == Action.RIGHT_CLICK_BLOCK){
 			Material m = e.getClickedBlock().getType();

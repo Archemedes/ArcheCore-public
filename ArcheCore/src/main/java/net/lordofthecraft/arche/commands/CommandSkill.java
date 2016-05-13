@@ -289,7 +289,7 @@ public class CommandSkill implements CommandExecutor {
 							if(skill.isIntensiveProfession() && pers.getProfession(ProfessionSlot.SECONDARY) != null)
 								newProfs[1] = null;
 
-							messageToSend = ChatColor.GOLD + "Your " + slot.toSimpleString().toLowerCase() + " prfession is now " + ChatColor.WHITE + skill.getName() + "\n"
+							messageToSend = ChatColor.GOLD + "Your " + slot.toSimpleString().toLowerCase() + " profession is now " + ChatColor.WHITE + skill.getName() + "\n"
 									+ ChatColor.YELLOW + "Your ability to train this profession has improved." + "\n"
 									+ ChatColor.YELLOW + "You can undo this selection by rerunning the command:" + "\n"
 									+ ChatColor.GRAY + "" + ChatColor.ITALIC + "/sk " + skill.getName() + " select " + slot.toSimpleString().toLowerCase();

@@ -3,11 +3,11 @@ package net.lordofthecraft.arche.attributes;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.md_5.bungee.api.chat.TranslatableComponent;
-import net.minecraft.server.v1_9_R1.NBTTagCompound;
-import net.minecraft.server.v1_9_R1.NBTTagList;
+import net.minecraft.server.v1_9_R2.NBTTagCompound;
+import net.minecraft.server.v1_9_R2.NBTTagList;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_9_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_9_R2.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -85,9 +85,9 @@ public class AttributeItem {
 			result.put("meta", meta);
 		}
 
-		net.minecraft.server.v1_9_R1.ItemStack nmsItemStack = null;
+		net.minecraft.server.v1_9_R2.ItemStack nmsItemStack = null;
 		try {
-			nmsItemStack = (net.minecraft.server.v1_9_R1.ItemStack) toNMSStack(is);
+			nmsItemStack = (net.minecraft.server.v1_9_R2.ItemStack) toNMSStack(is);
 		} catch (Exception e) {
 		}
 		if (nmsItemStack != null) {
@@ -235,7 +235,7 @@ public class AttributeItem {
 			setDouble.invoke(compound, "Amount", m.getValue());
 			setInt.invoke(compound, "Operation", m.getOperation());
 			if (m.getSlot() != null) {
-				setString.invoke(compound, "Slot", m.getSlot());
+				setString.invoke(compound, "Slot", m.getSlot().getValue());
 			}
 
 			//Find the correct place in the NBT Item Hierarchy to put the data
@@ -251,7 +251,7 @@ public class AttributeItem {
 
 	public static ItemStack addModifier(Long least, Long most, Object compound, ItemStack is){
 		try {
-			net.minecraft.server.v1_9_R1.ItemStack nmsItemStack = (net.minecraft.server.v1_9_R1.ItemStack) toNMSStack(is);
+			net.minecraft.server.v1_9_R2.ItemStack nmsItemStack = (net.minecraft.server.v1_9_R2.ItemStack) toNMSStack(is);
 			Object tag = nmsItemStack.getTag();
 			Object listNBT;
 
@@ -260,7 +260,7 @@ public class AttributeItem {
 				tag = compoundConstructor.newInstance();
 				/*if(setTagMethod == null) setTagMethod = nmsItemStack.getClass().getMethod("setTag");
 			setTagMethod.invoke(nmsItemStack, tag);*/
-				nmsItemStack.setTag((net.minecraft.server.v1_9_R1.NBTTagCompound) tag);
+				nmsItemStack.setTag((net.minecraft.server.v1_9_R2.NBTTagCompound) tag);
 				listNBT = createAttributeModifierList(tag);
 			} else if(!NBTCompoundHasKey(tag, "AttributeModifiers")) {
 				listNBT = createAttributeModifierList(tag);
@@ -325,8 +325,7 @@ public class AttributeItem {
 	private static ItemStack toBukkitStack(Object nmsItemStack) 
 			throws NoSuchMethodException, SecurityException, ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
 		Method convert = Class.forName(Bukkit.getItemFactory().getClass().getPackage().getName() + ".CraftItemStack").getMethod("asCraftMirror",nmsItemStack.getClass());
-		ItemStack result = (ItemStack) convert.invoke(null, nmsItemStack);
-		return result;
+		return (ItemStack) convert.invoke(null, nmsItemStack);
 	}
 
 	//Use to check if the specified key exists in the NBT compound object.

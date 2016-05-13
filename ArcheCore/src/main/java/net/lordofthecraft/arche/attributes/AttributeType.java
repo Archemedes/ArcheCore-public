@@ -10,11 +10,13 @@ public enum AttributeType {
 	HORSE_JUMPSTRENGTH("y", "horse.jumpStrength"),
 	ATTACK_SPEED ("f", "generic.attackSpeed"),
 	ARMOR ("g", "generic.Armor"),
-	LUCK ("h", "generic.luck"); //1.9
+	ARMORTOUGH("h", "generic.armorToughness"),
+	LUCK("i", "generic.luck"); //1.9
 	
 	final String field;
 	final String name;
-	private AttributeType(String field, String name){
+
+	AttributeType(String field, String name) {
 		this.field = field;
 		this.name = name;
 	}

@@ -36,6 +36,7 @@ public class PlayerJoinListener implements Listener {
         }
 		if(timer != null) timer.startTiming("login");
 		Player p = e.getPlayer();
+		RaceBonusHandler.reset(p);
 		handler.initPlayer(p);
 		Persona ps = handler.getPersona(p);
 		if(ps != null) Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));

@@ -2,8 +2,6 @@ package net.lordofthecraft.arche.listener;
 
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.attributes.AttributeBase;
-import net.lordofthecraft.arche.attributes.AttributeType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
@@ -34,8 +32,10 @@ import org.spigotmc.event.entity.EntityMountEvent;
 
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 public class RacialBonusListener implements Listener {
+	private final UUID random_uuid = UUID.randomUUID();
 	private final Random rnd = new Random();
 	private final ArchePersonaHandler handler;
 	private final ArcheCore plugin;
@@ -59,8 +59,9 @@ public class RacialBonusListener implements Listener {
 	@EventHandler
 	public void onRespawn(PlayerRespawnEvent e){
 		Player p = e.getPlayer();
-		AttributeBase.clearModifiers(p, AttributeType.MOVEMENT_SPEED);
-		AttributeBase.clearModifiers(p, AttributeType.ATTACK_DAMAGE);
+		RaceBonusHandler.reset(p);
+		//AttributeBase.clearModifiers(p, AttributeType.MOVEMENT_SPEED);
+		//AttributeBase.clearModifiers(p, AttributeType.ATTACK_DAMAGE);
 
 		Persona ps = handler.getPersona(p);
 		if(ps == null) RaceBonusHandler.reset(p);
@@ -188,16 +189,7 @@ public class RacialBonusListener implements Listener {
 					}
 					break;
 				case ORC: case OLOG :
-					/*
-					double fract = p.getHealth() / p.getMaxHealth();
-
-					if(fract < 0.20){
-						dmg *= 1.25;
-					} else if (fract < 0.50){
-						dmg *= 1.10;
-					}
-					 */
-					e.setDamage(dmg+4);
+						e.setDamage(dmg + 2);
 					break;
 				case HUMAN: case SOUTHERON: case NORTHENER: case HEARTLANDER: //Troop Morale
 					if(e.getEntity() instanceof Player){
@@ -238,6 +230,7 @@ public class RacialBonusListener implements Listener {
 			}
 		} 
 	}
+
 
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onEntityMount(EntityMountEvent e) {
