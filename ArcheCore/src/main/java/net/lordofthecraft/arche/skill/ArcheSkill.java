@@ -35,11 +35,12 @@ public class ArcheSkill implements Skill {
 	private final Map<Race, Double> raceMods;
 	
 	private final boolean intensive;
-	
+	private final boolean unlockedByTime;
+
 	private final PreparedStatement statement;
 	
-	ArcheSkill(int id, String name, int displayStrategy, boolean inert, 
-			Set<Race> mains, Map<Race,Double> raceMods, PreparedStatement state, boolean intensive){
+	ArcheSkill(int id, String name, int displayStrategy, boolean inert,
+			   Set<Race> mains, Map<Race, Double> raceMods, PreparedStatement state, boolean intensive, boolean unlockedByTime) {
 		
 		timer = ArcheCore.getPlugin().getMethodTimer();
 		
@@ -51,6 +52,7 @@ public class ArcheSkill implements Skill {
 		this.raceMods = raceMods;
 		this.statement = state;
 		this.intensive = intensive;
+		this.unlockedByTime = unlockedByTime;
 	}
 	
 	public PreparedStatement getUpdateStatement(){
@@ -248,8 +250,9 @@ public class ArcheSkill implements Skill {
 	@Override
 	public SkillTier getCapTier(Persona p){
 		if(this.isInert()) return SkillTier.SUPER;
-		
-		if(this.isProfessionFor(p.getRace()) || p.getTimePlayed() > 2500*60) return SkillTier.SUPER;
+
+		if (this.isProfessionFor(p.getRace()) || (p.getTimePlayed() > Skill.ALL_SKILL_UNLOCK_TIME && unlockedByTime))
+			return SkillTier.SUPER;
 		
 		for(ProfessionSlot slot : ProfessionSlot.values()){
 			if(p.getProfession(slot) == this) return SkillTier.SUPER;

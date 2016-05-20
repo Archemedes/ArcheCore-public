@@ -62,6 +62,14 @@ public interface SkillFactory {
 	SkillFactory setIntensiveProfession(boolean intensive);
 
 	/**
+	 * Sets whether or not the skill will be unlocked when a user has reached a certain number of minutes on a persona.
+	 * @see Skill#ALL_SKILL_UNLOCK_TIME
+	 * @param unlockByTime If the skill will be unlocked at the stated time.
+	 * @return itself
+	 */
+	SkillFactory setUnlockedByTime(boolean unlockByTime);
+
+	/**
 	 * Process the SkillFactory object to create a new skill. This method
 	 * will automatically do all the required back-end work to make the skill
 	 * immediately accessible and usable as per your used settings.

@@ -7,6 +7,11 @@ import org.bukkit.entity.Player;
 public interface Skill {
 
 	/**
+	 * Represents the required time in minutes for a persona to unlock the ability to level all skills to the maximum tier.
+	 */
+	int ALL_SKILL_UNLOCK_TIME = 2500 * 60;
+
+	/**
 	 * Skill is Visible
 	 */
 	int VISIBILITY_VISIBLE = 1;

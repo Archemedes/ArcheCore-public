@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 
 public class PlayerInteractListener implements Listener {
 	private final ArchePersonaHandler handler;
@@ -23,7 +24,7 @@ public class PlayerInteractListener implements Listener {
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
 	public void onClickPlayer(PlayerInteractEntityEvent e){
 		Player p = e.getPlayer();
-		if(e.getRightClicked() instanceof Player && p.isSneaking()){
+		if (e.getRightClicked() instanceof Player && p.isSneaking() && e.getHand() == EquipmentSlot.HAND) {
 			Player target = (Player) e.getRightClicked();
 			handler.whois(target).forEach(p::sendMessage);
 		}

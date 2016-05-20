@@ -23,22 +23,8 @@ public class ArcheSkillFactory implements SkillFactory {
 	private static final Map<String, String> VALS;
 	
 	private static final Map<String, ArcheSkill> skills = Maps.newLinkedHashMap();
-	private static int count = 0;
-	
 	static Set<ExpModifier> xpMods = EnumSet.noneOf(ExpModifier.class);
-	
-	private final String name;
-	private final int id;
-	
-	private int strategy = Skill.VISIBILITY_VISIBLE;
-	private boolean inert = false;
-	private final Set<Race> mains = EnumSet.noneOf(Race.class); 
-	private final Map<Race, Double> raceMods = new EnumMap<Race, Double>(Race.class);
-	
-	private boolean intensive =  false;
-	
-	private String helpText = null;
-	private Material helpIcon = null;
+	private static int count = 0;
 	
 	static{
 		Map<String, String> vals = Maps.newLinkedHashMap();
@@ -48,15 +34,30 @@ public class ArcheSkillFactory implements SkillFactory {
 		vals.put("visible", "INT NOT NULL");
 		//vals.put("FOREIGN KEY (player, id)", "REFERENCES persona(player, id) ON DELETE CASCADE");
 		vals.put("UNIQUE (player, id)", "ON CONFLICT REPLACE");
-		
+
 		VALS = Collections.unmodifiableMap(vals);
-		
+
+	}
+
+	private final String name;
+	private final int id;
+	private final Set<Race> mains = EnumSet.noneOf(Race.class);
+	private final Map<Race, Double> raceMods = new EnumMap<Race, Double>(Race.class);
+	private int strategy = Skill.VISIBILITY_VISIBLE;
+	private boolean inert = false;
+	private boolean intensive = false;
+	private boolean unlockedByTime = true;
+	private String helpText = null;
+	private Material helpIcon = null;
+
+	private ArcheSkillFactory(String name) {
+		this.name = name;
+		this.id = count++;
 	}
 	
 	public static void activateXpMod(ExpModifier mod){
 		xpMods.add(mod);
 	}
-	
 	
 	/**
 	 * Method to retrieve an existing Skill object
@@ -84,7 +85,7 @@ public class ArcheSkillFactory implements SkillFactory {
 	 * @throws DuplicateSkillException If a skill with the same name already exists
 	 */
 	public static Skill createSkill(String name){
-		return registerNewSkill(name).register();	
+		return registerNewSkill(name).register();
 	}
 	
 	/**
@@ -96,16 +97,11 @@ public class ArcheSkillFactory implements SkillFactory {
 	 */
 	public static SkillFactory registerNewSkill(String name){
 		name = name.toLowerCase();
-		
+
 		Skill test = skills.get(name);
 		if(test != null) throw new DuplicateSkillException("Skill " + name + " already exists");
-		
+
 		return new ArcheSkillFactory(name);
-	}
-	
-	private ArcheSkillFactory(String name){
-		this.name = name;
-		this.id = count++;
 	}
 	
 	@Override
@@ -144,7 +140,13 @@ public class ArcheSkillFactory implements SkillFactory {
 		this.intensive = intensive;
 		return this;
 	}
-	
+
+	@Override
+	public SkillFactory setUnlockedByTime(boolean unlockByTime) {
+		unlockedByTime = unlockByTime;
+		return this;
+	}
+
 	@Override
 	public Skill register(){
 		
@@ -158,8 +160,8 @@ public class ArcheSkillFactory implements SkillFactory {
 			
 			//And the SQL statement to provide values to it
 			PreparedStatement statement = con.prepareStatement("INSERT INTO sk_"+ name + " VALUES (?,?,?,?)");
-			
-			ArcheSkill skill = new ArcheSkill(id, name, strategy, inert, mains, raceMods, statement, intensive);
+
+			ArcheSkill skill = new ArcheSkill(id, name, strategy, inert, mains, raceMods, statement, intensive, unlockedByTime);
 			
 			//Make sure skill is registered for Plugins.
 			skills.put(name, skill);

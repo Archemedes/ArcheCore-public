@@ -41,6 +41,7 @@ import java.util.*;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 //import net.lordofthecraft.arche.listener.PersonaSkinListener;
 /*import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -272,7 +273,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	public List<Skill> getOrderedProfessions() {
 		List<Skill> skills = Lists.newArrayList();
-		for (SkillAttachment sk : profs) if (sk.skill.isVisible(this)) skills.add(sk.skill);
+		skills.addAll(profs.stream().filter(sk -> sk.skill.isVisible(this)).map(sk -> sk.skill).collect(Collectors.toList()));
 		Collections.sort(skills, new SkillComparator(this));
 		return skills;
 	}

@@ -36,28 +36,26 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class ArchePersonaHandler implements PersonaHandler {
+	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
+	private static TopData topData;
+	private final Map<UUID, ArchePersona[]> personas = new HashMap<>(Bukkit.getServer().getMaxPlayers());
 	//private final ArchePersonaExtender extender = new ArchePersonaExtender();
 	private SaveHandler buffer = SaveHandler.getInstance();
 	private boolean displayName = false;
-
-	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
-	private final Map<UUID, ArchePersona[]> personas = new HashMap<>(Bukkit.getServer().getMaxPlayers());
-	private static TopData topData;
-	
 	private PreparedStatement selectStatement = null;
 
 	private boolean preloading = false;
 
-    public boolean isPreloading() {
-        return preloading;
-    }
+	private ArchePersonaHandler() {
+		//Do nothing
+	}
 
 	public static ArchePersonaHandler getInstance(){
 		return instance;
 	}
 
-	private ArchePersonaHandler(){
-		//Do nothing
+	public boolean isPreloading() {
+		return preloading;
 	}
 	
 	public boolean testPersona() {
@@ -430,6 +428,10 @@ public class ArchePersonaHandler implements PersonaHandler {
 							RaceBonusHandler.apply(p, persona.getRace());
 						else
 							RaceBonusHandler.reset(p);
+
+						if (persona.getTimePlayed() > Skill.ALL_SKILL_UNLOCK_TIME) {
+							ArcheSkillFactory.getSkills().values().stream().filter(sk -> sk.getXp(persona) < 0).forEach(sk -> sk.reset(persona));
+						}
 
 					} else {
 						ArcheCore.getPlugin().getLogger().warning("Player " + p.getName() + " has simultaneous current Personas. Fixing now...");
