@@ -371,7 +371,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		pm.registerEvents(new JistumaCollectionListener(), this);
 		pm.registerEvents(new DebugListener(), this);
 		pm.registerEvents(new PersonaInventoryListener(), this);
-		pm.registerEvents(new PersonaSpawnListener(personaHandler), this);
 		//if (permissions) pm.registerEvents(new PersonaPermissionListener(personaHandler.getPermHandler()), this);
 
 		if (showXpToPlayers) {

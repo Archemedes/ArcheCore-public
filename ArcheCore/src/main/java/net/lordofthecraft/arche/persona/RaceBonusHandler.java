@@ -44,9 +44,8 @@ public class RaceBonusHandler {
                 vals.put(Attribute.GENERIC_MAX_HEALTH, new AttributeModifier(UUID_ARCHE, "arche_healthboost", 0.5, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
                 vals.put(Attribute.GENERIC_MOVEMENT_SPEED, new AttributeModifier(UUID_ARCHE, "arche_lessspeed", -0.40, AttributeModifier.Operation.ADD_SCALAR));
                 vals.put(Attribute.GENERIC_KNOCKBACK_RESISTANCE, new AttributeModifier(UUID_ARCHE, "arche_stalwart", 0.50, AttributeModifier.Operation.ADD_NUMBER));
-                vals.put(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier(UUID_ARCHE, "501_lessaspeed", -0.40, AttributeModifier.Operation.ADD_SCALAR));
-                vals.put(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier(UUID_ARCHE, "501_flatdamage", 6, AttributeModifier.Operation.ADD_NUMBER));
-                vals.put(Attribute.GENERIC_ARMOR, new AttributeModifier(UUID_ARCHE, "501_flatarmor", 15, AttributeModifier.Operation.ADD_NUMBER));
+                vals.put(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier(UUID_ARCHE, "501_lessaspeed", -0.60, AttributeModifier.Operation.ADD_SCALAR));
+                vals.put(Attribute.GENERIC_ARMOR, new AttributeModifier(UUID_ARCHE, "501_flatarmor", 10, AttributeModifier.Operation.ADD_NUMBER));
                 break;
             case NECROLYTE:
                 vals.put(Attribute.GENERIC_MAX_HEALTH, new AttributeModifier(UUID_ARCHE, "arche_healthboost", 0.2, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
@@ -81,10 +80,11 @@ public class RaceBonusHandler {
                 break;
             case OLOG:
                 vals.put(Attribute.GENERIC_MAX_HEALTH, new AttributeModifier(UUID_ARCHE, "arche_healthboost", 0.4, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
-                vals.put(Attribute.GENERIC_LUCK, new AttributeModifier(UUID_ARCHE, "501_lessluck", -0.1, AttributeModifier.Operation.ADD_NUMBER));
+                vals.put(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier(UUID_ARCHE, "501_lessaspeed", -0.30, AttributeModifier.Operation.ADD_SCALAR));
+                vals.put(Attribute.GENERIC_LUCK, new AttributeModifier(UUID_ARCHE, "501_lessluck", -0.05, AttributeModifier.Operation.ADD_NUMBER));
                 break;
             case ORC:
-                vals.put(Attribute.GENERIC_LUCK, new AttributeModifier(UUID_ARCHE, "501_lessluck", -0.1, AttributeModifier.Operation.ADD_NUMBER));
+                vals.put(Attribute.GENERIC_LUCK, new AttributeModifier(UUID_ARCHE, "501_lessluck", -0.05, AttributeModifier.Operation.ADD_NUMBER));
                 break;
             case KHARAJYR:
             case KHA_LEPARDA:
@@ -92,7 +92,6 @@ public class RaceBonusHandler {
             case KHA_PANTERA:
             case KHA_TIGRASI:
                 vals.put(Attribute.GENERIC_MOVEMENT_SPEED, new AttributeModifier(UUID_ARCHE, "arche_speed", 0.12, AttributeModifier.Operation.ADD_SCALAR));
-                vals.put(Attribute.GENERIC_MAX_HEALTH, new AttributeModifier(UUID_ARCHE, "arche_lesshealth", -2, AttributeModifier.Operation.ADD_NUMBER));
                 vals.put(Attribute.GENERIC_LUCK, new AttributeModifier(UUID_ARCHE, "501_moreluck", 0.1, AttributeModifier.Operation.ADD_NUMBER));
                 break;
             default: //Basic Humans, Default/Unset
