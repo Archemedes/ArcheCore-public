@@ -1,4 +1,3 @@
-/.settings
 /.idea
 /.idea/copyright/*.xml
 /.idea/libraries/*.xml
@@ -7,4 +6,6 @@
 /.idea/.name
 /.classpath
 /.project
+/ArcheCore.iml
 /target/
+/.settings/

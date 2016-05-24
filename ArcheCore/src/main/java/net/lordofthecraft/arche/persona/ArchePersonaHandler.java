@@ -43,6 +43,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	private SaveHandler buffer = SaveHandler.getInstance();
 	private boolean displayName = false;
 	private PreparedStatement selectStatement = null;
+	private Map<Race, Location> racespawns;
 
 	private boolean preloading = false;
 
@@ -302,9 +303,14 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		switchPersona(p, id); //This teleport will fail due to the Location being null still
 
-		if(ArcheCore.getControls().teleportNewPersonas()){ //new Personas may get teleported to spawn 
-			World w = ArcheCore.getControls().getNewPersonaWorld();
-			Location to = w == null? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
+		if (ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
+			Location to;
+			if (!racespawns.containsKey(race)) {
+				World w = ArcheCore.getControls().getNewPersonaWorld();
+				to = w == null ? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
+			} else {
+				to = racespawns.get(race);
+			}
 			p.teleport(to);
 		}
 
@@ -342,7 +348,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 		result.add(c + "Name: " + r + p.getName());
 
 		String race = p.getRaceString();
-		if(!race.equals("Unset")) result.add(c + "Race: " + r + race);
+		if (!race.equals("Unset")) {
+			result.add(c + "Race: " + r + race + (race.equals(p.getRace().getName()) && p.getRace() != Race.UNSET ? "" : ChatColor.DARK_GRAY + " (" + p.getRace().getName() + ")"));
+		}
 
 		String gender = p.getGender();
 		if(gender != null) result.add(c + "Gender: " + r + p.getGender());
@@ -571,7 +579,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 				ArchePersona persona = buildPersona(res, p);
 				prs[persona.getId()] = persona;
 			}
-
 		}catch(SQLException e){e.printStackTrace();}
 		finally{
 			for(ArchePersona[] prs : getPersonas()){
@@ -600,7 +607,36 @@ public class ArchePersonaHandler implements PersonaHandler {
 				}
 			}
 			topData = new TopData();
-            preloading = false;
+			ResultSet rs;
+			racespawns = Maps.newHashMap();
+			try {
+				rs = handler.query("SELECT * FROM persona_race_spawns");
+				List<String> toRemove = Lists.newArrayList();
+				while (rs.next()) {
+					Race r = Race.valueOf(rs.getString(1));
+					World w = Bukkit.getWorld(rs.getString(2));
+					if (r == null || w == null) {
+						toRemove.add(rs.getString(1));
+					} else {
+						int x = rs.getInt(3);
+						int y = rs.getInt(4);
+						int z = rs.getInt(5);
+						float yaw = rs.getFloat(6);
+						Location l = new Location(w, x, y, z, yaw, 0);
+						racespawns.put(r, l);
+					}
+				}
+				if (!toRemove.isEmpty()) {
+					PreparedStatement stat = handler.getConnection().prepareStatement("DELETE FROM persona_race_spawns WHERE race=?");
+					for (String ss : toRemove) {
+						stat.setString(1, ss);
+						stat.execute();
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			preloading = false;
 		}
 	}
 
@@ -655,4 +691,49 @@ public class ArchePersonaHandler implements PersonaHandler {
         }
     }
 
+	@Override
+	public Map<Race, Location> getRacespawns() {
+		return Collections.unmodifiableMap(racespawns);
+	}
+
+	//0
+	//90
+	//-180
+	//-90
+	public boolean addRaceSpawn(Race r, Location l) {
+		boolean erased = false;
+		SQLHandler handler = ArcheCore.getPlugin().getSQLHandler();
+		if (racespawns.containsKey(r)) {
+			racespawns.remove(r);
+			handler.execute("DELETE FROM persona_race_spawns WHERE race=" + r.name());
+			erased = true;
+		}
+		float yaw = l.getYaw();
+		float newYaw;
+		if (Math.abs(yaw) <= 45) {
+			newYaw = 0;
+		} else if (Math.abs(yaw) >= 90 + 45) {
+			newYaw = -180;
+		} else if (yaw > 0) {
+			newYaw = 90;
+		} else {
+			newYaw = -90;
+		}
+		Location loc = new Location(l.getWorld(), l.getBlockX(), l.getBlockY(), l.getBlockZ(), newYaw, 0);
+		racespawns.put(r, loc);
+		Map<String, Object> toIn = Maps.newLinkedHashMap();
+		toIn.put("race", r.name());
+		toIn.put("world", loc.getWorld().getName());
+		toIn.put("x", loc.getBlockX());
+		toIn.put("y", loc.getBlockY());
+		toIn.put("z", loc.getBlockZ());
+		toIn.put("yaw", loc.getYaw());
+		handler.insert("persona_race_spawns", toIn);
+		return erased;
+	}
+
+	public void removeRaceSpawn(Race r) {
+		racespawns.remove(r);
+		ArcheCore.getControls().getSQLHandler().execute("DELETE FROM persona_race_spawns WHERE race=" + r.getName());
+	}
 }

@@ -3,12 +3,14 @@ package net.lordofthecraft.arche.interfaces;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.skill.TopData;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface PersonaHandler {
@@ -182,4 +184,10 @@ public interface PersonaHandler {
 
 	double getLuck(@Nonnull Player p);
 
+	/**
+	 * Gets the races which have unique spawns assigned to them
+	 *
+	 * @return An unmodifiable list of Race and Location
+	 */
+	Map<Race, Location> getRacespawns();
 }

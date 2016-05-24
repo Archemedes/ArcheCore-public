@@ -215,6 +215,15 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		cols.put("UNIQUE (player, id, name)", "ON CONFLICT IGNORE");
 		sqlHandler.createTable("persona_names", cols);
 
+		cols = Maps.newLinkedHashMap();
+		cols.put("race", "TEXT PRIMARY KEY");
+		cols.put("world", "TEXT NOT NULL");
+		cols.put("x", "INT NOT NULL");
+		cols.put("y", "INT NOT NULL");
+		cols.put("z", "INT NOT NULL");
+		cols.put("yaw", "REAL");
+		sqlHandler.createTable("persona_race_spawns", cols);
+
 		//Blockregistry persistence stuff
 		cols = Maps.newLinkedHashMap();
 		cols.put("world", "TEXT NOT NULL");
@@ -346,6 +355,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         getCommand("arclone").setExecutor(new CommandSqlClone());
 		//501 added this
 		getCommand("newbies").setExecutor(new CommandNewbies(personaHandler));
+		getCommand("racespawn").setExecutor(new CommandRaceSpawn(personaHandler));
 	}
 
 	private void initListeners(){
@@ -361,6 +371,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		pm.registerEvents(new JistumaCollectionListener(), this);
 		pm.registerEvents(new DebugListener(), this);
 		pm.registerEvents(new PersonaInventoryListener(), this);
+		pm.registerEvents(new PersonaSpawnListener(personaHandler), this);
 		//if (permissions) pm.registerEvents(new PersonaPermissionListener(personaHandler.getPermHandler()), this);
 
 		if (showXpToPlayers) {

@@ -64,4 +64,9 @@ commands:
       description: interact with the Persona-based money balance
       permission: archecore.mod.persona
       permission-message: §4Insufficient Permission for this command
+   racespawn:
+      usage: /<command> [race]
+      description: Set the spawn of a race.
+      permission: archecore.mod.persona
+      permission-message: §4Insufficient Permission for this command
       
