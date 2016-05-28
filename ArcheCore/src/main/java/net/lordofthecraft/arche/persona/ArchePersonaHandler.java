@@ -318,7 +318,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	@Override
-	public List<String> whois(Persona p){
+	public List<String> whois(Persona p, boolean mod) {
 		List<String> result = Lists.newArrayList();
 
 		if(p == null) return result;
@@ -349,7 +349,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		String race = p.getRaceString();
 		if (!race.equals("Unset")) {
-			result.add(c + "Race: " + r + race + (race.equals(p.getRace().getName()) && p.getRace() != Race.UNSET ? "" : ChatColor.DARK_GRAY + " (" + p.getRace().getName() + ")"));
+			result.add(c + "Race: " + r + race + (race.equals(p.getRace().getName()) && mod ? "" : ChatColor.DARK_GRAY + " (" + p.getRace().getName() + ")"));
 		}
 
 		String gender = p.getGender();
@@ -374,8 +374,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	@Override
-	public List<String> whois(Player p){
-		return whois(getPersona(p));
+	public List<String> whois(Player p, boolean mod) {
+		return whois(getPersona(p), mod);
 	}
 
 	public void initPlayer(Player p){
@@ -734,6 +734,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	public void removeRaceSpawn(Race r) {
 		racespawns.remove(r);
-		ArcheCore.getControls().getSQLHandler().execute("DELETE FROM persona_race_spawns WHERE race=" + r.getName());
+		ArcheCore.getControls().getSQLHandler().execute("DELETE FROM persona_race_spawns WHERE race='" + r.getName() + "'");
 	}
 }

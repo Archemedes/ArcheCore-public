@@ -81,11 +81,11 @@ public class RaceBonusHandler {
             case OLOG:
                 vals.put(Attribute.GENERIC_MAX_HEALTH, new AttributeModifier(UUID_ARCHE, "arche_healthboost", 0.4, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
                 vals.put(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier(UUID_ARCHE, "501_lessaspeed", -0.30, AttributeModifier.Operation.ADD_SCALAR));
-                vals.put(Attribute.GENERIC_LUCK, new AttributeModifier(UUID_ARCHE, "501_lessluck", -0.05, AttributeModifier.Operation.ADD_NUMBER));
+                //vals.put(Attribute.GENERIC_LUCK, new AttributeModifier(UUID_ARCHE, "501_lessluck", -0.05, AttributeModifier.Operation.ADD_NUMBER));
                 break;
-            case ORC:
+            /*case ORC:
                 vals.put(Attribute.GENERIC_LUCK, new AttributeModifier(UUID_ARCHE, "501_lessluck", -0.05, AttributeModifier.Operation.ADD_NUMBER));
-                break;
+                break;*/
             case KHARAJYR:
             case KHA_LEPARDA:
             case KHA_CHEETRAH:

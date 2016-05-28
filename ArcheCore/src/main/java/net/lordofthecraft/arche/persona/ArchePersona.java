@@ -581,6 +581,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	@Override
 	public void clearDescription(){
+		description = null;
 		buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, null));
 	}
 

@@ -159,17 +159,19 @@ public interface PersonaHandler {
 	/**
 	 * Method that provides a human-readable list of information about a Persona, to be used in prints
 	 * @param p the Persona to be looked up
+	 * @param mod If the user viewing is a moderator
 	 * @return A list of initialised stats of the given Persona
 	 */
-	List<String> whois(Persona p);
+	List<String> whois(Persona p, boolean mod);
 
 	/**
-	 * Method that provides a human-readable list of information about a 
+	 * Method that provides a human-readable list of information about a
 	 * Player's current Persona, to be used in prints
 	 * @param p the Player to be looked up
+	 * @param mod If the user viewing is a moderator
 	 * @return A list of initialised stats of the given Persona
 	 */
-	List<String> whois(Player p);
+	List<String> whois(Player p, boolean mod);
 
 	/**
 	 * Call to the SQLite database to age all Personas by one year.
