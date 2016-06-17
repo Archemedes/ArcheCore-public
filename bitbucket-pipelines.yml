@@ -7,4 +7,4 @@ pipelines:
     - step:
         script: # Modify the commands below to build your repository.
           - mvn --version
-          - mvn clean install
+          - mvn -s settings.xml clean install
