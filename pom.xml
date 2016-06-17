@@ -9,6 +9,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>lotc</id>
+            <url>https://repo.lordofthecraft.net/repository/lotc-releases/</url>
+        </repository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.spigotmc</groupId>
@@ -128,6 +135,10 @@
         <repository>
             <id>dmulloy2-repo</id>
             <url>http://repo.dmulloy2.net/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>lotc</id>
+            <url>https://repo.lordofthecraft.net/repository/lotc-releases/</url>
         </repository>
     </repositories>
 </project>
