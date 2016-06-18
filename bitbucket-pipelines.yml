@@ -11,6 +11,6 @@ pipelines:
   branches:
     master:
       - step:
-        script: # Modify the commands below to build your repository.
+          script:
           - mvn --version
           - mvn -V -B -s settings.xml deploy
