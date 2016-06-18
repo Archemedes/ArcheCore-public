@@ -11,6 +11,6 @@ pipelines:
   branches:
     master:
       - step:
-          script:
+          script: #
           - mvn --version
           - mvn -V -B -s settings.xml deploy
