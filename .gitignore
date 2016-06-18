@@ -1,0 +1,11 @@
+/.idea
+/.idea/copyright/*.xml
+/.idea/libraries/*.xml
+/.idea/*.xml
+/.idea/inspectionProfiles/*.xml
+/.idea/.name
+/.classpath
+/.project
+/ArcheCore.iml
+/target/
+/.settings/
