@@ -6,9 +6,9 @@ import java.util.Map;
 
 public interface Menu {
 
-	
+
 	Player getOwner();
-	
+
 	Map<String, Object> getContext();
 	
 	

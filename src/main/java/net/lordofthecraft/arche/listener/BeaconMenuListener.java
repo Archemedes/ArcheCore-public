@@ -42,7 +42,7 @@ public class BeaconMenuListener implements Listener {
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
 	public void onClick(InventoryClickEvent e){
 		Inventory inv = e.getInventory();
-		if(ArcheBeacon.BEACON_HEADER.equals(inv.getTitle())){
+		if (ArcheBeacon.BEACON_HEADER.equals(inv.getTitle())) {
 			e.setCancelled(true);
 			final Player p = (Player) e.getWhoClicked();
 			final int s = e.getRawSlot();
@@ -162,7 +162,7 @@ public class BeaconMenuListener implements Listener {
 	@EventHandler(ignoreCancelled = true)
 	public void onDrag(InventoryDragEvent e){
 		Inventory inv = e.getInventory();
-		if(ArcheBeacon.BEACON_HEADER.equals(inv.getTitle())){
+		if (ArcheBeacon.BEACON_HEADER.equals(inv.getTitle())) {
 			e.setCancelled(true);
 		}
 	}

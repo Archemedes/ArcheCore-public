@@ -7,7 +7,7 @@ import java.sql.SQLException;
 
 /**
  * @author 501warhead
- * A task for logging casket rewards
+ *         A task for logging casket rewards
  */
 public class CasketTask extends StatementTask {
     private final Persona pers;

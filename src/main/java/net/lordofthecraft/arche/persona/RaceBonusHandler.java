@@ -106,14 +106,14 @@ public class RaceBonusHandler {
         });
         if (ArcheCore.getPlugin().debugMode()) {
             Logger log = ArcheCore.getPlugin().getLogger();
-            log.info("Resultant stats for the user "+p.getName());
+            log.info("Resultant stats for the user " + p.getName());
             Arrays.asList(Attribute.values()).stream()
                     .forEach(attr -> {
                         AttributeInstance inst = p.getAttribute(attr);
                         if (inst != null) {
-                            log.info("Attribute instance is "+inst.getAttribute().name()+" and it's final value is "+inst.getValue());
+                            log.info("Attribute instance is " + inst.getAttribute().name() + " and it's final value is " + inst.getValue());
                             log.info("modifiers are: ");
-                            inst.getModifiers().stream().forEach(mod -> log.info("Modifier operation is "+mod.getOperation().name()+" and it's value is "+mod.getAmount()+". Name is "+mod.getName()));
+                            inst.getModifiers().stream().forEach(mod -> log.info("Modifier operation is " + mod.getOperation().name() + " and it's value is " + mod.getAmount() + ". Name is " + mod.getName()));
                         }
                     });
         }

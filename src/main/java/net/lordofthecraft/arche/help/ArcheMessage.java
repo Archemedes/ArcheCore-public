@@ -245,7 +245,9 @@ public class ArcheMessage implements ChatMessage {
 		ClickEvent.Action act;
 		switch(action){
 
-			case RUN_COMMAND: act = Action.RUN_COMMAND; break;
+			case RUN_COMMAND:
+				act = Action.RUN_COMMAND;
+				break;
 		case SUGGEST_COMMAND: act = Action.SUGGEST_COMMAND; break;
 			case OPEN_URL:
 				act = Action.OPEN_URL;

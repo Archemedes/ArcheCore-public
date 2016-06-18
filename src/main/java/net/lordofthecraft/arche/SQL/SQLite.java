@@ -5,7 +5,8 @@ import java.io.File;
 import java.sql.*;
 import java.util.logging.Logger;
 
-interface StatementsList {} //Simple tagging. Might need public modifier.
+interface StatementsList {
+} //Simple tagging. Might need public modifier.
 
 public /*abstract*/ class SQLite implements Closeable {
 
@@ -23,13 +24,11 @@ public /*abstract*/ class SQLite implements Closeable {
 
     public SQLite(Logger logger, String prefix, String directory, String filename) //constructor
     {
-        if(logger == null)
-        {
+        if (logger == null) {
             Logger.getLogger("SimpleSQL").severe("logger cannot be null!");
             return;
         }
-        if(prefix == null)
-        {
+        if (prefix == null) {
             Logger.getLogger("SimpleSQL").severe("prefix cannot be null!");
             return;
         }
@@ -41,21 +40,15 @@ public /*abstract*/ class SQLite implements Closeable {
 
     public boolean open() //Overridden
     {
-        if (initialize())
-        {
-            try
-            {
+        if (initialize()) {
+            try {
                 this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.getFile().getAbsolutePath());
                 return true;
-            }
-            catch (SQLException e)
-            {
+            } catch (SQLException e) {
                 this.printError("Could not establish an SQLite connection, SQLException: " + e.getMessage());
                 return false;
             }
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -82,7 +75,8 @@ public /*abstract*/ class SQLite implements Closeable {
             try {
                 if (connection.isValid(1))
                     return true;
-            } catch (SQLException e) {}
+            } catch (SQLException e) {
+            }
         return false;
     }
 
@@ -91,30 +85,27 @@ public /*abstract*/ class SQLite implements Closeable {
             try {
                 if (connection.isValid(seconds))
                     return true;
-            } catch (SQLException e) {}
+            } catch (SQLException e) {
+            }
         return false;
     }
 
-    protected void printError(String error)
-    {
-        logger.severe(this.prefix+ "[SQL]" + error);
+    protected void printError(String error) {
+        logger.severe(this.prefix + "[SQL]" + error);
     }
 
-    public Statements getStatement(String query) throws SQLException
-    {
+    public Statements getStatement(String query) throws SQLException {
         String[] statement = query.trim().split(" ", 2);
-        try
-        {
+        try {
             Statements converted = Statements.valueOf(statement[0].toUpperCase());
             return converted;
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             throw new SQLException("Unknown statement: \"" + statement[0] + "\".");
         }
     }
 
-    protected void queryValidation(StatementsList statement) throws SQLException { }
+    protected void queryValidation(StatementsList statement) throws SQLException {
+    }
 
     //Function that talks with the database
     public final ResultSet query(String query) throws SQLException {
@@ -186,13 +177,11 @@ public /*abstract*/ class SQLite implements Closeable {
 
         private String string;
 
-        Statements(String string)
-        {
+        Statements(String string) {
             this.string = string;
         }
 
-        public String toString()
-        {
+        public String toString() {
             return string;
         }
     }

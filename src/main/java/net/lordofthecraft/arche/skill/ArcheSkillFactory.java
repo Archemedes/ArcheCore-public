@@ -201,9 +201,14 @@ public class ArcheSkillFactory implements SkillFactory {
 	
 	public static class DuplicateSkillException extends RuntimeException{
 		private static final long serialVersionUID = -6769690779325926399L;
-		private DuplicateSkillException() {super();}
 
-		private DuplicateSkillException(String message) {super(message);}
+		private DuplicateSkillException() {
+			super();
+		}
+
+		private DuplicateSkillException(String message) {
+			super(message);
+		}
 	}
 	
 }

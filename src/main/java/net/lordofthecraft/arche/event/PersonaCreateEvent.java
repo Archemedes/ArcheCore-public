@@ -12,7 +12,7 @@ public class PersonaCreateEvent extends PersonaEvent implements Cancellable{
 	private final Persona replaces;
 	//Generic Cancellable implementation
 	private boolean cancelled = false;
-	
+
 	public PersonaCreateEvent(Persona persona, Persona replaces) {
 		super(persona);
 		this.replaces = replaces;

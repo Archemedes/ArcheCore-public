@@ -180,9 +180,10 @@ public interface PersonaHandler {
 
 	/**
 	 * Gets the value of the luck attribute for a player
+	 *
 	 * @param p The player to check
 	 * @return The double value of the attribute, 0.0 if none found or none assigned
-     */
+	 */
 
 	double getLuck(@Nonnull Player p);
 

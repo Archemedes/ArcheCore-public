@@ -415,7 +415,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		boolean hasCurrent = false;
 		ResultSet res = null;
 		try {
-			if(selectStatement == null) selectStatement = handler.getConnection().prepareStatement("SELECT * FROM persona WHERE player = ?");
+			if (selectStatement == null)
+				selectStatement = handler.getConnection().prepareStatement("SELECT * FROM persona WHERE player = ?");
 			selectStatement.setString(1, p.getUniqueId().toString());
 			res = selectStatement.executeQuery();
 
@@ -680,16 +681,16 @@ public class ArchePersonaHandler implements PersonaHandler {
 		return pers;
 	}
 
-    @Override
+	@Override
 	public double getLuck(@Nonnull Player p) {
-        Attributable att = p;
-        AttributeInstance instance = att.getAttribute(Attribute.GENERIC_LUCK);
-        if (instance != null) {
-            return instance.getValue();
-        } else {
-            return 0.0d;
-        }
-    }
+		Attributable att = p;
+		AttributeInstance instance = att.getAttribute(Attribute.GENERIC_LUCK);
+		if (instance != null) {
+			return instance.getValue();
+		} else {
+			return 0.0d;
+		}
+	}
 
 	@Override
 	public Map<Race, Location> getRacespawns() {

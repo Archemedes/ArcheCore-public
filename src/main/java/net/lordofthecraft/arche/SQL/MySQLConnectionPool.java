@@ -8,10 +8,11 @@ import java.sql.SQLException;
 
 /**
  * Represents an SQL connection pool
+ *
  * @author diddiz
  * @author 501warhead
  */
-public class MySQLConnectionPool implements Closeable{
+public class MySQLConnectionPool implements Closeable {
 
     private final HikariDataSource ds;
 

@@ -38,7 +38,7 @@ public class ArcheSkill implements Skill {
 	private final boolean unlockedByTime;
 
 	private final PreparedStatement statement;
-	
+
 	ArcheSkill(int id, String name, int displayStrategy, boolean inert,
 			   Set<Race> mains, Map<Race, Double> raceMods, PreparedStatement state, boolean intensive, boolean unlockedByTime) {
 		

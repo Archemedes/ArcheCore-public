@@ -62,15 +62,15 @@ public class TreasureChest {
 	}
 
 	public static void initSQL() {
-        Map<String,String> cols = Maps.newLinkedHashMap();
-        cols.put("time", "REAL NOT NULL");
-        cols.put("player", "TEXT NOT NULL");
-        cols.put("id", "INT NOT NULL");
-        cols.put("luck", "REAL");
-        cols.put("rewards", "TEXT NOT NULL");
-        cols.put("UNIQUE (time,player,id,rewards)", "ON CONFLICT REPLACE");
-        ArcheCore.getControls().getSQLHandler().createTable("casket_log", cols);
-    }
+		Map<String, String> cols = Maps.newLinkedHashMap();
+		cols.put("time", "REAL NOT NULL");
+		cols.put("player", "TEXT NOT NULL");
+		cols.put("id", "INT NOT NULL");
+		cols.put("luck", "REAL");
+		cols.put("rewards", "TEXT NOT NULL");
+		cols.put("UNIQUE (time,player,id,rewards)", "ON CONFLICT REPLACE");
+		ArcheCore.getControls().getSQLHandler().createTable("casket_log", cols);
+	}
 	
 	/**
 	 * Amount of items in the drop table
@@ -134,11 +134,11 @@ public class TreasureChest {
 	 * @param luck The luck value to modify the loot by, usually based off of player luck attribute
 	 * @return An array containing all the items randomly picked from the TreasureChest drop table
 	 */
-	public static ItemStack[] rollItems(Double luck){
-        //501 edit - added luck
-        luck = Math.min(luck, 5);
-        luck = Math.max(luck, -5);
-        //Capping luck to avoid badness
+	public static ItemStack[] rollItems(Double luck) {
+		//501 edit - added luck
+		luck = Math.min(luck, 5);
+		luck = Math.max(luck, -5);
+		//Capping luck to avoid badness
 		if(loot.isEmpty()) return null;
 
 		int t = 0;
@@ -146,14 +146,14 @@ public class TreasureChest {
 
 		Random rnd = new Random();
 
-		int times = rnd.nextDouble() < 0.3+(0.1*luck)? 2:1;
+		int times = rnd.nextDouble() < 0.3 + (0.1 * luck) ? 2 : 1;
 		ItemStack[] items = new ItemStack[times];
 
 		//Pick items from drop table
 		for(int i=0; i < times; i++){
 			int roll = rnd.nextInt(t);
-            roll += luck*10;
-            roll = Math.max(roll, 0); //avoiding negatives which could cause issues and increase the drop chances
+			roll += luck * 10;
+			roll = Math.max(roll, 0); //avoiding negatives which could cause issues and increase the drop chances
 			for(Entry<ItemStack, Integer> entry : loot.entrySet()){
 				roll -= entry.getValue();
 				if(roll < 0){

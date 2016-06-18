@@ -26,7 +26,7 @@ public class ArcheSQLiteHandler extends SQLHandler {
 	 * @param plugin The Plugin to create this database for; this affects the db file's location
 	 * @param identifier The (file)name of the database.
 	 */
-	public ArcheSQLiteHandler(Plugin plugin, String identifier){
+	public ArcheSQLiteHandler(Plugin plugin, String identifier) {
 		sqlite = new SQLite(plugin.getLogger(), identifier, plugin.getDataFolder().getAbsolutePath(), identifier);
         this.folder = plugin.getDataFolder();
         name = identifier;
@@ -41,10 +41,10 @@ public class ArcheSQLiteHandler extends SQLHandler {
 	}
 
     /**
-     * Clones the database for this ArcheSQLiteHandler.
-     * Use with EXTREME caution. Will lock the DB for the duration of the clone, so don't use during runtime if you're
-     * constantly using the SQLite connection
-     */
+	 * Clones the database for this ArcheSQLiteHandler.
+	 * Use with EXTREME caution. Will lock the DB for the duration of the clone, so don't use during runtime if you're
+	 * constantly using the SQLite connection
+	 */
 
     public void cloneDB() {
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH");
@@ -94,7 +94,7 @@ public class ArcheSQLiteHandler extends SQLHandler {
 	}
 
 	@Override
-	public synchronized final void close(){
+	public synchronized final void close() {
 		sqlite.close();
 	}
 
@@ -210,10 +210,14 @@ public class ArcheSQLiteHandler extends SQLHandler {
 	@Override
 	public synchronized void execute(String query){
 		ResultSet res = null;
-		
-		try{res = sqlite.query(query);}
-		catch(SQLException e){e.printStackTrace();}
-		finally{SQLUtils.closeStatement(res);}
+
+		try {
+			res = sqlite.query(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			SQLUtils.closeStatement(res);
+		}
 	}
 
 	@Override

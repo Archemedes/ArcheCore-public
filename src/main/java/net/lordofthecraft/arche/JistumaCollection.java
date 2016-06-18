@@ -22,7 +22,7 @@ public class JistumaCollection implements JMisc{
         }
         p.setMetadata(name, new FixedMetadataValue(ArcheCore.getPlugin(),persona));
         Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> {
-            if (p.hasMetadata(name)){
+            if (p.hasMetadata(name)) {
                 p.removeMetadata(name, ArcheCore.getPlugin());
             }
         }, time);

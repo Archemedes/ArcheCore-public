@@ -5,15 +5,16 @@ import java.util.Map;
 
 public interface Button {
 
-	
-	Map<String, Object> getContext();
-	
-	void onClick();
-	
-	String getName();
-	
-	String setName();
-	
-	List<String> getDescription();
-	void setDescription();
+
+    Map<String, Object> getContext();
+
+    void onClick();
+
+    String getName();
+
+    String setName();
+
+    List<String> getDescription();
+
+    void setDescription();
 }

@@ -24,7 +24,7 @@ public class JistumaCollectionListener implements Listener{
 			List<?> lore = s.getItemMeta().getLore();
 			if (lore==null && !p.hasPermission("potions.mayuse")){
 				e.setCancelled(true);
-				p.getEquipment().setItemInMainHand(new ItemStack(Material.GLASS_BOTTLE,1));
+				p.getEquipment().setItemInMainHand(new ItemStack(Material.GLASS_BOTTLE, 1));
 			}
 		}
 		if (s.hasItemMeta() && p.isInsideVehicle()){

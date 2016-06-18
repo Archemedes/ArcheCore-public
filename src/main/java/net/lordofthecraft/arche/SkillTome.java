@@ -140,9 +140,9 @@ public class SkillTome {
         private final Skill skill;
 
 		public SkillTomeStatementTask(@Nonnull Skill skill, @Nonnull Persona pers, @Nonnull double xp) {
-            time = System.currentTimeMillis();
-            this.pers = pers;
-            this.amt = xp;
+			time = System.currentTimeMillis();
+			this.pers = pers;
+			this.amt = xp;
             this.skill = skill;
 		}
 

@@ -277,7 +277,7 @@ public class RacialBonusListener implements Listener {
 						|| handler.getPersona(e.getPlayer()).getRace() == Race.SPECTRE
 						|| handler.getPersona(e.getPlayer()).getRace() == Race.NECROLYTE) {
 					e.setCancelled(true);
-					e.getPlayer().getEquipment().setItemInMainHand(new ItemStack(Material.GLASS_BOTTLE,1));
+					e.getPlayer().getEquipment().setItemInMainHand(new ItemStack(Material.GLASS_BOTTLE, 1));
 				}
 			}
 		}

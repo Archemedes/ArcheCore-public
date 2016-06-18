@@ -69,8 +69,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private UUID newbieWorldUUID;
 	private boolean useWiki;
 	private String worldName;
-    private boolean racialSwingTimer;
-    private boolean usingMySQL;
+	private boolean racialSwingTimer;
+	private boolean usingMySQL;
 
 	private Thread saverThread = null;
 
@@ -102,17 +102,17 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		saveHandler.put(new EndOfStreamTask());
 
 		Bukkit.getOnlinePlayers().stream().forEach(p -> {
-            //This part must be done for safety reasons.
-            //Disables are messy, and in the brief period of Bukkit downtime
-            //Players may shift inventories around and dupe items they shouldn't dupe
-            p.closeInventory();
+			//This part must be done for safety reasons.
+			//Disables are messy, and in the brief period of Bukkit downtime
+			//Players may shift inventories around and dupe items they shouldn't dupe
+			p.closeInventory();
 
-            //Attribute Bonuses stick around forever. To prevent lingering ones, just in
-            //case the plugin is to be removed, we perform this method.
-            RaceBonusHandler.reset(p);
-        });
+			//Attribute Bonuses stick around forever. To prevent lingering ones, just in
+			//case the plugin is to be removed, we perform this method.
+			RaceBonusHandler.reset(p);
+		});
 
-		if(saverThread != null) {
+		if (saverThread != null) {
 			try {
 				saverThread.join();}
 			catch (InterruptedException e) {
@@ -121,9 +121,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			}
 		}
 		sqlHandler.close();
-        if (shouldClone && sqlHandler instanceof ArcheSQLiteHandler) {
+		if (shouldClone && sqlHandler instanceof ArcheSQLiteHandler) {
 			((ArcheSQLiteHandler) sqlHandler).cloneDB();
-        }
+		}
 	}
 
 	@Override
@@ -140,20 +140,20 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		initConfig();
 
 		//Find our Singletons and assign them.
-        getLogger().info("Loading "+(usingMySQL ? "MySQL" : "SQLite")+" handler now.");
-        if (usingMySQL) {
-            String username = getConfig().getString("mysql.user");
-            String password = getConfig().getString("mysql.password");
-            try {
-                getLogger().info("Logging into MySQL at "+WhySQLHandler.getUrl()+", Username: "+username);
-                sqlHandler = new WhySQLHandler(username, password);
-            } catch (Exception e) {
-                getLogger().log(Level.SEVERE, "Failed to initialize MySQL DB on url "+WhySQLHandler.getUrl()+" with username "+username+" and password "+password, e);
-                sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
-            }
-        } else {
-            sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
-        }
+		getLogger().info("Loading " + (usingMySQL ? "MySQL" : "SQLite") + " handler now.");
+		if (usingMySQL) {
+			String username = getConfig().getString("mysql.user");
+			String password = getConfig().getString("mysql.password");
+			try {
+				getLogger().info("Logging into MySQL at " + WhySQLHandler.getUrl() + ", Username: " + username);
+				sqlHandler = new WhySQLHandler(username, password);
+			} catch (Exception e) {
+				getLogger().log(Level.SEVERE, "Failed to initialize MySQL DB on url " + WhySQLHandler.getUrl() + " with username " + username + " and password " + password, e);
+				sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
+			}
+		} else {
+			sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
+		}
 		saveHandler = SaveHandler.getInstance();
 		blockRegistry = new BlockRegistry();
 		personaHandler = ArchePersonaHandler.getInstance();
@@ -288,7 +288,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		//Init skilltome logging
 		SkillTome.init(sqlHandler);
 
-        //Init treasurechest logging
+		//Init treasurechest logging
 		TreasureChest.initSQL();
 
 		//Create internally handled skill that holds Xp given from skill resets
@@ -319,8 +319,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		protectiveTeleport = config.getBoolean("teleport.to.rescue");
 		teleportNewbies = config.getBoolean("new.persona.to.spawn");
 		worldName = config.getString("server.world.name");
-        racialSwingTimer = config.getBoolean("racial.swing.timer");
-        usingMySQL = config.getBoolean("enable.mysql");
+		racialSwingTimer = config.getBoolean("racial.swing.timer");
+		usingMySQL = config.getBoolean("enable.mysql");
 
 
 		if(config.getBoolean("bonus.xp.racial"))
@@ -640,6 +640,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		return worldName;
 	}
 
-    @Override
-    public boolean isRacialSwingEnabled() {return racialSwingTimer;}
+	@Override
+	public boolean isRacialSwingEnabled() {
+		return racialSwingTimer;
+	}
 }

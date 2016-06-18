@@ -8,8 +8,8 @@ public enum AttributeType {
 	ATTACK_DAMAGE ("ATTACK_DAMAGE", "generic.attackDamage"),
 	ZOMBIE_REINFORCEMENTS("x", "zombie.spawnReinforcements"),
 	HORSE_JUMPSTRENGTH("y", "horse.jumpStrength"),
-	ATTACK_SPEED ("f", "generic.attackSpeed"),
-	ARMOR ("g", "generic.Armor"),
+	ATTACK_SPEED("f", "generic.attackSpeed"),
+	ARMOR("g", "generic.Armor"),
 	ARMORTOUGH("h", "generic.armorToughness"),
 	LUCK("i", "generic.luck"); //1.9
 	

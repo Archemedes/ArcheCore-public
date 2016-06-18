@@ -29,7 +29,7 @@ public class InsertTask extends ArcheTask {
 	@Override
 	public void run() {
 		try{
-			if(stat == null) stat = handle.getConnection()
+			if (stat == null) stat = handle.getConnection()
 				.prepareStatement("INSERT INTO persona (player,id,name,age,race,gender,autoage) VALUES (?,?,?,?,?,?,?)");
 				
 			stat.setString(1,player);

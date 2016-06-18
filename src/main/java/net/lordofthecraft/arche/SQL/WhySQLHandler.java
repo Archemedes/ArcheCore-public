@@ -13,6 +13,7 @@ import java.util.logging.Level;
 
 /**
  * Represents an SQLHandler affiliated with MySQL
+ *
  * @author 501warhead (Why)
  */
 public class WhySQLHandler extends SQLHandler {
@@ -184,9 +185,13 @@ public class WhySQLHandler extends SQLHandler {
     @Override
     public void execute(String query) {
         ResultSet res = null;
-        try{res = query(query);}
-        catch(SQLException e){e.printStackTrace();}
-        finally{SQLUtils.closeStatement(res);}
+        try {
+            res = query(query);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            SQLUtils.closeStatement(res);
+        }
     }
 
     @Override
