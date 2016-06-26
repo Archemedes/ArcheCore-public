@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.attributes;
 
+@Deprecated
 public enum AttributeType {
 	MAX_HEALTH ("maxHealth", "generic.maxHealth"),
 	FOLLOW_RANGE ("FOLLOW_RANGE", "generic.followRange"),

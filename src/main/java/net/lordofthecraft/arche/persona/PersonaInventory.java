@@ -1,7 +1,7 @@
 package net.lordofthecraft.arche.persona;
 
 import com.google.common.collect.Lists;
-import net.lordofthecraft.arche.attributes.AttributeItem;
+import io.github.archemedes.customitem.attributeitem.AttributeItem;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;

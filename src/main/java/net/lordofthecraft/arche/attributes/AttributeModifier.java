@@ -8,6 +8,7 @@ import java.util.UUID;
 /**
  * Represents a wrapped Minecraft Attribute Modifier that may be applied to an entity or item.
  */
+@Deprecated
 public class AttributeModifier {
 
 	private final String name;

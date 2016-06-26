@@ -15,15 +15,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
  * Static class containing the methods for applying an AttributeModifier to an item.
  */
+@Deprecated
 public class AttributeItem {
 	final private static String PATH = "net.minecraft.server." + Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3] + "."; 
 
@@ -207,8 +205,14 @@ public class AttributeItem {
 				tags.setAccessible(true);
 				attributeList = tags;
 			}
-			HashMap<?,?> l = (HashMap<?,?>) attributeList.get(m);
-			return !l.isEmpty();
+			if (attributeList.get(m) instanceof TreeMap) {
+				TreeMap<?, ?> l = (TreeMap<?, ?>) attributeList.get(m);
+				return !l.isEmpty();
+			} else {
+				HashMap<?, ?> l = (HashMap<?, ?>) attributeList.get(m);
+				return !l.isEmpty();
+			}
+
 		}catch(Throwable t){t.printStackTrace(); return false;}
 	}
 

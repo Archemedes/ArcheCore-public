@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 /**
  * Static class containing the methods for applying an AttributeModifier to an entity.
  */
+@Deprecated
 public class AttributeBase {
 	private static Constructor<?> maker = null;
 	

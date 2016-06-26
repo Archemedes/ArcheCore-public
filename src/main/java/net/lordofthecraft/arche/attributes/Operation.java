@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.attributes;
 
+@Deprecated
 public enum Operation {
 	INCREMENT (0),
 	MULTIPLY (1),

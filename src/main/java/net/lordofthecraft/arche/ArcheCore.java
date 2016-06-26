@@ -352,11 +352,12 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("money").setExecutor(new CommandMoney(helpdesk, economy));
 		getCommand("namelog").setExecutor(new CommandNamelog());
 		getCommand("arsql").setExecutor(new CommandSql());
-        getCommand("arclone").setExecutor(new CommandSqlClone());
-		//501 added this
+		//501 added these
+		getCommand("arclone").setExecutor(new CommandSqlClone());
 		getCommand("newbies").setExecutor(new CommandNewbies(personaHandler));
 		getCommand("racespawn").setExecutor(new CommandRaceSpawn(personaHandler));
-		getCommand("wikisign").setExecutor(new CommandWikiSign());
+		getCommand("attribute").setExecutor(new CommandAttribute());
+		getCommand("attribute").setTabCompleter(new CommandAttributeTabCompleter());
 	}
 
 	private void initListeners(){

@@ -74,4 +74,10 @@ commands:
       description: Set the spawn of a race.
       permission: archecore.mod.sign
       permission-message: §4Insufficient Permission for this command
+   attribute:
+      usage: /<command>
+      description: Edit the attributes of an online player.
+      permission: archecore.admin
+      aliases: [attr, att, attri, atr]
+      permission-message: §4Insufficient Permission for this command
       

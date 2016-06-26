@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.attributes;
 
+@Deprecated
 public enum AttributeSlot {
     MAINHAND("mainhand"),
     OFFHAND("offhand"),
