@@ -157,11 +157,11 @@ public class CommandAttribute implements CommandExecutor {
     }
 
     private boolean h(CommandSender s, String c) {
-        s.sendMessage("/" + c + " usage:");
-        s.sendMessage("/" + c + " [Player] : Prints out the current state of the player's attribute instances.");
-        s.sendMessage("/" + c + " [Player] [Attribute] : Prints out all the current modifiers for the Player's attribute instance of the specified type.");
-        s.sendMessage("/" + c + " [Player] [Attribute] -r [uuid/id] : Removes the attribute modifier of the specified ID. Id is found with the previous command.");
-        s.sendMessage("/" + c + " [Player] [Attribute] -a : Construct a new attribute to applied to this player. EXTREMELY DANGEROUS");
+        s.sendMessage(ChatColor.AQUA + "/" + c + " usage:");
+        s.sendMessage(ChatColor.GOLD + "/" + c + " [Player] :" + ChatColor.GRAY + " Prints out the current state of the player's attribute instances.");
+        s.sendMessage(ChatColor.GOLD + "/" + c + " [Player] [Attribute] :" + ChatColor.GRAY + " Prints out all the current modifiers for the Player's attribute instance of the specified type.");
+        s.sendMessage(ChatColor.GOLD + "/" + c + " [Player] [Attribute] -r [uuid/id] :" + ChatColor.GRAY + " Removes the attribute modifier of the specified ID. Id is found with the previous command.");
+        s.sendMessage(ChatColor.GOLD + "/" + c + " [Player] [Attribute] -a :" + ChatColor.GRAY + " Construct a new attribute to applied to this player." + ChatColor.RED + " EXTREMELY DANGEROUS");
         StringBuilder sb = new StringBuilder();
         sb.append("Valid Attributes: ");
         String ss = "";
@@ -333,7 +333,7 @@ public class CommandAttribute implements CommandExecutor {
 
         @Override
         protected Prompt acceptValidatedInput(ConversationContext conversationContext, Number number) {
-            conversationContext.setSessionData("amount", number.doubleValue());
+            conversationContext.setSessionData("amount", number.floatValue());
             return new ConfirmAttributeModifierCreationPrompt();
         }
 
@@ -358,7 +358,7 @@ public class CommandAttribute implements CommandExecutor {
                     Attribute att = Attribute.valueOf((String) data.get("attribute"));
                     String name = (String) data.get("name");
                     UUID id = (UUID) data.get("id");
-                    double amt = (double) data.get("amount");
+                    double amt = (float) data.get("amount");
                     AttributeModifier.Operation op = AttributeModifier.Operation.valueOf((String) data.get("operation"));
                     AttributeInstance instance = target.getAttribute(att);
                     instance.addModifier(new AttributeModifier(id, name, amt, op));
