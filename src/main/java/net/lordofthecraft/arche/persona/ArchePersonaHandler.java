@@ -608,6 +608,12 @@ public class ArchePersonaHandler implements PersonaHandler {
 				}
 			}
 			topData = new TopData();
+			/*
+			 * TODO
+			 * Move this out of initPreload, or if presonas aren't preloaded it will throw NPE since racespawns will be null.
+			 * - Kowaman
+			 * 
+			 */
 			ResultSet rs;
 			racespawns = Maps.newHashMap();
 			try {
