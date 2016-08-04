@@ -303,7 +303,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		switchPersona(p, id); //This teleport will fail due to the Location being null still
 
-		/*if (ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
+		if (ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
 			Location to;
 			if (!racespawns.containsKey(race)) {
 				World w = ArcheCore.getControls().getNewPersonaWorld();
@@ -312,7 +312,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 				to = racespawns.get(race);
 			}
 			p.teleport(to);
-		}*/
+		}
 
 		return persona;
 	}

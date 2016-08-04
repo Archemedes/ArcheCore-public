@@ -118,9 +118,9 @@ public class CreationDialog {
 		//1 week in ms = 604800000
 		final long weekSinceCreation = pers.creationTimeMS + 604800000;
 		final long hoursSince = TimeUnit.MILLISECONDS.toHours((System.currentTimeMillis() - pers.creationTimeMS));
-		Bukkit.broadcastMessage("created on" + pers.creationTimeMS);
-		Bukkit.broadcastMessage("current time" + System.currentTimeMillis());
-		Bukkit.broadcastMessage("expires on" + weekSinceCreation);
+		//Bukkit.broadcastMessage("created on" + pers.creationTimeMS);
+		//Bukkit.broadcastMessage("current time" + System.currentTimeMillis());
+		//Bukkit.broadcastMessage("expires on" + weekSinceCreation);
 		if(weekSinceCreation > System.currentTimeMillis()){
 			p.sendMessage(ChatColor.RED + "You must wait at least 1 week before deleting a persona!");
 			p.sendMessage(ChatColor.YELLOW + "You created this persona " + ChatColor.WHITE + hoursSince + ChatColor.YELLOW +" hours ago!");
