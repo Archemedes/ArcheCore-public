@@ -21,6 +21,7 @@ public enum PersonaField {
 	SKILL_PRIMARY("skill_primary"),
 	SKILL_SECONDARY("skill_secondary"),
 	SKILL_ADDITIONAL("skill_tertiary"),
+	STAT_CREATION("stat_creation"),
 	MONEY("money"),
 	SKIN("skin");
 	

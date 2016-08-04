@@ -43,6 +43,7 @@ public class PlayerJoinListener implements Listener {
 		//if(logger != null) logger.putPair(p.getUniqueId(), p.getName());
 		if(timer != null) timer.stopTiming("login");
 		if(ArcheCore.getPlugin().debugMode()) ArcheCore.getPlugin().getLogger().info("{Login} Currently have " + handler.getPersonas().size() + " persona files for " + Bukkit.getOnlinePlayers().size() + " players." );
+
 	}
 	
 	@EventHandler
@@ -57,7 +58,7 @@ public class PlayerJoinListener implements Listener {
 		//If Personas are not cached, send a signal into the consumer queue
 		//To unload the Personas as soon as all save operations are done
 		if(!plug.willCachePersonas()) buffer.put(new UnloadTask(p));
-		
+
 		RaceBonusHandler.reset(p);
 		
 		if(timer != null){

@@ -242,7 +242,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 
 	@Override
-	public ArchePersona createPersona(Player p, int id, String name, Race race, int gender, int age, boolean autoAge){
+	public ArchePersona createPersona(Player p, int id, String name, Race race, int gender, int age, boolean autoAge, long creationTime){
 
 		ArchePersona[] prs = personas.get(p.getUniqueId());
 		if(prs == null){
@@ -265,7 +265,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			deleteSkills(prs[id]);
 		}
 
-		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age);
+		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age,creationTime);
 		persona.autoAge = autoAge;
 
 		PersonaCreateEvent event = new PersonaCreateEvent(persona, prs[id]);
@@ -295,7 +295,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		for(PotionEffect ps : p.getActivePotionEffects())
 			p.removePotionEffect(ps.getType());
 
-		ArcheTask task = new InsertTask(uuid, id, name, age, race, gender, autoAge);
+		ArcheTask task = new InsertTask(uuid, id, name, age, race, gender, autoAge,creationTime);
 		buffer.put(task);
 
 		RaceBonusHandler.apply(p, race);
@@ -303,7 +303,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		switchPersona(p, id); //This teleport will fail due to the Location being null still
 
-		if (ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
+		/*if (ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
 			Location to;
 			if (!racespawns.containsKey(race)) {
 				World w = ArcheCore.getControls().getNewPersonaWorld();
@@ -312,7 +312,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 				to = racespawns.get(race);
 			}
 			p.teleport(to);
-		}
+		}*/
 
 		return persona;
 	}
@@ -500,8 +500,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 		Race race = Race.valueOf(res.getString(5));
 		String rheader = res.getString(6);
 		int gender = res.getInt(7);
+		long creationTimeMS = res.getLong(26);
 
-		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age);
+		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age,creationTimeMS);
 		//prs[id] = persona;
 
 		if(rheader != null && !rheader.equals("null") && !rheader.isEmpty()){
@@ -541,6 +542,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.professions[0] = ArcheSkillFactory.getSkill(res.getString(23));
 		persona.professions[1] = ArcheSkillFactory.getSkill(res.getString(24));
 		persona.professions[2] = ArcheSkillFactory.getSkill(res.getString(25));
+
 
 		//String skinURL = res.getString(26);
 		

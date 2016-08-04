@@ -17,10 +17,8 @@ import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Random;
 
 /**
  * A treasure chest is an item that players can click to pry open. 
@@ -164,5 +162,44 @@ public class TreasureChest {
 		}
 
 		return items;
+	}
+
+	private static List<ItemStack> getItemList(){
+		Set<ItemStack> keys = TreasureChest.loot.keySet();
+		Iterator<ItemStack> it= keys.iterator();
+		if(keys.size() > 0) {
+			List<ItemStack> items = new ArrayList<>();
+			for (int i = 0; i < keys.size() && it.hasNext(); i++) {
+				items.add(it.next());
+			}
+			return items;
+		}
+		return null;
+	}
+
+	public static List<ItemStack> first54(){
+		final List<ItemStack> items = getItemList();
+		if(items != null) {
+			List<ItemStack> first53Items = new ArrayList<>(54);
+			for (int i = 0; i < 55; i++) {
+				first53Items.add(items.get(i));
+			}
+			return first53Items;
+		}else{
+			return null;
+		}
+	}
+
+	public static List<ItemStack> remainingItems(){
+		final List<ItemStack> items = getItemList();
+		if(items != null) {
+			List<ItemStack> remains = new ArrayList<>();
+			for (int i = 54; i < items.size(); i++) {
+				remains.add(items.get(i));
+			}
+			return remains;
+		}else{
+			return null;
+		}
 	}
 }

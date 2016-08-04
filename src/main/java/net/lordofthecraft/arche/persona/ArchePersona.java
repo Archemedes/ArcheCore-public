@@ -77,7 +77,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	boolean autoAge;
 	String raceHeader = null;
 	long lastRenamed;
-
+	long creationTimeMS;
 	//Player name no longer final or private
 	//We must be able to change it in case of relogs/preloads
 	//Where the player has changed their username with Mojang
@@ -95,13 +95,14 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private int food = 0;
 	private double health = 0;
 	
-	private ArchePersona(int id, String name, Race race, int gender, int age) {
+	private ArchePersona(int id, String name, Race race, int gender, int age,long creationTimeMS) {
 		key = new ArchePersonaKey(UUID.randomUUID(),id);
 		player = name;
 		this.race = race;
 		this.name = name;
 		this.gender = gender;
 		this.age = age;
+		this.creationTimeMS = creationTimeMS;
 
 		timePlayed = new AtomicInteger();
 		charactersSpoken = new AtomicInteger();
@@ -112,7 +113,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		sqlCriteria.put("id", id);
 	}
 
-	ArchePersona(OfflinePlayer p, int id, String name, Race race, int gender, int age){
+	ArchePersona(OfflinePlayer p, int id, String name, Race race, int gender, int age,long creationTimeMS){
 		this.key = new ArchePersonaKey(p.getUniqueId(), id);
 
 		player = p.getName();
@@ -120,6 +121,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		this.name = name;
 		this.gender = gender;
 		this.age = age;
+		this.creationTimeMS = creationTimeMS;
 
 		timePlayed = new AtomicInteger();
 		charactersSpoken = new AtomicInteger();
@@ -131,7 +133,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	public static ArchePersona buildTestPersona() {
-		return new ArchePersona(0, "test", Race.UNSET, 0, 0);
+		return new ArchePersona(0, "test", Race.UNSET, 0, 0,0);
 	}
 
 	public void addSkill(ArcheSkill skill, FutureTask<SkillData> future){
@@ -787,5 +789,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		public int compare(Skill o1, Skill o2) {
 			return Double.compare(o2.getXp(p), o1.getXp(p));
 		}
+	}
+
+	@Override
+	public long getCreationTime(){
+		return this.creationTimeMS;
 	}
 }

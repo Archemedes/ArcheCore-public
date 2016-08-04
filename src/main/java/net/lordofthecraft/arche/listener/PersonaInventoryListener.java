@@ -26,10 +26,14 @@ public class PersonaInventoryListener implements Listener {
                         }
                         pers.getPInv().setContents(contents);
                     }
+
                 }
             } else {
                 e.setCancelled(true);
             }
+        }
+        if(e.getInventory().getTitle().contains("Casket Table(Pg.")){
+            e.setCancelled(true);
         }
     }
 }

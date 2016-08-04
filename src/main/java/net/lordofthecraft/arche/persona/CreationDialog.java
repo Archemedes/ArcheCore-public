@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class CreationDialog {
 
@@ -110,6 +111,22 @@ public class CreationDialog {
 		}
 
 		addAbandoners();
+
+		/*cancel persona deletion if persona was created less than a week ago to prevent people from creating and
+			deleting personas to just get the free skill xp
+		*/
+		//1 week in ms = 604800000
+		final long weekSinceCreation = pers.creationTimeMS + 604800000;
+		final long hoursSince = TimeUnit.MILLISECONDS.toHours((System.currentTimeMillis() - pers.creationTimeMS));
+		Bukkit.broadcastMessage("created on" + pers.creationTimeMS);
+		Bukkit.broadcastMessage("current time" + System.currentTimeMillis());
+		Bukkit.broadcastMessage("expires on" + weekSinceCreation);
+		if(weekSinceCreation > System.currentTimeMillis()){
+			p.sendMessage(ChatColor.RED + "You must wait at least 1 week before deleting a persona!");
+			p.sendMessage(ChatColor.YELLOW + "You created this persona " + ChatColor.WHITE + hoursSince + ChatColor.YELLOW +" hours ago!");
+			return;
+		}
+
 
 		Map<Object, Object> data = Maps.newHashMap();
 		data.put("persona", pers);
@@ -515,7 +532,8 @@ public class CreationDialog {
 			Race race = (Race) context.getSessionData("race");
 			int age = (Integer) context.getSessionData("age");
 			boolean autoAge = (Boolean) context.getSessionData("autoage");
-			Persona pers = ArchePersonaHandler.getInstance().createPersona(p, id, name, race, gender, age, autoAge);
+			long creationTimeMS = System.currentTimeMillis();
+			Persona pers = ArchePersonaHandler.getInstance().createPersona(p, id, name, race, gender, age, autoAge, creationTimeMS);
 
 			if(pers != null && context.getSessionData("first") != null){
 				Economy econ = ArcheCore.getControls().getEconomy();

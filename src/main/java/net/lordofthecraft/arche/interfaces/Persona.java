@@ -279,5 +279,6 @@ public interface Persona {
 	 * @return the inventory of this persona as an Inventory object
 	 */
 	Inventory getInventory();
-	
+
+	long getCreationTime();
 }

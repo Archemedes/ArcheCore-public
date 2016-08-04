@@ -154,7 +154,7 @@ public interface PersonaHandler {
 	 * @return The resulting persona
 	 */
 	Persona createPersona(Player p, int id, String name, Race race,
-						  int gender, int age, boolean autoAge);
+						  int gender, int age, boolean autoAge, long creationTimeMS);
 
 	/**
 	 * Method that provides a human-readable list of information about a Persona, to be used in prints
