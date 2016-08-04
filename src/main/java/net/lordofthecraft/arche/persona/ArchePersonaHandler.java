@@ -500,7 +500,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		Race race = Race.valueOf(res.getString(5));
 		String rheader = res.getString(6);
 		int gender = res.getInt(7);
-		long creationTimeMS = res.getLong(26);
+		long creationTimeMS = (res.getLong(26) == 0) ? System.currentTimeMillis() : res.getLong(26);
+
 
 		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age,creationTimeMS);
 		//prs[id] = persona;
