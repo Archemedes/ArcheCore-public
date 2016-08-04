@@ -534,7 +534,7 @@ public class CreationDialog {
 			boolean autoAge = (Boolean) context.getSessionData("autoage");
 			long creationTimeMS = System.currentTimeMillis();
 			Persona pers = ArchePersonaHandler.getInstance().createPersona(p, id, name, race, gender, age, autoAge, creationTimeMS);
-
+			//give raw xp 75k
 			if(pers != null && context.getSessionData("first") != null){
 				Economy econ = ArcheCore.getControls().getEconomy();
 				if(econ != null) econ.setPersona(pers, econ.getBeginnerAllowance());
