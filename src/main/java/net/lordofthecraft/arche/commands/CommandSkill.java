@@ -87,7 +87,8 @@ public class CommandSkill implements CommandExecutor {
 
 				double bonusXp = ArcheSkillFactory.getSkill("internal_drainxp").getXp(who);
 				if(bonusXp >= 1){
-					sender.sendMessage(ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + "Free XP (assign with /sk [skill] assign [xp]): " + (int) bonusXp);
+					sender.sendMessage(ChatColor.DARK_PURPLE + "" + ChatColor.ITALIC + "Free XP (assign with /sk [skill] assign [xp]) ");
+					sender.sendMessage(ChatColor.GOLD.toString() + ChatColor.ITALIC + "Free XP remaining: " + ChatColor.RESET + (int) bonusXp);
 				}
 
 				sender.sendMessage(ChatColor.GRAY + "(Color Index: " + ChatColor.DARK_GREEN + "Main Profession" + ChatColor.GRAY + ", " + ChatColor.GREEN + "Second Profession"  + ChatColor.GRAY + ", "

@@ -10,6 +10,8 @@ import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
+import net.lordofthecraft.arche.skill.ArcheSkill;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.conversations.*;
@@ -534,7 +536,8 @@ public class CreationDialog {
 			boolean autoAge = (Boolean) context.getSessionData("autoage");
 			long creationTimeMS = System.currentTimeMillis();
 			Persona pers = ArchePersonaHandler.getInstance().createPersona(p, id, name, race, gender, age, autoAge, creationTimeMS);
-			//give raw xp 75k
+			ArcheSkillFactory.getSkill("internal_drainxp").addRawXp(pers,75000);
+
 			if(pers != null && context.getSessionData("first") != null){
 				Economy econ = ArcheCore.getControls().getEconomy();
 				if(econ != null) econ.setPersona(pers, econ.getBeginnerAllowance());

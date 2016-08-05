@@ -305,14 +305,20 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		if (ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
 			Location to;
-			if (!racespawns.containsKey(race)) {
-				World w = ArcheCore.getControls().getNewPersonaWorld();
-				to = w == null ? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
-			} else {
-				to = racespawns.get(race);
+			try {
+				if (!racespawns.containsKey(race)) {
+					World w = ArcheCore.getControls().getNewPersonaWorld();
+					to = w == null ? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
+				} else {
+					to = racespawns.get(race);
+				}
+				p.teleport(to);
+			}catch (Exception e){
+				Bukkit.getLogger().info("Could not tp player to race spawn!");
 			}
-			p.teleport(to);
 		}
+
+
 
 		return persona;
 	}
