@@ -40,9 +40,9 @@ public class CreationDialog {
 	public CreationDialog(){
 		plugin = ArcheCore.getPlugin();
 		factory = new ConversationFactory(plugin)
-		.thatExcludesNonPlayersWithMessage("NO! FU Tythus how are you even seeing this?")
-		.withPrefix(new Prefix())
-		.withModality(true);
+				.thatExcludesNonPlayersWithMessage("NO! FU Tythus how are you even seeing this?")
+				.withPrefix(new Prefix())
+				.withModality(true);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -82,24 +82,14 @@ public class CreationDialog {
 		p.addPotionEffects(e);
 	}
 
-	public void addPersona(Player p, int slot){
+	public void addPersona(Player p, int slot, boolean nullPersona){
 		if(!mayConverse(p)){
 			p.sendRawMessage(ChatColor.RED + "ERROR: " + ChatColor.DARK_RED + "You are already in a dialog!");
 			p.sendRawMessage(ChatColor.RED + "Type 'cancel' to abandon your current dialog.");
 			return;
 		}
-		//@ teegah make this stuff into a method l8r
-		final ArchePersona pers = ArcheCore.getPlugin().getPersonaHandler().getPersona(p);
-		final long weekSinceCreation = pers.creationTimeMS + 604800000;
-		final long hoursSince = TimeUnit.MILLISECONDS.toHours((System.currentTimeMillis() - pers.creationTimeMS));
-		//Bukkit.broadcastMessage("created on" + pers.creationTimeMS);
-		//Bukkit.broadcastMessage("current time" + System.currentTimeMillis());
-		//Bukkit.broadcastMessage("expires on" + weekSinceCreation);
-		if(weekSinceCreation > System.currentTimeMillis()){
-			p.sendMessage(ChatColor.RED + "You must wait at least 1 week before deleting a persona!");
-			p.sendMessage(ChatColor.YELLOW + "You created this persona " + ChatColor.WHITE + hoursSince + ChatColor.YELLOW +" hours ago!");
-			return;
-		}
+		
+		if (!canDelete(ArcheCore.getControls().getPersonaHandler().getPersona(p.getUniqueId(), slot), p, nullPersona)) return;
 
 		addAbandoners();
 		Map<Object, Object> data = Maps.newHashMap();
@@ -123,24 +113,10 @@ public class CreationDialog {
 			p.sendRawMessage(ChatColor.RED + "Type 'cancel' to abandon your current dialog.");
 			return;
 		}
+		
+		if (!canDelete(pers, p, false)) return;
 
 		addAbandoners();
-
-		/*cancel persona deletion if persona was created less than a week ago to prevent people from creating and
-			deleting personas to just get the free skill xp
-		*/
-		//1 week in ms = 604800000
-		final long weekSinceCreation = pers.getCreationTime() + 604800000;
-		final long daysSince = TimeUnit.MILLISECONDS.toDays((System.currentTimeMillis() - pers.getCreationTime()));
-		//Bukkit.broadcastMessage("created on" + pers.creationTimeMS);
-		//Bukkit.broadcastMessage("current time" + System.currentTimeMillis());
-		//Bukkit.broadcastMessage("expires on" + weekSinceCreation);
-		if((pers != null) && (weekSinceCreation > System.currentTimeMillis())){
-			p.sendMessage(ChatColor.RED + "You must wait at least one week before deleting a persona!");
-			p.sendMessage(ChatColor.YELLOW + "You created this persona " + ChatColor.WHITE + daysSince + ChatColor.YELLOW +" hours ago!");
-			return;
-		}
-
 
 		Map<Object, Object> data = Maps.newHashMap();
 		data.put("persona", pers);
@@ -149,6 +125,24 @@ public class CreationDialog {
 		.withFirstPrompt(new ConfirmRemovalPrompt())
 		.buildConversation(p)
 		.begin();
+	}
+
+	private boolean canDelete(Persona pers, Player p, boolean nullPersona) {
+		if (nullPersona || pers == null) return true;
+
+		/*cancel persona deletion if persona was created less than a week ago to prevent people from creating and
+		deleting personas to just get the free skill xp
+		 */
+		//1 week in ms = 604800000
+		final long weekSinceCreation = pers.getCreationTime() + 604800000;
+		final long daysSince = TimeUnit.MILLISECONDS.toDays((System.currentTimeMillis() - pers.getCreationTime()));
+		if((pers != null) && (weekSinceCreation > System.currentTimeMillis())){
+			p.sendMessage(ChatColor.RED + "You must wait at least one week before deleting your persona " + pers.getName() + ".");
+			p.sendMessage(ChatColor.YELLOW + "You created this persona only " + ChatColor.WHITE + daysSince + ChatColor.YELLOW +" hours ago.");
+			return false;
+		}
+		return true;
+
 	}
 
 	private void addAbandoners(){
@@ -373,10 +367,10 @@ public class CreationDialog {
 
 			ChatMessage subraces = new ArcheMessage("Sub Race Options: ").applyChatColor(ChatColor.YELLOW);
 			subraces.addLine(selected.getName())
-				.setUnderlined()
-				.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
-				.setClickEvent(ChatBoxAction.RUN_COMMAND, selected.getName())
-				.addLine(", ");
+			.setUnderlined()
+			.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
+			.setClickEvent(ChatBoxAction.RUN_COMMAND, selected.getName())
+			.addLine(", ");
 
 			for (Race race : Race.values()){
 				if (Objects.equals(race.getParentRace(), selected.getName())
@@ -390,10 +384,10 @@ public class CreationDialog {
 			}
 
 			subraces.addLine("back...")
-				.setItalic()
-				.applyChatColor(ChatColor.GRAY)
-				.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Go back to Race selection")
-				.setClickEvent(ChatBoxAction.RUN_COMMAND, "back");
+			.setItalic()
+			.applyChatColor(ChatColor.GRAY)
+			.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Go back to Race selection")
+			.setClickEvent(ChatBoxAction.RUN_COMMAND, "back");
 
 			subraces.sendTo(p);
 
