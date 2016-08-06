@@ -32,7 +32,10 @@ public class ArmorPreventionListener implements Listener {
 		if (e.getPersona().getRace() == Race.SPECTRE || e.getPersona().getRace() == Race.CONSTRUCT) {
 			boolean flag = false;
 			for (final ItemStack is : e.getPlayer().getInventory().getArmorContents())
-				if (is.getType() != Material.AIR) { flag = true; break; }
+				if (is != null)
+					if (is.getType() != Material.AIR) {
+						flag = true; break;
+					}
 			
 			if (flag) {
 				e.getPlayer().sendMessage(ChatColor.RED+"Error; Please remove your armor before switching to this persona.");
