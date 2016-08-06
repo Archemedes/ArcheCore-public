@@ -58,7 +58,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public boolean isPreloading() {
 		return preloading;
 	}
-	
+
 	public boolean testPersona() {
 		try {
 			ArchePersona persona = ArchePersona.buildTestPersona();
@@ -76,7 +76,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public TopData getTopHandler() { return topData; }
 
@@ -412,6 +412,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 				ensureValidPersonaRecord(p, perses, false);
 			}
 
+			giveXP(perses);
+
 			return;	//Don't need to take further action on this
 		}
 
@@ -430,6 +432,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 				ArchePersona persona = buildPersona(res, p);
 				prs[persona.getId()] = persona;
+
+				giveXP(prs);
 
 				if(persona.current){ 
 					if(!hasCurrent){
@@ -467,6 +471,19 @@ public class ArchePersonaHandler implements PersonaHandler {
 			//Crucial that this part happens for obvious reasons.
 			personas.put(p.getUniqueId(), prs);
 		}	
+	}
+
+	private void giveXP(ArchePersona[] perses) {
+		for (Persona persona : perses) {
+			if (persona != null) {
+				int xp = 0;
+
+				for (Skill sk : ArcheSkillFactory.getSkills().values()) {
+					if (sk != null) xp += sk.getXp(persona);
+				}
+				if (xp == 0) ArcheCore.getControls().getSkill("internal_drainxp").addRawXp(persona, 75000); 
+			}
+		}
 	}
 
 	private void ensureValidPersonaRecord(final Player p, ArchePersona[] prs, boolean hasCurrent){
@@ -552,7 +569,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.pastPlayTime = res.getInt(28);
 
 		//String skinURL = res.getString(26);
-		
+
 		//if(!res.wasNull()){
 		//	persona.skin = new PersonaSkin(skinURL);
 		//}
@@ -566,7 +583,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public void initPreload(int range){
 		SQLHandler handler = ArcheCore.getPlugin().getSQLHandler();
 		long time = System.currentTimeMillis();
-        preloading = true;
+		preloading = true;
 		try{
 			ResultSet res = handler.query("SELECT * FROM persona");
 			while(res.next()){

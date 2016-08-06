@@ -233,7 +233,7 @@ public class ArcheSkill implements Skill {
 			int mins = p.getTimePlayed();
 			if(mins >= 1200){ 
 				double f = 0.05 * (mins / 12000 + Math.pow(mins, 1.5) / 700000);
-				double dmod = Math.min(1, f);
+				double dmod = Math.min(0.20, f);
 				mod += dmod;
 			}
 		}

@@ -135,8 +135,8 @@ public class CreationDialog {
 		//Bukkit.broadcastMessage("created on" + pers.creationTimeMS);
 		//Bukkit.broadcastMessage("current time" + System.currentTimeMillis());
 		//Bukkit.broadcastMessage("expires on" + weekSinceCreation);
-		if(weekSinceCreation > System.currentTimeMillis()){
-			p.sendMessage(ChatColor.RED + "You must wait at least 1 week before deleting a persona!");
+		if((pers != null) && (weekSinceCreation > System.currentTimeMillis())){
+			p.sendMessage(ChatColor.RED + "You must wait at least one week before deleting a persona!");
 			p.sendMessage(ChatColor.YELLOW + "You created this persona " + ChatColor.WHITE + daysSince + ChatColor.YELLOW +" hours ago!");
 			return;
 		}
