@@ -8,6 +8,9 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.PersonaRenameTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -121,8 +124,12 @@ public class CommandPersona implements CommandExecutor {
 
                 return true;
             } else if (args[0].equalsIgnoreCase("time")) {
-                sender.sendMessage(ChatColor.AQUA + "You have played " + ChatColor.GOLD.toString() + ChatColor.BOLD + Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on this persona during 5.0!");
+                sender.sendMessage(ChatColor.AQUA + "You have played " + ChatColor.GOLD.toString() + ChatColor.BOLD + Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on this during The Isles of Axios.");
                 sender.sendMessage(ChatColor.AQUA + "You have a total of " + ChatColor.GOLD.toString() + ChatColor.BOLD + Math.floor(pers.getTotalPlaytime() / 60) + ChatColor.AQUA + " hours on this persona!");
+                return true;
+            } else if (args[0].equalsIgnoreCase("creation")) {
+            	final long hoursSince = TimeUnit.MILLISECONDS.toHours((System.currentTimeMillis() - pers.getCreationTime()));
+            	sender.sendMessage(ChatColor.AQUA + "You created this persona " + ChatColor.GOLD.toString() + ChatColor.BOLD + hoursSince + ChatColor.AQUA + " hours ago.");
                 return true;
             } else if (args[0].equalsIgnoreCase("clearprefix") && prefix) {
                 pers.clearPrefix();

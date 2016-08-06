@@ -130,14 +130,14 @@ public class CreationDialog {
 			deleting personas to just get the free skill xp
 		*/
 		//1 week in ms = 604800000
-		final long weekSinceCreation = pers.creationTimeMS + 604800000;
-		final long hoursSince = TimeUnit.MILLISECONDS.toHours((System.currentTimeMillis() - pers.creationTimeMS));
+		final long weekSinceCreation = pers.getCreationTime() + 604800000;
+		final long daysSince = TimeUnit.MILLISECONDS.toDays((System.currentTimeMillis() - pers.getCreationTime()));
 		//Bukkit.broadcastMessage("created on" + pers.creationTimeMS);
 		//Bukkit.broadcastMessage("current time" + System.currentTimeMillis());
 		//Bukkit.broadcastMessage("expires on" + weekSinceCreation);
 		if(weekSinceCreation > System.currentTimeMillis()){
 			p.sendMessage(ChatColor.RED + "You must wait at least 1 week before deleting a persona!");
-			p.sendMessage(ChatColor.YELLOW + "You created this persona " + ChatColor.WHITE + hoursSince + ChatColor.YELLOW +" hours ago!");
+			p.sendMessage(ChatColor.YELLOW + "You created this persona " + ChatColor.WHITE + daysSince + ChatColor.YELLOW +" hours ago!");
 			return;
 		}
 

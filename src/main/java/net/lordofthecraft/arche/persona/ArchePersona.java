@@ -108,6 +108,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		timePlayed = new AtomicInteger();
 		charactersSpoken = new AtomicInteger();
 		lastRenamed = 0;
+		pastPlayTime = 0;
 
 		sqlCriteria = Maps.newHashMap();
 		sqlCriteria.put("player", getPlayerUUID().toString());
@@ -127,6 +128,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		timePlayed = new AtomicInteger();
 		charactersSpoken = new AtomicInteger();
 		lastRenamed = 0;
+		pastPlayTime = 0;
 
 		sqlCriteria = Maps.newHashMap();
 		sqlCriteria.put("player", getPlayerUUID().toString());
