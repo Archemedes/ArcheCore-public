@@ -506,7 +506,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		Race race = Race.valueOf(res.getString(5));
 		String rheader = res.getString(6);
 		int gender = res.getInt(7);
-		long creationTimeMS = res.getLong(26);
+		long creationTimeMS = res.getLong(27);
 
 
 		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age,creationTimeMS);
@@ -549,7 +549,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.professions[0] = ArcheSkillFactory.getSkill(res.getString(23));
 		persona.professions[1] = ArcheSkillFactory.getSkill(res.getString(24));
 		persona.professions[2] = ArcheSkillFactory.getSkill(res.getString(25));
-		persona.pastPlayTime = res.getInt(27);
+		persona.pastPlayTime = res.getInt(28);
 
 		//String skinURL = res.getString(26);
 		

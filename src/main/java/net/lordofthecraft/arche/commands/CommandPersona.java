@@ -129,11 +129,7 @@ public class CommandPersona implements CommandExecutor {
                 return true;
             } else if (args[0].equalsIgnoreCase("creation")) {
             	final long hoursSince = TimeUnit.MILLISECONDS.toHours((System.currentTimeMillis() - pers.getCreationTime()));
-                final long hoursSince2 = ((((System.currentTimeMillis() - pers.getCreationTime()) / 1000) /60)/60);
-                sender.sendMessage("Current time millis" + System.currentTimeMillis());
-                sender.sendMessage("Creation time " + pers.getCreationTime());
-            	sender.sendMessage(ChatColor.AQUA + "You created this persona " + ChatColor.GOLD.toString() + ChatColor.BOLD + hoursSince + ChatColor.AQUA + " hours ago. timeunit conversion");
-                sender.sendMessage(ChatColor.AQUA + "You created this persona " + ChatColor.GOLD.toString() + ChatColor.BOLD + hoursSince2 + ChatColor.AQUA + " hours ago. default conversion");
+            	sender.sendMessage(ChatColor.AQUA + "You created this persona " + ChatColor.GOLD.toString() + ChatColor.BOLD + hoursSince + ChatColor.AQUA + " hours ago.");
 
                 return true;
             } else if (args[0].equalsIgnoreCase("clearprefix") && prefix) {
