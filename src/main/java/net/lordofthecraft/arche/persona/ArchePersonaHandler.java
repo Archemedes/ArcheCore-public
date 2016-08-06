@@ -549,7 +549,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.professions[0] = ArcheSkillFactory.getSkill(res.getString(23));
 		persona.professions[1] = ArcheSkillFactory.getSkill(res.getString(24));
 		persona.professions[2] = ArcheSkillFactory.getSkill(res.getString(25));
-
+		persona.pastPlayTime = res.getInt(27);
 
 		//String skinURL = res.getString(26);
 		
@@ -754,4 +754,5 @@ public class ArchePersonaHandler implements PersonaHandler {
 		ArcheCore.getControls().getSQLHandler().remove("persona_race_spawns", map);
 		//ArcheCore.getControls().getSQLHandler().execute("DELETE FROM persona_race_spawns WHERE race='" + r.getName() + "'");
 	}
+
 }

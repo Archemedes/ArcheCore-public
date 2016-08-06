@@ -78,6 +78,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	String raceHeader = null;
 	long lastRenamed;
 	long creationTimeMS;
+	int pastPlayTime; //stat_playtime_past
 	//Player name no longer final or private
 	//We must be able to change it in case of relogs/preloads
 	//Where the player has changed their username with Mojang
@@ -794,5 +795,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	@Override
 	public long getCreationTime(){
 		return this.creationTimeMS;
+	}
+
+
+	public int getTotalPlaytime(){
+		return pastPlayTime + timePlayed.get();
 	}
 }

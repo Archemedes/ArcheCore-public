@@ -194,6 +194,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		cols.put("skill_secondary", "TEXT");
 		cols.put("skill_tertiary", "TEXT");
 		cols.put("stat_creation", "LONG");
+		cols.put("stat_playtime_past","INT");
 		cols.put("PRIMARY KEY (player, id)", "ON CONFLICT REPLACE");
 		sqlHandler.createTable("persona", cols);
 
