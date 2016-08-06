@@ -88,6 +88,18 @@ public class CreationDialog {
 			p.sendRawMessage(ChatColor.RED + "Type 'cancel' to abandon your current dialog.");
 			return;
 		}
+		//@ teegah make this stuff into a method l8r
+		final ArchePersona pers = ArcheCore.getPlugin().getPersonaHandler().getPersona(p);
+		final long weekSinceCreation = pers.creationTimeMS + 604800000;
+		final long hoursSince = TimeUnit.MILLISECONDS.toHours((System.currentTimeMillis() - pers.creationTimeMS));
+		//Bukkit.broadcastMessage("created on" + pers.creationTimeMS);
+		//Bukkit.broadcastMessage("current time" + System.currentTimeMillis());
+		//Bukkit.broadcastMessage("expires on" + weekSinceCreation);
+		if(weekSinceCreation > System.currentTimeMillis()){
+			p.sendMessage(ChatColor.RED + "You must wait at least 1 week before deleting a persona!");
+			p.sendMessage(ChatColor.YELLOW + "You created this persona " + ChatColor.WHITE + hoursSince + ChatColor.YELLOW +" hours ago!");
+			return;
+		}
 
 		addAbandoners();
 		Map<Object, Object> data = Maps.newHashMap();
