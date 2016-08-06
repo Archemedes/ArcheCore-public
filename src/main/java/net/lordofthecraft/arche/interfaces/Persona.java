@@ -280,5 +280,13 @@ public interface Persona {
 	 */
 	Inventory getInventory();
 
+	/**
+	 * @return the creation time of this persona in milliseconds
+	 */
 	long getCreationTime();
+
+	/**
+	 * @return the total playtime of this persona(all maps added)
+	 */
+	int getTotalPlaytime();
 }

@@ -773,7 +773,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		ArchePersona p = (ArchePersona) object;
 		return this.player.equals(p.player) && this.getId() == p.getId();
 	}
-
+//
 	@Override
 	public boolean isNewbie() {
 		return getTimePlayed() < ArcheCore.getControls().getNewbieDelay();
@@ -797,8 +797,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		return this.creationTimeMS;
 	}
 
-
+	@Override
 	public int getTotalPlaytime(){
-		return pastPlayTime + timePlayed.get();
+		return pastPlayTime + getTimePlayed();
 	}
 }

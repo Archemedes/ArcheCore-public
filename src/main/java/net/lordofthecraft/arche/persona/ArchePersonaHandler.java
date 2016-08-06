@@ -335,7 +335,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		result.add(l+"~~~~ " + r + p.getPlayerName() + "'s Roleplay Persona" + l + " ~~~~");
 
-		if(p.getTimePlayed() < ArcheCore.getPlugin().getNewbieProtectDelay()){
+		if(p.getTotalPlaytime() < ArcheCore.getPlugin().getNewbieProtectDelay()){
 			Player player = ArcheCore.getPlayer(p.getPlayerUUID());
 			if(player != null && !player.hasPermission("archecore.persona.nonewbie"))
 				result.add(ChatColor.LIGHT_PURPLE + "((Persona was recently made and can't engage in PvP))");

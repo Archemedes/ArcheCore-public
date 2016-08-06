@@ -121,7 +121,8 @@ public class CommandPersona implements CommandExecutor {
 
                 return true;
             } else if (args[0].equalsIgnoreCase("time")) {
-                sender.sendMessage(ChatColor.AQUA + "You have spent " + ChatColor.GOLD + "" + ChatColor.BOLD + Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on this persona.");
+                sender.sendMessage(ChatColor.AQUA + "You have played " + ChatColor.GOLD.toString() + ChatColor.BOLD + Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on this persona during 5.0!");
+                sender.sendMessage(ChatColor.AQUA + "You have a total of " + ChatColor.GOLD.toString() + ChatColor.BOLD + Math.floor(pers.getTotalPlaytime() / 60) + ChatColor.AQUA + " hours on this persona!");
                 return true;
             } else if (args[0].equalsIgnoreCase("clearprefix") && prefix) {
                 pers.clearPrefix();
