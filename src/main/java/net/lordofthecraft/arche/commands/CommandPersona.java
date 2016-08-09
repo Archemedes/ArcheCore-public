@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.commands;
 
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -124,7 +125,7 @@ public class CommandPersona implements CommandExecutor {
 
                 return true;
             } else if (args[0].equalsIgnoreCase("time")) {
-                sender.sendMessage(ChatColor.AQUA + "You have played " + ChatColor.GOLD.toString() + ChatColor.BOLD + Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on this during The Isles of Axios.");
+                sender.sendMessage(ChatColor.AQUA + "You have played " + ChatColor.GOLD.toString() + ChatColor.BOLD + Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on this during " + ArcheCore.getControls().getServerWorldName() + ".");
                 sender.sendMessage(ChatColor.AQUA + "You have a total of " + ChatColor.GOLD.toString() + ChatColor.BOLD + Math.floor(pers.getTotalPlaytime() / 60) + ChatColor.AQUA + " hours on this persona!");
                 return true;
             } else if (args[0].equalsIgnoreCase("creation")) {
