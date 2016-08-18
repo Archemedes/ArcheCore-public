@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.lordofthecraft.arche</groupId>
     <artifactId>ArcheCore</artifactId>
-    <version>1.102.3</version>
+    <version>1.102.6</version>
     <name>ArcheCore</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,12 +20,6 @@
         <dependency>
 			<groupId>com.destroystokyo.paper</groupId>
 			<artifactId>paper-api</artifactId>
-			<version>1.10.2-R0.1-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.bukkit</groupId>
-			<artifactId>bukkit</artifactId>
 			<version>1.10.2-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
@@ -148,7 +142,7 @@
         </repository>
         <repository>
 			<id>destroystokyo-repo</id>
-			<url>https://repo.destroystokyo.com/content/repositories/snapshots/</url>
+			<url>https://repo.destroystokyo.com/repository/maven-public/</url>
 		</repository>
     </repositories>
 </project>
