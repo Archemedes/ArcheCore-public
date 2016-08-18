@@ -341,7 +341,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 				result.add(ChatColor.LIGHT_PURPLE + "((Persona was recently made and can't engage in PvP))");
 			else
 				result.add(ChatColor.DARK_RED + "((Please remember not to metagame this information))");
-		} else if (ArcheCore.getPlugin().getNewbieNotificationDelay() > 0 && p.getTimePlayed() < 600){
+		} else if (ArcheCore.getPlugin().getNewbieNotificationDelay() > 0 && p.getTotalPlaytime() < 600){
 			Player player = ArcheCore.getPlayer(p.getPlayerUUID());
 			long age = player == null? Integer.MAX_VALUE : System.currentTimeMillis() - player.getFirstPlayed();
 			int mins = (int) (age / DateUtils.MILLIS_PER_MINUTE);

@@ -18,6 +18,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 import java.sql.PreparedStatement;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -224,6 +225,9 @@ public class ArcheSkill implements Skill {
 	}
 	
 	private double getXPModifier(Persona p, SkillAttachment att){
+		
+		BonusExpModifierHandler handler = ArcheCore.getControls().getBonusExpModifierHandler();
+		
 		if(xpMods.isEmpty() || this.getName().equalsIgnoreCase("internal_drainxp")) return 1;
 		double mod = att.getModifier();
 		if(mod > 0) return mod; //Cached value
@@ -243,10 +247,41 @@ public class ArcheSkill implements Skill {
 					mod += 0.10;
 			}
 		}
+		
+		double amod = 1;
+		if (xpMods.contains(ExpModifier.ACCOUNT)) {
+			List<BonusExpModifier> mods = handler.getAccountModifiers(p.getPlayer());
+			for (BonusExpModifier m : mods) {
+				amod = applyModifier(m, amod);
+			}
+		}
+		
+		if (xpMods.contains(ExpModifier.PERSONA)) {
+			List<BonusExpModifier> mods = handler.getPersonaModifiers(p);
+			for (BonusExpModifier m : mods) {
+				amod = applyModifier(m, amod);
+			}
+		}
+		
+		if (xpMods.contains(ExpModifier.GLOBAL)) {
+			List<BonusExpModifier> mods = handler.getGlobalModifiers();
+			for (BonusExpModifier m : mods) {
+				amod = applyModifier(m, amod);
+			}
+		}
+		
+		mod *= amod;
+		
 		att.setModifier(mod);
 		return mod;
 	}
 	
+	private double applyModifier(BonusExpModifier m, double amod) {
+		if ((m.getSkill() == this || m.getSkill() == null) && !m.isExpired() && m.getModifer() > amod)
+		return m.getModifer(); 
+		else return amod;
+	}
+
 	@Override
 	public SkillTier getCapTier(Persona p){
 		if(this.isInert()) return SkillTier.SUPER;

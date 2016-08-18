@@ -14,17 +14,23 @@ import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.skill.BonusExpModifier;
+import net.lordofthecraft.arche.skill.ExpModifier;
+
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class CommandSkill implements CommandExecutor {
 	private static final int XP_TRESHOLD_BEFORE_WARNING = 5000; 
@@ -45,7 +51,8 @@ public class CommandSkill implements CommandExecutor {
 				+ i + "$/sk [skill] teach [who]$: " + a + "Teach [who] this skill.\n"
 				+ i + "$/sk [skill] display$: " + a + "Show this skill on Persona card.\n"
 				+ i + "$/sk [skill] top$: " + a + "Show the current leaderboard for this skill.\n"
-				+ i + "$/sk [skill] select$ {main/second/bonus}: " + a + " Select a profession for your Persona, allowing for further levelling in that skill.\n";
+				+ i + "$/sk [skill] select$ {main/second/bonus}: " + a + " elect a profession for your Persona, allowing for further levelling in that skill.\n"
+				+ i + "$/sk [skill] assign$ [xp]: " + a + "Assign instant XP to this skill (if free xp is available).\n";
 
 		helpdesk.addInfoTopic("Skill Command", output);
 	}
@@ -56,23 +63,35 @@ public class CommandSkill implements CommandExecutor {
 			if(sender instanceof Player) helpdesk.outputHelp("skill command", (Player) sender);
 			else sender.sendMessage(helpdesk.getHelpText("skill command"));
 
+			String d = ChatColor.DARK_AQUA + "";
+
 			if(sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.skill")){
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] /sk [skill] tome : Gives experience tome");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] /sk [skill] reveal [who]: Reveal a skill to [who]");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] /sk [skill] give [who] [xp]: Gives XP");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] /sk [skill] drain [who] [return]: Drains skill xp and returns a factor for their personal redistribution");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] /sk drainall [return] [who]: Drain all xp and returns a factor for their personal redistribution");
-				sender.sendMessage(ChatColor.BLUE + "[M] See someone else's skills with " + ChatColor.ITALIC +  "/sk list [who]");
+				String m = ChatColor.DARK_AQUA + "[M] " + ChatColor.WHITE;
+				sender.sendMessage(m + "/sk [skill] tome: "+d+"Gives experience tome");
+				sender.sendMessage(m + "/sk [skill] reveal [who]: "+d+"Reveal a skill to [who]");
+				sender.sendMessage(m + "/sk [skill] give [who] [xp]: "+d+"Gives XP");
+				sender.sendMessage(m + "/sk [skill] drain [who] [return]: "+d+"Drains skill xp and returns a factor for their personal redistribution");
+				sender.sendMessage(m + "/sk drainall [return] [who]: "+d+"Drain all xp and returns a factor for their personal redistribution");
+				sender.sendMessage(m + "See someone else's skills with " + ChatColor.ITALIC +  "/sk list [who]");
 			}
 
-			if( (sender instanceof Player) && ArchePersonaHandler.getInstance().hasPersona((Player) sender)
+			if (sender.hasPermission("archecore.admin")) {
+				String a = ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] " + ChatColor.WHITE;
+				sender.sendMessage(a + "/sk [skill] bonus [who/when] [modifier] [time] [amount] -[p/a/g]: "+d+"Gives [who] experience multiplier x[modifer] for [amount] max xp, [time] max mins.\n"
+						+ ChatColor.GRAY + ChatColor.ITALIC + "Enter -1 for no max. -a makes it account based. -g is global. Using [when] will start the bonus in X minutes. "
+						+ "Omit [skill] from the bonus command to apply to all skills.");
+			}
+
+			/*if( (sender instanceof Player) && ArchePersonaHandler.getInstance().hasPersona((Player) sender)
 					&& ArcheCore.getControls().getSkill("internal_drainxp").getXp((Player) sender) > 0 ){
 				sender.sendMessage(ChatColor.BLUE + "/sk [skill] assign [xp]: Assign instant XP to this skill");
-			}
+			}*/
 
 
 			return true;
-		} else if(args[0].equalsIgnoreCase("list")){
+		} else if (args[0].equalsIgnoreCase("bonus")) {
+			processBonusCommand(sender, null, args);
+		} else if(args[0].equalsIgnoreCase("list")) {
 			Persona who = null;
 			if((sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.skill"))&& args.length >= 2){
 				who = CommandUtil.personaFromArg(args[1]);
@@ -149,7 +168,7 @@ public class CommandSkill implements CommandExecutor {
 			return true;
 		} else if(args[0].equalsIgnoreCase("drainall")){
 			if(sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.skill")){
-				Persona pers = findTargetPersona(sender, args);
+				Persona pers = findTargetPersona(sender, args, 2);
 				if(pers == null){
 					sender.sendMessage(ChatColor.RED + "Error: No Persona found.");
 					return true;
@@ -323,7 +342,7 @@ public class CommandSkill implements CommandExecutor {
 				}
 				return true;
 			}else if (args[1].equalsIgnoreCase("teach")){
-				pers = findTargetPersona(sender, args);
+				pers = findTargetPersona(sender, args, 2);
 				if(pers != null){
 					Persona send = findSenderPersona(sender);
 					if(send != null && skill.getXp(send) >= skill.getXp(pers) && sender.hasPermission("archecore.teachskill." + skill.getName() + (send == pers? ".self" : ""))){
@@ -360,7 +379,7 @@ public class CommandSkill implements CommandExecutor {
 							if (skill.getSkillTier(send).getTier() >= cap.getTier()) {
 								sender.sendMessage(ChatColor.RED + "You cannot assign experience over Aengulic (1,000,000 experience)");
 								return true;
-                            }
+							}
 							xp = Math.min((double) cap.getXp() - skill.getXp(send), xp);
 							if(xp > drainXp.getXp(send)){
 								sender.sendMessage(ChatColor.RED + "Error: Insuffcicient Free XP available");
@@ -388,7 +407,7 @@ public class CommandSkill implements CommandExecutor {
 					return true;
 				} else if(args[1].equalsIgnoreCase("reveal")){
 					sender.sendMessage(ChatColor.DARK_GREEN + "Attempting to reveal skill: " + ChatColor.GOLD + args[0]);
-					pers = findTargetPersona(sender, args);
+					pers = findTargetPersona(sender, args, 2);
 
 					if(pers != null)
 						skill.reveal(pers);
@@ -396,7 +415,7 @@ public class CommandSkill implements CommandExecutor {
 				} else if(args[1].equalsIgnoreCase("give") && args.length >= 4){
 
 					try{
-						pers = findTargetPersona(sender, args);
+						pers = findTargetPersona(sender, args, 2);
 						double xp = Double.parseDouble(args[3]); 
 						if(pers != null){
 							sender.sendMessage(ChatColor.DARK_GREEN + "Giving " + ChatColor.GOLD + xp + " " + skill.getName() + ChatColor.DARK_GREEN + " xp to " + ChatColor.GOLD + pers.getName());
@@ -406,7 +425,7 @@ public class CommandSkill implements CommandExecutor {
 					}catch(NumberFormatException e){return false;}
 				} else if(args[1].equalsIgnoreCase("drain") && args.length >= 4){
 					try{
-						pers = findTargetPersona(sender, args);
+						pers = findTargetPersona(sender, args, 2);
 						double factor = Double.parseDouble(args[3]); 
 						if(pers != null){
 							sender.sendMessage(ChatColor.DARK_GREEN + "Draining profession " + ChatColor.GOLD + skill.getName() + ChatColor.DARK_GREEN + " from " + ChatColor.GOLD + pers.getName());
@@ -415,10 +434,91 @@ public class CommandSkill implements CommandExecutor {
 						}
 						return true;
 					}catch(NumberFormatException e){return false;}
+				} else if (args[1].equalsIgnoreCase("bonus")) {
+					String[] clipArgs = Arrays.copyOfRange(args, 1, args.length);
+					return this.processBonusCommand(sender, skill, clipArgs);
 				}
 			}
 		}
 		return false;
+	}
+
+	@SuppressWarnings("deprecation")
+	private boolean processBonusCommand(CommandSender sender, Skill sk, String[] args) {
+		sender.sendMessage("/sk [skill] bonus [who/when] [modifier] [time] [amount] -[p/a/g]: Gives experience multiplier for [amount] max xp, [time] max mins. "
+				+ "Enter -1 for no max. -a makes it account based. -g is global. Using [when] will start the bonus in X minutes. "
+				+ "Omit [skill] from the bonus command to apply to all skills.");
+
+		if (args.length < 6 || ("server".equalsIgnoreCase(args[1]) && !"-g".equalsIgnoreCase(args[5]))) {
+			sender.sendMessage(ChatColor.RED + "Error. Server must use global.");
+			return true;
+		}
+
+		BonusExpModifier m = null;
+
+		double mod;
+		int time;
+		int xp;
+
+		try {
+			mod = Double.parseDouble(args[2]);
+			time = Integer.parseInt(args[3]);
+			xp = Integer.parseInt(args[4]);
+		} catch(NumberFormatException e){return false;}
+
+		long duration = -1;
+		if (time > 0) duration = TimeUnit.MINUTES.toMillis(time);
+		
+		if (mod <= 0 || time < -1 || xp < -1) return false;
+
+		OfflinePlayer player = null;
+
+		if ("server".equalsIgnoreCase(args[1])) {
+			player = null;
+		} else {
+			player = Bukkit.getOfflinePlayer(args[1]);
+			if (player == null) {
+				sender.sendMessage(ChatColor.RED + "Player not found.");
+				return true;
+			}
+		}
+
+		switch (args[5].toLowerCase()) {
+		case "-g" : {
+			if (player == null) {
+				int when;
+				try {
+					when = Integer.parseInt(args[1]);
+				} catch(NumberFormatException e){return false;}
+				long starttime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(when);
+				m = new BonusExpModifier(sk, starttime, duration, mod);
+			} else {
+				m = new BonusExpModifier(sk, duration, mod, player);
+			}
+		}
+		case "-a" : {
+			m = new BonusExpModifier(player, sk, duration, xp, mod);
+		}
+		case "-p" : {
+			Persona persona = ("global".equalsIgnoreCase(args[1])) ? null : this.findTargetPersona(sender, args, 1);
+			m = new BonusExpModifier(persona, sk, duration, xp, mod);
+		}
+		}
+
+		ArcheCore.getControls().getBonusExpModifierHandler().addModifier(m);
+
+		String g = ChatColor.GOLD + "";
+		String r = ChatColor.RESET + "";
+		
+		sender.sendMessage(ChatColor.GREEN + "Added the following modifier: \n" + ChatColor.RESET
+				+g+ "Type: " + r + m.getType().toString() + ", " 
+				+g+ (m.getUUID() == null ? "" : "Player: " + r + Bukkit.getServer().getOfflinePlayer(m.getUUID()).getName() + ", ")
+				+g+ (m.getPersonaID() == -1 ? "" : "Persona ID: " + r + m.getPersonaID() + ", ")
+				+g+ "Skill: " + r + (m.getSkill() == null ? "All" : m.getSkill().getName()) + ", "
+				+g+ "Start time: " + r + (m.getStartTime() <= System.currentTimeMillis() ? "Now" : "T-" + TimeUnit.MILLISECONDS.toMinutes(m.getStartTime())+ "m") + ", "
+				+g+ (m.getDuration() == -1 ? "" : "Duration: " + r + TimeUnit.MILLISECONDS.toMinutes(m.getDuration()) + "m, ")
+				+g+"Max XP Gain: " + r + (m.getCapExp() == -1 ? "Unlimited" : m.getCapExp() + "xp"));
+		return true;
 	}
 
 	private Persona findSenderPersona(CommandSender sender){
@@ -431,10 +531,10 @@ public class CommandSkill implements CommandExecutor {
 		return result;
 	}
 
-	private Persona findTargetPersona(CommandSender sender, String[] args){
+	private Persona findTargetPersona(CommandSender sender, String[] args, int pLocation){
 		Persona result;
 		if(args.length >= 3){
-			result = CommandUtil.personaFromArg(args[2]);
+			result = CommandUtil.personaFromArg(args[pLocation]);
 		} else {
 			if(sender instanceof Player) result = ArchePersonaHandler.getInstance().getPersona((Player) sender);
 			else result = null;

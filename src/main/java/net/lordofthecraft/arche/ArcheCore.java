@@ -18,6 +18,7 @@ import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
+import net.lordofthecraft.arche.skill.BonusExpModifierHandler;
 import net.lordofthecraft.arche.skill.ExpModifier;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -75,6 +76,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private Thread saverThread = null;
 
 	private boolean shouldClone = false;
+	
+	private BonusExpModifierHandler bonusExpModifierHandler;
 
 	public static PersonaKey getPersonaKey(UUID uuid, int pid) {
 		return new ArchePersonaKey(uuid, pid);
@@ -293,6 +296,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		//Init treasurechest logging
 		TreasureChest.initSQL();
+		
+		bonusExpModifierHandler = new BonusExpModifierHandler(sqlHandler, getControls());
 
 		//Create internally handled skill that holds Xp given from skill resets
 		registerNewSkill("internal_drainxp")
@@ -332,6 +337,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			ArcheSkillFactory.activateXpMod(ExpModifier.PLAYTIME);
 		if(config.getBoolean("bonus.xp.autoage"))
 			ArcheSkillFactory.activateXpMod(ExpModifier.AUTOAGE);
+		ArcheSkillFactory.activateXpMod(ExpModifier.PERSONA);
+		ArcheSkillFactory.activateXpMod(ExpModifier.ACCOUNT);
+		ArcheSkillFactory.activateXpMod(ExpModifier.GLOBAL);
 
 		if(teleportNewbies){
 			World w = Bukkit.getWorld(config.getString("preferred.spawn.world"));
@@ -647,5 +655,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	@Override
 	public boolean isRacialSwingEnabled() {
 		return racialSwingTimer;
+	}
+
+	@Override
+	public BonusExpModifierHandler getBonusExpModifierHandler() {
+		return bonusExpModifierHandler;
 	}
 }

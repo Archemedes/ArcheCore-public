@@ -43,7 +43,8 @@ public class CommandPersona implements CommandExecutor {
                 + i + "$</persona autoage>autoage$: " + a + "Toggle automatic aging for this persona.\n"
                 + i + "$</persona addbio >addbio$: " + a + "Add a line of text to your Persona's bio!.\n"
                 + i + "$</persona clearbio>clearbio$: " + a + "Clear your Persona's  bio completely.\n"
-                + i + "$</persona time>time$: " + a + "View the hours spent playing your Persona.\n";
+                + i + "$</persona time>time$: " + a + "View the hours spent playing your Persona.\n"
+                + i + "$</persona created>created$: " + a + "View how long ago you created your Persona.\n";
 
         helpdesk.addInfoTopic("Persona Command", output);
     }
@@ -125,13 +126,12 @@ public class CommandPersona implements CommandExecutor {
 
                 return true;
             } else if (args[0].equalsIgnoreCase("time")) {
-                sender.sendMessage(ChatColor.AQUA + "You have played " + ChatColor.GOLD.toString() + ChatColor.BOLD + Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on this during " + ArcheCore.getControls().getServerWorldName() + ".");
-                sender.sendMessage(ChatColor.AQUA + "You have a total of " + ChatColor.GOLD.toString() + ChatColor.BOLD + Math.floor(pers.getTotalPlaytime() / 60) + ChatColor.AQUA + " hours on this persona!");
+                sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int)Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on this persona in " + ArcheCore.getControls().getServerWorldName() + ".");
+                sender.sendMessage(ChatColor.AQUA + "You have a total of " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int)Math.floor(pers.getTotalPlaytime() / 60) + ChatColor.AQUA + " hours on this persona!");
                 return true;
-            } else if (args[0].equalsIgnoreCase("creation")) {
-            	final long hoursSince = TimeUnit.MILLISECONDS.toHours((System.currentTimeMillis() - pers.getCreationTime()));
-            	sender.sendMessage(ChatColor.AQUA + "You created this persona " + ChatColor.GOLD.toString() + ChatColor.BOLD + hoursSince + ChatColor.AQUA + " hours ago.");
-
+            } else if (args[0].equalsIgnoreCase("created")) {
+            	String time = millsToDaysHours(System.currentTimeMillis() - pers.getCreationTime());
+            	sender.sendMessage(ChatColor.AQUA + "You created this persona " + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
                 return true;
             } else if (args[0].equalsIgnoreCase("clearprefix") && prefix) {
                 pers.clearPrefix();
@@ -376,4 +376,32 @@ public class CommandPersona implements CommandExecutor {
         }
         return null;
     }
+    
+    /**
+     * Convert a millisecond duration to a string format
+     * 
+     * @param millis A duration to convert to a string form
+     * @return A string of the form "X Days Y Hours.
+     */
+    public static String millsToDaysHours(long millis)
+    {
+        if(millis < 0)
+        	
+        {
+            throw new IllegalArgumentException("Duration must be greater than zero!");
+        }
+
+        long days = TimeUnit.MILLISECONDS.toDays(millis);
+        millis -= TimeUnit.DAYS.toMillis(days);
+        long hours = TimeUnit.MILLISECONDS.toHours(millis);
+
+        StringBuilder sb = new StringBuilder(64);
+        sb.append(days);
+        sb.append(" days and ");
+        sb.append(hours);
+        sb.append(" hours");
+
+        return(sb.toString());
+    }
+    
 }

@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.UUID;
 
 public class CommandSql implements CommandExecutor {
 
@@ -18,7 +17,7 @@ public class CommandSql implements CommandExecutor {
 		if(args.length == 0 || !(sender instanceof Player)) return false;
 		
 		Player p = (Player) sender;
-		if(p.getUniqueId().equals(UUID.fromString("2b8176ac-89fc-47c8-99a5-4ed206380c2b"))){
+		if(p.hasPermission("archecore.arsql")){
 			String statement = StringUtils.join(args, ' ', 0, args.length);
 			try{
 				Connection c = ArcheCore.getControls().getSQLHandler().getConnection();

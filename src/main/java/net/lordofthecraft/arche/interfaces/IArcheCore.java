@@ -3,6 +3,8 @@ package net.lordofthecraft.arche.interfaces;
 import net.lordofthecraft.arche.BlockRegistry;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.help.HelpFile;
+import net.lordofthecraft.arche.skill.BonusExpModifierHandler;
+
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -207,4 +209,10 @@ public interface IArcheCore {
 	 * @return If the racial swing timers are enabled
 	 */
 	boolean isRacialSwingEnabled();
+
+	
+	/**
+	 * @return The bonus exp modifier handler
+	 */
+	BonusExpModifierHandler getBonusExpModifierHandler();
 }
