@@ -276,6 +276,19 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		}
 	}*/
 
+	@Override
+    public double withdraw(double amount) {
+        ArcheCore.getControls().getEconomy().withdrawPersona(this, amount);
+        return money;
+    }
+
+    @Override
+    public double deposit(double amount) {
+        ArcheCore.getControls().getEconomy().depositPersona(this, amount);
+        return money;
+    }
+
+
 	public List<Skill> getOrderedProfessions() {
 		List<Skill> skills = Lists.newArrayList();
 		skills.addAll(profs.stream().filter(sk -> sk.skill.isVisible(this)).map(sk -> sk.skill).collect(Collectors.toList()));

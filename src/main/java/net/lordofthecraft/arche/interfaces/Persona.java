@@ -11,6 +11,22 @@ import java.util.UUID;
 
 public interface Persona {
 
+    /**
+     * Take money from a Persona. Negative amounts possible, but consider using {@link #deposit(double)}  instead.
+     * @param amount The amount of money to modify the Persona account by
+     *
+     * @return Amount of minas persona possess after the transaction
+     */
+    double withdraw(double amount);
+
+    /**
+     * Give money to a Persona. Negative amounts possible, but consider using {@link #withdraw(double)} instead.
+     * @param amount The amount of money to modify the Persona account by
+     *
+     * @return Amount of minas persona possess after the transaction
+     */
+	double deposit(double amount);
+
 	/**
 	 * Reset a persona's visible skills (drainXp and Magic skills not effected) to 0 and allow it to be redistributed
 	 * @param mod The amount to return. 1 for 100% of experience, 0.50 for 50% of experience returned, etc.
