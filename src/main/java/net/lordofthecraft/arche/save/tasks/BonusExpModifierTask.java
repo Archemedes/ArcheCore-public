@@ -22,8 +22,8 @@ public class BonusExpModifierTask extends StatementTask{
 		stat.setLong(4, modifier.getStartTime());
 		stat.setInt(5, modifier.getStartExp());
 		stat.setInt(6, modifier.getCapExp());
-		stat.setString(7, modifier.getSkill().getName());
-		stat.setString(8, modifier.getUUID().toString());
+		stat.setString(7, (modifier.getSkill() == null) ? null : modifier.getSkill().getName());
+		stat.setString(8, (modifier.getUUID() == null) ? null : modifier.getUUID().toString());
 		stat.setInt(9, modifier.getPersonaID());
 		stat.setDouble(10, modifier.getModifer());
 	}

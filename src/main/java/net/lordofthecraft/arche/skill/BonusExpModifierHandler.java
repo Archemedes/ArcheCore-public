@@ -13,6 +13,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.interfaces.IArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
@@ -28,7 +29,7 @@ public class BonusExpModifierHandler {
 
 	public BonusExpModifierHandler(SQLHandler sqlHandler, IArcheCore iArcheCore) {
 		modifiers = Maps.newHashMap();
-		handler = sqlHandler;
+		handler = sqlHandler; 
 		controls = iArcheCore;
 		initSQL();
 		loadModifers();
@@ -41,7 +42,7 @@ public class BonusExpModifierHandler {
 			res = handler.query("SELECT * FROM bonus_exp_modifiers");
 			while(res.next()){
 				BonusExpModifier modifier = buildModifier(res);
-				if (modifier != null) if (!modifier.isExpired())
+				if (modifier != null)
 					modifiers.put(modifier.getId(), modifier);
 			}	
 		} catch (SQLException e) { e.printStackTrace();	}
@@ -153,7 +154,16 @@ public class BonusExpModifierHandler {
 	}
 
 	public static int nextId() {
-		return currentId++;
+		currentId++;
+		return currentId;
+	}
+
+	public ArrayList<BonusExpModifier> getModifiers(UUID playerUUID) {
+		ArrayList<BonusExpModifier> gmodifiers = Lists.newArrayList();
+		for (BonusExpModifier m : this.modifiers.values()) {
+			if (playerUUID.equals(m.getUUID())) gmodifiers.add(m);
+		}
+		return gmodifiers;
 	}
 
 }

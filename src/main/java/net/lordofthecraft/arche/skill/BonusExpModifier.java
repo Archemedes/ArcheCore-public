@@ -1,7 +1,10 @@
 package net.lordofthecraft.arche.skill;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -52,7 +55,7 @@ public class BonusExpModifier {
 		this.duration = duration;
 		int tostartxp = 0;
 		if (skill == null) {
-			for (Skill sk : ((ArchePersona)persona).professions) tostartxp += sk.getXp(persona);
+			for (Skill sk : ((ArchePersona)persona).professions) if (sk != null) tostartxp += sk.getXp(persona);
 		} else {
 			tostartxp += skill.getXp(persona);
 		}
@@ -75,11 +78,12 @@ public class BonusExpModifier {
 		this.duration = duration;
 		int tostartxp = 0;
 		for (Persona persona : ArcheCore.getControls().getPersonaHandler().getAllPersonas(player.getUniqueId())) {
-			if (skill == null) {
-				if (persona != null) for (Skill sk : ((ArchePersona)persona).professions) tostartxp += sk.getXp(persona);
-			} else {
-				tostartxp += skill.getXp(persona);
-			}
+			if (persona != null) 
+				if (skill == null) {
+					for (Skill sk : ((ArchePersona)persona).professions) if (sk != null) tostartxp += sk.getXp(persona);
+				} else {
+					tostartxp += skill.getXp(persona);
+				}
 		}
 		startxp = tostartxp;
 		this.capxp = capxp;
@@ -158,19 +162,25 @@ public class BonusExpModifier {
 
 	public boolean isExpired() {
 		if (this.getDuration() != -1) 
-		{ if (this.getStartTime() + this.getDuration() > System.currentTimeMillis()) return true; }
+		if (this.getStartTime() != -1) {
+			// Not yet started
+			if (this.getStartTime() > System.currentTimeMillis()) return true;
+			//Expired
+			else if (this.getStartTime() + this.getDuration() < System.currentTimeMillis()) return true;
+			else return false;
+		}
 		else if (this.skill == null) {
 			ArchePersona[] personas = (ArchePersona[]) ArcheCore.getControls().getPersonaHandler().getAllPersonas(this.uuid);
 			if (personas == null) return false; //If the player hasn't logged in recently, just load it and don't bother with it to avoid issues.
 			int expnow = 0;
 			if (this.getPersonaID() == -1) {
 				for (ArchePersona pers : personas) {
-					if (pers != null) for (Skill skill : pers.professions) expnow += skill.getXp(pers);
+					if (pers != null) for (Skill skill : pers.professions) if (skill != null) expnow += skill.getXp(pers);
 				}
 			} else {
 				ArchePersona pers = personas[this.getPersonaID()];
 				if (pers == null) return true;
-				else for (Skill skill : pers.professions) expnow += skill.getXp(pers);
+				else for (Skill skill : pers.professions) if (skill != null) expnow += skill.getXp(pers);
 			}
 			if (this.getStartExp() + this.getCapExp() > expnow) return true;
 		}
@@ -203,5 +213,22 @@ public class BonusExpModifier {
 
 	public int getId() {
 		return this.id;
+	}
+
+	public String readableString() {
+		BonusExpModifier m = this;
+		String g = ChatColor.GOLD + "";
+		String r = ChatColor.RESET + "";
+		return 
+				ChatColor.GRAY + "["+(!this.isExpired() ? ChatColor.DARK_GREEN +""+ ChatColor.BOLD + "ACTIVE" : ChatColor.RED +""+ ChatColor.BOLD + "INACTIVE") + ChatColor.GRAY + "]"
+				+g+ " ID: " + r + m.getId()
+				+g+ " Type: " + r + m.getType().toString()
+				+g+ " Modifer: " + r + m.getModifer()
+				+g+ " Initiated by: " + r + (m.getUUID() == null ? "Server" : Bukkit.getServer().getOfflinePlayer(m.getUUID()).getName())
+				+g+ (m.getPersonaID() == -1 ? "" : " Persona ID: " + r + m.getPersonaID())
+				+g+ " Skill: " + r + (m.getSkill() == null ? "All" : m.getSkill().getName())
+				+g+ (m.getStartTime() <= System.currentTimeMillis() ? "" : " Starting In: " + r + TimeUnit.MILLISECONDS.toMinutes(m.getStartTime() - System.currentTimeMillis())+ "m")
+				+g+ (m.getDuration() == -1 ? "" : " Duration: " + r + TimeUnit.MILLISECONDS.toMinutes(m.getDuration()) + "m")
+				+g+ (m.getCapExp() == -1 ? "" : " Max XP Gain: " + r + m.getCapExp() + "xp");
 	}
 }

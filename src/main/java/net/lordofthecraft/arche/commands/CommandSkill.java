@@ -89,18 +89,40 @@ public class CommandSkill implements CommandExecutor {
 
 			return true;
 		} else if (args[0].equalsIgnoreCase("bonus")) {
-			processBonusCommand(sender, null, args);
-		} else if(args[0].equalsIgnoreCase("list")) {
+			if (sender.hasPermission("archecore.admin"))
+				return processBonusCommand(sender, null, args);
+		} else if(args[0].equalsIgnoreCase("list") || args[0].equalsIgnoreCase("bonuslist")) {
+
 			Persona who = null;
+
 			if((sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.skill"))&& args.length >= 2){
 				who = CommandUtil.personaFromArg(args[1]);
 			} else if (sender instanceof Player){
 				who = ArchePersonaHandler.getInstance().getPersona((Player) sender);
 			}
 
-			if(who == null){
+			if ("bonuslist".equalsIgnoreCase(args[0])) {
+				if (sender.hasPermission("archecore.admin") && args[1] == null) {
+					sender.sendMessage(ChatColor.LIGHT_PURPLE + "Global exp modifiers:");
+					for (BonusExpModifier m : ArcheCore.getControls().getBonusExpModifierHandler().getGlobalModifiers()) 
+						sender.sendMessage(m.readableString());
+				}
+				else if (sender instanceof Player)
+					if(who == null){
+						sender.sendMessage(ChatColor.RED + "Error: No Persona found.");
+						return true;
+					} else {
+						sender.sendMessage(ChatColor.LIGHT_PURPLE + "Bonus exp modifiers for " + who.getPlayerName() + ":");
+						for (BonusExpModifier m : ArcheCore.getControls().getBonusExpModifierHandler().getModifiers(who.getPlayerUUID())) 
+							sender.sendMessage(m.readableString());
+					}
+				return true;
+			}
+
+			else if(who == null){
 				sender.sendMessage(ChatColor.RED + "Error: No Persona found.");
 			} else {
+
 				sender.sendMessage(ChatColor.LIGHT_PURPLE + who.getName() + ChatColor.AQUA + " has the following proficiencies: ");
 
 				double bonusXp = ArcheSkillFactory.getSkill("internal_drainxp").getXp(who);
@@ -463,14 +485,15 @@ public class CommandSkill implements CommandExecutor {
 
 		long duration = -1;
 		if (time > 0) duration = TimeUnit.MINUTES.toMillis(time);
-		
+
 		if (mod <= 0 || time < -1 || xp < -1) return false;
 
 		OfflinePlayer player = null;
-
-		if ("server".equalsIgnoreCase(args[1])) {
-			player = null;
-		} else {
+		int when = 0;
+		try {
+			when = Integer.parseInt(args[1]);
+			if (!"-g".equalsIgnoreCase(args[5])) return false;
+		} catch(NumberFormatException e){
 			player = Bukkit.getOfflinePlayer(args[1]);
 			if (player == null) {
 				sender.sendMessage(ChatColor.RED + "Player not found.");
@@ -481,10 +504,6 @@ public class CommandSkill implements CommandExecutor {
 		switch (args[5].toLowerCase()) {
 		case "-g" : {
 			if (player == null) {
-				int when;
-				try {
-					when = Integer.parseInt(args[1]);
-				} catch(NumberFormatException e){return false;}
 				long starttime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(when);
 				m = new BonusExpModifier(sk, starttime, duration, mod);
 				break;
@@ -511,18 +530,7 @@ public class CommandSkill implements CommandExecutor {
 
 		ArcheCore.getControls().getBonusExpModifierHandler().addModifier(m);
 
-		String g = ChatColor.GOLD + "";
-		String r = ChatColor.RESET + "";
-		
-		sender.sendMessage(ChatColor.GREEN + "Added the following modifier: \n" + ChatColor.RESET
-				+g+ "Type: " + r + m.getType().toString()
-				+g+ "Modifer: " + r + m.getModifer()
-				+g+ (m.getUUID() == null ? "" : "Player: " + r + Bukkit.getServer().getOfflinePlayer(m.getUUID()).getName())
-				+g+ (m.getPersonaID() == -1 ? "" : "Persona ID: " + r + m.getPersonaID())
-				+g+ "Skill: " + r + (m.getSkill() == null ? "All" : m.getSkill().getName())
-				+g+ "Start time: " + r + (m.getStartTime() <= System.currentTimeMillis() ? "Now" : "T-" + TimeUnit.MILLISECONDS.toMinutes(m.getStartTime() - System.currentTimeMillis())+ "m")
-				+g+ (m.getDuration() == -1 ? "" : "Duration: " + r + TimeUnit.MILLISECONDS.toMinutes(m.getDuration()) + "m")
-				+g+"Max XP Gain: " + r + (m.getCapExp() == -1 ? "Unlimited" : m.getCapExp() + "xp"));
+		sender.sendMessage(m.readableString());
 		return true;
 	}
 
