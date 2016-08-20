@@ -15,7 +15,6 @@ import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.BonusExpModifier;
-import net.lordofthecraft.arche.skill.ExpModifier;
 
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
@@ -445,10 +444,6 @@ public class CommandSkill implements CommandExecutor {
 
 	@SuppressWarnings("deprecation")
 	private boolean processBonusCommand(CommandSender sender, Skill sk, String[] args) {
-		sender.sendMessage("/sk [skill] bonus [who/when] [modifier] [time] [amount] -[p/a/g]: Gives experience multiplier for [amount] max xp, [time] max mins. "
-				+ "Enter -1 for no max. -a makes it account based. -g is global. Using [when] will start the bonus in X minutes. "
-				+ "Omit [skill] from the bonus command to apply to all skills.");
-
 		if (args.length < 6 || ("server".equalsIgnoreCase(args[1]) && !"-g".equalsIgnoreCase(args[5]))) {
 			sender.sendMessage(ChatColor.RED + "Error. Server must use global.");
 			return true;
@@ -492,16 +487,25 @@ public class CommandSkill implements CommandExecutor {
 				} catch(NumberFormatException e){return false;}
 				long starttime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(when);
 				m = new BonusExpModifier(sk, starttime, duration, mod);
+				break;
 			} else {
 				m = new BonusExpModifier(sk, duration, mod, player);
+				break;
 			}
 		}
 		case "-a" : {
 			m = new BonusExpModifier(player, sk, duration, xp, mod);
+			break;
 		}
 		case "-p" : {
-			Persona persona = ("global".equalsIgnoreCase(args[1])) ? null : this.findTargetPersona(sender, args, 1);
+			Persona persona = this.findTargetPersona(sender, args, 1);
+			if (persona == null) return true;
 			m = new BonusExpModifier(persona, sk, duration, xp, mod);
+			break;
+		}
+		default : {
+			sender.sendMessage(ChatColor.RED + "Error: Invalid type.");
+			return true;
 		}
 		}
 
@@ -511,12 +515,13 @@ public class CommandSkill implements CommandExecutor {
 		String r = ChatColor.RESET + "";
 		
 		sender.sendMessage(ChatColor.GREEN + "Added the following modifier: \n" + ChatColor.RESET
-				+g+ "Type: " + r + m.getType().toString() + ", " 
-				+g+ (m.getUUID() == null ? "" : "Player: " + r + Bukkit.getServer().getOfflinePlayer(m.getUUID()).getName() + ", ")
-				+g+ (m.getPersonaID() == -1 ? "" : "Persona ID: " + r + m.getPersonaID() + ", ")
-				+g+ "Skill: " + r + (m.getSkill() == null ? "All" : m.getSkill().getName()) + ", "
-				+g+ "Start time: " + r + (m.getStartTime() <= System.currentTimeMillis() ? "Now" : "T-" + TimeUnit.MILLISECONDS.toMinutes(m.getStartTime())+ "m") + ", "
-				+g+ (m.getDuration() == -1 ? "" : "Duration: " + r + TimeUnit.MILLISECONDS.toMinutes(m.getDuration()) + "m, ")
+				+g+ "Type: " + r + m.getType().toString()
+				+g+ "Modifer: " + r + m.getModifer()
+				+g+ (m.getUUID() == null ? "" : "Player: " + r + Bukkit.getServer().getOfflinePlayer(m.getUUID()).getName())
+				+g+ (m.getPersonaID() == -1 ? "" : "Persona ID: " + r + m.getPersonaID())
+				+g+ "Skill: " + r + (m.getSkill() == null ? "All" : m.getSkill().getName())
+				+g+ "Start time: " + r + (m.getStartTime() <= System.currentTimeMillis() ? "Now" : "T-" + TimeUnit.MILLISECONDS.toMinutes(m.getStartTime() - System.currentTimeMillis())+ "m")
+				+g+ (m.getDuration() == -1 ? "" : "Duration: " + r + TimeUnit.MILLISECONDS.toMinutes(m.getDuration()) + "m")
 				+g+"Max XP Gain: " + r + (m.getCapExp() == -1 ? "Unlimited" : m.getCapExp() + "xp"));
 		return true;
 	}
@@ -527,7 +532,7 @@ public class CommandSkill implements CommandExecutor {
 			Player t = (Player) sender;
 			result = ArchePersonaHandler.getInstance().getPersona(t);
 		}
-		if(result == null) sender.sendMessage(ChatColor.RED + "Error: No persona found");
+		if(result == null) sender.sendMessage(ChatColor.RED + "Error: No persona found.");
 		return result;
 	}
 
@@ -539,7 +544,7 @@ public class CommandSkill implements CommandExecutor {
 			if(sender instanceof Player) result = ArchePersonaHandler.getInstance().getPersona((Player) sender);
 			else result = null;
 		}
-		if(result == null) sender.sendMessage(ChatColor.RED + "Error: No target persona found");
+		if(result == null) sender.sendMessage(ChatColor.RED + "Error: No target persona found.");
 		return result;
 	}
 }

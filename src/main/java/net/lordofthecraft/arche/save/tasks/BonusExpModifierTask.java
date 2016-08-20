@@ -31,9 +31,9 @@ public class BonusExpModifierTask extends StatementTask{
 	@Override
 	protected String getQuery() {
 		if (!exists)
-		return "INSERT INTO skill_personal_mods VALUES (?,?,?,?,?,?,?,?,?,?)";
+		return "INSERT INTO bonus_exp_modifiers VALUES (?,?,?,?,?,?,?,?,?,?)";
 		else
-		return "UPDATE skill_personal_mods WHERE id=" + modifier.getId() + " SET (?,?,?,?,?,?,?,?,?,?)";
+		return "UPDATE bonus_exp_modifiers WHERE id=" + modifier.getId() + " SET (?,?,?,?,?,?,?,?,?,?)";
 	}
 
 }

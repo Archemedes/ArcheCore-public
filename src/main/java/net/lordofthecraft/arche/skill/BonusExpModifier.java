@@ -26,14 +26,6 @@ public class BonusExpModifier {
 
 	/**
 	 * Default constructor for SQL building.
-	 * @param type
-	 * @param persona
-	 * @param skill
-	 * @param starttime
-	 * @param startxp
-	 * @param capxp
-	 * @param duration
-	 * @param modifier
 	 */
 
 	public BonusExpModifier(int mId, ExpModifier type, UUID uuid, int id, Skill skill, long starttime, long duration, int startxp, int capxp, double modifier) {
@@ -51,14 +43,6 @@ public class BonusExpModifier {
 
 	/**
 	 * Persona specific, starts right away.
-	 * @param type
-	 * @param persona
-	 * @param skill
-	 * @param starttime
-	 * @param startxp
-	 * @param capxp
-	 * @param duration
-	 * @param modifier
 	 */
 
 	public BonusExpModifier(Persona persona, Skill skill, long duration, int capxp, double modifier) {
@@ -82,14 +66,6 @@ public class BonusExpModifier {
 
 	/**
 	 * Account based, starts right away.
-	 * @param type
-	 * @param persona
-	 * @param skill
-	 * @param starttime
-	 * @param startxp
-	 * @param capxp
-	 * @param duration
-	 * @param modifier
 	 */
 
 	public BonusExpModifier(OfflinePlayer player, Skill skill, long duration, int capxp, double modifier) {
@@ -115,12 +91,6 @@ public class BonusExpModifier {
 
 	/**
 	 * Global, player credited. Starts right away
-	 * @param type
-	 * @param skill
-	 * @param starttime
-	 * @param duration
-	 * @param player
-	 * @param modifier
 	 */
 
 	public BonusExpModifier(Skill skill, long duration, double modifier, OfflinePlayer player) {
@@ -138,11 +108,6 @@ public class BonusExpModifier {
 
 	/**
 	 * Global server initiated. Stars when told.
-	 * @param type
-	 * @param skill
-	 * @param starttime
-	 * @param duration
-	 * @param modifier
 	 */
 
 	public BonusExpModifier(Skill skill, long starttime, long duration, double modifier) {
