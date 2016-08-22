@@ -102,7 +102,7 @@ public class CommandSkill implements CommandExecutor {
 			}
 
 			if ("bonuslist".equalsIgnoreCase(args[0])) {
-				if (sender.hasPermission("archecore.admin") && args[1] == null) {
+				if (sender.hasPermission("archecore.admin") && args.length == 1) {
 					sender.sendMessage(ChatColor.LIGHT_PURPLE + "Global exp modifiers:");
 					for (BonusExpModifier m : ArcheCore.getControls().getBonusExpModifierHandler().getGlobalModifiers()) 
 						sender.sendMessage(m.readableString());
