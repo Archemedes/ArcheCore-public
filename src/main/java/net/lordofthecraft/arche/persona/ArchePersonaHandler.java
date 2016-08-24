@@ -355,7 +355,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		String race = p.getRaceString();
 		if (!race.equals("Unset")) {
-			result.add(c + "Race: " + r + race + ((race.equals(p.getRace().getName()) && mod) ? "" : ChatColor.DARK_GRAY + " (" + p.getRace().getName() + ")"));
+			result.add(c + "Race: " + r + race + 
+					((!p.getRace().getName().equalsIgnoreCase(race) && mod) ? ChatColor.DARK_GRAY + " (" + p.getRace().getName() + ")" : ""));
 		}
 
 		String gender = p.getGender();

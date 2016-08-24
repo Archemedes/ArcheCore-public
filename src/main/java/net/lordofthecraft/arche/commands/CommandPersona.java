@@ -111,7 +111,7 @@ public class CommandPersona implements CommandExecutor {
                 } else {
                     //If the persona is found the Whois should always succeed
                     //We have assured the persona is found earlier
-                    handler.whois(pers, sender.hasPermission("archecore.mod.persona")).forEach(sender::sendMessage);
+                    handler.whois(pers, sender.hasPermission("archecore.mod.other")).forEach(sender::sendMessage);
                 }
                 return true;
             } else if (args[0].equalsIgnoreCase("autoage")) {

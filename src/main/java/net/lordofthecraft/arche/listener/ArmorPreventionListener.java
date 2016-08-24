@@ -33,7 +33,7 @@ public class ArmorPreventionListener implements Listener {
 			boolean flag = false;
 			for (final ItemStack is : e.getPlayer().getInventory().getArmorContents())
 				if (is != null)
-					if (is.getType() != Material.AIR) {
+					if (is.getType() != Material.AIR && is.getType() != Material.ELYTRA) {
 						flag = true; break;
 					}
 			
@@ -158,7 +158,7 @@ public class ArmorPreventionListener implements Listener {
 				}
 			}
 		}
-		return !(ps != null && (ps.getRace() == Race.CONSTRUCT || ps.getRace() == Race.SPECTRE));
+		return !(ps != null && (ps.getRace() == Race.CONSTRUCT || ps.getRace() == Race.SPECTRE) && armor.getType() != Material.ELYTRA);
 	}
 
 	
