@@ -113,9 +113,9 @@ public class RacialBonusListener implements Listener {
 				} else if(race == Race.ORC || race == Race.OLOG || race == Race.GOBLIN){
 					p.removePotionEffect(PotionEffectType.HUNGER);
 
-					if(race == Race.OLOG && p.isSprinting()){
+					/*if(race == Race.OLOG && p.isSprinting()){
 						e.setFoodLevel(Math.max(0, e.getFoodLevel() - 3));
-					}
+					}*/
 				}  else {
 					if(rnd.nextBoolean())
 						e.setCancelled(true);
@@ -140,7 +140,7 @@ public class RacialBonusListener implements Listener {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 120, 1, true), true);
 						}else {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 450, 2, true), true);
-							p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 120, 1, true), true);
+							p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 240, 1, true), true);
 						}
 
 						p.playSound(p.getLocation(), Sound.AMBIENT_CAVE, 0.8f, 2f);
@@ -175,7 +175,7 @@ public class RacialBonusListener implements Listener {
 			}
 		}
 
-		if(e.getDamager() instanceof Arrow){ //Wood Elf arrow bonus
+		/*if(e.getDamager() instanceof Arrow){ //Wood Elf arrow bonus
 			if(((Arrow) e.getDamager()).getShooter() instanceof Player){
 				Player p =  (Player) ((Arrow) e.getDamager()).getShooter();
 				Persona pers = handler.getPersona(p);
@@ -185,7 +185,8 @@ public class RacialBonusListener implements Listener {
 					e.setDamage(dmg);
 				}
 			}
-		}else if(e.getDamager() instanceof Player){ //Racial Damage bonuses
+		}else*/
+		if(e.getDamager() instanceof Player){ //Racial Damage bonuses
 			Player p = (Player) e.getDamager();
 			Persona pers = handler.getPersona(p);
 			if(pers != null){
@@ -193,7 +194,7 @@ public class RacialBonusListener implements Listener {
 				Race r = pers.getRace();
 				switch(r){
 					//Magical Affinity. A portion of damage a high elf does is converted to Magic damage. Increases if using a gold weapon.
-					case HIGH_ELF:
+					/*case HIGH_ELF:
 						if (holdsGoldenWeapon(e.getDamager())) {
 							e.setDamage(dmg * 0.5);
 							e.setDamage(DamageModifier.MAGIC, dmg * 0.5);
@@ -227,7 +228,7 @@ public class RacialBonusListener implements Listener {
 								}
 							}
 						}
-						break;
+						break; */
 					case SPECTRE:
 						if (e.getCause() != DamageCause.MAGIC
 								&& !(e.getEntity() instanceof ArmorStand)
@@ -239,7 +240,7 @@ public class RacialBonusListener implements Listener {
 							e.setDamage(DamageModifier.MAGIC, dmg1 + blocking);
 						}
 						break;
-					case KHARAJYR:
+					/*case KHARAJYR:
 					case KHA_TIGRASI:
 					case KHA_PANTERA:
 					case KHA_LEPARDA:
@@ -248,7 +249,7 @@ public class RacialBonusListener implements Listener {
 						if (p.getEquipment().getItemInMainHand().getType() == Material.AIR)
 							e.setDamage(dmg + 2);
 
-						break;
+						break;*/
 					default:
 						break;
 				}

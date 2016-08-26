@@ -29,9 +29,9 @@ import java.util.concurrent.TimeUnit;
 
 public class CreationDialog {
 
-	private static final String DIVIDER = ChatColor.LIGHT_PURPLE + 
+	private static final String DIVIDER = ChatColor.LIGHT_PURPLE +
 			"\n--------------------------------------------------\n" + ChatColor.YELLOW;
-	private static final String NOTE = ChatColor.DARK_RED + "" + ChatColor.BOLD + 
+	private static final String NOTE = ChatColor.DARK_RED + "" + ChatColor.BOLD +
 			"NB:" + ChatColor.YELLOW;
 	private static long lastAnnounce = -1;
 	private final ConversationFactory factory;
@@ -71,10 +71,10 @@ public class CreationDialog {
 
 
 		factory.withFirstPrompt(new WelcomePrompt())
-		.withInitialSessionData(data)
-		.addConversationAbandonedListener(new PersonaCreationAbandonedListener())
-		.buildConversation(p)
-		.begin();
+				.withInitialSessionData(data)
+				.addConversationAbandonedListener(new PersonaCreationAbandonedListener())
+				.buildConversation(p)
+				.begin();
 
 		Collection<PotionEffect> e = Lists.newArrayList();
 		e.add(new PotionEffect(PotionEffectType.SLOW, 40000, 10));
@@ -88,7 +88,7 @@ public class CreationDialog {
 			p.sendRawMessage(ChatColor.RED + "Type 'cancel' to abandon your current dialog.");
 			return;
 		}
-		
+
 		if (!canDelete(ArcheCore.getControls().getPersonaHandler().getPersona(p.getUniqueId(), slot), p, nullPersona)) return;
 
 		addAbandoners();
@@ -96,9 +96,9 @@ public class CreationDialog {
 		data.put("slot", slot);
 
 		factory.withInitialSessionData(data)
-		.withFirstPrompt(new RedoCharacterPrompt())
-		.buildConversation(p)
-		.begin();
+				.withFirstPrompt(new RedoCharacterPrompt())
+				.buildConversation(p)
+				.begin();
 	}
 
 	public void removePersona(ArchePersona pers){
@@ -113,7 +113,7 @@ public class CreationDialog {
 			p.sendRawMessage(ChatColor.RED + "Type 'cancel' to abandon your current dialog.");
 			return;
 		}
-		
+
 		if (!canDelete(pers, p, false)) return;
 
 		addAbandoners();
@@ -122,9 +122,9 @@ public class CreationDialog {
 		data.put("persona", pers);
 
 		factory.withInitialSessionData(data)
-		.withFirstPrompt(new ConfirmRemovalPrompt())
-		.buildConversation(p)
-		.begin();
+				.withFirstPrompt(new ConfirmRemovalPrompt())
+				.buildConversation(p)
+				.begin();
 	}
 
 	private boolean canDelete(Persona pers, Player p, boolean nullPersona) {
@@ -146,17 +146,17 @@ public class CreationDialog {
 
 	private void addAbandoners(){
 		factory
-		.withEscapeSequence("quit")
-		.withEscapeSequence("exit")
-		.withEscapeSequence("cancel")
-		.withEscapeSequence("stop")
-		.withEscapeSequence("/stop")
-		.withEscapeSequence("/quit")
-		.withEscapeSequence("/exit")
-		.withEscapeSequence("/cancel")
-		.withEscapeSequence("/me")
-		.withEscapeSequence("/beaconme")
-		.withEscapeSequence("/bme");
+				.withEscapeSequence("quit")
+				.withEscapeSequence("exit")
+				.withEscapeSequence("cancel")
+				.withEscapeSequence("stop")
+				.withEscapeSequence("/stop")
+				.withEscapeSequence("/quit")
+				.withEscapeSequence("/exit")
+				.withEscapeSequence("/cancel")
+				.withEscapeSequence("/me")
+				.withEscapeSequence("/beaconme")
+				.withEscapeSequence("/bme");
 	}
 
 	private class ConfirmRemovalPrompt extends BooleanPrompt{
@@ -165,7 +165,7 @@ public class CreationDialog {
 		public String getPromptText(ConversationContext context) {
 			String name = ((ArchePersona) context.getSessionData("persona")).getName();
 			return "Are you sure you wish to permakill poor " +
-			ChatColor.GREEN + name + ChatColor.YELLOW + "?";
+					ChatColor.GREEN + name + ChatColor.YELLOW + "?";
 		}
 
 		@Override
@@ -264,11 +264,11 @@ public class CreationDialog {
 
 			for(String s : new String[]{"female", "male", "other"}){
 				mains.addLine(s)
-				.setUnderlined()
-				.applyChatColor(ChatColor.WHITE)
-				.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select")
-				.setClickEvent(ChatBoxAction.RUN_COMMAND, s)
-				.addLine(",  ");
+						.setUnderlined()
+						.applyChatColor(ChatColor.WHITE)
+						.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select")
+						.setClickEvent(ChatBoxAction.RUN_COMMAND, s)
+						.addLine(",  ");
 			}
 
 			mains.sendTo(p);
@@ -297,19 +297,19 @@ public class CreationDialog {
 				Race race = Race.values()[i];
 				if(p.hasPermission("archecore.race." + race.toString().toLowerCase())){
 					mains.addLine(race.getName())
-					.setUnderlined()
-					.applyChatColor(ChatColor.WHITE)
-					.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
-					.setClickEvent(ChatBoxAction.RUN_COMMAND, race.getName())
-					.addLine(",  ");
+							.setUnderlined()
+							.applyChatColor(ChatColor.WHITE)
+							.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
+							.setClickEvent(ChatBoxAction.RUN_COMMAND, race.getName())
+							.addLine(",  ");
 				}
 			}
 
 			mains.addLine("more...")
-			.setItalic()
-			.applyChatColor(ChatColor.GRAY)
-			.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click for more races")
-			.setClickEvent(ChatBoxAction.RUN_COMMAND, "more");
+					.setItalic()
+					.applyChatColor(ChatColor.GRAY)
+					.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click for more races")
+					.setClickEvent(ChatBoxAction.RUN_COMMAND, "more");
 
 			mains.sendTo(p);
 
@@ -366,27 +366,27 @@ public class CreationDialog {
 
 			ChatMessage subraces = new ArcheMessage("Sub Race Options: ").applyChatColor(ChatColor.YELLOW);
 			subraces.addLine(selected.getName())
-			.setUnderlined()
-			.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
-			.setClickEvent(ChatBoxAction.RUN_COMMAND, selected.getName())
-			.addLine(", ");
+					.setUnderlined()
+					.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
+					.setClickEvent(ChatBoxAction.RUN_COMMAND, selected.getName())
+					.addLine(", ");
 
 			for (Race race : Race.values()){
 				if (Objects.equals(race.getParentRace(), selected.getName())
 						&& race != selected){
 					subraces.addLine(race.getName())
-					.setUnderlined()
-					.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
-					.setClickEvent(ChatBoxAction.RUN_COMMAND, race.getName())
-					.addLine(", ");
+							.setUnderlined()
+							.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
+							.setClickEvent(ChatBoxAction.RUN_COMMAND, race.getName())
+							.addLine(", ");
 				}
 			}
 
 			subraces.addLine("back...")
-			.setItalic()
-			.applyChatColor(ChatColor.GRAY)
-			.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Go back to Race selection")
-			.setClickEvent(ChatBoxAction.RUN_COMMAND, "back");
+					.setItalic()
+					.applyChatColor(ChatColor.GRAY)
+					.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Go back to Race selection")
+					.setClickEvent(ChatBoxAction.RUN_COMMAND, "back");
 
 			subraces.sendTo(p);
 
@@ -436,10 +436,10 @@ public class CreationDialog {
 			for(Race race : Race.values()){
 				if(p.hasPermission("archecore.race." + race.toString().toLowerCase())){
 					m.addLine(race.getName())
-					.applyChatColor(ChatColor.WHITE)
-					.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
-					.setClickEvent(ChatBoxAction.RUN_COMMAND, race.getName())
-					.addLine(",  ");
+							.applyChatColor(ChatColor.WHITE)
+							.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
+							.setClickEvent(ChatBoxAction.RUN_COMMAND, race.getName())
+							.addLine(",  ");
 				}
 			}
 
