@@ -46,7 +46,7 @@ public class PlayerJoinListener implements Listener {
 
 	}
 	
-	@EventHandler
+	@EventHandler (priority = EventPriority.LOW)
 	public void onLeave(PlayerQuitEvent e){
 		if(timer != null) timer.startTiming("logout");
 		ArcheCore plug = ArcheCore.getPlugin();
@@ -60,6 +60,9 @@ public class PlayerJoinListener implements Listener {
 		if(!plug.willCachePersonas()) buffer.put(new UnloadTask(p));
 
 		RaceBonusHandler.reset(p);
+		
+		//Stop dupe?
+		p.saveData();
 		
 		if(timer != null){
 			timer.stopTiming("logout");

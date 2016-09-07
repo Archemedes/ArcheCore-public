@@ -215,4 +215,10 @@ public interface IArcheCore {
 	 * @return The bonus exp modifier handler
 	 */
 	BonusExpModifierHandler getBonusExpModifierHandler();
+
+	/**
+	 * @return If damage bonuses are enabled for races
+	 */
+	
+	boolean areRacialDamageBonusesEnabled();
 }
