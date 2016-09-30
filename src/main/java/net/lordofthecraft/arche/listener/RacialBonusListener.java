@@ -32,10 +32,9 @@ import org.spigotmc.event.entity.EntityMountEvent;
 
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 
 public class RacialBonusListener implements Listener {
-	private final UUID random_uuid = UUID.randomUUID();
+	//private final UUID random_uuid = UUID.randomUUID();
 	private final Random rnd = new Random();
 	private final ArchePersonaHandler handler;
 	private final ArcheCore plugin;
@@ -50,15 +49,15 @@ public class RacialBonusListener implements Listener {
 
 	private boolean hasTogglePower(Race race){
 		switch(race){
-			case DARK_ELF:
-			case KHARAJYR:
-			case KHA_CHEETRAH:
-			case KHA_PANTERA:
-			case KHA_LEPARDA:
-			case KHA_TIGRASI:
-				return true;
-			default:
-				return false;
+		case DARK_ELF:
+		case KHARAJYR:
+		case KHA_CHEETRAH:
+		case KHA_PANTERA:
+		case KHA_LEPARDA:
+		case KHA_TIGRASI:
+			return true;
+		default:
+			return false;
 		}
 	}
 
@@ -111,11 +110,12 @@ public class RacialBonusListener implements Listener {
 					e.setCancelled(true);
 					e.setFoodLevel(20);
 				} else if(race == Race.ORC || race == Race.OLOG || race == Race.GOBLIN){
+					//Allows eating of rotten food
 					p.removePotionEffect(PotionEffectType.HUNGER);
 
-					if(race == Race.OLOG && p.isSprinting()){
+					/*if(race == Race.OLOG && p.isSprinting()){
 						e.setFoodLevel(Math.max(0, e.getFoodLevel() - 3));
-					}
+					}*/
 				}  else {
 					if(rnd.nextBoolean())
 						e.setCancelled(true);
@@ -140,7 +140,7 @@ public class RacialBonusListener implements Listener {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 120, 1, true), true);
 						}else {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 450, 2, true), true);
-							p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 120, 1, true), true);
+							p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 240, 1, true), true);
 						}
 
 						p.playSound(p.getLocation(), Sound.AMBIENT_CAVE, 0.8f, 2f);
@@ -157,6 +157,7 @@ public class RacialBonusListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onDamage(EntityDamageByEntityEvent e){
+		//Racial Resistance Bonuses
 		if(e.getEntity() instanceof Player){
 			Player p = (Player) e.getEntity();
 			Persona pers = handler.getPersona(p);
@@ -169,29 +170,32 @@ public class RacialBonusListener implements Listener {
 					}
 				} else if (r == Race.CONSTRUCT) {
 					e.setDamage(DamageModifier.MAGIC, e.getDamage(DamageModifier.MAGIC) * 0.2);
+
 				} else if (r == Race.HIGH_ELF) {
 					e.setDamage(DamageModifier.MAGIC, e.getDamage(DamageModifier.MAGIC) * 0.7);
 				}
 			}
 		}
-
-		if(e.getDamager() instanceof Arrow){ //Wood Elf arrow bonus
-			if(((Arrow) e.getDamager()).getShooter() instanceof Player){
-				Player p =  (Player) ((Arrow) e.getDamager()).getShooter();
-				Persona pers = handler.getPersona(p);
-				if(pers != null && pers.getRace() == Race.WOOD_ELF){
-					double dmg = e.getDamage();
-					dmg *= 1.1;
-					e.setDamage(dmg);
+		//Racial Damage bonuses
+		if (plugin.areRacialDamageBonusesEnabled()) {
+			//Wood Elf arrow bonus
+			if(e.getDamager() instanceof Arrow){ 
+				if(((Arrow) e.getDamager()).getShooter() instanceof Player){
+					Player p =  (Player) ((Arrow) e.getDamager()).getShooter();
+					Persona pers = handler.getPersona(p);
+					if(pers != null && pers.getRace() == Race.WOOD_ELF){
+						double dmg = e.getDamage();
+						dmg *= 1.1;
+						e.setDamage(dmg);
+					}
 				}
-			}
-		}else if(e.getDamager() instanceof Player){ //Racial Damage bonuses
-			Player p = (Player) e.getDamager();
-			Persona pers = handler.getPersona(p);
-			if(pers != null){
-				double dmg = e.getDamage();
-				Race r = pers.getRace();
-				switch(r){
+			} else if (e.getDamager() instanceof Player){
+				Player p = (Player) e.getDamager();
+				Persona pers = handler.getPersona(p);
+				if(pers != null){
+					double dmg = e.getDamage();
+					Race r = pers.getRace();
+					switch(r){
 					//Magical Affinity. A portion of damage a high elf does is converted to Magic damage. Increases if using a gold weapon.
 					case HIGH_ELF:
 						if (holdsGoldenWeapon(e.getDamager())) {
@@ -227,12 +231,12 @@ public class RacialBonusListener implements Listener {
 								}
 							}
 						}
-						break;
+						break; 
 					case SPECTRE:
 						if (e.getCause() != DamageCause.MAGIC
-								&& !(e.getEntity() instanceof ArmorStand)
-								&& e.getEntity() instanceof LivingEntity
-								&& !(e.getEntity() instanceof ItemFrame)) {
+						&& !(e.getEntity() instanceof ArmorStand)
+						&& e.getEntity() instanceof LivingEntity
+						&& !(e.getEntity() instanceof ItemFrame)) {
 							final double dmg1 = e.getDamage();
 							final double blocking = e.getDamage(DamageModifier.BLOCKING);
 							e.setDamage(0);
@@ -251,12 +255,14 @@ public class RacialBonusListener implements Listener {
 						break;
 					default:
 						break;
+					}
 				}
 			}
 		}
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onEntityMount(EntityMountEvent e) {
 		if (e.getMount() instanceof Horse && e.getEntity() instanceof Player) {
@@ -289,17 +295,17 @@ public class RacialBonusListener implements Listener {
 			ItemStack is = le.getEquipment().getItemInMainHand();
 			if(is != null){
 				switch(is.getType()){
-					case GOLD_SWORD:
-					case GOLD_AXE:
-					case GOLD_PICKAXE:
-					case GOLD_SPADE:
-					case GOLD_HOE:
-					case GOLD_INGOT:
-					case GOLD_BLOCK:
-					case GOLD_NUGGET:
-						return true;
-					default:
-						break;
+				case GOLD_SWORD:
+				case GOLD_AXE:
+				case GOLD_PICKAXE:
+				case GOLD_SPADE:
+				case GOLD_HOE:
+				case GOLD_INGOT:
+				case GOLD_BLOCK:
+				case GOLD_NUGGET:
+					return true;
+				default:
+					break;
 				}
 			}
 		}
@@ -335,16 +341,16 @@ public class RacialBonusListener implements Listener {
 			} else if (c == DamageCause.FALL){
 				double dmg = e.getDamage();
 				switch(r){
-					case KHARAJYR:
-					case KHA_CHEETRAH:
-					case KHA_LEPARDA:
-					case KHA_TIGRASI:
-					case KHA_PANTERA:
-						dmg -= 6;
-						if (dmg <= 0) e.setCancelled(true);
-						else e.setDamage(dmg);
-					default:
-						break;
+				case KHARAJYR:
+				case KHA_CHEETRAH:
+				case KHA_LEPARDA:
+				case KHA_TIGRASI:
+				case KHA_PANTERA:
+					dmg -= 6;
+					if (dmg <= 0) e.setCancelled(true);
+					else e.setDamage(dmg);
+				default:
+					break;
 				}
 			}
 		}

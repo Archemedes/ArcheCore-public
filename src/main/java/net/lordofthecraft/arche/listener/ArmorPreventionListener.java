@@ -120,6 +120,7 @@ public class ArmorPreventionListener implements Listener {
 		}
 	}*/
 
+	/*
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent e){
 		Player p = (Player) e.getPlayer();
@@ -133,7 +134,7 @@ public class ArmorPreventionListener implements Listener {
 				}
 			}
 		}
-	}
+	}*/
 	
 	/*@EventHandler
 	public void onEntityMount(EntityMountEvent e) {
