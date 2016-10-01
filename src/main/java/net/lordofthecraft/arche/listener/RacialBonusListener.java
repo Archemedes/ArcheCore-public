@@ -61,7 +61,7 @@ public class RacialBonusListener implements Listener {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onRespawn(PlayerRespawnEvent e){
 		Player p = e.getPlayer();
 		RaceBonusHandler.reset(p);
