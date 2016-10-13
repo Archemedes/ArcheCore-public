@@ -32,7 +32,7 @@ public enum SkillTier {
 	LEGENDARY(11, 350000,"Legendary"),
 	AENGULIC(12, 1000000,"Aengulic"),
 	DAEMONIC(13, 2500000, "Enlightened"),
-	ILLUMINATED(14, 6000000, "Mytholgoical"),
+	ILLUMINATED(14, 6000000, "Mythological"),
 	GODSENT(15, 14000000, "Otherworldly"),
 	SUPER(16, 30000000, "Lord of the");
 	
