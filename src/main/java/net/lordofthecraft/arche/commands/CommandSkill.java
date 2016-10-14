@@ -164,8 +164,9 @@ public class CommandSkill implements CommandExecutor {
 							}
 							if (!s.achievedTier(who, max)
 									&& sender instanceof Player){
+								SkillTier next = s.getSkillTier(who).getNext();
 								new ArcheMessage(txt + xp)
-								.setHoverEvent(ChatBoxAction.SHOW_TEXT,"Next tier: "+s.getSkillTier(who).getNext().getTitle()+" "+WordUtils.capitalize(s.getName()))
+								.setHoverEvent(ChatBoxAction.SHOW_TEXT," Next tier: " + (next == SkillTier.SUPER ? "???" : (next.getTitle() + " " + WordUtils.capitalize(s.getName()))))
 								.sendTo((Player) sender);
 							} else
 								sender.sendMessage(txt + xp);
