@@ -142,17 +142,22 @@ public class CommandPersona implements CommandExecutor {
                 sender.sendMessage(ChatColor.AQUA + "Cleared your Bio!");
                 return true;
             } else if (args[0].equalsIgnoreCase("permakill")) {
-                if (!sender.hasPermission("archecore.admin") && !sender.hasPermission("archecore.mod.persona")) {
+                if (!sender.hasPermission("archecore.admin")) {
                     sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
                 } else {
                     Player other = pers.getPlayer();
 
+                    if (!(args.length > 1)) {
+                        sender.sendMessage(ChatColor.RED + "Don't delete yourself by mistake friend!");
+                        return true;
+                    }
+                    
                     //Only do if online else problems
-                    if (other == null) {
+                    else if (other == null) {
                         sender.sendMessage(ChatColor.RED + "Too risky to remove personas of offline players");
                         return true;
                     }
-
+                    
                     if (pers.remove()) {
                         if (handler.countPersonas(other) == 0 && !other.hasPermission("archecore.exempt"))
                             other.kickPlayer("Your final Persona was Permakilled. Please relog.");
