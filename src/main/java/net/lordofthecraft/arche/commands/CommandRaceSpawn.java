@@ -31,7 +31,7 @@ public class CommandRaceSpawn implements CommandExecutor {
         if (args.length > 0) {
             if ("list".equalsIgnoreCase(args[0])) {
                 sender.sendMessage(ChatColor.AQUA + "Printing racial spawns...");
-                handler.getRacespawns().entrySet().stream().forEach(rs -> {
+                handler.getRacespawns().entrySet().forEach(rs -> {
                     Location l = rs.getValue();
                     sender.sendMessage(ChatColor.GOLD + rs.getKey().name() + ": X: " + l.getBlockX() + ", Y: " + l.getBlockY() + " Z: " + l.getBlockZ() + " World: " + l.getWorld().getName());
                 });
@@ -98,9 +98,9 @@ public class CommandRaceSpawn implements CommandExecutor {
     }
 
     private Race findRace(String s) {
-        s = s.replace('\'', ' ');
+        s = s.replace('_', ' ');
         for (Race r : Race.values()) {
-            if (s.equalsIgnoreCase(r.getName().replace('\'', ' '))) return r;
+            if (s.equalsIgnoreCase(r.getName())) return r;
         }
         return null;
     }
