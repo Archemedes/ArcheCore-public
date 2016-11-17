@@ -47,7 +47,6 @@ public class TreasureChest {
 		if(c.isConfigurationSection("index")){
 			for (Entry<String, Object> entry : c.getConfigurationSection("index").getValues(false).entrySet()) {
 				Integer in = (Integer) entry.getValue();
-				//Customizer.deserialize(entry.);
 				ItemStack item = c.getItemStack(entry.getKey());
 				if (item.getType() != Material.EMPTY_MAP)
 					loot.put(item, in);

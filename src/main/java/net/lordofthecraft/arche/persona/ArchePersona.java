@@ -43,20 +43,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-//import net.lordofthecraft.arche.listener.PersonaSkinListener;
-/*import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-
-import com.comphenix.packetwrapper.WrapperPlayServerNamedEntitySpawn;
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
-import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction;
-import com.comphenix.protocol.wrappers.PlayerInfoData;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;*/
-
 public final class ArchePersona implements Persona, InventoryHolder {
 	private static final String TABLE = "persona";
 
