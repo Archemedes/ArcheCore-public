@@ -18,6 +18,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 import java.sql.PreparedStatement;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -346,7 +347,17 @@ public class ArcheSkill implements Skill {
 		SkillAttachment att = getAttachment(p);
 		return inert || att.isVisible() || getVisibility() == VISIBILITY_DISCOVERABLE;
 	}
-	
+
+	@Override
+	public Map<Race, Double> getRaceMods() {
+		return Collections.unmodifiableMap(raceMods);
+	}
+
+	@Override
+	public Set<Race> getMains() {
+		return Collections.unmodifiableSet(mains);
+	}
+
 	private Persona getPersona(Player p){
 		return ArchePersonaHandler.getInstance().getPersona(p);
 	}
