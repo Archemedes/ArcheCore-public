@@ -1,8 +1,14 @@
 package net.lordofthecraft.arche.SQL;
 
+import org.sqlite.SQLiteDataSource;
+
+import javax.sql.DataSource;
 import java.io.Closeable;
 import java.io.File;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Logger;
 
 interface StatementsList {
@@ -17,6 +23,7 @@ public /*abstract*/ class SQLite implements Closeable {
     // protected String dbprefix;
     @SuppressWarnings("unused")
     private int lastUpdate; //Exclusively a debug tool
+    private SQLiteDataSource ds;
     //private volatile Object syncObject = new Object();
     //private volatile boolean shouldWait = false;
 
@@ -38,11 +45,20 @@ public /*abstract*/ class SQLite implements Closeable {
         setFile(directory, filename);
     }
 
+    public DataSource getDataSource() {
+        return ds;
+    }
+
     public boolean open() //Overridden
     {
         if (initialize()) {
             try {
-                this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.getFile().getAbsolutePath());
+                SQLiteDataSource ds = new SQLiteDataSource();
+                ds.setUrl("jdbc:sqlite:" + this.getFile().getAbsolutePath());
+                this.ds = ds;
+                this.connection = ds.getConnection();
+                //this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.getFile().getAbsolutePath());
+
                 return true;
             } catch (SQLException e) {
                 this.printError("Could not establish an SQLite connection, SQLException: " + e.getMessage());

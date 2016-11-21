@@ -3,6 +3,7 @@ package net.lordofthecraft.arche.SQL;
 import net.lordofthecraft.arche.ArcheCore;
 import org.bukkit.configuration.ConfigurationSection;
 
+import javax.sql.DataSource;
 import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -76,6 +77,11 @@ public class WhySQLHandler extends SQLHandler {
             statement.close();
             return null;
         }
+    }
+
+    @Override
+    public DataSource getDataSource() {
+        return pool.getDatasource();
     }
 
     /*@Override
