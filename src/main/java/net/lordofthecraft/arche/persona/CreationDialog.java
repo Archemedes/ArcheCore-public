@@ -10,7 +10,6 @@ import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
-import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -25,7 +24,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 public class CreationDialog {
 
@@ -135,7 +133,7 @@ public class CreationDialog {
 		 */
 		//1 week in ms = 604800000
 		final long weekSinceCreation = pers.getCreationTime() + 432000000;
-		if((pers != null) && (weekSinceCreation > System.currentTimeMillis())){
+		if((pers != null) && (weekSinceCreation > System.currentTimeMillis() || ArcheSkillFactory.getSkill("internal_drainxp").getXp(pers) == plugin.getConfig().getInt("free.xp") )){
 			p.sendMessage(ChatColor.RED + "You must wait at least five days before deleting your persona " + pers.getName() + ".");
 			p.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Type /persona created to see when you made this persona.");
 			return false;
@@ -541,7 +539,7 @@ public class CreationDialog {
 			boolean autoAge = (Boolean) context.getSessionData("autoage");
 			long creationTimeMS = System.currentTimeMillis();
 			Persona pers = ArchePersonaHandler.getInstance().createPersona(p, id, name, race, gender, age, autoAge, creationTimeMS);
-			ArcheSkillFactory.getSkill("internal_drainxp").addRawXp(pers,75000);
+			ArcheSkillFactory.getSkill("internal_drainxp").addRawXp(pers,plugin.getConfig().getInt("free.xp"));
 
 			if(pers != null && context.getSessionData("first") != null){
 				Economy econ = ArcheCore.getControls().getEconomy();

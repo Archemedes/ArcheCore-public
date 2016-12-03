@@ -482,7 +482,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 				for (Skill sk : ArcheSkillFactory.getSkills().values()) {
 					if (sk != null) xp += sk.getXp(persona);
 				}
-				if (xp == 0) ArcheCore.getControls().getSkill("internal_drainxp").addRawXp(persona, 75000); 
+				if (xp == 0) ArcheCore.getControls().getSkill("internal_drainxp").addRawXp(persona, ArcheCore.getPlugin().getConfig().getInt("free.xp"));
 			}
 		}
 	}

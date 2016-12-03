@@ -115,3 +115,6 @@ mysql:
 
 #Debug mode outputs internal information and timings to console
 enable.debug.mode: false
+
+# Amount of free xp granted!
+free.xp: 75000
