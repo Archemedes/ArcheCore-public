@@ -3,6 +3,7 @@ package net.lordofthecraft.arche.SQL;
 import net.lordofthecraft.arche.ArcheCore;
 import org.bukkit.plugin.Plugin;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,6 +39,11 @@ public class ArcheSQLiteHandler extends SQLHandler {
 	    {
 			plugin.getLogger().severe(e.getMessage());
 	    }
+	}
+
+	@Override
+	public DataSource getDataSource() {
+		return sqlite.getDataSource();
 	}
 
     /**

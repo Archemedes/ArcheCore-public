@@ -3,6 +3,7 @@ package net.lordofthecraft.arche.SQL;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import javax.sql.DataSource;
 import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -42,6 +43,8 @@ public abstract class SQLHandler {
 
         execute(pretext + "(" + buffer.toString() + ");");
     }
+
+    public abstract DataSource getDataSource();
 
     /**
      * Retrieves the underlying SQLite/MySQLConnectionPool object that handles database queries and statement creations.

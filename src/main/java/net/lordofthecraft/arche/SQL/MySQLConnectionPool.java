@@ -42,4 +42,8 @@ public class MySQLConnectionPool implements Closeable {
     public Connection getConnection() throws SQLException {
         return ds.getConnection();
     }
+
+    public HikariDataSource getDatasource() {
+        return ds;
+    }
 }
