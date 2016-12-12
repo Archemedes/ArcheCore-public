@@ -17,6 +17,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -92,12 +93,23 @@ public class ArmorPreventionListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerInteract(PlayerInteractEvent e){
 		Player p = e.getPlayer();
-		ItemStack armor = p.getEquipment().getItemInMainHand();
-		if ((e.getAction()==Action.RIGHT_CLICK_AIR || e.getAction()==Action.RIGHT_CLICK_BLOCK) 
-				&& isArmor(armor.getType()) && !canEquip(p, armor)){
-			e.setCancelled(true);
-			p.updateInventory();
-			return;
+		if (!(e.getHand()==EquipmentSlot.OFF_HAND)){
+			ItemStack armor = p.getEquipment().getItemInMainHand();
+			if ((e.getAction()==Action.RIGHT_CLICK_AIR || e.getAction()==Action.RIGHT_CLICK_BLOCK) 
+					&& isArmor(armor.getType()) && !canEquip(p, armor)){
+				e.setCancelled(true);
+				p.updateInventory();
+				return;
+			}
+		}
+		else {
+			ItemStack armor = p.getEquipment().getItemInOffHand();
+			if ((e.getAction()==Action.RIGHT_CLICK_AIR || e.getAction()==Action.RIGHT_CLICK_BLOCK) 
+					&& isArmor(armor.getType()) && !canEquip(p, armor)){
+				e.setCancelled(true);
+				p.updateInventory();
+				return;
+			}
 		}
 	}
 
