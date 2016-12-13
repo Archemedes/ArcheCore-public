@@ -9,9 +9,6 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.PersonaRenameTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -19,6 +16,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.concurrent.TimeUnit;
 
 public class CommandPersona implements CommandExecutor {
     private final HelpDesk helpdesk;
@@ -44,7 +43,8 @@ public class CommandPersona implements CommandExecutor {
                 + i + "$</persona addbio >addbio$: " + a + "Add a line of text to your Persona's bio!.\n"
                 + i + "$</persona clearbio>clearbio$: " + a + "Clear your Persona's  bio completely.\n"
                 + i + "$</persona time>time$: " + a + "View the hours spent playing your Persona.\n"
-                + i + "$</persona created>created$: " + a + "View how long ago you created your Persona.\n";
+                + i + "$</persona created>created$: " + a + "View how long ago you created your Persona.\n"
+                + i + "$</persona list>list$: " + a + "View all your Personas with names + IDs.\n";
 
         helpdesk.addInfoTopic("Persona Command", output);
     }
@@ -73,7 +73,9 @@ public class CommandPersona implements CommandExecutor {
 
             //Go through process to find the Persona we want
             Persona pers = null;
-            if ((args[0].equalsIgnoreCase("view") && args.length > 1)) {
+            if ((args[0].equalsIgnoreCase("view") ||
+                    args[0].equalsIgnoreCase("list"))
+                    && args.length > 1) {
                 pers = CommandUtil.personaFromArg(args[1]);
             } else if ((args[0].equalsIgnoreCase("permakill")
                     || args[0].equalsIgnoreCase("time")
@@ -140,6 +142,18 @@ public class CommandPersona implements CommandExecutor {
             } else if (args[0].equalsIgnoreCase("clearbio")) {
                 pers.clearDescription();
                 sender.sendMessage(ChatColor.AQUA + "Cleared your Bio!");
+                return true;
+            } else if (args[0].equalsIgnoreCase("list")) {
+                ArchePersona[] personas = handler.getAllPersonas(pers.getPlayer().getUniqueId());
+
+                for (int i = 0; i <= 3; i++ ) {
+                    Persona persona = personas[i];
+                    if (persona != null) {
+                        sender.sendMessage(ChatColor.GRAY + "[" + i + "] " + ChatColor.AQUA + persona.getName());
+                    } else {
+                        sender.sendMessage(ChatColor.GRAY + "[" + i + "] " + ChatColor.WHITE + "Empty");
+                    }
+                }
                 return true;
             } else if (args[0].equalsIgnoreCase("permakill")) {
                 if (!sender.hasPermission("archecore.admin")) {
