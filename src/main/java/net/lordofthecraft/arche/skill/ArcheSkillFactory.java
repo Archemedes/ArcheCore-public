@@ -46,7 +46,7 @@ public class ArcheSkillFactory implements SkillFactory {
 	private int strategy = Skill.VISIBILITY_VISIBLE;
 	private boolean inert = false;
 	private boolean intensive = false;
-	private boolean unlockedByTime = true;
+	private boolean unlockedByTime = false;
 	private String helpText = null;
 	private Material helpIcon = null;
 
