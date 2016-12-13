@@ -133,7 +133,7 @@ public class CreationDialog {
 		 */
 		//1 week in ms = 604800000
 		final long weekSinceCreation = pers.getCreationTime() + 432000000;
-		if((weekSinceCreation > System.currentTimeMillis() || ArcheSkillFactory.getSkill("internal_drainxp").getXp(pers) < plugin.getConfig().getInt("free.xp") )){
+		if((weekSinceCreation > System.currentTimeMillis()) || (ArcheSkillFactory.getSkill("internal_drainxp").getXp(pers) < plugin.getConfig().getInt("free.xp")) ){
 			p.sendMessage(ChatColor.RED + "You must wait at least five days before deleting your persona " + pers.getName() + ".");
 			p.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Type /persona created to see when you made this persona.");
 			return false;
