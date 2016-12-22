@@ -65,8 +65,8 @@ public class CommandMoney implements CommandExecutor {
 					sender.sendMessage(pr+(count+1)+". "
 							+ ChatColor.BLUE + t.getName()
 							+ ChatColor.AQUA + ChatColor.ITALIC + " ("+t.getPlayerName()+"@"+t.getId()+") "
-							+ ChatColor.RESET + "" + ChatColor.GOLD + "" + total + " " + (total == 1 ? econ.currencyNameSingular() : econ.currencyNamePlural()));
-					++count;
+                            + ChatColor.RESET + "" + ChatColor.GOLD + "" + Math.round(total) + " " + (total == 1 ? econ.currencyNameSingular() : econ.currencyNamePlural()));
+                    ++count;
 				}
 			} else {
 				sender.sendMessage(ChatColor.RED+"Everyone is poor! How unfortunate.");
