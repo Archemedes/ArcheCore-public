@@ -49,7 +49,10 @@ public class CommandMoney implements CommandExecutor {
 				sender.sendMessage(displayMoney(p));
 			}else sendHelp(sender);
 			return true;
-		} else if (args[0].equalsIgnoreCase("top")) {
+		}else if (args[0].equalsIgnoreCase("help")) {
+			sendHelp(sender);
+			return true;
+		}else if (args[0].equalsIgnoreCase("top")) {
 			LinkedHashMap<Persona, Double> top = ArcheCore.getControls().getPersonaHandler().getTopHandler().getTopMoney();
 			
 			sender.sendMessage(ChatColor.BLUE+""+ChatColor.BOLD+".:: Money Top ::.");
