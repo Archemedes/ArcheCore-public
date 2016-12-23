@@ -68,43 +68,57 @@ public class CommandMoney implements CommandExecutor {
 					sender.sendMessage(pr+(count+1)+". "
 							+ ChatColor.BLUE + t.getName()
 							+ ChatColor.AQUA + ChatColor.ITALIC + " ("+t.getPlayerName()+"@"+t.getId()+") "
-							+ ChatColor.RESET + "" + ChatColor.GOLD + "" + total + " " + (total == 1 ? econ.currencyNameSingular() : econ.currencyNamePlural()));
-					++count;
+                            + ChatColor.RESET + "" + ChatColor.GOLD + "" + Math.round(total) + " " + (total == 1 ? econ.currencyNameSingular() : econ.currencyNamePlural()));
+                    ++count;
 				}
 			} else {
 				sender.sendMessage(ChatColor.RED+"Everyone is poor! How unfortunate.");
 			}
 			
 			return true;
-		} else if(args[0].equalsIgnoreCase("pay") && args.length == 3){
-			if(!(sender instanceof Player)){ sendHelp(sender); return true;}
-			
-			Player p = (Player) sender;
-			double amt;
-			try{amt = Double.parseDouble(args[2]);} catch(NumberFormatException e){return false;}
-			if(amt < 0.01) return false;
-			
-			amt = (double)((int)(amt * 10)) / 10d;
-			
-			Persona from = ArcheCore.getControls().getPersonaHandler().getPersona(p);
-			Persona to = CommandUtil.currentPersonaFromArg(args[1]);
-			
-			
-			if(from == null || to == null || to.getPlayer() == null) sender.sendMessage(ChatColor.RED + "ERROR: " + ChatColor.DARK_RED + "You both need a valid Persona");
-			else if(econ.requirePaymentProximity() && (p.getWorld() != to.getPlayer().getWorld() || p.getLocation().distance(to.getPlayer().getLocation()) > PAYMENT_PROXIMITY))
-				sender.sendMessage(ChatColor.RED + "ERROR: " + ChatColor.DARK_RED + "You must be near the Persona you wish to pay.");
-			else if(!econ.has(from, amt)) sender.sendMessage(ChatColor.RED + "ERROR: " + ChatColor.DARK_RED + "You do not have this amount of " + econ.currencyNamePlural());
-			else{
-				Player pt = to.getPlayer();
-				String p1 = ChatColor.WHITE + from.getName() + ChatColor.GRAY + "" + ChatColor.ITALIC + " (" + from.getPlayerName() + ") " + ChatColor.AQUA;
-				String p2 = ChatColor.WHITE + to.getName() + ChatColor.GRAY + "" + ChatColor.ITALIC + " (" + to.getPlayerName() + ") ";
-				String mn = ChatColor.GOLD +""+ amt + " " + ChatColor.AQUA + (amt >= 1 && amt < 2? econ.currencyNameSingular() : econ.currencyNamePlural());
-				sender.sendMessage(ChatColor.AQUA + "You have paid " + p2 + mn);
-				if(pt != null) pt.sendMessage(p1 + "has given you " + mn);
-				
-				econ.withdrawPersona(from, amt);
-				econ.depositPersona(to, amt);
-			}
+        } else if (args[0].equalsIgnoreCase("pay")) {
+            if (args.length >= 3) {
+                if (!(sender instanceof Player)) {
+                    sendHelp(sender);
+                    return true;
+                }
+
+                Player p = (Player) sender;
+                double amt;
+                try {
+                    amt = Double.parseDouble(args[2]);
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+                if (amt < 0.01) return false;
+
+                amt = (double) ((int) (amt * 10)) / 10d;
+
+                Persona from = ArcheCore.getControls().getPersonaHandler().getPersona(p);
+                Persona to = CommandUtil.currentPersonaFromArg(args[1]);
+
+
+                if (from == null || to == null || to.getPlayer() == null)
+                    sender.sendMessage(ChatColor.RED + "ERROR: " + ChatColor.DARK_RED + "You both need a valid Persona");
+                else if (econ.requirePaymentProximity() && (p.getWorld() != to.getPlayer().getWorld() || p.getLocation().distance(to.getPlayer().getLocation()) > PAYMENT_PROXIMITY))
+                    sender.sendMessage(ChatColor.RED + "ERROR: " + ChatColor.DARK_RED + "You must be near the Persona you wish to pay.");
+                else if (!econ.has(from, amt))
+                    sender.sendMessage(ChatColor.RED + "ERROR: " + ChatColor.DARK_RED + "You do not have this amount of " + econ.currencyNamePlural());
+                else {
+                    Player pt = to.getPlayer();
+                    String p1 = ChatColor.WHITE + from.getName() + ChatColor.GRAY + "" + ChatColor.ITALIC + " (" + from.getPlayerName() + ") " + ChatColor.AQUA;
+                    String p2 = ChatColor.WHITE + to.getName() + ChatColor.GRAY + "" + ChatColor.ITALIC + " (" + to.getPlayerName() + ") ";
+                    String mn = ChatColor.GOLD + "" + amt + " " + ChatColor.AQUA + (amt >= 1 && amt < 2 ? econ.currencyNameSingular() : econ.currencyNamePlural());
+                    sender.sendMessage(ChatColor.AQUA + "You have paid " + p2 + mn);
+                    if (pt != null) pt.sendMessage(p1 + "has given you " + mn);
+
+                    econ.withdrawPersona(from, amt);
+                    econ.depositPersona(to, amt);
+                }
+            } else {
+                sendHelp(sender);
+            }
+
 			return true;
 		} else if(isMod(sender) && args.length == 3 && (args[0].equalsIgnoreCase("set") || args[0].equalsIgnoreCase("grand") || args[0].equalsIgnoreCase("grant"))){
 			
@@ -126,13 +140,15 @@ public class CommandMoney implements CommandExecutor {
 			
 			return true;
 		} else { //Assume args[0] is a player name. Request the money :)
-			if(sender.hasPermission("archecore.money.seeother")){
-				Persona lookup = CommandUtil.personaFromArg(args[0]);
-				sender.sendMessage(displayMoney(lookup));
-				if(lookup == null && (sender instanceof Player)) sendHelp(sender);
-			} else {
-				sender.sendMessage(ChatColor.RED + "You do not have permission to do this.");
-			}
+            if (!args[0].equalsIgnoreCase("help") && !args[0].equalsIgnoreCase("pay")) {
+                if (sender.hasPermission("archecore.money.seeother")) {
+                    Persona lookup = CommandUtil.personaFromArg(args[0]);
+                    sender.sendMessage(displayMoney(lookup));
+                    if (lookup == null && (sender instanceof Player)) sendHelp(sender);
+                } else {
+                    sender.sendMessage(ChatColor.RED + "You do not have permission to do this.");
+                }
+            }
 			return true;
 			
 		}
@@ -157,9 +173,10 @@ public class CommandMoney implements CommandExecutor {
 		money = (double)((int)(money * 10)) / 10d;
 		
 		return ChatColor.AQUA + p.getName() + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + " (" + p.getPlayerName() + ") " 
-				+ ChatColor.AQUA + "currently has " + ChatColor.GOLD + money + " " + ChatColor.AQUA  
-				+ (money >= 1 && money < 2? econ.currencyNameSingular() : econ.currencyNamePlural());
-	}
+				+ ChatColor.AQUA + "currently has " + ChatColor.GOLD + money + " " + ChatColor.AQUA
+                + (money >= 1 && money < 2 ? econ.currencyNameSingular() : econ.currencyNamePlural()
+                + ChatColor.DARK_GRAY + "\n(Use /money help to see more information)");
+    }
 	
 	private boolean isMod(CommandSender sender){
 		return sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.economy");
