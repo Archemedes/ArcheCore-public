@@ -16,16 +16,24 @@ public interface Persona {
      * @param amount The amount of money to modify the Persona account by
      *
      * @return Amount of minas persona possess after the transaction
+     * @deprecated Use {@link #withdraw(double, Transaction }
      */
+    @Deprecated()
     double withdraw(double amount);
+
+    double withdraw(double amount, Transaction cause);
 
     /**
      * Give money to a Persona. Negative amounts possible, but consider using {@link #withdraw(double)} instead.
      * @param amount The amount of money to modify the Persona account by
      *
      * @return Amount of minas persona possess after the transaction
+     * @deprecated Use {@link #deposit(double, Transaction }
      */
+    @Deprecated()
 	double deposit(double amount);
+
+    double deposit(double amount, Transaction cause);
 
 	/**
 	 * Reset a persona's visible skills (drainXp and Magic skills not effected) to 0 and allow it to be redistributed

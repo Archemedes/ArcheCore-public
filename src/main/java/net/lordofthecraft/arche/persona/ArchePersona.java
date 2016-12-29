@@ -13,6 +13,7 @@ import net.lordofthecraft.arche.event.PersonaSwitchEvent;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
@@ -263,12 +264,26 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}*/
 
 	@Override
+	public double withdraw(double amount, Transaction cause) {
+		ArcheCore.getControls().getEconomy().withdrawPersona(this, amount);
+		return money;
+	}
+
+	@Override
+    @Deprecated
     public double withdraw(double amount) {
         ArcheCore.getControls().getEconomy().withdrawPersona(this, amount);
         return money;
     }
 
     @Override
+	public double deposit(double amount, Transaction cause){
+		ArcheCore.getControls().getEconomy().depositPersona(this, amount);
+		return money;
+	}
+
+    @Override
+    @Deprecated
     public double deposit(double amount) {
         ArcheCore.getControls().getEconomy().depositPersona(this, amount);
         return money;
