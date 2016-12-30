@@ -16,7 +16,7 @@ public interface Persona {
      * @param amount The amount of money to modify the Persona account by
      *
      * @return Amount of minas persona possess after the transaction
-     * @deprecated Use {@link #withdraw(double, Transaction }
+     * @deprecated Use {@link #withdraw(double, Transaction)}
      */
     @Deprecated()
     double withdraw(double amount);
@@ -28,7 +28,7 @@ public interface Persona {
      * @param amount The amount of money to modify the Persona account by
      *
      * @return Amount of minas persona possess after the transaction
-     * @deprecated Use {@link #deposit(double, Transaction }
+     * @deprecated Use {@link #deposit(double, Transaction) }
      */
     @Deprecated()
 	double deposit(double amount);
