@@ -90,6 +90,7 @@ public class ArmorPreventionListener implements Listener {
 		return;
 	}
 
+
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerInteract(PlayerInteractEvent e){
 		Player p = e.getPlayer();
@@ -161,16 +162,6 @@ public class ArmorPreventionListener implements Listener {
 
 	private boolean canEquip(Player p, ItemStack armor) {
 		Persona ps = handler.getPersona(p);
-		if (p.isInsideVehicle()) {
-			if (p.getVehicle() instanceof Horse && armor != null) {
-				if (armor.getType()==Material.IRON_HELMET
-						|| armor.getType()==Material.IRON_CHESTPLATE
-						|| armor.getType()==Material.IRON_LEGGINGS
-						|| armor.getType()==Material.IRON_BOOTS) {
-					return false;
-				}
-			}
-		}
 		return !(ps != null && (ps.getRace() == Race.CONSTRUCT || ps.getRace() == Race.SPECTRE) && armor.getType() != Material.ELYTRA);
 	}
 
