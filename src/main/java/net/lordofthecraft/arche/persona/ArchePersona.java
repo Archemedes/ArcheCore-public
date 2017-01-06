@@ -669,7 +669,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	void restoreMinecraftSpecifics(final Player p){
 
 		// Dismount them if they're mounted. Also dismount anyone on them.
-		p.getVehicle().eject();
+		if (p.isInsideVehicle()) {
+			p.leaveVehicle();
+		}
 		p.eject();
 
 		//Teleport the Player to the new Persona's stored location
