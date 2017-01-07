@@ -20,13 +20,6 @@ public class JistumaCollectionListener implements Listener{
 	public void onDrinkingPotion (PlayerItemConsumeEvent e){
 		ItemStack s = e.getItem();
 		final Player p = e.getPlayer();
-		if (s.getType()==Material.POTION && s.getAmount()==1){
-			List<?> lore = s.getItemMeta().getLore();
-			if (lore==null && !p.hasPermission("potions.mayuse")){
-				e.setCancelled(true);
-				s.setType(Material.GLASS_BOTTLE);
-			}
-		}
 		if (s.hasItemMeta() && p.isInsideVehicle()){
 			String name = s.getItemMeta().getDisplayName();
 			if (name == null) return;
