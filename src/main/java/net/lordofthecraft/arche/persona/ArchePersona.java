@@ -675,12 +675,20 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		p.eject();
 
 		//Teleport the Player to the new Persona's stored location
-		if(location != null) p.teleport(location.toLocation().add(0.5, 0.5, 0.5));
+		if(location != null) {
+		    Bukkit.getScheduler().runTaskLater(ArcheCore.getPlugin(),
+                    () -> p.teleport(location.toLocation().add(0.5, 0.5, 0.5))
+                    , 3);
+		}
 
 		//Do we protect incase of bad teleport?
 		if (ArcheCore.getPlugin().teleportProtectively()) {
 			NewbieProtectListener.bonusProtects.add(p.getUniqueId());
-			new BukkitRunnable(){public void run(){NewbieProtectListener.bonusProtects.remove(p.getUniqueId());}};
+			// TODO: This doesn't aactually do anything lmao
+			new BukkitRunnable(){
+			    public void run(){
+			        NewbieProtectListener.bonusProtects.remove(p.getUniqueId());
+			    }};
 		}
 
 		//Give them an inventory.
