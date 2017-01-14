@@ -277,7 +277,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         });
 
 		//Start tracking Personas and their playtime.
-		new TimeTrackerRunnable(personaHandler).runTaskTimer(this, 2400, 1200);
+		new TimeTrackerRunnable(personaHandler).runTaskTimerAsynchronously(this, 2400, 1200);
 
 		//Some racial bonus stuff
 		/*		if(this.areRacialBonusesEnabled())
