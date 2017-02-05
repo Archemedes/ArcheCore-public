@@ -559,7 +559,11 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		String invString = res.getString(21);
 		if(!res.wasNull()){
-			try {persona.inv = PersonaInventory.restore(invString);} catch (InvalidConfigurationException e) {e.printStackTrace();}
+			try {
+				persona.inv = PersonaInventory.restore(invString);
+			} catch (InvalidConfigurationException e) {
+				e.printStackTrace();
+			}
 		}
 
 		if(ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble(22);

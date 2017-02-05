@@ -684,7 +684,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		//Do we protect incase of bad teleport?
 		if (ArcheCore.getPlugin().teleportProtectively()) {
 			NewbieProtectListener.bonusProtects.add(p.getUniqueId());
-			// TODO: This doesn't aactually do anything lmao
+			// TODO: This doesn't actually do anything lmao
 			new BukkitRunnable(){
 			    public void run(){
 			        NewbieProtectListener.bonusProtects.remove(p.getUniqueId());
@@ -695,6 +695,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		PlayerInventory pinv = p.getInventory();
 		if(inv != null){ //Grab inv from Persona file
 			pinv.setContents(inv.getContents());
+
+			// Legacy code. This is only here to make sure personas that are pre 1.11 load
 			if (inv.getArmorContents() != null) {
 				pinv.setArmorContents(inv.getArmorContents());
 			}
@@ -714,8 +716,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		if (p.getMaxHealth() < health) p.setHealth(p.getMaxHealth());
 		else p.setHealth(health);
 		p.setFoodLevel(food);
-		//for(PotionEffectType pet : PotionEffectType.values())
-		//	if(p.hasPotionEffect(pet)) p.removePotionEffect(pet);
 	}
 
 	@Override
@@ -771,10 +771,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			return getPlayer().getInventory();
 		} else {
 			Inventory binv = Bukkit.createInventory(this, 45, "Persona Inventory: " + key.toString());
-			ItemStack[] contents = inv.getContents();
-			for (int i = 0; i < binv.getSize(); i++) {
-				binv.setItem(i, contents[i]);
-			}
+			binv.setContents(inv.getContents());
 			return binv;
 		}
 	}
