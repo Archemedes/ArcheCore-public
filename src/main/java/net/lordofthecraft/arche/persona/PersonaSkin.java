@@ -86,6 +86,7 @@ public class PersonaSkin {
 	
 	public ItemStack getHeadItem(){
 		ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+		if (data == null) return skull;
 		ItemMeta skullMeta = skull.getItemMeta();
 		
 		GameProfile profile = new GameProfile(UUID.randomUUID(), null);

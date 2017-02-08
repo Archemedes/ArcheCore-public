@@ -97,7 +97,7 @@ public class ArcheBeacon {
 					else
 						buildItem(is, "Locked Slot", g + "Please " + ChatColor.GREEN+""+ChatColor.ITALIC + "Donate", g + "To be able to make", "more Personas");
 				} else {
-					is = new ItemStack(Material.SKULL_ITEM, 1, (short)3);
+					is = a.getSkin().getHeadItem();
 					String name = ChatColor.YELLOW + "" + ChatColor.ITALIC + a.getName();
 					String gender = a.getGender() == null? "" : a.getGender();
 					String desc = ChatColor.GRAY + a.getRaceString() + " " + gender + ", " + a.getAge();
