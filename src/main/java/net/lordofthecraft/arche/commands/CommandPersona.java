@@ -6,6 +6,7 @@ import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.PersonaSkin;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.PersonaRenameTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
@@ -200,31 +201,16 @@ public class CommandPersona implements CommandExecutor {
                     }
                     return true;
 
-				/*} else if (args[0].equalsIgnoreCase("skin")){
-                    PersonaSkin skin = pers.getSkin();
-					if (skin == null) {
-						if (!(sender instanceof Player) && args.length < 2) {
-							sender.sendMessage("Please specify a player name");
-							return true;
-						}
-						Player skinee = null;
-						if (args.length > 1) {
-							skinee = Bukkit.getPlayer(args[1]);
-						} else {
-							skinee = (Player) sender;
-						}
-						if (skinee == null) {
-							sender.sendMessage(ChatColor.RED + "Error: Player not found.");
-							return true;
-						}
-						PersonaSkin newskin = new PersonaSkin(skinee);
-						pers.setSkin(newskin);
-						sender.sendMessage(ChatColor.AQUA + "Your current skin has been tied to this persona.");
-					} else {
-						sender.sendMessage(ChatColor.AQUA + "Skin cleared.");
-						pers.setSkin(null);
-						return true;
-					}*/
+                } else if (args[0].equalsIgnoreCase("skin") || args[0].equalsIgnoreCase("head")){
+					if (!(sender instanceof Player)) return false;
+					PersonaSkin newskin = new PersonaSkin((Player)sender);
+					pers.setSkin(newskin);
+					sender.sendMessage(ChatColor.AQUA + "Your current skin has been tied to this persona.");
+					return true;
+				} else if (args[0].equalsIgnoreCase("clearskin")){
+					pers.setSkin(null);
+					sender.sendMessage(ChatColor.AQUA + "Skin cleared.");
+					return true;
                 } else if (args[0].equalsIgnoreCase("prefix") && prefix) {
                     int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
                     String name = StringUtils.join(args, ' ', 1, parseTo);

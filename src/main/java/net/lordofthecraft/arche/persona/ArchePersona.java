@@ -169,7 +169,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	public void setSkin(PersonaSkin skin) {
 		this.skin = skin;
-		buffer.put(new UpdateTask(this, PersonaField.SKIN, skin.getCombined()));
+		buffer.put(new UpdateTask(this, PersonaField.SKIN, skin.getData()));
 		//if (this.getPlayer() != null) PersonaSkinListener.updatePlayerSkin(this.getPlayer());
 	}
 
