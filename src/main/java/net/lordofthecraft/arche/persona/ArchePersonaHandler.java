@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.Syntax;
 import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.*;
@@ -687,21 +686,12 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	@Override
 	public void ageUs(){
-		Map<String, Object> crits = Maps.newHashMap();
-		crits.put("autoage", 1);
-
-		Map<String, Object> vals = Maps.newHashMap();
-		vals.put("age", new Syntax("age+1"));
-
-		DataTask s = new DataTask(DataTask.UPDATE, "persona", vals, crits);
-		buffer.put(s);
-
 		for(ArchePersona[] prs : getPersonas()){
 			if(prs == null) continue;
 			for(ArchePersona p : prs){
 				if(p == null) continue;
 				if(p.doesAutoAge()){
-					p.age++;
+					p.setAge(p.getAge() + 1);
 				}
 			}
 		}
