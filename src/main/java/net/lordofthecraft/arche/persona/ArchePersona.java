@@ -576,6 +576,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			}
 		}
 		buffer.put(new UpdateTask(this, PersonaField.RACE_REAL, race));
+		buffer.put(new UpdateTask(this, PersonaField.RACE, ""));
 		this.raceHeader = null;
 	}
 
