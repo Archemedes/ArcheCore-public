@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.CreationDialog;
+import net.lordofthecraft.arche.persona.PersonaSkin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -91,13 +92,16 @@ public class ArcheBeacon {
 			for(int i = 0; i < 4; i++){
 				ArchePersona a = prs[i];
 				if(a == null){
-					is = new ItemStack(Material.SKULL_ITEM, 1, mayMakeMore? (short)0:(short)1);
+					is = new ItemStack(Material.SKULL_ITEM, 1, mayMakeMore ? (short)0 : (short)1);
 					if(mayMakeMore)
 						buildItem(is, "Empty Persona", ChatColor.GREEN+""+ChatColor.ITALIC + "Click here", g + "To create a new Persona");
 					else
 						buildItem(is, "Locked Slot", g + "Please " + ChatColor.GREEN+""+ChatColor.ITALIC + "Donate", g + "To be able to make", "more Personas");
 				} else {
-					is = new ItemStack(Material.SKULL_ITEM, 1, (short)3);
+				    PersonaSkin skin = a.getSkin();
+				    // Give a normal human head if skin is null.
+				    is = skin != null ? a.getSkin().getHeadItem() : new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+
 					String name = ChatColor.YELLOW + "" + ChatColor.ITALIC + a.getName();
 					String gender = a.getGender() == null? "" : a.getGender();
 					String desc = ChatColor.GRAY + a.getRaceString() + " " + gender + ", " + a.getAge();

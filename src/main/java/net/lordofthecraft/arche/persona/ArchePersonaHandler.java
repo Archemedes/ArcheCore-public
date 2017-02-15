@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.Syntax;
 import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.*;
@@ -559,7 +558,11 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		String invString = res.getString(21);
 		if(!res.wasNull()){
-			try {persona.inv = PersonaInventory.restore(invString);} catch (InvalidConfigurationException e) {e.printStackTrace();}
+			try {
+				persona.inv = PersonaInventory.restore(invString);
+			} catch (InvalidConfigurationException e) {
+				e.printStackTrace();
+			}
 		}
 
 		if(ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble(22);
@@ -569,11 +572,11 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.professions[2] = ArcheSkillFactory.getSkill(res.getString(25));
 		persona.pastPlayTime = res.getInt(28);
 
-		//String skinURL = res.getString(26);
+		String skinURL = res.getString("skindata");
 
-		//if(!res.wasNull()){
-		//	persona.skin = new PersonaSkin(skinURL);
-		//}
+		if(!res.wasNull()){
+			persona.skin = new PersonaSkin(skinURL);
+		}
 
 		//We now let all Personas load their skills (albeit lazily). Let's do this now
 		persona.loadSkills();
@@ -683,21 +686,12 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	@Override
 	public void ageUs(){
-		Map<String, Object> crits = Maps.newHashMap();
-		crits.put("autoage", 1);
-
-		Map<String, Object> vals = Maps.newHashMap();
-		vals.put("age", new Syntax("age+1"));
-
-		DataTask s = new DataTask(DataTask.UPDATE, "persona", vals, crits);
-		buffer.put(s);
-
 		for(ArchePersona[] prs : getPersonas()){
 			if(prs == null) continue;
 			for(ArchePersona p : prs){
 				if(p == null) continue;
 				if(p.doesAutoAge()){
-					p.age++;
+					p.setAge(p.getAge() + 1);
 				}
 			}
 		}

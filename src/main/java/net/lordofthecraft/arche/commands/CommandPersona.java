@@ -6,6 +6,7 @@ import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.PersonaSkin;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.PersonaRenameTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
@@ -44,6 +45,7 @@ public class CommandPersona implements CommandExecutor {
                 + i + "$</persona clearbio>clearbio$: " + a + "Clear your Persona's  bio completely.\n"
                 + i + "$</persona time>time$: " + a + "View the hours spent playing your Persona.\n"
                 + i + "$</persona created>created$: " + a + "View how long ago you created your Persona.\n"
+                + i + "$</persona skin>skin$: " + a + "Save your current skin to your persona\n"
                 + i + "$</persona list>list$: " + a + "View all your Personas with names + IDs.\n";
 
         helpdesk.addInfoTopic("Persona Command", output);
@@ -91,11 +93,14 @@ public class CommandPersona implements CommandExecutor {
                     || args[0].equalsIgnoreCase("keeper")
                     || args[0].equalsIgnoreCase("realrace")
                     || args[0].equalsIgnoreCase("wiperace")
-                    || args[0].equalsIgnoreCase("openinv"))
+                    || args[0].equalsIgnoreCase("openinv")
+            		|| args[0].equalsIgnoreCase("head")
+            		|| args[0].equalsIgnoreCase("skin")
+            		|| args[0].equalsIgnoreCase("created"))
                     && args.length > 1
                     && (sender.hasPermission("archecore.mod.persona") || sender.hasPermission("archecore.mod.other"))) {
                 pers = CommandUtil.personaFromArg(args[1]);
-            } else if (args.length > 3 && args[args.length - 2].equals("-p") && (sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.persona"))) {
+            } else if (args.length > 2 && args[args.length - 2].equalsIgnoreCase("-p") && (sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.persona"))) {
                 pers = CommandUtil.personaFromArg(args[args.length - 1]);
             } else if (sender instanceof Player) {
                 pers = handler.getPersona((Player) sender);
@@ -135,6 +140,12 @@ public class CommandPersona implements CommandExecutor {
             	String time = millsToDaysHours(System.currentTimeMillis() - pers.getCreationTime());
             	sender.sendMessage(ChatColor.AQUA + "You created this persona " + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
                 return true;
+            } else if (args[0].equalsIgnoreCase("skin") || args[0].equalsIgnoreCase("head")){
+				if (!(sender instanceof Player)) return false;
+				PersonaSkin newskin = new PersonaSkin((Player)sender);
+				pers.setSkin(newskin);
+				sender.sendMessage(ChatColor.AQUA + "Your current skin has been tied to this persona.");
+				return true;
             } else if (args[0].equalsIgnoreCase("clearprefix") && prefix) {
                 pers.clearPrefix();
                 sender.sendMessage(ChatColor.AQUA + "Persona prefix was cleared.");
@@ -200,31 +211,10 @@ public class CommandPersona implements CommandExecutor {
                     }
                     return true;
 
-				/*} else if (args[0].equalsIgnoreCase("skin")){
-                    PersonaSkin skin = pers.getSkin();
-					if (skin == null) {
-						if (!(sender instanceof Player) && args.length < 2) {
-							sender.sendMessage("Please specify a player name");
-							return true;
-						}
-						Player skinee = null;
-						if (args.length > 1) {
-							skinee = Bukkit.getPlayer(args[1]);
-						} else {
-							skinee = (Player) sender;
-						}
-						if (skinee == null) {
-							sender.sendMessage(ChatColor.RED + "Error: Player not found.");
-							return true;
-						}
-						PersonaSkin newskin = new PersonaSkin(skinee);
-						pers.setSkin(newskin);
-						sender.sendMessage(ChatColor.AQUA + "Your current skin has been tied to this persona.");
-					} else {
-						sender.sendMessage(ChatColor.AQUA + "Skin cleared.");
-						pers.setSkin(null);
-						return true;
-					}*/
+				} else if (args[0].equalsIgnoreCase("clearskin")){
+					pers.setSkin(null);
+					sender.sendMessage(ChatColor.AQUA + "Skin cleared.");
+					return true;
                 } else if (args[0].equalsIgnoreCase("prefix") && prefix) {
                     int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
                     String name = StringUtils.join(args, ' ', 1, parseTo);
