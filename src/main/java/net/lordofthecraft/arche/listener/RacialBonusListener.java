@@ -2,15 +2,13 @@ package net.lordofthecraft.arche.listener;
 
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.DelayedTask;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -28,6 +26,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 import org.spigotmc.event.entity.EntityMountEvent;
 
 import java.util.List;
@@ -49,6 +48,8 @@ public class RacialBonusListener implements Listener {
 
 	private boolean hasTogglePower(Race race){
 		switch(race){
+		case OLOG:
+		case ORC:
 		case DARK_ELF:
 		case KHARAJYR:
 		case KHA_CHEETRAH:
@@ -138,9 +139,62 @@ public class RacialBonusListener implements Listener {
 					} else { //Shift pressed down twice in short time
 						if (pers.getRace() == Race.DARK_ELF) {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 120, 1, true), true);
-						}else {
+						}else if(pers.getRace() == Race.KHARAJYR || pers.getRace() == Race.KHA_CHEETRAH || pers.getRace() == Race.KHA_LEPARDA || pers.getRace() == Race.KHA_PANTERA || pers.getRace() == Race.KHA_TIGRASI){
 							p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 450, 2, true), true);
 							p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 240, 1, true), true);
+						}else if(pers.getRace() == Race.OLOG || pers.getRace() == Race.ORC){
+
+							if(p.isOnGround()) {
+								p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP,50,128,false,false));
+								p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,50,128,false,false));
+								p.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 50, 1, false, false, Color.RED));
+								p.getWorld().playSound(p.getLocation(),Sound.ENTITY_ENDERDRAGON_GROWL,1.0F,1.0F);
+
+								Location loc = p.getLocation();
+								for (int degree = 0; degree < 360; degree++) {
+									double radians = Math.toRadians(degree);
+									double x = Math.cos(radians) * 0.65;
+									double z = Math.sin(radians) * 0.65;
+									loc.add(x,2.0,z);
+									p.getWorld().spawnParticle(Particle.REDSTONE,loc,0,255,0,0);
+									p.getWorld().spawnParticle(Particle.REDSTONE,loc.clone().subtract(0.0,0.8,0.0),0,255,0,0);
+									p.getWorld().spawnParticle(Particle.REDSTONE,loc.clone().subtract(0.0,1.6,0.0),0,255,0,0);
+									loc.subtract(x,2.0,z);
+								}
+
+
+								new DelayedTask(50) {
+
+
+									@Override
+									public void run() {
+										final Vector facing = p.getEyeLocation().getDirection();
+										if(p.getLocation().getPitch() < -10 && p.getLocation().getPitch() > -90){
+											p.setVelocity(new Vector(facing.getX(), .025, facing.getZ()).multiply(20));
+										}else{
+											p.setVelocity(new Vector(facing.getX(), 0, facing.getZ()).multiply(20));
+										}
+
+										new DelayedTask(5){
+
+											@Override
+											public void run(){
+												List<Player> players = p.getWorld().getPlayers();
+												players.remove(p);
+												for (Player pl : players) {
+													if (pl.getLocation().distanceSquared(p.getLocation()) <= 6.25 ) {
+														Bukkit.broadcastMessage(pl.getName());
+														pl.setVelocity(p.getLocation().getDirection().multiply(1.2).setY(0.54));
+														pl.damage(4.0);
+													}
+												}
+											}
+										}.start();
+									}
+
+								}.start();
+
+							}
 						}
 
 						p.playSound(p.getLocation(), Sound.AMBIENT_CAVE, 0.8f, 2f);
@@ -148,7 +202,7 @@ public class RacialBonusListener implements Listener {
 						new BukkitRunnable(){public void run(){
 							sneakers.remove(p.getName());
 							p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
-						}}.runTaskLater(plugin, 600);
+						}}.runTaskLater(plugin, 900);
 					}
 				}
 			}
