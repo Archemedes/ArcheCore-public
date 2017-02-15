@@ -147,7 +147,6 @@ public class RacialBonusListener implements Listener {
 							if(p.isOnGround()) {
 								p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP,50,128,false,false));
 								p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,50,128,false,false));
-								p.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 50, 1, false, false, Color.RED));
 								p.getWorld().playSound(p.getLocation(),Sound.ENTITY_ENDERDRAGON_GROWL,1.0F,1.0F);
 
 								Location loc = p.getLocation();
@@ -183,7 +182,6 @@ public class RacialBonusListener implements Listener {
 												players.remove(p);
 												for (Player pl : players) {
 													if (pl.getLocation().distanceSquared(p.getLocation()) <= 6.25 ) {
-														Bukkit.broadcastMessage(pl.getName());
 														pl.setVelocity(p.getLocation().getDirection().multiply(1.2).setY(0.54));
 														pl.damage(4.0);
 													}
