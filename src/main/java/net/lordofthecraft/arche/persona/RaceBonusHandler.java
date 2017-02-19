@@ -54,6 +54,7 @@ public class RaceBonusHandler {
             case HIGH_ELF:
             case WOOD_ELF:
             case DARK_ELF:
+            case SNOW_ELF:
                 vals.put(Attribute.GENERIC_MOVEMENT_SPEED, new AttributeModifier(UUID_ARCHE, "arche_speed", 0.10, AttributeModifier.Operation.ADD_SCALAR));
                 break;
             case FOREST_DWARF:
@@ -92,11 +93,22 @@ public class RaceBonusHandler {
                 vals.put(Attribute.GENERIC_MOVEMENT_SPEED, new AttributeModifier(UUID_ARCHE, "arche_speed", 0.12, AttributeModifier.Operation.ADD_SCALAR));
                 vals.put(Attribute.GENERIC_LUCK, new AttributeModifier(UUID_ARCHE, "501_moreluck", 0.1, AttributeModifier.Operation.ADD_NUMBER));
                 break;
+            case HOUZI_LAO:
+            case HOUZI_FEI:
+
+                vals.put(Attribute.GENERIC_MOVEMENT_SPEED, new AttributeModifier(UUID_ARCHE, "arche_speed", 0.12, AttributeModifier.Operation.ADD_SCALAR));
+                vals.put(Attribute.GENERIC_LUCK, new AttributeModifier(UUID_ARCHE, "501_moreluck", 0.1, AttributeModifier.Operation.ADD_NUMBER));
+
+                break;
+            case HOUZI_HEI:
+                vals.put(Attribute.GENERIC_MAX_HEALTH, new AttributeModifier(UUID_ARCHE, "arche_healthboost", 0.2, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
+                vals.put(Attribute.GENERIC_LUCK, new AttributeModifier(UUID_ARCHE, "501_moreluck", 0.1, AttributeModifier.Operation.ADD_NUMBER));
+                break;
             default: //Basic Humans, Default/Unset
                 break;
         }
         reset(p);
-        vals.entrySet().stream().forEach(ent -> {
+        vals.entrySet().forEach(ent -> {
             AttributeInstance inst = p.getAttribute(ent.getKey());
             if (inst != null) {
                 inst.addModifier(ent.getValue());
@@ -105,13 +117,13 @@ public class RaceBonusHandler {
         if (ArcheCore.getPlugin().debugMode()) {
             Logger log = ArcheCore.getPlugin().getLogger();
             log.info("Resultant stats for the user " + p.getName());
-            Arrays.asList(Attribute.values()).stream()
+            Arrays.stream(Attribute.values())
                     .forEach(attr -> {
                         AttributeInstance inst = p.getAttribute(attr);
                         if (inst != null) {
                             log.info("Attribute instance is " + inst.getAttribute().name() + " and it's final value is " + inst.getValue());
                             log.info("modifiers are: ");
-                            inst.getModifiers().stream().forEach(mod -> log.info("Modifier operation is " + mod.getOperation().name() + " and it's value is " + mod.getAmount() + ". Name is " + mod.getName()));
+                            inst.getModifiers().forEach(mod -> log.info("Modifier operation is " + mod.getOperation().name() + " and it's value is " + mod.getAmount() + ". Name is " + mod.getName()));
                         }
                     });
         }

@@ -9,6 +9,7 @@ import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import org.bukkit.*;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -18,10 +19,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -56,6 +54,10 @@ public class RacialBonusListener implements Listener {
 		case KHA_PANTERA:
 		case KHA_LEPARDA:
 		case KHA_TIGRASI:
+			case HOUZI_FEI:
+			case HOUZI_LAO:
+			case NEPHILIM:
+			case SNOW_ELF:
 			return true;
 		default:
 			return false;
@@ -139,7 +141,7 @@ public class RacialBonusListener implements Listener {
 					} else { //Shift pressed down twice in short time
 						if (pers.getRace() == Race.DARK_ELF) {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 120, 1, true), true);
-						}else if(pers.getRace() == Race.KHARAJYR || pers.getRace() == Race.KHA_CHEETRAH || pers.getRace() == Race.KHA_LEPARDA || pers.getRace() == Race.KHA_PANTERA || pers.getRace() == Race.KHA_TIGRASI){
+						}else if (pers.getRace().getParentRace().equalsIgnoreCase("Kharajyr")) {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 450, 2, true), true);
 							p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 240, 1, true), true);
 						}else if(pers.getRace() == Race.OLOG || pers.getRace() == Race.ORC){
@@ -193,6 +195,23 @@ public class RacialBonusListener implements Listener {
 								}.start();
 
 							}
+						}else if (pers.getRace().getParentRace().equalsIgnoreCase("hou-zi")) {
+							AreaEffectCloud ae = (AreaEffectCloud) p.getWorld().spawnEntity(p.getLocation().clone().add(0, 0.5, 0), EntityType.AREA_EFFECT_CLOUD);
+							ae.setParticle(Particle.CLOUD);
+							ae.setDuration(5);
+							ae.setRadius(3);
+							ae.setWaitTime(0);
+
+							Bukkit.getScheduler().runTaskLater(ArcheCore.getPlugin(), () -> p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 100, 0, true)), 2);
+						} else if (pers.getRace() == Race.NEPHILIM) {
+							//TODO breathe fire.
+						} else if (pers.getRace() == Race.SNOW_ELF) { //I had to. -501warhead
+							Location l = p.getLocation();
+							if (l.getBlock().getType() == Material.AIR && l.getBlock().getRelative(BlockFace.DOWN).getType().isSolid()) {
+								l.getBlock().setType(Material.SNOW);
+							} else {
+								return;
+							}
 						}
 
 						p.playSound(p.getLocation(), Sound.AMBIENT_CAVE, 0.8f, 2f);
@@ -200,7 +219,7 @@ public class RacialBonusListener implements Listener {
 						new BukkitRunnable(){public void run(){
 							sneakers.remove(p.getName());
 							p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
-						}}.runTaskLater(plugin, 900);
+						}}.runTaskLater(plugin, 600);
 					}
 				}
 			}
@@ -225,6 +244,24 @@ public class RacialBonusListener implements Listener {
 
 				} else if (r == Race.HIGH_ELF) {
 					e.setDamage(DamageModifier.MAGIC, e.getDamage(DamageModifier.MAGIC) * 0.7);
+				} else if (r.getParentRace().equalsIgnoreCase("hou-zi") && r != Race.HOUZI_HEI && !isWearingArmor(p)) {
+					e.setDamage(e.getDamage()*0.75);
+				}
+			}
+		}
+		if (e.getDamager() instanceof Player && e.getEntity() instanceof LivingEntity) {
+			Player p = (Player) e.getDamager();
+			LivingEntity ent = (LivingEntity) e.getEntity();
+			Persona pers = handler.getPersona(p);
+			if(pers != null) {
+				Race r = pers.getRace();
+				if (r.getParentRace().equalsIgnoreCase("hou-zi")
+						&& r != Race.HOUZI_HEI
+						&& p.hasPotionEffect(PotionEffectType.INVISIBILITY)
+						&& (p.getEquipment().getItemInMainHand() == null || p.getEquipment().getItemInMainHand().getType() == Material.AIR)) {
+					ent.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 100, 1));
+					p.removePotionEffect(PotionEffectType.INVISIBILITY);
+					ent.sendMessage(ChatColor.RED+"The "+r.getName()+" snuck up on you and delivered a quick strike, leaving you weakened!");
 				}
 			}
 		}
@@ -364,6 +401,16 @@ public class RacialBonusListener implements Listener {
 		return false;
 	}
 
+	private boolean isWearingArmor(Player p) {
+		for (ItemStack is : p.getEquipment().getArmorContents()) {
+			if (is != null && is.getType() != Material.ELYTRA && is.getType() != Material.PUMPKIN) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onDamage(EntityDamageEvent e){
 
@@ -398,6 +445,10 @@ public class RacialBonusListener implements Listener {
 				case KHA_LEPARDA:
 				case KHA_TIGRASI:
 				case KHA_PANTERA:
+					case HOUZI:
+					case HOUZI_FEI:
+					case HOUZI_LAO:
+					case HOUZI_HEI:
 					dmg -= 6;
 					if (dmg <= 0) e.setCancelled(true);
 					else e.setDamage(dmg);

@@ -102,8 +102,9 @@ public class HelpDesk {
 		topic = topic.toLowerCase();
 		HelpFile h = findHelpFile(topic);
 
-		if(h==null) return null;
-		else return h.outputHelp();
+		if(h==null){
+			return null;
+		}else return h.outputHelp();
 	}
 
 	public String getSkillHelpText(String topic){

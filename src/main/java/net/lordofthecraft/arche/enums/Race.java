@@ -6,15 +6,18 @@ public enum Race {
     DWARF("Dwarf", "Dwarf", 1d),
     ORC("Orc", "Orc", -1d),
     KHARAJYR("Kharajyr", "Kharajyr", 1d),
+    HOUZI("Hou-zi", "Hou-zi", 300, 1d),
 
     NORTHENER("Highlander", "Human", 100, 1.05, 0d),
     SOUTHERON("Farfolk", "Human", 100, 1.05, 0d),
     HEARTLANDER("Heartlander", "Human", 100, 1.05, 0d),
+    ADUNIAN("Adunian", "Human", 200, 1.05, 0d),
     HALFLING("Halfling", "Human", 200, 1.05, 2d),
 
     HIGH_ELF("High Elf", "Elf", 1000, 0d),
     DARK_ELF("Dark Elf", "Elf", 1000),
     WOOD_ELF("Wood Elf", "Elf", 1000),
+    SNOW_ELF("Snow Elf", "Elf", 1000), //Kill me please -501warhead
 
     CAVE_DWARF("Cave Dwarf", "Dwarf", 1d),
     FOREST_DWARF("Forest Dwarf", "Dwarf", 1d),
@@ -29,9 +32,14 @@ public enum Race {
     KHA_CHEETRAH("Kha'Cheetrah", "Kharajyr", 1d),
     KHA_PANTERA("Kha'Pantera", "Kharajyr", 1d),
 
-    CONSTRUCT("Construct", "Special", 10000, 0.5, 0d),
-    SPECTRE("Spectre", "Special", 10000, 0.0, 0d),
-    NECROLYTE("Necrolyte", "Special", 10000, 0d),
+    HOUZI_LAO("Laobai-Zhu", "Hou-zi", 300, 1d), //Normal
+    HOUZI_HEI("Hei-Zhu", "Hou-zi", 350, 1d), //Stronk and Slow
+    HOUZI_FEI("Fei-Zhu", "Hou-zi", 300, 1d), //Light and Fast
+
+    CONSTRUCT("Construct", "Creature", 10000, 0.5, 0d),
+    SPECTRE("Spectre", "Creature", 10000, 0.0, 0d),
+    NECROLYTE("Necrolyte", "Creature", 10000, 0d),
+    NEPHILIM("Azdrazi", "Creature", 10000, 0d),
     UNDEAD("Undead", "Special", 10000, 0d),
     ASCENDED("Aengulbound", "Special", 10000, 0d),
 
