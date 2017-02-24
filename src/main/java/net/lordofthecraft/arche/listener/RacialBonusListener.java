@@ -46,8 +46,8 @@ public class RacialBonusListener implements Listener {
 
 	private boolean hasTogglePower(Race race){
 		switch(race){
-		case OLOG:
-		case ORC:
+		//case OLOG:
+		//case ORC:
 		case DARK_ELF:
 		case KHARAJYR:
 		case KHA_CHEETRAH:
@@ -144,8 +144,8 @@ public class RacialBonusListener implements Listener {
 						}else if (pers.getRace().getParentRace().equalsIgnoreCase("Kharajyr")) {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 450, 2, true), true);
 							p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 240, 1, true), true);
-						}else if(pers.getRace() == Race.OLOG || pers.getRace() == Race.ORC){
-
+						}else if(pers.getRace() == Race.OLOG || pers.getRace() == Race.ORC) {
+							/*
 							if(p.isOnGround()) {
 								p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP,50,128,false,false));
 								p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,50,128,false,false));
@@ -194,7 +194,7 @@ public class RacialBonusListener implements Listener {
 
 								}.start();
 
-							}
+							}*/
 						}else if (pers.getRace().getParentRace().equalsIgnoreCase("hou-zi")) {
 							AreaEffectCloud ae = (AreaEffectCloud) p.getWorld().spawnEntity(p.getLocation().clone().add(0, 0.5, 0), EntityType.AREA_EFFECT_CLOUD);
 							ae.setParticle(Particle.CLOUD);
