@@ -242,7 +242,7 @@ public class CreationDialog {
             
             if (input.startsWith("/")) return false;
             String lower = input.toLowerCase();
-            if (lower.contains("help") || lower.contains("hello")) return false;
+            if (lower.contains("help") || lower.contains("hello") || lower.contains("why") || lower.contains("?")) return false;
 
             return p.hasPermission("archecore.longname") || input.length() <= 32;
         }
