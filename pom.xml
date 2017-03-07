@@ -12,7 +12,7 @@
     <distributionManagement>
         <repository>
             <id>lotc-release</id>
-            <url>https://repo.lordofthecraft.net/repository/lotc-releases/</url>
+            <url>https://repo.lordofthecraft.net/artifactory/lotc-releases/</url>
         </repository>
     </distributionManagement>
 
@@ -27,7 +27,7 @@
         </repository>
         <repository>
             <id>lotc-release</id>
-            <url>https://repo.lordofthecraft.net/repository/lotc-releases/</url>
+            <url>https://repo.lordofthecraft.net/artifactory/lotc-releases/</url>
         </repository>
         <repository>
             <id>destroystokyo-repo</id>
