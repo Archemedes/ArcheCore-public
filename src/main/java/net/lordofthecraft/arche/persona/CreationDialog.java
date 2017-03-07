@@ -230,8 +230,8 @@ public class CreationDialog {
         @Override
         public String getPromptText(ConversationContext context) {
             Player p = (Player) context.getForWhom();
-            String pretext = "Please type a name for your RP Persona!";
-            String affix = "\n" + NOTE + "You may only change your Persona's name every 2 days.";
+            String pretext = "Please type a name for your Roleplay Persona!";
+            String affix = "\n" + NOTE + "You may only change your Persona's name every 2 hours.";
 
             return pretext + (p.hasPermission("archecore.quickrename")? "" : affix) + DIVIDER;
         }
@@ -239,6 +239,10 @@ public class CreationDialog {
         @Override
         protected boolean isInputValid(ConversationContext context, String input) {
             Player p = (Player) context.getForWhom();
+            
+            if (input.startsWith("/")) return false;
+            String lower = input.toLowerCase();
+            if (lower.contains("help") || lower.contains("hello") || lower.contains("why") || lower.contains("?")) return false;
 
             return p.hasPermission("archecore.longname") || input.length() <= 32;
         }
