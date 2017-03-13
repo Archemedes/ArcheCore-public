@@ -175,7 +175,7 @@ public class CreationDialog {
         }
     }
 
-    private class RemoveExecutedPrompt extends MessagePrompt{
+    private class RemoveExecutedPrompt extends MessagePrompt {
         @Override
         public String getPromptText(ConversationContext context) {
             return "This Persona will be permakilled. So long :(";
@@ -189,7 +189,7 @@ public class CreationDialog {
         }
     }
 
-    private class RedoCharacterPrompt extends MessagePrompt{
+    private class RedoCharacterPrompt extends MessagePrompt {
 
         @Override
         public String getPromptText(ConversationContext arg0) {
@@ -202,7 +202,7 @@ public class CreationDialog {
         }
     }
 
-    private class WelcomePrompt extends MessagePrompt{
+    private class WelcomePrompt extends MessagePrompt {
 
         @Override
         public String getPromptText(ConversationContext arg0) {
@@ -225,7 +225,7 @@ public class CreationDialog {
         }
     }
 
-    private class PickNamePrompt extends ValidatingPrompt{
+    private class PickNamePrompt extends ValidatingPrompt {
 
         @Override
         public String getPromptText(ConversationContext context) {
@@ -249,8 +249,32 @@ public class CreationDialog {
 
         @Override
         public Prompt acceptValidatedInput(ConversationContext context, String input) {
-            context.setSessionData("name", input);
-            return new PickSexPrompt();
+           return new ConfirmNamePrompt(input);
+        }
+    }
+    
+    private class ConfirmNamePrompt extends BooleanPrompt {
+    	
+    	private String name;
+
+        public ConfirmNamePrompt(String input) {
+			this.name = input;
+		}
+
+		@Override
+        public String getPromptText(ConversationContext context) {
+            return "You have entered " +
+                    ChatColor.GREEN + name + ChatColor.YELLOW + " as your character name. Is this correct (yes/no)?";
+        }
+
+        @Override
+        protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
+        	 if (input) {
+        		 context.setSessionData("name", name);
+        		 return new PickSexPrompt();
+        	 } else {
+        		 return new PickNamePrompt();
+        	 }
         }
     }
 
@@ -288,7 +312,7 @@ public class CreationDialog {
 
 
     }
-
+    
     private class PickRacePrompt extends ValidatingPrompt {
 
         @Override
