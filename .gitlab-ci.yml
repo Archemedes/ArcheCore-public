@@ -1,6 +1,6 @@
 build:
   script:
-    - mvn -B clean package
+    - mvn -V -B -s clean package --settings settings.xml
   artifacts: 
     paths:
       - ./target/*.jar
@@ -8,7 +8,7 @@ build:
     expire_in: 2 weeks
 deploy:
   script:
-    - mvn clean deploy --settings settings.xml -B -U
+    - mvn clean deploy --settings settings.xml -V -B -s -U
   when: on_success
   only:
   - master
