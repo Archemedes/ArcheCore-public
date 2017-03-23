@@ -7,7 +7,7 @@ build:
     expire_in: 2 weeks
 deploy:
   script:
-    - mvn clean deploy --settings settings.xml -V -B -s -U
+    - mvn clean deploy --settings settings.xml -V -B -U
   when: on_success
   only:
   - master
