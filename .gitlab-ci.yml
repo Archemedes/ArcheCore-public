@@ -1,6 +1,5 @@
 build:
-  script:
-    - mvn -V -B -s clean package --settings settings.xml
+  script: "mvn -V -B -s settings.xml clean package"
   artifacts: 
     paths:
       - ./target/*.jar
