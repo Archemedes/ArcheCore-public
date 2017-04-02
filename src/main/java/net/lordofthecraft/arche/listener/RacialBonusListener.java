@@ -9,6 +9,7 @@ import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -27,6 +28,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.spigotmc.event.entity.EntityMountEvent;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -35,6 +37,7 @@ public class RacialBonusListener implements Listener {
 	private final Random rnd = new Random();
 	private final ArchePersonaHandler handler;
 	private final ArcheCore plugin;
+	private final HashSet<Byte> IGNORE_BLOCKS;
 
 	private final List<String> sneakAttempts = Lists.newArrayList();
 	private final List<String> sneakers = Lists.newArrayList();
@@ -42,6 +45,19 @@ public class RacialBonusListener implements Listener {
 	public RacialBonusListener(ArcheCore plugin, ArchePersonaHandler handler){
 		this.plugin = plugin;
 		this.handler = handler;
+		IGNORE_BLOCKS = new HashSet<Byte>();
+		initIgnore();
+	}
+
+	private void initIgnore(){
+		IGNORE_BLOCKS.add((byte) 0);
+		IGNORE_BLOCKS.add((byte) 6);
+		IGNORE_BLOCKS.add((byte) 31);
+		IGNORE_BLOCKS.add((byte) 37);
+		IGNORE_BLOCKS.add((byte) 38);
+		IGNORE_BLOCKS.add((byte) 39);
+		IGNORE_BLOCKS.add((byte) 40);
+		IGNORE_BLOCKS.add((byte) 175);
 	}
 
 	private boolean hasTogglePower(Race race){
@@ -145,56 +161,7 @@ public class RacialBonusListener implements Listener {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 450, 2, true), true);
 							p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 240, 1, true), true);
 						}else if(pers.getRace() == Race.OLOG || pers.getRace() == Race.ORC) {
-							/*
-							if(p.isOnGround()) {
-								p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP,50,128,false,false));
-								p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,50,128,false,false));
-								p.getWorld().playSound(p.getLocation(),Sound.ENTITY_ENDERDRAGON_GROWL,1.0F,1.0F);
-
-								Location loc = p.getLocation();
-								for (int degree = 0; degree < 360; degree++) {
-									double radians = Math.toRadians(degree);
-									double x = Math.cos(radians) * 0.65;
-									double z = Math.sin(radians) * 0.65;
-									loc.add(x,2.0,z);
-									p.getWorld().spawnParticle(Particle.REDSTONE,loc,0,255,0,0);
-									p.getWorld().spawnParticle(Particle.REDSTONE,loc.clone().subtract(0.0,0.8,0.0),0,255,0,0);
-									p.getWorld().spawnParticle(Particle.REDSTONE,loc.clone().subtract(0.0,1.6,0.0),0,255,0,0);
-									loc.subtract(x,2.0,z);
-								}
-
-
-								new DelayedTask(50) {
-
-
-									@Override
-									public void run() {
-										final Vector facing = p.getEyeLocation().getDirection();
-										if(p.getLocation().getPitch() < -10 && p.getLocation().getPitch() > -90){
-											p.setVelocity(new Vector(facing.getX(), .025, facing.getZ()).multiply(20));
-										}else{
-											p.setVelocity(new Vector(facing.getX(), 0, facing.getZ()).multiply(20));
-										}
-
-										new DelayedTask(5){
-
-											@Override
-											public void run(){
-												List<Player> players = p.getWorld().getPlayers();
-												players.remove(p);
-												for (Player pl : players) {
-													if (pl.getLocation().distanceSquared(p.getLocation()) <= 6.25 ) {
-														pl.setVelocity(p.getLocation().getDirection().multiply(1.2).setY(0.54));
-														pl.damage(4.0);
-													}
-												}
-											}
-										}.start();
-									}
-
-								}.start();
-
-							}*/
+							p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION,100,1),true);
 						}else if (pers.getRace().getParentRace().equalsIgnoreCase("hou-zi")) {
 							AreaEffectCloud ae = (AreaEffectCloud) p.getWorld().spawnEntity(p.getLocation().clone().add(0, 0.5, 0), EntityType.AREA_EFFECT_CLOUD);
 							ae.setParticle(Particle.CLOUD);
@@ -204,7 +171,35 @@ public class RacialBonusListener implements Listener {
 
 							Bukkit.getScheduler().runTaskLater(ArcheCore.getPlugin(), () -> p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 100, 0, true)), 2);
 						} else if (pers.getRace() == Race.NEPHILIM) {
-							//TODO breathe fire.
+
+							new BukkitRunnable(){
+								List<Block> line = p.getLineOfSight(IGNORE_BLOCKS, 12);
+								int i = 2;
+								@Override
+								public void run() {
+									if(i < line.size()){
+										Block next = line.get(i);
+										next.getWorld().spawnParticle(Particle.FLAME,next.getLocation(),5,0,0,0,.01);
+										i++;
+									}
+									else{
+										p.getWorld().playEffect(p.getLocation(), Effect.SMOKE, 5);
+										final Location loc = line.get(line.size() - 1).getLocation().add(0, 1, 0.05);
+										Entity e = loc.getWorld().spawnEntity(loc, EntityType.ARROW);
+										List<Entity> n = e.getNearbyEntities(4,6, 4);
+										e.remove();
+										for(final Entity t : n){
+											if (t instanceof Player){
+												Player p = (Player) t;
+												if(p.getLocation().distanceSquared(loc) < 12){
+													p.setFireTicks(60);
+												}
+											}
+										}
+									}
+									this.cancel();
+								}
+							}.runTaskTimer(ArcheCore.getPlugin(), 0, 1);
 						} else if (pers.getRace() == Race.SNOW_ELF) { //I had to. -501warhead
 							Location l = p.getLocation();
 							if (l.getBlock().getType() == Material.AIR && l.getBlock().getRelative(BlockFace.DOWN).getType().isSolid()) {
