@@ -156,10 +156,17 @@ public class ArcheSkillFactory implements SkillFactory {
 			Connection con = handler.getConnection();
 			
 			//Creates the underlying SQL table, if necessary
-			ArcheCore.getPlugin().getSQLHandler().createTable("sk_" + name, VALS);
+			PreparedStatement createStat = con.prepareStatement("INSERT IGNORE INTO skills VALUES (?,?)");
+			createStat.setString(1, name);
+			createStat.setInt(2, strategy);
+			createStat.execute();
+			createStat.close();
+
+			/*ArcheCore.getPlugin().getSQLHandler().createTable("sk_" + name, VALS);*/
 			
 			//And the SQL statement to provide values to it
-			PreparedStatement statement = con.prepareStatement("INSERT INTO sk_"+ name + " VALUES (?,?,?,?)");
+			PreparedStatement statement = con.prepareStatement("INSERT INTO persona_skills VALUES (?,?,?,?)");
+
 
 			ArcheSkill skill = new ArcheSkill(id, name, strategy, inert, mains, raceMods, statement, intensive, unlockedByTime);
 			
