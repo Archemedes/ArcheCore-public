@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche.listener;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheBeacon;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SkillTome;
@@ -20,10 +21,14 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class BeaconMenuListener implements Listener {
 	private final List<String> switchCooldowns = Lists.newArrayList();
+	private final Map<UUID, Long> switchCooldown = Maps.newConcurrentMap();
 	
 	private final ArcheCore plugin;
 	private final HelpDesk helpdesk;
@@ -130,12 +135,18 @@ public class BeaconMenuListener implements Listener {
 							}
 						} else if(current != t){ //Tried to switch Personas
 							final String pname = p.getName();
-							if(switchCooldowns.contains(pname)){
-								p.sendMessage(ChatColor.RED + "You have a " + switchCooldownMinutes + " minute delay between switching Personas.");
+							if (((switchCooldown.containsKey(p.getUniqueId()) && System.currentTimeMillis() - switchCooldown.get(p.getUniqueId()) > 1800000)) || (switchCooldown.containsKey(p.getUniqueId()) &&  p.hasPermission("archecore.persona.quickswitch"))) {
+								switchCooldown.remove(p.getUniqueId());
+							}
+							if (switchCooldown.containsKey(p.getUniqueId())) {
+							//if(switchCooldowns.contains(pname)){
+								p.sendMessage(ChatColor.RED+"You must wait another " + getMinutesFromMilli((switchCooldown.get(p.getUniqueId()) + 1800000) - System.currentTimeMillis())+" minutes before you can switch personas.");
+								//p.sendMessage(ChatColor.RED + "You have a " + switchCooldownMinutes + " minute delay between switching Personas.");
 							}else {
 								if(!p.hasPermission("archecore.persona.quickswitch")){
-									switchCooldowns.add(pname); //Cooldown if the Player does not have the appropriate permission
-									new BukkitRunnable(){@Override public void run(){switchCooldowns.remove(pname);}}.runTaskLater(plugin, switchCooldownMinutes * 60 * 20);
+									switchCooldown.put(p.getUniqueId(), System.currentTimeMillis());
+									//switchCooldowns.add(pname); //Cooldown if the Player does not have the appropriate permission
+									//new BukkitRunnable(){@Override public void run(){switchCooldowns.remove(pname);}}.runTaskLater(plugin, switchCooldownMinutes * 60 * 20);
 								}
 								
 								final boolean suc = handler.switchPersona(p, t);
@@ -165,5 +176,9 @@ public class BeaconMenuListener implements Listener {
 		if (ArcheBeacon.BEACON_HEADER.equals(inv.getTitle())) {
 			e.setCancelled(true);
 		}
+	}
+
+	private int getMinutesFromMilli(long l) {
+		return (int) (l / 1000) / 60;
 	}
 }
