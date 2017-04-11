@@ -23,6 +23,10 @@ public class OpenEnderRunnable implements Runnable {
         Player p = pers.getPlayer();
         if (p != null) {
             if (!p.hasPermission("archecore.mod")) {
+                if(p.getWorld().getName().equals("war")){
+                    p.sendMessage(ChatColor.RED + "Cannot open your enderchest here!");
+                    return;
+                }
                 OpenEnderRunnable r = new OpenEnderRunnable(pers, pers.getPlayer().getLocation());
                 p.getWorld().playSound(pers.getPlayer().getLocation(), Sound.BLOCK_NOTE_PLING, 1, 1);
                 p.sendMessage(ChatColor.AQUA + "Opening your enderchest. Don't move or you will interrupt the process.");

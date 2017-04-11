@@ -62,8 +62,8 @@ public class RacialBonusListener implements Listener {
 
 	private boolean hasTogglePower(Race race){
 		switch(race){
-		//case OLOG:
-		//case ORC:
+		case OLOG:
+		case ORC:
 		case DARK_ELF:
 		case KHARAJYR:
 		case KHA_CHEETRAH:
@@ -171,35 +171,8 @@ public class RacialBonusListener implements Listener {
 
 							Bukkit.getScheduler().runTaskLater(ArcheCore.getPlugin(), () -> p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 100, 0, true)), 2);
 						} else if (pers.getRace() == Race.NEPHILIM) {
+							//breathe fire
 
-							new BukkitRunnable(){
-								List<Block> line = p.getLineOfSight(IGNORE_BLOCKS, 12);
-								int i = 2;
-								@Override
-								public void run() {
-									if(i < line.size()){
-										Block next = line.get(i);
-										next.getWorld().spawnParticle(Particle.FLAME,next.getLocation(),5,0,0,0,.01);
-										i++;
-									}
-									else{
-										p.getWorld().playEffect(p.getLocation(), Effect.SMOKE, 5);
-										final Location loc = line.get(line.size() - 1).getLocation().add(0, 1, 0.05);
-										Entity e = loc.getWorld().spawnEntity(loc, EntityType.ARROW);
-										List<Entity> n = e.getNearbyEntities(4,6, 4);
-										e.remove();
-										for(final Entity t : n){
-											if (t instanceof Player){
-												Player p = (Player) t;
-												if(p.getLocation().distanceSquared(loc) < 12){
-													p.setFireTicks(60);
-												}
-											}
-										}
-									}
-									this.cancel();
-								}
-							}.runTaskTimer(ArcheCore.getPlugin(), 0, 1);
 						} else if (pers.getRace() == Race.SNOW_ELF) { //I had to. -501warhead
 							Location l = p.getLocation();
 							if (l.getBlock().getType() == Material.AIR && l.getBlock().getRelative(BlockFace.DOWN).getType().isSolid()) {

@@ -66,7 +66,6 @@ public class RaceBonusHandler {
             case MOUNTAIN_DWARF:
             case DARK_DWARF:
                 vals.put(Attribute.GENERIC_MAX_HEALTH, new AttributeModifier(UUID_ARCHE, "arche_healthboost", 0.2, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
-                vals.put(Attribute.GENERIC_KNOCKBACK_RESISTANCE, new AttributeModifier(UUID_ARCHE, "arche_stalwart", 0.2, AttributeModifier.Operation.ADD_NUMBER));
                 vals.put(Attribute.GENERIC_LUCK, new AttributeModifier(UUID_ARCHE, "501_moreluck", 0.1, AttributeModifier.Operation.ADD_NUMBER));
                 vals.put(Attribute.GENERIC_MOVEMENT_SPEED, new AttributeModifier(UUID_ARCHE, "arche_lessspeed", -0.10, AttributeModifier.Operation.ADD_SCALAR));
                 break;
