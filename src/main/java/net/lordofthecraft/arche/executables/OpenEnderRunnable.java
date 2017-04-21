@@ -41,7 +41,7 @@ public class OpenEnderRunnable implements Runnable {
     public void run() {
         Player p = pers.getPlayer();
         if (p != null) {
-            if (p.getWorld() == start.getWorld() && p.getLocation().distance(start) < 1) {
+            if (p.getWorld() == start.getWorld() && p.getLocation().distanceSquared(start) < 1) {
                 p.getWorld().playSound(p.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 1);
                 p.closeInventory();
                 p.openInventory(p.getEnderChest());
