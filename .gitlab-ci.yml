@@ -1,0 +1,13 @@
+build:
+  script: "mvn -V -B -s settings.xml clean package"
+  artifacts: 
+    paths:
+      - ./target/*.jar
+    name: "$CI_PROJECT_NAME-$CI_BUILD_REF_NAME-$CI_BUILD_REF"
+    expire_in: 2 weeks
+deploy:
+  script:
+    - mvn clean deploy --settings settings.xml -V -B -U
+  when: on_success
+  only:
+  - master
