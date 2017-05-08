@@ -42,6 +42,8 @@ public enum Race {
     NEPHILIM("Azdrazi", "Creature", 10000, 0d),
     UNDEAD("Undead", "Special", 10000, 0d),
     ASCENDED("Aengulbound", "Special", 10000, 0d),
+    AENGUL("Aengul", "Special", 10000, 0d),
+    DAEMON("Daemon", "Special", 10000, 0d),
 
     UNSET("Unset", "Unset", 1000, 0d);
 
