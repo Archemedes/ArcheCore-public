@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.lordofthecraft.arche</groupId>
     <artifactId>ArcheCore</artifactId>
-    <version>1.112.2</version>
+    <version>1.12.0</version>
     <name>ArcheCore</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -17,21 +17,20 @@
     </distributionManagement>
 
     <repositories>
+        <!-- Spigot/Bukkit -->
         <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+        <!-- ProtocolLib -->
         <repository>
             <id>dmulloy2-repo</id>
             <url>http://repo.dmulloy2.net/content/groups/public</url>
         </repository>
+        <!-- LoTC Plugins -->
         <repository>
             <id>lotc-release</id>
             <url>https://repo.lordofthecraft.net/artifactory/lotc-releases/</url>
-        </repository>
-        <repository>
-            <id>destroystokyo-repo</id>
-            <url>https://repo.destroystokyo.com/repository/maven-public/</url>
         </repository>
     </repositories>
 
@@ -39,24 +38,24 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
-            <version>1.11.2-R0.1-SNAPSHOT</version>
+            <version>1.12-pre5-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
             <artifactId>ProtocolLib</artifactId>
-            <version>4.2.1-SNAPSHOT</version>
+            <version>4.3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.github.archemedes</groupId>
             <artifactId>customitem</artifactId>
-            <version>1.112.0</version>
+            <version>1.12.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>2.5.1</version>
+            <version>2.6.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -100,18 +99,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.6</version>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Class-Path>./lib/hikari.jar</Class-Path>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -29,6 +29,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -572,7 +573,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			if (p != null && this.isCurrent()) {
 				RaceBonusHandler.reset(p);
 				RaceBonusHandler.apply(p, race);
-				p.setHealth(p.getMaxHealth());
+				p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 			}
 		}
 		buffer.put(new UpdateTask(this, PersonaField.RACE_REAL, race));

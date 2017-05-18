@@ -3,11 +3,11 @@ package net.lordofthecraft.arche.attributes;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.md_5.bungee.api.chat.TranslatableComponent;
-import net.minecraft.server.v1_11_R1.NBTTagCompound;
-import net.minecraft.server.v1_11_R1.NBTTagList;
+import net.minecraft.server.v1_12_R1.NBTTagCompound;
+import net.minecraft.server.v1_12_R1.NBTTagList;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_11_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -83,9 +83,9 @@ public class AttributeItem {
 			result.put("meta", meta);
 		}
 
-		net.minecraft.server.v1_11_R1.ItemStack nmsItemStack = null;
+		net.minecraft.server.v1_12_R1.ItemStack nmsItemStack = null;
 		try {
-			nmsItemStack = (net.minecraft.server.v1_11_R1.ItemStack) toNMSStack(is);
+			nmsItemStack = (net.minecraft.server.v1_12_R1.ItemStack) toNMSStack(is);
 		} catch (Exception e) {
 		}
 		if (nmsItemStack != null) {
@@ -255,7 +255,7 @@ public class AttributeItem {
 
 	public static ItemStack addModifier(Long least, Long most, Object compound, ItemStack is){
 		try {
-			net.minecraft.server.v1_11_R1.ItemStack nmsItemStack = (net.minecraft.server.v1_11_R1.ItemStack) toNMSStack(is);
+			net.minecraft.server.v1_12_R1.ItemStack nmsItemStack = (net.minecraft.server.v1_12_R1.ItemStack) toNMSStack(is);
 			Object tag = nmsItemStack.getTag();
 			Object listNBT;
 
@@ -264,7 +264,7 @@ public class AttributeItem {
 				tag = compoundConstructor.newInstance();
 				/*if(setTagMethod == null) setTagMethod = nmsItemStack.getClass().getMethod("setTag");
 			setTagMethod.invoke(nmsItemStack, tag);*/
-				nmsItemStack.setTag((net.minecraft.server.v1_11_R1.NBTTagCompound) tag);
+				nmsItemStack.setTag((net.minecraft.server.v1_12_R1.NBTTagCompound) tag);
 				listNBT = createAttributeModifierList(tag);
 			} else if(!NBTCompoundHasKey(tag, "AttributeModifiers")) {
 				listNBT = createAttributeModifierList(tag);
