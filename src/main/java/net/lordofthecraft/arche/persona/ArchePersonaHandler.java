@@ -11,6 +11,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.persona.PersonaFlags.PersonaFlag;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
 import net.lordofthecraft.arche.save.tasks.DataTask;
@@ -378,6 +379,33 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		return result;
 	}
+	
+	@Override
+	public List<String> whoisMore(Persona p, boolean mod, boolean self) {
+		List<String> result = Lists.newArrayList();
+
+		if(p == null) return result;
+
+		String r = ChatColor.RESET+"";
+		String b = ChatColor.BLUE+"";
+		String l = ChatColor.GRAY+"";
+
+		result.add(l+"Extended Information for " + p.getName() + ":");
+
+		if (!p.hasFlag("hide_magic")) result.add(b + "Magic: " + r + (p.hasFlag("magic") ? getMagics(p.getFlag("magic")) : "None"));
+		
+		return result;
+	}
+
+	private String getMagics(PersonaFlag flag) {
+		StringBuilder sb = new StringBuilder();
+		for (String m : flag.getValues()) {
+			String tier = m.substring(0,0);
+			String teacher = (m.substring(2,2).equals("T") ? " (Teacher" + (tier == "0" ? " Only" : "" + ")") : "");
+			sb.append("\n" + m.substring(4) + (tier == "0" ? "" : " - Tier " + tier) + teacher);
+		}
+		return sb.toString();
+	}
 
 	@Override
 	public List<String> whois(Player p, boolean mod) {
@@ -509,7 +537,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 					pr.setCurrent(true);
 					if (!ArcheCore.getPlugin().areRacialBonusesEnabled())
 						RaceBonusHandler.reset(p);
-					//p.setDisplayName(prs[i].getName()); <--Already done within setCurrent
 					break;
 				}
 			}
@@ -526,7 +553,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		long creationTimeMS = res.getLong(27);
 
 
-		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age,creationTimeMS);
+		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age, creationTimeMS);
 		//prs[id] = persona;
 
 		if(rheader != null && !rheader.equals("null") && !rheader.isEmpty()){

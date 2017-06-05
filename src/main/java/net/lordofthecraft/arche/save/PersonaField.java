@@ -24,7 +24,9 @@ public enum PersonaField {
 	STAT_CREATION("stat_creation"),
 	STAT_PLAYTIME_PAST("stat_playtime_past"),
 	MONEY("money"),
-	SKIN("skindata");
+	SKIN("skindata"), 
+	GENDER("gender"),
+	FLAGS("flags");
 	
 	private static final String STATEMENT_PREFIX = "UPDATE persona SET ";
 	private static final String STATEMENT_SUFFIX = " = ? WHERE player = ? AND id = ?";
