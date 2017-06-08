@@ -243,11 +243,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	@Override
 	public ArchePersona createPersona(Player p, int id, String name, Race race, int gender, int age, boolean autoAge, long creationTime){
 
-		ArchePersona[] prs = personas.get(p.getUniqueId());
-		if(prs == null){
-			prs = new ArchePersona[4];
-			personas.put(p.getUniqueId(), prs);
-		}
+		ArchePersona[] prs = personas.computeIfAbsent(p.getUniqueId(), k -> new ArchePersona[4]);
 
 		//Check for old Persona
 		if(prs[id] != null){

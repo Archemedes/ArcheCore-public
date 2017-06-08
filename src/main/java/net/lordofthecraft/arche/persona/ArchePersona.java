@@ -294,7 +294,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public List<Skill> getOrderedProfessions() {
 		List<Skill> skills = Lists.newArrayList();
 		skills.addAll(profs.stream().filter(sk -> sk.skill.isVisible(this)).map(sk -> sk.skill).collect(Collectors.toList()));
-		Collections.sort(skills, new SkillComparator(this));
+		skills.sort(new SkillComparator(this));
 		return skills;
 	}
 

@@ -45,7 +45,7 @@ public class RacialBonusListener implements Listener {
 	public RacialBonusListener(ArcheCore plugin, ArchePersonaHandler handler){
 		this.plugin = plugin;
 		this.handler = handler;
-		IGNORE_BLOCKS = new HashSet<Byte>();
+		IGNORE_BLOCKS = new HashSet<>();
 		initIgnore();
 	}
 

@@ -51,7 +51,7 @@ public class CommandNamelog implements CommandExecutor {
 								}
 								
 								String n = res.getString(2);
-								b.append(n + ", ");
+								b.append(n).append(", ");
 							}
 							res.close();
 							

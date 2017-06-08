@@ -86,7 +86,7 @@ public class AttributeItem {
 		net.minecraft.server.v1_12_R1.ItemStack nmsItemStack = null;
 		try {
 			nmsItemStack = (net.minecraft.server.v1_12_R1.ItemStack) toNMSStack(is);
-		} catch (Exception e) {
+		} catch (Exception ignored) {
 		}
 		if (nmsItemStack != null) {
 			NBTTagCompound tagc = nmsItemStack.getTag();

@@ -107,10 +107,10 @@ public class RaceBonusHandler {
                 break;
         }
         reset(p);
-        vals.entrySet().forEach(ent -> {
-            AttributeInstance inst = p.getAttribute(ent.getKey());
+        vals.forEach((key, value) -> {
+            AttributeInstance inst = p.getAttribute(key);
             if (inst != null) {
-                inst.addModifier(ent.getValue());
+                inst.addModifier(value);
             }
         });
         if (ArcheCore.getPlugin().debugMode()) {

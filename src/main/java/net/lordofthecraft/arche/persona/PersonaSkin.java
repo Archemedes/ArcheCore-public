@@ -14,7 +14,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;

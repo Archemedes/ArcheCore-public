@@ -91,7 +91,7 @@ public /*abstract*/ class SQLite implements Closeable {
             try {
                 if (connection.isValid(1))
                     return true;
-            } catch (SQLException e) {
+            } catch (SQLException ignored) {
             }
         return false;
     }
@@ -101,7 +101,7 @@ public /*abstract*/ class SQLite implements Closeable {
             try {
                 if (connection.isValid(seconds))
                     return true;
-            } catch (SQLException e) {
+            } catch (SQLException ignored) {
             }
         return false;
     }
