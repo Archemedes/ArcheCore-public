@@ -96,7 +96,7 @@ public class ArcheBeacon {
 					if(mayMakeMore)
 						buildItem(is, "Empty Persona", ChatColor.GREEN+""+ChatColor.ITALIC + "Click here", g + "To create a new Persona");
 					else
-						buildItem(is, "Locked Slot", g + "Please " + ChatColor.GREEN+""+ChatColor.ITALIC + "Donate", g + "To be able to make", "more Personas");
+						buildItem(is, "Locked Slot", g + "Please " + ChatColor.GREEN+""+ChatColor.ITALIC + "Purchase", g + "You may purchase more personas in the store");
 				} else {
 				    PersonaSkin skin = a.getSkin();
 				    // Give a normal human head if skin is null.
