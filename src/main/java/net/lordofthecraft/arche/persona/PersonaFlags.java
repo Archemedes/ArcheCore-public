@@ -1,13 +1,16 @@
 package net.lordofthecraft.arche.persona;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-public class PersonaFlags {
-
+public class PersonaFlags implements Serializable {
+	
+	private static final long serialVersionUID = -4481347109844409875L;
+	
 	public HashMap<String, PersonaFlag> flags = Maps.newHashMap();
 	
 	public boolean addFlag(PersonaFlag flag) {
@@ -42,17 +45,10 @@ public class PersonaFlags {
 		return null;
 	}
 	
-	public String serialize() {
-		//TODO
-		return null;
-	}
-	
-	public PersonaFlag deserialize(String serial) {
-		//TODO
-		return null;
-	}
-	
-	public static class PersonaFlag {
+	public static class PersonaFlag implements Serializable {
+
+		private static final long serialVersionUID = 992575205150259285L;
+		
 		private final String id;
 		private List<String> values;
 		

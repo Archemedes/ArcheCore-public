@@ -19,6 +19,8 @@ import net.lordofthecraft.arche.save.tasks.InsertTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.TopData;
+
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.*;
@@ -588,6 +590,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			try {
 				persona.inv = PersonaInventory.restore(invString);
 			} catch (InvalidConfigurationException e) {
+				ArcheCore.getPlugin().getLogger().warning("Error loading persona inventory for: " + persona.getPlayerUUID() + "@" + persona.getId() + " (" + persona.getPlayerName() + ")");
 				e.printStackTrace();
 			}
 		}
@@ -603,6 +606,17 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		if(!res.wasNull()){
 			persona.skin = new PersonaSkin(skinURL);
+		}
+		
+		String flagString = res.getString("flags");
+		
+		if(!res.wasNull()){
+			try {
+				persona.setFlags((PersonaFlags) SerializationUtils.deserialize(flagString.getBytes()));
+			} catch (Exception e) {
+				ArcheCore.getPlugin().getLogger().warning("Error loading persona flags for: " + persona.getPlayerUUID() + "@" + persona.getId() + " (" + persona.getPlayerName() + ")");
+				e.printStackTrace();
+			}
 		}
 
 		//We now let all Personas load their skills (albeit lazily). Let's do this now

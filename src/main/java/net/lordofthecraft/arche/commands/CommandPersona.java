@@ -217,7 +217,7 @@ public class CommandPersona implements CommandExecutor {
 						if (handler.countPersonas(other) == 0 && !other.hasPermission("archecore.exempt"))
 							other.kickPlayer("Your final Persona was Permakilled. Please relog.");
 						else
-							other.sendMessage(ChatColor.DARK_GRAY + "A persona of yours was Permakilled: " + pers.getName());
+							other.sendMessage(ChatColor.AQUA+ "A persona of yours was Permakilled: " + ChatColor.RESET + pers.getName());
 
 						sender.sendMessage(ChatColor.AQUA + "You have permakilled Persona " + ChatColor.WHITE + pers.getName() + ChatColor.AQUA + " belonging to " + ChatColor.WHITE + pers.getPlayerName());
 					} else sender.sendMessage(ChatColor.RED + "I'm afraid I can't do that.");

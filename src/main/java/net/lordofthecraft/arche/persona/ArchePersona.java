@@ -25,6 +25,8 @@ import net.lordofthecraft.arche.save.tasks.UpdateTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.SkillData;
+
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -162,19 +164,19 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	@Override
 	public void setFlags(PersonaFlags flags) {
 		this.flags = flags;
-		buffer.put(new UpdateTask(this, PersonaField.FLAGS, flags.serialize()));
+		buffer.put(new UpdateTask(this, PersonaField.FLAGS, SerializationUtils.serialize(flags)));
 	}
 	
 	@Override
 	public void applyFlag(PersonaFlag flag) {
 		this.flags.updateFlag(flag);
-		buffer.put(new UpdateTask(this, PersonaField.FLAGS, flags.serialize()));
+		buffer.put(new UpdateTask(this, PersonaField.FLAGS, SerializationUtils.serialize(flags)));
 	}
 	
 	@Override
 	public void removeFlag(String flag) {
 		this.flags.removeFlag(flag);
-		buffer.put(new UpdateTask(this, PersonaField.FLAGS, flags.serialize()));
+		buffer.put(new UpdateTask(this, PersonaField.FLAGS, SerializationUtils.serialize(flags)));
 	}
 
 	@Override
