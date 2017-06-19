@@ -85,7 +85,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private int hash = 0;
 	private int food = 0;
 	private double health = 0;
-	private PersonaFlags flags = null;
+	private PersonaFlags flags = new PersonaFlags();
 	
 	private ArchePersona(int id, String name, Race race, int gender, int age,long creationTimeMS) {
 		key = new ArchePersonaKey(UUID.randomUUID(),id);
@@ -164,19 +164,19 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	@Override
 	public void setFlags(PersonaFlags flags) {
 		this.flags = flags;
-		buffer.put(new UpdateTask(this, PersonaField.FLAGS, SerializationUtils.serialize(flags)));
+		buffer.put(new UpdateTask(this, PersonaField.FLAGS, PersonaFlags.serialize(flags)));
 	}
 	
 	@Override
 	public void applyFlag(PersonaFlag flag) {
-		this.flags.updateFlag(flag);
-		buffer.put(new UpdateTask(this, PersonaField.FLAGS, SerializationUtils.serialize(flags)));
+		flags.updateFlag(flag);
+		buffer.put(new UpdateTask(this, PersonaField.FLAGS, PersonaFlags.serialize(flags)));
 	}
 	
 	@Override
 	public void removeFlag(String flag) {
-		this.flags.removeFlag(flag);
-		buffer.put(new UpdateTask(this, PersonaField.FLAGS, SerializationUtils.serialize(flags)));
+		flags.removeFlag(flag);
+		buffer.put(new UpdateTask(this, PersonaField.FLAGS, PersonaFlags.serialize(flags)));
 	}
 
 	@Override

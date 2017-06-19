@@ -158,7 +158,7 @@ public class CommandPersona implements CommandExecutor {
 				return true;
 			} else if (args[0].equalsIgnoreCase("showmagic")) {
 				boolean more = pers.hasFlag("show_magic");
-				sender.sendMessage(ChatColor.AQUA + "Turned showing magic information " + ChatColor.GOLD + "" + ChatColor.BOLD + (more ? "OFF" : "ON") + ChatColor.AQUA + " for " + pers.getName() + ".");
+				sender.sendMessage(ChatColor.AQUA + "Turned showing magic information " + ChatColor.GOLD + "" + ChatColor.BOLD + (more ? "OFF" : "ON") + ChatColor.AQUA + " for " + ChatColor.RESET + pers.getName() + ".");
 				if (more) pers.removeFlag("show_magic");
 				else pers.applyFlag(new PersonaFlag("show_magic"));
 				return true;

@@ -612,7 +612,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		
 		if(!res.wasNull()){
 			try {
-				persona.setFlags((PersonaFlags) SerializationUtils.deserialize(flagString.getBytes()));
+				persona.setFlags(PersonaFlags.deserialize(flagString));
 			} catch (Exception e) {
 				ArcheCore.getPlugin().getLogger().warning("Error loading persona flags for: " + persona.getPlayerUUID() + "@" + persona.getId() + " (" + persona.getPlayerName() + ")");
 				e.printStackTrace();
