@@ -43,6 +43,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 	private boolean displayName = false;
 	private PreparedStatement selectStatement = null;
 	private Map<Race, Location> racespawns;
+    
+    private UUID tythus = UUID.fromString("561637ba-06f6-4457-9787-ba65768c1b73");
 
 	private boolean preloading = false;
 
@@ -596,7 +598,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 				if(prs == null){ //Apparently not, see if we should based on player login time
 					long days = (time - p.getLastPlayed()) / (1000L * 3600L * 24L);
-					if(days > range) continue; //Player file too old, don't preload
+					if(days > range && !uuid.equals(tythus)) continue; //Player file too old, don't preload. Preload Tythus
 
 					//Preload, generate a Persona file
 					prs = new ArchePersona[4];
