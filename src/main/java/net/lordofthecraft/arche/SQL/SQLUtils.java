@@ -23,7 +23,7 @@ public class SQLUtils {
         for (Map.Entry<String, Object> entry : val.entrySet()) {
             result.append(div);
             div = " AND ";
-            result.append(entry.getKey() + '=');
+            result.append(entry.getKey()).append('=');
             Object o = entry.getValue();
             if (o == null) o = new Syntax("NULL");
             else if (o instanceof Boolean) o = ((Boolean) o) ? 1 : 0;
@@ -42,7 +42,7 @@ public class SQLUtils {
         for (Map.Entry<String, Object> entry : val.entrySet()) {
             result.append(div);
             div = ",";
-            result.append(entry.getKey() + '=');
+            result.append(entry.getKey()).append('=');
             Object o = entry.getValue();
             if (o == null) o = new Syntax("NULL");
             else if (o instanceof Boolean) o = ((Boolean) o) ? 1 : 0;

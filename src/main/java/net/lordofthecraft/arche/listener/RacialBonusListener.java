@@ -2,14 +2,12 @@ package net.lordofthecraft.arche.listener;
 
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.DelayedTask;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -20,12 +18,14 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 import org.spigotmc.event.entity.EntityMountEvent;
 
 import java.util.HashSet;
@@ -45,7 +45,7 @@ public class RacialBonusListener implements Listener {
 	public RacialBonusListener(ArcheCore plugin, ArchePersonaHandler handler){
 		this.plugin = plugin;
 		this.handler = handler;
-		IGNORE_BLOCKS = new HashSet<Byte>();
+		IGNORE_BLOCKS = new HashSet<>();
 		initIgnore();
 	}
 

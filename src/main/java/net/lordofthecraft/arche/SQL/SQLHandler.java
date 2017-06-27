@@ -102,7 +102,7 @@ public abstract class SQLHandler {
 
             ResultSetMetaData rsmd = res.getMetaData();
             int count = rsmd.getColumnCount();
-            LinkedList<LinkedList<Object>> data = new LinkedList<LinkedList<Object>>();
+            LinkedList<LinkedList<Object>> data = new LinkedList<>();
 
             for (int i = 1; i <= count; i++) {
                 String label = rsmd.getColumnLabel(i);

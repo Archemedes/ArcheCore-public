@@ -404,13 +404,12 @@ public class CommandPersona implements CommandExecutor {
         millis -= TimeUnit.DAYS.toMillis(days);
         long hours = TimeUnit.MILLISECONDS.toHours(millis);
 
-        StringBuilder sb = new StringBuilder(64);
-        sb.append(days);
-        sb.append(" days and ");
-        sb.append(hours);
-        sb.append(" hours");
+        String sb = String.valueOf(days) +
+                " days and " +
+                hours +
+                " hours";
 
-        return(sb.toString());
+        return(sb);
     }
     
 }

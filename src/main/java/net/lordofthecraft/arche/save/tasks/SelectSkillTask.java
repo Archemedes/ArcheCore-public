@@ -15,7 +15,7 @@ public class SelectSkillTask extends ArcheTask {
 	public SelectSkillTask(ArchePersona persona, Skill s){
 		super();
 		SkillDataCallable callable = new SkillDataCallable(persona, s.getName(), handle);
-		future = new FutureTask<SkillData>(callable);
+		future = new FutureTask<>(callable);
 		
 		if(ArcheCore.getPlugin().debugMode())
 			ArcheCore.getPlugin().getLogger().info("[Debug] Now creating a SelectSkillTask for " + persona.getPlayerName() + " and skill " + s.getName());

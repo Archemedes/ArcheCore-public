@@ -29,6 +29,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -293,7 +294,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public List<Skill> getOrderedProfessions() {
 		List<Skill> skills = Lists.newArrayList();
 		skills.addAll(profs.stream().filter(sk -> sk.skill.isVisible(this)).map(sk -> sk.skill).collect(Collectors.toList()));
-		Collections.sort(skills, new SkillComparator(this));
+		skills.sort(new SkillComparator(this));
 		return skills;
 	}
 
@@ -572,7 +573,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			if (p != null && this.isCurrent()) {
 				RaceBonusHandler.reset(p);
 				RaceBonusHandler.apply(p, race);
-				p.setHealth(p.getMaxHealth());
+				p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 			}
 		}
 		buffer.put(new UpdateTask(this, PersonaField.RACE_REAL, race));
