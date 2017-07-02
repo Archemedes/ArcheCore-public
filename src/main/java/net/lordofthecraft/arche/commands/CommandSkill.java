@@ -25,11 +25,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class CommandSkill implements CommandExecutor {
 	private static final int XP_TRESHOLD_BEFORE_WARNING = 5000; 
@@ -58,27 +56,27 @@ public class CommandSkill implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if(args.length == 0 || args[0].equalsIgnoreCase("help")){
-			if(sender instanceof Player) helpdesk.outputHelp("skill command", (Player) sender);
+		if(args.length == 0 || args[0].equalsIgnoreCase("help")) {
+			if (sender instanceof Player) helpdesk.outputHelp("skill command", (Player) sender);
 			else sender.sendMessage(helpdesk.getHelpText("skill command"));
 
 			String d = ChatColor.DARK_AQUA + "";
 
-			if(sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.skill")){
+			if (sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.skill")) {
 				String m = ChatColor.DARK_AQUA + "[M] " + ChatColor.WHITE;
-				sender.sendMessage(m + "/sk [skill] tome: "+d+"Gives experience tome");
-				sender.sendMessage(m + "/sk [skill] reveal [who]: "+d+"Reveal a skill to [who]");
-				sender.sendMessage(m + "/sk [skill] give [who] [xp]: "+d+"Gives XP");
-				sender.sendMessage(m + "/sk [skill] drain [who] [return]: "+d+"Drains skill xp and returns a factor for their personal redistribution");
-				sender.sendMessage(m + "/sk drainall [return] [who]: "+d+"Drain all xp and returns a factor for their personal redistribution");
-				sender.sendMessage(m + "See someone else's skills with " + ChatColor.ITALIC +  "/sk list [who]");
+				sender.sendMessage(m + "/sk [skill] tome: " + d + "Gives experience tome");
+				sender.sendMessage(m + "/sk [skill] reveal [who]: " + d + "Reveal a skill to [who]");
+				sender.sendMessage(m + "/sk [skill] give [who] [xp]: " + d + "Gives XP");
+				sender.sendMessage(m + "/sk [skill] drain [who] [return]: " + d + "Drains skill xp and returns a factor for their personal redistribution");
+				sender.sendMessage(m + "/sk drainall [return] [who]: " + d + "Drain all xp and returns a factor for their personal redistribution");
+				sender.sendMessage(m + "See someone else's skills with " + ChatColor.ITALIC + "/sk list [who]");
 			}
 
-			if (sender.hasPermission("archecore.admin")) {
-				String a = ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] " + ChatColor.WHITE;
-				sender.sendMessage(a + "/sk [skill] bonus [who/when] [modifier] [time] [amount] -[p/a/g]: "+d+"Gives [who] experience multiplier x[modifer] for [amount] max xp, [time] max mins.\n"
-						+ ChatColor.GRAY + ChatColor.ITALIC + "Enter -1 for no max. -a makes it account based. -g is global. Using [when] will start the bonus in X minutes. "
-						+ "Omit [skill] from the bonus command to apply to all skills.");
+			if (sender.hasPermission("archecore.admin") && sender instanceof Player) {
+				ArcheMessage m = new ArcheMessage("");
+				m.addLine("[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] ");
+				m.addLine("[Click to view Help for skill bonuses (/sk bonushelp)]").setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click me!").setClickEvent(ChatBoxAction.RUN_COMMAND, "/skill bonushelp");
+				m.sendTo((Player) sender);
 			}
 
 			/*if( (sender instanceof Player) && ArchePersonaHandler.getInstance().hasPersona((Player) sender)
@@ -87,6 +85,12 @@ public class CommandSkill implements CommandExecutor {
 			}*/
 
 
+			return true;
+		} else if (args[0].equalsIgnoreCase("bonushelp") &&  sender.hasPermission("archecore.admin")) {
+			String a = ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] " + ChatColor.WHITE;
+			sender.sendMessage(a + "/sk [skill] bonus [who/when] [modifier] [time] [amount] -[p/a/g]: " + ChatColor.DARK_AQUA + "Gives [who] experience multiplier x[modifer] for [amount] max xp, [time] max mins.\n"
+					+ ChatColor.GRAY + ChatColor.ITALIC + "Enter -1 for no max. -a makes it account based. -g is global. Using [when] will start the bonus in X minutes. "
+					+ "Omit [skill] from the bonus command to apply to all skills.");
 			return true;
 		} else if (args[0].equalsIgnoreCase("bonus")) {
 			if (sender.hasPermission("archecore.admin"))
@@ -138,8 +142,8 @@ public class CommandSkill implements CommandExecutor {
 					if(s.isVisible(who)){
 						SkillTier tier = s.getSkillTier(who);
 
-						ChatColor color = ChatColor.YELLOW;
-						if(s.isProfessionFor(who.getRace())) 
+						ChatColor color = who.colorForSkill(s);
+						/*if(s.isProfessionFor(who.getRace()))
 							color = ChatColor.BLUE;
 						else {
 							if(who.getProfession(ProfessionSlot.PRIMARY) == s){
@@ -149,7 +153,7 @@ public class CommandSkill implements CommandExecutor {
 							} else if(who.getProfession(ProfessionSlot.ADDITIONAL) == s){
 								color = ChatColor.AQUA;
 							}
-						}
+						}*/
 
 						String txt = color.toString() + tier.getTitle() + " " + WordUtils.capitalize(s.getName());
 
@@ -272,29 +276,35 @@ public class CommandSkill implements CommandExecutor {
 						sender.sendMessage(ChatColor.LIGHT_PURPLE + "You do not need to select this profession.");
 						sender.sendMessage(ChatColor.LIGHT_PURPLE + "You inherit it for free from your Persona's race.");
 					}else if(args[2].equalsIgnoreCase("primary") || args[2].equalsIgnoreCase("main") || args[2].equalsIgnoreCase("first")){
-						if (pers.getProfession(ProfessionSlot.ADDITIONAL) == skill || pers.getProfession(ProfessionSlot.SECONDARY) == skill){
+						Optional<Skill> oskill = pers.getProfession(ProfessionSlot.ADDITIONAL);
+
+						if (pers.isSkillInSlot(skill, ProfessionSlot.ADDITIONAL) || pers.isSkillInSlot(skill, ProfessionSlot.SECONDARY)){
 							sender.sendMessage(ChatColor.RED + "You already have this profession selected!");
 						}else{	
 							slot = ProfessionSlot.PRIMARY;
 						}
 					} else if(args[2].equalsIgnoreCase("secondary") || args[2].equalsIgnoreCase("second")){
-						if(pers.getProfession(ProfessionSlot.PRIMARY) == null){
-							if (pers.getProfession(ProfessionSlot.ADDITIONAL) == skill || pers.getProfession(ProfessionSlot.SECONDARY) == skill){
+						Optional<Skill> prim = pers.getProfession(ProfessionSlot.PRIMARY);
+						if(!prim.isPresent()){
+							if (pers.isSkillInSlot(skill, ProfessionSlot.ADDITIONAL) || pers.isSkillInSlot(skill, ProfessionSlot.SECONDARY)){
 								sender.sendMessage(ChatColor.RED + "You already have this profession selected!");
 							}else{	
 								slot = ProfessionSlot.PRIMARY;
 							}
-						} else if (pers.getProfession(ProfessionSlot.PRIMARY).isIntensiveProfession()){
-							sender.sendMessage(ChatColor.RED + "Your main profession is too intensive for you to also take up a second profession.");
-						} else if (pers.getProfession(ProfessionSlot.PRIMARY) == skill || pers.getProfession(ProfessionSlot.ADDITIONAL) == skill){
-							sender.sendMessage(ChatColor.RED + "You already have this profession selected!");
-						} else if (skill.isIntensiveProfession()){
-							sender.sendMessage(ChatColor.RED + "You may only select this skill as your main profession");
 						} else {
-							slot = ProfessionSlot.SECONDARY;
+							Skill sk = prim.get();
+							if (sk.isIntensiveProfession()){
+								sender.sendMessage(ChatColor.RED + "Your main profession is too intensive for you to also take up a second profession.");
+							} else if (pers.isSkillInSlot(skill, ProfessionSlot.ADDITIONAL) || pers.isSkillInSlot(skill, ProfessionSlot.SECONDARY)){
+								sender.sendMessage(ChatColor.RED + "You already have this profession selected!");
+							} else if (skill.isIntensiveProfession()){
+								sender.sendMessage(ChatColor.RED + "You may only select this skill as your main profession");
+							} else {
+								slot = ProfessionSlot.SECONDARY;
+							}
 						}
 					} else if(args[2].equalsIgnoreCase("additional") || args[2].equalsIgnoreCase("bonus")){
-						if (pers.getProfession(ProfessionSlot.PRIMARY) == skill || pers.getProfession(ProfessionSlot.SECONDARY) == skill){
+						if (pers.isSkillInSlot(skill, ProfessionSlot.PRIMARY) || pers.isSkillInSlot(skill, ProfessionSlot.SECONDARY)){
 							sender.sendMessage(ChatColor.RED + "You already have this profession selected!");
 						} else if (skill.isIntensiveProfession()){
 							sender.sendMessage(ChatColor.RED + "You may only select this skill as your main profession");
@@ -312,23 +322,26 @@ public class CommandSkill implements CommandExecutor {
 
 					if(slot != null){
 						ArchePersona apers = (ArchePersona) pers;
-						Skill[] oldProfs = apers.professions;
+						Skill[] oldProfs = apers.getArrayOfProfessions();
 						Skill[] newProfs = oldProfs.clone();
 
 						String messageToSend = null;
 
-						if(pers.getProfession(slot) == skill){
-							if(slot == ProfessionSlot.PRIMARY && pers.getProfession(ProfessionSlot.SECONDARY) != null) {
-								messageToSend = ChatColor.YELLOW + "Cleared your main profession. Your second profession has been transfered to the main slot.";
-								newProfs[slot.getSlot()] = pers.getProfession(ProfessionSlot.SECONDARY);
+						if(pers.isSkillInSlot(skill, slot)){
+							if(slot == ProfessionSlot.PRIMARY && pers.getProfession(ProfessionSlot.SECONDARY).isPresent()) {
+								messageToSend = ChatColor.YELLOW + "Cleared your main profession. Your second profession has been transferred to the main slot.";
+								//pers.setProfession(slot, skill);
+								newProfs[slot.getSlot()] = pers.getProfession(ProfessionSlot.SECONDARY).get();
 								newProfs[ProfessionSlot.SECONDARY.getSlot()] = null;
 							}else{
+								//pers.deselectSlot(slot);
 								newProfs[slot.getSlot()] = null;
 								messageToSend = ChatColor.YELLOW + "You have reset your " + slot.toSimpleString().toLowerCase() + " profession";	
 							}
 						} else {
 							newProfs[slot.getSlot()] = skill;
-							if(skill.isIntensiveProfession() && pers.getProfession(ProfessionSlot.SECONDARY) != null)
+							//pers.setProfession(slot, skill);
+							if(skill.isIntensiveProfession() && pers.getProfession(ProfessionSlot.SECONDARY).isPresent())
 								newProfs[1] = null;
 
 							messageToSend = ChatColor.GOLD + "Your " + slot.toSimpleString().toLowerCase() + " profession is now " + ChatColor.WHITE + skill.getName() + "\n"
@@ -338,7 +351,7 @@ public class CommandSkill implements CommandExecutor {
 						}
 
 						if(!this.skillResets.contains(apers.getPlayerUUID())){
-							apers.professions = newProfs;
+							//apers.professions = newProfs;
 							double xplost = apers.getXpLost();
 							if(xplost > XP_TRESHOLD_BEFORE_WARNING){ // buggy still?
 								skillResets.add(apers.getPlayerUUID());
@@ -346,16 +359,18 @@ public class CommandSkill implements CommandExecutor {
 								sender.sendMessage(ChatColor.DARK_RED + "You will lose " + ChatColor.GOLD + ChatColor.BOLD + xplost + ChatColor.DARK_RED + " experience that can not be recovered.");
 								sender.sendMessage(ChatColor.LIGHT_PURPLE + "If you are okay with this, repeat the command and accept the experience penalty.");
 
-								apers.professions = oldProfs;
+								//apers.professions = oldProfs;
 								return true;
-							} else {
+							} /*else {
 								apers.professions = oldProfs;
-							}
+							}*/
 						}
 
 						sender.sendMessage(messageToSend);
 						for(ProfessionSlot s: ProfessionSlot.values()){
-							apers.setProfession(s, newProfs[s.getSlot()]);
+							if (s != ProfessionSlot.UNSELECTED) {
+								apers.setProfession(s, newProfs[s.getSlot()]);
+							}
 						}
 						apers.handleProfessionSelection();
 					}

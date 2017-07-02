@@ -24,11 +24,13 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 
 import javax.annotation.Nonnull;
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -43,6 +45,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	private boolean displayName = false;
 	private PreparedStatement selectStatement = null;
 	private Map<Race, Location> racespawns;
+	private CallableStatement personaDeleteCall = null;
 
 	private boolean preloading = false;
 
@@ -243,11 +246,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	@Override
 	public ArchePersona createPersona(Player p, int id, String name, Race race, int gender, int age, boolean autoAge, long creationTime){
 
-		ArchePersona[] prs = personas.get(p.getUniqueId());
-		if(prs == null){
-			prs = new ArchePersona[4];
-			personas.put(p.getUniqueId(), prs);
-		}
+		ArchePersona[] prs = personas.computeIfAbsent(p.getUniqueId(), k -> new ArchePersona[4]);
 
 		//Check for old Persona
 		if(prs[id] != null){
@@ -264,7 +263,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			deleteSkills(prs[id]);
 		}
 
-		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age,creationTime);
+		ArchePersona persona = new ArchePersona(UUID.randomUUID(), p, id, name, race, gender, age,creationTime);
 		persona.autoAge = autoAge;
 
 		PersonaCreateEvent event = new PersonaCreateEvent(persona, prs[id]);
@@ -289,6 +288,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		for(ArcheSkill s : ArcheSkillFactory.getSkills().values()){
 			persona.addSkill(s, null);
 		}
+
+		persona.createEmptyTags();
 
 		String uuid = p.getUniqueId().toString();
 		for(PotionEffect ps : p.getActivePotionEffects())
@@ -328,15 +329,24 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		if(p == null) return result;
 
+		boolean masked = p.hasTagKey("masked");
+
 		String r = ChatColor.RESET+"";
 		String c = ChatColor.BLUE+"";
 		String l = ChatColor.GRAY+"";
 
-		result.add(l+"~~~~ " + r + p.getPlayerName() + "'s Roleplay Persona" + l + " ~~~~");
+		result.add(l+"~~~~ " + r + ((masked) ? p.getName() : p.getPlayerName()) + ((mod && masked) ? l+"("+p.getPlayerName()+")"+r : "") + "'s Roleplay Persona" + l + " ~~~~");
 
-		if(p.getTotalPlaytime() < ArcheCore.getPlugin().getNewbieProtectDelay()){
+		if (p.getPersonaType().equalsIgnoreCase("event"))
+			result.add(ChatColor.DARK_GREEN + "((This is an Event Character))");
+		else if (p.getPersonaType().equalsIgnoreCase("admin"))
+			result.add(ChatColor.RED + "((This Persona is an Administrative Persona))");
+		else if (p.getPersonaType().equalsIgnoreCase("lore"))
+			result.add(ChatColor.YELLOW + "((This Persona is a significant Lore Character))");
+		else if(p.getTotalPlaytime() < ArcheCore.getPlugin().getNewbieProtectDelay()){
 			Player player = ArcheCore.getPlayer(p.getPlayerUUID());
-			if(player != null && !player.hasPermission("archecore.persona.nonewbie"))
+
+			if(player != null && !player.hasPermission("archecore.persona.nonewbie") && !masked)
 				result.add(ChatColor.LIGHT_PURPLE + "((Persona was recently made and can't engage in PvP))");
 			else
 				result.add(ChatColor.DARK_RED + "((Please remember not to metagame this information))");
@@ -344,7 +354,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			Player player = ArcheCore.getPlayer(p.getPlayerUUID());
 			long age = player == null? Integer.MAX_VALUE : System.currentTimeMillis() - player.getFirstPlayed();
 			int mins = (int) (age / DateUtils.MILLIS_PER_MINUTE);
-			if(ArcheCore.getPlugin().getNewbieNotificationDelay() > mins && !player.hasPermission("archecore.persona.nonewbie"))
+			if(ArcheCore.getPlugin().getNewbieNotificationDelay() > mins && !player.hasPermission("archecore.persona.nonewbie") && !masked)
 				result.add(ChatColor.AQUA + "((This player is new to the server))");
 			else 
 				result.add(ChatColor.DARK_RED + "((Please remember not to metagame this information))");
@@ -382,6 +392,72 @@ public class ArchePersonaHandler implements PersonaHandler {
 	@Override
 	public List<String> whois(Player p, boolean mod) {
 		return whois(getPersona(p), mod);
+	}
+
+	public List<String> whoisdebug(Persona p) {
+		List<String> result = Lists.newArrayList();
+
+		if(p == null) return result;
+
+		boolean masked = p.hasTagKey("masked");
+
+		String r = ChatColor.RESET+"";
+		String c = ChatColor.BLUE+"";
+		String l = ChatColor.GRAY+"";
+
+		result.add(l+"~~~~ " + r + ((masked) ? p.getName() : p.getPlayerName()) + ((masked) ? l+"("+p.getPlayerName()+")"+r : "") + "'s Roleplay Persona" + l + " ~~~~");
+
+		if(p.getTotalPlaytime() < ArcheCore.getPlugin().getNewbieProtectDelay()){
+			Player player = ArcheCore.getPlayer(p.getPlayerUUID());
+			if(player != null && !player.hasPermission("archecore.persona.nonewbie") && !masked)
+				result.add(ChatColor.LIGHT_PURPLE + "((Persona was recently made and can't engage in PvP))");
+			else
+				result.add(ChatColor.DARK_RED + "((Please remember not to metagame this information))");
+		} else if (ArcheCore.getPlugin().getNewbieNotificationDelay() > 0 && p.getTotalPlaytime() < 600){
+			Player player = ArcheCore.getPlayer(p.getPlayerUUID());
+			long age = player == null? Integer.MAX_VALUE : System.currentTimeMillis() - player.getFirstPlayed();
+			int mins = (int) (age / DateUtils.MILLIS_PER_MINUTE);
+			if(ArcheCore.getPlugin().getNewbieNotificationDelay() > mins && !player.hasPermission("archecore.persona.nonewbie") && !masked)
+				result.add(ChatColor.AQUA + "((This player is new to the server))");
+			else
+				result.add(ChatColor.DARK_RED + "((Please remember not to metagame this information))");
+		} else result.add(ChatColor.DARK_RED + "((Please remember not to metagame this information))");
+
+		result.add(c + "Name: " + r + p.getName());
+
+		String race = p.getRaceString();
+		result.add(c + "Race: " + r + race +
+				((!p.getRace().getName().equalsIgnoreCase(race)) ? ChatColor.DARK_GRAY + " (" + p.getRace().getName() + ")" : ""));
+
+		String gender = p.getGender();
+		if(gender != null) result.add(c + "Gender: " + r + p.getGender());
+		else result.add(c + "Gender: " + r + "None");
+
+		boolean aa = p.doesAutoAge();
+		result.add((aa? c : (ChatColor.DARK_RED)) + "Age: " + r + p.getAge() + l + "(Autoaging? "+(p.doesAutoAge() ? "Yes" : "No")+")");
+		String desc = p.getDescription();
+
+		if(desc != null)
+			result.add(c + "Description: " + r + desc);
+		else result.add(c + "Description: " + r + "Null");
+
+		Skill prof = p.getMainSkill();
+
+		if(prof != null){
+			String title = prof.getSkillTier(p).getTitle();
+			result.add(c + "Profession: " + r + title + " " + WordUtils.capitalize(prof.getName()));
+		} else {
+			result.add(c + "Profession: " + r + "None Selected");
+		}
+
+		result.add(c + "Persona Type: " + r + p.getPersonaType());
+
+		result.add(c + "Persona Tags");
+		for (Map.Entry<String,String> ent : p.getTags().entrySet()) {
+			result.add(r + ent.getKey() + ": " + ent.getValue());
+		}
+
+		return result;
 	}
 
 	public void initPlayer(Player p){
@@ -424,7 +500,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		ResultSet res = null;
 		try {
 			if (selectStatement == null)
-				selectStatement = handler.getConnection().prepareStatement("SELECT * FROM persona WHERE player = ?");
+				selectStatement = handler.getConnection().prepareStatement("SELECT * FROM persona WHERE player_fk = ?");
 			selectStatement.setString(1, p.getUniqueId().toString());
 			res = selectStatement.executeQuery();
 
@@ -517,46 +593,50 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	private ArchePersona buildPersona(ResultSet res, OfflinePlayer p) throws SQLException{
-		int id = res.getInt(2);
-		String name = res.getString(3);
-		int age = res.getInt(4);
-		Race race = Race.valueOf(res.getString(5));
-		String rheader = res.getString(6);
-		int gender = res.getInt(7);
+		UUID pers_id = UUID.fromString(res.getString("persona_id"));
+		int id = res.getInt("id");
+		String name = res.getString("persona_name");
+		int age = res.getInt("age");
+		Race race = Race.valueOf(res.getString("race_key_fk"));
+		//net.lordofthecraft.arche.persona.Race newrace = net.lordofthecraft.arche.persona.Race.getOrCreateRace(res.getString("race_key_fk"));
+		String rheader = res.getString("rheader");
+		String pregender = res.getString("gender");
+		int gender = pregender.equals("m") ? 0 : pregender.equals("f") ? 1 : 2;
+
 		long creationTimeMS = res.getLong(27);
 
 
-		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age,creationTimeMS);
+		ArchePersona persona = new ArchePersona(pers_id,p, id, name, race, gender, age,creationTimeMS);
 		//prs[id] = persona;
 
 		if(rheader != null && !rheader.equals("null") && !rheader.isEmpty()){
 			persona.raceHeader = rheader;
 		}
 
-		persona.description = res.getString(8);
-		persona.prefix = res.getString(9);
-		persona.current = res.getBoolean(10);
+		persona.description = res.getString("descr");
+		persona.prefix = res.getString("pref");
+		persona.current = res.getBoolean("curr");
 
-		persona.autoAge = res.getBoolean(11);
-		persona.timePlayed.set(res.getInt(12));
-		persona.charactersSpoken.set(res.getInt(13));
-		persona.lastRenamed = res.getLong(14);
-		persona.gainsXP = res.getBoolean(15);
-		persona.profession = ArcheSkillFactory.getSkill(res.getString(16));
+		persona.autoAge = res.getBoolean("autoage");
+		persona.timePlayed.set(res.getInt("stat_played"));
+		persona.charactersSpoken.set(res.getInt("stat_chars"));
+		persona.lastRenamed = res.getLong("stat_renamed");
+		persona.gainsXP = res.getBoolean("xpgain");
+		persona.profession = ArcheSkillFactory.getSkill(res.getString("skill_fk"));
 
-		String wstr = res.getString(17);
+		String wstr = res.getString("world");
 		if(!res.wasNull()){
 			UUID wuuid = UUID.fromString(wstr);
 			World w = Bukkit.getWorld(wuuid);
 			if(w != null){
-				int x = res.getInt(18);
-				int y = res.getInt(19);
-				int z = res.getInt(20);
+				int x = res.getInt("x");
+				int y = res.getInt("y");
+				int z = res.getInt("z");
 				persona.location = new WeakBlock(w, x, y, z);
 			}
 		}
 
-		String invString = res.getString(21);
+		String invString = res.getString("inv");
 		if(!res.wasNull()){
 			try {
 				persona.inv = PersonaInventory.restore(invString);
@@ -565,12 +645,12 @@ public class ArchePersonaHandler implements PersonaHandler {
 			}
 		}
 
-		if(ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble(22);
+		if(ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble("money");
 
-		persona.professions[0] = ArcheSkillFactory.getSkill(res.getString(23));
-		persona.professions[1] = ArcheSkillFactory.getSkill(res.getString(24));
-		persona.professions[2] = ArcheSkillFactory.getSkill(res.getString(25));
-		persona.pastPlayTime = res.getInt(28);
+		//persona.professions[0] = ArcheSkillFactory.getSkill(res.getString(23));
+		//persona.professions[1] = ArcheSkillFactory.getSkill(res.getString(24));
+		//persona.professions[2] = ArcheSkillFactory.getSkill(res.getString(25));
+		persona.pastPlayTime = res.getInt("stat_playtime_past");
 
 		String skinURL = res.getString("skindata");
 
@@ -578,8 +658,12 @@ public class ArchePersonaHandler implements PersonaHandler {
 			persona.skin = new PersonaSkin(skinURL);
 		}
 
+
+
 		//We now let all Personas load their skills (albeit lazily). Let's do this now
 		persona.loadSkills();
+
+		persona.loadTags();
 
 		return persona;
 	}
@@ -588,10 +672,22 @@ public class ArchePersonaHandler implements PersonaHandler {
 		SQLHandler handler = ArcheCore.getPlugin().getSQLHandler();
 		long time = System.currentTimeMillis();
 		preloading = true;
+		net.lordofthecraft.arche.persona.Race.init();
 		try{
-			ResultSet res = handler.query("SELECT * FROM persona");
+			PreparedStatement persona_prep = handler.getConnection().prepareStatement("SELECT " +
+					"persona_id,id,race_key_fk,gender" +
+					",persona_name,curr,rheader,autoage,age,xpgain,descr,pref,money,skindata" +
+					",world,x,y,z,inv" +
+					",stat_played,stat_chars,stat_renamed,stat_playtime_past,date_created,last_played " +
+					"FROM persona JOIN persona_extras ON persona.persona_id=persona_extras.persona_id_fk " +
+					"JOIN persona_world ON persona.persona_id=persona_world.persona_id_fk " +
+					"JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
+					"WHERE player_fk=?");
+
+
+			ResultSet res = handler.query("SELECT player,preload_force FROM players");
 			while(res.next()){
-				UUID uuid = UUID.fromString(res.getString(1));
+				UUID uuid = UUID.fromString(res.getString("player"));
 				OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
 
 				//Have we loaded a Persona for this player already?
@@ -600,14 +696,14 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 				if(prs == null){ //Apparently not, see if we should based on player login time
 					long days = (time - p.getLastPlayed()) / (1000L * 3600L * 24L);
-					if(days > range) continue; //Player file too old, don't preload
+					if(days > range && !res.getBoolean("preload_force")) continue; //Player file too old, don't preload
 
 					//Preload, generate a Persona file
 					prs = new ArchePersona[4];
 					personas.put(uuid, prs);
 				}
-
-				ArchePersona persona = buildPersona(res, p);
+				persona_prep.setString(1, p.getUniqueId().toString());
+				ArchePersona persona = buildPersona(persona_prep.executeQuery(), p);
 				prs[persona.getId()] = persona;
 			}
 		}catch(SQLException e){e.printStackTrace();}

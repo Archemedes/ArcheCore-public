@@ -5,6 +5,7 @@ import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.skill.TopData;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
@@ -162,9 +163,9 @@ public interface PersonaHandler {
 	 * @param mod If the user viewing is a moderator
 	 * @return A list of initialised stats of the given Persona
 	 */
-	List<String> whois(Persona p, boolean mod);
+    List<String> whois(Persona p, boolean mod);
 
-	/**
+    /**
 	 * Method that provides a human-readable list of information about a
 	 * Player's current Persona, to be used in prints
 	 * @param p the Player to be looked up

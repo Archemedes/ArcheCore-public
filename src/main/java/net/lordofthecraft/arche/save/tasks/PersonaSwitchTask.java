@@ -8,14 +8,12 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class PersonaSwitchTask extends StatementTask {
-	private final UUID uuid;
-	private final int id;
+	private final UUID id;
 	private final Location l;
 	private final PersonaInventory inv;
 	
 	public PersonaSwitchTask(ArchePersona p){
-		this.uuid = p.getPlayerUUID();
-		this.id = p.getId();
+		this.id = p.getPersonaId();
 		this.l = p.getLocation();
 		this.inv = p.getPInv();
 	}
@@ -27,11 +25,10 @@ public class PersonaSwitchTask extends StatementTask {
 		stat.setInt(3, l.getBlockY());
 		stat.setInt(4, l.getBlockZ());
 		stat.setString(5, inv.getAsString());
-		stat.setString(6, uuid.toString());
-		stat.setInt(7, id);
+		stat.setString(6, id.toString());
 	}
 
 	@Override
-	protected String getQuery(){return "UPDATE persona SET world=?, x=?, y=?, z=?, inv=? WHERE player=? AND id=?";}
+	protected String getQuery(){return "UPDATE persona_world SET world=?, x=?, y=?, z=?, inv=? WHERE persona_id_fk=?";}
 
 }

@@ -24,6 +24,7 @@ public class CommandSql implements CommandExecutor {
 			//This removes comments from the SQL command.
 			//Things like DR/**/OP DATABASE ARCHECORE; would be possible otherwise.
 			statement = statement.replace("/*", "").replace("*/", "");
+			statement = statement.substring(statement.lastIndexOf(';')+1); //Preventing SELECT * FROM PERSONA; DROP PERSONA;
 			try{
 				Connection c = ArcheCore.getControls().getSQLHandler().getConnection();
 				boolean query = statement.toUpperCase().contains("SELECT");

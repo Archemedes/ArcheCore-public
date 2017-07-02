@@ -17,14 +17,22 @@ import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ArcheSkill implements Skill {
-	
+
+	public static ArrayList<Integer> levelList = new ArrayList<>();
+
+	static {
+		levelList.add(Integer.MIN_VALUE);
+		levelList.add(0);
+		for (int i = 2; i <= 1000; i++) {
+			levelList.add(getXpFromLevel(i));
+		}
+	}
+
 	private static Set<ExpModifier> xpMods = ArcheSkillFactory.xpMods;
 	private static ArcheTimer timer;
 	
@@ -291,11 +299,11 @@ public class ArcheSkill implements Skill {
 			return SkillTier.SUPER;
 		
 		for(ProfessionSlot slot : ProfessionSlot.values()){
-			if(p.getProfession(slot) == this) return SkillTier.SUPER;
+			if(p.getProfession(slot).isPresent() && p.getProfession(slot).get().equals(this)) return SkillTier.SUPER;
 		}
 		
-		SkillTier t = p.getProfession(ProfessionSlot.PRIMARY) == null? SkillTier.ADEQUATE :
-			p.getProfession(ProfessionSlot.SECONDARY) == null && !p.getProfession(ProfessionSlot.PRIMARY).isIntensiveProfession()? SkillTier.CLUMSY : SkillTier.RUSTY;
+		SkillTier t = !p.getProfession(ProfessionSlot.PRIMARY).isPresent()? SkillTier.ADEQUATE :
+			!p.getProfession(ProfessionSlot.SECONDARY).isPresent() && (!p.getProfession(ProfessionSlot.PRIMARY).get().isIntensiveProfession())? SkillTier.CLUMSY : SkillTier.RUSTY;
 		
 		Race r = p.getRace();
 		if(t != SkillTier.RUSTY && (r == Race.HUMAN || r == Race.NORTHENER || r == Race.SOUTHERON || r == Race.HEARTLANDER))
@@ -342,6 +350,16 @@ public class ArcheSkill implements Skill {
 		return result;
 	}
 
+	public int getLevel(Persona p) {
+		SkillAttachment att = getAttachment(p);
+		return att.getLevel();
+	}
+
+	public boolean achievedLevel(Persona p, int level) {
+		SkillAttachment att = getAttachment(p);
+		return att.getLevel() >= level;
+	}
+
 	@Override
 	public boolean canGainXp(Persona p){
 		SkillAttachment att = getAttachment(p);
@@ -370,6 +388,25 @@ public class ArcheSkill implements Skill {
 		
 		return attach;
 	}
-	
-	
+
+	public static int getXpFromLevel(int level) {
+		BigDecimal xp = new BigDecimal(0);
+
+		for (int i = 2 ; i <= level ; i++) {
+			xp = xp.add(new BigDecimal(201.0410225).multiply(new BigDecimal(i))).subtract(new BigDecimal(152.082045));
+		}
+
+		return xp.intValue();
+	}
+
+	public static int getLevelFromXp(double xp) {
+		for (int i = 1; i <= 1000; i++) {
+			if (xp < levelList.get(i)) {
+				return i-1;
+			}
+		}
+		return 0;
+	}
+
+
 }

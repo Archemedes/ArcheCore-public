@@ -1,6 +1,12 @@
 package net.lordofthecraft.arche.enums;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+
 public enum SkillTier {
+
+
+
 /*	RUSTY(0,Integer.MIN_VALUE,"Inept"),
 	INEXPERIENCED(1,-3000,"Promising"),
 	BUNGLING(2,250,"Bungling"),
@@ -35,7 +41,7 @@ public enum SkillTier {
 	ILLUMINATED(14, 6000000, "Mythological"),
 	GODSENT(15, 14000000, "Otherworldly"),
 	SUPER(16, 30000000, "Lord of the");
-	
+
 	final int xp;
 	final int tier;
 	final String title;
@@ -92,5 +98,4 @@ public enum SkillTier {
 	public int getXp(){
 		return xp;
 	}
-
 }

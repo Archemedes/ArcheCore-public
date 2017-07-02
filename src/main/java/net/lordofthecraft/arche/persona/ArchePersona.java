@@ -17,10 +17,7 @@ import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.DataTask;
-import net.lordofthecraft.arche.save.tasks.PersonaSwitchTask;
-import net.lordofthecraft.arche.save.tasks.SelectSkillTask;
-import net.lordofthecraft.arche.save.tasks.UpdateTask;
+import net.lordofthecraft.arche.save.tasks.*;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.SkillData;
@@ -38,9 +35,14 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.ref.WeakReference;
+import java.sql.CallableStatement;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -49,6 +51,11 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
 	private static final SaveHandler buffer = SaveHandler.getInstance();
+	private static CallableStatement deleteCall = null;
+
+	private final UUID persona_id;
+
+
 
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger timePlayed;
@@ -56,7 +63,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private final ArchePersonaKey key;
 	private final int gender;
 	private final List<SkillAttachment> profs = Lists.newArrayList();
-	public Skill[] professions = new Skill[3];
+	//public Skill[] professions = new Skill[3];
 	int age;
 	String description = null;
 	volatile String prefix = null;
@@ -82,8 +89,12 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private int hash = 0;
 	private int food = 0;
 	private double health = 0;
+	private TagAttachment attachment;
+	private Map<String,String> tags;
+	private String type;
 	
-	private ArchePersona(int id, String name, Race race, int gender, int age,long creationTimeMS) {
+	private ArchePersona(UUID persona_id, int id, String name, Race race, int gender, int age,long creationTimeMS) {
+		this.persona_id = persona_id;
 		key = new ArchePersonaKey(UUID.randomUUID(),id);
 		player = name;
 		this.race = race;
@@ -97,12 +108,16 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		lastRenamed = 0;
 		pastPlayTime = 0;
 
+		tags = Maps.newConcurrentMap();
+
 		sqlCriteria = Maps.newHashMap();
-		sqlCriteria.put("player", getPlayerUUID().toString());
-		sqlCriteria.put("id", id);
+		sqlCriteria.put("persona_id", persona_id);
+		//sqlCriteria.put("player", getPlayerUUID().toString());
+		//sqlCriteria.put("id", id);
 	}
 
-	ArchePersona(OfflinePlayer p, int id, String name, Race race, int gender, int age,long creationTimeMS){
+	ArchePersona(UUID persona_id, OfflinePlayer p, int id, String name, Race race, int gender, int age,long creationTimeMS){
+		this.persona_id = persona_id;
 		this.key = new ArchePersonaKey(p.getUniqueId(), id);
 
 		player = p.getName();
@@ -117,13 +132,15 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		lastRenamed = 0;
 		pastPlayTime = 0;
 
+		tags = Maps.newConcurrentMap();
+
 		sqlCriteria = Maps.newHashMap();
 		sqlCriteria.put("player", getPlayerUUID().toString());
 		sqlCriteria.put("id", id);
 	}
 
 	public static ArchePersona buildTestPersona() {
-		return new ArchePersona(0, "test", Race.UNSET, 0, 0,0);
+		return new ArchePersona(UUID.randomUUID(),0, "test", Race.UNSET, 0, 0,0);
 	}
 
 	public void addSkill(ArcheSkill skill, FutureTask<SkillData> future){
@@ -167,6 +184,48 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		return skin;
 	}
 
+	@Override
+	public boolean hasTagKey(String s) {
+		return tags.containsKey(s);
+	}
+
+	@Override
+	public Optional<String> getTagValue(String tag) {
+		String s = attachment.getValue(tag);
+		if (s == null) {
+			return Optional.empty();
+		} else {
+			return Optional.of(s);
+		}
+	}
+
+	@Override
+	public Map<String, String> getTags() {
+		return attachment.getTags();
+	}
+
+	@Override
+	public void setTag(String name, String value) {
+		attachment.setValue(name, value);
+	}
+
+	@Override
+	public void removeTag(String name) {
+		attachment.delValue(name);
+	}
+
+	@Override
+	public String getPersonaType() {
+		return type;
+	}
+
+	@Override
+	public void setPersonaType(String type) {
+		this.type = type;
+
+		buffer.put(new UpdateTask(this, PersonaField.TYPE, type));
+	}
+
 	public void setSkin(PersonaSkin skin) {
 		this.skin = skin;
 		buffer.put(new UpdateTask(this, PersonaField.SKIN, skin.getData()));
@@ -180,7 +239,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		boolean main = false;
 		boolean second = false;
 		boolean bonus = false;
-		this.professions = new Skill[3];
+		//this.professions = new Skill[3];
 		for (Skill sk : skills) {
 			System.out.println(sk.getName() + " " + sk.getXp(this));
 			if (sk.getXp(this) <= 0) {
@@ -289,11 +348,30 @@ public final class ArchePersona implements Persona, InventoryHolder {
         return money;
     }
 
+    public Skill[] getArrayOfProfessions() {
+		Skill[] skills = new Skill[3];
+		if (getProfession(ProfessionSlot.PRIMARY).isPresent()) {
+			skills[0] = getProfession(ProfessionSlot.PRIMARY).get();
+		} else {
+			skills[0] = null;
+		}
+		if (getProfession(ProfessionSlot.SECONDARY).isPresent()) {
+			skills[1] = getProfession(ProfessionSlot.SECONDARY).get();
+		} else {
+			skills[1] = null;
+		}
+		if (getProfession(ProfessionSlot.ADDITIONAL).isPresent()) {
+			skills[2] = getProfession(ProfessionSlot.ADDITIONAL).get();
+		} else {
+			skills[2] = null;
+		}
+		return skills;
+	}
 
 	public List<Skill> getOrderedProfessions() {
 		List<Skill> skills = Lists.newArrayList();
 		skills.addAll(profs.stream().filter(sk -> sk.skill.isVisible(this)).map(sk -> sk.skill).collect(Collectors.toList()));
-		Collections.sort(skills, new SkillComparator(this));
+		skills.sort(new SkillComparator(this));
 		return skills;
 	}
 
@@ -306,26 +384,87 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void setMainSkill(Skill profession){
 		this.profession = profession;
 		String name = profession == null? null : profession.getName();
+
 		buffer.put(new UpdateTask(this,PersonaField.SKILL_SELECTED, name));
 	}
 
 	@Override
-	public Skill getProfession(ProfessionSlot slot){
+	public Optional<Skill> getProfession(ProfessionSlot slot){
+		Optional<SkillAttachment> att = profs.stream().filter(s -> s.getSlot() == slot).findFirst();
+		return att.map(skillAttachment -> skillAttachment.skill);
+		/*return profs.stream().filter(s -> s.getSlot() == slot).findFirst();
 		switch(slot){
 		case PRIMARY: return professions[0];
 		case SECONDARY: return professions[1];
 		case ADDITIONAL: return professions[2];
 		default: throw new IllegalArgumentException();
+		}*/
+	}
+
+	@Override
+	public boolean isSkillInSlot(Skill s, ProfessionSlot slot) {
+		Optional<SkillAttachment> oatt = profs.stream().filter(a -> a.getSkill().equals(s)).findFirst();
+		return oatt.filter(skillAttachment -> skillAttachment.getSlot() == slot).isPresent();
+	}
+
+	@Override
+	public ChatColor colorForSkill(Skill s) {
+		Optional<SkillAttachment> oatt = profs.stream().filter(at -> at.getSkill().equals(s)).findFirst();
+		if (oatt.isPresent()) {
+			SkillAttachment att = oatt.get();
+			if (att.getSkill().isProfessionFor(race)) {
+				return ChatColor.BLUE;
+			}
+			switch (att.getSlot()) {
+				case PRIMARY:
+					return ChatColor.DARK_GREEN;
+				case SECONDARY:
+					return ChatColor.GREEN;
+				case ADDITIONAL:
+					return ChatColor.AQUA;
+				default:
+					return ChatColor.YELLOW;
+			}
+		} else {
+			return ChatColor.YELLOW;
 		}
 	}
 
 	@Override
 	public void setProfession(ProfessionSlot slot, Skill profession){
-		if(professions[slot.getSlot()] == profession) return;
-		professions[slot.getSlot()] = profession;
+		//if(professions[slot.getSlot()] == profession) return;
+		//professions[slot.getSlot()] = profession;
+		Optional<SkillAttachment> att = profs.stream().filter(a -> a.getSkill().equals(profession)).findFirst();
+		if (att.isPresent()) {
+			SkillAttachment attch = att.get();
+			if (attch.getSlot() == slot) {
+				return;
+			}
+			attch.setSlot(slot);
+			if (slot != ProfessionSlot.UNSELECTED) {
+				profs.stream().filter(a -> a.getSlot() == slot).forEach(a -> {
+					ArcheCore.getPlugin().getLogger().info("Deselected the skill "+a.getSkill().getName()+" from the slot "+slot.name()+" for the persona "+persona_id+" for the player "+player);
+					a.setSlot(ProfessionSlot.UNSELECTED);
+				});
 
-		String name = profession == null? null : profession.getName();
-		buffer.put(new UpdateTask(this, slot.getPersonaField(), name));
+			}
+		} else {
+			ArcheCore.getPlugin().getLogger().severe("The Persona "+persona_id+" for the player "+player+" had no skill attachment for the skill "+profession.getName()+"!?!?!");
+		}
+
+		//String name = profession == null? null : profession.getName();
+		buffer.put(new UpdateSkillSlotTask(this, profession, slot));
+		//buffer.put(new UpdateTask(this, slot.getPersonaField(), name));
+	}
+
+	@Override
+	public void deselectProfession(Skill profession) {
+		profs.stream().filter(a -> a.getSkill().equals(profession)).forEach(a -> a.setSlot(ProfessionSlot.UNSELECTED));
+	}
+
+	@Override
+	public void deselectSlot(ProfessionSlot slot) {
+		profs.stream().filter(a -> a.getSlot() == slot).forEach(a -> a.setSlot(ProfessionSlot.UNSELECTED));
 	}
 
 	public double getXpLost(){
@@ -416,6 +555,24 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 			addSkill(s, fut);
 		}
+	}
+
+	void loadTags() {
+		FutureTask<TagAttachment> task = new FutureTask<>(new TagAttachmentCallable(persona_id, ArcheCore.getSQLControls()));
+		try {
+			attachment = task.get(200, TimeUnit.MILLISECONDS);
+
+		} catch (TimeoutException e) {
+			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We timed out while trying to fetch the persona "+persona_id.toString()+"'s tags!", e);
+			attachment = new TagAttachment(Maps.newConcurrentMap(), persona_id, false);
+		} catch (Exception e) {
+			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We threw an exception while trying to fetch the persona "+persona_id.toString()+"'s tags!", e);
+			attachment = new TagAttachment(Maps.newConcurrentMap(), persona_id, false);
+		}
+	}
+
+	void createEmptyTags() {
+		attachment = new TagAttachment(Maps.newConcurrentMap(), persona_id, true);
 	}
 
 	@Override
@@ -720,7 +877,15 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	@Override
-	public boolean remove(){
+	public boolean remove() {
+		if (deleteCall == null) {
+			try {
+				deleteCall = ArcheCore.getControls().getSQLHandler().getConnection().prepareCall("{call delete_persona(?, ?)}");
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return false;
+			}
+		}
 		Player p = Bukkit.getPlayer(getPlayerUUID());
 
 		//We enforce Player is online to do this right now
@@ -729,6 +894,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		PersonaRemoveEvent event = new PersonaRemoveEvent(this, false);
 		Bukkit.getPluginManager().callEvent(event);
 		if(event.isCancelled()) return false;
+
 
 		buffer.put(new DataTask(DataTask.DELETE, TABLE, null, sqlCriteria));
 		//		Both could be commented out once cascading db is setup!
@@ -771,7 +937,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		if (current && getPlayer() != null) {
 			return getPlayer().getInventory();
 		} else {
-			Inventory binv = Bukkit.createInventory(this, 45, "Persona Inventory: " + key.toString());
+			if (inv == null || inv.getContents() == null) {
+				return null;
+			}
+			Inventory binv = Bukkit.createInventory(this, 45, "Persona Inventory: " + getPlayerName()+"@"+getId());
 			binv.setContents(inv.getContents());
 			return binv;
 		}
@@ -829,4 +998,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public int getTotalPlaytime(){
 		return pastPlayTime + getTimePlayed();
 	}
+
+	@Override
+	public UUID getPersonaId() { return persona_id; }
 }

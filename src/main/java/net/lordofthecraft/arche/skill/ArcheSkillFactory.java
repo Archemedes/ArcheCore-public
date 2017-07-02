@@ -49,6 +49,7 @@ public class ArcheSkillFactory implements SkillFactory {
 	private boolean unlockedByTime = false;
 	private String helpText = null;
 	private Material helpIcon = null;
+	private boolean forceRacials = false;
 
 	private ArcheSkillFactory(String name) {
 		this.name = name;
@@ -147,6 +148,10 @@ public class ArcheSkillFactory implements SkillFactory {
 		return this;
 	}
 
+	public void setForceRacials(boolean forceRacials) {
+		this.forceRacials = forceRacials;
+	}
+
 	@Override
 	public Skill register(){
 		
@@ -166,7 +171,27 @@ public class ArcheSkillFactory implements SkillFactory {
 			
 			//And the SQL statement to provide values to it
 			PreparedStatement statement = con.prepareStatement("INSERT INTO persona_skills VALUES (?,?,?,?)");
+			/*
+			CREATE TABLE IF NOT EXISTS race_xp (
+    race_key_fk 	VARCHAR(255),
+    skill_fk 		VARCHAR(255),
+    xp_mult 		DOUBLE(10,2) DEFAULT 1.0,
+    racial_skill	BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (race_key_fk, skill_fk),
+    FOREIGN KEY (race_key_fk) REFERENCES races (race_key),
+    FOREIGN KEY (skill_fk) REFERENCES skills (skill)
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+			 */
+			if (!forceRacials) {
+				String statment = "SELECT xp_mult,racial_skill FROM race_xp WHERE skill_fk=? AND race_key_fk=?";
+				PreparedStatement racialStat = con.prepareStatement("SELECT xp_mult,racial_skill FROM race_xp WHERE skill_fk=? AND race_key_fk=?");
+				racialStat.setString(1, name);
+				for (net.lordofthecraft.arche.persona.Race race : net.lordofthecraft.arche.persona.Race.getRaces()) {
+
+				}
+			}
 
 			ArcheSkill skill = new ArcheSkill(id, name, strategy, inert, mains, raceMods, statement, intensive, unlockedByTime);
 			

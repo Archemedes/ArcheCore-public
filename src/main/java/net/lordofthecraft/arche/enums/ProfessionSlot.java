@@ -3,22 +3,17 @@ package net.lordofthecraft.arche.enums;
 import net.lordofthecraft.arche.save.PersonaField;
 
 public enum ProfessionSlot {
-	PRIMARY(PersonaField.SKILL_PRIMARY, 0, "main"),
-	SECONDARY(PersonaField.SKILL_SECONDARY, 1, "second"),
-	ADDITIONAL(PersonaField.SKILL_ADDITIONAL, 2, "bonus");
-	
-	private final PersonaField field;
+	PRIMARY( 0, "main"),
+	SECONDARY(1, "second"),
+	ADDITIONAL(2, "bonus"),
+	UNSELECTED(3, "unselected");
+
 	private final int slot;
 	private final String simple;
 
-	ProfessionSlot(PersonaField field, int slot, String simple) {
-		this.field = field;
+	ProfessionSlot(int slot, String simple) {
 		this.slot = slot;
 		this.simple = simple;
-	}
-	
-	public PersonaField getPersonaField(){
-		return field;
 	}
 	
 	public int getSlot(){
@@ -27,6 +22,15 @@ public enum ProfessionSlot {
 
 	public String toSimpleString() {
 		return simple;
+	}
+
+	public static ProfessionSlot byInt(int i) {
+		for (ProfessionSlot slot : values()) {
+			if (slot.slot == i) {
+				return slot;
+			}
+		}
+		return UNSELECTED;
 	}
 	
 }

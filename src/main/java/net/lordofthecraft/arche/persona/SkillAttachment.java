@@ -1,6 +1,8 @@
 package net.lordofthecraft.arche.persona;
 
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.enums.ProfessionSlot;
+import net.lordofthecraft.arche.enums.SkillTier;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
@@ -19,12 +21,13 @@ public class SkillAttachment {
 	private static final SaveHandler buffer = SaveHandler.getInstance();
 	final ArcheSkill skill;
 	private final String uuid;
-	private final int id;
 	private FutureTask<SkillData> call;
 	private double xp;
 	private boolean canSee;
 	private double modifier = -1;
 	private boolean error = false;
+	private ProfessionSlot slot;
+	private int level = 0;
 	
 	SkillAttachment(ArcheSkill skill, ArchePersona persona, FutureTask<SkillData> call){
 		this.call = call;
@@ -33,8 +36,7 @@ public class SkillAttachment {
 		canSee = skill.getVisibility() == Skill.VISIBILITY_VISIBLE;
 		
 		this.skill = skill;
-		this.uuid = persona.getPlayerUUID().toString();
-		this.id = persona.getId();
+		this.uuid = persona.getPersonaId().toString();
 	}
 	
 	
@@ -50,6 +52,8 @@ public class SkillAttachment {
 				if(data != null){ 
 					xp = data.xp;
 					canSee = data.visible;
+					slot = ProfessionSlot.byInt(data.slot);
+					level = ArcheSkill.getLevelFromXp(xp);
 				}
 
 				call = null;
@@ -88,6 +92,14 @@ public class SkillAttachment {
 		return xp;
 	}
 
+	public int getLevel() {
+		return level;
+	}
+
+	public ProfessionSlot getSlot() {
+		return slot;
+	}
+
 	public void setXp(double xp) {
 		this.xp = xp;
 		performSQLUpdate();
@@ -106,20 +118,34 @@ public class SkillAttachment {
 	
 	public void addXp(double added){
 		xp += added;
+		if (xp > ArcheSkill.getXpFromLevel(level+1) && level < 1000) {
+			++level;
+		}
 
 		performSQLUpdate();
 	}
 	
 	public void removeXP(double removed){
 		xp -= removed;
+		if (xp < ArcheSkill.getXpFromLevel(level) && level > 0) {
+			--level;
+		}
 
 		performSQLUpdate();
 	}
-	
+
+	public void setSlot(ProfessionSlot slot) {
+		this.slot = slot;
+
+		performSQLUpdate();
+	}
 	private void performSQLUpdate(){
 		if(error) return;
-		ArcheTask task = new UpdateSkillTask(skill, uuid, id, xp, canSee);
+		ArcheTask task = new UpdateSkillTask(skill, uuid, xp, canSee, slot.getSlot());
 		buffer.put(task);
 	}
-	
+
+	public ArcheSkill getSkill() {
+		return skill;
+	}
 }

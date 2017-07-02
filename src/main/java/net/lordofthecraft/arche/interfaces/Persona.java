@@ -4,9 +4,12 @@ import net.lordofthecraft.arche.enums.ProfessionSlot;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.PersonaInventory;
 import net.lordofthecraft.arche.persona.PersonaSkin;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface Persona {
@@ -54,9 +57,13 @@ public interface Persona {
 	 * @param slot The chosen slot to query
 	 * @return A player's self-set 'main' skill.
 	 */
-	Skill getProfession(ProfessionSlot slot);
+	Optional<Skill> getProfession(ProfessionSlot slot);
 
-	/**
+    boolean isSkillInSlot(Skill s, ProfessionSlot slot);
+
+    ChatColor colorForSkill(Skill s);
+
+    /**
 	 * Set a Persona's choice of professions. Chosen professions can be levelled to their maximum
 	 * @param slot The chosen slot to query
 	 * @param profession The skill to be set as main.
@@ -74,7 +81,11 @@ public interface Persona {
 	 * @param profession The skill to be set as main.
 	 */
 	void setMainSkill(Skill profession);
-	
+
+    void deselectProfession(Skill profession);
+
+	void deselectSlot(ProfessionSlot slot);
+
 	/**
 	 * Returns the session-invariant ID of the Persona. Ids are between 0 and 3.
 	 * IDs are only unique for the same player 
@@ -275,7 +286,21 @@ public interface Persona {
 	 */
 
 	PersonaSkin getSkin();
-	
+
+    boolean hasTagKey(String s);
+
+	Optional<String> getTagValue(String tag);
+
+	Map<String, String> getTags();
+
+    void setTag(String name, String value);
+
+	void removeTag(String name);
+
+	String getPersonaType();
+
+	void setPersonaType(String type);
+
 	/**
 	 * Set the current skin of this Persona.
 	 * @param skin the skin to set.
@@ -313,4 +338,6 @@ public interface Persona {
 	 * @return the total playtime of this persona(all maps added)
 	 */
 	int getTotalPlaytime();
+
+    UUID getPersonaId();
 }

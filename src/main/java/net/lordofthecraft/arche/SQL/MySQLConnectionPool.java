@@ -22,7 +22,6 @@ public class MySQLConnectionPool implements Closeable {
         ds.setUsername(user);
         ds.setPassword(password);
 
-        ds.setMinimumIdle(2);
         ds.setPoolName("ArcheCore-Connection-Pool");
 
         ds.addDataSourceProperty("useUnicode", "true");

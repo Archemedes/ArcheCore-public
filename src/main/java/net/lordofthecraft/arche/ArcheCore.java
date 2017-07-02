@@ -15,6 +15,7 @@ import net.lordofthecraft.arche.persona.ArchePersonaKey;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import net.lordofthecraft.arche.save.DataSaveRunnable;
 import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.DatabaseCreateTask;
 import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
@@ -92,6 +93,16 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		return instance;
 	}
 
+	public static PersonaHandler getPersonaControls() { return getControls().getPersonaHandler(); }
+
+	public static Economy getEconomyControls() { return getControls().getEconomy(); }
+
+	public static SQLHandler getSQLControls() { return getControls().getSQLHandler(); }
+
+	public static Persona getPersona(Player p) { return instance.getPersonaHandler().getPersona(p); }
+
+	public static boolean hasPersona(Player p) { return instance.getPersonaHandler().hasPersona(p); }
+
 	/**
 	 * Fetch the current instance of the ArcheCore plugin
 	 *
@@ -105,7 +116,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		saveHandler.put(new EndOfStreamTask());
 
-		Bukkit.getOnlinePlayers().stream().forEach(p -> {
+		Bukkit.getOnlinePlayers().forEach(p -> {
 			//This part must be done for safety reasons.
 			//Disables are messy, and in the brief period of Bukkit downtime
 			//Players may shift inventories around and dupe items they shouldn't dupe
@@ -159,6 +170,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
 		}
 		saveHandler = SaveHandler.getInstance();
+
 		blockRegistry = new BlockRegistry();
 		personaHandler = ArchePersonaHandler.getInstance();
 		helpdesk = HelpDesk.getInstance();
@@ -166,9 +178,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		timer = debugMode? new ArcheTimer(this) : null;
 		personaHandler.setModifyDisplayNames(modifyDisplayNames);
+		saveHandler.put(new DatabaseCreateTask());
 
 		//Create the Persona table
-		Map<String,String> cols = Maps.newLinkedHashMap();
+		/*Map<String,String> cols = Maps.newLinkedHashMap();
 		cols.put("player", "TEXT"); //1
 		cols.put("id", "INT");
 		cols.put("name", "TEXT");
@@ -204,7 +217,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		cols.put("PRIMARY KEY (player, id)", "ON CONFLICT REPLACE");
 		sqlHandler.createTable("persona", cols);
 
-		/*		cols = Maps.newLinkedHashMap();
+				cols = Maps.newLinkedHashMap();
 		cols.put("player", "TEXT NOT NULL");
 		cols.put("id", "INT NOT NULL");
 		cols.put("wastaught", "INT");
@@ -213,7 +226,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		cols.put("xplimit", "INT");
 		cols.put("UNIQUE (player, id)", "ON CONFLICT IGNORE");
 		cols.put("FOREIGN KEY (player, id)", "REFERENCES persona(player, id) ON DELETE CASCADE");
-		sqlHandler.createTable("persona_ext", cols);*/
+		sqlHandler.createTable("persona_ext", cols);
 
 		cols = Maps.newLinkedHashMap();
 		cols.put("player", "TEXT NOT NULL");
@@ -239,7 +252,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		cols.put("y", "INT");
 		cols.put("z", "INT");
 		cols.put("UNIQUE (world, x, y, z)", "ON CONFLICT IGNORE");
-		sqlHandler.createTable("blockregistry", cols);
+		sqlHandler.createTable("blockregistry", cols);*/
 
 		sqlHandler.execute("DELETE FROM blockregistry WHERE ROWID IN (SELECT ROWID FROM blockregistry ORDER BY ROWID DESC LIMIT -1 OFFSET 5000)");
 
