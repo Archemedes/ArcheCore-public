@@ -1,6 +1,6 @@
 package net.lordofthecraft.arche.save.tasks;
 
-import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.persona.Race;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -38,7 +38,7 @@ public class InsertTask extends ArcheTask {
 			stat.setInt(2, id);
 			stat.setString(3,name);
 			stat.setInt(4, age);
-			stat.setString(5, race.toString());
+			stat.setString(5, race.getRaceId());
 			stat.setInt(6,gender);
 			stat.setBoolean(7, autoage);
 			stat.setLong(8,creationTime);

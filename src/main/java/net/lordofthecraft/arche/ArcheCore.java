@@ -1,6 +1,5 @@
 package net.lordofthecraft.arche;
 
-import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
@@ -13,8 +12,8 @@ import net.lordofthecraft.arche.persona.ArcheEconomy;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.ArchePersonaKey;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
-import net.lordofthecraft.arche.save.DataSaveRunnable;
-import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.persona.magic.ArcheMagic;
+import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.DatabaseCreateTask;
 import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
@@ -37,7 +36,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -45,8 +43,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private static ArcheCore instance;
 
 	private SQLHandler sqlHandler;
-	private SaveHandler saveHandler;
-	private BlockRegistry blockRegistry;
+    //private SaveHandler saveHandler;
+    private SaveExecutorManager saveManager;
+    private BlockRegistry blockRegistry;
 	private ArchePersonaHandler personaHandler;
 	private HelpDesk helpdesk;
 	private ArcheTimer timer;
@@ -114,7 +113,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 	public void onDisable() {
 
-		saveHandler.put(new EndOfStreamTask());
+        saveManager.submit(new EndOfStreamTask());
 
 		Bukkit.getOnlinePlayers().forEach(p -> {
 			//This part must be done for safety reasons.
@@ -169,7 +168,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		} else {
 			sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
 		}
-		saveHandler = SaveHandler.getInstance();
+        saveManager = SaveExecutorManager.getInstance();
+        //saveHandler = SaveHandler.getInstance();
 
 		blockRegistry = new BlockRegistry();
 		personaHandler = ArchePersonaHandler.getInstance();
@@ -178,7 +178,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		timer = debugMode? new ArcheTimer(this) : null;
 		personaHandler.setModifyDisplayNames(modifyDisplayNames);
-		saveHandler.put(new DatabaseCreateTask());
+        saveManager.submit(new DatabaseCreateTask());
 
 		//Create the Persona table
 		/*Map<String,String> cols = Maps.newLinkedHashMap();
@@ -271,6 +271,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 
 		Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+            ArcheMagic.init(sqlHandler);
+
             if(willCachePersonas()){
                 long time = System.currentTimeMillis();
                 getLogger().info("Preloading Personas as far back as " + cachePersonas + " days");
@@ -285,8 +287,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             }
 
             //Start saving our data
-            saverThread = new Thread(new DataSaveRunnable(saveHandler, timer, sqlHandler), "ArcheCore SQL Consumer");
-            saverThread.start();
+            //saverThread = new Thread(new DataSaveRunnable(saveHandler, timer, sqlHandler), "ArcheCore SQL Consumer");
+            //saverThread.start();
 
         });
 
@@ -682,4 +684,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	public BonusExpModifierHandler getBonusExpModifierHandler() {
 		return bonusExpModifierHandler;
 	}
+
+    @Override
+    public SaveExecutorManager getSaveManager() {
+        return saveManager;
+    }
 }

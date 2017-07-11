@@ -3,13 +3,13 @@ package net.lordofthecraft.arche.skill;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.enums.ProfessionSlot;
-import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.enums.SkillTier;
 import net.lordofthecraft.arche.event.GainXPEvent;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.Race;
 import net.lordofthecraft.arche.persona.SkillAttachment;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
@@ -252,7 +252,7 @@ public class ArcheSkill implements Skill {
 		}
 		if(xpMods.contains(ExpModifier.AUTOAGE)){
 			if(p.doesAutoAge()){
-				if(r == Race.HUMAN || r == Race.HALFLING || r == Race.NORTHENER || r == Race.SOUTHERON || r == Race.HEARTLANDER)
+				if (r.getRaceId().equalsIgnoreCase("human") || (r.getSuperRace() != null && r.getSuperRace().equalsIgnoreCase("human")))
 					mod += 0.10;
 			}
 		}
@@ -306,7 +306,7 @@ public class ArcheSkill implements Skill {
 			!p.getProfession(ProfessionSlot.SECONDARY).isPresent() && (!p.getProfession(ProfessionSlot.PRIMARY).get().isIntensiveProfession())? SkillTier.CLUMSY : SkillTier.RUSTY;
 		
 		Race r = p.getRace();
-		if(t != SkillTier.RUSTY && (r == Race.HUMAN || r == Race.NORTHENER || r == Race.SOUTHERON || r == Race.HEARTLANDER))
+		if (t != SkillTier.RUSTY && (r.getRaceId().equalsIgnoreCase("human") || (r.getSuperRace() != null && r.getSuperRace().equalsIgnoreCase("human"))))
 			return t.getNext().getNext();
 		else return t;
 	}	

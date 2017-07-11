@@ -5,13 +5,12 @@ import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.WeakBlock;
-import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.*;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
 import net.lordofthecraft.arche.save.tasks.DataTask;
 import net.lordofthecraft.arche.save.tasks.InsertTask;
@@ -21,10 +20,8 @@ import net.lordofthecraft.arche.skill.TopData;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.*;
-import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -41,7 +38,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 	private static TopData topData;
 	private final Map<UUID, ArchePersona[]> personas = new HashMap<>(Bukkit.getServer().getMaxPlayers());
 	//private final ArchePersonaExtender extender = new ArchePersonaExtender();
-	private SaveHandler buffer = SaveHandler.getInstance();
+	//private SaveHandler buffer = SaveHandler.getInstance();
+	private final SaveExecutorManager manager = SaveExecutorManager.getInstance();
 	private boolean displayName = false;
 	private PreparedStatement selectStatement = null;
 	private Map<Race, Location> racespawns;
@@ -64,10 +62,10 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public boolean testPersona() {
 		try {
 			ArchePersona persona = ArchePersona.buildTestPersona();
-			if (persona != null && buffer != null) {
+			if (persona != null && manager != null) {
 				persona.setName("test2");
 				persona.setAge(10);
-				persona.setRace(Race.HUMAN);
+				//persona.setRace(Race.getRace("UNSET"));
 				persona.setDescription("Kowaman is stupid");
 				persona.addTimePlayed(5);
 				persona.setXPGain(false);
@@ -257,7 +255,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 			//This should no longer be necessary because of unique constraints
 			//buffer.put(new DataTask(DataTask.DELETE, "persona", null, prs[id].sqlCriteria));
-			buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, prs[id].sqlCriteria));
+			manager.submit(new DataTask(DataTask.DELETE, "persona_names", null, prs[id].sqlCriteria));
 
 			//delete all skill records
 			deleteSkills(prs[id]);
@@ -275,7 +273,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		if(prs[id] != null){
 			//This should no longer be necessary because of unique constraints
 			//buffer.put(new DataTask(DataTask.DELETE, "persona", null, prs[id].sqlCriteria));
-			buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, prs[id].sqlCriteria));
+			manager.submit(new DataTask(DataTask.DELETE, "persona_names", null, prs[id].sqlCriteria));
 
 			//delete all skill records
 			deleteSkills(prs[id]);
@@ -296,7 +294,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			p.removePotionEffect(ps.getType());
 
 		ArcheTask task = new InsertTask(uuid, id, name, age, race, gender, autoAge,creationTime);
-		buffer.put(task);
+		manager.submit(task);
 
 		RaceBonusHandler.apply(p, race);
 		persona.updateDisplayName(p);
@@ -597,7 +595,11 @@ public class ArchePersonaHandler implements PersonaHandler {
 		int id = res.getInt("id");
 		String name = res.getString("persona_name");
 		int age = res.getInt("age");
-		Race race = Race.valueOf(res.getString("race_key_fk"));
+		Optional<Race> orace = Race.getOrCreateRace(res.getString("race_key_fk"));
+		if (!orace.isPresent()) {
+			return null;
+		}
+		Race race = orace.get();
 		//net.lordofthecraft.arche.persona.Race newrace = net.lordofthecraft.arche.persona.Race.getOrCreateRace(res.getString("race_key_fk"));
 		String rheader = res.getString("rheader");
 		String pregender = res.getString("gender");
@@ -662,6 +664,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		//We now let all Personas load their skills (albeit lazily). Let's do this now
 		persona.loadSkills();
+
+		persona.loadMagics();
 
 		persona.loadTags();
 
@@ -746,7 +750,11 @@ public class ArchePersonaHandler implements PersonaHandler {
 				rs = handler.query("SELECT * FROM persona_race_spawns");
 				List<String> toRemove = Lists.newArrayList();
 				while (rs.next()) {
-					Race r = Race.valueOf(rs.getString(1));
+					Optional<Race> or = Race.getRaceByKey(rs.getString(1));
+					if (!or.isPresent()) {
+						continue;
+					}
+					Race r = or.get();
 					World w = Bukkit.getWorld(rs.getString(2));
 					if (r == null || w == null) {
 						toRemove.add(rs.getString(1));
@@ -775,7 +783,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	void deleteSkills(ArchePersona p){
 		for(String sname : ArcheSkillFactory.getSkills().keySet()){
-			buffer.put(new DataTask(DataTask.DELETE, "sk_" + sname, null, p.sqlCriteria));
+			manager.submit(new DataTask(DataTask.DELETE, "persona_skills", null, p.sqlCriteria));
 
 		}
 	}
@@ -806,8 +814,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	@Override
 	public double getLuck(@Nonnull Player p) {
-		Attributable att = p;
-		AttributeInstance instance = att.getAttribute(Attribute.GENERIC_LUCK);
+		AttributeInstance instance = p.getAttribute(Attribute.GENERIC_LUCK);
 		if (instance != null) {
 			return instance.getValue();
 		} else {
@@ -845,7 +852,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		Location loc = new Location(l.getWorld(), l.getBlockX(), l.getBlockY(), l.getBlockZ(), newYaw, 0);
 		racespawns.put(r, loc);
 		Map<String, Object> toIn = Maps.newLinkedHashMap();
-		toIn.put("race", r.name());
+		toIn.put("race", r.getRaceId());
 		toIn.put("world", loc.getWorld().getName());
 		toIn.put("x", loc.getBlockX());
 		toIn.put("y", loc.getBlockY());
@@ -858,7 +865,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public void removeRaceSpawn(Race r) {
 		racespawns.remove(r);
 		Map<String, Object> map = Maps.newHashMap();
-		map.put("race", r.name());
+		map.put("race", r.getRaceId());
 		ArcheCore.getControls().getSQLHandler().remove("persona_race_spawns", map);
 		//ArcheCore.getControls().getSQLHandler().execute("DELETE FROM persona_race_spawns WHERE race='" + r.getName() + "'");
 	}

@@ -2,7 +2,6 @@ package net.lordofthecraft.arche.save.tasks;
 
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.TagAttachment;
 
 import java.sql.PreparedStatement;
@@ -35,6 +34,8 @@ public class TagAttachmentCallable implements Callable<TagAttachment> {
         while (rs.next()) {
             tags.put(rs.getString("tag_name"), rs.getString("tag"));
         }
+        rs.close();
+        stat.close();
         return new TagAttachment(tags, persona_id, true);
     }
 }

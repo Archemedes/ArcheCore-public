@@ -1,24 +1,21 @@
 package net.lordofthecraft.arche.skill;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.interfaces.IArcheCore;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.save.SaveExecutorManager;
+import net.lordofthecraft.arche.save.tasks.BonusExpModifierTask;
+import org.bukkit.entity.Player;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import org.bukkit.entity.Player;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.enums.ChatBoxAction;
-import net.lordofthecraft.arche.interfaces.IArcheCore;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.BonusExpModifierTask;
 
 public class BonusExpModifierHandler {
 
@@ -51,14 +48,14 @@ public class BonusExpModifierHandler {
 	
 	public void addModifier(BonusExpModifier m) {
 		modifiers.put(m.getId(), m);
-		SaveHandler.getInstance().put(new BonusExpModifierTask(m, false));
-	}
+        SaveExecutorManager.getInstance().submit(new BonusExpModifierTask(m, false));
+    }
 	
 	public void endNow(BonusExpModifier m) {
 		modifiers.remove(m);
 		m.setDuration(System.currentTimeMillis() - m.getStartTime());
-		SaveHandler.getInstance().put(new BonusExpModifierTask(m, true));
-	}
+        SaveExecutorManager.getInstance().submit(new BonusExpModifierTask(m, true));
+    }
 
 	public HashMap<Integer, BonusExpModifier> getModifiers() {
 		return modifiers;
@@ -160,8 +157,8 @@ public class BonusExpModifierHandler {
 
 	public ArrayList<BonusExpModifier> getModifiers(UUID playerUUID) {
 		ArrayList<BonusExpModifier> gmodifiers = Lists.newArrayList();
-		for (BonusExpModifier m : this.modifiers.values()) {
-			if (playerUUID.equals(m.getUUID())) gmodifiers.add(m);
+        for (BonusExpModifier m : modifiers.values()) {
+            if (playerUUID.equals(m.getUUID())) gmodifiers.add(m);
 		}
 		return gmodifiers;
 	}

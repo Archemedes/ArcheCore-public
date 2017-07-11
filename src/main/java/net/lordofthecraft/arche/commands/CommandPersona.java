@@ -2,14 +2,14 @@ package net.lordofthecraft.arche.commands;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.ChatBoxAction;
-import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.help.ArcheMessage;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.PersonaSkin;
-import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.persona.Race;
+import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.PersonaRenameTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import org.apache.commons.lang.StringUtils;
@@ -231,7 +231,7 @@ public class CommandPersona implements CommandExecutor {
                         pers.setName(name);
                         sender.sendMessage(ChatColor.AQUA + "Persona name was set to: " + ChatColor.RESET + name);
                         if (sender == pers.getPlayer()) //Player renamed by his own accord
-                            SaveHandler.getInstance().put(new PersonaRenameTask(pers));
+                            SaveExecutorManager.getInstance().submit(new PersonaRenameTask(pers));
                     } else {
                         sender.sendMessage(ChatColor.RED + "Error: Name too long. Max length 32 characters");
                     }
@@ -363,7 +363,7 @@ public class CommandPersona implements CommandExecutor {
                     } else {
                         Optional<net.lordofthecraft.arche.persona.Race> r = net.lordofthecraft.arche.persona.Race.getRace(args[1]);
                         if (r.isPresent()) {
-                            net.lordofthecraft.arche.persona.Race race = r.get();
+                            Race race = r.get();
                             if (race.isSpecial()) {
                                 return doRaceChange(sender, pers, r.get());
                             } else {
@@ -380,28 +380,57 @@ public class CommandPersona implements CommandExecutor {
                     if (!sender.hasPermission("archecore.command.construct") && !sender.hasPermission("archecore.admin")) {
                         sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
                         return true;
-                    } else
-                        return doRaceChange(sender, pers, Race.CONSTRUCT);
+                    } else {
+                        Optional<Race> r = Race.getRace("Construct");
+                        if (r.isPresent()) {
+                            return doRaceChange(sender, pers, r.get());
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "Error! Construct race was not initialized. Please contact a Developer immediately.");
+                            return true;
+                        }
+                    }
+
                 } else if (args[0].equalsIgnoreCase("spectre") || args[0].equalsIgnoreCase("spectral") || args[0].equalsIgnoreCase("specter")) {
                     if (!sender.hasPermission("archecore.command.spectre") && !sender.hasPermission("archecore.admin")) {
                         sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
                         return true;
-                    } else
-                        return doRaceChange(sender, pers, Race.SPECTRE);
+                    } else {
+                        Optional<Race> r = Race.getRace("Spectre");
+                        if (r.isPresent()) {
+                            return doRaceChange(sender, pers, r.get());
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "Error! Construct race was not initialized. Please contact a Developer immediately.");
+                            return true;
+                        }
+                    }
                 } else if (args[0].equalsIgnoreCase("necrolyte") || args[0].equalsIgnoreCase("necro")) {
                     if (!sender.hasPermission("archecore.command.necrolyte") && !sender.hasPermission("archecore.admin")) {
                         sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
                         return true;
-                    } else
-                        return doRaceChange(sender, pers, Race.NECROLYTE);
+                    } else {
+                        Optional<Race> r = Race.getRace("Necrolyte");
+                        if (r.isPresent()) {
+                            return doRaceChange(sender, pers, r.get());
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "Error! Construct race was not initialized. Please contact a Developer immediately.");
+                            return true;
+                        }
+                    }
                 } else if (args[0].equalsIgnoreCase("aengulbound")
                         || args[0].equalsIgnoreCase("keeper")
                         || args[0].equalsIgnoreCase("ascended")) {
                     if (!sender.hasPermission("archecore.command.ascended") && !sender.hasPermission("archecore.admin")) {
                         sender.sendMessage(ChatColor.RED + "Error: Permission denied");
                         return true;
-                    } else
-                        return doRaceChange(sender, pers, Race.ASCENDED);
+                    } else {
+                        Optional<Race> r = Race.getRace("Ascended");
+                        if (r.isPresent()) {
+                            return doRaceChange(sender, pers, r.get());
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "Error! Construct race was not initialized. Please contact a Developer immediately.");
+                            return true;
+                        }
+                    }
                 }
             }
         }
@@ -432,33 +461,9 @@ public class CommandPersona implements CommandExecutor {
         return true;
     }
 
-    private boolean doRaceChange(CommandSender sender, Persona pers, net.lordofthecraft.arche.persona.Race race) {
-        ArchePersona apers = (ArchePersona) pers;
-        apers.setRace(race);
-        sender.sendMessage(ChatColor.AQUA + "Underlying race changed to " + race.getName() + " for: " + ChatColor.WHITE + pers.getName());
-        int lost = (int) apers.reskillRacialReassignment();
-        if (lost > 0) {
-            ArcheSkillFactory.getSkill("internal_drainxp").addRawXp(pers, lost);
-            sender.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + lost + ChatColor.AQUA + " XP was lost and granted for personal redistribution.");
-            sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Free XP can be assigned with /sk [skill] assign [xp]");
-        }
-        Player p = pers.getPlayer();
-        if (sender != p) {
-            sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "To purge this value, type /sk internal_drainxp give [who] -[amount]");
-            if (p != null) {
-                p.sendMessage(ChatColor.AQUA + "Underlying race changed to " + race.getName() + " for this persona.");
-                if (lost > 0) {
-                    p.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + lost + ChatColor.AQUA + " XP was lost and granted for personal redistribution.");
-                    p.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Free XP can be assigned with /sk [skill] assign [xp]");
-                }
-            }
-        }
-        return true;
-    }
-
     private Race findRace(String s) {
         s = s.replace('\'', ' ');
-        for (Race r : Race.values()) {
+        for (Race r : Race.getRaces()) {
             if (s.equalsIgnoreCase(r.getName().replace('\'', ' '))) return r;
         }
         return null;

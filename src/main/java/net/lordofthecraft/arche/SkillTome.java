@@ -8,7 +8,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.StatementTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import org.apache.commons.lang.WordUtils;
@@ -116,8 +116,8 @@ public class SkillTome {
 									double xp = amt*getXpBoost(skill.getXp(pers));
 									double newxp = Math.round(skill.addRawXp(pers, xp, true));
 									hasTome = true;
-                                    SaveHandler.getInstance().put(new SkillTomeStatementTask(skill, pers, newxp));
-								}
+                                    SaveExecutorManager.getInstance().submit(new SkillTomeStatementTask(skill, pers, newxp));
+                                }
 							}
 						}
 					}

@@ -141,6 +141,16 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE INDEX idx_skill ON skills (skill);
 
+CREATE TABLE IF NOT EXISTS magics (
+    name        VARCHAR(255),
+    max_tier    INT,
+    self_teach  BOOLEAN,
+    PRIMARY KEY (name)
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE INDEX idx_magic ON magics (name);
+
 /* parent */
 CREATE TABLE IF NOT EXISTS bonus_exp_types (
     exp_type 		VARCHAR(255),
@@ -210,6 +220,21 @@ CREATE TABLE IF NOT EXISTS persona_skills (
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE INDEX idx_skill_id ON persona_skills (skill_id);
+
+CREATE TABLE IF NOT EXISTS persona_magics (
+    magic_id        INT UNSIGNED AUTO_INCREMENT,
+    magic_fk        VARCHAR(255) NOT NULL,
+    persona_fk      CHAR(36) NOT NULL,
+    tier            INT,
+    last_advanced   TIMESTAMP DEFAULT NOW(),
+    teacher         CHAR(36) DEFAULT NULL,
+    learned         TIMESTAMP DEFAULT NOW(),
+    visible         BOOLEAN DEFAULT TRUE,
+    PRIMARY KEY (magic_id),
+    FOREIGN KEY (magic_fk) REFERENCES magics (name) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (persona_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* Child */
 CREATE TABLE IF NOT EXISTS buddylist (

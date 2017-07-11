@@ -195,6 +195,8 @@ public interface Skill {
 	 */
 	SkillTier getCapTier(Persona p);
 
+	boolean isProfessionFor(net.lordofthecraft.arche.persona.Race race);
+
 	/**
 	 * An intensive skill can only be set as the primary profession and selecting it will act as if
 	 * both a primary and secondary profession are set, capping xp accordingly and disallowing a secondary profession
@@ -213,10 +215,10 @@ public interface Skill {
 	/**
 	 * @return The list of registered racial mods for this skill.
 	 */
-	Map<Race, Double> getRaceMods();
+	Map<net.lordofthecraft.arche.persona.Race, Double> getRaceMods();
 
 	/**
 	 * @return The list of races who call this skill their racial profession, or one of them.
 	 */
-	Set<Race> getMains();
+	Set<net.lordofthecraft.arche.persona.Race> getMains();
 }

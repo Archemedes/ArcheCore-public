@@ -5,7 +5,6 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SkillTome;
 import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.enums.ProfessionSlot;
-import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.enums.SkillTier;
 import net.lordofthecraft.arche.help.ArcheMessage;
 import net.lordofthecraft.arche.help.HelpDesk;
@@ -13,9 +12,9 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.Race;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.BonusExpModifier;
-
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -27,7 +26,6 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class CommandSkill implements CommandExecutor {
 	private static final int XP_TRESHOLD_BEFORE_WARNING = 5000; 

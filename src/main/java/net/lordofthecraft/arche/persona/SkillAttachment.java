@@ -2,9 +2,8 @@ package net.lordofthecraft.arche.persona;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.ProfessionSlot;
-import net.lordofthecraft.arche.enums.SkillTier;
 import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
 import net.lordofthecraft.arche.save.tasks.UpdateSkillTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
@@ -18,7 +17,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 public class SkillAttachment {
-	private static final SaveHandler buffer = SaveHandler.getInstance();
+	private static final SaveExecutorManager buffer = SaveExecutorManager.getInstance();
 	final ArcheSkill skill;
 	private final String uuid;
 	private FutureTask<SkillData> call;
@@ -142,7 +141,7 @@ public class SkillAttachment {
 	private void performSQLUpdate(){
 		if(error) return;
 		ArcheTask task = new UpdateSkillTask(skill, uuid, xp, canSee, slot.getSlot());
-		buffer.put(task);
+		buffer.submit(task);
 	}
 
 	public ArcheSkill getSkill() {

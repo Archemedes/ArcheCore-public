@@ -17,9 +17,12 @@ import java.util.logging.Level;
  */
 public class SaveExecutorManager {
 
+    public static SaveExecutorManager getInstance() {
+        return SaveExecutorManager.SingletonHolder.INSTANCE;
+    }
     private final ExecutorService SAVESERVICE;
 
-    public SaveExecutorManager() {
+    protected SaveExecutorManager() {
         SAVESERVICE = Executors.newCachedThreadPool();
     }
 
@@ -34,7 +37,7 @@ public class SaveExecutorManager {
         }
     }
 
-    public Future<?> call(Callable<?> call) {
+    public <V> Future<V> call(Callable<V> call) {
         if (SAVESERVICE.isShutdown()) {
             ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "ArcheCore caught a task being submitted after the save executor service has been shutdown. Type: "+call.toString());
             return null;
@@ -46,6 +49,14 @@ public class SaveExecutorManager {
 
     }
 
+    public ExecutorService getService() {
+        return SAVESERVICE;
+    }
+
     private void a() {
+    }
+
+    private static class SingletonHolder {
+        private static final SaveExecutorManager INSTANCE = new SaveExecutorManager();
     }
 }

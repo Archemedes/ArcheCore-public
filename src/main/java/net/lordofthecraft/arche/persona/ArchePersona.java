@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.enums.ProfessionSlot;
-import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.enums.SkillTier;
 import net.lordofthecraft.arche.event.PersonaRemoveEvent;
 import net.lordofthecraft.arche.event.PersonaRenameEvent;
@@ -15,8 +14,10 @@ import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
+import net.lordofthecraft.arche.persona.magic.ArcheMagic;
+import net.lordofthecraft.arche.persona.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.*;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
@@ -35,9 +36,9 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.ref.WeakReference;
-import java.sql.CallableStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -50,7 +51,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private static final String TABLE = "persona";
 
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
-	private static final SaveHandler buffer = SaveHandler.getInstance();
+	//private static final SaveHandler buffer = SaveHandler.getInstance();
+	private static final SaveExecutorManager exe = SaveExecutorManager.getInstance();
 	private static CallableStatement deleteCall = null;
 
 	private final UUID persona_id;
@@ -63,6 +65,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private final ArchePersonaKey key;
 	private final int gender;
 	private final List<SkillAttachment> profs = Lists.newArrayList();
+	private final List<MagicAttachment> magics = Lists.newArrayList();
 	//public Skill[] professions = new Skill[3];
 	int age;
 	String description = null;
@@ -140,7 +143,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	public static ArchePersona buildTestPersona() {
-		return new ArchePersona(UUID.randomUUID(),0, "test", Race.UNSET, 0, 0,0);
+		return new ArchePersona(UUID.randomUUID(), 0, "test", null, 0, 0, 0);
 	}
 
 	public void addSkill(ArcheSkill skill, FutureTask<SkillData> future){
@@ -223,12 +226,12 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void setPersonaType(String type) {
 		this.type = type;
 
-		buffer.put(new UpdateTask(this, PersonaField.TYPE, type));
+		exe.submit(new UpdateTask(this, PersonaField.TYPE, type));
 	}
 
 	public void setSkin(PersonaSkin skin) {
 		this.skin = skin;
-		buffer.put(new UpdateTask(this, PersonaField.SKIN, skin.getData()));
+		exe.submit(new UpdateTask(this, PersonaField.SKIN, skin.getData()));
 		//if (this.getPlayer() != null) PersonaSkinListener.updatePlayerSkin(this.getPlayer());
 	}
 
@@ -385,7 +388,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		this.profession = profession;
 		String name = profession == null? null : profession.getName();
 
-		buffer.put(new UpdateTask(this,PersonaField.SKILL_SELECTED, name));
+		exe.submit(new UpdateTask(this, PersonaField.SKILL_SELECTED, name));
 	}
 
 	@Override
@@ -453,7 +456,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		}
 
 		//String name = profession == null? null : profession.getName();
-		buffer.put(new UpdateSkillSlotTask(this, profession, slot));
+		exe.submit(new UpdateSkillSlotTask(this, profession, slot));
 		//buffer.put(new UpdateTask(this, slot.getPersonaField(), name));
 	}
 
@@ -512,7 +515,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 			this.current = current;
 
-			buffer.put(new UpdateTask(this, PersonaField.CURRENT, current));
+			exe.submit(new UpdateTask(this, PersonaField.CURRENT, current));
 
 			if (current) { // Persona becoming Player's current Persona.
 				Player p = Bukkit.getPlayer(getPlayerUUID());
@@ -551,7 +554,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			//Start loading this Persona's Skill data for this one particular skill
 			SelectSkillTask task = new SelectSkillTask(this, s);
 			FutureTask<SkillData> fut = task.getFuture();
-			buffer.put(task);
+			exe.submit(task);
 
 			addSkill(s, fut);
 		}
@@ -571,8 +574,68 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		}
 	}
 
+	void loadMagics() {
+		String sql = "SELECT magic_id,magic_fk,tier,last_advanced,teacher,learned,visible FROM persona_magic WHERE persona_fk=?";
+		try {
+			PreparedStatement stat = ArcheCore.getSQLControls().getConnection().prepareStatement(sql);
+			stat.setString(1, persona_id.toString());
+			ResultSet rs = stat.executeQuery();
+			while (rs.next()) {
+				MagicData data = null;
+				String magic = rs.getString("magic_fk");
+				Optional<ArcheMagic> armagic = ArcheMagic.getMagicByName(magic);
+				if (armagic.isPresent()) {
+					int it = rs.getInt("magic_id");
+					int tier = rs.getInt("tier");
+					Timestamp last_advanced = rs.getTimestamp("last_advanced");
+					Timestamp learned = rs.getTimestamp("learned");
+					String teacher = rs.getString("teacher");
+					boolean visible = rs.getBoolean("visible");
+					data = new MagicData(armagic.get(), it, tier, visible, teacher == null, (teacher == null ? null : UUID.fromString(teacher)), learned.toInstant().toEpochMilli(), last_advanced.toInstant().toEpochMilli());
+					magics.add(new MagicAttachment(armagic.get(), persona_id, data));
+				}
+			}
+			rs.close();
+			stat.close();
+		} catch (SQLException e) {
+			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "An error occurred while loading " + player + "'s persona magics!!!", e);
+		}
+	}
+
 	void createEmptyTags() {
 		attachment = new TagAttachment(Maps.newConcurrentMap(), persona_id, true);
+	}
+
+	public Optional<MagicAttachment> getAttachment(ArcheMagic m) {
+		return magics.stream().filter(at -> at.getMagic().equals(m)).findFirst();
+	}
+
+	public boolean hasMagic(ArcheMagic m) {
+		return magics.stream().anyMatch(at -> at.getMagic().equals(m));
+	}
+
+	public boolean hasAchievedMagicTier(ArcheMagic m, int tier) {
+		Optional<MagicAttachment> omat = magics.stream().filter(at -> at.getMagic().equals(m)).findFirst();
+		return omat.filter(magicAttachment -> magicAttachment.getTier() >= tier).isPresent();
+	}
+
+	public Optional<Future<MagicAttachment>> createAttachment(ArcheMagic m, int tier, Persona teacher, boolean visible) {
+		if (magics.stream().anyMatch(at -> at.getMagic().equals(m))) {
+			return Optional.empty();
+		}
+		MagicCreateCallable call = new MagicCreateCallable(persona_id, m, tier, (teacher == null ? null : teacher.getPersonaId()), visible, ArcheCore.getSQLControls());
+		Future<MagicAttachment> future = exe.call(call);
+		try {
+			MagicAttachment attach = future.get(200, TimeUnit.MILLISECONDS);
+
+			magics.add(attach);
+			return Optional.of(future);
+		} catch (TimeoutException e) {
+			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Timed out while adding a magic to the persona " + persona_id + " (" + player + "). Magic: " + m.getName(), e);
+		} catch (Exception e) {
+			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "An error occurred while adding a magic to the persona " + persona_id + " (" + player + "). Magic: " + m.getName(), e);
+		}
+		return Optional.empty();
 	}
 
 	@Override
@@ -584,7 +647,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void setPrefix(String prefix){
 		this.prefix = prefix;
 		updateDisplayName(Bukkit.getPlayer(this.getPlayerUUID()));
-		buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
+		exe.submit(new UpdateTask(this, PersonaField.PREFIX, prefix));
 	}
 
 	@Override
@@ -596,7 +659,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void clearPrefix(){
 		prefix = null;
 		updateDisplayName(Bukkit.getPlayer(this.getPlayerUUID()));
-		buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
+		exe.submit(new UpdateTask(this, PersonaField.PREFIX, prefix));
 	}
 
 	void updateDisplayName(Player p){
@@ -618,7 +681,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		if(this.gainsXP != gainsXP){
 			this.gainsXP = gainsXP;
 
-			buffer.put(new UpdateTask(this, PersonaField.XP_GAIN, gainsXP));
+			exe.submit(new UpdateTask(this, PersonaField.XP_GAIN, gainsXP));
 		}
 	}
 
@@ -634,7 +697,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void addTimePlayed(int timePlayed){
 		int val = this.timePlayed.addAndGet(timePlayed);
 
-		buffer.put(new UpdateTask(this, PersonaField.STAT_PLAYED, val));
+		exe.submit(new UpdateTask(this, PersonaField.STAT_PLAYED, val));
 	}
 
 	@Override
@@ -649,7 +712,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void addCharactersSpoken(int charsSpoken){
 		int val = charactersSpoken.addAndGet(charsSpoken);
 
-		buffer.put(new UpdateTask(this, PersonaField.STAT_CHARS, val));
+		exe.submit(new UpdateTask(this, PersonaField.STAT_CHARS, val));
 	}
 
 	//@Override
@@ -708,8 +771,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		this.name = name;
 		lastRenamed = System.currentTimeMillis();
 
-		buffer.put(new UpdateTask(this, PersonaField.NAME, name));
-		buffer.put(new UpdateTask(this, PersonaField.STAT_RENAMED, lastRenamed));
+		exe.submit(new UpdateTask(this, PersonaField.NAME, name));
+		exe.submit(new UpdateTask(this, PersonaField.STAT_RENAMED, lastRenamed));
 
 		if (current) {
 			Player p = Bukkit.getPlayer(getPlayerUUID());
@@ -732,8 +795,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 				p.setHealth(p.getMaxHealth());
 			}
 		}
-		buffer.put(new UpdateTask(this, PersonaField.RACE_REAL, race));
-		buffer.put(new UpdateTask(this, PersonaField.RACE, ""));
+		exe.submit(new UpdateTask(this, PersonaField.RACE_REAL, race));
+		exe.submit(new UpdateTask(this, PersonaField.RACE, ""));
 		this.raceHeader = null;
 	}
 
@@ -748,7 +811,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void setApparentRace(String race){
 		raceHeader = race;
 
-		buffer.put(new UpdateTask(this, PersonaField.RACE, race));
+		exe.submit(new UpdateTask(this, PersonaField.RACE, race));
 	}
 
 	@Override
@@ -759,7 +822,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	@Override
 	public void clearDescription(){
 		description = null;
-		buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, null));
+		exe.submit(new UpdateTask(this, PersonaField.DESCRIPTION, null));
 	}
 
 	@Override
@@ -767,7 +830,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		if(description == null) description = addendum;
 		else description = description + " " + addendum;
 
-		buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
+		exe.submit(new UpdateTask(this, PersonaField.DESCRIPTION, description));
 	}
 
 	@Override
@@ -779,7 +842,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void setDescription(String description) {
 		this.description = description;
 
-		buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
+		exe.submit(new UpdateTask(this, PersonaField.DESCRIPTION, description));
 	}
 
 	@Override
@@ -800,7 +863,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void setAge(int age){
 		this.age = age;
 
-		buffer.put(new UpdateTask(this, PersonaField.AGE, age));
+		exe.submit(new UpdateTask(this, PersonaField.AGE, age));
 	}
 
 	@Override
@@ -811,7 +874,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	@Override
 	public void setAutoAge(boolean autoAge){
 		this.autoAge = autoAge;
-		buffer.put(new UpdateTask(this, PersonaField.AUTOAGE, autoAge));
+		exe.submit(new UpdateTask(this, PersonaField.AUTOAGE, autoAge));
 	}
 
 	void saveMinecraftSpecifics(final Player p){
@@ -821,7 +884,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		inv = PersonaInventory.store(p);
 		location = new WeakBlock(p.getLocation());
 
-		buffer.put(new PersonaSwitchTask(this));
+		exe.submit(new PersonaSwitchTask(this));
 	}
 
 	void restoreMinecraftSpecifics(final Player p){
@@ -896,9 +959,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		if(event.isCancelled()) return false;
 
 
-		buffer.put(new DataTask(DataTask.DELETE, TABLE, null, sqlCriteria));
+		exe.submit(new DataTask(DataTask.DELETE, TABLE, null, sqlCriteria));
 		//		Both could be commented out once cascading db is setup!
-		buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, sqlCriteria));
+		exe.submit(new DataTask(DataTask.DELETE, "persona_names", null, sqlCriteria));
 		handler.deleteSkills(this);
 
 		ArchePersona[] prs = handler.getAllPersonas(this.getPlayerUUID());

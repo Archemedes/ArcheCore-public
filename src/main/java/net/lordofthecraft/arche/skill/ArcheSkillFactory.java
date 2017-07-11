@@ -1,22 +1,27 @@
 package net.lordofthecraft.arche.skill;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.interfaces.SkillFactory;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.persona.Race;
+import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.SelectSkillTask;
 import org.bukkit.Material;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.FutureTask;
 
 public class ArcheSkillFactory implements SkillFactory {
@@ -41,8 +46,8 @@ public class ArcheSkillFactory implements SkillFactory {
 
 	private final String name;
 	private final int id;
-	private final Set<Race> mains = EnumSet.noneOf(Race.class);
-	private final Map<Race, Double> raceMods = new EnumMap<Race, Double>(Race.class);
+	private final Set<Race> mains = Sets.newConcurrentHashSet();
+	private final Map<Race, Double> raceMods = Maps.newConcurrentMap();
 	private int strategy = Skill.VISIBILITY_VISIBLE;
 	private boolean inert = false;
 	private boolean intensive = false;
@@ -185,12 +190,20 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 			 */
 			if (!forceRacials) {
-				String statment = "SELECT xp_mult,racial_skill FROM race_xp WHERE skill_fk=? AND race_key_fk=?";
 				PreparedStatement racialStat = con.prepareStatement("SELECT xp_mult,racial_skill FROM race_xp WHERE skill_fk=? AND race_key_fk=?");
 				racialStat.setString(1, name);
-				for (net.lordofthecraft.arche.persona.Race race : net.lordofthecraft.arche.persona.Race.getRaces()) {
-
+				for (Race race : Race.getRaces()) {
+					racialStat.setString(2, race.getRaceId());
+					ResultSet rs = racialStat.executeQuery();
+					while (rs.next()) {
+						if (rs.getBoolean("racial_skill")) {
+							mains.add(race);
+						}
+						raceMods.put(race, rs.getDouble("xp_mult"));
+					}
+					rs.close();
 				}
+				racialStat.close();
 			}
 
 			ArcheSkill skill = new ArcheSkill(id, name, strategy, inert, mains, raceMods, statement, intensive, unlockedByTime);
@@ -212,7 +225,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 						//Start loading this Persona's Skill data for this one particular skill
 						SelectSkillTask task = new SelectSkillTask(p, skill);
 						FutureTask<SkillData> fut = task.getFuture();
-						SaveHandler.getInstance().put(task);
+						SaveExecutorManager.getInstance().submit(task);
 						
 						p.addSkill(skill, fut);
 						break;

@@ -203,7 +203,7 @@ public interface Persona {
 	 * Retrieve the immutable Race of this Persona.
 	 * @return Race of the Persona.
 	 */
-	Race getRace();
+	net.lordofthecraft.arche.persona.Race getRace();
 
 	/**
 	 * Retrieves the Human-readable Race of this Persona. This String may have been
@@ -279,6 +279,8 @@ public interface Persona {
 	 * @param autoAge If the persona should auto-age.
 	 */
 	void setAutoAge(boolean autoAge);
+
+	void racialReassign(net.lordofthecraft.arche.persona.Race r);
 
 	/**
 	 * Get the associated skin of this Persona.

@@ -54,6 +54,11 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         }
     }
 
+    @Deprecated
+    public static Optional<Race> getOldRace(net.lordofthecraft.arche.enums.Race race) {
+        return getRaceByKey(race.name());
+    }
+
     public static Optional<Race> getRace(String name) {
         return races.parallelStream().filter(r -> r.name.equalsIgnoreCase(name)).findFirst();
     }
@@ -137,15 +142,15 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         return name;
     }
 
-    public String getRace_id() {
+    public String getRaceId() {
         return race_id;
     }
 
-    public int getMaxAge() {
+    public int getMaximumAge() {
         return maxAge;
     }
 
-    public double getXpMult() {
+    public double getBaseXpMultiplier() {
         return xpMult;
     }
 

@@ -1,8 +1,8 @@
 package net.lordofthecraft.arche.commands;
 
-import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.Race;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -40,7 +40,7 @@ public class CommandRaceSpawn implements CommandExecutor {
                 if (args.length > 1) {
                     Race r = findRace(StringUtils.join(args, ' ', 1, args.length));
                     if (r != null) {
-                        sender.sendMessage(ChatColor.DARK_GREEN + "Successfully removed the racial spawn for " + r.name());
+                        sender.sendMessage(ChatColor.DARK_GREEN + "Successfully removed the racial spawn for " + r.getRaceId());
                         ArchePersonaHandler.getInstance().removeRaceSpawn(r);
                     } else {
                         sender.sendMessage(ChatColor.RED + "Could not find the race " + StringUtils.join(args, ' ', 1, args.length));
@@ -66,7 +66,7 @@ public class CommandRaceSpawn implements CommandExecutor {
                     l = ((Player) sender).getLocation();
                 }
                 if (l != null) {
-                    sender.sendMessage(ChatColor.GOLD + "Successfully set the racial spawn of " + r.name());
+                    sender.sendMessage(ChatColor.GOLD + "Successfully set the racial spawn of " + r.getRaceId());
                     boolean b = ArchePersonaHandler.getInstance().addRaceSpawn(r, l);
                     if (b) {
                         sender.sendMessage(ChatColor.GRAY + "The old spawn for this race has been overwritten.");
@@ -83,9 +83,9 @@ public class CommandRaceSpawn implements CommandExecutor {
         String ss = "";
         StringBuilder sb = new StringBuilder();
         sb.append("Valid races: ");
-        for (Race r : Race.values()) {
+        for (Race r : Race.getRaces()) {
             sb.append(ss);
-            sb.append(r.name());
+            sb.append(r.getRaceId());
             ss = ", ";
         }
         s.sendMessage(sb.toString());
@@ -99,7 +99,7 @@ public class CommandRaceSpawn implements CommandExecutor {
 
     private Race findRace(String s) {
         s = s.replace('_', ' ');
-        for (Race r : Race.values()) {
+        for (Race r : Race.getRaces()) {
             if (s.equalsIgnoreCase(r.getName())) return r;
         }
         return null;

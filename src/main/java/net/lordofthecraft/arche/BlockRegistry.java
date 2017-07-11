@@ -1,7 +1,7 @@
 package net.lordofthecraft.arche;
 
 import com.google.common.collect.Sets;
-import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.BlockRegistryDeleteTask;
 import net.lordofthecraft.arche.save.tasks.BlockRegistryInsertTask;
 import org.bukkit.Material;
@@ -13,9 +13,10 @@ import java.util.Set;
 public class BlockRegistry {
 	final Set<WeakBlock> playerPlaced = Sets.newHashSetWithExpectedSize(3000);
 	private final Set<Material> watching = EnumSet.noneOf(Material.class);
-	private final SaveHandler buffer = SaveHandler.getInstance();
-			
-	BlockRegistry(){}
+    private final SaveExecutorManager manager = SaveExecutorManager.getInstance();
+    //private final SaveHandler buffer = SaveHandler.getInstance();
+
+    BlockRegistry(){}
 	
 	/**
 	 * Lets you specify the material which the registry will watch for player placement
@@ -41,8 +42,8 @@ public class BlockRegistry {
 	public void monitorBlock(Block b){
 		WeakBlock wb = new WeakBlock(b);
 		playerPlaced.add(wb);
-		buffer.put(new BlockRegistryInsertTask(wb));
-	}
+        manager.submit(new BlockRegistryInsertTask(wb));
+    }
 	
 	/**
 	 * No longer monitor this particular block
@@ -52,8 +53,8 @@ public class BlockRegistry {
 	public boolean removeBlock(Block b){
 		WeakBlock wb = new WeakBlock(b);
 		boolean res = playerPlaced.remove(wb);
-		buffer.put(new BlockRegistryDeleteTask(wb));
-		return res;
+        manager.submit(new BlockRegistryDeleteTask(wb));
+        return res;
 	}
 	
 	/**

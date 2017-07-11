@@ -21,7 +21,7 @@ public class DataSaveRunnable implements Runnable{
 	public void run() {
 		while(true){
 			try{
-				ArcheTask task = queue.take(); //This waits until a task is found.
+				ArcheTask task = null; //This waits until a task is found.
 				
 				int i = 0;
 				handle.execute("BEGIN");
@@ -36,7 +36,7 @@ public class DataSaveRunnable implements Runnable{
 					}
 					
 					if(i++ >= 1000) task = null;
-					else task = queue.poll();
+					//else task = queue.poll();
 				}while(task != null);
 				handle.execute("END TRANSACTION");
 			}catch(Exception e){	  				//Report possible errors from executing tasks

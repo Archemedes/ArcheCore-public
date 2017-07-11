@@ -1,15 +1,15 @@
 package net.lordofthecraft.arche.skill;
 
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class BonusExpModifier {
 
@@ -55,7 +55,8 @@ public class BonusExpModifier {
 		this.duration = duration;
 		int tostartxp = 0;
 		if (skill == null) {
-			for (Skill sk : ((ArchePersona)persona).professions) if (sk != null) tostartxp += sk.getXp(persona);
+			for (Skill sk : ((ArchePersona) persona).getArrayOfProfessions())
+				if (sk != null) tostartxp += sk.getXp(persona);
 		} else {
 			tostartxp += skill.getXp(persona);
 		}
@@ -80,7 +81,8 @@ public class BonusExpModifier {
 		for (Persona persona : ArcheCore.getControls().getPersonaHandler().getAllPersonas(player.getUniqueId())) {
 			if (persona != null) 
 				if (skill == null) {
-					for (Skill sk : ((ArchePersona)persona).professions) if (sk != null) tostartxp += sk.getXp(persona);
+					for (Skill sk : ((ArchePersona) persona).getArrayOfProfessions())
+						if (sk != null) tostartxp += sk.getXp(persona);
 				} else {
 					tostartxp += skill.getXp(persona);
 				}
@@ -166,8 +168,7 @@ public class BonusExpModifier {
 			// Not yet started
 			if (this.getStartTime() > System.currentTimeMillis()) return true;
 			//Expired
-			else if (this.getStartTime() + this.getDuration() < System.currentTimeMillis()) return true;
-			else return false;
+			else return this.getStartTime() + this.getDuration() < System.currentTimeMillis();
 		}
 		else if (this.skill == null) {
 			ArchePersona[] personas = (ArchePersona[]) ArcheCore.getControls().getPersonaHandler().getAllPersonas(this.uuid);
@@ -175,12 +176,13 @@ public class BonusExpModifier {
 			int expnow = 0;
 			if (this.getPersonaID() == -1) {
 				for (ArchePersona pers : personas) {
-					if (pers != null) for (Skill skill : pers.professions) if (skill != null) expnow += skill.getXp(pers);
+					if (pers != null)
+						for (Skill skill : pers.getArrayOfProfessions()) if (skill != null) expnow += skill.getXp(pers);
 				}
 			} else {
 				ArchePersona pers = personas[this.getPersonaID()];
 				if (pers == null) return true;
-				else for (Skill skill : pers.professions) if (skill != null) expnow += skill.getXp(pers);
+				else for (Skill skill : pers.getArrayOfProfessions()) if (skill != null) expnow += skill.getXp(pers);
 			}
 			if (this.getStartExp() + this.getCapExp() > expnow) return true;
 		}
