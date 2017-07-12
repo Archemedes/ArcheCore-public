@@ -2,14 +2,12 @@ package net.lordofthecraft.arche.listener;
 
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.DelayedTask;
-import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.Race;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -20,12 +18,14 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 import org.spigotmc.event.entity.EntityMountEvent;
 
 import java.util.HashSet;
@@ -61,19 +61,19 @@ public class RacialBonusListener implements Listener {
 	}
 
 	private boolean hasTogglePower(Race race){
-		switch(race){
-		case OLOG:
-		case ORC:
-		case DARK_ELF:
-		case KHARAJYR:
-		case KHA_CHEETRAH:
-		case KHA_PANTERA:
-		case KHA_LEPARDA:
-		case KHA_TIGRASI:
-			case HOUZI_FEI:
-			case HOUZI_LAO:
-			case NEPHILIM:
-			case SNOW_ELF:
+		switch (race.getRaceId()) {
+			case "OLOG":
+			case "ORC":
+			case "DARK_ELF":
+			case "KHARAJYR":
+			case "KHA_CHEETRAH":
+			case "KHA_PANTERA":
+			case "KHA_LEPARDA":
+			case "KHA_TIGRASI":
+			case "HOUZI_FEI":
+			case "HOUZI_LAO":
+			case "NEPHILIM":
+			case "SNOW_ELF":
 			return true;
 		default:
 			return false;
@@ -104,7 +104,7 @@ public class RacialBonusListener implements Listener {
 
 		Persona ps = handler.getPersona(p);
 		if(ps != null){
-			if(ps.getRace() == Race.CONSTRUCT && p.getGameMode() != GameMode.CREATIVE){
+			if (ps.getRace().idEquals("CONSTRUCT") && p.getGameMode() != GameMode.CREATIVE) {
 				//p.sendMessage(ChatColor.RED + "You are moving too fast!");
 				//p.damage(4);
 				int hunger = p.getFoodLevel();
@@ -125,10 +125,10 @@ public class RacialBonusListener implements Listener {
 			if(pers != null){
 				Race race = pers.getRace();
 
-				if(race == Race.SPECTRE || race == Race.CONSTRUCT || race == Race.NECROLYTE){
+				if (race.idEquals("SPECTRE") || race.idEquals("CONSTRUCT") || race.idEquals("NECROLYTE")) {
 					e.setCancelled(true);
 					e.setFoodLevel(20);
-				} else if(race == Race.ORC || race == Race.OLOG || race == Race.GOBLIN){
+				} else if (race.idEquals("ORC") || race.superEquals("ORC")) {
 					//Allows eating of rotten food
 					p.removePotionEffect(PotionEffectType.HUNGER);
 
@@ -155,14 +155,14 @@ public class RacialBonusListener implements Listener {
 						sneakAttempts.add(p.getName());
 						new BukkitRunnable(){public void run(){sneakAttempts.remove(p.getName());}}.runTaskLater(plugin, 12);
 					} else { //Shift pressed down twice in short time
-						if (pers.getRace() == Race.DARK_ELF) {
+						if (pers.getRace().idEquals("DARK_ELF")) {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 120, 1, true), true);
-						}else if (pers.getRace().getParentRace().equalsIgnoreCase("Kharajyr")) {
+						} else if (pers.getRace().superEquals("Kharajyr")) {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 450, 2, true), true);
 							p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 240, 1, true), true);
-						}else if(pers.getRace() == Race.OLOG || pers.getRace() == Race.ORC) {
+						} else if (pers.getRace().idEquals("OLOG") || pers.getRace().idEquals("ORC")) {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION,100,1),true);
-						}else if (pers.getRace().getParentRace().equalsIgnoreCase("hou-zi")) {
+						} else if (pers.getRace().superEquals("hou-zi")) {
 							AreaEffectCloud ae = (AreaEffectCloud) p.getWorld().spawnEntity(p.getLocation().clone().add(0, 0.5, 0), EntityType.AREA_EFFECT_CLOUD);
 							ae.setParticle(Particle.CLOUD);
 							ae.setDuration(5);
@@ -170,10 +170,10 @@ public class RacialBonusListener implements Listener {
 							ae.setWaitTime(0);
 
 							Bukkit.getScheduler().runTaskLater(ArcheCore.getPlugin(), () -> p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 100, 0, true)), 2);
-						} else if (pers.getRace() == Race.NEPHILIM) {
+						} else if (pers.getRace().idEquals("NEPHILIM")) {
 							//breathe fire
 
-						} else if (pers.getRace() == Race.SNOW_ELF) { //I had to. -501warhead
+						} else if (pers.getRace().idEquals("SNOW_ELF")) { //I had to. -501warhead
 							Location l = p.getLocation();
 							if (l.getBlock().getType() == Material.AIR && l.getBlock().getRelative(BlockFace.DOWN).getType().isSolid()) {
 								l.getBlock().setType(Material.SNOW);
@@ -202,17 +202,17 @@ public class RacialBonusListener implements Listener {
 			Persona pers = handler.getPersona(p);
 			if(pers != null){
 				Race r = pers.getRace();
-				if(r == Race.NECROLYTE || r == Race.SPECTRE){
+				if (r.idEquals("NECROLYTE") || r.idEquals("SPECTRE")) {
 					if(holdsGoldenWeapon(e.getDamager())){
-						double factor = r == Race.SPECTRE? 3 : 1.5;
+						double factor = r.idEquals("") ? 3 : 1.5;
 						e.setDamage(e.getDamage()*factor);
 					}
-				} else if (r == Race.CONSTRUCT) {
+				} else if (r.idEquals("CONSTRUCT")) {
 					e.setDamage(DamageModifier.MAGIC, e.getDamage(DamageModifier.MAGIC) * 0.2);
 
-				} else if (r == Race.HIGH_ELF) {
+				} else if (r.idEquals("HIGH_ELF")) {
 					e.setDamage(DamageModifier.MAGIC, e.getDamage(DamageModifier.MAGIC) * 0.7);
-				} else if (r.getParentRace().equalsIgnoreCase("hou-zi") && r != Race.HOUZI_HEI && !isWearingArmor(p)) {
+				} else if ((r.getSuperRace() != null && r.idEquals("HOU-ZI")) && !r.idEquals("HOUZI_HEI") && !isWearingArmor(p)) {
 					e.setDamage(e.getDamage()*0.75);
 				}
 			}
@@ -223,8 +223,8 @@ public class RacialBonusListener implements Listener {
 			Persona pers = handler.getPersona(p);
 			if(pers != null) {
 				Race r = pers.getRace();
-				if (r.getParentRace().equalsIgnoreCase("hou-zi")
-						&& r != Race.HOUZI_HEI
+				if ((r.superEquals("HOU-ZI") || r.idEquals("HOU-ZI"))
+						&& !r.idEquals("HOUZI_HEI")
 						&& p.hasPotionEffect(PotionEffectType.INVISIBILITY)
 						&& (p.getEquipment().getItemInMainHand() == null || p.getEquipment().getItemInMainHand().getType() == Material.AIR)) {
 					ent.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 100, 1));
@@ -240,7 +240,7 @@ public class RacialBonusListener implements Listener {
 				if(((Arrow) e.getDamager()).getShooter() instanceof Player){
 					Player p =  (Player) ((Arrow) e.getDamager()).getShooter();
 					Persona pers = handler.getPersona(p);
-					if(pers != null && pers.getRace() == Race.WOOD_ELF){
+					if (pers != null && pers.getRace().idEquals("WOOD_ELF")) {
 						double dmg = e.getDamage();
 						dmg *= 1.1;
 						e.setDamage(dmg);
@@ -252,9 +252,9 @@ public class RacialBonusListener implements Listener {
 				if(pers != null){
 					double dmg = e.getDamage();
 					Race r = pers.getRace();
-					switch(r){
+					switch (r.getRaceId()) {
 					//Magical Affinity. A portion of damage a high elf does is converted to Magic damage. Increases if using a gold weapon.
-					case HIGH_ELF:
+						case "HIGH_ELF":
 						if (holdsGoldenWeapon(e.getDamager())) {
 							e.setDamage(dmg * 0.5);
 							e.setDamage(DamageModifier.MAGIC, dmg * 0.5);
@@ -263,22 +263,22 @@ public class RacialBonusListener implements Listener {
 							e.setDamage(DamageModifier.MAGIC, dmg * 0.20);
 						}
 						break;
-					case ORC:
-					case OLOG:
+						case "ORC":
+						case "OLOG":
 						if (e.getDamage() > 2) {
 							e.setDamage(dmg + 2);
 						}
 						break;
-					case HUMAN:
-					case SOUTHERON:
-					case NORTHENER:
-					case HEARTLANDER: //Troop Morale
+						case "HUMAN":
+						case "SOUTHERON":
+						case "NORTHENER":
+						case "HEARTLANDER": //Troop Morale
 						if (e.getEntity() instanceof Player) {
 							int count = 0;
 							for (Entity ent : p.getNearbyEntities(10, 5, 10)) {
 								if (ent instanceof Player) {
 									ArchePersona x = handler.getPersona((Player) ent);
-									if (x != null && (x.getRace() == Race.HUMAN || x.getRace() == Race.NORTHENER || x.getRace() == Race.SOUTHERON || x.getRace() == Race.HEARTLANDER)) {
+									if (x != null && (x.getRace().idEquals("HUMAN") || (x.getRace().getSuperRace() != null && x.getRace().getSuperRace().equalsIgnoreCase("HUMAN")))) {
 										if (++count >= 5 && e.getDamage() > 2) {
 											dmg *= 1.25;
 											e.setDamage(dmg);
@@ -288,8 +288,8 @@ public class RacialBonusListener implements Listener {
 								}
 							}
 						}
-						break; 
-					case SPECTRE:
+						break;
+						case "SPECTRE":
 						if (e.getCause() != DamageCause.MAGIC
 						&& !(e.getEntity() instanceof ArmorStand)
 						&& e.getEntity() instanceof LivingEntity
@@ -300,11 +300,11 @@ public class RacialBonusListener implements Listener {
 							e.setDamage(DamageModifier.MAGIC, dmg1 + blocking);
 						}
 						break;
-					case KHARAJYR:
-					case KHA_TIGRASI:
-					case KHA_PANTERA:
-					case KHA_LEPARDA:
-					case KHA_CHEETRAH:
+						case "KHARAJYR":
+						case "KHA_TIGRASI":
+						case "KHA_PANTERA":
+						case "KHA_LEPARDA":
+						case "KHA_CHEETRAH":
 						//Kitty got claws
 						if (p.getEquipment().getItemInMainHand().getType() == Material.AIR)
 							e.setDamage(dmg + 2);
@@ -325,7 +325,7 @@ public class RacialBonusListener implements Listener {
 		if (e.getMount() instanceof Horse && e.getEntity() instanceof Player) {
 			Player p = (Player) e.getEntity();
 			if (handler.hasPersona(p)) {
-				if (handler.getPersona(p).getRace() == Race.CONSTRUCT) {
+				if (handler.getPersona(p).getRace().idEquals("CONSTRUCT")) {
 					e.setCancelled(true);
 				}
 			}
@@ -336,9 +336,9 @@ public class RacialBonusListener implements Listener {
 	public void onPotionDrink(PlayerItemConsumeEvent e) {
 		if (e.getItem().getType() == Material.POTION) {
 			if (handler.hasPersona(e.getPlayer())){
-				if (handler.getPersona(e.getPlayer()).getRace() == Race.CONSTRUCT
-						|| handler.getPersona(e.getPlayer()).getRace() == Race.SPECTRE
-						|| handler.getPersona(e.getPlayer()).getRace() == Race.NECROLYTE) {
+				if (handler.getPersona(e.getPlayer()).getRace().idEquals("CONSTRUCT")
+						|| handler.getPersona(e.getPlayer()).getRace().idEquals("SPECTRE")
+						|| handler.getPersona(e.getPlayer()).getRace().idEquals("NECROLYTE")) {
 					e.setCancelled(true);
 					e.getPlayer().getEquipment().setItemInMainHand(new ItemStack(Material.GLASS_BOTTLE, 1));
 				}
@@ -388,35 +388,35 @@ public class RacialBonusListener implements Listener {
 			if(pers == null) return;
 
 			final Race r = pers.getRace();
-			if(r == Race.SPECTRE || r == Race.CONSTRUCT){
+			if (r.idEquals("SPECTRE") || r.idEquals("CONSTRUCT")) {
 				if(e.getCause() == DamageCause.POISON || e.getCause() == DamageCause.DROWNING){
 					e.setCancelled(true);
 				} else if( !(c == DamageCause.SUICIDE || c == DamageCause.VOID) ){
-					double factor = r == Race.SPECTRE? 0.5:0.4;
+					double factor = r.idEquals("SPECTRE") ? 0.5 : 0.4;
 					e.setDamage(e.getDamage() * factor);
 				}
 			}
 			if(c == DamageCause.MAGIC){
 				double dmg = e.getDamage();
-				if(r == Race.HIGH_ELF){
+				if (r.idEquals("HIGH_ELF")) {
 					dmg *= 0.7;
 					e.setDamage(dmg);
-				} else if (r == Race.CONSTRUCT){
+				} else if (r.idEquals("CONSTRUCT")) {
 					dmg *=0.2;
 					e.setDamage(dmg);
 				}
 			} else if (c == DamageCause.FALL){
 				double dmg = e.getDamage();
-				switch(r){
-				case KHARAJYR:
-				case KHA_CHEETRAH:
-				case KHA_LEPARDA:
-				case KHA_TIGRASI:
-				case KHA_PANTERA:
-					case HOUZI:
-					case HOUZI_FEI:
-					case HOUZI_LAO:
-					case HOUZI_HEI:
+				switch (r.getRaceId()) {
+					case "KHARAJYR":
+					case "KHA_CHEETRAH":
+					case "KHA_LEPARDA":
+					case "KHA_TIGRASI":
+					case "KHA_PANTERA":
+					case "HOUZI":
+					case "HOUZI_FEI":
+					case "HOUZI_LAO":
+					case "HOUZI_HEI":
 					dmg -= 6;
 					if (dmg <= 0) e.setCancelled(true);
 					else e.setDamage(dmg);

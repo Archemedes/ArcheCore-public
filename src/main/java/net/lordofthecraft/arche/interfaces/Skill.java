@@ -1,7 +1,7 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.enums.SkillTier;
+import net.lordofthecraft.arche.persona.Race;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
@@ -194,8 +194,6 @@ public interface Skill {
 	 * @return The maximum SkillTier obtainable by this Persona
 	 */
 	SkillTier getCapTier(Persona p);
-
-	boolean isProfessionFor(net.lordofthecraft.arche.persona.Race race);
 
 	/**
 	 * An intensive skill can only be set as the primary profession and selecting it will act as if

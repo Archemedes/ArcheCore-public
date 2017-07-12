@@ -5,7 +5,7 @@ import net.lordofthecraft.arche.enums.ProfessionSlot;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
-import net.lordofthecraft.arche.save.tasks.UpdateSkillTask;
+import net.lordofthecraft.arche.save.tasks.skills.UpdateSkillTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.SkillData;
 import org.bukkit.entity.Player;

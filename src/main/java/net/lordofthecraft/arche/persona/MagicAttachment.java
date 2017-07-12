@@ -4,7 +4,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.magic.ArcheMagic;
 import net.lordofthecraft.arche.persona.magic.MagicData;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
-import net.lordofthecraft.arche.save.tasks.MagicUpdateTask;
+import net.lordofthecraft.arche.save.tasks.magic.MagicUpdateTask;
 
 import java.util.Optional;
 import java.util.UUID;

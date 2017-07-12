@@ -10,7 +10,7 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.PersonaSkin;
 import net.lordofthecraft.arche.persona.Race;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
-import net.lordofthecraft.arche.save.tasks.PersonaRenameTask;
+import net.lordofthecraft.arche.save.tasks.persona.PersonaRenameTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;

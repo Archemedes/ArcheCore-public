@@ -7,7 +7,7 @@ import net.lordofthecraft.arche.interfaces.IArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
-import net.lordofthecraft.arche.save.tasks.BonusExpModifierTask;
+import net.lordofthecraft.arche.save.tasks.skills.BonusExpModifierTask;
 import org.bukkit.entity.Player;
 
 import java.sql.ResultSet;

@@ -1,8 +1,8 @@
-package net.lordofthecraft.arche.save.tasks;
+package net.lordofthecraft.arche.save.tasks.skills;
 
+import net.lordofthecraft.arche.save.tasks.StatementTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class UpdateSkillTask extends StatementTask {

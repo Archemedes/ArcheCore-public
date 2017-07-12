@@ -1,7 +1,7 @@
 package net.lordofthecraft.arche.persona;
 
 import net.lordofthecraft.arche.save.SaveExecutorManager;
-import net.lordofthecraft.arche.save.tasks.PersonaTagTask;
+import net.lordofthecraft.arche.save.tasks.persona.PersonaTagTask;
 
 import java.util.Collections;
 import java.util.Map;

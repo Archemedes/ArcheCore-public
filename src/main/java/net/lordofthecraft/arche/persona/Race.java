@@ -9,9 +9,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * Created on 3/22/2017
@@ -160,6 +162,22 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
     public boolean isSpecial() {
         return special;
+    }
+
+    public boolean idEquals(String id) {
+        return race_id.equalsIgnoreCase(id);
+    }
+
+    public boolean superEquals(String superRace) {
+        return this.superRace != null && this.superRace.equalsIgnoreCase(superRace);
+    }
+
+    public List<Race> getChildren() {
+        return races.parallelStream().filter(race -> race.superEquals(race_id)).collect(Collectors.toList());
+    }
+
+    public boolean hasChildren() {
+        return races.parallelStream().anyMatch(race -> race.superEquals(race_id));
     }
 
     @Nullable

@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.github.archemedes.customitem.Customizer;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
-import net.lordofthecraft.arche.save.tasks.CasketTask;
+import net.lordofthecraft.arche.save.tasks.logging.CasketTask;
 import org.apache.commons.lang.RandomStringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;

@@ -1,7 +1,8 @@
-package net.lordofthecraft.arche.save.tasks;
+package net.lordofthecraft.arche.save.tasks.persona;
 
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.PersonaInventory;
+import net.lordofthecraft.arche.save.tasks.StatementTask;
 import org.bukkit.Location;
 
 import java.sql.SQLException;

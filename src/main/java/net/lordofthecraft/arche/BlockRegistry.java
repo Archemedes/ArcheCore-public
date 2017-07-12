@@ -2,8 +2,8 @@ package net.lordofthecraft.arche;
 
 import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
-import net.lordofthecraft.arche.save.tasks.BlockRegistryDeleteTask;
-import net.lordofthecraft.arche.save.tasks.BlockRegistryInsertTask;
+import net.lordofthecraft.arche.save.tasks.logging.BlockRegistryDeleteTask;
+import net.lordofthecraft.arche.save.tasks.logging.BlockRegistryInsertTask;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 

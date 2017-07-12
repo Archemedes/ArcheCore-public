@@ -1,10 +1,11 @@
-package net.lordofthecraft.arche.save.tasks;
+package net.lordofthecraft.arche.save.tasks.skills;
+
+import net.lordofthecraft.arche.save.tasks.StatementTask;
+import net.lordofthecraft.arche.skill.BonusExpModifier;
 
 import java.sql.SQLException;
 
-import net.lordofthecraft.arche.skill.BonusExpModifier;
-
-public class BonusExpModifierTask extends StatementTask{
+public class BonusExpModifierTask extends StatementTask {
 
 	private final BonusExpModifier modifier;
 	private final boolean exists;

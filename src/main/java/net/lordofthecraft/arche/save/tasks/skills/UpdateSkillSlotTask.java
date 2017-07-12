@@ -1,8 +1,9 @@
-package net.lordofthecraft.arche.save.tasks;
+package net.lordofthecraft.arche.save.tasks.skills;
 
 import net.lordofthecraft.arche.enums.ProfessionSlot;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.save.tasks.StatementTask;
 
 import java.sql.SQLException;
 

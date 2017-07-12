@@ -1,8 +1,9 @@
-package net.lordofthecraft.arche.save.tasks;
+package net.lordofthecraft.arche.save.tasks.persona;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.save.tasks.ArcheTask;
 import net.lordofthecraft.arche.skill.SkillData;
 import net.lordofthecraft.arche.skill.SkillDataCallable;
 

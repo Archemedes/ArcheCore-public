@@ -1,9 +1,11 @@
 package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.enums.ProfessionSlot;
-import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.persona.PersonaInventory;
 import net.lordofthecraft.arche.persona.PersonaSkin;
+import net.lordofthecraft.arche.persona.Race;
+import net.lordofthecraft.arche.persona.magic.ArcheMagic;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -11,6 +13,7 @@ import org.bukkit.inventory.Inventory;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Future;
 
 public interface Persona {
 
@@ -98,6 +101,14 @@ public interface Persona {
 	 * @return Whether or not the Persona is current
 	 */
 	boolean isCurrent();
+
+    Optional<MagicAttachment> getAttachment(ArcheMagic m);
+
+    boolean hasMagic(ArcheMagic m);
+
+    boolean hasAchievedMagicTier(ArcheMagic m, int tier);
+
+    Optional<Future<MagicAttachment>> createAttachment(ArcheMagic m, int tier, Persona teacher, boolean visible);
 
 	/**
 	 * Gets a Personas prefix.
@@ -279,8 +290,6 @@ public interface Persona {
 	 * @param autoAge If the persona should auto-age.
 	 */
 	void setAutoAge(boolean autoAge);
-
-	void racialReassign(net.lordofthecraft.arche.persona.Race r);
 
 	/**
 	 * Get the associated skin of this Persona.

@@ -10,10 +10,11 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.persona.magic.ArcheMagic;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
 import net.lordofthecraft.arche.save.tasks.DataTask;
-import net.lordofthecraft.arche.save.tasks.InsertTask;
+import net.lordofthecraft.arche.save.tasks.persona.InsertTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.TopData;
@@ -786,6 +787,14 @@ public class ArchePersonaHandler implements PersonaHandler {
 			manager.submit(new DataTask(DataTask.DELETE, "persona_skills", null, p.sqlCriteria));
 
 		}
+	}
+
+	public void removeMagic(ArcheMagic magic) {
+		getPersonas().forEach(pers -> {
+			for (Persona p : pers) {
+				((ArchePersona) p).removeMagicAttachment(magic);
+			}
+		});
 	}
 
 	@Override

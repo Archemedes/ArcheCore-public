@@ -11,7 +11,7 @@ import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.Race;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
-import net.lordofthecraft.arche.save.tasks.SelectSkillTask;
+import net.lordofthecraft.arche.save.tasks.persona.SelectSkillTask;
 import org.bukkit.Material;
 
 import java.sql.Connection;

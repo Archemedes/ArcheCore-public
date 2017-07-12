@@ -18,7 +18,13 @@ import net.lordofthecraft.arche.persona.magic.ArcheMagic;
 import net.lordofthecraft.arche.persona.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
-import net.lordofthecraft.arche.save.tasks.*;
+import net.lordofthecraft.arche.save.tasks.DataTask;
+import net.lordofthecraft.arche.save.tasks.magic.MagicCreateCallable;
+import net.lordofthecraft.arche.save.tasks.persona.PersonaSwitchTask;
+import net.lordofthecraft.arche.save.tasks.persona.SelectSkillTask;
+import net.lordofthecraft.arche.save.tasks.persona.TagAttachmentCallable;
+import net.lordofthecraft.arche.save.tasks.persona.UpdateTask;
+import net.lordofthecraft.arche.save.tasks.skills.UpdateSkillSlotTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.SkillData;
@@ -27,6 +33,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -138,8 +145,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		tags = Maps.newConcurrentMap();
 
 		sqlCriteria = Maps.newHashMap();
-		sqlCriteria.put("player", getPlayerUUID().toString());
-		sqlCriteria.put("id", id);
+		sqlCriteria.put("player", persona_id.toString());
 	}
 
 	public static ArchePersona buildTestPersona() {
@@ -606,19 +612,27 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		attachment = new TagAttachment(Maps.newConcurrentMap(), persona_id, true);
 	}
 
+	void removeMagicAttachment(ArcheMagic magic) {
+		magics.removeIf(mag -> mag.getMagic().equals(magic));
+	}
+
+	@Override
 	public Optional<MagicAttachment> getAttachment(ArcheMagic m) {
 		return magics.stream().filter(at -> at.getMagic().equals(m)).findFirst();
 	}
 
+	@Override
 	public boolean hasMagic(ArcheMagic m) {
 		return magics.stream().anyMatch(at -> at.getMagic().equals(m));
 	}
 
+	@Override
 	public boolean hasAchievedMagicTier(ArcheMagic m, int tier) {
 		Optional<MagicAttachment> omat = magics.stream().filter(at -> at.getMagic().equals(m)).findFirst();
 		return omat.filter(magicAttachment -> magicAttachment.getTier() >= tier).isPresent();
 	}
 
+	@Override
 	public Optional<Future<MagicAttachment>> createAttachment(ArcheMagic m, int tier, Persona teacher, boolean visible) {
 		if (magics.stream().anyMatch(at -> at.getMagic().equals(m))) {
 			return Optional.empty();
@@ -792,7 +806,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			if (p != null && this.isCurrent()) {
 				RaceBonusHandler.reset(p);
 				RaceBonusHandler.apply(p, race);
-				p.setHealth(p.getMaxHealth());
+				p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 			}
 		}
 		exe.submit(new UpdateTask(this, PersonaField.RACE_REAL, race));
@@ -929,12 +943,13 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 		//Heal them so their Persona is fresh
 		if (health == 0) {
-			health = p.getMaxHealth();
+			health = p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
 		}
 		if (food == 0) {
 			food = 20;
 		}
-		if (p.getMaxHealth() < health) p.setHealth(p.getMaxHealth());
+		if (p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue() < health)
+			p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 		else p.setHealth(health);
 		p.setFoodLevel(food);
 	}

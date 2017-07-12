@@ -4,7 +4,7 @@ import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
-import net.lordofthecraft.arche.save.tasks.UpdateTask;
+import net.lordofthecraft.arche.save.tasks.persona.UpdateTask;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class ArcheEconomy implements Economy {

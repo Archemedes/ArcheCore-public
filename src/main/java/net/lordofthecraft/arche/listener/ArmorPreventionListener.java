@@ -1,24 +1,20 @@
 package net.lordofthecraft.arche.listener;
 
-import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.PersonaSwitchEvent;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class ArmorPreventionListener implements Listener {
@@ -30,8 +26,8 @@ public class ArmorPreventionListener implements Listener {
 	
 	@EventHandler(ignoreCancelled = true)
 	public void onPersonaSwitch(PersonaSwitchEvent e) {
-		if (e.getPersona().getRace() == Race.SPECTRE || e.getPersona().getRace() == Race.CONSTRUCT) {
-			boolean flag = false;
+        if (e.getPersona().getRace().idEquals("SPECTRE") || e.getPersona().getRace().idEquals("CONSTRUCT")) {
+            boolean flag = false;
 			for (final ItemStack is : e.getPlayer().getInventory().getArmorContents())
 				if (is != null)
 					if (is.getType() != Material.AIR && is.getType() != Material.ELYTRA) {
@@ -162,8 +158,8 @@ public class ArmorPreventionListener implements Listener {
 
 	private boolean canEquip(Player p, ItemStack armor) {
 		Persona ps = handler.getPersona(p);
-		return !(ps != null && (ps.getRace() == Race.CONSTRUCT || ps.getRace() == Race.SPECTRE) && armor.getType() != Material.ELYTRA);
-	}
+        return !(ps != null && (ps.getRace().idEquals("CONSTRUCT") || ps.getRace().idEquals("SPECTRE")) && armor.getType() != Material.ELYTRA);
+    }
 
 	
 	private boolean isWearingIron(ItemStack[] armor) {

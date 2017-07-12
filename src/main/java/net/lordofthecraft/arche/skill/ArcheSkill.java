@@ -252,8 +252,8 @@ public class ArcheSkill implements Skill {
 		}
 		if(xpMods.contains(ExpModifier.AUTOAGE)){
 			if(p.doesAutoAge()){
-				if (r.getRaceId().equalsIgnoreCase("human") || (r.getSuperRace() != null && r.getSuperRace().equalsIgnoreCase("human")))
-					mod += 0.10;
+                if (r.idEquals("human") || (r.getSuperRace() != null && r.getSuperRace().equalsIgnoreCase("human")))
+                    mod += 0.10;
 			}
 		}
 		
@@ -306,8 +306,8 @@ public class ArcheSkill implements Skill {
 			!p.getProfession(ProfessionSlot.SECONDARY).isPresent() && (!p.getProfession(ProfessionSlot.PRIMARY).get().isIntensiveProfession())? SkillTier.CLUMSY : SkillTier.RUSTY;
 		
 		Race r = p.getRace();
-		if (t != SkillTier.RUSTY && (r.getRaceId().equalsIgnoreCase("human") || (r.getSuperRace() != null && r.getSuperRace().equalsIgnoreCase("human"))))
-			return t.getNext().getNext();
+        if (t != SkillTier.RUSTY && (r.idEquals("human") || (r.getSuperRace() != null && r.getSuperRace().equalsIgnoreCase("human"))))
+            return t.getNext().getNext();
 		else return t;
 	}	
 

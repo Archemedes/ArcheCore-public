@@ -1,4 +1,6 @@
-package net.lordofthecraft.arche.save.tasks;
+package net.lordofthecraft.arche.save.tasks.magic;
+
+import net.lordofthecraft.arche.save.tasks.StatementTask;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;

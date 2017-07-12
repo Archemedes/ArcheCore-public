@@ -31,10 +31,7 @@ public class CommandRaceSpawn implements CommandExecutor {
         if (args.length > 0) {
             if ("list".equalsIgnoreCase(args[0])) {
                 sender.sendMessage(ChatColor.AQUA + "Printing racial spawns...");
-                handler.getRacespawns().entrySet().forEach(rs -> {
-                    Location l = rs.getValue();
-                    sender.sendMessage(ChatColor.GOLD + rs.getKey().name() + ": X: " + l.getBlockX() + ", Y: " + l.getBlockY() + " Z: " + l.getBlockZ() + " World: " + l.getWorld().getName());
-                });
+                handler.getRacespawns().forEach((key, l) -> sender.sendMessage(ChatColor.GOLD + key.getRaceId() + ": X: " + l.getBlockX() + ", Y: " + l.getBlockY() + " Z: " + l.getBlockZ() + " World: " + l.getWorld().getName()));
                 return true;
             } else if ("remove".equalsIgnoreCase(args[0])) {
                 if (args.length > 1) {

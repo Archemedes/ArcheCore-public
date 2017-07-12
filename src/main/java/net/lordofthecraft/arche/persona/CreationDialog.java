@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.ChatBoxAction;
-import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.help.ArcheMessage;
 import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.interfaces.Economy;
@@ -20,10 +19,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CreationDialog {
 
@@ -236,15 +233,15 @@ public class CreationDialog {
             return pretext + (p.hasPermission("archecore.quickrename")? "" : affix) + DIVIDER;
         }
 
+
         @Override
         protected boolean isInputValid(ConversationContext context, String input) {
             Player p = (Player) context.getForWhom();
-            
+
             if (input.startsWith("/")) return false;
             String lower = input.toLowerCase();
-            if (lower.contains("help") || lower.contains("hello") || lower.contains("why") || lower.contains("?")) return false;
+            return !(lower.contains("help") || lower.contains("hello") || lower.contains("why") || lower.contains("?")) && (p.hasPermission("archecore.longname") || input.length() <= 32);
 
-            return p.hasPermission("archecore.longname") || input.length() <= 32;
         }
 
         @Override
@@ -321,7 +318,19 @@ public class CreationDialog {
 
             ChatMessage mains = new ArcheMessage("Main Races: ").applyChatColor(ChatColor.YELLOW);
 
-            for(int i = 0; i < 5; i++){
+            List<Race> mainraces = Race.getRaces().parallelStream().filter(race -> race.idEquals("ELF") || race.idEquals("HUMAN") || race.idEquals("ORC") || race.idEquals("DWARF")).collect(Collectors.toList());
+
+            mainraces.forEach(race -> {
+                if (p.hasPermission("archecore.race." + race.getRaceId().replace(' ', '_').toLowerCase())) {
+                    mains.addLine(race.getName())
+                            .setUnderlined()
+                            .applyChatColor(ChatColor.WHITE)
+                            .setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
+                            .setClickEvent(ChatBoxAction.RUN_COMMAND, race.getName())
+                            .addLine(",  ");
+                }
+            });
+            /*for(int i = 0; i < 5; i++){
                 Race race = Race.values()[i];
                 if(p.hasPermission("archecore.race." + race.toString().toLowerCase())){
                     mains.addLine(race.getName())
@@ -331,7 +340,7 @@ public class CreationDialog {
                             .setClickEvent(ChatBoxAction.RUN_COMMAND, race.getName())
                             .addLine(",  ");
                 }
-            }
+            }*/
 
             mains.addLine("more...")
                     .setItalic()
@@ -352,13 +361,13 @@ public class CreationDialog {
         protected boolean isInputValid(ConversationContext context, String input) {
             if(input.equalsIgnoreCase("more")) return true;
 
-            Race r = findRace(input);
+            Optional<Race> r = findRace(input);
 
             Player p = (Player) context.getForWhom();
-            if(r==null || !p.hasPermission("archecore.race." + r.toString().toLowerCase())){
+            if (!r.isPresent() || !p.hasPermission("archecore.race." + r.get().getRaceId().replace(' ', '_').toLowerCase())) {
                 return false;
             } else {
-                context.setSessionData("race", r);
+                context.setSessionData("race", r.get());
                 return true;
             }
         }
@@ -366,21 +375,22 @@ public class CreationDialog {
         @Override
         protected Prompt acceptValidatedInput(ConversationContext context, String input) {
             if(input.equalsIgnoreCase("more")) return new PickMoreRacePrompt();
-            if(findRace(input).hasChildren()) return new PickSubRacePrompt(input);
+            if (findRace(input).isPresent() && findRace(input).get().hasChildren()) return new PickSubRacePrompt(input);
             else return new SetAgePrompt();
         }
 
-        private Race findRace(String s){
+        private Optional<Race> findRace(String s) {
             s = s.replace('\'', ' ');
-            for(Race r : Race.values()){
-                if(s.equalsIgnoreCase(r.getName().replace('\'', ' '))) return r;
+            for (Race r : Race.getRaces()) {
+                if (s.equalsIgnoreCase(r.getName().replace('\'', ' '))) return Optional.of(r);
             }
-            return null;
+            return Optional.empty();
         }
     }
 
     private class PickSubRacePrompt extends ValidatingPrompt {
         String string;
+        boolean failed = false;
 
         private PickSubRacePrompt(String string){
             this.string = string;
@@ -390,7 +400,13 @@ public class CreationDialog {
         public String getPromptText(ConversationContext context) {
             Player p = (Player) context.getForWhom();
 
-            Race selected = findRace(string);
+            Optional<Race> oselected = findRace(string);
+
+            if (!oselected.isPresent()) {
+                failed = true;
+                return "An error occurred!";
+            }
+            Race selected = oselected.get();
 
             ChatMessage subraces = new ArcheMessage("Sub Race Options: ").applyChatColor(ChatColor.YELLOW);
             subraces.addLine(selected.getName())
@@ -399,8 +415,8 @@ public class CreationDialog {
                     .setClickEvent(ChatBoxAction.RUN_COMMAND, selected.getName())
                     .addLine(", ");
 
-            for (Race race : Race.values()){
-                if (Objects.equals(race.getParentRace(), selected.getName())
+            for (Race race : Race.getRaces()) {
+                if (race.superEquals(selected.getRaceId())
                         && race != selected){
                     subraces.addLine(race.getName())
                             .setUnderlined()
@@ -426,29 +442,30 @@ public class CreationDialog {
         @Override
         protected boolean isInputValid(ConversationContext context, String input) {
             if ("back".equalsIgnoreCase(input)) return true;
-            Race r = findRace(input);
+            Optional<Race> r = findRace(input);
 
             Player p = (Player) context.getForWhom();
-            if(r==null || !p.hasPermission("archecore.race." + r.toString().toLowerCase())){
+            if (!r.isPresent() || !p.hasPermission("archecore.race." + r.get().getRaceId().replace(' ', '_').toLowerCase())) {
                 return false;
             } else {
-                context.setSessionData("race", r);
+                context.setSessionData("race", r.get());
                 return true;
             }
         }
 
         @Override
         protected Prompt acceptValidatedInput(ConversationContext context, String input) {
+            if (failed) return Prompt.END_OF_CONVERSATION;
             if ("back".equalsIgnoreCase(input)) return new PickRacePrompt();
             return new SetAgePrompt();
         }
 
-        private Race findRace(String s){
+        private Optional<Race> findRace(String s) {
             s = s.replace('\'', ' ');
-            for(Race r : Race.values()){
-                if(s.equalsIgnoreCase(r.getName().replace('\'', ' '))) return r;
+            for (Race r : Race.getRaces()) {
+                if (s.equalsIgnoreCase(r.getName().replace('\'', ' '))) return Optional.of(r);
             }
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -461,8 +478,8 @@ public class CreationDialog {
 
             Player p = (Player) context.getForWhom();
 
-            for(Race race : Race.values()){
-                if(p.hasPermission("archecore.race." + race.toString().toLowerCase())){
+            for (Race race : Race.getRaces()) {
+                if (p.hasPermission("archecore.race." + race.getRaceId().replace(' ', '_').toLowerCase())) {
                     m.addLine(race.getName())
                             .applyChatColor(ChatColor.WHITE)
                             .setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
@@ -479,10 +496,10 @@ public class CreationDialog {
         @Override
         protected boolean isInputValid(ConversationContext context, String input) {
 
-            Race r = findRace(input);
+            Optional<Race> r = findRace(input);
 
             Player p = (Player) context.getForWhom();
-            if(r==null || !p.hasPermission("archecore.race." + r.toString().toLowerCase())){
+            if (!r.isPresent() || !p.hasPermission("archecore.race." + r.get().getRaceId().replace(' ', '_').toLowerCase())) {
                 return false;
             } else {
                 context.setSessionData("race", r);
@@ -495,12 +512,12 @@ public class CreationDialog {
             return new SetAgePrompt();
         }
 
-        private Race findRace(String s){
+        private Optional<Race> findRace(String s) {
             s = s.replace('\'', ' ');
-            for(Race r : Race.values()){
-                if(s.equalsIgnoreCase(r.getName().replace('\'', ' '))) return r;
+            for (Race r : Race.getRaces()) {
+                if (s.equalsIgnoreCase(r.getName().replace('\'', ' '))) return Optional.of(r);
             }
-            return null;
+            return Optional.empty();
         }
     }
 

@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche.save.tasks;
+package net.lordofthecraft.arche.save.tasks.magic;
 
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.persona.magic.ArcheMagic;

@@ -1,7 +1,8 @@
-package net.lordofthecraft.arche.save.tasks;
+package net.lordofthecraft.arche.save.tasks.persona;
 
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.PersonaField;
+import net.lordofthecraft.arche.save.tasks.ArcheTask;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

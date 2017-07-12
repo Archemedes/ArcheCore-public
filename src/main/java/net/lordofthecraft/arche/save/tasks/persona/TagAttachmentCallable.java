@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche.save.tasks;
+package net.lordofthecraft.arche.save.tasks.persona;
 
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.SQL.SQLHandler;
