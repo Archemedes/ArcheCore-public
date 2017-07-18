@@ -5,8 +5,11 @@ import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.WeakBlock;
+import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.*;
+import net.lordofthecraft.arche.help.ArcheMessage;
+import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
@@ -372,41 +375,58 @@ public class ArchePersonaHandler implements PersonaHandler {
 		if(desc != null)
 			result.add(c + "Description: " + r + desc);
 
-		Skill prof = p.getMainSkill();
-
-		if(prof != null){
-			String title = prof.getSkillTier(p).getTitle();
-			result.add(c + "Profession: " + r + title + " " + WordUtils.capitalize(prof.getName()));
-		}
-
 		return result;
 	}
 	
 	@Override
-	public List<String> whoisMore(Persona p, boolean mod, boolean self) {
-		List<String> result = Lists.newArrayList();
+	public List<ChatMessage> whoisMore(Persona p, boolean mod, boolean self) {
+		List<ChatMessage> result = Lists.newArrayList();
 
 		if(p == null) return result;
 
 		String r = ChatColor.RESET+"";
 		String b = ChatColor.BLUE+"";
 		String l = ChatColor.GRAY+"";
+		String i = ChatColor.ITALIC+"";
 
-		result.add(l+"Extended Information for " + p.getName() + ":");
+		result.add(new ArcheMessage(l+"~~~~ " + r + p.getPlayerName() + "'s Extended Roleplay Persona" + l + " ~~~~"));
+		result.add(new ArcheMessage(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
+		
+		Skill prof = p.getMainSkill();
 
-		if (!p.hasFlag("hide_magic")) result.add(b + "Magic: " + r + (p.hasFlag("magic") ? getMagics(p.getFlag("magic")) : "None"));
+		if(prof != null){
+			String title = prof.getSkillTier(p).getTitle();
+			result.add(new ArcheMessage(b + "Profession: " + r + title + " " + WordUtils.capitalize(prof.getName())));
+		}
+
+		result.add(getMagics(p));
 		
 		return result;
 	}
 
-	private String getMagics(PersonaFlag flag) {
-		StringBuilder sb = new StringBuilder();
-		for (String m : flag.getValues()) {
-			String tier = m.substring(0,0);
-			String teacher = (m.substring(2,2).equals("T") ? " (Teacher" + (tier == "0" ? " Only" : "" + ")") : "");
-			sb.append("\n" + m.substring(4) + (tier == "0" ? "" : " - Tier " + tier) + teacher);
+	private ArcheMessage getMagics(Persona p) {
+		
+		String r = ChatColor.RESET+"";
+		String b = ChatColor.BLUE+"";
+		String l = ChatColor.GRAY+"";
+		String i = ChatColor.ITALIC+"";
+		
+		ArcheMessage magics = new ArcheMessage(b + "Magic: " + r);
+		
+		PersonaFlag flag = p.getFlag("magic");
+		
+		if (flag == null) 
+			magics.addLine("None");
+		
+		else for (String ms : flag.getValues()) {
+			MagicWrapper m = MagicWrapper.fromFlag(p.getFlag(ms));
+			if (m.isVisible()) magics.addLine(WordUtils.capitalize(m.getID()) + ", ").setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click for details.")
+			.setClickEvent(ChatBoxAction.RUN_COMMAND, "/pers magicinfo " + m.getID() + p.getPlayerName() + "@" + p.getId()).addLine(",");
 		}
-		return sb.toString();
+		
+		magics.removeLine(magics.size()-1);
+		
+		return magics;
 	}
 
 	@Override

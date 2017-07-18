@@ -202,5 +202,5 @@ public interface PersonaHandler {
 	 * @return A list of initialised stats of the given Persona
 	 */
 	
-	List<String> whoisMore(Persona p, boolean mod, boolean self);
+	List<ChatMessage> whoisMore(Persona p, boolean mod, boolean self);
 }

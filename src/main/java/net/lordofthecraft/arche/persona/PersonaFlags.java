@@ -130,6 +130,10 @@ public class PersonaFlags {
 			return this.id;
 		}
 		
+		public String getValue(int index) {
+			return this.values.get(index);
+		}
+		
 		public List<String> getValues() {
 			return this.values;
 		}

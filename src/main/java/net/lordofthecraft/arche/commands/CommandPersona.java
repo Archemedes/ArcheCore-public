@@ -142,7 +142,15 @@ public class CommandPersona implements CommandExecutor {
 				} else {
 					//If the persona is found the Whois should always succeed
 					//We have assured the persona is found earlier
-						handler.whoisMore(pers, sender.hasPermission("archecore.mod.other"), sender == pers.getPlayer()).forEach(sender::sendMessage);
+						for (ChatMessage m : handler.whoisMore(pers, sender.hasPermission("archecore.mod.other"), sender == pers.getPlayer())) {
+							m.sendTo((Player) sender);
+						}
+						if (sender instanceof Player) {
+							ChatMessage mes = new ArcheMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Click for more...");
+							mes.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to show basic persona information.");
+							mes.setClickEvent(ChatBoxAction.RUN_COMMAND, "/pers view " + pers.getPlayerName() + "@" + pers.getId());
+							mes.sendTo((Player)sender);
+						}
 				}
 				return true;
 			} else if (args[0].equalsIgnoreCase("autoage")) {
@@ -156,11 +164,9 @@ public class CommandPersona implements CommandExecutor {
 				}
 
 				return true;
-			} else if (args[0].equalsIgnoreCase("showmagic")) {
+			} else if (args[0].equalsIgnoreCase("hidemagic")) {
 				boolean more = pers.hasFlag("show_magic");
 				sender.sendMessage(ChatColor.AQUA + "Turned showing magic information " + ChatColor.GOLD + "" + ChatColor.BOLD + (more ? "OFF" : "ON") + ChatColor.AQUA + " for " + ChatColor.RESET + pers.getName() + ".");
-				if (more) pers.removeFlag("show_magic");
-				else pers.applyFlag(new PersonaFlag("show_magic"));
 				return true;
 			} else if (args[0].equalsIgnoreCase("time")) {
 				sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int)Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + pers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
