@@ -233,7 +233,7 @@ public class RacialBonusListener implements Listener {
 				}
 			}
 		}
-		if (e.getDamager() instanceof Player) {
+		/*if (e.getDamager() instanceof Player) {
 			Player p = (Player) e.getDamager();
 			Persona pers = handler.getPersona(p);
 			if (pers != null) {
@@ -251,7 +251,7 @@ public class RacialBonusListener implements Listener {
 					}
 				}
 			}
-		}
+		}*/
 
 		//Racial Damage bonuses
 		if (plugin.areRacialDamageBonusesEnabled()) {
