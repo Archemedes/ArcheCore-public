@@ -233,6 +233,26 @@ public class RacialBonusListener implements Listener {
 				}
 			}
 		}
+		if (e.getDamager() instanceof Player) {
+			Player p = (Player) e.getDamager();
+			Persona pers = handler.getPersona(p);
+			if (pers != null) {
+				double dmg = e.getDamage();
+				if(pers.getRace() == Race.SPECTRE){
+					if (e.getCause() != DamageCause.MAGIC
+							&& !(e.getEntity() instanceof ArmorStand)
+							&& e.getEntity() instanceof LivingEntity
+							&& !(e.getEntity() instanceof ItemFrame)) {
+						final double dmg1 = e.getDamage();
+						final double blocking = e.getDamage(DamageModifier.BLOCKING);
+						e.setDamage(0);
+						e.setDamage(DamageModifier.MAGIC, dmg1 + blocking);
+						//Bukkit.broadcastMessage("spectre hit");
+					}
+				}
+			}
+		}
+
 		//Racial Damage bonuses
 		if (plugin.areRacialDamageBonusesEnabled()) {
 			//Wood Elf arrow bonus
@@ -298,6 +318,7 @@ public class RacialBonusListener implements Listener {
 							final double blocking = e.getDamage(DamageModifier.BLOCKING);
 							e.setDamage(0);
 							e.setDamage(DamageModifier.MAGIC, dmg1 + blocking);
+							//Bukkit.broadcastMessage("spectre hit2");
 						}
 						break;
 					case KHARAJYR:
