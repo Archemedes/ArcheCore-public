@@ -10,7 +10,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.persona.magic.ArcheMagic;
+import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
 import net.lordofthecraft.arche.save.tasks.DataTask;

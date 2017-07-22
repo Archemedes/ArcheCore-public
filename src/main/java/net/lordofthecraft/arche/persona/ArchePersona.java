@@ -14,8 +14,8 @@ import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
-import net.lordofthecraft.arche.persona.magic.ArcheMagic;
-import net.lordofthecraft.arche.persona.magic.MagicData;
+import net.lordofthecraft.arche.magic.ArcheMagic;
+import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.DataTask;
@@ -616,8 +616,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		magics.removeIf(mag -> mag.getMagic().equals(magic));
 	}
 
-	@Override
-	public Optional<MagicAttachment> getAttachment(ArcheMagic m) {
+	public Optional<MagicAttachment> getMagicAttachment(ArcheMagic m) {
 		return magics.stream().filter(at -> at.getMagic().equals(m)).findFirst();
 	}
 

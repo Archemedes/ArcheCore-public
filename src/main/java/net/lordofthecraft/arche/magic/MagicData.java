@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche.persona.magic;
+package net.lordofthecraft.arche.magic;
 
 import java.util.UUID;
 

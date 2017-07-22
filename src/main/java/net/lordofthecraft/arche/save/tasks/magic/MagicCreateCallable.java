@@ -2,8 +2,8 @@ package net.lordofthecraft.arche.save.tasks.magic;
 
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.persona.MagicAttachment;
-import net.lordofthecraft.arche.persona.magic.ArcheMagic;
-import net.lordofthecraft.arche.persona.magic.MagicData;
+import net.lordofthecraft.arche.magic.ArcheMagic;
+import net.lordofthecraft.arche.magic.MagicData;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

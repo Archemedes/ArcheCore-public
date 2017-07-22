@@ -1,6 +1,6 @@
 package net.lordofthecraft.arche.save.tasks.magic;
 
-import net.lordofthecraft.arche.persona.magic.ArcheMagic;
+import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.save.tasks.StatementTask;
 
 import java.sql.SQLException;

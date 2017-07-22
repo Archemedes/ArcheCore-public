@@ -3,7 +3,7 @@ package net.lordofthecraft.arche.commands;
 import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.help.ArcheMessage;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
-import net.lordofthecraft.arche.persona.magic.ArcheMagic;
+import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;

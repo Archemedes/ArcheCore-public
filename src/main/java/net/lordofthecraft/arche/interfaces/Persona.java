@@ -5,7 +5,7 @@ import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.persona.PersonaInventory;
 import net.lordofthecraft.arche.persona.PersonaSkin;
 import net.lordofthecraft.arche.persona.Race;
-import net.lordofthecraft.arche.persona.magic.ArcheMagic;
+import net.lordofthecraft.arche.magic.ArcheMagic;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -101,8 +101,6 @@ public interface Persona {
 	 * @return Whether or not the Persona is current
 	 */
 	boolean isCurrent();
-
-    Optional<MagicAttachment> getAttachment(ArcheMagic m);
 
     boolean hasMagic(ArcheMagic m);
 
@@ -214,7 +212,7 @@ public interface Persona {
 	 * Retrieve the immutable Race of this Persona.
 	 * @return Race of the Persona.
 	 */
-	net.lordofthecraft.arche.persona.Race getRace();
+	Race getRace();
 
 	/**
 	 * Retrieves the Human-readable Race of this Persona. This String may have been

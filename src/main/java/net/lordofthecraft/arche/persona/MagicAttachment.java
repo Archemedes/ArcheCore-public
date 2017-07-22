@@ -1,8 +1,8 @@
 package net.lordofthecraft.arche.persona;
 
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.persona.magic.ArcheMagic;
-import net.lordofthecraft.arche.persona.magic.MagicData;
+import net.lordofthecraft.arche.magic.ArcheMagic;
+import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.magic.MagicUpdateTask;
 

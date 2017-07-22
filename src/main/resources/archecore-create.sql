@@ -141,15 +141,42 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE INDEX idx_skill ON skills (skill);
 
+CREATE TABLE IF NOT EXISTS magic_archetypes (
+    id_key      VARCHAR(255),
+    name        TEXT,
+    parent_type VARCHAR(255),
+    PRIMARY KEY (id_key)
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE INDEX idx_magic_archetypes ON magic_archetypes (id_key);
+
+ALTER TABLE magic_archetypes ADD CONSTRAINT fk_parent_type FOREIGN KEY (parent_type) REFERENCES magic_archetypes (id_key);
+
 CREATE TABLE IF NOT EXISTS magics (
-    name        VARCHAR(255),
-    max_tier    INT,
-    self_teach  BOOLEAN,
-    PRIMARY KEY (name)
+    id_key          VARCHAR(255),
+    max_tier        INT,
+    extra_tier      BOOLEAN,
+    self_teach      BOOLEAN,
+    teachable       BOOLEAN,
+    description     TEXT,
+    label           TEXT,
+    days_to_max     INT UNSIGNED,
+    days_to_extra   INT UNSIGNED,
+    archetype       VARCHAR(255),
+    PRIMARY KEY (name),
+    FOREIGN KEY (id_key) REFERENCES magic_archetypes(id_key)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE INDEX idx_magic ON magics (name);
+
+CREATE TABLE IF NOT EXISTS magic_weaknesses (
+    fk_id_key       VARCHAR(255),
+
+
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* parent */
 CREATE TABLE IF NOT EXISTS bonus_exp_types (

@@ -1,13 +1,18 @@
-package net.lordofthecraft.arche.persona.magic;
+package net.lordofthecraft.arche.magic;
 
 import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.interfaces.Magic;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.magic.ArcheMagicDeleteTask;
 import net.lordofthecraft.arche.save.tasks.magic.ArcheMagicInsertTask;
 import net.lordofthecraft.arche.save.tasks.magic.ArcheMagicUpdateTask;
+import org.bukkit.entity.Player;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,14 +27,22 @@ import java.util.logging.Level;
  *
  * @author 501warhead
  */
-public class ArcheMagic {
+public class ArcheMagic implements Magic {
 
     /*
-    CREATE TABLE IF NOT EXISTS magics (
-    name        VARCHAR(255),
-    max_tier    INT,
-    self_teach  BOOLEAN,
-    PRIMARY KEY (name)
+CREATE TABLE IF NOT EXISTS magics (
+    id_key          VARCHAR(255),
+    max_tier        INT,
+    extra_tier      BOOLEAN,
+    self_teach      BOOLEAN,
+    teachable       BOOLEAN,
+    description     TEXT,
+    label           TEXT,
+    days_to_max     INT UNSIGNED,
+    days_to_extra   INT UNSIGNED,
+    archetype       VARCHAR(255),
+    PRIMARY KEY (name),
+    FOREIGN KEY (id_key) REFERENCES magic_archetypes(id_key)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
      */
@@ -43,17 +56,25 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     private boolean teachable;
     private int daysToMaxTier;
     private int daysToBonusTier;
-
+    private ArcheType type;
 
     public static void init(SQLHandler handler) {
         try {
-            PreparedStatement stat = handler.getConnection().prepareStatement("SELECT name,max_tier,self_teach FROM magics");
+            PreparedStatement stat = handler.getConnection().prepareStatement("SELECT id_key,max_tier,self_teach,extra_tier,teachable,description,label,days_to_max,days_to_extra,archetype FROM magics");
             ResultSet rs = stat.executeQuery();
             while (rs.next()) {
-                String name = rs.getString("name");
+                String id_key = rs.getString("id_key");
                 int max_tier = rs.getInt("max_tier");
                 boolean selfteach = rs.getBoolean("self_teach");
-                ArcheMagic m = new ArcheMagic(name, max_tier, selfteach);
+                boolean teach = rs.getBoolean("teachable");
+                String label = rs.getString("label");
+                String description = rs.getString("description");
+                int extra_tier = rs.getInt("extra_tier");
+                int days_to_max = rs.getInt("days_to_max");
+                int days_to_extra = rs.getInt("days_to_extra");
+                String sarchetype = rs.getString("archetype");
+                //TODO verify archetype
+                ArcheMagic m = new ArcheMagic(id_key, max_tier, selfteach);
                 MAGICS.add(m);
             }
             stat.close();
@@ -98,16 +119,72 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         performSQLUpdate();
     }
 
+    @Override
+    public String getLabel() {
+        return label;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public boolean isTeachable() {
+        return teachable;
+    }
+
+    @Override
+    public int getDaysToMaxTier() {
+        return daysToMaxTier;
+    }
+
+    @Override
+    public int getDaysToBonusTier() {
+        return daysToBonusTier;
+    }
+
+    @Override
+    public ArcheType getType() {
+        return type;
+    }
+
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public int getMaxTier() {
         return maxTier;
     }
 
+    @Override
     public boolean isSelfTeachable() {
         return selfTeachable;
+    }
+
+    public int getTier(Player p) { return getTier(ArcheCore.getPersona(p));}
+
+    public int getTier(Persona p) {
+        if (getAttach(p).isPresent()) {
+            return getAttach(p).get().getTier();
+        } else {
+            return 0;
+        }
+    }
+
+    private Optional<MagicAttachment> getAttach(Persona p) {
+        return ((ArchePersona) p).getMagicAttachment(this);
+    }
+
+    private Optional<Persona> getPersona(Player p) {
+        Persona pers = ArcheCore.getPersona(p);
+        if (pers == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(pers);
+        }
     }
 
     protected void performSQLUpdate() {

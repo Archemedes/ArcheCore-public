@@ -8,11 +8,12 @@ import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.help.HelpFile;
 import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.listener.*;
+import net.lordofthecraft.arche.magic.Archenomicon;
 import net.lordofthecraft.arche.persona.ArcheEconomy;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.ArchePersonaKey;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
-import net.lordofthecraft.arche.persona.magic.ArcheMagic;
+import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.DatabaseCreateTask;
 import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
@@ -47,6 +48,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private SaveExecutorManager saveManager;
     private BlockRegistry blockRegistry;
 	private ArchePersonaHandler personaHandler;
+	private Archenomicon archenomicon;
 	private HelpDesk helpdesk;
 	private ArcheTimer timer;
 	private Economy economy;
@@ -173,12 +175,14 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		blockRegistry = new BlockRegistry();
 		personaHandler = ArchePersonaHandler.getInstance();
+		archenomicon = Archenomicon.getInstance();
 		helpdesk = HelpDesk.getInstance();
 		jcoll = new JistumaCollection(personaHandler);
 
 		timer = debugMode? new ArcheTimer(this) : null;
 		personaHandler.setModifyDisplayNames(modifyDisplayNames);
         saveManager.submit(new DatabaseCreateTask());
+        archenomicon.createTomeFromKnowledge(sqlHandler);
 
 		//Create the Persona table
 		/*Map<String,String> cols = Maps.newLinkedHashMap();
