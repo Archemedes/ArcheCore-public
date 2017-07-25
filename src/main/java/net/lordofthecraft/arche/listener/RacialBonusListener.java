@@ -177,6 +177,7 @@ public class RacialBonusListener implements Listener {
 							Location l = p.getLocation();
 							AreaEffectCloud cloud = (AreaEffectCloud) l.getWorld().spawnEntity(l, EntityType.AREA_EFFECT_CLOUD);
 							cloud.setDuration(40);
+							cloud.setColor(Color.WHITE);
 							for (Entity en : l.getWorld().getNearbyEntities(l, 5, 5, 5)) {
 								if (!(en instanceof LivingEntity)) continue;
 								LivingEntity ent = (LivingEntity) en;
