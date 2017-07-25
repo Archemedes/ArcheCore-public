@@ -70,10 +70,10 @@ public class RacialBonusListener implements Listener {
 		case KHA_PANTERA:
 		case KHA_LEPARDA:
 		case KHA_TIGRASI:
-			case HOUZI_FEI:
-			case HOUZI_LAO:
-			case NEPHILIM:
-			case SNOW_ELF:
+		case HOUZI_FEI:
+		case HOUZI_LAO:
+		case NEPHILIM:
+		case SNOW_ELF:
 			return true;
 		default:
 			return false;
@@ -175,6 +175,19 @@ public class RacialBonusListener implements Listener {
 
 						} else if (pers.getRace() == Race.SNOW_ELF) { //I had to. -501warhead
 							Location l = p.getLocation();
+							AreaEffectCloud cloud = (AreaEffectCloud) l.getWorld().spawnEntity(l, EntityType.AREA_EFFECT_CLOUD);
+							cloud.setDuration(40);
+							for (Entity en : l.getWorld().getNearbyEntities(l, 5, 5, 5)) {
+								if (!(en instanceof LivingEntity)) continue;
+								LivingEntity ent = (LivingEntity) en;
+								if (ent.getLocation().distanceSquared(l) > 9) continue;
+								if (ent.equals(pers.getPlayer())) continue;
+								ent.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 0, false, false));
+								ent.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 0, false, false));
+								if (!(ent instanceof Player)) continue;
+								Player targ = (Player) ent;
+								targ.sendMessage(ChatColor.AQUA + "" + ChatColor.ITALIC + "You are blinded and slowed by a gust of snow!");
+							}
 							if (l.getBlock().getType() == Material.AIR && l.getBlock().getRelative(BlockFace.DOWN).getType().isSolid()) {
 								l.getBlock().setType(Material.SNOW);
 							} else {
@@ -434,10 +447,10 @@ public class RacialBonusListener implements Listener {
 				case KHA_LEPARDA:
 				case KHA_TIGRASI:
 				case KHA_PANTERA:
-					case HOUZI:
-					case HOUZI_FEI:
-					case HOUZI_LAO:
-					case HOUZI_HEI:
+				case HOUZI:
+				case HOUZI_FEI:
+				case HOUZI_LAO:
+				case HOUZI_HEI:
 					dmg -= 6;
 					if (dmg <= 0) e.setCancelled(true);
 					else e.setDamage(dmg);
