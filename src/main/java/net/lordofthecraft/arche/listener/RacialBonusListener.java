@@ -9,6 +9,7 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -208,6 +209,17 @@ public class RacialBonusListener implements Listener {
 		}
 	}
 
+	@EventHandler(priority = EventPriority.HIGH)
+	public void onEat(PlayerItemConsumeEvent e){
+		Persona pers = handler.getPersona(e.getPlayer());
+		if(pers != null) {
+			Race r = pers.getRace();
+			if (r == Race.CONSTRUCT) {
+				e.setCancelled(true);
+			}
+		}
+	}
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onDamage(EntityDamageByEntityEvent e){
 		//Racial Resistance Bonuses
@@ -216,14 +228,21 @@ public class RacialBonusListener implements Listener {
 			Persona pers = handler.getPersona(p);
 			if(pers != null){
 				Race r = pers.getRace();
-				if(r == Race.NECROLYTE || r == Race.SPECTRE){
-					if(holdsGoldenWeapon(e.getDamager())){
-						double factor = r == Race.SPECTRE? 3 : 1.5;
-						e.setDamage(e.getDamage()*factor);
+				if(r == Race.NECROLYTE || r == Race.SPECTRE || r == Race.CONSTRUCT){
+					if(holdsGoldenWeapon(e.getDamager())) {
+						double lvl = 0.0;
+						double factor = r == Race.SPECTRE ? 3 : 1.5;
+						if(e.getDamager() instanceof Player){
+							Player dmgr = (Player) e.getDamager();
+							if(dmgr.getEquipment().getItemInMainHand() != null){
+								ItemStack wep = dmgr.getEquipment().getItemInMainHand();
+								if(wep.containsEnchantment(Enchantment.DAMAGE_UNDEAD)){
+									lvl = wep.getEnchantmentLevel(Enchantment.DAMAGE_UNDEAD) * 0.3;
+								}
+							}
+						}
+						e.setDamage(e.getDamage() * factor * lvl);
 					}
-				} else if (r == Race.CONSTRUCT) {
-					e.setDamage(DamageModifier.MAGIC, e.getDamage(DamageModifier.MAGIC) * 0.2);
-
 				} else if (r == Race.HIGH_ELF) {
 					e.setDamage(DamageModifier.MAGIC, e.getDamage(DamageModifier.MAGIC) * 0.7);
 				} else if (r.getParentRace().equalsIgnoreCase("hou-zi") && r != Race.HOUZI_HEI && !isWearingArmor(p)) {
