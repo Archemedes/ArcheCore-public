@@ -19,10 +19,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -209,6 +206,21 @@ public class RacialBonusListener implements Listener {
 		}
 	}
 
+	//fix construct shields?
+	@EventHandler(priority = EventPriority.HIGH)
+	public void onInteract(PlayerInteractEvent e){
+		Persona pers = handler.getPersona(e.getPlayer());
+		if(pers != null) {
+			Race r = pers.getRace();
+			if (r == Race.CONSTRUCT) {
+				if(e.getPlayer().isBlocking()){
+					e.setCancelled(true);
+				}
+			}
+		}
+	}
+
+	//fix construct food glitch
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onEat(PlayerItemConsumeEvent e){
 		Persona pers = handler.getPersona(e.getPlayer());
@@ -228,7 +240,7 @@ public class RacialBonusListener implements Listener {
 			Persona pers = handler.getPersona(p);
 			if(pers != null){
 				Race r = pers.getRace();
-				if(r == Race.NECROLYTE || r == Race.SPECTRE || r == Race.CONSTRUCT){
+				if(r == Race.NECROLYTE || r == Race.SPECTRE){
 					if(holdsGoldenWeapon(e.getDamager())) {
 						double lvl = 0.0;
 						double factor = r == Race.SPECTRE ? 3 : 1.5;
@@ -237,12 +249,18 @@ public class RacialBonusListener implements Listener {
 							if(dmgr.getEquipment().getItemInMainHand() != null){
 								ItemStack wep = dmgr.getEquipment().getItemInMainHand();
 								if(wep.containsEnchantment(Enchantment.DAMAGE_UNDEAD)){
-									lvl = wep.getEnchantmentLevel(Enchantment.DAMAGE_UNDEAD) * 0.3;
+									lvl = wep.getEnchantmentLevel(Enchantment.DAMAGE_UNDEAD) * 0.3 + 1;
 								}
 							}
 						}
-						e.setDamage(e.getDamage() * factor * lvl);
+						if(lvl > 0) {
+							e.setDamage(e.getDamage() * factor * lvl);
+						}else{
+							e.setDamage(e.getDamage() * factor);
+						}
 					}
+				} else if (r == Race.CONSTRUCT) {
+					e.setDamage(DamageModifier.MAGIC, e.getDamage(DamageModifier.MAGIC) * 0.2);
 				} else if (r == Race.HIGH_ELF) {
 					e.setDamage(DamageModifier.MAGIC, e.getDamage(DamageModifier.MAGIC) * 0.7);
 				} else if (r.getParentRace().equalsIgnoreCase("hou-zi") && r != Race.HOUZI_HEI && !isWearingArmor(p)) {
