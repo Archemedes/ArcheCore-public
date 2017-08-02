@@ -42,7 +42,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	private SaveHandler buffer = SaveHandler.getInstance();
 	private boolean displayName = false;
 	private PreparedStatement selectStatement = null;
-	private Map<Race, Location> racespawns;
+	private Map<Race, Location> racespawns = Maps.newHashMap();
     
     private UUID tythus = UUID.fromString("561637ba-06f6-4457-9787-ba65768c1b73");
 
@@ -643,7 +643,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 			 * 
 			 */
 			ResultSet rs;
-			racespawns = Maps.newHashMap();
 			try {
 				rs = handler.query("SELECT * FROM persona_race_spawns");
 				List<String> toRemove = Lists.newArrayList();
