@@ -164,26 +164,28 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         return selfTeachable;
     }
 
+    @Override
     public boolean hasLearned(Player p) {
         return hasLearned(ArcheCore.getPersona(p));
     }
 
+    @Override
     public boolean hasLearned(Persona p) {
         return getAttach(p).isPresent();
     }
 
+    @Override
     public boolean isVisible(Player p) { return isVisible(ArcheCore.getPersona(p)); }
 
+    @Override
     public boolean isVisible(Persona p) {
-        if (getAttach(p).isPresent()) {
-            return getAttach(p).get().isVisible();
-        } else {
-            return false;
-        }
+        return getAttach(p).isPresent() && getAttach(p).get().isVisible();
     }
 
+    @Override
     public int getTier(Player p) { return getTier(ArcheCore.getPersona(p));}
 
+    @Override
     public int getTier(Persona p) {
         if (getAttach(p).isPresent()) {
             return getAttach(p).get().getTier();
@@ -192,14 +194,17 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         }
     }
 
+    @Override
     public boolean achievedTier(Player p, int tier) {
         return achievedTier(ArcheCore.getPersona(p), tier);
     }
 
+    @Override
     public boolean achievedTier(Persona p, int tier) {
         return getTier(p) >= tier;
     }
 
+    @Override
     public void setTier(Persona p, int tier) {
         if (getAttach(p).isPresent()) {
             getAttach(p).get().setTier(tier);
