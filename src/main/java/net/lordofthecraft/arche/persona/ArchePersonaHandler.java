@@ -452,7 +452,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 					} else {
 						ArcheCore.getPlugin().getLogger().warning("Player " + p.getName() + " has simultaneous current Personas. Fixing now...");
-						persona.setCurrent(false);
+						saveTo			persona.setCurrent(false);
 					}
 				}
 			}
