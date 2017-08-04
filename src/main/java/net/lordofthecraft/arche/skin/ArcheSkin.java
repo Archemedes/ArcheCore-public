@@ -2,10 +2,15 @@ package net.lordofthecraft.arche.skin;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.UUID;
 
+import com.google.common.collect.Maps;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.SQL.SQLHandler;
 
 public class ArcheSkin {
 	private int index;
@@ -13,8 +18,8 @@ public class ArcheSkin {
 	private String skinUrl; //We use mojang url to refresh the validated skin data.
 	private boolean slim;
 	
-	private long timeLastRefreshed; //We need this to make sure we refresh every 24 hrs.
-	private PropertyMap mojangSkinData; //This is valid data to add to GameProfile
+	long timeLastRefreshed; //We need this to make sure we refresh every 24 hrs.
+	PropertyMap mojangSkinData; //This is valid data to add to GameProfile
 	
 	public ArcheSkin(int index, String url, boolean isSlim) {
 		this.index = index;
@@ -28,6 +33,10 @@ public class ArcheSkin {
 		return skinUrl;
 	}
 	
+	public int getIndex() {
+		return index;
+	}
+	
 	public boolean isSlim() {
 		return slim;
 	}
@@ -38,6 +47,36 @@ public class ArcheSkin {
 	
 	public PropertyMap getMojangSkinData() {
 		return mojangSkinData;
+	}
+	
+	private Property getProperty() {
+		return this.mojangSkinData.get("textures").iterator().next();	
+	}
+	
+	void insertSql() {
+		Map<String, Object> toIn = Maps.newLinkedHashMap();
+		toIn.put("player", this.owner);
+		toIn.put("index", this.index);
+		toIn.put("skinUrl", this.skinUrl);
+		toIn.put("slim", slim? 1:0);
+		Property textures = getProperty();
+		toIn.put("skinValue", textures.getValue());
+		toIn.put("skinSignature", textures.getSignature());
+		toIn.put("refresh", this.timeLastRefreshed);
+		ArcheCore.getControls().getSQLHandler().insert("persona_skins", toIn);
+	}
+	
+	void updateSql() {
+		Map<String, Object> toIn= Maps.newLinkedHashMap();
+		Property textures = getProperty();
+		toIn.put("skinValue", textures.getValue());
+		toIn.put("skinSignature", textures.getSignature());
+		toIn.put("refresh", this.timeLastRefreshed);
+		
+		Map<String, Object> crit= Maps.newLinkedHashMap();
+		crit.put("player", this.owner);
+		crit.put("index", this.index);
+		ArcheCore.getControls().getSQLHandler().update("persona_skins", toIn, crit);
 	}
 	
 	public static ArcheSkin fromSQL(ResultSet res) throws SQLException {

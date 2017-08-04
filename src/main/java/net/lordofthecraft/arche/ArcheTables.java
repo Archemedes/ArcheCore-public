@@ -109,7 +109,7 @@ public class ArcheTables {
 		cols.put("id", "INT NOT NULL");
 		cols.put("index", "INT");
 		cols.put("UNIQUE (player, id)", "ON CONFLICT REPLACE");
-		sqlHandler.createTable("persona_skins", cols);
+		sqlHandler.createTable("persona_skins_used", cols);
 		
 	}
 	
