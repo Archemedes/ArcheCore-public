@@ -1,25 +1,11 @@
 package net.lordofthecraft.arche;
 
-import com.google.common.collect.Maps;
-import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
-import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.WhySQLHandler;
-import net.lordofthecraft.arche.commands.*;
-import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.help.HelpFile;
-import net.lordofthecraft.arche.interfaces.*;
-import net.lordofthecraft.arche.listener.*;
-import net.lordofthecraft.arche.persona.ArcheEconomy;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.ArchePersonaKey;
-import net.lordofthecraft.arche.persona.RaceBonusHandler;
-import net.lordofthecraft.arche.save.DataSaveRunnable;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
-import net.lordofthecraft.arche.skill.BonusExpModifierHandler;
-import net.lordofthecraft.arche.skill.ExpModifier;
+import java.io.File;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.UUID;
+import java.util.logging.Level;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -33,12 +19,63 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.UUID;
-import java.util.logging.Level;
+import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
+import net.lordofthecraft.arche.commands.CommandArchehelp;
+import net.lordofthecraft.arche.commands.CommandAttribute;
+import net.lordofthecraft.arche.commands.CommandAttributeTabCompleter;
+import net.lordofthecraft.arche.commands.CommandAutoage;
+import net.lordofthecraft.arche.commands.CommandBeaconme;
+import net.lordofthecraft.arche.commands.CommandHelpMenu;
+import net.lordofthecraft.arche.commands.CommandMoney;
+import net.lordofthecraft.arche.commands.CommandNamelog;
+import net.lordofthecraft.arche.commands.CommandNewbies;
+import net.lordofthecraft.arche.commands.CommandPersona;
+import net.lordofthecraft.arche.commands.CommandRaceSpawn;
+import net.lordofthecraft.arche.commands.CommandRealname;
+import net.lordofthecraft.arche.commands.CommandSkill;
+import net.lordofthecraft.arche.commands.CommandSkin;
+import net.lordofthecraft.arche.commands.CommandSql;
+import net.lordofthecraft.arche.commands.CommandSqlClone;
+import net.lordofthecraft.arche.commands.CommandTreasurechest;
+import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.help.HelpFile;
+import net.lordofthecraft.arche.interfaces.Economy;
+import net.lordofthecraft.arche.interfaces.IArcheCore;
+import net.lordofthecraft.arche.interfaces.JMisc;
+import net.lordofthecraft.arche.interfaces.PersonaKey;
+import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.interfaces.SkillFactory;
+import net.lordofthecraft.arche.listener.ArmorPreventionListener;
+import net.lordofthecraft.arche.listener.BeaconMenuListener;
+import net.lordofthecraft.arche.listener.BlockRegistryListener;
+import net.lordofthecraft.arche.listener.DebugListener;
+import net.lordofthecraft.arche.listener.EconomyListener;
+import net.lordofthecraft.arche.listener.ExperienceOrbListener;
+import net.lordofthecraft.arche.listener.HelpMenuListener;
+import net.lordofthecraft.arche.listener.HelpOverrideListener;
+import net.lordofthecraft.arche.listener.JistumaCollectionListener;
+import net.lordofthecraft.arche.listener.LegacyCommandsListener;
+import net.lordofthecraft.arche.listener.NewbieProtectListener;
+import net.lordofthecraft.arche.listener.PersonaInventoryListener;
+import net.lordofthecraft.arche.listener.PlayerChatListener;
+import net.lordofthecraft.arche.listener.PlayerInteractListener;
+import net.lordofthecraft.arche.listener.PlayerJoinListener;
+import net.lordofthecraft.arche.listener.RacialBonusListener;
+import net.lordofthecraft.arche.listener.TreasureChestListener;
+import net.lordofthecraft.arche.persona.ArcheEconomy;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.ArchePersonaKey;
+import net.lordofthecraft.arche.persona.RaceBonusHandler;
+import net.lordofthecraft.arche.save.DataSaveRunnable;
+import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
+import net.lordofthecraft.arche.skill.BonusExpModifierHandler;
+import net.lordofthecraft.arche.skill.ExpModifier;
+import net.lordofthecraft.arche.skin.SkinCache;
 
 public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private static ArcheCore instance;
@@ -48,6 +85,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private BlockRegistry blockRegistry;
 	private ArchePersonaHandler personaHandler;
 	private HelpDesk helpdesk;
+	private SkinCache skinCache;
 	private ArcheTimer timer;
 	private Economy economy;
 	private JistumaCollection jcoll;
@@ -162,6 +200,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		blockRegistry = new BlockRegistry();
 		personaHandler = ArchePersonaHandler.getInstance();
 		helpdesk = HelpDesk.getInstance();
+		skinCache = SkinCache.getInstance();
 		jcoll = new JistumaCollection(personaHandler);
 
 		timer = debugMode? new ArcheTimer(this) : null;
@@ -445,6 +484,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	@Override
 	public SQLHandler getSQLHandler(){
 		return sqlHandler;
+	}
+	
+	@Override
+	public SkinCache getSkinCache(){
+		return skinCache;
 	}
 
 	@Override

@@ -14,6 +14,7 @@ public class ArcheTables {
 		createPersonaNamesTable(sqlHandler);
 		createPersonaSpawnsTable(sqlHandler);
 		createBlockRegistryTable(sqlHandler);
+		createPersonaSkinsTable(sqlHandler);
 	}
 	
 	
@@ -88,6 +89,28 @@ public class ArcheTables {
 		sqlHandler.createTable("blockregistry", cols);
 
 		sqlHandler.execute("DELETE FROM blockregistry WHERE ROWID IN (SELECT ROWID FROM blockregistry ORDER BY ROWID DESC LIMIT -1 OFFSET 5000)");
+	}
+	
+	private static void createPersonaSkinsTable(SQLHandler sqlHandler) {
+		//Skins table
+		Map<String,String> 	cols = Maps.newLinkedHashMap();
+		cols.put("player", "TEXT NOT NULL");
+		cols.put("index", "INT");
+		cols.put("skinUrl", "TEXT");
+		cols.put("slim", "INT");
+		cols.put("skinValue", "TEXT");
+		cols.put("skinSignature", "TEXT");
+		cols.put("refresh", "INT");
+		cols.put("UNIQUE (player, index)", "ON CONFLICT REPLACE");
+		sqlHandler.createTable("persona_skins", cols);
+
+		cols = Maps.newLinkedHashMap();
+		cols.put("player", "TEXT NOT NULL");
+		cols.put("id", "INT NOT NULL");
+		cols.put("index", "INT");
+		cols.put("UNIQUE (player, id)", "ON CONFLICT REPLACE");
+		sqlHandler.createTable("persona_skins", cols);
+		
 	}
 	
 }

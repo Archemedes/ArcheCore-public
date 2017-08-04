@@ -16,13 +16,20 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
+import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 
 public class SkinCache {
+	private static final SkinCache INSTANCE = new SkinCache();
+	
 	private Multimap<UUID, ArcheSkin> skinCache = HashMultimap.create();
 	private Map<PersonaKey, ArcheSkin> applied = Maps.newHashMap();
 	
-	public static void getSkinInfoFromPlayer(Player p) throws UnsupportedEncodingException, ParseException {
+	
+	public static SkinCache getInstance() { return INSTANCE; }
+	private SkinCache() {}
+	
+	public void getSkinInfoFromPlayer(Player p) throws UnsupportedEncodingException, ParseException {
 		WrappedGameProfile profile = WrappedGameProfile.fromPlayer(p); //Protocollib for version independence	}
 		Multimap<String, WrappedSignedProperty> properties = profile.getProperties();
 		String encodedValue = properties.get("textures").stream() //Should be only 1
@@ -42,9 +49,10 @@ public class SkinCache {
 		System.out.println(metadata + " " + slim + " and " + skinUrl);
 	}
 	
-		
-	public void refresh(SkinTexture text) {
-		
+	public ArcheSkin getSkinFor(Persona pers) {
+		return applied.get(pers.getPersonaKey());
 	}
+	
+		
 	
 }
