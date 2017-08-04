@@ -372,6 +372,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("racespawn").setExecutor(new CommandRaceSpawn(personaHandler));
 		getCommand("attribute").setExecutor(new CommandAttribute());
 		getCommand("attribute").setTabCompleter(new CommandAttributeTabCompleter());
+		getCommand("skin").setExecutor(new CommandSkin(this));
 	}
 
 	private void initListeners(){

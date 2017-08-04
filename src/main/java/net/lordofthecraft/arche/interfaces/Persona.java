@@ -1,13 +1,13 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.enums.ProfessionSlot;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.persona.PersonaInventory;
-import net.lordofthecraft.arche.persona.PersonaSkin;
+import java.util.UUID;
+
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
-import java.util.UUID;
+import net.lordofthecraft.arche.enums.ProfessionSlot;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.persona.PersonaInventory;
 
 public interface Persona {
 
@@ -268,19 +268,6 @@ public interface Persona {
 	 * @param autoAge If the persona should auto-age.
 	 */
 	void setAutoAge(boolean autoAge);
-
-	/**
-	 * Get the associated skin of this Persona.
-	 * @return The Persona's skin.
-	 */
-
-	PersonaSkin getSkin();
-	
-	/**
-	 * Set the current skin of this Persona.
-	 * @param skin the skin to set.
-	 */
-	void setSkin(PersonaSkin skin);
 
 	/**
 	 * Delete the Persona from the Plugin records.

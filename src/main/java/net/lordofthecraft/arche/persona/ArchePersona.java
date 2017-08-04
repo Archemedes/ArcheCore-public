@@ -1,7 +1,32 @@
 package net.lordofthecraft.arche.persona;
 
+import java.lang.ref.WeakReference;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.enums.ProfessionSlot;
@@ -24,26 +49,6 @@ import net.lordofthecraft.arche.save.tasks.UpdateTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.SkillData;
-import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import java.lang.ref.WeakReference;
-import java.util.*;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public final class ArchePersona implements Persona, InventoryHolder {
 	private static final String TABLE = "persona";
@@ -73,7 +78,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	String player;
 	WeakBlock location = null;
 	PersonaInventory inv = null;
-	PersonaSkin skin = null;
 	double money = 0;
 	boolean gainsXP = true;
 	Skill profession = null; /*professionPrimary = null, professionSecondary = null, professionAdditional = null;*/
@@ -162,16 +166,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void racialReassign(Race r){
 		setRace(r);
 		this.reskillRacialReassignment();
-	}
-
-	public PersonaSkin getSkin() {
-		return skin;
-	}
-
-	public void setSkin(PersonaSkin skin) {
-		this.skin = skin;
-		buffer.put(new UpdateTask(this, PersonaField.SKIN, skin.getData()));
-		//if (this.getPlayer() != null) PersonaSkinListener.updatePlayerSkin(this.getPlayer());
 	}
 
 	public double reskillRacialReassignment() {
