@@ -95,19 +95,19 @@ public class ArcheTables {
 		//Skins table
 		Map<String,String> 	cols = Maps.newLinkedHashMap();
 		cols.put("player", "TEXT NOT NULL");
-		cols.put("index", "INT");
+		cols.put("slot", "INT");
 		cols.put("skinUrl", "TEXT");
 		cols.put("slim", "INT");
 		cols.put("skinValue", "TEXT");
 		cols.put("skinSignature", "TEXT");
 		cols.put("refresh", "INT");
-		cols.put("UNIQUE (player, index)", "ON CONFLICT REPLACE");
+		cols.put("UNIQUE (player, slot)", "ON CONFLICT REPLACE");
 		sqlHandler.createTable("persona_skins", cols);
 
 		cols = Maps.newLinkedHashMap();
 		cols.put("player", "TEXT NOT NULL");
 		cols.put("id", "INT NOT NULL");
-		cols.put("index", "INT");
+		cols.put("slot", "INT");
 		cols.put("UNIQUE (player, id)", "ON CONFLICT REPLACE");
 		sqlHandler.createTable("persona_skins_used", cols);
 		

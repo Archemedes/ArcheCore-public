@@ -30,14 +30,12 @@ public class PersonaSkinListener /*extends PacketAdapter*/ implements Listener {
 
 	ProtocolManager manager = ProtocolLibrary.getProtocolManager();
 	PersonaHandler handler = ArcheCore.getControls().getPersonaHandler();
-	SkinCache cache = ArcheCore.getControls().getSkinCache();
 
 	public void listen(){
 		manager.addPacketListener(
 				new PacketAdapter(ArcheCore.getPlugin(), ListenerPriority.LOWEST, PacketType.Play.Server.PLAYER_INFO) {
 					@Override
 					public void onPacketSending(PacketEvent event) {
-						Player p = event.getPlayer();
 						PacketContainer packet = event.getPacket();
 						PlayerInfoAction at = packet.getPlayerInfoAction().read(0);
 						
@@ -51,6 +49,7 @@ public class PersonaSkinListener /*extends PacketAdapter*/ implements Listener {
 								if(subject != null) {
 									Persona ps = handler.getPersona(subject);
 									if(ps != null) {
+										SkinCache cache = ArcheCore.getControls().getSkinCache();
 										ArcheSkin skin = cache.getSkinFor(ps);	
 										if(skin != null) {
 											WrappedGameProfile reskinnedProfile = 
@@ -66,6 +65,7 @@ public class PersonaSkinListener /*extends PacketAdapter*/ implements Listener {
 								}
 								pidl_new.add(pid);
 							}
+						packet.getPlayerInfoDataLists().write(0, pidl_new);
 						}
 					}
 				});

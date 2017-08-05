@@ -1,6 +1,10 @@
 package net.lordofthecraft.arche.skin;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
@@ -17,9 +21,16 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.exceptions.AuthenticationException;
+import com.mojang.authlib.properties.PropertyMap;
 
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
+import net.lordofthecraft.arche.listener.PersonaSkinListener;
+import net.lordofthecraft.arche.persona.ArchePersonaKey;
+import net.lordofthecraft.arche.skin.MojangCommunicator.AuthenthicationData;
+import net.lordofthecraft.arche.skin.MojangCommunicator.MinecraftAccount;
 
 public class SkinCache {
 	private static final SkinCache INSTANCE = new SkinCache();
@@ -27,9 +38,17 @@ public class SkinCache {
 	private Multimap<UUID, ArcheSkin> skinCache = HashMultimap.create();
 	private Map<PersonaKey, ArcheSkin> applied = Maps.newHashMap();
 	
+	private final SkinRefresher refreshTask;
 	
 	public static SkinCache getInstance() { return INSTANCE; }
-	private SkinCache() {}
+	private SkinCache() { 
+		init();
+		new PersonaSkinListener().listen(); 
+		refreshTask = new SkinRefresher(this);
+		refreshTask.runTaskTimerAsynchronously(ArcheCore.getPlugin(), 20*120, 20*120);
+	}
+	
+	private int refreshThresholdInHours = 15;
 	
 	private ArcheSkin savePlayerSkin(Player p, int index) throws UnsupportedEncodingException, ParseException {
 		WrappedGameProfile profile = WrappedGameProfile.fromPlayer(p); //Protocollib for version independence	}
@@ -48,7 +67,7 @@ public class SkinCache {
 		boolean slim = metadata != null;
 		String skinUrl = skinJson.get("url").toString();
 		
-		ArcheSkin skin = new ArcheSkin(index, skinUrl, slim);
+		ArcheSkin skin = new ArcheSkin(p.getUniqueId(), index, skinUrl, slim);
 		skin.timeLastRefreshed = System.currentTimeMillis(); //Actually refreshed during the player's login.
 		skin.mojangSkinData = ((GameProfile) profile.getHandle()).getProperties();
 		
@@ -71,10 +90,87 @@ public class SkinCache {
 		
 	}
 	
+	public boolean applySkin(Persona pers, int index) {
+		UUID uuid = pers.getPlayerUUID();
+		ArcheSkin skin = skinCache.get(uuid).stream()
+		.filter(ss -> ss.getIndex() == index)
+		.findAny().orElse(null);
+		
+		if(skin == null) return false;
+		applied.put(pers.getPersonaKey(), skin);
+		Map<String, Object> toIn = Maps.newLinkedHashMap();
+		toIn.put("player", pers.getPlayerUUID());
+		toIn.put("slot", pers.getId());
+		toIn.put("slot", index);
+		ArcheCore.getControls().getSQLHandler().insert("persona_skins_used", toIn);
+		return true;
+	}
+	
 	public ArcheSkin getSkinFor(Persona pers) {
 		return applied.get(pers.getPersonaKey());
 	}
 	
+	public ArcheSkin getSkinAtSlot(UUID playerUUID, int index) {
+		return skinCache.get(playerUUID).stream()
+		.filter(s -> s.getIndex() == index)
+		.findAny().orElse(null);
+	}
+	
+	private void init() {
+		try {
+			PreparedStatement selectStatement = ArcheCore.getControls().getSQLHandler().getConnection().prepareStatement("SELECT * FROM persona_skins");
+			ResultSet res = selectStatement.executeQuery();
+			while(res.next()) {
+				ArcheSkin skin = ArcheSkin.fromSQL(res);
+				skinCache.put(skin.getOwner(), skin);
+			}
+
+			selectStatement.close();
+			selectStatement = ArcheCore.getControls().getSQLHandler().getConnection().prepareStatement("SELECT * FROM persona_skins_used");
+			res = selectStatement.executeQuery();
+			while(res.next()) {
+				UUID uuid = UUID.fromString(res.getString(1));
+				int pId = res.getInt(2);
+				int index = res.getInt(3);
+				ArcheSkin skin = getSkinAtSlot(uuid, index);
+				if(skin != null) {
+					PersonaKey key = new ArchePersonaKey(uuid, pId);
+					applied.put(key, skin);
+				} else {
+					ArcheCore.getPlugin().getLogger().warning("Persona applied skin not found: "
+							+ uuid + "," + pId + "," + index);
+				}
+			}
+
+		}catch(SQLException e) {e.printStackTrace();}
+	}
+	
+	void checkRefreshTime() {
+		//Assume we refresh 25 skins per hour (we do 1 per 2 minutes, plus downtime, crashes)
+		//Skin cache size / 25 = hours in advance we need to refresh all skins.
 		
+		int cachedSkins = skinCache.values().size();
+		refreshThresholdInHours = 3 + (cachedSkins / 25);
+	}
+	
+	ArcheSkin grabOneSkinAndRefresh(MinecraftAccount account) throws IOException, ParseException, AuthenticationException {
+		//Run this Async. Obviously.
+		long tooOldTime = System.currentTimeMillis() - (this.refreshThresholdInHours*3600*1000);
+		
+		ArcheSkin whichOneToRefresh = skinCache.values().stream()
+			.filter(s -> s.getLastRefreshed() < tooOldTime )
+			.sorted((s1,s2) -> Long.compare(s2.getLastRefreshed(), s1.getLastRefreshed()) )
+			.findFirst().orElse( null);
+		
+		if(whichOneToRefresh == null) return null;
+		AuthenthicationData auth = MojangCommunicator.authenthicate(account);
+		MojangCommunicator.setSkin(auth, whichOneToRefresh.getURL());
+		PropertyMap props = MojangCommunicator.requestSkin(auth.uuid);
+		whichOneToRefresh.mojangSkinData = props;
+		whichOneToRefresh.timeLastRefreshed = System.currentTimeMillis();
+		whichOneToRefresh.updateSql();
+		
+		return whichOneToRefresh;
+	}
 	
 }

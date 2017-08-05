@@ -17,8 +17,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.mojang.authlib.exceptions.AuthenticationException;
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 
 public class MojangCommunicator {
 
@@ -109,7 +110,7 @@ public class MojangCommunicator {
 		}
 	}
 	
-	public static WrappedSignedProperty requestSkin(String uuidUser) throws IOException, ParseException {
+	public static PropertyMap requestSkin(String uuidUser) throws IOException, ParseException {
 		//See Kowaman (if you see him ask him to read up on resource leaks)
 		InputStreamReader in = null;
 
@@ -133,8 +134,10 @@ public class MojangCommunicator {
 			String signature = textures.get("signature").toString();
 			
 			Validate.isTrue("textures".equals(name), "Skin properties file fetched from Mojang had wrong name: " + name);
-			return WrappedSignedProperty.fromValues("textures", value, signature);
-			
+			PropertyMap props = new PropertyMap();
+			Property textureProperty = new Property("textures", value, signature);
+			props.put("textures", textureProperty);
+			return props;
 		} finally { if(in != null) in.close(); }
 	}
 

@@ -21,16 +21,21 @@ public class ArcheSkin {
 	long timeLastRefreshed; //We need this to make sure we refresh every 24 hrs.
 	PropertyMap mojangSkinData; //This is valid data to add to GameProfile
 	
-	public ArcheSkin(int index, String url, boolean isSlim) {
+	public ArcheSkin(UUID uuid, int index, String url, boolean isSlim) {
 		this.index = index;
 		this.skinUrl = url;
 		this.slim = isSlim;
+		this.owner = uuid;
 	}
 	
 	private ArcheSkin() {};
 	
 	public String getURL() {
 		return skinUrl;
+	}
+	
+	public UUID getOwner() {
+		return owner;
 	}
 	
 	public int getIndex() {
@@ -56,7 +61,7 @@ public class ArcheSkin {
 	void insertSql() {
 		Map<String, Object> toIn = Maps.newLinkedHashMap();
 		toIn.put("player", this.owner);
-		toIn.put("index", this.index);
+		toIn.put("slot", this.index);
 		toIn.put("skinUrl", this.skinUrl);
 		toIn.put("slim", slim? 1:0);
 		Property textures = getProperty();
@@ -75,7 +80,7 @@ public class ArcheSkin {
 		
 		Map<String, Object> crit= Maps.newLinkedHashMap();
 		crit.put("player", this.owner);
-		crit.put("index", this.index);
+		crit.put("slot", this.index);
 		ArcheCore.getControls().getSQLHandler().update("persona_skins", toIn, crit);
 	}
 	
