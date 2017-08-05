@@ -13,7 +13,6 @@ import net.lordofthecraft.arche.persona.ArcheEconomy;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.ArchePersonaKey;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
-import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.DatabaseCreateTask;
 import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
@@ -275,7 +274,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 
 		Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
-            ArcheMagic.init(sqlHandler);
 
             if(willCachePersonas()){
                 long time = System.currentTimeMillis();

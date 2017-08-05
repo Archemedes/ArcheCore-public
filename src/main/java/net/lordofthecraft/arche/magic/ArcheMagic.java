@@ -1,8 +1,8 @@
 package net.lordofthecraft.arche.magic;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.interfaces.Magic;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
@@ -14,13 +14,10 @@ import net.lordofthecraft.arche.save.tasks.magic.ArcheMagicInsertTask;
 import net.lordofthecraft.arche.save.tasks.magic.ArcheMagicUpdateTask;
 import org.bukkit.entity.Player;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.logging.Level;
 
 /**
  * Created on 7/3/2017
@@ -57,32 +54,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     private int daysToMaxTier;
     private int daysToBonusTier;
     private ArcheType type;
-
-    public static void init(SQLHandler handler) {
-        try {
-            PreparedStatement stat = handler.getConnection().prepareStatement("SELECT id_key,max_tier,self_teach,extra_tier,teachable,description,label,days_to_max,days_to_extra,archetype FROM magics");
-            ResultSet rs = stat.executeQuery();
-            while (rs.next()) {
-                String id_key = rs.getString("id_key");
-                int max_tier = rs.getInt("max_tier");
-                boolean selfteach = rs.getBoolean("self_teach");
-                boolean teach = rs.getBoolean("teachable");
-                String label = rs.getString("label");
-                String description = rs.getString("description");
-                int extra_tier = rs.getInt("extra_tier");
-                int days_to_max = rs.getInt("days_to_max");
-                int days_to_extra = rs.getInt("days_to_extra");
-                String sarchetype = rs.getString("archetype");
-                //TODO verify archetype
-                ArcheMagic m = new ArcheMagic(id_key, max_tier, selfteach);
-                MAGICS.add(m);
-            }
-            stat.close();
-            rs.close();
-        } catch (SQLException e) {
-            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to initialize ArcheMagics! Persona-tethered magics will be unavailable!", e);
-        }
-    }
+    private Map<Magic, Integer> weaknesses;
 
     public static ArcheMagic createMagic(String name, int maxTier, boolean selfTeachable) {
         Optional<ArcheMagic> magic = MAGICS.stream().filter(m -> m.getName().equalsIgnoreCase(name)).findFirst();
@@ -107,6 +79,20 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         this.name = name;
         this.maxTier = maxTier;
         this.selfTeachable = selfTeachable;
+        weaknesses = Maps.newConcurrentMap();
+    }
+
+    public ArcheMagic(String name, int maxTier, boolean selfTeachable, String label, String description, boolean teachable, int daysToMaxTier, int daysToBonusTier, ArcheType type) {
+        this.name = name;
+        this.maxTier = maxTier;
+        this.selfTeachable = selfTeachable;
+        this.label = label;
+        this.description = description;
+        this.teachable = teachable;
+        this.daysToMaxTier = daysToMaxTier;
+        this.daysToBonusTier = daysToBonusTier;
+        this.type = type;
+        weaknesses = Maps.newConcurrentMap();
     }
 
     public void setMaxTier(int maxTier) {
@@ -117,6 +103,19 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     public void setSelfTeachable(boolean selfTeachable) {
         this.selfTeachable = selfTeachable;
         performSQLUpdate();
+    }
+
+    public void addWeakness(Magic m, int mod) {
+        weaknesses.put(m, mod);
+    }
+
+    public boolean isWeakAgainst(Magic m) {
+        return weaknesses.containsKey(m);
+    }
+
+    public int getWeaknessModifier(Magic m) {
+        if (!weaknesses.containsKey(m)) return 0;
+        return weaknesses.get(m);
     }
 
     @Override

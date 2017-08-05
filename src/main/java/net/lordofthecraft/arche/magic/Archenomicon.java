@@ -5,6 +5,9 @@ import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.interfaces.Magic;
 import net.lordofthecraft.arche.interfaces.MagicFactory;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -26,39 +29,6 @@ public class Archenomicon {
                             |  C| /
                             |===|/
                             '---'
-     */
-
-    /*
-     * loading from list
-     * input method
-     * get method
-     *
-         * magic:
-         * * name
-         * * label
-         * * description
-         * * abilities
-         * * tier.max
-         * * tier.extra
-         * * mastery.max
-         * * mastery.extra
-         * * self_teachable
-         * * teachable
-         * * archetype
-         * * weak_to
-         *
-         * archetype:
-         * * parent
-         * * description
-         *
-         * creatures:
-         * * name
-         * * creators
-         * * description
-         * * abilities
-         * * magic
-         * * buff
-         *
      */
 
     private static Archenomicon ourInstance = new Archenomicon();
@@ -122,7 +92,99 @@ public class Archenomicon {
     private final Set<ArcheCreature> creatures = Sets.newConcurrentHashSet();
 
     public void createTomeFromKnowledge(SQLHandler handler) {
-        //TODO init methods
+        if (!archetypes.isEmpty()) {
+            return;
+        }
+        try {
+            PreparedStatement stat = handler.getConnection().prepareStatement("SELECT id_key,name,parent_type,descr FROM magic_archetypes");
+            PreparedStatement magicselect = handler.getConnection().prepareStatement("SELECT id_key,max_tier,extra_tier,self_teach,teachable,description,label,days_to_max,days_to_extra FROM magics WHERE archetype=?");
+            PreparedStatement weakselect = handler.getConnection().prepareStatement("SELECT fk_weakness_magic,modifier FROM magic_weaknesses WHERE fk_source_magic=?");
+            ResultSet rs = stat.executeQuery();
+            while (rs.next()) {
+                String id = rs.getString("id_key");
+                String name = rs.getString("name");
+                String parent = rs.getString("parent_type");
+                String description = rs.getString("descr");
+                ArcheType aparent = null;
+                if (parent != null) {
+                    Optional<ArcheType> pt = studyMagicType(parent);
+                    if (pt.isPresent()) {
+                        aparent = pt.get();
+                    }
+                }
+                ArcheType t = new ArcheType(id, name, aparent, description);
+                forgeArchetype(t);
+                magicselect.clearParameters();
+                magicselect.setString(1, id);
+                ResultSet magics = magicselect.executeQuery();
+                while (magics.next()) {
+                    String mid = rs.getString("id_key");
+                    int max_tier = rs.getInt("max_tier");
+                    boolean extra_tier = rs.getBoolean("extra_tier");
+                    boolean self_teach = rs.getBoolean("self_teach");
+                    boolean teachable = rs.getBoolean("teachable");
+                    String mdesc = rs.getString("description");
+                    String label = rs.getString("label");
+                    int days_to_max = rs.getInt("days_to_max");
+                    int days_to_extra = rs.getInt("days_to_extra");
+                    ArcheMagic m = new ArcheMagic(mid, max_tier, self_teach, label, description, teachable, days_to_max, days_to_extra, t);
+                    registerArcana(m);
+                }
+                magics.close();
+            }
+            rs.close();
+            magicselect.close();
+            stat.close();
+
+            for (Magic m : magics) {
+                weakselect.clearParameters();
+                weakselect.setString(1, m.getName());
+                rs = weakselect.executeQuery();
+                while (rs.next()) {
+                    String mid = rs.getString("fk_weakness_magic");
+                    int modifier = rs.getInt("modifier");
+                    Optional<Magic> weak = researchMagic(mid);
+                    weak.ifPresent(magic -> ((ArcheMagic) m).addWeakness(magic, modifier));
+                }
+                rs.close();
+            }
+            weakselect.close();
+
+            PreparedStatement creatureselect = handler.getConnection().prepareStatement("SELECT id_key,name,descr FROM magic_creatures");
+            PreparedStatement creaturecreators = handler.getConnection().prepareStatement("SELECT magic_id_fk FROM creature_creators WHERE creature_fk=?");
+            PreparedStatement creatureabilities = handler.getConnection().prepareStatement("SELECT ability FROM creature_abilities WHERE creature_fk=?");
+
+            rs = creatureselect.executeQuery();
+            while (rs.next()) {
+                String cid = rs.getString("id_key");
+                String name = rs.getString("name");
+                String description = rs.getString("descr");
+                ArcheCreature creature = new ArcheCreature(cid, name, description);
+                birthCreature(creature);
+                creaturecreators.clearParameters();
+                creaturecreators.setString(1, cid);
+                ResultSet creators = creaturecreators.executeQuery();
+                while (creators.next()) {
+                    String smagic = creators.getString("magic_id_fk");
+                    Optional<Magic> omagic = researchMagic(smagic);
+                    omagic.ifPresent(creature::addCreator);
+                }
+                creators.close();
+                creatureabilities.clearParameters();
+                creatureabilities.setString(1, cid);
+                ResultSet abilities = creatureabilities.executeQuery();
+                while (abilities.next()) {
+                    creature.addAbility(abilities.getString("ability"));
+                }
+                abilities.close();
+            }
+            rs.close();
+            creatureselect.close();
+            creaturecreators.close();
+            creatureabilities.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     /*
@@ -148,6 +210,12 @@ public class Archenomicon {
     public void forgeArchetype(ArcheType type) {
         if (!archetypes.contains(type)) {
             archetypes.add(type);
+        }
+    }
+
+    public void birthCreature(ArcheCreature creature) {
+        if (!creatures.contains(creature)) {
+            creatures.add(creature);
         }
     }
 

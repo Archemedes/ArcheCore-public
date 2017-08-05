@@ -145,13 +145,14 @@ CREATE TABLE IF NOT EXISTS magic_archetypes (
     id_key      VARCHAR(255),
     name        TEXT,
     parent_type VARCHAR(255),
+    descr       TEXT
     PRIMARY KEY (id_key)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE INDEX idx_magic_archetypes ON magic_archetypes (id_key);
-
 ALTER TABLE magic_archetypes ADD CONSTRAINT fk_parent_type FOREIGN KEY (parent_type) REFERENCES magic_archetypes (id_key);
+
+CREATE INDEX idx_magic_archetypes ON magic_archetypes (id_key);
 
 CREATE TABLE IF NOT EXISTS magics (
     id_key          VARCHAR(255),
@@ -165,16 +166,43 @@ CREATE TABLE IF NOT EXISTS magics (
     days_to_extra   INT UNSIGNED,
     archetype       VARCHAR(255),
     PRIMARY KEY (name),
-    FOREIGN KEY (id_key) REFERENCES magic_archetypes(id_key)
+    FOREIGN KEY (id_key) REFERENCES magic_archetypes(id_key) ON UPDATE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE INDEX idx_magic ON magics (name);
 
 CREATE TABLE IF NOT EXISTS magic_weaknesses (
-    fk_id_key       VARCHAR(255),
+    fk_source_magic     VARCHAR(255),
+    fk_weakness_magic   VARCHAR(255),
+    modifier            FLOAT DEFAULT 1.0,
+    PRIMARY KEY (fk_source_magic,fk_weakness_magic),
+    FOREIGN KEY (fk_source_magic) REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (fk_weakness_magic) REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS magic_creatures (
+    id_key      VARCHAR(255),
+    name        TEXT,
+    descr       TEXT,
+    PRIMARY KEY (id_key)
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS creature_creators (
+    magic_id_fk     VARCHAR(255),
+    creature_fk     VARCHAR(255),
+    PRIMARY KEY (magic_id_fk),
+    FOREIGN KEY (magic_id_fk) REFERENCES magics(id_key) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (creature_fk) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE CASCADE
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS creature_abilities (
+    creature_fk VARCHAR(255) NOT NULL,
+    ability     TEXT,
+    FOREIGN KEY (fk_creature) REFERENCES magic_creatures (fk_creature) ON UPDATE CASCADE ON DELETE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
