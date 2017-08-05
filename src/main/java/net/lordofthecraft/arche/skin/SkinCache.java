@@ -2,22 +2,34 @@ package net.lordofthecraft.arche.skin;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.codec.binary.Base64;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
+import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction;
+import com.comphenix.protocol.wrappers.PlayerInfoData;
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.mojang.authlib.GameProfile;
@@ -25,6 +37,7 @@ import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.properties.PropertyMap;
 
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheProtocolUtil;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.listener.PersonaSkinListener;
@@ -63,7 +76,8 @@ public class SkinCache {
 		JSONObject topJson = (JSONObject) parser.parse(actualValue);
 		JSONObject textureJson = (JSONObject) topJson.get("textures");
 		JSONObject skinJson = (JSONObject) textureJson.get("SKIN");
-		Object metadata = skinJson.get("metadata");
+		@SuppressWarnings("unchecked")
+		Object metadata = skinJson.getOrDefault("metadata", null);
 		boolean slim = metadata != null;
 		String skinUrl = skinJson.get("url").toString();
 		
@@ -100,7 +114,7 @@ public class SkinCache {
 		applied.put(pers.getPersonaKey(), skin);
 		Map<String, Object> toIn = Maps.newLinkedHashMap();
 		toIn.put("player", pers.getPlayerUUID());
-		toIn.put("slot", pers.getId());
+		toIn.put("id", pers.getId());
 		toIn.put("slot", index);
 		ArcheCore.getControls().getSQLHandler().insert("persona_skins_used", toIn);
 		return true;
@@ -145,12 +159,16 @@ public class SkinCache {
 		}catch(SQLException e) {e.printStackTrace();}
 	}
 	
-	void checkRefreshTime() {
+	
+	/*---------------------- Tasks used for the Runnable ----------------------*/
+	
+	int checkRefreshTime() {
 		//Assume we refresh 25 skins per hour (we do 1 per 2 minutes, plus downtime, crashes)
 		//Skin cache size / 25 = hours in advance we need to refresh all skins.
 		
 		int cachedSkins = skinCache.values().size();
 		refreshThresholdInHours = 3 + (cachedSkins / 25);
+		return refreshThresholdInHours;
 	}
 	
 	ArcheSkin grabOneSkinAndRefresh(MinecraftAccount account) throws IOException, ParseException, AuthenticationException {
@@ -172,5 +190,36 @@ public class SkinCache {
 		
 		return whichOneToRefresh;
 	}
-	
+
+	public void refreshPlayer(Player p) {
+		Bukkit.getOnlinePlayers().stream()
+		.filter(x -> (x != p))
+		.forEach(x -> {x.hidePlayer(p); x.showPlayer(p);});
+		
+		
+		final ProtocolManager manager = ProtocolLibrary.getProtocolManager();
+		
+		WrappedGameProfile profile = WrappedGameProfile.fromPlayer(p); //Protocollib for version independence	}
+		List<PlayerInfoData> lpid = Lists.newArrayList();
+		
+		lpid.add(new PlayerInfoData(profile, 
+				1, //who cares honestly
+				NativeGameMode.fromBukkit(p.getGameMode()), 
+				WrappedChatComponent.fromText(p.getDisplayName())));
+		
+		final PacketContainer packetDel = manager.createPacket(PacketType.Play.Server.PLAYER_INFO);
+		final PacketContainer packetAdd = manager.createPacket(PacketType.Play.Server.PLAYER_INFO);
+		packetDel.getPlayerInfoAction().write(0, PlayerInfoAction.REMOVE_PLAYER);
+		packetAdd.getPlayerInfoAction().write(0, PlayerInfoAction.ADD_PLAYER);
+		packetDel.getPlayerInfoDataLists().write(0, lpid);
+		packetAdd.getPlayerInfoDataLists().write(0, lpid);
+		
+		try {
+			manager.sendServerPacket(p, packetDel);
+			manager.sendServerPacket(p, packetAdd);
+			ArcheProtocolUtil.fakeRespawn(p, p.getWorld().getEnvironment());
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
+	}
 }

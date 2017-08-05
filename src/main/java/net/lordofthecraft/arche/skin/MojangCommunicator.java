@@ -28,9 +28,9 @@ public class MojangCommunicator {
 		//See wiki.vg/Authenthication		
 		InputStream in = null;
 		BufferedWriter out = null;
+		HttpURLConnection conn = null;
 		try {
 			URL url = new URL("https://authserver.mojang.com/authenticate");
-			HttpURLConnection conn;
 			conn = (HttpURLConnection) url.openConnection();
 			conn.setDoOutput(true); //lets us write method body
 			conn.setDoInput(true); //cuz fuck it why not
@@ -47,11 +47,11 @@ public class MojangCommunicator {
 			payload.put("password", account.password);
 
 			String payloadString = payload.toJSONString();
-			System.out.print(payloadString);
 
 			out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
 			out.write(payloadString);
-
+			out.close();
+			
 			int responseCode = conn.getResponseCode();
 			if(responseCode == 200) {
 				in = new BufferedInputStream(conn.getInputStream());
@@ -74,6 +74,7 @@ public class MojangCommunicator {
 		} finally {
 			if(in != null) in.close();
 			if(out != null) out.close();
+			if(conn != null) conn.disconnect();
 		}
 	}
 	
@@ -81,10 +82,11 @@ public class MojangCommunicator {
 		//See wiki.vg/Mojang_API#Change_Skin
 		InputStream in = null;
 		DataOutputStream out = null;
+		HttpURLConnection conn = null;
 		try {
 			String urlString = "https://api.mojang.com/user/profile/"+ data.uuid +"/skin";
 			URL url = new URL(urlString);
-			HttpURLConnection conn;
+			
 			conn = (HttpURLConnection) url.openConnection();
 			conn.setDoOutput(true); //lets us write method body
 			conn.setDoInput(true); //cuz fuck it why not
@@ -99,7 +101,6 @@ public class MojangCommunicator {
 			out = new DataOutputStream(conn.getOutputStream());  
 			out.writeBytes(query);
 
-			System.out.println(conn.getResponseCode());
 			in = new BufferedInputStream(conn.getInputStream());
 			String result = org.apache.commons.io.IOUtils.toString(in, "UTF-8");
 			in.close();	
@@ -107,17 +108,18 @@ public class MojangCommunicator {
 		} finally {
 			if(in != null) in.close();
 			if(out != null) out.close();
+			if(conn != null) conn.disconnect();
 		}
 	}
 	
 	public static PropertyMap requestSkin(String uuidUser) throws IOException, ParseException {
 		//See Kowaman (if you see him ask him to read up on resource leaks)
 		InputStreamReader in = null;
+		HttpURLConnection con = null;
 
 		try {//Request player profile from mojang api
 			URL url;
-			HttpURLConnection con;
-			url = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuidUser);
+			url = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuidUser + "?unsigned=false");
 			con = (HttpURLConnection) url.openConnection();
 			con.setRequestProperty("Content-type", "application/json");
 			con.setRequestProperty("Accept", "application/json");
@@ -138,7 +140,7 @@ public class MojangCommunicator {
 			Property textureProperty = new Property("textures", value, signature);
 			props.put("textures", textureProperty);
 			return props;
-		} finally { if(in != null) in.close(); }
+		} finally { if(in != null) in.close(); if (con != null) con.disconnect();}
 	}
 
 	

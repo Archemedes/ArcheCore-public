@@ -9,7 +9,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 
 public class ArcheGameProfile extends WrappedGameProfile
-{
+{	
     @SuppressWarnings("deprecation")
 	private ArcheGameProfile(final String arg0, final String arg1) {
         super(arg0, arg1);
