@@ -1,12 +1,43 @@
 package net.lordofthecraft.arche.persona;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.annotation.Nonnull;
+
+import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang.time.DateUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.attribute.Attributable;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.WeakBlock;
+import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.event.*;
+import net.lordofthecraft.arche.event.PersonaActivateEvent;
+import net.lordofthecraft.arche.event.PersonaCreateEvent;
+import net.lordofthecraft.arche.event.PersonaDeactivateEvent;
+import net.lordofthecraft.arche.event.PersonaRemoveEvent;
+import net.lordofthecraft.arche.event.PersonaSwitchEvent;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
@@ -18,21 +49,8 @@ import net.lordofthecraft.arche.save.tasks.InsertTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.TopData;
-import org.apache.commons.lang.WordUtils;
-import org.apache.commons.lang.time.DateUtils;
-import org.bukkit.*;
-import org.bukkit.attribute.Attributable;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-
-import javax.annotation.Nonnull;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import net.lordofthecraft.arche.skin.ArcheSkin;
+import net.lordofthecraft.arche.skin.SkinCache;
 
 public class ArchePersonaHandler implements PersonaHandler {
 	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
@@ -220,7 +238,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		Bukkit.getPluginManager().callEvent(event);
 
 		if(event.isCancelled()) return false;
-
+		
 		for (ArchePersona pr : prs) {
 			if (pr != null) {
 				boolean setAs = pr.getId() == id;
@@ -228,7 +246,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 				pr.setCurrent(setAs);
 			}
 		}
-
+		
 		Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(after, PersonaActivateEvent.Reason.SWITCH));
 		if(before != null) Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(before, PersonaDeactivateEvent.Reason.SWITCH));
 
@@ -238,6 +256,15 @@ public class ArchePersonaHandler implements PersonaHandler {
 		}
 
 		after.restoreMinecraftSpecifics(p);
+		
+		//Check if switched-to Persona will require a different skin from storage
+		SkinCache cache = ArcheCore.getControls().getSkinCache();
+		ArcheSkin skBefore = cache.getSkinFor(before);
+		ArcheSkin skAfter = cache.getSkinFor(after);
+		if( skBefore != skAfter ) {
+			cache.refreshPlayer(p);
+		}
+		
 		return true;
 	}
 
@@ -246,7 +273,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public ArchePersona createPersona(Player p, int id, String name, Race race, int gender, int age, boolean autoAge, long creationTime){
 
 		ArchePersona[] prs = personas.computeIfAbsent(p.getUniqueId(), k -> new ArchePersona[4]);
-
+		
 		//Check for old Persona
 		if(prs[id] != null){
 			PersonaRemoveEvent event2 = new PersonaRemoveEvent(prs[id], true);
@@ -260,6 +287,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 			//delete all skill records
 			deleteSkills(prs[id]);
+			SkinCache.getInstance().clearSkin(prs[id]);
 		}
 
 		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age,creationTime);
@@ -267,18 +295,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		PersonaCreateEvent event = new PersonaCreateEvent(persona, prs[id]);
 		Bukkit.getPluginManager().callEvent(event);
-
-		//if(event.isCancelled()) return null;
-
-		//Delete old Persona
-		if(prs[id] != null){
-			//This should no longer be necessary because of unique constraints
-			//buffer.put(new DataTask(DataTask.DELETE, "persona", null, prs[id].sqlCriteria));
-			buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, prs[id].sqlCriteria));
-
-			//delete all skill records
-			deleteSkills(prs[id]);
-		}
 
 		//Add this Persona into its slot
 		prs[id] = persona;

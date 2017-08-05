@@ -123,6 +123,7 @@ public class SkinCache {
 	
 	
 	public ArcheSkin getSkinFor(Persona pers) {
+		if(pers == null) return null;
 		return applied.get(pers.getPersonaKey());
 	}
 	
@@ -182,18 +183,21 @@ public class SkinCache {
 	
 	public boolean clearSkin(Persona ps) {
 		PersonaKey key = ps.getPersonaKey();
-		
+		return clearSkin(key);
+	}
+	
+	public boolean clearSkin(PersonaKey key) {
 		ArcheSkin sk = applied.remove(key);
 		if(sk == null) return false;
 
 		Map<String, Object> crit= Maps.newLinkedHashMap();
-		crit.put("player", ps.getPlayerUUID().toString());
-		crit.put("id", ps.getId());
+		crit.put("player", key.getPlayerUUID().toString());
+		crit.put("id", key.getPersonaId());
 		crit.put("slot", sk.getIndex());
 		ArcheCore.getControls().getSQLHandler().remove("persona_skins_used", crit);
 		
-		Player p = ps.getPlayer();
-		if(p != null) refreshPlayer(p);
+		Player p = Bukkit.getPlayer(key.getPlayerUUID());
+		if(p != null && key.getPersona().isCurrent()) refreshPlayer(p);
 		
 		return true;
 	}
@@ -201,6 +205,7 @@ public class SkinCache {
 	public void refreshPlayer(Player p) {
 		Bukkit.getOnlinePlayers().stream()
 		.filter(x -> (x != p))
+		.filter(x -> x.canSee(p))
 		.forEach(x -> {x.hidePlayer(p); x.showPlayer(p);});
 		
 		

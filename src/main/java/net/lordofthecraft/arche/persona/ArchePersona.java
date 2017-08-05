@@ -49,6 +49,7 @@ import net.lordofthecraft.arche.save.tasks.UpdateTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.SkillData;
+import net.lordofthecraft.arche.skin.SkinCache;
 
 public final class ArchePersona implements Persona, InventoryHolder {
 	private static final String TABLE = "persona";
@@ -733,6 +734,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		ArchePersona[] prs = handler.getAllPersonas(this.getPlayerUUID());
 		prs[getId()] = null;
 
+		SkinCache cache = ArcheCore.getControls().getSkinCache();
+		boolean newPersonaHasSkin = false;
 		if(isCurrent()){
 			boolean success = false;
 			for (ArchePersona pr : prs) {
@@ -744,11 +747,15 @@ public final class ArchePersona implements Persona, InventoryHolder {
 					pr.setCurrent(true);
 					pr.restoreMinecraftSpecifics(p);
 					success = true;
+					newPersonaHasSkin = cache.getSkinFor(pr) != null;
 					break;
 				}
 			}
 
 			if(!success){
+				boolean cleared = cache.clearSkin(this);
+				if(!cleared && newPersonaHasSkin) cache.refreshPlayer(p);
+				
 				Plugin plugin = ArcheCore.getPlugin();
 				plugin.getLogger().warning("Player " + player + " removed his final usable Persona!");
 				RaceBonusHandler.reset(p); //Clear Racial bonuses, for now...
