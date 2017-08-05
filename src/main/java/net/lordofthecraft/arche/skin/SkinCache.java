@@ -88,8 +88,9 @@ public class SkinCache {
 		return skin;
 	}
 	
-	public void storeSkin(Player p, int index) throws UnsupportedEncodingException, ParseException {
+	public void storeSkin(Player p, int index, String name) throws UnsupportedEncodingException, ParseException {
 		ArcheSkin skin = savePlayerSkin(p, index);
+		skin.setName(name);
 		Iterator<ArcheSkin> skins = skinCache.get(p.getUniqueId()).iterator();
 		while(skins.hasNext()) {
 			ArcheSkin remove = skins.next();
@@ -119,6 +120,7 @@ public class SkinCache {
 		ArcheCore.getControls().getSQLHandler().insert("persona_skins_used", toIn);
 		return true;
 	}
+	
 	
 	public ArcheSkin getSkinFor(Persona pers) {
 		return applied.get(pers.getPersonaKey());
@@ -159,36 +161,41 @@ public class SkinCache {
 		}catch(SQLException e) {e.printStackTrace();}
 	}
 	
-	
-	/*---------------------- Tasks used for the Runnable ----------------------*/
-	
-	int checkRefreshTime() {
-		//Assume we refresh 25 skins per hour (we do 1 per 2 minutes, plus downtime, crashes)
-		//Skin cache size / 25 = hours in advance we need to refresh all skins.
+	public boolean removeSkin(UUID uuid, int index) {
+		ArcheSkin sk = getSkinAtSlot(uuid, index);
+		if(sk == null) return false;
+		sk.deleteSql();
 		
-		int cachedSkins = skinCache.values().size();
-		refreshThresholdInHours = 3 + (cachedSkins / 25);
-		return refreshThresholdInHours;
+		Iterator<ArcheSkin> iter = applied.values().iterator();
+		while(iter.hasNext()) {
+			ArcheSkin other = iter.next();
+			if(sk == other) iter.remove();
+		}
+		
+		Map<String, Object> crit= Maps.newLinkedHashMap();
+		crit.put("player", uuid.toString());
+		crit.put("slot", index);
+		ArcheCore.getControls().getSQLHandler().remove("persona_skins_used", crit);
+		
+		return true;
 	}
 	
-	ArcheSkin grabOneSkinAndRefresh(MinecraftAccount account) throws IOException, ParseException, AuthenticationException {
-		//Run this Async. Obviously.
-		long tooOldTime = System.currentTimeMillis() - (this.refreshThresholdInHours*3600*1000);
+	public boolean clearSkin(Persona ps) {
+		PersonaKey key = ps.getPersonaKey();
 		
-		ArcheSkin whichOneToRefresh = skinCache.values().stream()
-			.filter(s -> s.getLastRefreshed() < tooOldTime )
-			.sorted((s1,s2) -> Long.compare(s2.getLastRefreshed(), s1.getLastRefreshed()) )
-			.findFirst().orElse( null);
+		ArcheSkin sk = applied.remove(key);
+		if(sk == null) return false;
+
+		Map<String, Object> crit= Maps.newLinkedHashMap();
+		crit.put("player", ps.getPlayerUUID().toString());
+		crit.put("id", ps.getId());
+		crit.put("slot", sk.getIndex());
+		ArcheCore.getControls().getSQLHandler().remove("persona_skins_used", crit);
 		
-		if(whichOneToRefresh == null) return null;
-		AuthenthicationData auth = MojangCommunicator.authenthicate(account);
-		MojangCommunicator.setSkin(auth, whichOneToRefresh.getURL());
-		PropertyMap props = MojangCommunicator.requestSkin(auth.uuid);
-		whichOneToRefresh.mojangSkinData = props;
-		whichOneToRefresh.timeLastRefreshed = System.currentTimeMillis();
-		whichOneToRefresh.updateSql();
+		Player p = ps.getPlayer();
+		if(p != null) refreshPlayer(p);
 		
-		return whichOneToRefresh;
+		return true;
 	}
 
 	public void refreshPlayer(Player p) {
@@ -222,4 +229,37 @@ public class SkinCache {
 			e.printStackTrace();
 		}
 	}
+	
+	/*---------------------- Tasks used for the Runnable ----------------------*/
+	
+	int checkRefreshTime() {
+		//Assume we refresh 25 skins per hour (we do 1 per 2 minutes, plus downtime, crashes)
+		//Skin cache size / 25 = hours in advance we need to refresh all skins.
+		
+		int cachedSkins = skinCache.values().size();
+		refreshThresholdInHours = 3 + (cachedSkins / 25);
+		return refreshThresholdInHours;
+	}
+	
+	ArcheSkin grabOneSkinAndRefresh(MinecraftAccount account) throws IOException, ParseException, AuthenticationException {
+		//Run this Async. Obviously.
+		long tooOldTime = System.currentTimeMillis() - (this.refreshThresholdInHours*3600*1000);
+		
+		ArcheSkin whichOneToRefresh = skinCache.values().stream()
+			.filter(s -> s.getLastRefreshed() < tooOldTime )
+			.sorted((s1,s2) -> Long.compare(s2.getLastRefreshed(), s1.getLastRefreshed()) )
+			.findFirst().orElse( null);
+		
+		if(whichOneToRefresh == null) return null;
+		AuthenthicationData auth = MojangCommunicator.authenthicate(account);
+		MojangCommunicator.setSkin(auth, whichOneToRefresh.getURL());
+		PropertyMap props = MojangCommunicator.requestSkin(auth.uuid);
+		whichOneToRefresh.mojangSkinData = props;
+		whichOneToRefresh.timeLastRefreshed = System.currentTimeMillis();
+		whichOneToRefresh.updateSql();
+		
+		return whichOneToRefresh;
+	}
+
+
 }

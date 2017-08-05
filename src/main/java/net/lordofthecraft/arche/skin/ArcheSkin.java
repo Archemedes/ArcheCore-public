@@ -20,6 +20,8 @@ public class ArcheSkin {
 	long timeLastRefreshed; //We need this to make sure we refresh every 24 hrs.
 	PropertyMap mojangSkinData; //This is valid data to add to GameProfile
 	
+	String name;
+	
 	public ArcheSkin(UUID uuid, int index, String url, boolean isSlim) {
 		this.index = index;
 		this.skinUrl = url;
@@ -28,6 +30,15 @@ public class ArcheSkin {
 	}
 	
 	private ArcheSkin() {};
+	
+	
+	public String getName() {
+		return name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
 	
 	public String getURL() {
 		return skinUrl;
@@ -61,6 +72,7 @@ public class ArcheSkin {
 		Map<String, Object> toIn = Maps.newLinkedHashMap();
 		toIn.put("player", this.owner);
 		toIn.put("slot", this.index);
+		toIn.put("name", this.name);
 		toIn.put("skinUrl", this.skinUrl);
 		toIn.put("slim", slim? 1:0);
 		Property textures = getProperty();
@@ -83,19 +95,28 @@ public class ArcheSkin {
 		ArcheCore.getControls().getSQLHandler().update("persona_skins", toIn, crit);
 	}
 	
+	void deleteSql() {
+		Map<String, Object> crit= Maps.newLinkedHashMap();
+		crit.put("player", this.owner);
+		crit.put("slot", this.index);
+		ArcheCore.getControls().getSQLHandler().remove("persona_skins", crit);
+	}
+	
+	
 	public static ArcheSkin fromSQL(ResultSet res) throws SQLException {
 		ArcheSkin skin = new ArcheSkin();
 		skin.owner = UUID.fromString(res.getString(1));
 		skin.index = res.getInt(2);
-		skin.skinUrl = res.getString(3);
-		skin.slim = res.getInt(4) != 0;
+		skin.name = res.getString(3);
+		skin.skinUrl = res.getString(4);
+		skin.slim = res.getInt(5) != 0;
 		
-		String value = res.getString(5);
-		String signature = res.getString(6);
+		String value = res.getString(6);
+		String signature = res.getString(7);
 		skin.mojangSkinData = new PropertyMap();
 		skin.mojangSkinData.put("textures", new Property("textures", value, signature));
 		
-		skin.timeLastRefreshed = res.getLong(7);
+		skin.timeLastRefreshed = res.getLong(8);
 		
 		return skin;
 	}

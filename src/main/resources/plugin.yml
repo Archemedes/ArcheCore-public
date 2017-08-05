@@ -82,6 +82,6 @@ commands:
       permission-message: §4Insufficient Permission for this command
    skin:
       usage: /<command>
-      permission: archecore.skincommand
+      permission: archecore.command.skin
       description: store and load skins
       

@@ -96,6 +96,7 @@ public class ArcheTables {
 		Map<String,String> 	cols = Maps.newLinkedHashMap();
 		cols.put("player", "TEXT NOT NULL");
 		cols.put("slot", "INT");
+		cols.put("name", "TEXT");
 		cols.put("skinUrl", "TEXT");
 		cols.put("slim", "INT");
 		cols.put("skinValue", "TEXT");
