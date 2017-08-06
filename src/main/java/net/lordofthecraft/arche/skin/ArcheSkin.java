@@ -1,11 +1,17 @@
 package net.lordofthecraft.arche.skin;
 
+import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.UUID;
 
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
 import com.google.common.collect.Maps;
+import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 
@@ -67,6 +73,28 @@ public class ArcheSkin {
 	private Property getProperty() {
 		return this.mojangSkinData.get("textures").iterator().next();	
 	}
+	
+	public ItemStack getHeadItem(){ //Kowaman
+		ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+		//return skull;
+		ItemMeta skullMeta = skull.getItemMeta();
+		
+		GameProfile profile = new GameProfile(UUID.randomUUID(), null);		
+		profile.getProperties().putAll("textures", mojangSkinData.get("textures"));
+		
+		Field profileField = null;
+		
+		try {
+			profileField = skullMeta.getClass().getDeclaredField("profile");
+			profileField.setAccessible(true);
+			profileField.set(skullMeta, profile);
+		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException e) {
+			e.printStackTrace();
+		}
+		skull.setItemMeta(skullMeta);
+		return skull;
+	}
+	
 	
 	void insertSql() {
 		Map<String, Object> toIn = Maps.newLinkedHashMap();

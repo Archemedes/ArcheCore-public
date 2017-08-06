@@ -236,6 +236,7 @@ public class SkinCache {
 		}
 	}
 	
+	
 	/*---------------------- Tasks used for the Runnable ----------------------*/
 	
 	int checkRefreshTime() {
