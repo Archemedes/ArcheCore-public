@@ -203,61 +203,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		this.handleProfessionSelection();
 		return lostXP;
 	}
-	/*
-	@SuppressWarnings("deprecation")
-	public void broadcastSkinChange() {
-		// TODO
-		Player p = this.getPlayer();
-		final ProtocolManager man = ProtocolLibrary.getProtocolManager();
-		final List<Player> tracked = Lists.newArrayList();
-		for (Player x : p.getWorld().getPlayers()) {
-			if (x == p) continue;
-			if (p.getLocation().distance(x.getLocation()) < 96) {
-				tracked.add(x);
-			}
-		}
-		PacketContainer remove = man.createPacket(PacketType.Play.Server.ENTITY_DESTROY);
-		remove.getIntegerArrays().write(0, new int[]{p.getEntityId()});
-
-		for (Player x : tracked) {
-			try {
-				man.sendServerPacket(x, remove);
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-			}
-		}
-
-		PacketContainer update = man.createPacket(PacketType.Play.Server.PLAYER_INFO);
-		List<PlayerInfoData> pfile = Arrays.asList(new PlayerInfoData(
-				WrappedGameProfile.fromPlayer(p),
-				0,
-				NativeGameMode.SURVIVAL,
-				null));
-		update.getPlayerInfoDataLists().write(0, pfile); 
-		update.getPlayerInfoAction().write(0, PlayerInfoAction.REMOVE_PLAYER);
-		man.broadcastServerPacket(update);
-		update.getPlayerInfoAction().write(0, PlayerInfoAction.ADD_PLAYER);
-		man.broadcastServerPacket(update);
-
-		WrapperPlayServerNamedEntitySpawn add = new WrapperPlayServerNamedEntitySpawn();
-		add.setEntityId(p.getEntityId());
-		add.setPlayerUuid(p.getUniqueId());
-		add.setPosition(p.getLocation().toVector());
-		add.setCurrentItem(p.getItemInHand().getTypeId());
-
-		Location head = p.getEyeLocation();
-		add.setPitch(head.getPitch());
-		add.setYaw(head.getYaw());
-
-		WrappedDataWatcher watcher = new WrappedDataWatcher();
-		watcher.setObject(10, ((CraftPlayer)p).getHandle().getDataWatcher().getByte(10));
-		watcher.setObject(6, (float)p.getHealth());
-		add.setMetadata(watcher);
-
-		for (Player x : tracked) {
-			add.sendPacket(x);
-		}
-	}*/
 
 	@Override
 	public double withdraw(double amount, Transaction cause) {

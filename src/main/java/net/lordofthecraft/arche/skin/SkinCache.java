@@ -166,6 +166,7 @@ public class SkinCache {
 		ArcheSkin sk = getSkinAtSlot(uuid, index);
 		if(sk == null) return false;
 		sk.deleteSql();
+		skinCache.remove(uuid, sk);
 		
 		Iterator<ArcheSkin> iter = applied.values().iterator();
 		while(iter.hasNext()) {

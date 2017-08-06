@@ -54,6 +54,8 @@ public class CommandSkin implements CommandExecutor {
 				if(sk == null) msg.addLine(ChatColor.GRAY + "" + ChatColor.ITALIC + "Empty...");
 				else {
 					msg.addLine(ChatColor.GOLD + sk.getName());
+					Persona pers = plugin.getPersonaHandler().getPersona(p);
+					if(cache.getSkinFor(pers) == sk) msg.addLine(ChatColor.LIGHT_PURPLE + " [in use]");
 					msg.setClickEvent(ChatBoxAction.RUN_COMMAND, "/skin apply " + i);
 					msg.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to apply this skin");
 				}
@@ -63,6 +65,9 @@ public class CommandSkin implements CommandExecutor {
 			return true;
 		} else if(arg(args[0],"delete","remove","del","rm")) {
 			try {
+				Persona pers = plugin.getPersonaHandler().getPersona(p);
+				if(pers != null) cache.clearSkin(pers);
+				
 				int i = Integer.parseInt(args[1]);
 				boolean result = cache.removeSkin(p.getUniqueId(), i);
 				if(result)p.sendMessage(ChatColor.GOLD + "successfully cleared the skin file in slot: " + ChatColor.RESET + i);

@@ -102,7 +102,6 @@ public class ArcheSkin {
 		ArcheCore.getControls().getSQLHandler().remove("persona_skins", crit);
 	}
 	
-	
 	public static ArcheSkin fromSQL(ResultSet res) throws SQLException {
 		ArcheSkin skin = new ArcheSkin();
 		skin.owner = UUID.fromString(res.getString(1));
