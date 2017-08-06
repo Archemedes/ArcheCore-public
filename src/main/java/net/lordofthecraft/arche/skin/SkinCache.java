@@ -88,8 +88,16 @@ public class SkinCache {
 		return skin;
 	}
 	
-	public void storeSkin(Player p, int index, String name) throws UnsupportedEncodingException, ParseException {
+	public int storeSkin(Player p, int index, String name) throws UnsupportedEncodingException, ParseException {
 		ArcheSkin skin = savePlayerSkin(p, index);
+		
+		for(ArcheSkin sk : skinCache.get(p.getUniqueId())) {
+			if(skin.getURL().equals(sk.getURL())){
+				return index;
+			}
+		}
+		
+		
 		skin.setName(name);
 		Iterator<ArcheSkin> skins = skinCache.get(p.getUniqueId()).iterator();
 		while(skins.hasNext()) {
@@ -102,7 +110,7 @@ public class SkinCache {
 		
 		skin.insertSql();
 		skinCache.put(p.getUniqueId(), skin);
-		
+		return -1;
 	}
 	
 	public boolean applySkin(Persona pers, int index) {

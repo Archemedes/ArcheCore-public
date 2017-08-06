@@ -81,7 +81,7 @@ commands:
       aliases: [attr, att, attri, atr]
       permission-message: §4Insufficient Permission for this command
    skin:
-      usage: /<command>
+      usage: Please see /<command> help for a list of commands
       permission: archecore.command.skin
       description: store and load skins
       

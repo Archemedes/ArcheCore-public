@@ -1,13 +1,18 @@
 package net.lordofthecraft.arche.commands;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Set;
+import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.json.simple.parser.ParseException;
+
+import com.google.common.collect.Sets;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.ChatBoxAction;
@@ -20,6 +25,8 @@ import net.lordofthecraft.arche.skin.SkinCache;
 public class CommandSkin implements CommandExecutor {
 	final private ArcheCore plugin;
 	final private SkinCache cache;
+	
+	final private Set<UUID> cooldowns = Sets.newHashSet();
 	
 	public CommandSkin(ArcheCore plugin) {
 		this.plugin = plugin;
@@ -36,19 +43,18 @@ public class CommandSkin implements CommandExecutor {
 		Player p = (Player) sender;
 
 		if(args.length == 0 || arg(args[0],"help")) {
-			
-			help(p, "list", "Shows a list of all stored skins, highlighting the one used for your Persona");
+			help(p, "list", "Prints out a list of all your stored skins, highlighting the one currently used for your Persona");
 			help(p, "use [id]", "Use the skin saved in slot [id]");
-			help(p, "clear", "Stop using a stored skin for your current Persona");
-			help(p, "store [id] [name]", "Store a skin in slot [id] with a given name.");
+			help(p, "clear", "Stop using a stored skin for this Persona");
+			help(p, "store [id] [name]", "Store a skin in slot [id] with your chosen identifier.");
 			help(p, "delete [id]", "Delete a skin from your stored skins.");
 			
-			p.sendMessage(ChatColor.GRAY+""+ChatColor.ITALIC + "You are allowed to store" + maxAllowed(p) + " skins.");
+			p.sendMessage(ChatColor.GRAY+""+ChatColor.ITALIC + "You are allowed to store " + maxAllowed(p) + " skins.");
 			return true;
-		} else if( arg(args[0], "view", "list", "show")) {
+		} else if( arg(args[0], "view", "list", "ls", "show")) {
 			p.sendMessage(ChatColor.AQUA + "Now showing you your personal skin storage:");
 			for(int i = 1; i <= maxAllowed(p); i++) {
-				ChatMessage msg = ArcheMessage.create("[" + i + "]").applyChatColor(ChatColor.AQUA);
+				ChatMessage msg = ArcheMessage.create("[" + i + "] ").applyChatColor(ChatColor.AQUA);
 		
 				ArcheSkin sk = cache.getSkinAtSlot(p.getUniqueId(), i);
 				if(sk == null) msg.addLine(ChatColor.GRAY + "" + ChatColor.ITALIC + "Empty...");
@@ -83,8 +89,17 @@ public class CommandSkin implements CommandExecutor {
 					return true;
 				}
 				
+				Persona pers = plugin.getPersonaHandler().getPersona(p);
+				if(cache.getSkinFor(pers).getIndex() == i) {
+					p.sendMessage(ChatColor.RED + "Can't override a skin currently in use by your Persona!");
+					return true;
+				}
+				
 				String name = args[2];
-				cache.storeSkin(p, i, name);
+				int index = cache.storeSkin(p, i, name);
+				if(index > 0) {
+					p.sendMessage("You already have this skin saved in slot: " + ChatColor.RESET + index);
+				}
 				
 				p.sendMessage(ChatColor.GOLD + "Stored your current skin successfully under slot: " + ChatColor.RESET + i);
 			} catch (NumberFormatException | IndexOutOfBoundsException e) {
@@ -102,11 +117,21 @@ public class CommandSkin implements CommandExecutor {
 			
 			if(arg(args[0], "apply", "use")) {
 				try {
+					if(isCoolingDown(p)) {
+						p.sendMessage(ChatColor.RED + "You are applying new skins too often! Be decisive!");
+						return true;
+					}
 					int i = Integer.parseInt(args[1]);
+					if(i < 1 || i > maxAllowed(p)) {
+						p.sendMessage(ChatColor.RED + "That is not a valid skin slot");
+						return true;
+					}
+					
 					boolean success = cache.applySkin(pers, i);
 					if(success) {
 						p.sendMessage(ChatColor.GOLD + "We have now applied stored skin: " + i);
 						cache.refreshPlayer(p);
+						addCooldown(p);
 					} else { p.sendMessage(ChatColor.RED + "No skin stored under : " + i); }
 				} catch(NumberFormatException e) { return false; }
 			} else if (arg(args[0], "clear")) {
@@ -133,5 +158,16 @@ public class CommandSkin implements CommandExecutor {
 		if(p.hasPermission("archecore.skincommand.3")) return 3;
 		if(p.hasPermission("archecore.skincommand.2")) return 2;
 		return 1;
+	}
+	
+	private boolean isCoolingDown(Player p) {
+		return cooldowns.contains(p.getUniqueId());
+	}
+	
+	private void addCooldown(Player p) {
+		if(p.hasPermission("archecore.skincommand.nocooldown")) return;
+		cooldowns.add(p.getUniqueId());
+		Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin, ()->{cooldowns.remove(p.getUniqueId());}, 5*60*20);
+		
 	}
 }

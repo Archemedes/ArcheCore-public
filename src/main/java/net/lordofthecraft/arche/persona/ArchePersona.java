@@ -696,15 +696,15 @@ public final class ArchePersona implements Persona, InventoryHolder {
 					break;
 				}
 			}
-
-			if(!success){
-				boolean cleared = cache.clearSkin(this);
-				if(!cleared && newPersonaHasSkin) cache.refreshPlayer(p);
-				
+			
+			boolean cleared = cache.clearSkin(this);
+			if(!success){			
 				Plugin plugin = ArcheCore.getPlugin();
 				plugin.getLogger().warning("Player " + player + " removed his final usable Persona!");
 				RaceBonusHandler.reset(p); //Clear Racial bonuses, for now...
 				if(p.hasPermission("archecore.mayuse") && !p.hasPermission("archecore.exempt")) new CreationDialog().makeFirstPersona(p);
+			} else {
+				if(!cleared && newPersonaHasSkin) cache.refreshPlayer(p);
 			}
 
 			p.sendMessage(ChatColor.DARK_PURPLE + "Your persona was removed: " + ChatColor.GRAY + this.getName());
