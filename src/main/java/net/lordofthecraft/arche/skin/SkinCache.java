@@ -82,7 +82,7 @@ public class SkinCache {
 		String skinUrl = skinJson.get("url").toString();
 		
 		ArcheSkin skin = new ArcheSkin(p.getUniqueId(), index, skinUrl, slim);
-		skin.timeLastRefreshed = System.currentTimeMillis(); //Actually refreshed during the player's login.
+		skin.timeLastRefreshed = 0;
 		skin.mojangSkinData = ((GameProfile) profile.getHandle()).getProperties();
 		
 		return skin;
@@ -93,7 +93,7 @@ public class SkinCache {
 		
 		for(ArcheSkin sk : skinCache.get(p.getUniqueId())) {
 			if(skin.getURL().equals(sk.getURL())){
-				return index;
+				return sk.getIndex();
 			}
 		}
 		
@@ -192,10 +192,7 @@ public class SkinCache {
 	
 	public boolean clearSkin(Persona ps) {
 		PersonaKey key = ps.getPersonaKey();
-		return clearSkin(key);
-	}
-	
-	public boolean clearSkin(PersonaKey key) {
+		
 		ArcheSkin sk = applied.remove(key);
 		if(sk == null) return false;
 
@@ -206,11 +203,11 @@ public class SkinCache {
 		ArcheCore.getControls().getSQLHandler().remove("persona_skins_used", crit);
 		
 		Player p = Bukkit.getPlayer(key.getPlayerUUID());
-		if(p != null && key.getPersona().isCurrent()) refreshPlayer(p);
+		if(p != null && ps.isCurrent()) refreshPlayer(p);
 		
 		return true;
 	}
-
+	
 	public void refreshPlayer(Player p) {
 		Bukkit.getOnlinePlayers().stream()
 		.filter(x -> (x != p))
@@ -247,12 +244,12 @@ public class SkinCache {
 	
 	/*---------------------- Tasks used for the Runnable ----------------------*/
 	
-	int checkRefreshTime() {
+	int checkRefreshTime(int accs) {
 		//Assume we refresh 25 skins per hour (we do 1 per 2 minutes, plus downtime, crashes)
 		//Skin cache size / 25 = hours in advance we need to refresh all skins.
 		
 		int cachedSkins = skinCache.values().size();
-		refreshThresholdInHours = 3 + (cachedSkins / 25);
+		refreshThresholdInHours = 2 + (cachedSkins / (25*accs));
 		return refreshThresholdInHours;
 	}
 	

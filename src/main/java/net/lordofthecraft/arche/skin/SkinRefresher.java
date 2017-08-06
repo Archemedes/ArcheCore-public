@@ -29,7 +29,7 @@ public class SkinRefresher extends BukkitRunnable {
 	@Override
 	public void run() {
 		Logger log = ArcheCore.getPlugin().getLogger();
-		int time = cache.checkRefreshTime(); //This lets us know at what time to start refreshing
+		int time = cache.checkRefreshTime(accounts.size()); //This lets us know at what time to start refreshing
 		log.info("Going to refresh skins for cached files older than " + time + " hours");
 
 		for(MinecraftAccount acc : accounts) {

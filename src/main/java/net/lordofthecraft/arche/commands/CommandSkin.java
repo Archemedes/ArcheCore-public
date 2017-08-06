@@ -100,6 +100,7 @@ public class CommandSkin implements CommandExecutor {
 				int index = cache.storeSkin(p, i, name);
 				if(index > 0) {
 					p.sendMessage("You already have this skin saved in slot: " + ChatColor.RESET + index);
+					return true;
 				}
 				
 				p.sendMessage(ChatColor.GOLD + "Stored your current skin successfully under slot: " + ChatColor.RESET + i);
