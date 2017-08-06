@@ -90,8 +90,9 @@ public class CommandSkin implements CommandExecutor {
 				}
 				
 				Persona pers = plugin.getPersonaHandler().getPersona(p);
-				if(cache.getSkinFor(pers).getIndex() == i) {
-					p.sendMessage(ChatColor.RED + "Can't override a skin currently in use by your Persona!");
+				ArcheSkin other = cache.getSkinFor(pers);
+				if(other != null) {
+					p.sendMessage(ChatColor.RED + "Can't store skins while using a custom skin!");
 					return true;
 				}
 				
@@ -133,7 +134,7 @@ public class CommandSkin implements CommandExecutor {
 						cache.refreshPlayer(p);
 						addCooldown(p);
 					} else { p.sendMessage(ChatColor.RED + "No skin stored under : " + i); }
-				} catch(NumberFormatException e) { return false; }
+				} catch(NumberFormatException | IndexOutOfBoundsException e) { return false; }
 			} else if (arg(args[0], "clear")) {
 				boolean cleared = cache.clearSkin(pers);
 				if(cleared)p.sendMessage(ChatColor.GOLD + "You are no longer using a stored skin on " + ChatColor.RESET + pers.getName());
