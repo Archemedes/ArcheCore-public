@@ -6,10 +6,7 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.event.*;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.PersonaHandler;
-import net.lordofthecraft.arche.interfaces.PersonaKey;
-import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
@@ -789,7 +786,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		}
 	}
 
-	public void removeMagic(ArcheMagic magic) {
+	public void removeMagic(Magic magic) {
 		getPersonas().forEach(pers -> {
 			for (Persona p : pers) {
 				((ArchePersona) p).removeMagicAttachment(magic);

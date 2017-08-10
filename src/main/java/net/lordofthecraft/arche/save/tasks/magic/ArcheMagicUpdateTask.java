@@ -25,20 +25,23 @@ CREATE INDEX idx_magic ON magics (name);
      */
 
     private final ArcheMagic magic;
+    private final ArcheMagic.Field field;
+    private final Object data;
 
-    public ArcheMagicUpdateTask(ArcheMagic magic) {
+    public ArcheMagicUpdateTask(ArcheMagic magic, ArcheMagic.Field field, Object data) {
         this.magic = magic;
+        this.field = field;
+        this.data = data;
     }
 
     @Override
     protected void setValues() throws SQLException {
-        stat.setInt(1, magic.getMaxTier());
-        stat.setBoolean(2, magic.isSelfTeachable());
-        stat.setString(3, magic.getName());
+        stat.setObject(1, data, field.type);
+        stat.setString(2, magic.getName());
     }
 
     @Override
     protected String getQuery() {
-        return "UPDATE magics SET max_tier=? AND self_teach=? WHERE name=?";
+        return "UPDATE magics SET "+field.field+"=? WHERE name=?";
     }
 }

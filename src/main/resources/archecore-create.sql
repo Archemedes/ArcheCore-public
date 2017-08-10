@@ -164,10 +164,9 @@ CREATE TABLE IF NOT EXISTS magics (
     label           TEXT,
     days_to_max     INT UNSIGNED,
     days_to_extra   INT UNSIGNED,
-    archetype       VARCHAR(255),
-    PRIMARY KEY (name),
-    FOREIGN KEY (id_key) REFERENCES magic_archetypes(id_key) ON UPDATE CASCADE
-)
+    archetype       VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id_key),
+    FOREIGN KEY (archetype) REFERENCES magic_archetypes(id_key) ON UPDATE CASCADE
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE INDEX idx_magic ON magics (name);
@@ -339,9 +338,11 @@ CREATE TABLE IF NOT EXISTS persona_extras (
     money 			DOUBLE(10,2),
     skindata		TEXT,
     skill_fk        VARCHAR(255) DEFAULT NULL,
+    creature_fk     VARCHAR(255) DEFAULT NULL,
     PRIMARY KEY (persona_id_fk),
     FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE,
-    FOREIGN KEY (skill_fk) REFERENCES skill (skill_id) ON UPDATE CASCADE
+    FOREIGN KEY (skill_fk) REFERENCES skill (skill_id) ON UPDATE CASCADE,
+    FOREIGN KEY (creature_fk) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

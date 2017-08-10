@@ -3,6 +3,7 @@ package net.lordofthecraft.arche.interfaces;
 import net.lordofthecraft.arche.BlockRegistry;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.help.HelpFile;
+import net.lordofthecraft.arche.magic.Archenomicon;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.skill.BonusExpModifierHandler;
 import org.bukkit.Material;
@@ -19,8 +20,10 @@ public interface IArcheCore {
 	 * @return The PersonaHandler singleton
 	 */
 	PersonaHandler getPersonaHandler();
-	
-	/**
+
+    Archenomicon getArchenomicon();
+
+    /**
 	 * Each Persona is uniquely identified with a composite key that consists of
 	 * the Mojang Player UUID and a integer that refers to the Persona of the player.
 	 * The PersonaKey pairs these two objects, and can be used to compare Personas and as keys in HashMaps.

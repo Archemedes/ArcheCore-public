@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche.magic;
 
 import com.google.common.collect.Sets;
+import net.lordofthecraft.arche.interfaces.Creature;
 import net.lordofthecraft.arche.interfaces.Magic;
 
 import java.util.Collections;
@@ -11,7 +12,7 @@ import java.util.Set;
  *
  * @author 501warhead
  */
-public class ArcheCreature {
+public class ArcheCreature implements Creature {
 
     private final String id;
     private Set<Magic> creators;
@@ -27,20 +28,29 @@ public class ArcheCreature {
         abilities = Sets.newConcurrentHashSet();
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public Set<Magic> getCreators() {
         return Collections.unmodifiableSet(creators);
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getDescription() {
         return description;
+    }
+
+    @Override
+    public Set<String> getAbilities() {
+        return Collections.unmodifiableSet(abilities);
     }
 
     public void addCreator(Magic m) {

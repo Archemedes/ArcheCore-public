@@ -5,7 +5,6 @@ import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.persona.PersonaInventory;
 import net.lordofthecraft.arche.persona.PersonaSkin;
 import net.lordofthecraft.arche.persona.Race;
-import net.lordofthecraft.arche.magic.ArcheMagic;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -102,11 +101,11 @@ public interface Persona {
 	 */
 	boolean isCurrent();
 
-    boolean hasMagic(ArcheMagic m);
+    boolean hasMagic(Magic m);
 
-    boolean hasAchievedMagicTier(ArcheMagic m, int tier);
+    boolean hasAchievedMagicTier(Magic m, int tier);
 
-    Optional<Future<MagicAttachment>> createAttachment(ArcheMagic m, int tier, Persona teacher, boolean visible);
+    Optional<Future<MagicAttachment>> createAttachment(Magic m, int tier, Persona teacher, boolean visible);
 
 	/**
 	 * Gets a Personas prefix.

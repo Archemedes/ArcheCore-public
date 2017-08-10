@@ -1,5 +1,7 @@
 package net.lordofthecraft.arche.magic;
 
+import net.lordofthecraft.arche.interfaces.Magic;
+
 import java.util.UUID;
 
 /**
@@ -9,7 +11,7 @@ import java.util.UUID;
  */
 public class MagicData {
 
-    public final ArcheMagic magic;
+    public final Magic magic;
     public final int id;
     public final int tier;
     public final boolean visible;
@@ -18,7 +20,7 @@ public class MagicData {
     public final long learned;
     public final long lastAdvanced;
 
-    public MagicData(ArcheMagic magic, int id, int tier, boolean visible, boolean taught, UUID teacher, long learned, long lastAdvanced) {
+    public MagicData(Magic magic, int id, int tier, boolean visible, boolean taught, UUID teacher, long learned, long lastAdvanced) {
         this.magic = magic;
         this.id = id;
         this.tier = tier;

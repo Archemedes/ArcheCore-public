@@ -99,6 +99,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 	public static SQLHandler getSQLControls() { return getControls().getSQLHandler(); }
 
+	public static Archenomicon getMagicControls() { return getControls().getArchenomicon(); }
+
 	public static Persona getPersona(Player p) { return instance.getPersonaHandler().getPersona(p); }
 
 	public static boolean hasPersona(Player p) { return instance.getPersonaHandler().hasPersona(p); }
@@ -173,8 +175,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         //saveHandler = SaveHandler.getInstance();
 
 		blockRegistry = new BlockRegistry();
-		personaHandler = ArchePersonaHandler.getInstance();
 		archenomicon = Archenomicon.getInstance();
+		personaHandler = ArchePersonaHandler.getInstance();
 		helpdesk = HelpDesk.getInstance();
 		jcoll = new JistumaCollection(personaHandler);
 
@@ -502,6 +504,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			}
 		}
 
+	}
+
+	@Override
+	public Archenomicon getArchenomicon() {
+		return archenomicon;
 	}
 
 	@Override

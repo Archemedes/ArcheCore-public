@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.persona;
 
+import net.lordofthecraft.arche.interfaces.Magic;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.magic.MagicData;
@@ -17,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class MagicAttachment {
     private static final SaveExecutorManager buffer = SaveExecutorManager.getInstance();
-    private final ArcheMagic magic;
+    private final Magic magic;
     private final int id;
     private final UUID persona_id;
     //private FutureTask<MagicData> call;
@@ -29,7 +30,7 @@ public class MagicAttachment {
     private long lastAdvanced;
 
 
-    public MagicAttachment(ArcheMagic magic, UUID persona_id, MagicData data) {
+    public MagicAttachment(Magic magic, UUID persona_id, MagicData data) {
         this.magic = magic;
         this.persona_id = persona_id;
         id = data.id;
@@ -72,7 +73,7 @@ public class MagicAttachment {
         return id;
     }
 
-    public ArcheMagic getMagic() {
+    public Magic getMagic() {
         return magic;
     }
 

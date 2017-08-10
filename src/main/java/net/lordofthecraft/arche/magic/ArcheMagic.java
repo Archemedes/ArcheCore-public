@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Magic;
+import net.lordofthecraft.arche.interfaces.MagicType;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
@@ -14,6 +15,8 @@ import net.lordofthecraft.arche.save.tasks.magic.ArcheMagicInsertTask;
 import net.lordofthecraft.arche.save.tasks.magic.ArcheMagicUpdateTask;
 import org.bukkit.entity.Player;
 
+import java.sql.JDBCType;
+import java.sql.SQLType;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -44,7 +47,27 @@ CREATE TABLE IF NOT EXISTS magics (
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
      */
 
-    private static Set<ArcheMagic> MAGICS = Sets.newConcurrentHashSet();
+    public enum Field {
+        MAX_TIER("max_tier", JDBCType.INTEGER),
+        EXTRA_TIER("extra_tier", JDBCType.BOOLEAN),
+        SELF_TEACH("self_teach", JDBCType.BOOLEAN),
+        TEACHABLE("teachable", JDBCType.BOOLEAN),
+        DESCRIPTION("description", JDBCType.VARCHAR),
+        LABEL("label", JDBCType.VARCHAR),
+        DAYS_TO_MAX("days_to_max", JDBCType.INTEGER),
+        DAYS_TO_EXTRA("days_to_extra", JDBCType.INTEGER),
+        ARCHETYPE("archetype", JDBCType.VARCHAR);
+
+        public final String field;
+        public final SQLType type;
+
+
+        Field(String field, SQLType type) {
+            this.field = field;
+            this.type = type;
+        }
+    }
+
     private final String name;
     private int maxTier;
     private boolean selfTeachable;
@@ -53,27 +76,20 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     private boolean teachable;
     private int daysToMaxTier;
     private int daysToBonusTier;
-    private ArcheType type;
+    private MagicType type;
     private Map<Magic, Integer> weaknesses;
 
-    public static ArcheMagic createMagic(String name, int maxTier, boolean selfTeachable) {
-        Optional<ArcheMagic> magic = MAGICS.stream().filter(m -> m.getName().equalsIgnoreCase(name)).findFirst();
+    public static Magic createMagic(String name, int maxTier, boolean selfTeachable) {
+        Optional<Magic> magic = ArcheCore.getMagicControls().researchMagic(name);
         if (magic.isPresent()) {
             return magic.get();
         }
         ArcheMagic m = new ArcheMagic(name, maxTier, selfTeachable);
-        MAGICS.add(m);
+        ArcheCore.getMagicControls().registerArcana(m);
         SaveExecutorManager.getInstance().submit(new ArcheMagicInsertTask(m));
         return m;
     }
 
-    public static Set<ArcheMagic> getMagics() {
-        return Collections.unmodifiableSet(MAGICS);
-    }
-
-    public static Optional<ArcheMagic> getMagicByName(String name) {
-        return MAGICS.stream().filter(m -> m.name.equalsIgnoreCase(name)).findFirst();
-    }
 
     protected ArcheMagic(String name, int maxTier, boolean selfTeachable) {
         this.name = name;
@@ -82,7 +98,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         weaknesses = Maps.newConcurrentMap();
     }
 
-    public ArcheMagic(String name, int maxTier, boolean selfTeachable, String label, String description, boolean teachable, int daysToMaxTier, int daysToBonusTier, ArcheType type) {
+    ArcheMagic(String name, int maxTier, boolean selfTeachable, String label, String description, boolean teachable, int daysToMaxTier, int daysToBonusTier, ArcheType type) {
         this.name = name;
         this.maxTier = maxTier;
         this.selfTeachable = selfTeachable;
@@ -97,22 +113,24 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
     public void setMaxTier(int maxTier) {
         this.maxTier = maxTier;
-        performSQLUpdate();
+        performSQLUpdate(Field.MAX_TIER, maxTier);
     }
 
     public void setSelfTeachable(boolean selfTeachable) {
         this.selfTeachable = selfTeachable;
-        performSQLUpdate();
+        performSQLUpdate(Field.SELF_TEACH, selfTeachable);
     }
 
     public void addWeakness(Magic m, int mod) {
         weaknesses.put(m, mod);
     }
 
+    @Override
     public boolean isWeakAgainst(Magic m) {
         return weaknesses.containsKey(m);
     }
 
+    @Override
     public int getWeaknessModifier(Magic m) {
         if (!weaknesses.containsKey(m)) return 0;
         return weaknesses.get(m);
@@ -144,7 +162,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     }
 
     @Override
-    public ArcheType getType() {
+    public MagicType getType() {
         return type;
     }
 
@@ -223,12 +241,12 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         }
     }
 
-    protected void performSQLUpdate() {
-        SaveExecutorManager.getInstance().submit(new ArcheMagicUpdateTask(this));
+    protected void performSQLUpdate(Field f, Object data) {
+        SaveExecutorManager.getInstance().submit(new ArcheMagicUpdateTask(this, f, data));
     }
 
     public void remove() {
-        ArchePersonaHandler.getInstance().removeMagic(this);
+        ArcheCore.getMagicControls().banishMagic(this);
         SaveExecutorManager.getInstance().submit(new ArcheMagicDeleteTask(name));
     }
 

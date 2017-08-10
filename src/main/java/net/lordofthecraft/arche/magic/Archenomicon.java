@@ -2,14 +2,18 @@ package net.lordofthecraft.arche.magic;
 
 import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.interfaces.Creature;
 import net.lordofthecraft.arche.interfaces.Magic;
 import net.lordofthecraft.arche.interfaces.MagicFactory;
+import net.lordofthecraft.arche.interfaces.MagicType;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created on 7/12/2017
@@ -88,8 +92,8 @@ public class Archenomicon {
      */
 
     private final Set<Magic> magics = Sets.newConcurrentHashSet();
-    private final Set<ArcheType> archetypes = Sets.newConcurrentHashSet();
-    private final Set<ArcheCreature> creatures = Sets.newConcurrentHashSet();
+    private final Set<MagicType> archetypes = Sets.newConcurrentHashSet();
+    private final Set<Creature> creatures = Sets.newConcurrentHashSet();
 
     public void createTomeFromKnowledge(SQLHandler handler) {
         if (!archetypes.isEmpty()) {
@@ -105,14 +109,14 @@ public class Archenomicon {
                 String name = rs.getString("name");
                 String parent = rs.getString("parent_type");
                 String description = rs.getString("descr");
-                ArcheType aparent = null;
+                MagicType aparent = null;
                 if (parent != null) {
-                    Optional<ArcheType> pt = studyMagicType(parent);
+                    Optional<MagicType> pt = studyMagicType(parent);
                     if (pt.isPresent()) {
                         aparent = pt.get();
                     }
                 }
-                ArcheType t = new ArcheType(id, name, aparent, description);
+                ArcheType t = new ArcheType(id, name, (aparent == null ? null : (ArcheType) aparent), description);
                 forgeArchetype(t);
                 magicselect.clearParameters();
                 magicselect.setString(1, id);
@@ -231,11 +235,11 @@ public class Archenomicon {
                         '''
      */
 
-    public Optional<ArcheCreature> summonCreature(String id) {
+    public Optional<Creature> summonCreature(String id) {
         return creatures.stream().filter(c -> c.getId().equals(id)).findFirst();
     }
 
-    public Optional<ArcheCreature> summonCreatureByName(String name) {
+    public Optional<Creature> summonCreatureByName(String name) {
         return creatures.stream().filter(c -> c.getName().equals(name)).findFirst();
     }
 
@@ -247,14 +251,23 @@ public class Archenomicon {
         return magics.stream().filter(m -> m.getLabel().equals(name)).findFirst();
     }
 
-    public Optional<ArcheType> studyMagicType(String id) {
+    public Optional<MagicType> studyMagicType(String id) {
         return archetypes.stream().filter(a -> a.getKey().equals(id)).findFirst();
     }
 
-    public Optional<ArcheType> studyMagicTypeByName(String name) {
+    public Optional<MagicType> studyMagicTypeByName(String name) {
         return archetypes.stream().filter(a -> a.getName().equals(name)).findFirst();
     }
 
+    public Set<Magic> listMagicsByArchetype(MagicType type) {
+        return magics.parallelStream().filter(m -> m.getType().equals(type)).collect(Collectors.toSet());
+    }
+
+
+    public void banishMagic(Magic m) {
+        ArchePersonaHandler.getInstance().removeMagic(m);
+        magics.remove(m);
+    }
 
 
 }

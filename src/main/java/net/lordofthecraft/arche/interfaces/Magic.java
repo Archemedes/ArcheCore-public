@@ -9,6 +9,10 @@ import org.bukkit.entity.Player;
  * @author 501warhead
  */
 public interface Magic {
+    boolean isWeakAgainst(Magic m);
+
+    int getWeaknessModifier(Magic m);
+
     String getLabel();
 
     String getDescription();
@@ -19,7 +23,7 @@ public interface Magic {
 
     int getDaysToBonusTier();
 
-    ArcheType getType();
+    MagicType getType();
 
     String getName();
 

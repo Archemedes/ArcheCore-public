@@ -9,10 +9,7 @@ import net.lordofthecraft.arche.enums.SkillTier;
 import net.lordofthecraft.arche.event.PersonaRemoveEvent;
 import net.lordofthecraft.arche.event.PersonaRenameEvent;
 import net.lordofthecraft.arche.event.PersonaSwitchEvent;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.PersonaKey;
-import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.interfaces.Transaction;
+import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
 import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.magic.MagicData;
@@ -94,6 +91,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	boolean gainsXP = true;
 	Skill profession = null; /*professionPrimary = null, professionSecondary = null, professionAdditional = null;*/
 	private Race race;
+	private Creature creature;
 	private volatile String name;
 	private WeakReference<Player> playerObject;
 	private int hash = 0;
@@ -589,7 +587,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			while (rs.next()) {
 				MagicData data = null;
 				String magic = rs.getString("magic_fk");
-				Optional<ArcheMagic> armagic = ArcheMagic.getMagicByName(magic);
+				Optional<Magic> armagic = ArcheCore.getMagicControls().researchMagic(magic);
 				if (armagic.isPresent()) {
 					int it = rs.getInt("magic_id");
 					int tier = rs.getInt("tier");
@@ -612,31 +610,31 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		attachment = new TagAttachment(Maps.newConcurrentMap(), persona_id, true);
 	}
 
-	void removeMagicAttachment(ArcheMagic magic) {
+	void removeMagicAttachment(Magic magic) {
 		magics.removeIf(mag -> mag.getMagic().equals(magic));
 	}
 
-	public Optional<MagicAttachment> getMagicAttachment(ArcheMagic m) {
+	public Optional<MagicAttachment> getMagicAttachment(Magic m) {
 		return magics.stream().filter(at -> at.getMagic().equals(m)).findFirst();
 	}
 
 	@Override
-	public boolean hasMagic(ArcheMagic m) {
+	public boolean hasMagic(Magic m) {
 		return magics.stream().anyMatch(at -> at.getMagic().equals(m));
 	}
 
 	@Override
-	public boolean hasAchievedMagicTier(ArcheMagic m, int tier) {
+	public boolean hasAchievedMagicTier(Magic m, int tier) {
 		Optional<MagicAttachment> omat = magics.stream().filter(at -> at.getMagic().equals(m)).findFirst();
 		return omat.filter(magicAttachment -> magicAttachment.getTier() >= tier).isPresent();
 	}
 
 	@Override
-	public Optional<Future<MagicAttachment>> createAttachment(ArcheMagic m, int tier, Persona teacher, boolean visible) {
+	public Optional<Future<MagicAttachment>> createAttachment(Magic m, int tier, Persona teacher, boolean visible) {
 		if (magics.stream().anyMatch(at -> at.getMagic().equals(m))) {
 			return Optional.empty();
 		}
-		MagicCreateCallable call = new MagicCreateCallable(persona_id, m, tier, (teacher == null ? null : teacher.getPersonaId()), visible, ArcheCore.getSQLControls());
+		MagicCreateCallable call = new MagicCreateCallable(persona_id, (ArcheMagic) m, tier, (teacher == null ? null : teacher.getPersonaId()), visible, ArcheCore.getSQLControls());
 		Future<MagicAttachment> future = exe.call(call);
 		try {
 			MagicAttachment attach = future.get(200, TimeUnit.MILLISECONDS);
