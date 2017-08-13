@@ -2,6 +2,7 @@ package net.lordofthecraft.arche;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
@@ -41,11 +42,13 @@ public class ArcheProtocolUtil {
 			manager.sendServerPacket(p, teleport);
 			
 			//Some wizardry here to make the right amount of hearts how up
-			boolean toggle = p.isHealthScaled();
-			p.setHealthScaled(!toggle);
-			p.setHealthScale(p.getHealthScale());
-			p.setHealth(p.getHealth());
-			p.setHealthScaled(toggle);
+			if(p.getGameMode() == GameMode.ADVENTURE || p.getGameMode() == GameMode.SURVIVAL) {
+				boolean toggle = p.isHealthScaled();
+				p.setHealthScaled(!toggle);
+				p.setHealthScale(p.getHealthScale());
+				p.setHealth(p.getHealth());
+				p.setHealthScaled(toggle);
+			}
 			
 			//Some wizardry here to prevent unintended speedhacking
 			p.setWalkSpeed(p.getWalkSpeed());
