@@ -51,14 +51,17 @@ public class SkinCache {
 	private Multimap<UUID, ArcheSkin> skinCache = HashMultimap.create();
 	private Map<PersonaKey, ArcheSkin> applied = Maps.newHashMap();
 	
-	private final SkinRefresher refreshTask;
+	//private final SkinRefresher refreshTask;
 	
 	public static SkinCache getInstance() { return INSTANCE; }
 	private SkinCache() { 
 		init();
 		new PersonaSkinListener().listen(); 
-		refreshTask = new SkinRefresher(this);
-		refreshTask.runTaskTimerAsynchronously(ArcheCore.getPlugin(), 20*120, 20*120);
+		
+		//Note: we turn this off as there doesnt seem to be an expiry date
+		//on signed skin data sent by Mojang right now. Why? IDK. But rejoice.
+		/*refreshTask = new SkinRefresher(this);
+		refreshTask.runTaskTimerAsynchronously(ArcheCore.getPlugin(), 20*120, 20*120);*/
 	}
 	
 	private int refreshThresholdInHours = 15;
