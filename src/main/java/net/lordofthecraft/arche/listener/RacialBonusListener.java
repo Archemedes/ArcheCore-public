@@ -9,6 +9,7 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPolarBear;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -105,14 +106,14 @@ public class RacialBonusListener implements Listener {
 			if(ps.getRace() == Race.CONSTRUCT && p.getGameMode() != GameMode.CREATIVE){
 				//p.sendMessage(ChatColor.RED + "You are moving too fast!");
 				//p.damage(4);
-				int hunger = p.getFoodLevel();
-				p.setFoodLevel(4); //Ghetto but works.
-				Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> p.setFoodLevel(hunger), 8);
+				p.setFoodLevel(6); //Ghetto but works.
 				p.setSprinting(false);
 				e.setCancelled(true);
 			}
 		}
 	}
+
+
 
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
 	public void onHunger(FoodLevelChangeEvent e){
@@ -123,9 +124,12 @@ public class RacialBonusListener implements Listener {
 			if(pers != null){
 				Race race = pers.getRace();
 
-				if(race == Race.SPECTRE || race == Race.CONSTRUCT || race == Race.NECROLYTE){
+				if(race == Race.SPECTRE || race == Race.NECROLYTE) {
 					e.setCancelled(true);
 					e.setFoodLevel(20);
+				}else if(race == Race.CONSTRUCT){
+					e.setCancelled(true);
+					e.setFoodLevel(6);
 				} else if(race == Race.ORC || race == Race.OLOG || race == Race.GOBLIN){
 					//Allows eating of rotten food
 					p.removePotionEffect(PotionEffectType.HUNGER);
@@ -206,19 +210,6 @@ public class RacialBonusListener implements Listener {
 		}
 	}
 
-	//fix construct shields?
-	@EventHandler(priority = EventPriority.HIGH)
-	public void onInteract(PlayerInteractEvent e){
-		Persona pers = handler.getPersona(e.getPlayer());
-		if(pers != null) {
-			Race r = pers.getRace();
-			if (r == Race.CONSTRUCT) {
-				if(e.getPlayer().isBlocking()){
-					e.setCancelled(true);
-				}
-			}
-		}
-	}
 
 	//fix construct food glitch
 	@EventHandler(priority = EventPriority.HIGH)
@@ -394,7 +385,7 @@ public class RacialBonusListener implements Listener {
 	@SuppressWarnings("deprecation")
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onEntityMount(EntityMountEvent e) {
-		if (e.getMount() instanceof Horse && e.getEntity() instanceof Player) {
+		if (isMountable(e.getMount()) && e.getEntity() instanceof Player) {
 			Player p = (Player) e.getEntity();
 			if (handler.hasPersona(p)) {
 				if (handler.getPersona(p).getRace() == Race.CONSTRUCT) {
@@ -402,6 +393,10 @@ public class RacialBonusListener implements Listener {
 				}
 			}
 		}
+	}
+
+	private boolean isMountable(Entity e){
+		return e instanceof Horse || e instanceof Donkey || e instanceof Mule || e instanceof CraftPolarBear || e instanceof Llama;
 	}
 
 	@EventHandler(priority=EventPriority.LOWEST)
