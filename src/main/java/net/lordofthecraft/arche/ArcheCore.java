@@ -196,6 +196,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		} else {
 			sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
 		}
+		
+		ArcheTables.setUpSQLTables(sqlHandler);
+		
 		saveHandler = SaveHandler.getInstance();
 		blockRegistry = new BlockRegistry();
 		personaHandler = ArchePersonaHandler.getInstance();
@@ -206,7 +209,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		timer = debugMode? new ArcheTimer(this) : null;
 		personaHandler.setModifyDisplayNames(modifyDisplayNames);
 
-		ArcheTables.setUpSQLTables(sqlHandler);
+		
 
 		try{
 			ResultSet res = sqlHandler.query("SELECT * FROM blockregistry");
