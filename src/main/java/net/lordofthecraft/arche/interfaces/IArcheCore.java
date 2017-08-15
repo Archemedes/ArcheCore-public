@@ -4,6 +4,7 @@ import net.lordofthecraft.arche.BlockRegistry;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.help.HelpFile;
 import net.lordofthecraft.arche.skill.BonusExpModifierHandler;
+import net.lordofthecraft.arche.skin.SkinCache;
 
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -221,4 +222,10 @@ public interface IArcheCore {
 	 */
 	
 	boolean areRacialDamageBonusesEnabled();
+	
+	/**
+	 * Skin Cache keeps track of skins belonging to players, and custom skins applied to persona
+	 * @return The SkinCache singleton
+	 */
+	SkinCache getSkinCache();
 }

@@ -1,7 +1,32 @@
 package net.lordofthecraft.arche.persona;
 
+import java.lang.ref.WeakReference;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.enums.ProfessionSlot;
@@ -24,26 +49,7 @@ import net.lordofthecraft.arche.save.tasks.UpdateTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.SkillData;
-import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import java.lang.ref.WeakReference;
-import java.util.*;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import net.lordofthecraft.arche.skin.SkinCache;
 
 public final class ArchePersona implements Persona, InventoryHolder {
 	private static final String TABLE = "persona";
@@ -73,7 +79,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	String player;
 	WeakBlock location = null;
 	PersonaInventory inv = null;
-	PersonaSkin skin = null;
 	double money = 0;
 	boolean gainsXP = true;
 	Skill profession = null; /*professionPrimary = null, professionSecondary = null, professionAdditional = null;*/
@@ -164,16 +169,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		this.reskillRacialReassignment();
 	}
 
-	public PersonaSkin getSkin() {
-		return skin;
-	}
-
-	public void setSkin(PersonaSkin skin) {
-		this.skin = skin;
-		buffer.put(new UpdateTask(this, PersonaField.SKIN, skin.getData()));
-		//if (this.getPlayer() != null) PersonaSkinListener.updatePlayerSkin(this.getPlayer());
-	}
-
 	public double reskillRacialReassignment() {
 		List<Skill> skills = getOrderedProfessions();
 		boolean canHaveBonus = this.getTimePlayed() / 60 >= 250;
@@ -208,61 +203,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		this.handleProfessionSelection();
 		return lostXP;
 	}
-	/*
-	@SuppressWarnings("deprecation")
-	public void broadcastSkinChange() {
-		// TODO
-		Player p = this.getPlayer();
-		final ProtocolManager man = ProtocolLibrary.getProtocolManager();
-		final List<Player> tracked = Lists.newArrayList();
-		for (Player x : p.getWorld().getPlayers()) {
-			if (x == p) continue;
-			if (p.getLocation().distance(x.getLocation()) < 96) {
-				tracked.add(x);
-			}
-		}
-		PacketContainer remove = man.createPacket(PacketType.Play.Server.ENTITY_DESTROY);
-		remove.getIntegerArrays().write(0, new int[]{p.getEntityId()});
-
-		for (Player x : tracked) {
-			try {
-				man.sendServerPacket(x, remove);
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-			}
-		}
-
-		PacketContainer update = man.createPacket(PacketType.Play.Server.PLAYER_INFO);
-		List<PlayerInfoData> pfile = Arrays.asList(new PlayerInfoData(
-				WrappedGameProfile.fromPlayer(p),
-				0,
-				NativeGameMode.SURVIVAL,
-				null));
-		update.getPlayerInfoDataLists().write(0, pfile); 
-		update.getPlayerInfoAction().write(0, PlayerInfoAction.REMOVE_PLAYER);
-		man.broadcastServerPacket(update);
-		update.getPlayerInfoAction().write(0, PlayerInfoAction.ADD_PLAYER);
-		man.broadcastServerPacket(update);
-
-		WrapperPlayServerNamedEntitySpawn add = new WrapperPlayServerNamedEntitySpawn();
-		add.setEntityId(p.getEntityId());
-		add.setPlayerUuid(p.getUniqueId());
-		add.setPosition(p.getLocation().toVector());
-		add.setCurrentItem(p.getItemInHand().getTypeId());
-
-		Location head = p.getEyeLocation();
-		add.setPitch(head.getPitch());
-		add.setYaw(head.getYaw());
-
-		WrappedDataWatcher watcher = new WrappedDataWatcher();
-		watcher.setObject(10, ((CraftPlayer)p).getHandle().getDataWatcher().getByte(10));
-		watcher.setObject(6, (float)p.getHealth());
-		add.setMetadata(watcher);
-
-		for (Player x : tracked) {
-			add.sendPacket(x);
-		}
-	}*/
 
 	@Override
 	public double withdraw(double amount, Transaction cause) {
@@ -739,6 +679,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		ArchePersona[] prs = handler.getAllPersonas(this.getPlayerUUID());
 		prs[getId()] = null;
 
+		SkinCache cache = ArcheCore.getControls().getSkinCache();
+		boolean newPersonaHasSkin = false;
 		if(isCurrent()){
 			boolean success = false;
 			for (ArchePersona pr : prs) {
@@ -750,15 +692,19 @@ public final class ArchePersona implements Persona, InventoryHolder {
 					pr.setCurrent(true);
 					pr.restoreMinecraftSpecifics(p);
 					success = true;
+					newPersonaHasSkin = cache.getSkinFor(pr) != null;
 					break;
 				}
 			}
-
-			if(!success){
+			
+			boolean cleared = cache.clearSkin(this);
+			if(!success){			
 				Plugin plugin = ArcheCore.getPlugin();
 				plugin.getLogger().warning("Player " + player + " removed his final usable Persona!");
 				RaceBonusHandler.reset(p); //Clear Racial bonuses, for now...
 				if(p.hasPermission("archecore.mayuse") && !p.hasPermission("archecore.exempt")) new CreationDialog().makeFirstPersona(p);
+			} else {
+				if(!cleared && newPersonaHasSkin) cache.refreshPlayer(p);
 			}
 
 			p.sendMessage(ChatColor.DARK_PURPLE + "Your persona was removed: " + ChatColor.GRAY + this.getName());

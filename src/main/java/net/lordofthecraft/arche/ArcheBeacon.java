@@ -1,10 +1,8 @@
 package net.lordofthecraft.arche;
 
-import com.google.common.collect.Lists;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.CreationDialog;
-import net.lordofthecraft.arche.persona.PersonaSkin;
+import java.util.List;
+import java.util.logging.Logger;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -13,8 +11,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.List;
-import java.util.logging.Logger;
+import com.google.common.collect.Lists;
+
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.CreationDialog;
+import net.lordofthecraft.arche.skin.ArcheSkin;
+import net.lordofthecraft.arche.skin.SkinCache;
 
 public class ArcheBeacon {
 	public static final String BEACON_HEADER = ChatColor.AQUA + "" + ChatColor.BOLD + "Your settings:";
@@ -98,10 +101,9 @@ public class ArcheBeacon {
 					else
 						buildItem(is, "Locked Slot", g + "Please " + ChatColor.GREEN+""+ChatColor.ITALIC + "Purchase", g + "You may purchase more personas in the store");
 				} else {
-				    PersonaSkin skin = a.getSkin();
-				    // Give a normal human head if skin is null.
-				    is = skin != null ? a.getSkin().getHeadItem() : new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-
+					ArcheSkin sk = SkinCache.getInstance().getSkinFor(a);
+				    is = sk != null ? sk.getHeadItem() : new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+					
 					String name = ChatColor.YELLOW + "" + ChatColor.ITALIC + a.getName();
 					String gender = a.getGender() == null? "" : a.getGender();
 					String desc = ChatColor.GRAY + a.getRaceString() + " " + gender + ", " + a.getAge();

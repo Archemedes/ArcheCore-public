@@ -1,15 +1,7 @@
 package net.lordofthecraft.arche.commands;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.PersonaSkin;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.PersonaRenameTask;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -18,7 +10,15 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.concurrent.TimeUnit;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.PersonaRenameTask;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 
 public class CommandPersona implements CommandExecutor {
     private final HelpDesk helpdesk;
@@ -139,12 +139,6 @@ public class CommandPersona implements CommandExecutor {
             } else if (args[0].equalsIgnoreCase("created")) {
             	String time = millsToDaysHours(System.currentTimeMillis() - pers.getCreationTime());
             	sender.sendMessage(ChatColor.AQUA + "You created this persona " + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
-                return true;
-            } else if (args[0].equalsIgnoreCase("skin") || args[0].equalsIgnoreCase("head")){
-				if (!(sender instanceof Player)) return false;
-				PersonaSkin newskin = new PersonaSkin((Player)sender);
-				pers.setSkin(newskin);
-				sender.sendMessage(ChatColor.AQUA + "Your current skin has been tied to this persona.");
 				return true;
             } else if (args[0].equalsIgnoreCase("clearprefix") && prefix) {
                 pers.clearPrefix();
@@ -211,10 +205,6 @@ public class CommandPersona implements CommandExecutor {
                     }
                     return true;
 
-				} else if (args[0].equalsIgnoreCase("clearskin")){
-					pers.setSkin(null);
-					sender.sendMessage(ChatColor.AQUA + "Skin cleared.");
-					return true;
                 } else if (args[0].equalsIgnoreCase("prefix") && prefix) {
                     int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
                     String name = StringUtils.join(args, ' ', 1, parseTo);
