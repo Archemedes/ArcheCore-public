@@ -44,6 +44,9 @@ commands:
       permission: archecore.command.treasurechest
       permission-message: §4Insufficient Permission for this command
       aliases: trch
+   card: 
+      description: Legacy command. Added for tab-complete purposes.
+      usage: Please type /<command> <player>@<persona>
    realname:
       description: get the current Minecraft Username from a Persona name.
       permission: archecore.mayuse

@@ -17,63 +17,63 @@ public class ArcheMessage implements ChatMessage {
 	private ArcheMessage(){
 		current = null;
 	}
-	
+
 	public ArcheMessage(String text){
 		addLine(text);
 	}
-	
+
 	public ArcheMessage(BaseComponent component){
 		parts.add(component);
 	}
 
 	public static ChatColor convertChatColor(org.bukkit.ChatColor color) {
 		switch (color) {
-			case AQUA:
-				return ChatColor.AQUA;
-			case BLACK:
-				return ChatColor.BLACK;
-			case BLUE:
-				return ChatColor.BLUE;
-			case BOLD:
-				return ChatColor.BOLD;
-			case DARK_AQUA:
-				return ChatColor.DARK_AQUA;
-			case DARK_BLUE:
-				return ChatColor.DARK_BLUE;
-			case DARK_GRAY:
-				return ChatColor.DARK_GRAY;
-			case DARK_GREEN:
-				return ChatColor.DARK_GREEN;
-			case DARK_PURPLE:
-				return ChatColor.DARK_PURPLE;
-			case DARK_RED:
-				return ChatColor.DARK_RED;
-			case GOLD:
-				return ChatColor.GOLD;
-			case GRAY:
-				return ChatColor.GRAY;
-			case GREEN:
-				return ChatColor.GREEN;
-			case ITALIC:
-				return ChatColor.ITALIC;
-			case LIGHT_PURPLE:
-				return ChatColor.LIGHT_PURPLE;
-			case MAGIC:
-				return ChatColor.MAGIC;
-			case RED:
-				return ChatColor.RED;
-			case RESET:
-				return ChatColor.RESET;
-			case STRIKETHROUGH:
-				return ChatColor.STRIKETHROUGH;
-			case UNDERLINE:
-				return ChatColor.UNDERLINE;
-			case WHITE:
-				return ChatColor.WHITE;
-			case YELLOW:
-				return ChatColor.YELLOW;
-			default:
-				throw new IllegalArgumentException();
+		case AQUA:
+			return ChatColor.AQUA;
+		case BLACK:
+			return ChatColor.BLACK;
+		case BLUE:
+			return ChatColor.BLUE;
+		case BOLD:
+			return ChatColor.BOLD;
+		case DARK_AQUA:
+			return ChatColor.DARK_AQUA;
+		case DARK_BLUE:
+			return ChatColor.DARK_BLUE;
+		case DARK_GRAY:
+			return ChatColor.DARK_GRAY;
+		case DARK_GREEN:
+			return ChatColor.DARK_GREEN;
+		case DARK_PURPLE:
+			return ChatColor.DARK_PURPLE;
+		case DARK_RED:
+			return ChatColor.DARK_RED;
+		case GOLD:
+			return ChatColor.GOLD;
+		case GRAY:
+			return ChatColor.GRAY;
+		case GREEN:
+			return ChatColor.GREEN;
+		case ITALIC:
+			return ChatColor.ITALIC;
+		case LIGHT_PURPLE:
+			return ChatColor.LIGHT_PURPLE;
+		case MAGIC:
+			return ChatColor.MAGIC;
+		case RED:
+			return ChatColor.RED;
+		case RESET:
+			return ChatColor.RESET;
+		case STRIKETHROUGH:
+			return ChatColor.STRIKETHROUGH;
+		case UNDERLINE:
+			return ChatColor.UNDERLINE;
+		case WHITE:
+			return ChatColor.WHITE;
+		case YELLOW:
+			return ChatColor.YELLOW;
+		default:
+			throw new IllegalArgumentException();
 		}
 	}
 
@@ -179,6 +179,19 @@ public class ArcheMessage implements ChatMessage {
 	}
 
 	@Override
+	public boolean removeLine(int i){
+		if (i >= size()) return false;
+		else parts.remove(i);
+		return true;
+	}
+
+	@Override
+	public int size(int i){
+		return parts.size();
+	}
+
+
+	@Override
 	public ArcheMessage select(int i){
 		if(i < 0) throw new IllegalArgumentException();
 		if(i > parts.size()) throw new ArrayIndexOutOfBoundsException();
@@ -245,13 +258,13 @@ public class ArcheMessage implements ChatMessage {
 		ClickEvent.Action act;
 		switch(action){
 
-			case RUN_COMMAND:
-				act = Action.RUN_COMMAND;
-				break;
+		case RUN_COMMAND:
+			act = Action.RUN_COMMAND;
+			break;
 		case SUGGEST_COMMAND: act = Action.SUGGEST_COMMAND; break;
-			case OPEN_URL:
-				act = Action.OPEN_URL;
-				break;
+		case OPEN_URL:
+			act = Action.OPEN_URL;
+			break;
 		case OPEN_FILE: act = Action.OPEN_FILE; break;
 		default: throw new IllegalArgumentException("Not all actions supported for ClickEvent");
 		}
@@ -273,9 +286,9 @@ public class ArcheMessage implements ChatMessage {
 		switch(action){
 		case SHOW_ACHIEVEMENT: act = HoverEvent.Action.SHOW_ACHIEVEMENT; break;
 		case SHOW_TEXT: act = HoverEvent.Action.SHOW_TEXT; break;
-			case SHOW_ITEM:
-				act = HoverEvent.Action.SHOW_ITEM;
-				break;
+		case SHOW_ITEM:
+			act = HoverEvent.Action.SHOW_ITEM;
+			break;
 		default: throw new IllegalArgumentException("Not all actions supported for HoverEvent");
 		}
 
@@ -301,7 +314,7 @@ public class ArcheMessage implements ChatMessage {
 
 		return builder.toString();
 	}
-	
+
 	public String toText() {
 		StringBuilder builder = new StringBuilder();
 		for(BaseComponent comp : parts)
@@ -321,7 +334,7 @@ public class ArcheMessage implements ChatMessage {
 		comps[length] = current;
 		p.spigot().sendMessage(comps);
 	}
-	
+
 	private static class StringPair{
 		private String url,vis;
 
@@ -329,7 +342,7 @@ public class ArcheMessage implements ChatMessage {
 			this.url = url;
 			this.vis = vis;
 		}
-		
+
 		private static StringPair parseSyntax(String segment){
 			String url,vis;
 			//Possible to have a topic link with a different Body text.
@@ -351,5 +364,5 @@ public class ArcheMessage implements ChatMessage {
 			return new StringPair(url, vis);
 		}
 	}
-	
+
 }

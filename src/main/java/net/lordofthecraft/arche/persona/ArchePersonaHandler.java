@@ -32,12 +32,15 @@ import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.PersonaActivateEvent;
 import net.lordofthecraft.arche.event.PersonaCreateEvent;
 import net.lordofthecraft.arche.event.PersonaDeactivateEvent;
 import net.lordofthecraft.arche.event.PersonaRemoveEvent;
 import net.lordofthecraft.arche.event.PersonaSwitchEvent;
+import net.lordofthecraft.arche.help.ArcheMessage;
+import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
@@ -61,8 +64,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 	private boolean displayName = false;
 	private PreparedStatement selectStatement = null;
 	private Map<Race, Location> racespawns = Maps.newHashMap();
-    
-    private UUID tythus = UUID.fromString("561637ba-06f6-4457-9787-ba65768c1b73");
+
+	private UUID tythus = UUID.fromString("561637ba-06f6-4457-9787-ba65768c1b73");
 
 	private boolean preloading = false;
 
@@ -238,7 +241,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		Bukkit.getPluginManager().callEvent(event);
 
 		if(event.isCancelled()) return false;
-		
+
 		for (ArchePersona pr : prs) {
 			if (pr != null) {
 				boolean setAs = pr.getId() == id;
@@ -246,7 +249,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 				pr.setCurrent(setAs);
 			}
 		}
-		
+
 		Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(after, PersonaActivateEvent.Reason.SWITCH));
 		if(before != null) Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(before, PersonaDeactivateEvent.Reason.SWITCH));
 
@@ -256,7 +259,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		}
 
 		after.restoreMinecraftSpecifics(p);
-		
+
 		//Check if switched-to Persona will require a different skin from storage
 		SkinCache cache = ArcheCore.getControls().getSkinCache();
 		ArcheSkin skBefore = cache.getSkinFor(before);
@@ -264,7 +267,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		if( skBefore != skAfter ) {
 			cache.refreshPlayer(p);
 		}
-		
+
 		return true;
 	}
 
@@ -273,7 +276,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public ArchePersona createPersona(Player p, int id, String name, Race race, int gender, int age, boolean autoAge, long creationTime){
 
 		ArchePersona[] prs = personas.computeIfAbsent(p.getUniqueId(), k -> new ArchePersona[4]);
-		
+
 		//Check for old Persona
 		if(prs[id] != null){
 			PersonaRemoveEvent event2 = new PersonaRemoveEvent(prs[id], true);
@@ -383,21 +386,41 @@ public class ArchePersonaHandler implements PersonaHandler {
 		if(desc != null)
 			result.add(c + "Description: " + r + desc);
 
-		Skill prof = p.getMainSkill();
-
-		if(prof != null){
-			String title = prof.getSkillTier(p).getTitle();
-			result.add(c + "Profession: " + r + title + " " + WordUtils.capitalize(prof.getName()));
-		}
-		
-		//Will add more eventually
-		
 		return result;
 	}
 
 	@Override
 	public List<String> whois(Player p, boolean mod) {
 		return whois(getPersona(p), mod);
+	}
+
+	@Override
+	public List<ChatMessage> whoisMore(Persona p, boolean mod, boolean self) {
+		List<ChatMessage> result = Lists.newArrayList();
+
+		if(p == null) return result;
+
+		String r = ChatColor.RESET+"";
+		String b = ChatColor.BLUE+"";
+		String l = ChatColor.GRAY+"";
+		String i = ChatColor.ITALIC+"";
+
+		result.add(new ArcheMessage(l+"~~~~ " + r + p.getPlayerName() + "'s Extended Roleplay Persona" + l + " ~~~~"));
+		result.add(new ArcheMessage(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
+
+		Skill prof = p.getMainSkill();
+
+		if(prof != null){
+			String title = prof.getSkillTier(p).getTitle();
+			result.add(new ArcheMessage(b + "Profession: " + r + title + " " + WordUtils.capitalize(prof.getName()))
+					.setHoverEvent(ChatBoxAction.SHOW_TEXT, ChatColor.GRAY + "Click for info...")
+					.setClickEvent(ChatBoxAction.RUN_COMMAND, "/archehelp " + prof.getName().toLowerCase()));
+			result.add(new ArcheMessage(b + "Profession: " + r + title + " " + WordUtils.capitalize(prof.getName())));
+		}
+		
+		//Will add more eventually
+		
+		return result;
 	}
 
 	public void initPlayer(Player p){
@@ -587,7 +610,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.professions[1] = ArcheSkillFactory.getSkill(res.getString(24));
 		persona.professions[2] = ArcheSkillFactory.getSkill(res.getString(25));
 		persona.pastPlayTime = res.getInt(28);
-		
+
 		String icon = res.getString("skindata");
 
 		if(!res.wasNull()){
