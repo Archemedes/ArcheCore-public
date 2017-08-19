@@ -46,8 +46,8 @@ public class CommandPersona implements CommandExecutor {
 				+ (prefix ? (i + "$</persona prefix >prefix [prefix]$: " + a + "Sets Persona Prefix (delete with $</persona clearprefix>clearprefix$).\n") : "")
 				+ i + "$</persona age >age [new age]$: " + a + "Set your character's age.\n"
 				+ i + "$</persona autoage>autoage$: " + a + "Toggle automatic aging for this persona.\n"
-				+ i + "$</persona addbio >addbio$: " + a + "Add a line of text to your Persona's bio!.\n"
-				+ i + "$</persona clearbio>clearbio$: " + a + "Clear your Persona's  bio completely.\n"
+				+ i + "$</persona addbio >addinfo$: " + a + "Add a line of text to your Persona's description..\n"
+				+ i + "$</persona clearbio>clearinfo$: " + a + "Clear your Persona's description completely.\n"
 				+ i + "$</persona time>time$: " + a + "View the hours spent playing your Persona.\n"
 				+ i + "$</persona created>created$: " + a + "View how long ago you created your Persona.\n"
 				+ i + "$</persona skin>skin$: " + a + "Save your current skin to your persona\n"
@@ -171,17 +171,17 @@ public class CommandPersona implements CommandExecutor {
 				String time = millsToDaysHours(System.currentTimeMillis() - pers.getCreationTime());
 				sender.sendMessage(ChatColor.AQUA + "You created " + pers.getName() + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
 				return true;
-			} else if (args[0].equalsIgnoreCase("skin") || args[0].equalsIgnoreCase("head")){
+			} else if (args[0].equalsIgnoreCase("icon") || args[0].equalsIgnoreCase("head")){
 				if (!(sender instanceof Player)) return false;
 				PersonaSkin newskin = new PersonaSkin((Player)sender);
 				pers.setSkin(newskin);
-				sender.sendMessage(ChatColor.AQUA + "Your current skin has been tied to " + pers.getName() + ".");
+				sender.sendMessage(ChatColor.AQUA + "Your current skin has been set as the icon for " + pers.getName() + ".");
 				return true;
 			} else if (args[0].equalsIgnoreCase("clearprefix") && prefix) {
 				pers.clearPrefix();
 				sender.sendMessage(ChatColor.AQUA + "Persona prefix was cleared for " + pers.getName() + ".");
 				return true;
-			} else if (args[0].equalsIgnoreCase("clearbio")) {
+			} else if (args[0].equalsIgnoreCase("clearbio") || args[0].equalsIgnoreCase("clearinfo") || args[0].equalsIgnoreCase("cleardesc") || args[0].equalsIgnoreCase("cleardescription")) {
 				pers.clearDescription();
 				sender.sendMessage(ChatColor.AQUA + "Cleared the biography for " + pers.getName() + ".");
 				return true;
@@ -258,17 +258,17 @@ public class CommandPersona implements CommandExecutor {
 						sender.sendMessage(ChatColor.RED + "Error: Prefix too long. Max length 16 characters");
 					}
 					return true;
-				} else if (args[0].equalsIgnoreCase("addbio")) {
+				} else if (args[0].equalsIgnoreCase("addbio") || args[0].equalsIgnoreCase("addinfo") || args[0].equalsIgnoreCase("adddesc") || args[0].equalsIgnoreCase("adddescription")) {
 					int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
 					String line = StringUtils.join(args, ' ', 1, parseTo);
 
 					int length = line.length();
 					if (pers.getDescription() != null) length += pers.getDescription().length();
 					if (length > 150 && !sender.hasPermission("archecore.persona.longbio")) {
-						sender.sendMessage(ChatColor.RED + "Error: Biography too long.");
+						sender.sendMessage(ChatColor.RED + "Error: Description too long.");
 					} else {
 						pers.addDescription(line);
-						sender.sendMessage(ChatColor.AQUA + pers.getName() + "'s bio now reads: " + line);
+						sender.sendMessage(ChatColor.AQUA + pers.getName() + "'s description now reads: " + line);
 					}
 
 					return true;
@@ -291,12 +291,12 @@ public class CommandPersona implements CommandExecutor {
 
 						return true;
 					}
-				} else if (args[0].equalsIgnoreCase("setbio")) {
+				} else if (args[0].equalsIgnoreCase("setbio") || args[0].equalsIgnoreCase("setinfo") || args[0].equalsIgnoreCase("setdesc") || args[0].equalsIgnoreCase("setdescription")) {
 					int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
 					String line = StringUtils.join(args, ' ', 1, parseTo);
 
 					pers.setDescription(line);
-					sender.sendMessage(ChatColor.AQUA + pers.getName() + "'s bio now reads: " + line);
+					sender.sendMessage(ChatColor.AQUA + pers.getName() + "'s description now reads: " + line);
 					return true;
 				} else if (args[0].equalsIgnoreCase("setrace")) {
 					if (!sender.hasPermission("archecore.admin") && !sender.hasPermission("archecore.mod.persona") && !sender.hasPermission("archecore.persona.setrace")) {
