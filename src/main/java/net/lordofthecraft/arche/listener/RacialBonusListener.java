@@ -181,9 +181,8 @@ public class RacialBonusListener implements Listener {
 							for (Entity en : l.getWorld().getNearbyEntities(l, 5, 5, 5)) {
 								if (!(en instanceof LivingEntity)) continue;
 								LivingEntity ent = (LivingEntity) en;
-								if (ent.getLocation().distanceSquared(l) > 9) continue;
+								if (ent.getLocation().distanceSquared(l) > 25) continue;
 								if (ent.equals(pers.getPlayer())) continue;
-								ent.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 0, false, false));
 								ent.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 0, false, false));
 								if (!(ent instanceof Player)) continue;
 								Player targ = (Player) ent;
