@@ -7,18 +7,15 @@ import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class ArmorPreventionListener implements Listener {
@@ -167,16 +164,16 @@ public class ArmorPreventionListener implements Listener {
 
 	
 	private boolean isWearingIron(ItemStack[] armor) {
-		for (int i = 0; i < armor.length; i++) {
-			if (armor[i] != null) {
-				if (armor[i].getType() == Material.IRON_HELMET 
-						|| armor[i].getType() == Material.IRON_CHESTPLATE
-						|| armor[i].getType() == Material.IRON_LEGGINGS
-						|| armor[i].getType() == Material.IRON_BOOTS) {
-					return true;
-				}
-			}
-		}
+        for (ItemStack anArmor : armor) {
+            if (anArmor != null) {
+                if (anArmor.getType() == Material.IRON_HELMET
+                        || anArmor.getType() == Material.IRON_CHESTPLATE
+                        || anArmor.getType() == Material.IRON_LEGGINGS
+                        || anArmor.getType() == Material.IRON_BOOTS) {
+                    return true;
+                }
+            }
+        }
 		return false;
 	}
 

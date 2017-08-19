@@ -33,11 +33,9 @@ public abstract class DelayedTask {
 
     public void start() {
         started = true;
-        taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin(), new Runnable() {
-            public void run() {
-                started = false;
-                object().run();
-            }
+        taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin(), () -> {
+            started = false;
+            object().run();
         }, delay);
     }
 
@@ -49,7 +47,7 @@ public abstract class DelayedTask {
             try {
                 started = false;
                 Bukkit.getScheduler().cancelTask(taskId);
-            }catch(Exception e) {  }
+            }catch(Exception ignored) {  }
         }
     }
 

@@ -105,7 +105,7 @@ public class CommandAttribute implements CommandExecutor {
                 } else if (args.length >= 3) {
                     if ("-r".equalsIgnoreCase(args[2]) && args.length >= 4) {
                         AttributeModifier toRemove = null;
-                        if (NumberUtils.isNumber(args[3])) {
+                        if (NumberUtils.isCreatable(args[3])) {
                             int id = Integer.valueOf(args[3]);
                             if (id <= mods.size()) {
                                 int count = 0;

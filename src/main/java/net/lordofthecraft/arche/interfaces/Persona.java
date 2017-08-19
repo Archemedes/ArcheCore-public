@@ -1,38 +1,37 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.enums.ProfessionSlot;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.persona.PersonaFlags;
-import net.lordofthecraft.arche.persona.PersonaFlags.PersonaFlag;
-import net.lordofthecraft.arche.persona.PersonaInventory;
-import net.lordofthecraft.arche.persona.PersonaSkin;
+import java.util.UUID;
+
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
-import java.util.UUID;
+import net.lordofthecraft.arche.enums.ProfessionSlot;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.persona.PersonaIcon;
+import net.lordofthecraft.arche.persona.PersonaInventory;
 
 public interface Persona {
 
-    /**
-     * Take money from a Persona. Negative amounts possible, but consider using {@link #deposit(double)}  instead.
-     * @param amount The amount of money to modify the Persona account by
-     *
-     * @return Amount of minas persona possess after the transaction
-     * @deprecated Use {@link #withdraw(double, Transaction)}
-     */
-    @Deprecated()
-    double withdraw(double amount);
+	/**
+	 * Take money from a Persona. Negative amounts possible, but consider using {@link #deposit(double)}  instead.
+	 * @param amount The amount of money to modify the Persona account by
+	 *
+	 * @return Amount of minas persona possess after the transaction
+	 * @deprecated Use {@link #withdraw(double, Transaction)}
+	 */
+	@Deprecated()
+	double withdraw(double amount);
 
-    double withdraw(double amount, Transaction cause);
+	double withdraw(double amount, Transaction cause);
 
-    /**
-     * Give money to a Persona. Negative amounts possible, but consider using {@link #withdraw(double)} instead.
-     * @param amount The amount of money to modify the Persona account by
-     *
-     * @return Amount of minas persona possess after the transaction
-     * @deprecated Use {@link #deposit(double, Transaction) }
-     */
-    @Deprecated()
+	/**
+	 * Give money to a Persona. Negative amounts possible, but consider using {@link #withdraw(double)} instead.
+	 * @param amount The amount of money to modify the Persona account by
+	 *
+	 * @return Amount of minas persona possess after the transaction
+	 * @deprecated Use {@link #deposit(double, Transaction) }
+	 */
+	@Deprecated()
 	double deposit(double amount);
 
     double deposit(double amount, Transaction cause);
@@ -46,13 +45,13 @@ public interface Persona {
 	 */
 
 	double resetSkills(float mod);
-	
+
 	/**
 	 * Assign a persona's race to the specified race as well as resets the user's racial skill in raw experience for distribution.
 	 * @param r The new persona's race.
 	 */
 	void racialReassign(Race r);
-	
+
 	/**
 	 * A method that retrieves the Persona's 'main' skill or profession, which they can set for their Persona's RP professions
 	 * @param slot The chosen slot to query
@@ -78,7 +77,7 @@ public interface Persona {
 	 * @param profession The skill to be set as main.
 	 */
 	void setMainSkill(Skill profession);
-	
+
 	/**
 	 * Returns the session-invariant ID of the Persona. Ids are between 0 and 3.
 	 * IDs are only unique for the same player 
@@ -156,30 +155,30 @@ public interface Persona {
 	 * @return The Persona Key for this persona
 	 */
 	PersonaKey getPersonaKey();
-	
-	
-	
+
+
+
 	/**
 	 * Retrieve the Mojang-issued UUID coupled to this Persona's player
 	 * @return the Player's unique id.
 	 */
 	UUID getPlayerUUID();
-	
-	
+
+
 	/**
 	 * Retrieve the Player to which this Persona belongs. The Persona object does not hold any references (not even weak ones)
 	 * belonging to its owning Player. The object will be found by iterating over all online players and comparing their UUID.
 	 * @return The Player belonging to this character, or null if the player is not online
 	 */
 	Player getPlayer();
-	
-	
+
+
 	/**
 	 * Retrieves the Persona's qualified Chat name. That is, it returns a proper concatenation of the prefix and Persona name
 	 * @return The name of the Player used for chat
 	 */
 	String getChatName();
-	
+
 	/**
 	 * Retrieve the Roleplay name of this Persona 
 	 * @return The Persona's RP name.
@@ -274,19 +273,6 @@ public interface Persona {
 	void setAutoAge(boolean autoAge);
 
 	/**
-	 * Get the associated skin of this Persona.
-	 * @return The Persona's skin.
-	 */
-
-	PersonaSkin getSkin();
-	
-	/**
-	 * Set the current skin of this Persona.
-	 * @param skin the skin to set.
-	 */
-	void setSkin(PersonaSkin skin);
-
-	/**
 	 * Delete the Persona from the Plugin records.
 	 * @return whether or not the removal was successful.
 	 */
@@ -303,6 +289,18 @@ public interface Persona {
 	 */
 	PersonaInventory getPInv();
 
+	/** Get the current head icon of this persona.
+	 * @return The Persona's icon.
+	 */
+
+	PersonaIcon getIcon();
+
+	/**
+	 * Set the current head icon of this Persona.
+	 * @param icon the icon to set.
+	 */
+	void setIcon(PersonaIcon icon);
+
 	/**
 	 * @return the inventory of this persona as an Inventory object
 	 */
@@ -312,6 +310,8 @@ public interface Persona {
 	 * @return the creation time of this persona in milliseconds
 	 */
 	long getCreationTime();
+
+
 
 	/**
 	 * @return the total playtime of this persona(all maps added)

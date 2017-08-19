@@ -1,5 +1,15 @@
 package net.lordofthecraft.arche.commands;
 
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.enums.Race;
@@ -9,21 +19,10 @@ import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.PersonaFlags.PersonaFlag;
-import net.lordofthecraft.arche.persona.PersonaSkin;
+import net.lordofthecraft.arche.persona.PersonaIcon;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.PersonaRenameTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-
-import java.util.concurrent.TimeUnit;
 
 public class CommandPersona implements CommandExecutor {
 	private final HelpDesk helpdesk;
@@ -42,7 +41,6 @@ public class CommandPersona implements CommandExecutor {
 		String output = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "How to use the command: " + i + "/persona\n"
 				+ ChatColor.BLUE + "Type " + i + "/persona [par]" + ChatColor.BLUE + " where " + i + "'[par]'" + ChatColor.BLUE + " is any of the following:\n" + a
 				+ i + "$</persona view >view {player}$: " + a + "View the current Character Card of {Player}.\n"
-				+ i + "$</persona more>more {player}$: " + a + "View additional persona information.\n"
 				+ i + "$</persona name >name [new name]$: " + a + "Rename your Persona to the given name.\n"
 				+ (prefix ? (i + "$</persona prefix >prefix [prefix]$: " + a + "Sets Persona Prefix (delete with $</persona clearprefix>clearprefix$).\n") : "")
 				+ i + "$</persona age >age [new age]$: " + a + "Set your character's age.\n"
@@ -51,7 +49,7 @@ public class CommandPersona implements CommandExecutor {
 				+ i + "$</persona clearbio>clearbio$: " + a + "Clear your Persona's  bio completely.\n"
 				+ i + "$</persona time>time$: " + a + "View the hours spent playing your Persona.\n"
 				+ i + "$</persona created>created$: " + a + "View how long ago you created your Persona.\n"
-				+ i + "$</persona skin>skin$: " + a + "Save your current skin to your persona\n"
+				+ i + "$</persona icon>icon$: " + a + "Save your current skin as your persona icon.\n"
 				+ i + "$</persona list>list$: " + a + "View all your Personas with names + IDs.\n";
 
 		helpdesk.addInfoTopic("Persona Command", output);
@@ -66,7 +64,7 @@ public class CommandPersona implements CommandExecutor {
 
 			if (sender.hasPermission("archecore.mod.persona")) {
 				sender.sendMessage(ChatColor.DARK_AQUA + "[M] Change apparant race with 'setrace'. This changes visible race, but not the underlying race.");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] View the real race of a persona with 'realrace' and reset the apparent race with 'wiperace'.");
+				sender.sendMessage(ChatColor.DARK_AQUA + "[M] View the real race of a persona with 'realrace' and reset the apparent race with 'wiperace.");
 				sender.sendMessage(ChatColor.DARK_AQUA + "[M] Open the inventory of a persona with openinv [player]@[personaid]");
 				sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can add the flag '-p {player}' to the end of the command to modify someone's current Persona.");
 				sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can use [player]@[personaid] to modify a different Persona");
@@ -83,7 +81,7 @@ public class CommandPersona implements CommandExecutor {
 
 			//Go through process to find the Persona we want
 			Persona pers = null;
-			if ((args[0].equalsIgnoreCase("view") || args[0].equalsIgnoreCase("more") ||
+			if ((args[0].equalsIgnoreCase("view") ||
 					args[0].equalsIgnoreCase("list"))
 					&& args.length > 1) {
 				pers = CommandUtil.personaFromArg(args[1]);
@@ -103,7 +101,8 @@ public class CommandPersona implements CommandExecutor {
 					|| args[0].equalsIgnoreCase("wiperace")
 					|| args[0].equalsIgnoreCase("openinv")
 					|| args[0].equalsIgnoreCase("head")
-					|| args[0].equalsIgnoreCase("skin"))
+					|| args[0].equalsIgnoreCase("icon")
+					|| args[0].equalsIgnoreCase("created"))
 					&& args.length > 1
 					&& (sender.hasPermission("archecore.mod.persona") || sender.hasPermission("archecore.mod.other"))) {
 				pers = CommandUtil.personaFromArg(args[1]);
@@ -126,31 +125,6 @@ public class CommandPersona implements CommandExecutor {
 					//If the persona is found the Whois should always succeed
 					//We have assured the persona is found earlier
 					handler.whois(pers, sender.hasPermission("archecore.mod.other")).forEach(sender::sendMessage);
-					if (sender instanceof Player) {
-						ChatMessage mes = new ArcheMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Click for more...");
-						mes.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to show extended persona information.");
-						mes.setClickEvent(ChatBoxAction.RUN_COMMAND, "/pers more " + pers.getPlayerName() + "@" + pers.getId());
-						mes.sendTo((Player)sender);
-					}
-				}
-				return true;
-			}
-			else if (args[0].equalsIgnoreCase("more")) {
-				Player t = Bukkit.getPlayer(pers.getPlayerUUID());
-				if (t != null && !handler.mayUse(t)) {
-					sender.sendMessage(ChatColor.DARK_AQUA + "This player is a Wandering Soul (may not use Personas)");
-				} else {
-					//If the persona is found the Whois should always succeed
-					//We have assured the persona is found earlier
-						for (ChatMessage m : handler.whoisMore(pers, sender.hasPermission("archecore.mod.other"), sender == pers.getPlayer())) {
-							m.sendTo((Player) sender);
-						}
-						if (sender instanceof Player) {
-							ChatMessage mes = new ArcheMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Click for more...");
-							mes.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to show basic persona information.");
-							mes.setClickEvent(ChatBoxAction.RUN_COMMAND, "/pers view " + pers.getPlayerName() + "@" + pers.getId());
-							mes.sendTo((Player)sender);
-						}
 				}
 				return true;
 			} else if (args[0].equalsIgnoreCase("autoage")) {
@@ -461,13 +435,12 @@ public class CommandPersona implements CommandExecutor {
 		millis -= TimeUnit.DAYS.toMillis(days);
 		long hours = TimeUnit.MILLISECONDS.toHours(millis);
 
-		StringBuilder sb = new StringBuilder(64);
-		sb.append(days);
-		sb.append(" days and ");
-		sb.append(hours);
-		sb.append(" hours");
+		String sb = String.valueOf(days) +
+				" days and " +
+				hours +
+				" hours";
 
-		return(sb.toString());
+		return(sb);
 	}
 
 }
