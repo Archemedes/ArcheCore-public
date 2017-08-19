@@ -162,18 +162,6 @@ public class ArcheMessage implements ChatMessage {
 
 		return this;
 	}
-	
-	@Override
-	public boolean removeLine(int i){
-		if (i >= size()) return false;
-		else parts.remove(i);
-		return true;
-	}
-	
-	@Override
-	public int size(int i){
-		return parts.size();
-	}
 
 	@Override
 	public ArcheMessage addTranslation(String translate, String... with){

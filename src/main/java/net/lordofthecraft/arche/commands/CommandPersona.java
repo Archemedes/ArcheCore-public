@@ -11,11 +11,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.help.ArcheMessage;
 import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
@@ -73,8 +70,6 @@ public class CommandPersona implements CommandExecutor {
 			if (sender.hasPermission("archecore.admin")) {
 				sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Force a permakill with 'permakill [persona]'. Default on your current Persona");
 				sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Reassign the underlying race with 'assignrace'. Will trigger a professions reshuffle.");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Perform gender reassignment surgery with 'assigngender'.");
-
 			}
 			return true;
 		} else {
@@ -133,40 +128,41 @@ public class CommandPersona implements CommandExecutor {
 				if (auto && !sender.hasPermission("archecore.stopautoage")) {
 					sender.sendMessage(ChatColor.RED + "Error: You may not turn off Auto-aging once on.");
 				} else {
-					sender.sendMessage(ChatColor.AQUA + "Turned " + ChatColor.GOLD + "" + ChatColor.BOLD + (auto ? "OFF" : "ON") + ChatColor.AQUA + " auto aging for " + pers.getName() + ".");
+					sender.sendMessage(ChatColor.AQUA + "Turned " + ChatColor.GOLD + "" + ChatColor.BOLD + (auto ? "OFF" : "ON") + ChatColor.AQUA + " auto aging.");
 					pers.setAutoAge(!auto);
 				}
 
 				return true;
-			} else if (args[0].equalsIgnoreCase("hidemagic")) {
-				boolean more = pers.hasFlag("show_magic");
-				sender.sendMessage(ChatColor.AQUA + "Turned showing magic information " + ChatColor.GOLD + "" + ChatColor.BOLD + (more ? "OFF" : "ON") + ChatColor.AQUA + " for " + ChatColor.RESET + pers.getName() + ".");
-				return true;
 			} else if (args[0].equalsIgnoreCase("time")) {
-				sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int)Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + pers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
-				sender.sendMessage(ChatColor.AQUA + "You have a total of " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int)Math.floor(pers.getTotalPlaytime() / 60) + ChatColor.AQUA + " hours on " + pers.getName() + "!");
+				sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int)Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on this persona in " + ArcheCore.getControls().getServerWorldName() + ".");
+				sender.sendMessage(ChatColor.AQUA + "You have a total of " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int)Math.floor(pers.getTotalPlaytime() / 60) + ChatColor.AQUA + " hours on this persona!");
 				return true;
 			} else if (args[0].equalsIgnoreCase("created")) {
 				String time = millsToDaysHours(System.currentTimeMillis() - pers.getCreationTime());
-				sender.sendMessage(ChatColor.AQUA + "You created " + pers.getName() + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
+				sender.sendMessage(ChatColor.AQUA + "You created this persona " + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
 				return true;
-			} else if (args[0].equalsIgnoreCase("skin") || args[0].equalsIgnoreCase("head")){
+			} else if (args[0].equalsIgnoreCase("icon") || args[0].equalsIgnoreCase("head")){
 				if (!(sender instanceof Player)) return false;
-				PersonaSkin newskin = new PersonaSkin((Player)sender);
-				pers.setSkin(newskin);
-				sender.sendMessage(ChatColor.AQUA + "Your current skin has been tied to " + pers.getName() + ".");
+				PersonaIcon newIcon = new PersonaIcon((Player)sender);
+				pers.setIcon(newIcon);
+				sender.sendMessage(ChatColor.AQUA + "Your current skin has been set as this persona's icon.");
 				return true;
+			} else if (args[0].equalsIgnoreCase("clearicon")){
+				pers.setIcon(null);
+				sender.sendMessage(ChatColor.AQUA + "Icon cleared.");
+				return true;
+
 			} else if (args[0].equalsIgnoreCase("clearprefix") && prefix) {
 				pers.clearPrefix();
-				sender.sendMessage(ChatColor.AQUA + "Persona prefix was cleared for " + pers.getName() + ".");
+				sender.sendMessage(ChatColor.AQUA + "Persona prefix was cleared.");
 				return true;
 			} else if (args[0].equalsIgnoreCase("clearbio")) {
 				pers.clearDescription();
-				sender.sendMessage(ChatColor.AQUA + "Cleared the biography for " + pers.getName() + ".");
+				sender.sendMessage(ChatColor.AQUA + "Cleared your Bio!");
 				return true;
 			} else if (args[0].equalsIgnoreCase("list")) {
-				ArchePersona[] personas = handler.getAllPersonas(pers.getPlayerUUID());
-				sender.sendMessage(ChatColor.AQUA + ArcheCore.getPlugin().getServer().getOfflinePlayer(pers.getPlayerUUID()).getName() + "'s personas:");
+				ArchePersona[] personas = handler.getAllPersonas(pers.getPlayer().getUniqueId());
+
 				for (int i = 0; i <= 3; i++ ) {
 					Persona persona = personas[i];
 					if (persona != null) {
@@ -197,7 +193,7 @@ public class CommandPersona implements CommandExecutor {
 						if (handler.countPersonas(other) == 0 && !other.hasPermission("archecore.exempt"))
 							other.kickPlayer("Your final Persona was Permakilled. Please relog.");
 						else
-							other.sendMessage(ChatColor.AQUA+ "A persona of yours was Permakilled: " + ChatColor.RESET + pers.getName());
+							other.sendMessage(ChatColor.DARK_GRAY + "A persona of yours was Permakilled: " + pers.getName());
 
 						sender.sendMessage(ChatColor.AQUA + "You have permakilled Persona " + ChatColor.WHITE + pers.getName() + ChatColor.AQUA + " belonging to " + ChatColor.WHITE + pers.getPlayerName());
 					} else sender.sendMessage(ChatColor.RED + "I'm afraid I can't do that.");
@@ -212,9 +208,8 @@ public class CommandPersona implements CommandExecutor {
 					if (timeLeft > 0 && !sender.hasPermission("archecore.persona.quickrename")) {
 						sender.sendMessage(ChatColor.RED + "You must wait " + timeLeft + " minutes before renaming again");
 					} else if (name.length() <= 32 || sender.hasPermission("archecore.persona.longname")) {
-						String oldname = pers.getName();
 						pers.setName(name);
-						sender.sendMessage(ChatColor.AQUA + "Persona name was changed from " + oldname + " to: " + ChatColor.RESET + name);
+						sender.sendMessage(ChatColor.AQUA + "Persona name was set to: " + ChatColor.RESET + name);
 						if (sender == pers.getPlayer()) //Player renamed by his own accord
 							SaveHandler.getInstance().put(new PersonaRenameTask(pers));
 					} else {
@@ -222,17 +217,13 @@ public class CommandPersona implements CommandExecutor {
 					}
 					return true;
 
-				} else if (args[0].equalsIgnoreCase("clearskin")){
-					pers.setSkin(null);
-					sender.sendMessage(ChatColor.AQUA + "Skin cleared.");
-					return true;
 				} else if (args[0].equalsIgnoreCase("prefix") && prefix) {
 					int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
 					String name = StringUtils.join(args, ' ', 1, parseTo);
 
 					if (name.length() <= 16) {
 						pers.setPrefix(name);
-						sender.sendMessage(ChatColor.AQUA + "Set the prefix of " + pers.getName() + " to: " + ChatColor.RESET + name);
+						sender.sendMessage(ChatColor.AQUA + "Persona prefix was set to: " + ChatColor.RESET + name);
 					} else {
 						sender.sendMessage(ChatColor.RED + "Error: Prefix too long. Max length 16 characters");
 					}
@@ -247,7 +238,7 @@ public class CommandPersona implements CommandExecutor {
 						sender.sendMessage(ChatColor.RED + "Error: Biography too long.");
 					} else {
 						pers.addDescription(line);
-						sender.sendMessage(ChatColor.AQUA + pers.getName() + "'s bio now reads: " + line);
+						sender.sendMessage(ChatColor.AQUA + "Added: " + ChatColor.RESET + line);
 					}
 
 					return true;
@@ -256,16 +247,17 @@ public class CommandPersona implements CommandExecutor {
 						int ageNow = pers.getAge();
 						int age = Integer.parseInt(args[1]);
 
+
 						if (sender.hasPermission("archecore.ageless")) {
 							pers.setAge(age);
-							sender.sendMessage(ChatColor.AQUA + "Set the age of " + pers.getName() + " to: " + ChatColor.RESET + age);
+							sender.sendMessage(ChatColor.AQUA + "Set your Persona's age to: " + ChatColor.RESET + age);
 						} else if (ageNow > age) {
 							sender.sendMessage(ChatColor.RED + "Error: You cannot become younger");
 						} else if (age < 5 || age > pers.getRace().getMaximumAge()) {
 							sender.sendMessage(ChatColor.RED + "Error: Age must be between 5 and " + pers.getRace().getMaximumAge());
 						} else {
 							pers.setAge(age);
-							sender.sendMessage(ChatColor.AQUA + "Set the age of " + pers.getName() + " to: " + ChatColor.RESET + age);
+							sender.sendMessage(ChatColor.AQUA + "Set your Persona's age to: " + ChatColor.RESET + age);
 						}
 
 						return true;
@@ -275,7 +267,7 @@ public class CommandPersona implements CommandExecutor {
 					String line = StringUtils.join(args, ' ', 1, parseTo);
 
 					pers.setDescription(line);
-					sender.sendMessage(ChatColor.AQUA + pers.getName() + "'s bio now reads: " + line);
+					sender.sendMessage(ChatColor.AQUA + "Bio now reads: " + line);
 					return true;
 				} else if (args[0].equalsIgnoreCase("setrace")) {
 					if (!sender.hasPermission("archecore.admin") && !sender.hasPermission("archecore.mod.persona") && !sender.hasPermission("archecore.persona.setrace")) {
@@ -284,28 +276,14 @@ public class CommandPersona implements CommandExecutor {
 						int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
 						String race = StringUtils.join(args, ' ', 1, parseTo);
 						pers.setApparentRace(race);
-						sender.sendMessage(ChatColor.AQUA + "Set visible race of " + pers.getName() + " to: " + ChatColor.RESET + race);
-					}
-					return true;
-				} else if (args[0].equalsIgnoreCase("assigngender")) {
-					if (!sender.hasPermission("archecore.admin") && !sender.hasPermission("archecore.persona.gender")) {
-						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-					} else {
-						String gender = args[1].toLowerCase();
-						switch (gender) {
-						case "male": case "female" : case "other" : {
-							pers.setGender(gender);
-							sender.sendMessage(ChatColor.AQUA + "Set gender of " + pers.getName() + " to: " + ChatColor.RESET + gender);
-							return true;
-						}
-						}  
+						sender.sendMessage(ChatColor.AQUA + "Set visible race of this persona to: " + ChatColor.RESET + race);
 					}
 					return true;
 				} else if (args[0].equalsIgnoreCase("realrace")) {
 					if (!sender.hasPermission("archecore.admin") && !sender.hasPermission("archecore.mod.persona") && !sender.hasPermission("archecore.persona.realrace")) {
 						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
 					} else {
-						sender.sendMessage(ChatColor.AQUA + "Underlying for " + pers.getName() + " is: " + ChatColor.GOLD + pers.getRace().getName());
+						sender.sendMessage(ChatColor.AQUA + "Underlying for this persona: " + ChatColor.GOLD + pers.getRace().getName());
 						sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "(Visible: " + pers.getRaceString() + ")");
 					}
 					return true;
@@ -313,7 +291,8 @@ public class CommandPersona implements CommandExecutor {
 					if (!sender.hasPermission("archecore.admin") && !sender.hasPermission("archecore.mod.persona") && !sender.hasPermission("archecore.persona.setrace")) {
 						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
 					} else {
-						sender.sendMessage(ChatColor.AQUA + "Visible race of " + pers.getName() + " has been reset to: " + ChatColor.RESET + pers.getRace().getName());
+						sender.sendMessage(ChatColor.AQUA + "Resetting visible race value of: " + ChatColor.GOLD + pers.getRaceString());
+						sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "(Real: " + pers.getRace().getName() + ")");
 						pers.setApparentRace(null);
 					}
 					return true;
@@ -326,30 +305,22 @@ public class CommandPersona implements CommandExecutor {
 						if (race == null) {
 							sender.sendMessage(ChatColor.RED + "Please enter a valid race.");
 						} else if (pers.getRace() == race) {
-							sender.sendMessage(ChatColor.RED + "Race for " + pers.getName() + " is already " + race.getName());
+							sender.sendMessage(ChatColor.RED + "Race already equals " + race.getName());
 						} else {
 							doRaceChange(sender, pers, race);
 						}
 					}
 					return true;
 				} else if (args[0].equalsIgnoreCase("openinv")) {
-					if (!sender.hasPermission("archecore.admin")) {
-						if (sender.hasPermission("archecore.mod.persona")) 
-							sender.sendMessage(ChatColor.RED + "Error: This command is currently suspended from moderators until we can sort out some bugs - Dev Team");
-						else 
-							sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
+					if (!sender.hasPermission("archecore.mod.persona")) {
+						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
 					} else {
 						if (sender instanceof Player) {
 							Player pl = (Player) sender;
 							pl.closeInventory();
-							Inventory inv = pers.getInventory();
-							if (inv == null) sender.sendMessage(ChatColor.RED + "This persona is currently active! Please use /openinv <player>");
-							else { 
-								sender.sendMessage(ChatColor.AQUA + "Opening invenotry contents for " + pers.getName() + ".");
-								pl.openInventory(pers.getInventory());
-							}
+							pl.openInventory(pers.getInventory());
 						} else {
-							sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
+							sender.sendMessage(ChatColor.RED + "This command can only be run from in game");
 						}
 					}
 					return true;
@@ -388,18 +359,18 @@ public class CommandPersona implements CommandExecutor {
 	private boolean doRaceChange(CommandSender sender, Persona pers, Race race) {
 		ArchePersona apers = (ArchePersona) pers;
 		apers.setRace(race);
-		sender.sendMessage(ChatColor.AQUA + "Underlying race for " + pers.getName()+ " has been changed to: " + ChatColor.RESET+ race.getName());
+		sender.sendMessage(ChatColor.AQUA + "Underlying race changed to " + race.getName() + " for: " + ChatColor.WHITE + pers.getName());
 		int lost = (int) apers.reskillRacialReassignment();
 		if (lost > 0) {
 			ArcheSkillFactory.getSkill("internal_drainxp").addRawXp(pers, lost);
 			sender.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + lost + ChatColor.AQUA + " XP was lost and granted for personal redistribution.");
 			sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Free XP can be assigned with /sk [skill] assign [xp]");
-			sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "To purge this value, type /sk internal_drainxp give [who] -[amount]");
 		}
 		Player p = pers.getPlayer();
 		if (sender != p) {
+			sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "To purge this value, type /sk internal_drainxp give [who] -[amount]");
 			if (p != null) {
-				sender.sendMessage(ChatColor.AQUA + "Underlying race for " + pers.getName()+ " has been changed to: " + ChatColor.RESET + race.getName());
+				p.sendMessage(ChatColor.AQUA + "Underlying race changed to " + race.getName() + " for this persona.");
 				if (lost > 0) {
 					p.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + lost + ChatColor.AQUA + " XP was lost and granted for personal redistribution.");
 					p.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Free XP can be assigned with /sk [skill] assign [xp]");
