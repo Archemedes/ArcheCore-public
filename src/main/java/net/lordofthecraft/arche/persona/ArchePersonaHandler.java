@@ -585,6 +585,13 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.professions[1] = ArcheSkillFactory.getSkill(res.getString(24));
 		persona.professions[2] = ArcheSkillFactory.getSkill(res.getString(25));
 		persona.pastPlayTime = res.getInt(28);
+		
+		String icon = res.getString("skindata");
+
+		if(!res.wasNull()){
+			persona.setIcon(new PersonaIcon(icon));
+		}
+
 
 		//We now let all Personas load their skills (albeit lazily). Let's do this now
 		persona.loadSkills();

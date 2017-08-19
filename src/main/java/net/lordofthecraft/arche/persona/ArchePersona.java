@@ -88,7 +88,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private int hash = 0;
 	private int food = 0;
 	private double health = 0;
-	
+	PersonaIcon icon = null;
+
 	private ArchePersona(int id, String name, Race race, int gender, int age,long creationTimeMS) {
 		key = new ArchePersonaKey(UUID.randomUUID(),id);
 		player = name;
@@ -211,24 +212,24 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	@Override
-    @Deprecated
-    public double withdraw(double amount) {
-        ArcheCore.getControls().getEconomy().withdrawPersona(this, amount);
-        return money;
-    }
+	@Deprecated
+	public double withdraw(double amount) {
+		ArcheCore.getControls().getEconomy().withdrawPersona(this, amount);
+		return money;
+	}
 
-    @Override
+	@Override
 	public double deposit(double amount, Transaction cause){
 		ArcheCore.getControls().getEconomy().depositPersona(this, amount);
 		return money;
 	}
 
-    @Override
-    @Deprecated
-    public double deposit(double amount) {
-        ArcheCore.getControls().getEconomy().depositPersona(this, amount);
-        return money;
-    }
+	@Override
+	@Deprecated
+	public double deposit(double amount) {
+		ArcheCore.getControls().getEconomy().depositPersona(this, amount);
+		return money;
+	}
 
 
 	public List<Skill> getOrderedProfessions() {
@@ -618,9 +619,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 		//Teleport the Player to the new Persona's stored location
 		if(location != null) {
-		    Bukkit.getScheduler().runTaskLater(ArcheCore.getPlugin(),
-                    () -> p.teleport(location.toLocation().add(0.5, 0.5, 0.5))
-                    , 3);
+			Bukkit.getScheduler().runTaskLater(ArcheCore.getPlugin(),
+					() -> p.teleport(location.toLocation().add(0.5, 0.5, 0.5))
+					, 3);
 		}
 
 		//Do we protect incase of bad teleport?
@@ -628,9 +629,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			NewbieProtectListener.bonusProtects.add(p.getUniqueId());
 			// TODO: This doesn't actually do anything lmao
 			new BukkitRunnable(){
-			    public void run(){
-			        NewbieProtectListener.bonusProtects.remove(p.getUniqueId());
-			    }};
+				public void run(){
+					NewbieProtectListener.bonusProtects.remove(p.getUniqueId());
+				}};
 		}
 
 		//Give them an inventory.
@@ -696,7 +697,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 					break;
 				}
 			}
-			
+
 			boolean cleared = cache.clearSkin(this);
 			if(!success){			
 				Plugin plugin = ArcheCore.getPlugin();
@@ -748,7 +749,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		ArchePersona p = (ArchePersona) object;
 		return this.player.equals(p.player) && this.getId() == p.getId();
 	}
-//
+	//
 	@Override
 	public boolean isNewbie() {
 		return getTimePlayed() < ArcheCore.getControls().getNewbieDelay();
@@ -765,6 +766,17 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		public int compare(Skill o1, Skill o2) {
 			return Double.compare(o2.getXp(p), o1.getXp(p));
 		}
+	}
+
+	@Override
+	public PersonaIcon getIcon() {
+		return icon;
+	}
+
+	@Override
+	public void setIcon(PersonaIcon icon) {
+		this.icon = icon;
+		buffer.put(new UpdateTask(this, PersonaField.ICON, icon.getData()));
 	}
 
 	@Override
