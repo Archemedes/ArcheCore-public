@@ -56,7 +56,7 @@ public class CommandSkin implements CommandExecutor {
 			help(p, "list", "Lists your stored skins.");
 			help(p, "use [id]", "Use the skin saved in slot [id].");
 			help(p, "clear", "Stop using a stored skin for this Persona.");
-			help(p, "store [id] [label]", "Store a skin in slot [id] with a chosen label.");
+			help(p, "store [id] [label]", "Store a skin in slot [id] with any label.");
 			help(p, "delete [id]", "Delete a skin from your stored skins.");
 
 			p.sendMessage(ChatColor.GRAY+""+ChatColor.ITALIC + "\nYou are allowed to store " + maxAllowed + " skins.");
@@ -181,7 +181,7 @@ public class CommandSkin implements CommandExecutor {
 	}
 
 	private void addCooldown(Player p) {
-		if(p.hasPermission("archecore.skincommand.nocooldown")) return;
+		if(p.hasPermission("archecore.command.skin.nocooldown")) return;
 		cooldowns.add(p.getUniqueId());
 		Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin, ()->{cooldowns.remove(p.getUniqueId());}, 5*60*20);
 
