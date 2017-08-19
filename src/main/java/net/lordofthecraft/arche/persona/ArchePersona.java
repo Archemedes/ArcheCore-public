@@ -15,7 +15,6 @@ import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
-import net.lordofthecraft.arche.persona.PersonaFlags.PersonaFlag;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.DataTask;
@@ -26,7 +25,6 @@ import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.SkillData;
 
-import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -85,7 +83,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private int hash = 0;
 	private int food = 0;
 	private double health = 0;
-	private PersonaFlags flags = new PersonaFlags();
 	
 	private ArchePersona(int id, String name, Race race, int gender, int age,long creationTimeMS) {
 		key = new ArchePersonaKey(UUID.randomUUID(),id);
@@ -146,39 +143,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		return profs.get(skillId);
 	}
 	
-	@Override
-	public PersonaFlags getFlags() {
-		return flags;
-	}
-	
-	@Override
-	public PersonaFlag getFlag(String flag) {
-		return flags.getFlag(flag);
-	}
-	
-	@Override
-	public boolean hasFlag(String flag) {
-		return (flags.hasFlag(flag));
-	}
-	
-	@Override
-	public void setFlags(PersonaFlags flags) {
-		this.flags = flags;
-		buffer.put(new UpdateTask(this, PersonaField.FLAGS, PersonaFlags.serialize(flags)));
-	}
-	
-	@Override
-	public void applyFlag(PersonaFlag flag) {
-		flags.updateFlag(flag);
-		buffer.put(new UpdateTask(this, PersonaField.FLAGS, PersonaFlags.serialize(flags)));
-	}
-	
-	@Override
-	public void removeFlag(String flag) {
-		flags.removeFlag(flag);
-		buffer.put(new UpdateTask(this, PersonaField.FLAGS, PersonaFlags.serialize(flags)));
-	}
-
 	@Override
 	public double resetSkills(float mod){
 		if (mod > 1) mod = 1f;

@@ -14,7 +14,6 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.persona.PersonaFlags.PersonaFlag;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
 import net.lordofthecraft.arche.save.tasks.DataTask;
@@ -398,35 +397,10 @@ public class ArchePersonaHandler implements PersonaHandler {
 			String title = prof.getSkillTier(p).getTitle();
 			result.add(new ArcheMessage(b + "Profession: " + r + title + " " + WordUtils.capitalize(prof.getName())));
 		}
-
-		result.add(getMagics(p));
+		
+		//Will add more eventually
 		
 		return result;
-	}
-
-	private ArcheMessage getMagics(Persona p) {
-		
-		String r = ChatColor.RESET+"";
-		String b = ChatColor.BLUE+"";
-		String l = ChatColor.GRAY+"";
-		String i = ChatColor.ITALIC+"";
-		
-		ArcheMessage magics = new ArcheMessage(b + "Magic: " + r);
-		
-		PersonaFlag flag = p.getFlag("magic");
-		
-		if (flag == null) 
-			magics.addLine("None");
-		
-		else for (String ms : flag.getValues()) {
-			MagicWrapper m = MagicWrapper.fromFlag(p.getFlag(ms));
-			if (m.isVisible()) magics.addLine(WordUtils.capitalize(m.getID()) + ", ").setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click for details.")
-			.setClickEvent(ChatBoxAction.RUN_COMMAND, "/pers magicinfo " + m.getID() + p.getPlayerName() + "@" + p.getId()).addLine(",");
-		}
-		
-		magics.removeLine(magics.size()-1);
-		
-		return magics;
 	}
 
 	@Override
@@ -623,21 +597,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.pastPlayTime = res.getInt(28);
 
 		String skinURL = res.getString("skindata");
-
-		if(!res.wasNull()){
-			persona.skin = new PersonaSkin(skinURL);
-		}
-		
-		String flagString = res.getString("flags");
-		
-		if(!res.wasNull()){
-			try {
-				persona.setFlags(PersonaFlags.deserialize(flagString));
-			} catch (Exception e) {
-				ArcheCore.getPlugin().getLogger().warning("Error loading persona flags for: " + persona.getPlayerUUID() + "@" + persona.getId() + " (" + persona.getPlayerName() + ")");
-				e.printStackTrace();
-			}
-		}
 
 		//We now let all Personas load their skills (albeit lazily). Let's do this now
 		persona.loadSkills();

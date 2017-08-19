@@ -2,10 +2,9 @@ package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.enums.ProfessionSlot;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.persona.PersonaFlags;
-import net.lordofthecraft.arche.persona.PersonaFlags.PersonaFlag;
 import net.lordofthecraft.arche.persona.PersonaInventory;
 import net.lordofthecraft.arche.persona.PersonaSkin;
+
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
@@ -318,15 +317,4 @@ public interface Persona {
 	 */
 	int getTotalPlaytime();
 
-	PersonaFlags getFlags();
-
-	void setFlags(PersonaFlags flags);
-
-	void applyFlag(PersonaFlag flag);
-
-	void removeFlag(String flag);
-
-	boolean hasFlag(String flag);
-
-	PersonaFlag getFlag(String flag);
 }

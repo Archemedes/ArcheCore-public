@@ -9,7 +9,6 @@ import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.PersonaFlags.PersonaFlag;
 import net.lordofthecraft.arche.persona.PersonaSkin;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.PersonaRenameTask;
@@ -163,10 +162,6 @@ public class CommandPersona implements CommandExecutor {
 					pers.setAutoAge(!auto);
 				}
 
-				return true;
-			} else if (args[0].equalsIgnoreCase("hidemagic")) {
-				boolean more = pers.hasFlag("show_magic");
-				sender.sendMessage(ChatColor.AQUA + "Turned showing magic information " + ChatColor.GOLD + "" + ChatColor.BOLD + (more ? "OFF" : "ON") + ChatColor.AQUA + " for " + ChatColor.RESET + pers.getName() + ".");
 				return true;
 			} else if (args[0].equalsIgnoreCase("time")) {
 				sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int)Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + pers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
