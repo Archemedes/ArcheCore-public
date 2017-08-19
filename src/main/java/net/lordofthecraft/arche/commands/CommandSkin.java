@@ -169,9 +169,9 @@ public class CommandSkin implements CommandExecutor {
 	}
 
 	private int maxAllowed(Player p) {
-		if(p.hasPermission("archecore.skincommand.4")) return 4;
-		else if(p.hasPermission("archecore.skincommand.3")) return 3;
-		else if(p.hasPermission("archecore.skincommand.2")) return 2;
+		if(p.hasPermission("archecore.command.skin.4")) return 4;
+		else if(p.hasPermission("archecore.command.skin.3")) return 3;
+		else if(p.hasPermission("archecore.command.skin.2")) return 2;
 		else if (p.hasPermission("archecore.command.skin.1")) return 1;
 		return 0;
 	}
