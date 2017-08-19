@@ -48,6 +48,8 @@ public class CommandSkin implements CommandExecutor {
 			ChatMessage msg = ArcheMessage.create("Please purchase a VIP rank to use automatic skin switching. Click here to visit the store.").applyChatColor(ChatColor.DARK_PURPLE);
 			msg.setClickEvent(ChatBoxAction.RUN_COMMAND, "/store");
 			msg.setHoverEvent(ChatBoxAction.SHOW_TEXT, ChatColor.GRAY + "" + ChatColor.ITALIC + "Click here to visit the store.");
+			msg.sendTo(p);
+			return true;
 		}
 		
 		if(args.length == 0 || arg(args[0],"help")) {
