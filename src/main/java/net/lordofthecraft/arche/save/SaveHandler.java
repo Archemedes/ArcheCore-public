@@ -7,7 +7,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 public class SaveHandler {
 
-	private BlockingDeque<ArcheTask> saveQueue = new LinkedBlockingDeque<ArcheTask>();
+	private BlockingDeque<ArcheTask> saveQueue = new LinkedBlockingDeque<>();
 
 	public static SaveHandler getInstance() {
 		return SingletonHolder.INSTANCE;

@@ -42,7 +42,7 @@ public class ArcheSkillFactory implements SkillFactory {
 	private final String name;
 	private final int id;
 	private final Set<Race> mains = EnumSet.noneOf(Race.class);
-	private final Map<Race, Double> raceMods = new EnumMap<Race, Double>(Race.class);
+	private final Map<Race, Double> raceMods = new EnumMap<>(Race.class);
 	private int strategy = Skill.VISIBILITY_VISIBLE;
 	private boolean inert = false;
 	private boolean intensive = false;

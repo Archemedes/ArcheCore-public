@@ -27,7 +27,7 @@ public class MapAutosaver {
 		name = name.toLowerCase();
 		if(names.contains(name)) throw new IllegalArgumentException("Table name '" + name + "' already in use!");
 		
-		AutosavedHashMap<T> result = new AutosavedHashMap<T>(con, name, reflective);
+		AutosavedHashMap<T> result = new AutosavedHashMap<>(con, name, reflective);
 		try {
 			sql.query("CREATE TABLE IF NOT EXISTS " + name + " (key TEXT UNIQUE REPLACE, value BLOB);");
 			if(reflective){

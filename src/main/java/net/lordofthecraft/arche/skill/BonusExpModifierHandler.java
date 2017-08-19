@@ -13,7 +13,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.interfaces.IArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;

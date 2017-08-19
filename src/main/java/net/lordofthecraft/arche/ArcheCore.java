@@ -1,25 +1,11 @@
 package net.lordofthecraft.arche;
 
-import com.google.common.collect.Maps;
-import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
-import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.WhySQLHandler;
-import net.lordofthecraft.arche.commands.*;
-import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.help.HelpFile;
-import net.lordofthecraft.arche.interfaces.*;
-import net.lordofthecraft.arche.listener.*;
-import net.lordofthecraft.arche.persona.ArcheEconomy;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.ArchePersonaKey;
-import net.lordofthecraft.arche.persona.RaceBonusHandler;
-import net.lordofthecraft.arche.save.DataSaveRunnable;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
-import net.lordofthecraft.arche.skill.BonusExpModifierHandler;
-import net.lordofthecraft.arche.skill.ExpModifier;
+import java.io.File;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.UUID;
+import java.util.logging.Level;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -33,12 +19,63 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.UUID;
-import java.util.logging.Level;
+import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
+import net.lordofthecraft.arche.commands.CommandArchehelp;
+import net.lordofthecraft.arche.commands.CommandAttribute;
+import net.lordofthecraft.arche.commands.CommandAttributeTabCompleter;
+import net.lordofthecraft.arche.commands.CommandAutoage;
+import net.lordofthecraft.arche.commands.CommandBeaconme;
+import net.lordofthecraft.arche.commands.CommandHelpMenu;
+import net.lordofthecraft.arche.commands.CommandMoney;
+import net.lordofthecraft.arche.commands.CommandNamelog;
+import net.lordofthecraft.arche.commands.CommandNewbies;
+import net.lordofthecraft.arche.commands.CommandPersona;
+import net.lordofthecraft.arche.commands.CommandRaceSpawn;
+import net.lordofthecraft.arche.commands.CommandRealname;
+import net.lordofthecraft.arche.commands.CommandSkill;
+import net.lordofthecraft.arche.commands.CommandSkin;
+import net.lordofthecraft.arche.commands.CommandSql;
+import net.lordofthecraft.arche.commands.CommandSqlClone;
+import net.lordofthecraft.arche.commands.CommandTreasurechest;
+import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.help.HelpFile;
+import net.lordofthecraft.arche.interfaces.Economy;
+import net.lordofthecraft.arche.interfaces.IArcheCore;
+import net.lordofthecraft.arche.interfaces.JMisc;
+import net.lordofthecraft.arche.interfaces.PersonaKey;
+import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.interfaces.SkillFactory;
+import net.lordofthecraft.arche.listener.ArmorPreventionListener;
+import net.lordofthecraft.arche.listener.BeaconMenuListener;
+import net.lordofthecraft.arche.listener.BlockRegistryListener;
+import net.lordofthecraft.arche.listener.DebugListener;
+import net.lordofthecraft.arche.listener.EconomyListener;
+import net.lordofthecraft.arche.listener.ExperienceOrbListener;
+import net.lordofthecraft.arche.listener.HelpMenuListener;
+import net.lordofthecraft.arche.listener.HelpOverrideListener;
+import net.lordofthecraft.arche.listener.JistumaCollectionListener;
+import net.lordofthecraft.arche.listener.LegacyCommandsListener;
+import net.lordofthecraft.arche.listener.NewbieProtectListener;
+import net.lordofthecraft.arche.listener.PersonaInventoryListener;
+import net.lordofthecraft.arche.listener.PlayerChatListener;
+import net.lordofthecraft.arche.listener.PlayerInteractListener;
+import net.lordofthecraft.arche.listener.PlayerJoinListener;
+import net.lordofthecraft.arche.listener.RacialBonusListener;
+import net.lordofthecraft.arche.listener.TreasureChestListener;
+import net.lordofthecraft.arche.persona.ArcheEconomy;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.ArchePersonaKey;
+import net.lordofthecraft.arche.persona.RaceBonusHandler;
+import net.lordofthecraft.arche.save.DataSaveRunnable;
+import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
+import net.lordofthecraft.arche.skill.BonusExpModifierHandler;
+import net.lordofthecraft.arche.skill.ExpModifier;
+import net.lordofthecraft.arche.skin.SkinCache;
 
 public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private static ArcheCore instance;
@@ -48,6 +85,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private BlockRegistry blockRegistry;
 	private ArchePersonaHandler personaHandler;
 	private HelpDesk helpdesk;
+	private SkinCache skinCache;
 	private ArcheTimer timer;
 	private Economy economy;
 	private JistumaCollection jcoll;
@@ -158,90 +196,20 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		} else {
 			sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
 		}
+		
+		ArcheTables.setUpSQLTables(sqlHandler);
+		
 		saveHandler = SaveHandler.getInstance();
 		blockRegistry = new BlockRegistry();
 		personaHandler = ArchePersonaHandler.getInstance();
 		helpdesk = HelpDesk.getInstance();
+		skinCache = SkinCache.getInstance();
 		jcoll = new JistumaCollection(personaHandler);
 
 		timer = debugMode? new ArcheTimer(this) : null;
 		personaHandler.setModifyDisplayNames(modifyDisplayNames);
 
-		//Create the Persona table
-		Map<String,String> cols = Maps.newLinkedHashMap();
-		cols.put("player", "TEXT"); //1
-		cols.put("id", "INT");
-		cols.put("name", "TEXT");
-		cols.put("age", "INT");
-		cols.put("race", "TEXT"); //5
-		cols.put("rheader", "TEXT");
-		cols.put("gender", "INT");
-		cols.put("desc", "TEXT");
-		cols.put("prefix", "TEXT");
-		cols.put("current", "INT DEFAULT 1"); //10
-		cols.put("autoage", "INT DEFAULT 1");
-		cols.put("stat_played", "INT DEFAULT 0");
-		cols.put("stat_chars", "INT DEFAULT 0");
-		cols.put("stat_renamed", "INT DEFAULT 0");
-		cols.put("skill_xpgain", "INT DEFAULT 1"); //15
-		cols.put("skill_selected", "TEXT");
-		cols.put("world", "TEXT");
-		cols.put("x", "INT");
-		cols.put("y", "INT");
-		cols.put("z", "INT"); //20
-		//cols.put("health", "REAL");
-		//cols.put("hunger", "REAL");
-		//cols.put("saturation", "REAL");
-		cols.put("inv", "TEXT");
-		cols.put("money", "REAL DEFAULT 0");
-		cols.put("skill_primary", "TEXT");
-		cols.put("skill_secondary", "TEXT");
-		cols.put("skill_tertiary", "TEXT");
-		//cols.put("skin","TEXT");
-		cols.put("stat_creation", "LONG");
-		cols.put("stat_playtime_past","INT");
-		cols.put("skindata","TEXT");
-		cols.put("PRIMARY KEY (player, id)", "ON CONFLICT REPLACE");
-		sqlHandler.createTable("persona", cols);
-
-		/*		cols = Maps.newLinkedHashMap();
-		cols.put("player", "TEXT NOT NULL");
-		cols.put("id", "INT NOT NULL");
-		cols.put("wastaught", "INT");
-		cols.put("hastaught", "INT");
-		cols.put("boosted", "INT");
-		cols.put("xplimit", "INT");
-		cols.put("UNIQUE (player, id)", "ON CONFLICT IGNORE");
-		cols.put("FOREIGN KEY (player, id)", "REFERENCES persona(player, id) ON DELETE CASCADE");
-		sqlHandler.createTable("persona_ext", cols);*/
-
-		cols = Maps.newLinkedHashMap();
-		cols.put("player", "TEXT NOT NULL");
-		cols.put("id", "INT NOT NULL");
-		cols.put("name", "TEXT NOT NULL");
-		//cols.put("FOREIGN KEY (player, id)", "REFERENCES persona(player, id) ON DELETE CASCADE");
-		cols.put("UNIQUE (player, id, name)", "ON CONFLICT IGNORE");
-		sqlHandler.createTable("persona_names", cols);
-
-		cols = Maps.newLinkedHashMap();
-		cols.put("race", "TEXT PRIMARY KEY");
-		cols.put("world", "TEXT NOT NULL");
-		cols.put("x", "INT NOT NULL");
-		cols.put("y", "INT NOT NULL");
-		cols.put("z", "INT NOT NULL");
-		cols.put("yaw", "REAL");
-		sqlHandler.createTable("persona_race_spawns", cols);
-
-		//Blockregistry persistence stuff
-		cols = Maps.newLinkedHashMap();
-		cols.put("world", "TEXT NOT NULL");
-		cols.put("x", "INT");
-		cols.put("y", "INT");
-		cols.put("z", "INT");
-		cols.put("UNIQUE (world, x, y, z)", "ON CONFLICT IGNORE");
-		sqlHandler.createTable("blockregistry", cols);
-
-		sqlHandler.execute("DELETE FROM blockregistry WHERE ROWID IN (SELECT ROWID FROM blockregistry ORDER BY ROWID DESC LIMIT -1 OFFSET 5000)");
+		
 
 		try{
 			ResultSet res = sqlHandler.query("SELECT * FROM blockregistry");
@@ -372,6 +340,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("racespawn").setExecutor(new CommandRaceSpawn(personaHandler));
 		getCommand("attribute").setExecutor(new CommandAttribute());
 		getCommand("attribute").setTabCompleter(new CommandAttributeTabCompleter());
+		getCommand("skin").setExecutor(new CommandSkin(this));
 	}
 
 	private void initListeners(){
@@ -518,6 +487,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	@Override
 	public SQLHandler getSQLHandler(){
 		return sqlHandler;
+	}
+	
+	@Override
+	public SkinCache getSkinCache(){
+		return skinCache;
 	}
 
 	@Override

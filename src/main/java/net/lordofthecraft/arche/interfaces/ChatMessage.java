@@ -1,7 +1,6 @@
 package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.enums.ChatBoxAction;
-import net.lordofthecraft.arche.help.ArcheMessage;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.entity.Player;
@@ -121,19 +120,6 @@ public interface ChatMessage {
 	 * @return ChatMessage text body
 	 */
 	String toText();
-
-	/**
-	 * Removes a line from the ChatMessage
-	 * @return false Index out of bounds
-	 * @return true Chat message was removed
-	 */
-	boolean removeLine(int i);
-
-	/**
-	 * How many parts are in the ChatMessage
-	 * @return Amount of parts
-	 */
-	int size(int i);
 
 	
 

@@ -6,5 +6,5 @@ public enum ExpModifier {
 	PLAYTIME,
 	PERSONA,
 	ACCOUNT,
-	GLOBAL;
+	GLOBAL
 }

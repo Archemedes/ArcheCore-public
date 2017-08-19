@@ -1,7 +1,32 @@
 package net.lordofthecraft.arche.persona;
 
+import java.lang.ref.WeakReference;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.enums.ProfessionSlot;
@@ -24,26 +49,7 @@ import net.lordofthecraft.arche.save.tasks.UpdateTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.SkillData;
-
-import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import java.lang.ref.WeakReference;
-import java.util.*;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import net.lordofthecraft.arche.skin.SkinCache;
 
 public final class ArchePersona implements Persona, InventoryHolder {
 	private static final String TABLE = "persona";
@@ -55,7 +61,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	final AtomicInteger timePlayed;
 	final AtomicInteger charactersSpoken;
 	private final ArchePersonaKey key;
-	private int gender;
+	private final int gender;
 	private final List<SkillAttachment> profs = Lists.newArrayList();
 	public Skill[] professions = new Skill[3];
 	int age;
@@ -73,7 +79,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	String player;
 	WeakBlock location = null;
 	PersonaInventory inv = null;
-	PersonaSkin skin = null;
 	double money = 0;
 	boolean gainsXP = true;
 	Skill profession = null; /*professionPrimary = null, professionSecondary = null, professionAdditional = null;*/
@@ -83,7 +88,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private int hash = 0;
 	private int food = 0;
 	private double health = 0;
-	
+	PersonaIcon icon = null;
+
 	private ArchePersona(int id, String name, Race race, int gender, int age,long creationTimeMS) {
 		key = new ArchePersonaKey(UUID.randomUUID(),id);
 		player = name;
@@ -142,7 +148,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public SkillAttachment getSkill(int skillId){
 		return profs.get(skillId);
 	}
-	
+
 	@Override
 	public double resetSkills(float mod){
 		if (mod > 1) mod = 1f;
@@ -162,16 +168,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void racialReassign(Race r){
 		setRace(r);
 		this.reskillRacialReassignment();
-	}
-
-	public PersonaSkin getSkin() {
-		return skin;
-	}
-
-	public void setSkin(PersonaSkin skin) {
-		this.skin = skin;
-		buffer.put(new UpdateTask(this, PersonaField.SKIN, skin.getData()));
-		//if (this.getPlayer() != null) PersonaSkinListener.updatePlayerSkin(this.getPlayer());
 	}
 
 	public double reskillRacialReassignment() {
@@ -208,61 +204,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		this.handleProfessionSelection();
 		return lostXP;
 	}
-	/*
-	@SuppressWarnings("deprecation")
-	public void broadcastSkinChange() {
-		// TODO
-		Player p = this.getPlayer();
-		final ProtocolManager man = ProtocolLibrary.getProtocolManager();
-		final List<Player> tracked = Lists.newArrayList();
-		for (Player x : p.getWorld().getPlayers()) {
-			if (x == p) continue;
-			if (p.getLocation().distance(x.getLocation()) < 96) {
-				tracked.add(x);
-			}
-		}
-		PacketContainer remove = man.createPacket(PacketType.Play.Server.ENTITY_DESTROY);
-		remove.getIntegerArrays().write(0, new int[]{p.getEntityId()});
-
-		for (Player x : tracked) {
-			try {
-				man.sendServerPacket(x, remove);
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-			}
-		}
-
-		PacketContainer update = man.createPacket(PacketType.Play.Server.PLAYER_INFO);
-		List<PlayerInfoData> pfile = Arrays.asList(new PlayerInfoData(
-				WrappedGameProfile.fromPlayer(p),
-				0,
-				NativeGameMode.SURVIVAL,
-				null));
-		update.getPlayerInfoDataLists().write(0, pfile); 
-		update.getPlayerInfoAction().write(0, PlayerInfoAction.REMOVE_PLAYER);
-		man.broadcastServerPacket(update);
-		update.getPlayerInfoAction().write(0, PlayerInfoAction.ADD_PLAYER);
-		man.broadcastServerPacket(update);
-
-		WrapperPlayServerNamedEntitySpawn add = new WrapperPlayServerNamedEntitySpawn();
-		add.setEntityId(p.getEntityId());
-		add.setPlayerUuid(p.getUniqueId());
-		add.setPosition(p.getLocation().toVector());
-		add.setCurrentItem(p.getItemInHand().getTypeId());
-
-		Location head = p.getEyeLocation();
-		add.setPitch(head.getPitch());
-		add.setYaw(head.getYaw());
-
-		WrappedDataWatcher watcher = new WrappedDataWatcher();
-		watcher.setObject(10, ((CraftPlayer)p).getHandle().getDataWatcher().getByte(10));
-		watcher.setObject(6, (float)p.getHealth());
-		add.setMetadata(watcher);
-
-		for (Player x : tracked) {
-			add.sendPacket(x);
-		}
-	}*/
 
 	@Override
 	public double withdraw(double amount, Transaction cause) {
@@ -271,30 +212,30 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	@Override
-    @Deprecated
-    public double withdraw(double amount) {
-        ArcheCore.getControls().getEconomy().withdrawPersona(this, amount);
-        return money;
-    }
+	@Deprecated
+	public double withdraw(double amount) {
+		ArcheCore.getControls().getEconomy().withdrawPersona(this, amount);
+		return money;
+	}
 
-    @Override
+	@Override
 	public double deposit(double amount, Transaction cause){
 		ArcheCore.getControls().getEconomy().depositPersona(this, amount);
 		return money;
 	}
 
-    @Override
-    @Deprecated
-    public double deposit(double amount) {
-        ArcheCore.getControls().getEconomy().depositPersona(this, amount);
-        return money;
-    }
+	@Override
+	@Deprecated
+	public double deposit(double amount) {
+		ArcheCore.getControls().getEconomy().depositPersona(this, amount);
+		return money;
+	}
 
 
 	public List<Skill> getOrderedProfessions() {
 		List<Skill> skills = Lists.newArrayList();
 		skills.addAll(profs.stream().filter(sk -> sk.skill.isVisible(this)).map(sk -> sk.skill).collect(Collectors.toList()));
-		Collections.sort(skills, new SkillComparator(this));
+		skills.sort(new SkillComparator(this));
 		return skills;
 	}
 
@@ -573,7 +514,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			if (p != null && this.isCurrent()) {
 				RaceBonusHandler.reset(p);
 				RaceBonusHandler.apply(p, race);
-				p.setHealth(p.getMaxHealth());
+				p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 			}
 		}
 		buffer.put(new UpdateTask(this, PersonaField.RACE_REAL, race));
@@ -634,18 +575,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		default: return null;
 		}
 	}
-	
-	@Override
-	public void setGender(String gender) {
-		switch(gender.toLowerCase()){
-		case "female": this.gender = 0; break;
-		case "male": this.gender = 1; break;
-		case "other": this.gender = 2; break;
-		default: return;
-		}
-		
-		buffer.put(new UpdateTask(this, PersonaField.GENDER, gender));
-	}
 
 	@Override
 	public int getAge(){
@@ -690,9 +619,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 		//Teleport the Player to the new Persona's stored location
 		if(location != null) {
-		    Bukkit.getScheduler().runTaskLater(ArcheCore.getPlugin(),
-                    () -> p.teleport(location.toLocation().add(0.5, 0.5, 0.5))
-                    , 3);
+			Bukkit.getScheduler().runTaskLater(ArcheCore.getPlugin(),
+					() -> p.teleport(location.toLocation().add(0.5, 0.5, 0.5))
+					, 3);
 		}
 
 		//Do we protect incase of bad teleport?
@@ -700,9 +629,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			NewbieProtectListener.bonusProtects.add(p.getUniqueId());
 			// TODO: This doesn't actually do anything lmao
 			new BukkitRunnable(){
-			    public void run(){
-			        NewbieProtectListener.bonusProtects.remove(p.getUniqueId());
-			    }};
+				public void run(){
+					NewbieProtectListener.bonusProtects.remove(p.getUniqueId());
+				}};
 		}
 
 		//Give them an inventory.
@@ -751,6 +680,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		ArchePersona[] prs = handler.getAllPersonas(this.getPlayerUUID());
 		prs[getId()] = null;
 
+		SkinCache cache = ArcheCore.getControls().getSkinCache();
+		boolean newPersonaHasSkin = false;
 		if(isCurrent()){
 			boolean success = false;
 			for (ArchePersona pr : prs) {
@@ -762,15 +693,19 @@ public final class ArchePersona implements Persona, InventoryHolder {
 					pr.setCurrent(true);
 					pr.restoreMinecraftSpecifics(p);
 					success = true;
+					newPersonaHasSkin = cache.getSkinFor(pr) != null;
 					break;
 				}
 			}
 
-			if(!success){
+			boolean cleared = cache.clearSkin(this);
+			if(!success){			
 				Plugin plugin = ArcheCore.getPlugin();
 				plugin.getLogger().warning("Player " + player + " removed his final usable Persona!");
 				RaceBonusHandler.reset(p); //Clear Racial bonuses, for now...
 				if(p.hasPermission("archecore.mayuse") && !p.hasPermission("archecore.exempt")) new CreationDialog().makeFirstPersona(p);
+			} else {
+				if(!cleared && newPersonaHasSkin) cache.refreshPlayer(p);
 			}
 
 			p.sendMessage(ChatColor.DARK_PURPLE + "Your persona was removed: " + ChatColor.GRAY + this.getName());
@@ -782,10 +717,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	@Override
 	public Inventory getInventory() {
 		if (current && getPlayer() != null) {
-			return null;
+			return getPlayer().getInventory();
 		} else {
 			Inventory binv = Bukkit.createInventory(this, 45, "Persona Inventory: " + key.toString());
-			//NPE: inv is null for some reason if they haven't logged on in this session. TODO 
 			binv.setContents(inv.getContents());
 			return binv;
 		}
@@ -815,7 +749,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		ArchePersona p = (ArchePersona) object;
 		return this.player.equals(p.player) && this.getId() == p.getId();
 	}
-//
+	//
 	@Override
 	public boolean isNewbie() {
 		return getTimePlayed() < ArcheCore.getControls().getNewbieDelay();
@@ -832,6 +766,17 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		public int compare(Skill o1, Skill o2) {
 			return Double.compare(o2.getXp(p), o1.getXp(p));
 		}
+	}
+
+	@Override
+	public PersonaIcon getIcon() {
+		return icon;
+	}
+
+	@Override
+	public void setIcon(PersonaIcon icon) {
+		this.icon = icon;
+		buffer.put(new UpdateTask(this, PersonaField.ICON, icon.getData()));
 	}
 
 	@Override
