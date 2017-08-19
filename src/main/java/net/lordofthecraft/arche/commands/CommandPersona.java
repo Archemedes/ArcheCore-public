@@ -46,7 +46,7 @@ public class CommandPersona implements CommandExecutor {
 				+ i + "$</persona clearbio>clearbio$: " + a + "Clear your Persona's  bio completely.\n"
 				+ i + "$</persona time>time$: " + a + "View the hours spent playing your Persona.\n"
 				+ i + "$</persona created>created$: " + a + "View how long ago you created your Persona.\n"
-				+ i + "$</persona skin>skin$: " + a + "Save your current skin to your persona\n"
+				+ i + "$</persona icon>icon$: " + a + "Save your current skin as your persona icon.\n"
 				+ i + "$</persona list>list$: " + a + "View all your Personas with names + IDs.\n";
 
 		helpdesk.addInfoTopic("Persona Command", output);
