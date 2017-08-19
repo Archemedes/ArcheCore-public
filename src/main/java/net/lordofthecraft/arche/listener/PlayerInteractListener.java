@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.listener;
 
 import net.lordofthecraft.arche.ArcheBeacon;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -26,7 +27,9 @@ public class PlayerInteractListener implements Listener {
 		Player p = e.getPlayer();
 		if (e.getRightClicked() instanceof Player && p.isSneaking() && e.getHand() == EquipmentSlot.HAND) {
 			Player target = (Player) e.getRightClicked();
-			handler.whois(target, p.hasPermission("archecore.mod.other")).forEach(p::sendMessage);
+			for (ChatMessage m : handler.whois(target, p.hasPermission("archecore.mod.other"))) {
+				m.sendTo(p);
+			}
 		}
 		
 	}

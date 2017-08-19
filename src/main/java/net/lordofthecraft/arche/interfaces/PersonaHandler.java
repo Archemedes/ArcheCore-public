@@ -162,7 +162,7 @@ public interface PersonaHandler {
 	 * @param mod If the user viewing is a moderator
 	 * @return A list of initialised stats of the given Persona
 	 */
-	List<String> whois(Persona p, boolean mod);
+	List<ChatMessage> whois(Persona p, boolean mod);
 
 	/**
 	 * Method that provides a human-readable list of information about a
@@ -171,7 +171,7 @@ public interface PersonaHandler {
 	 * @param mod If the user viewing is a moderator
 	 * @return A list of initialised stats of the given Persona
 	 */
-	List<String> whois(Player p, boolean mod);
+	List<ChatMessage> whois(Player p, boolean mod);
 
 	/**
 	 * Method that provides a human-readable list of additional information, to be used in prints

@@ -118,23 +118,21 @@ public class CommandPersona implements CommandExecutor {
 			}
 
 			if (args[0].equalsIgnoreCase("view")) {
+				if (!(sender instanceof Player)) return false;
 				Player t = Bukkit.getPlayer(pers.getPlayerUUID());
 				if (t != null && !handler.mayUse(t)) {
 					sender.sendMessage(ChatColor.DARK_AQUA + "This player is a Wandering Soul (may not use Personas)");
 				} else {
 					//If the persona is found the Whois should always succeed
 					//We have assured the persona is found earlier
-					handler.whois(pers, sender.hasPermission("archecore.mod.other")).forEach(sender::sendMessage);
-					if (sender instanceof Player) {
-						ChatMessage mes = new ArcheMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Click for more...");
-						mes.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to show extended persona information.");
-						mes.setClickEvent(ChatBoxAction.RUN_COMMAND, "/pers more " + pers.getPlayerName() + "@" + pers.getId());
-						mes.sendTo((Player)sender);
+					for (ChatMessage m : handler.whois(pers, sender.hasPermission("archecore.mod.other"))) {
+						m.sendTo((Player) sender);
 					}
 				}
 				return true;
 			}
 			else if (args[0].equalsIgnoreCase("more")) {
+				if (!(sender instanceof Player)) return false;
 				Player t = Bukkit.getPlayer(pers.getPlayerUUID());
 				if (t != null && !handler.mayUse(t)) {
 					sender.sendMessage(ChatColor.DARK_AQUA + "This player is a Wandering Soul (may not use Personas)");
@@ -143,12 +141,6 @@ public class CommandPersona implements CommandExecutor {
 					//We have assured the persona is found earlier
 					for (ChatMessage m : handler.whoisMore(pers, sender.hasPermission("archecore.mod.other"), sender == pers.getPlayer())) {
 						m.sendTo((Player) sender);
-					}
-					if (sender instanceof Player) {
-						ChatMessage mes = new ArcheMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Click for more...");
-						mes.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to show basic persona information.");
-						mes.setClickEvent(ChatBoxAction.RUN_COMMAND, "/pers view " + pers.getPlayerName() + "@" + pers.getId());
-						mes.sendTo((Player)sender);
 					}
 				}
 				return true;
