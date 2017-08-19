@@ -34,9 +34,7 @@ public interface Persona {
 	@Deprecated()
 	double deposit(double amount);
 
-    double deposit(double amount, Transaction cause);
-    
-    void setGender(String gender);
+	double deposit(double amount, Transaction cause);
 
 	/**
 	 * Reset a persona's visible skills (drainXp and Magic skills not effected) to 0 and allow it to be redistributed
@@ -317,16 +315,4 @@ public interface Persona {
 	 * @return the total playtime of this persona(all maps added)
 	 */
 	int getTotalPlaytime();
-
-	PersonaFlags getFlags();
-
-	void setFlags(PersonaFlags flags);
-
-	void applyFlag(PersonaFlag flag);
-
-	void removeFlag(String flag);
-
-	boolean hasFlag(String flag);
-
-	PersonaFlag getFlag(String flag);
 }
