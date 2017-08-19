@@ -15,18 +15,18 @@ import java.util.UUID;
 
 public interface PersonaHandler {
 
-    /**
-     * @return If archecore is currently preloading personas
-     */
+	/**
+	 * @return If archecore is currently preloading personas
+	 */
 
 	boolean isPreloading();
 
 	/**
 	 * @return A handler to obtain data
 	 */
-	
+
 	TopData getTopHandler();
-	
+
 	/**
 	 * Set whether or not ArcheCore should continue to modify Bukkit Display Names to reflect Persona names
 	 * @param will the value to set to
@@ -52,7 +52,7 @@ public interface PersonaHandler {
 	 * @return Amount of Personas Player may have, based on Permission Nodes
 	 */
 	int getAllowedPersonas(Player p);
-	
+
 	Collection<ArchePersona[]> getPersonas();
 
 	/**
@@ -61,7 +61,7 @@ public interface PersonaHandler {
 	 * @return the Persona (null if not found)
 	 */
 	Persona getPersona(PersonaKey key);
-	
+
 	/**
 	 * Attempts to find a Persona corresponding to a Player UUID and id. Persona may not exist or may not be loaded
 	 * @param uuid The Player UUID to look for
@@ -69,7 +69,7 @@ public interface PersonaHandler {
 	 * @return The found Persona (null if not found)
 	 */
 	Persona getPersona(UUID uuid, int id);
-	
+
 	/**
 	 * Fetch a Player's current Persona
 	 * @param p Player in question
@@ -83,8 +83,8 @@ public interface PersonaHandler {
 	 * @return Current Persona, or 'null' if not found.
 	 */
 	Persona getPersona(Player p);
-	
-	
+
+
 	/**
 	 * Returns whether or not the given Player currently has an
 	 * active persona registered and loaded. In other words, it sees whether or not
@@ -101,7 +101,7 @@ public interface PersonaHandler {
 	 * @return An array of the Player's persona.
 	 */
 	Persona[] getAllPersonas(OfflinePlayer p);
-	
+
 	/**
 	 * Returns all of the Player's current Personas. Each persona's ID should correspond
 	 * to the index of the Persona in the returned Array.
@@ -109,7 +109,7 @@ public interface PersonaHandler {
 	 * @return An array of the Player's persona.
 	 */
 	Persona[] getAllPersonas(UUID uuid);
-	
+
 	/**
 	 * Gives the amount of Personas the current player possesses. This only counts
 	 * Personas that are currently registered and selectable, not previous (killed) personas.
@@ -117,13 +117,13 @@ public interface PersonaHandler {
 	 * @return The amount of registered Personas
 	 */
 	int countPersonas(UUID uuid);
-	
+
 	/**
 	 * @return all currently active personas in game
 	 */
 
 	List<Persona> getAllActivePersonas();
-	
+
 	/**
 	 * Gives the amount of Personas the current player possesses. This only counts
 	 * Personas that are currently registered and selectable, not previous (killed) personas.
@@ -147,14 +147,14 @@ public interface PersonaHandler {
 	 * @param p The player for which to create the Persona
 	 * @param id Id of the Persona (0-3)
 	 * @param name RP Name of the Persona
-	 * @param race Race of the Persona, immutable
-	 * @param gender Gender, with 0 = female, 1 = male, any other value counts as 'unset', immutable
+	 * @param race Race of the Persona
+	 * @param gender Gender, with 0 = female, 1 = male, any other value counts as 'unset'
 	 * @param age The Age of the RP persona
 	 * @param autoAge Whether or not this Persona's age should automatically increase
 	 * @return The resulting persona
 	 */
 	Persona createPersona(Player p, int id, String name, Race race,
-						  int gender, int age, boolean autoAge, long creationTimeMS);
+			int gender, int age, boolean autoAge, long creationTimeMS);
 
 	/**
 	 * Method that provides a human-readable list of information about a Persona, to be used in prints
@@ -172,6 +172,17 @@ public interface PersonaHandler {
 	 * @return A list of initialised stats of the given Persona
 	 */
 	List<String> whois(Player p, boolean mod);
+
+	/**
+	 * Method that provides a human-readable list of additional information, to be used in prints
+	 * @param p the Persona to be looked up
+	 * @param mod If the user viewing is a moderator
+	 * @param self If the user viewing is the owner of the persona
+	 * @return A list of initialised stats of the given Persona
+	 */
+
+	List<ChatMessage> whoisMore(Persona p, boolean mod, boolean self);
+
 
 	/**
 	 * Call to the SQLite database to age all Personas by one year.

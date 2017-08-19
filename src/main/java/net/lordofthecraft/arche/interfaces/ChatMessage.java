@@ -13,7 +13,7 @@ public interface ChatMessage {
 	 * @return itself
 	 */
 	ChatMessage addLine(String line);
-	
+
 	/**
 	 * Add a translatable line of text, respecting MC's internal translation strings
 	 * @param translate Internal translation string to add
@@ -41,6 +41,20 @@ public interface ChatMessage {
 	 * @return itself
 	 */
 	ChatMessage applyChatColor(org.bukkit.ChatColor color);
+
+	/**
+	 * Removes a line from the ChatMessage
+	 * @return false Index out of bounds
+	 * @return true Chat message was removed
+	 */
+	boolean removeLine(int i);
+
+	/**
+	 * How many parts are in the ChatMessage
+	 * @return Amount of parts
+	 */
+	int size(int i);
+
 
 	/**
 	 * Make current section bold
@@ -121,6 +135,6 @@ public interface ChatMessage {
 	 */
 	String toText();
 
-	
+
 
 }

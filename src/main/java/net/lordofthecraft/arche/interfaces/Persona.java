@@ -241,10 +241,17 @@ public interface Persona {
 
 	/**
 	 * Get the human-readable Gender of this Persona
-	 * @return The Persona's gender, immutable
+	 * @return The Persona's gender
 	 */
 	String getGender();
 
+	/**
+	 * Assign a persona's gender to the specified gender.
+	 * @param r The persona's new gender.
+	 */
+
+	void setGender(String gender);
+	
 	/**
 	 * Get the current Age of this Persona.
 	 * @return the Persona's age

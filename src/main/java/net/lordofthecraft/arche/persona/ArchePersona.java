@@ -61,7 +61,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	final AtomicInteger timePlayed;
 	final AtomicInteger charactersSpoken;
 	private final ArchePersonaKey key;
-	private final int gender;
+	private int gender;
 	private final List<SkillAttachment> profs = Lists.newArrayList();
 	public Skill[] professions = new Skill[3];
 	int age;
@@ -575,6 +575,19 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		default: return null;
 		}
 	}
+	
+	@Override
+	 public void setGender(String gender) {
+	 switch(gender.toLowerCase()){
+	 case "female": this.gender = 0; break;
+	 case "male": this.gender = 1; break;
+	 case "other": this.gender = 2; break;
+	 default: return;
+	 }
+	 
+	 buffer.put(new UpdateTask(this, PersonaField.GENDER, gender));
+	 }
+
 
 	@Override
 	public int getAge(){
