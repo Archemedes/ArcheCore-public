@@ -40,6 +40,7 @@ import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
+import net.lordofthecraft.arche.persona.PersonaFlags.PersonaFlag;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.DataTask;
@@ -61,7 +62,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	final AtomicInteger timePlayed;
 	final AtomicInteger charactersSpoken;
 	private final ArchePersonaKey key;
-	private final int gender;
+	private int gender;
 	private final List<SkillAttachment> profs = Lists.newArrayList();
 	public Skill[] professions = new Skill[3];
 	int age;
@@ -147,6 +148,39 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	public SkillAttachment getSkill(int skillId){
 		return profs.get(skillId);
+	}
+	
+	@Override
+	public PersonaFlags getFlags() {
+		return flags;
+	}
+	
+	@Override
+	public PersonaFlag getFlag(String flag) {
+		return flags.getFlag(flag);
+	}
+	
+	@Override
+	public boolean hasFlag(String flag) {
+		return (flags.hasFlag(flag));
+	}
+	
+	@Override
+	public void setFlags(PersonaFlags flags) {
+		this.flags = flags;
+		buffer.put(new UpdateTask(this, PersonaField.FLAGS, PersonaFlags.serialize(flags)));
+	}
+	
+	@Override
+	public void applyFlag(PersonaFlag flag) {
+		flags.updateFlag(flag);
+		buffer.put(new UpdateTask(this, PersonaField.FLAGS, PersonaFlags.serialize(flags)));
+	}
+	
+	@Override
+	public void removeFlag(String flag) {
+		flags.removeFlag(flag);
+		buffer.put(new UpdateTask(this, PersonaField.FLAGS, PersonaFlags.serialize(flags)));
 	}
 
 	@Override
@@ -575,6 +609,18 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		default: return null;
 		}
 	}
+	
+	@Override
+	public void setGender(String gender) {
+		switch(gender.toLowerCase()){
+		case "female": this.gender = 0; break;
+		case "male": this.gender = 1; break;
+		case "other": this.gender = 2; break;
+		default: return;
+		}
+		
+		buffer.put(new UpdateTask(this, PersonaField.GENDER, gender));
+	}
 
 	@Override
 	public int getAge(){
@@ -717,9 +763,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	@Override
 	public Inventory getInventory() {
 		if (current && getPlayer() != null) {
-			return getPlayer().getInventory();
+			return null;
 		} else {
 			Inventory binv = Bukkit.createInventory(this, 45, "Persona Inventory: " + key.toString());
+			//NPE: inv is null for some reason if they haven't logged on in this session. TODO 
 			binv.setContents(inv.getContents());
 			return binv;
 		}

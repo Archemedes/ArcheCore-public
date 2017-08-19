@@ -148,7 +148,7 @@ public interface PersonaHandler {
 	 * @param id Id of the Persona (0-3)
 	 * @param name RP Name of the Persona
 	 * @param race Race of the Persona, immutable
-	 * @param gender Gender, with 0 = female, 1 = male, any other value counts as 'unset', immutable
+	 * @param gender Gender, with 0 = female, 1 = male, any other value counts as 'unset'
 	 * @param age The Age of the RP persona
 	 * @param autoAge Whether or not this Persona's age should automatically increase
 	 * @return The resulting persona
@@ -193,4 +193,14 @@ public interface PersonaHandler {
 	 * @return An unmodifiable list of Race and Location
 	 */
 	Map<Race, Location> getRacespawns();
+
+	/**
+	 * Method that provides a human-readable list of additional information, to be used in prints
+	 * @param p the Persona to be looked up
+	 * @param mod If the user viewing is a moderator
+	 * @param self If the user viewing is the owner of the persona
+	 * @return A list of initialised stats of the given Persona
+	 */
+	
+	List<ChatMessage> whoisMore(Persona p, boolean mod, boolean self);
 }

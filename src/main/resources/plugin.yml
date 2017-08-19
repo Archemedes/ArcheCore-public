@@ -15,6 +15,9 @@ commands:
       permission: archecore.mayuse
       permission-message: §4Insufficient Permission for this command
       aliases: [pers,prs,p]
+   card: 
+     description: Legacy command. Added for tab-complete purposes.
+     usage: Please type /<command> <player>@<persona>
    newbies:
      description: Allows you to scan for nearby new personas
      usage: This command can only be run from ingame.

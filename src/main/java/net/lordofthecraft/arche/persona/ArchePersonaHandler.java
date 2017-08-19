@@ -42,6 +42,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.persona.PersonaFlags.PersonaFlag;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
 import net.lordofthecraft.arche.save.tasks.DataTask;
@@ -383,14 +384,58 @@ public class ArchePersonaHandler implements PersonaHandler {
 		if(desc != null)
 			result.add(c + "Description: " + r + desc);
 
+		return result;
+	}
+	
+	@Override
+	public List<ChatMessage> whoisMore(Persona p, boolean mod, boolean self) {
+		List<ChatMessage> result = Lists.newArrayList();
+
+		if(p == null) return result;
+
+		String r = ChatColor.RESET+"";
+		String b = ChatColor.BLUE+"";
+		String l = ChatColor.GRAY+"";
+		String i = ChatColor.ITALIC+"";
+
+		result.add(new ArcheMessage(l+"~~~~ " + r + p.getPlayerName() + "'s Extended Roleplay Persona" + l + " ~~~~"));
+		result.add(new ArcheMessage(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
+		
 		Skill prof = p.getMainSkill();
 
 		if(prof != null){
 			String title = prof.getSkillTier(p).getTitle();
-			result.add(c + "Profession: " + r + title + " " + WordUtils.capitalize(prof.getName()));
+			result.add(new ArcheMessage(b + "Profession: " + r + title + " " + WordUtils.capitalize(prof.getName())));
 		}
 
+		result.add(getMagics(p));
+		
 		return result;
+	}
+
+	private ArcheMessage getMagics(Persona p) {
+		
+		String r = ChatColor.RESET+"";
+		String b = ChatColor.BLUE+"";
+		String l = ChatColor.GRAY+"";
+		String i = ChatColor.ITALIC+"";
+		
+		ArcheMessage magics = new ArcheMessage(b + "Magic: " + r);
+		
+		PersonaFlag flag = p.getFlag("magic");
+		
+		if (flag == null) 
+			magics.addLine("None");
+		
+		else for (String ms : flag.getValues()) {
+			MagicWrapper m = MagicWrapper.fromFlag(p.getFlag(ms));
+			if (m.isVisible()) magics.addLine(WordUtils.capitalize(m.getID()) + ", ").setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click for details.")
+			.setClickEvent(ChatBoxAction.RUN_COMMAND, "/pers magicinfo " + m.getID() + p.getPlayerName() + "@" + p.getId()).addLine(",");
+		}
+		
+		magics.removeLine(magics.size()-1);
+		
+		return magics;
 	}
 
 	@Override
@@ -523,7 +568,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 					pr.setCurrent(true);
 					if (!ArcheCore.getPlugin().areRacialBonusesEnabled())
 						RaceBonusHandler.reset(p);
-					//p.setDisplayName(prs[i].getName()); <--Already done within setCurrent
 					break;
 				}
 			}
@@ -540,7 +584,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		long creationTimeMS = res.getLong(27);
 
 
-		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age,creationTimeMS);
+		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age, creationTimeMS);
 		//prs[id] = persona;
 
 		if(rheader != null && !rheader.equals("null") && !rheader.isEmpty()){
@@ -575,6 +619,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			try {
 				persona.inv = PersonaInventory.restore(invString);
 			} catch (InvalidConfigurationException e) {
+				ArcheCore.getPlugin().getLogger().warning("Error loading persona inventory for: " + persona.getPlayerUUID() + "@" + persona.getId() + " (" + persona.getPlayerName() + ")");
 				e.printStackTrace();
 			}
 		}
@@ -590,6 +635,17 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		if(!res.wasNull()){
 			persona.setIcon(new PersonaIcon(icon));
+		}
+		
+		String flagString = res.getString("flags");
+		
+		if(!res.wasNull()){
+			try {
+				persona.setFlags(PersonaFlags.deserialize(flagString));
+			} catch (Exception e) {
+				ArcheCore.getPlugin().getLogger().warning("Error loading persona flags for: " + persona.getPlayerUUID() + "@" + persona.getId() + " (" + persona.getPlayerName() + ")");
+				e.printStackTrace();
+			}
 		}
 
 
