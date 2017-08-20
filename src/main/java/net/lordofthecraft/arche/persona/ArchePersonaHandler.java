@@ -413,13 +413,15 @@ public class ArchePersonaHandler implements PersonaHandler {
 		result.add(new ArcheMessage(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
 
 		Skill prof = p.getMainSkill();
-
+		String title = "";
+		String profname = "None";
 		if(prof != null){
-			String title = prof.getSkillTier(p).getTitle();
-			result.add(new ArcheMessage(b + "Profession: " + r + title + " " + WordUtils.capitalize(prof.getName()))
-					.setHoverEvent(ChatBoxAction.SHOW_TEXT, ChatColor.GRAY + "Click for info...")
-					.setClickEvent(ChatBoxAction.RUN_COMMAND, "/archehelp " + prof.getName().toLowerCase()));
+			title = prof.getSkillTier(p).getTitle() + " ";
+			profname = WordUtils.capitalize(prof.getName());
 		}
+			result.add(new ArcheMessage(b + "Profession: " + r + title + profname)
+					.setHoverEvent(ChatBoxAction.SHOW_TEXT, ChatColor.GRAY + "Click for info...")
+					.setClickEvent(ChatBoxAction.RUN_COMMAND, "/archehelp " + (profname.equals("None") ? "professions" : profname)));
 		
 		//Will add more eventually
 		
