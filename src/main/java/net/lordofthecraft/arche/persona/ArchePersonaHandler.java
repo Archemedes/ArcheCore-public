@@ -419,7 +419,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 			result.add(new ArcheMessage(b + "Profession: " + r + title + " " + WordUtils.capitalize(prof.getName()))
 					.setHoverEvent(ChatBoxAction.SHOW_TEXT, ChatColor.GRAY + "Click for info...")
 					.setClickEvent(ChatBoxAction.RUN_COMMAND, "/archehelp " + prof.getName().toLowerCase()));
-			result.add(new ArcheMessage(b + "Profession: " + r + title + " " + WordUtils.capitalize(prof.getName())));
 		}
 		
 		//Will add more eventually
