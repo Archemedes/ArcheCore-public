@@ -1,27 +1,27 @@
 package net.lordofthecraft.arche.attributes;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import net.md_5.bungee.api.chat.TranslatableComponent;
-import net.minecraft.server.v1_12_R1.NBTTagCompound;
-import net.minecraft.server.v1_12_R1.NBTTagList;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeMap;
+
+import org.bukkit.Bukkit;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import com.comphenix.protocol.utility.MinecraftReflection;
+
+import net.md_5.bungee.api.chat.TranslatableComponent;
 
 
 /**
  * Static class containing the methods for applying an AttributeModifier to an item.
  */
-@Deprecated
 public class AttributeItem {
 	final private static String PATH = "net.minecraft.server." + Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3] + "."; 
 
@@ -59,112 +59,6 @@ public class AttributeItem {
 			setInt = NBTTagCompound.getMethod("setInt", String.class, int.class);
 			setDouble = NBTTagCompound.getMethod("setDouble", String.class, double.class);
 		}catch(Throwable t){t.printStackTrace();}
-	}
-
-	/**
-	 * Retrieve NBT Tag saving this item as a string
-	 * @param is Item to check
-	 * @return String of NBT
-	 */
-
-	public static LinkedHashMap<String, Object> serialize(ItemStack is) {
-		final LinkedHashMap<String, Object> result = Maps.newLinkedHashMap();
-		if (is == null) return null;
-		if (is.getType() == Material.AIR) return null;
-		result.put("type", is.getType().name());
-		if (is.getDurability() != 0) {
-			result.put("damage", is.getDurability());
-		}
-		if (is.getAmount() != 1) {
-			result.put("amount", is.getAmount());
-		}
-		final ItemMeta meta = is.getItemMeta();
-		if (!Bukkit.getItemFactory().equals(meta, null)) {
-			result.put("meta", meta);
-		}
-
-		net.minecraft.server.v1_12_R1.ItemStack nmsItemStack = null;
-		try {
-			nmsItemStack = (net.minecraft.server.v1_12_R1.ItemStack) toNMSStack(is);
-		} catch (Exception ignored) {
-		}
-		if (nmsItemStack != null) {
-			NBTTagCompound tagc = nmsItemStack.getTag();
-			if (tagc != null) {
-				NBTTagList tag = (NBTTagList) tagc.get("AttributeModifiers");
-				if (tag != null) {
-					List<HashMap<String, Object>> atts = Lists.newArrayList();
-					for (int i = 0 ; i < tag.size() ; i++) {
-						NBTTagCompound mod = tag.get(i);
-						HashMap<String, Object> modmap = Maps.newHashMapWithExpectedSize(6);
-						String name = mod.getString("Name");
-						modmap.put("Name", name);
-						String attname = mod.getString("AttributeName");
-						modmap.put("AttributeName", attname);
-						modmap.put("Amount", mod.getDouble("Amount"));
-						modmap.put("Operation", mod.getInt("Operation"));
-						modmap.put("UUIDMost", mod.getLong("UUIDMost"));
-						modmap.put("UUIDLeast", mod.getLong("UUIDLeast"));
-						modmap.put("Slot", mod.getString("Slot"));
-						atts.add(modmap);
-					}
-					if (atts.size() > 0) result.put("att", atts);
-				}
-			}
-		}
-		return result;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static ItemStack deserialize(final Map<String, Object> args) {
-		if (args == null) return new ItemStack(Material.AIR);
-		final Material type = Material.getMaterial((String)args.get("type"));
-		int damage = 0;
-		int amount = 1;
-		if (args.containsKey("damage")) {
-			damage = (Integer) args.get("damage");
-		}
-		if (args.containsKey("amount")) {
-			amount = (Integer) args.get("amount");
-		}
-		ItemStack result = new ItemStack(type, amount, (short)damage);
-		if (args.containsKey("meta")) {
-			final Object raw = args.get("meta");
-			if (raw instanceof ItemMeta) {
-				result.setItemMeta((ItemMeta)raw);
-			}
-		}
-
-		if (args.containsKey("att")) {
-			List<HashMap<String, Object>> atts = (List<HashMap<String, Object>>) args.get("att");
-			for (HashMap<String, Object> att : atts) {
-				try{
-					NBTTagCompound compound = new NBTTagCompound();
-				
-					long least = (Long) att.get("UUIDLeast");
-					
-					long most = (Long) att.get("UUIDMost");
-					setLong.invoke(compound, "UUIDLeast",least);
-					setLong.invoke(compound, "UUIDMost", most);
-
-					setString.invoke(compound, "AttributeName", att.get("AttributeName"));
-					setString.invoke(compound, "Name", att.get("Name"));
-
-					setDouble.invoke(compound, "Amount", att.get("Amount"));
-					setInt.invoke(compound, "Operation", att.get("Operation"));
-					if (att.get("Slot") != null) {
-						if (!((String) att.get("Slot")).isEmpty()) {
-							setString.invoke(compound, "Slot", att.get("Slot"));
-						}
-					}
-					result = addModifier(least,most,compound,result);
-				} catch(Exception e) {
-					e.printStackTrace();
-					continue;
-				}
-			}
-		}
-		return result;
 	}
 
 	/**
@@ -215,31 +109,34 @@ public class AttributeItem {
 
 		}catch(Throwable t){t.printStackTrace(); return false;}
 	}
-
+	
 	/**
 	 * Add a modifier to an item
+	 * @param att the Minecraft attribute to modify
 	 * @param m the AttributeModifier to invoke
+	 * @param slot the equipment slot to apply to, can be null.
 	 * @param is The base ItemStack to apply a modifier to
 	 * @return The ItemStack with the modifier applied 
 	 */
-	public static ItemStack addModifier(AttributeModifier m, ItemStack is){
+
+	public static ItemStack addModifier(Attribute att, AttributeModifier m, Slot slot, ItemStack is){
 		try{
 
 			Object compound = compoundConstructor.newInstance();
 
 			//Setting the compound with the required values from the Wrapped Modifier.
-			long least = m.getUUID().getLeastSignificantBits();
-			long most  = m.getUUID().getMostSignificantBits();
+			long least = m.getUniqueId().getLeastSignificantBits();
+			long most  = m.getUniqueId().getMostSignificantBits();
 			setLong.invoke(compound, "UUIDLeast",least);
 			setLong.invoke(compound, "UUIDMost", most);
 
-			setString.invoke(compound, "AttributeName", m.getAttribute().getName());
+			setString.invoke(compound, "AttributeName", getInternalAttributeName(att));
 			setString.invoke(compound, "Name", m.getName());
 
-			setDouble.invoke(compound, "Amount", m.getValue());
-			setInt.invoke(compound, "Operation", m.getOperation());
-			if (m.getSlot() != null) {
-				setString.invoke(compound, "Slot", m.getSlot().getValue());
+			setDouble.invoke(compound, "Amount", m.getAmount());
+			setInt.invoke(compound, "Operation", m.getOperation().ordinal()); //unsafe but probably works
+			if (slot != null) {
+				setString.invoke(compound, "Slot", slot.getField());
 			}
 
 			//Find the correct place in the NBT Item Hierarchy to put the data
@@ -311,7 +208,7 @@ public class AttributeItem {
 			if(!NBTCompoundHasKey(tag,"AttributeModifiers")) return is;
 
 			Object listNBT = NBTTagCompound.getMethod("get", String.class).invoke(tag, "AttributeModifiers");
-			removeNBTModifier(listNBT, m.getUUID().getLeastSignificantBits(), m.getUUID().getMostSignificantBits());
+			removeNBTModifier(listNBT, m.getUniqueId().getLeastSignificantBits(), m.getUniqueId().getMostSignificantBits());
 			return toBukkitStack(nmsItemStack);
 
 		}catch(Throwable t){t.printStackTrace();}	
@@ -319,17 +216,26 @@ public class AttributeItem {
 		return null;
 	}
 
-	private static Object toNMSStack(ItemStack stack) 
-			throws NoSuchMethodException, SecurityException, ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
-		/*Method convert = Class.forName(Bukkit.getItemFactory().getClass().getPackage().getName() + ".CraftItemStack").getMethod("asNMSCopy", ItemStack.class);
-		Object result = convert.invoke(null, stack);*/
-		return CraftItemStack.asNMSCopy(stack);
-	}
-
-	private static ItemStack toBukkitStack(Object nmsItemStack) 
-			throws NoSuchMethodException, SecurityException, ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
-		Method convert = Class.forName(Bukkit.getItemFactory().getClass().getPackage().getName() + ".CraftItemStack").getMethod("asCraftMirror",nmsItemStack.getClass());
-		return (ItemStack) convert.invoke(null, nmsItemStack);
+	private static Object toNMSStack(ItemStack stack){return MinecraftReflection.getMinecraftItemStack(stack);}
+	private static ItemStack toBukkitStack(Object nmsItemStack) {return MinecraftReflection.getBukkitItemStack(nmsItemStack);}
+	
+	private static String getInternalAttributeName(Attribute att) {
+		switch(att) {
+		case GENERIC_ARMOR: return "generic.Armor";
+		case GENERIC_ARMOR_TOUGHNESS: return "generic.armorToughness";
+		case GENERIC_ATTACK_DAMAGE: return "generic.attackDamage";
+		case GENERIC_ATTACK_SPEED: return "generic.attackSpeed";
+		case GENERIC_FLYING_SPEED: return "generic.flyingSpeed";
+		case GENERIC_FOLLOW_RANGE: return "generic.followRange";
+		case GENERIC_KNOCKBACK_RESISTANCE: return "generic.knockbackResistance";
+		case GENERIC_LUCK: return "generic.luck";
+		case GENERIC_MAX_HEALTH: return "generic.maxHealth";
+		case GENERIC_MOVEMENT_SPEED: return "generic.movementSpeed";
+		case HORSE_JUMP_STRENGTH: return "horse.jumpStrength";
+		case ZOMBIE_SPAWN_REINFORCEMENTS: return "zombie.spawnReinforcements";
+		default: throw new IllegalArgumentException("Unhandled attribute. Likely a Minecraft update has added new attribute type and the devs need to handle it.");
+		}
+		
 	}
 
 	//Use to check if the specified key exists in the NBT compound object.
@@ -357,101 +263,26 @@ public class AttributeItem {
 
 		f.setAccessible(false);
 	}
-	/*
-	@SuppressWarnings("unchecked")
-	public static Map<String, Object> serializeItem(ItemStack is) {
-		Map<String, Object> result = new LinkedHashMap<String, Object>();
-		if (is == null) is = new ItemStack(Material.AIR);
-		result.put("type", is.getType().name());
+	
+	public enum Slot {
+	    MAINHAND("mainhand"),
+	    OFFHAND("offhand"),
+	    FEET("feet"),
+	    LEGS("legs"),
+	    CHEST("chest"),
+	    HEAD("head");
 
-		if (is.getDurability() != 0) {
-			result.put("damage", is.getDurability());
-		}
+	    final String field;
+	    
+	    Slot(String field) {this.field = field;}
 
-		if (is.getAmount() != 1) {
-			result.put("amount", is.getAmount());
-		}
+	    public String getField() {
+	        return field;
+	    }
 
-		ItemMeta meta = is.getItemMeta();
-		if (!Bukkit.getItemFactory().equals(meta, null)) {
-			result.put("meta", meta);
-		}
-
-		net.minecraft.server.v1_8_R1.NBTTagCompound tag = null;
-		net.minecraft.server.v1_8_R1.ItemStack nms = null;
-		try {
-			nms = (net.minecraft.server.v1_8_R1.ItemStack) toNMSStack(is);
-		} catch (Exception e) {
-		}
-		if (nms != null) { // is not air
-			tag = nms.getTag();
-			NBTTagList nbtlist = (NBTTagList) tag.get("AttributeModifiers");
-			if (listField == null) {
-				try {
-					listField = nbtlist.getClass().getDeclaredField("list");
-				} catch (Exception e) {
-
-				}
-				listField.setAccessible(true);
-			}
-
-			List<NBTBase> list = null;
-			try {
-				list = (List<NBTBase>) listField.get(nbtlist);
-			} catch (Exception e) {
-
-			}
-			if (list != null) {
-				for (NBTBase base : list) {
-					base.toString();
-				}
-			}
-
-		}
-
-		return result;
+	    @Override
+	    public String toString() {
+	        return field;
+	    }
 	}
-
-	public static ItemStack deserializeItem(Map<String, Object> args) {
-		Material type = Material.getMaterial((String) args.get("type"));
-		short damage = 0;
-		int amount = 1;
-
-		if (args.containsKey("damage")) {
-			damage = ((Number) args.get("damage")).shortValue();
-		}
-
-		if (args.containsKey("amount")) {
-			amount = (Integer) args.get("amount");
-		}
-
-		ItemStack result = new ItemStack(type, amount, damage);
-
-		if (args.containsKey("meta")) {
-			Object raw = args.get("meta");
-			if (raw instanceof ItemMeta) {
-				result.setItemMeta((ItemMeta) raw);
-			}
-		}
-
-		if (args.containsKey("nbt")) {
-			net.minecraft.server.v1_8_R1.ItemStack nms;
-			try {
-				nms = (net.minecraft.server.v1_8_R1.ItemStack) toNMSStack(result);
-				net.minecraft.server.v1_8_R1.NBTTagCompound tag = nms.getTag();
-				if (mapField == null) {
-					try {
-						mapField = net.minecraft.server.v1_8_R1.NBTTagCompound.class.getDeclaredField("map");
-						mapField.setAccessible(true);
-					} catch (NoSuchFieldException e) {}
-				}
-				mapField.set(tag, args.get("nbtmap"));
-				nms.setTag(tag);
-			} catch (Exception e) {
-			}
-		}
-
-		return result;
-	}*/
-
 }
