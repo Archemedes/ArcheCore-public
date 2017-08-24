@@ -12,15 +12,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.help.ArcheMessage;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.PersonaIcon;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.PersonaRenameTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
@@ -163,17 +160,6 @@ public class CommandPersona implements CommandExecutor {
 				String time = millsToDaysHours(System.currentTimeMillis() - pers.getCreationTime());
 				sender.sendMessage(ChatColor.AQUA + "You created " + pers.getName() + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
 				return true;
-			} else if (args[0].equalsIgnoreCase("icon") || args[0].equalsIgnoreCase("head")){
-				if (!(sender instanceof Player)) return false;
-				PersonaIcon newIcon = new PersonaIcon((Player)sender);
-				pers.setIcon(newIcon);
-				sender.sendMessage(ChatColor.AQUA + "Your current skin has been set as the icon for " + pers.getName() + ".");
-				return true;
-			} else if (args[0].equalsIgnoreCase("clearicon")){
-				pers.setIcon(null);
-				sender.sendMessage(ChatColor.AQUA + "Icon cleared for " + pers.getName() + ".");
-				return true;
-
 			} else if (args[0].equalsIgnoreCase("clearprefix") && prefix) {
 				pers.clearPrefix();
 				sender.sendMessage(ChatColor.AQUA + "Persona prefix was cleared for " + pers.getName() + ".");
