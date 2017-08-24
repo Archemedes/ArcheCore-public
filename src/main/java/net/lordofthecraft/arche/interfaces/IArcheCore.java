@@ -180,12 +180,6 @@ public interface IArcheCore {
 	Economy getEconomy();
 	
 	/**
-	 * JMisc holds a set of methods and values for the LotC coder Jistuma, implemented here for easy access.
-	 * @return the JMisc object
-	 */
-	JMisc getMisc();
-	
-	/**
 	 * @return If new Personas will be teleported to spawn after creation
 	 */
 	boolean teleportNewPersonas();

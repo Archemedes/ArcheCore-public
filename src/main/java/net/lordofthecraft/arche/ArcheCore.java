@@ -43,7 +43,6 @@ import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.help.HelpFile;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.IArcheCore;
-import net.lordofthecraft.arche.interfaces.JMisc;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.interfaces.SkillFactory;
@@ -88,7 +87,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private SkinCache skinCache;
 	private ArcheTimer timer;
 	private Economy economy;
-	private JistumaCollection jcoll;
 
 	//Config settings
 	private boolean helpOverriden;
@@ -204,7 +202,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		personaHandler = ArchePersonaHandler.getInstance();
 		helpdesk = HelpDesk.getInstance();
 		skinCache = SkinCache.getInstance();
-		jcoll = new JistumaCollection(personaHandler);
 
 		timer = debugMode? new ArcheTimer(this) : null;
 		personaHandler.setModifyDisplayNames(modifyDisplayNames);
@@ -601,9 +598,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	public Economy getEconomy() {
 		return economy;
 	}
-
-	@Override
-	public JMisc getMisc() { return jcoll; }
 
 	@Override
 	public boolean teleportNewPersonas() {
