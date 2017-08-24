@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche;
+package net.lordofthecraft.arche.util;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -14,7 +14,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.EnumWrappers.Difficulty;
 import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
 
-public class ArcheProtocolUtil {
+public class ProtocolUtil {
 
 	@SuppressWarnings("deprecation")
 	public static void fakeRespawn(Player p, Environment env) {

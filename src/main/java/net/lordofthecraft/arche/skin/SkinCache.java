@@ -37,13 +37,13 @@ import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.properties.PropertyMap;
 
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheProtocolUtil;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.listener.PersonaSkinListener;
 import net.lordofthecraft.arche.persona.ArchePersonaKey;
 import net.lordofthecraft.arche.skin.MojangCommunicator.AuthenthicationData;
 import net.lordofthecraft.arche.skin.MojangCommunicator.MinecraftAccount;
+import net.lordofthecraft.arche.util.ProtocolUtil;
 
 public class SkinCache {
 	private static final SkinCache INSTANCE = new SkinCache();
@@ -238,7 +238,7 @@ public class SkinCache {
 		try {
 			manager.sendServerPacket(p, packetDel);
 			manager.sendServerPacket(p, packetAdd);
-			ArcheProtocolUtil.fakeRespawn(p, p.getWorld().getEnvironment());
+			ProtocolUtil.fakeRespawn(p, p.getWorld().getEnvironment());
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		}
