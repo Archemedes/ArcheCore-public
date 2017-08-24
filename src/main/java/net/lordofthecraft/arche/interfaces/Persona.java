@@ -7,7 +7,6 @@ import org.bukkit.inventory.Inventory;
 
 import net.lordofthecraft.arche.enums.ProfessionSlot;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.persona.PersonaIcon;
 import net.lordofthecraft.arche.persona.PersonaInventory;
 
 public interface Persona {
@@ -297,14 +296,6 @@ public interface Persona {
 	/** Get the current head icon of this persona.
 	 * @return The Persona's icon.
 	 */
-
-	PersonaIcon getIcon();
-
-	/**
-	 * Set the current head icon of this Persona.
-	 * @param icon the icon to set.
-	 */
-	void setIcon(PersonaIcon icon);
 
 	/**
 	 * @return the inventory of this persona as an Inventory object

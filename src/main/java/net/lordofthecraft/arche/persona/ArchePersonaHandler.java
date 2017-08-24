@@ -407,7 +407,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		String r = ChatColor.RESET+"";
 		String b = ChatColor.BLUE+"";
 		String l = ChatColor.GRAY+"";
-		String i = ChatColor.ITALIC+"";
+		//String i = ChatColor.ITALIC+"";
 
 		result.add(new ArcheMessage(l+"~~~~ " + r + p.getPlayerName() + "'s Extended Roleplay Persona" + l + " ~~~~"));
 		result.add(new ArcheMessage(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
@@ -619,12 +619,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.professions[1] = ArcheSkillFactory.getSkill(res.getString(24));
 		persona.professions[2] = ArcheSkillFactory.getSkill(res.getString(25));
 		persona.pastPlayTime = res.getInt(28);
-
-		String icon = res.getString("skindata");
-
-		if(!res.wasNull()){
-			persona.setIcon(new PersonaIcon(icon));
-		}
 
 
 		//We now let all Personas load their skills (albeit lazily). Let's do this now

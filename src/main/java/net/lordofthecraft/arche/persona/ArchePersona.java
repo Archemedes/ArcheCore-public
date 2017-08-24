@@ -88,7 +88,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private int hash = 0;
 	private int food = 0;
 	private double health = 0;
-	PersonaIcon icon = null;
 
 	private ArchePersona(int id, String name, Race race, int gender, int age,long creationTimeMS) {
 		key = new ArchePersonaKey(UUID.randomUUID(),id);
@@ -779,17 +778,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		public int compare(Skill o1, Skill o2) {
 			return Double.compare(o2.getXp(p), o1.getXp(p));
 		}
-	}
-
-	@Override
-	public PersonaIcon getIcon() {
-		return icon;
-	}
-
-	@Override
-	public void setIcon(PersonaIcon icon) {
-		this.icon = icon;
-		buffer.put(new UpdateTask(this, PersonaField.ICON, icon.getData()));
 	}
 
 	@Override
