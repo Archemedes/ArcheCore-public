@@ -39,7 +39,8 @@ public class AttributeItem {
 	private static Method setInt;
 	private static Method setDouble;
 	private static Method hasKey;
-
+	private static Method saveToJson;
+	
 	private static Field attributeList;
 	private static Method getTagMethod;
 	//private static Method setTagMethod;
@@ -61,6 +62,23 @@ public class AttributeItem {
 		}catch(Throwable t){t.printStackTrace();}
 	}
 
+	/**
+	 * Transforms an itemstack into its JSON equivalent. Useful for HoverEvent SHOW_ITEM or uncommon serialization needs
+	 * @param is The item to convert
+	 * @return A JSON string (can be turned to JSON object if desired)
+	 */
+	public static String getItemJson(ItemStack is) {
+		try {
+			Object nms = toNMSStack(is);
+			Object compound = compoundConstructor.newInstance();
+			
+			if(saveToJson == null) saveToJson = nms.getClass().getMethod("save", NBTTagCompound);
+			saveToJson.invoke(nms, compound);
+			return compound.toString();
+		}catch(Throwable t){t.printStackTrace();}
+		return null;
+	}
+	
 	/**
 	 * Name of ItemStack as displayed by en_US language
 	 * @param is ItemStack to check
