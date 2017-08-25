@@ -8,6 +8,13 @@ import org.bukkit.entity.Player;
 public interface ChatMessage {
 
 	/**
+	 *  Adds a raw line of text, faster but produces odd results if containing Minecraft color codes.
+	 * @param line Raw line of text to add
+	 * @return itself
+	 */
+	ChatMessage addRawLine(String line);
+	
+	/**
 	 *  Adds a line of text, respecting the legacy Minecraft formatting and color codes
 	 * @param line Line of text to add
 	 * @return itself

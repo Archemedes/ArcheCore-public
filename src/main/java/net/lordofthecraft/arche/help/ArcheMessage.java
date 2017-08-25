@@ -1,14 +1,20 @@
 package net.lordofthecraft.arche.help;
 
+import java.util.List;
+
+import org.bukkit.entity.Player;
+
 import com.google.common.collect.Lists;
+
 import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.*;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
-import org.bukkit.entity.Player;
-
-import java.util.List;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.TranslatableComponent;
 
 public class ArcheMessage implements ChatMessage {
 	List<BaseComponent> parts = Lists.newArrayList();
@@ -23,7 +29,7 @@ public class ArcheMessage implements ChatMessage {
 	}
 
 	public ArcheMessage(BaseComponent component){
-		parts.add(component);
+		current = component;
 	}
 
 	public static ChatColor convertChatColor(org.bukkit.ChatColor color) {
@@ -92,6 +98,12 @@ public class ArcheMessage implements ChatMessage {
 		return result;
 	}
 
+	public static ChatMessage createRaw(String text) {
+		ChatMessage message = new ArcheMessage();
+		message.addRawLine(text);
+		return message;
+	}
+	
 	public static ChatMessage create(String text) {
 		ChatMessage message = new ArcheMessage();
 
@@ -160,6 +172,29 @@ public class ArcheMessage implements ChatMessage {
 				current.addExtra(extra);
 		}
 
+		return this;
+	}
+	
+	@Override
+	public ArcheMessage addRawLine(String line){
+		if(current != null) parts.add(current);
+
+		BaseComponent constructed = new TextComponent(line);
+		current = constructed;
+		return this;
+	}
+		
+	public ArcheMessage addExtra(ArcheMessage other) {
+		if(current == null) current = new TextComponent();
+		
+		if(other.parts.isEmpty() && other.current == null)
+			return this;
+		
+		TextComponent toAdd = new TextComponent();
+		other.parts.forEach(p->toAdd.addExtra(p));
+		if(other.current != null) toAdd.addExtra(other.current);
+		
+		current.addExtra(toAdd);
 		return this;
 	}
 
@@ -262,6 +297,7 @@ public class ArcheMessage implements ChatMessage {
 			act = Action.RUN_COMMAND;
 			break;
 		case SUGGEST_COMMAND: act = Action.SUGGEST_COMMAND; break;
+		case CHANGE_PAGE: act = Action.CHANGE_PAGE; break;
 		case OPEN_URL:
 			act = Action.OPEN_URL;
 			break;
@@ -286,9 +322,8 @@ public class ArcheMessage implements ChatMessage {
 		switch(action){
 		case SHOW_ACHIEVEMENT: act = HoverEvent.Action.SHOW_ACHIEVEMENT; break;
 		case SHOW_TEXT: act = HoverEvent.Action.SHOW_TEXT; break;
-		case SHOW_ITEM:
-			act = HoverEvent.Action.SHOW_ITEM;
-			break;
+		case SHOW_ITEM: act = HoverEvent.Action.SHOW_ITEM; break;
+		case SHOW_ENTITY: act = HoverEvent.Action.SHOW_ENTITY; break;
 		default: throw new IllegalArgumentException("Not all actions supported for HoverEvent");
 		}
 
