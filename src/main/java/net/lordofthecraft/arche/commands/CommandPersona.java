@@ -14,13 +14,13 @@ import org.bukkit.inventory.Inventory;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.PersonaRenameTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.util.MessageUtil;
 
 public class CommandPersona implements CommandExecutor {
 	private final HelpDesk helpdesk;
@@ -114,34 +114,21 @@ public class CommandPersona implements CommandExecutor {
 				return true;
 			}
 
-			if (args[0].equalsIgnoreCase("view")) {
-				if (!(sender instanceof Player)) return false;
+			if (args[0].equalsIgnoreCase("view") || args[0].equalsIgnoreCase("more")) {
+				boolean extendedInfo = args[0].equalsIgnoreCase("more");
+				
 				Player t = Bukkit.getPlayer(pers.getPlayerUUID());
 				if (t != null && !handler.mayUse(t)) {
 					sender.sendMessage(ChatColor.DARK_AQUA + "This player is a Wandering Soul (may not use Personas)");
 				} else {
 					//If the persona is found the Whois should always succeed
 					//We have assured the persona is found earlier
-					for (ChatMessage m : handler.whois(pers, sender.hasPermission("archecore.mod.other"))) {
-						m.sendTo((Player) sender);
-					}
+					boolean mod = sender.hasPermission("archecore.mod.other");
+					(extendedInfo ? handler.whoisMore(pers, mod, sender == pers.getPlayer()) : handler.whois(pers, mod))
+							.forEach(o->MessageUtil.send(o, sender));
 				}
 				return true;
-			}
-			else if (args[0].equalsIgnoreCase("more")) {
-				if (!(sender instanceof Player)) return false;
-				Player t = Bukkit.getPlayer(pers.getPlayerUUID());
-				if (t != null && !handler.mayUse(t)) {
-					sender.sendMessage(ChatColor.DARK_AQUA + "This player is a Wandering Soul (may not use Personas)");
-				} else {
-					//If the persona is found the Whois should always succeed
-					//We have assured the persona is found earlier
-					for (ChatMessage m : handler.whoisMore(pers, sender.hasPermission("archecore.mod.other"), sender == pers.getPlayer())) {
-						m.sendTo((Player) sender);
-					}
-				}
-				return true;
-			} else if (args[0].equalsIgnoreCase("autoage")) {
+			}else if (args[0].equalsIgnoreCase("autoage")) {
 				boolean auto = pers.doesAutoAge();
 
 				if (auto && !sender.hasPermission("archecore.stopautoage")) {

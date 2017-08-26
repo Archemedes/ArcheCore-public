@@ -1,17 +1,20 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.skill.TopData;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.annotation.Nonnull;
+
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.skill.TopData;
+import net.md_5.bungee.api.chat.BaseComponent;
 
 public interface PersonaHandler {
 
@@ -162,7 +165,7 @@ public interface PersonaHandler {
 	 * @param mod If the user viewing is a moderator
 	 * @return A list of initialised stats of the given Persona
 	 */
-	List<ChatMessage> whois(Persona p, boolean mod);
+	List<BaseComponent> whois(Persona p, boolean mod);
 
 	/**
 	 * Method that provides a human-readable list of information about a
@@ -171,7 +174,7 @@ public interface PersonaHandler {
 	 * @param mod If the user viewing is a moderator
 	 * @return A list of initialised stats of the given Persona
 	 */
-	List<ChatMessage> whois(Player p, boolean mod);
+	List<BaseComponent> whois(Player p, boolean mod);
 
 	/**
 	 * Method that provides a human-readable list of additional information, to be used in prints
@@ -181,7 +184,7 @@ public interface PersonaHandler {
 	 * @return A list of initialised stats of the given Persona
 	 */
 
-	List<ChatMessage> whoisMore(Persona p, boolean mod, boolean self);
+	List<BaseComponent> whoisMore(Persona p, boolean mod, boolean self);
 
 
 	/**

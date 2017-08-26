@@ -1,8 +1,11 @@
 package net.lordofthecraft.arche.help;
 
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.enums.ChatBoxAction;
-import net.lordofthecraft.arche.interfaces.ChatMessage;
+import net.lordofthecraft.arche.util.MessageUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -17,7 +20,7 @@ import java.util.UUID;
 
 public class WikiHelpFile extends HelpFile {
 	private final static String WIKI = "https://wikia.lordofthecraft.net/index.php?title=";
-	private ChatMessage[] messages = null;
+	private BaseComponent[] messages = null;
 
 	public WikiHelpFile(String topic) {
 		super(topic);
@@ -26,13 +29,15 @@ public class WikiHelpFile extends HelpFile {
 	@Override
 	public void output(Player p) {
 		if(messages != null){
-			for(ChatMessage message : messages) message.sendTo(p);
-			new ArcheMessage("Read more...")
-				.setItalic()
-				.applyChatColor(ChatColor.YELLOW)
-				.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Open the wiki page")
-					.setClickEvent(ChatBoxAction.OPEN_URL, WIKI + getTopic().substring(2).replace("\\", "").replace("/", "").replace('?', ' ').replace(' ', '_'))
-				.sendTo(p);
+			for(BaseComponent message : messages) p.spigot().sendMessage(message);
+			p.spigot().sendMessage(
+					new ComponentBuilder("Read more...")
+					.italic(true)
+					.color(MessageUtil.convertColor(ChatColor.YELLOW))
+					.event(MessageUtil.hoverEvent("Open the wiki page"))
+					.event(new ClickEvent(ClickEvent.Action.OPEN_URL, WIKI + getTopic().substring(2).replace("\\", "").replace("/", "").replace('?', ' ').replace(' ', '_')))
+					.create()
+			);
 		} else {
 			p.sendMessage(ChatColor.RED + "Help topic not available...");
 		}
@@ -45,8 +50,8 @@ public class WikiHelpFile extends HelpFile {
 		StringBuilder builder = new StringBuilder(256);
 		String prefix = "";
 		
-		for(ChatMessage message : messages){
-			builder.append(prefix).append(message.toString());
+		for(BaseComponent message : messages){
+			builder.append(prefix).append(message.toPlainText());
 			prefix = "\n";
 		}
 		
@@ -67,7 +72,7 @@ public class WikiHelpFile extends HelpFile {
 		public void run(){
 			String help = getParagraph();
 			if(help == null) boss.messages = null;
-			else boss.messages = ArcheMessage.createMultiple(help);
+			else boss.messages = parseMultiple(help);
 			
 			new BukkitRunnable(){
 				

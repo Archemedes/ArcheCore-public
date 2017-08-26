@@ -1,6 +1,12 @@
 package net.lordofthecraft.arche.help;
 
 import com.google.common.collect.Lists;
+
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -54,4 +60,101 @@ public abstract class HelpFile {
 	public abstract void output(Player p);
 
 	public abstract String outputHelp();
+	
+	
+	//Global parsing methods for helpfiles
+	public static BaseComponent[] parseMultiple(String text) {
+		String[] segments = text.split("\n");
+		BaseComponent[] result = new BaseComponent[segments.length];
+
+		int i = 0;
+		String colorCode = "";
+		for (String segment : segments) {
+			result[i++] = parse(colorCode + segment);
+			colorCode = org.bukkit.ChatColor.getLastColors(segment);
+		}
+
+		return result;
+	}
+	
+	public static BaseComponent parse(String text) {
+		BaseComponent message = new TextComponent();
+
+		boolean link = text.startsWith("@");
+
+		for (String segment : text.split("@")) {
+
+			if (link) { // You're a link
+				StringPair sp = StringPair.parseSyntax(segment);
+
+				//Format the link into the chatmessage
+				message.addExtra(sp.vis);
+				message.setUnderlined(true);
+
+				HoverEvent hEv = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+						TextComponent.fromLegacyText("Link to Topic: "
+								+ ChatColor.ITALIC + sp.url.replace('+', ' ')));
+				ClickEvent cEv = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/archehelp " + sp.url);
+
+				message.setHoverEvent(hEv);
+				message.setClickEvent(cEv);
+
+			} else {//Not a link, maybe a command suggest?
+				boolean sugg = segment.startsWith("$");
+
+				for (String miniSegment : segment.split("\\$")) { // Let's split up into commandables
+
+					if (sugg) { //Is a command, clicking it inserts command in chatbox
+						StringPair sp = StringPair.parseSyntax(miniSegment);
+
+						BaseComponent[] cmp = new BaseComponent[]{new TextComponent("Run Command")};
+
+						BaseComponent vis = new TextComponent(sp.vis);
+						HoverEvent hEv = new HoverEvent(HoverEvent.Action.SHOW_TEXT, cmp);
+						ClickEvent cEv = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, sp.url);
+
+						vis.setHoverEvent(hEv);
+						vis.setClickEvent(cEv);
+						message.addExtra(vis);
+					} else {
+						message.addExtra(miniSegment);
+					}
+
+					sugg = !sugg;
+				}
+			}
+
+			link = !link;
+		}
+
+		return message;
+	}
+
+	private static class StringPair{
+		private String url,vis;
+
+		private StringPair(String url, String vis) {
+			this.url = url;
+			this.vis = vis;
+		}
+		
+		private static StringPair parseSyntax(String segment){
+			String url,vis;
+			//Possible to have a topic link with a different Body text.
+			//Syntax: @<Human>Men@. Links to 'Human' but says 'Men'
+			//We now see if this functionality was used
+			if(segment.startsWith("<") && segment.contains(">")){
+				int index = segment.lastIndexOf('>');
+				if(index == segment.length() - 1){
+					url=vis= segment.replace('<', ' ').replace('>', ' ');
+				} else {
+					url = segment.substring(1, index);
+					vis = segment.substring(index+1);
+				}
+			} else {
+				url=vis=segment;
+			}
+			return new StringPair(url, vis);
+		}
+	}
 }

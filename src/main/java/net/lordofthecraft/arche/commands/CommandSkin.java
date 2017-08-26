@@ -15,12 +15,14 @@ import org.json.simple.parser.ParseException;
 import com.google.common.collect.Sets;
 
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.enums.ChatBoxAction;
-import net.lordofthecraft.arche.help.ArcheMessage;
-import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
+import net.lordofthecraft.arche.util.MessageUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class CommandSkin implements CommandExecutor {
 	final private ArcheCore plugin;
@@ -45,10 +47,11 @@ public class CommandSkin implements CommandExecutor {
 		int maxAllowed = maxAllowed(p);
 
 		if (maxAllowed == 0) {
-			ChatMessage msg = ArcheMessage.create("Please purchase a VIP rank to use automatic skin switching. Click here to visit the store.").applyChatColor(ChatColor.GREEN);
-			msg.setClickEvent(ChatBoxAction.RUN_COMMAND, "/store");
-			msg.setHoverEvent(ChatBoxAction.SHOW_TEXT, ChatColor.GRAY + "" + ChatColor.ITALIC + "Click here to visit the store.");
-			msg.sendTo(p);
+			BaseComponent msg = new TextComponent("Please purchase a VIP rank to use automatic skin switching. Click here to visit the store.");
+			msg.setColor(MessageUtil.convertColor(ChatColor.GREEN));
+			msg.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/store"));
+			msg.setHoverEvent(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, ChatColor.GRAY + "" + ChatColor.ITALIC + "Click here to visit the store."));
+			p.spigot().sendMessage(msg);
 			return true;
 		}
 		
@@ -64,22 +67,23 @@ public class CommandSkin implements CommandExecutor {
 		} else if( arg(args[0], "view", "list", "ls", "show")) {
 			p.sendMessage(ChatColor.AQUA + "Now showing you your personal skin storage:");
 			for(int i = 1; i <= maxAllowed; i++) {
-				ChatMessage msg = ArcheMessage.create("[" + i + "] ").applyChatColor(ChatColor.AQUA);
+				BaseComponent msg = new TextComponent("[" + i + "] ");
+				msg.setColor(MessageUtil.convertColor(ChatColor.AQUA));
 
 				ArcheSkin sk = cache.getSkinAtSlot(p.getUniqueId(), i);
-				if(sk == null) msg.addLine(ChatColor.GRAY + "" + ChatColor.ITALIC + "Empty...");
+				if(sk == null) msg.addExtra(ChatColor.GRAY + "" + ChatColor.ITALIC + "Empty...");
 				else {
 					Persona pers = plugin.getPersonaHandler().getPersona(p);
 					boolean current = cache.getSkinFor(pers) == sk;
-					msg.addLine((current ? ChatColor.LIGHT_PURPLE : ChatColor.GOLD) + sk.getName());
-					if(current) msg.setHoverEvent(ChatBoxAction.SHOW_TEXT, ChatColor.LIGHT_PURPLE + "Currently in use for " + pers.getName() + ".");
+					msg.addExtra((current ? ChatColor.LIGHT_PURPLE : ChatColor.GOLD) + sk.getName());
+					if(current) msg.setHoverEvent(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, ChatColor.LIGHT_PURPLE + "Currently in use for " + pers.getName() + "."));
 					else {
-						msg.setClickEvent(ChatBoxAction.RUN_COMMAND, "/skin apply " + i);
-						msg.setHoverEvent(ChatBoxAction.SHOW_TEXT, ChatColor.GRAY + "" + ChatColor.ITALIC + "Click to apply this skin.");
+						msg.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/skin apply " + i));
+						msg.setHoverEvent(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, ChatColor.GRAY + "" + ChatColor.ITALIC + "Click to apply this skin."));
 					}
 				}
 
-				msg.sendTo(p);
+				p.spigot().sendMessage(msg);
 			}
 			return true;
 		} else if(arg(args[0],"delete","remove","del","rm")) {

@@ -3,14 +3,18 @@ package net.lordofthecraft.arche.persona;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.help.ArcheMessage;
-import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.util.MessageUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.conversations.*;
@@ -287,19 +291,20 @@ public class CreationDialog {
         @Override
         public String getPromptText(ConversationContext context) {
             Player p = (Player) context.getForWhom();
-            new ArcheMessage("Please type the desired Gender of your Persona.").applyChatColor(ChatColor.YELLOW).sendTo(p);
-            ChatMessage mains = new ArcheMessage("Available Options: ").applyChatColor(ChatColor.YELLOW);
+            
+            p.spigot().sendMessage(new ComponentBuilder("Please type the desired Gender of your Persona.")
+            		.color(MessageUtil.convertColor(ChatColor.YELLOW))
+            		.create()
+            		);
+            BaseComponent mains = new TextComponent("Available Options: ");
+            mains.setColor(MessageUtil.convertColor(ChatColor.YELLOW));
 
             for(String s : new String[]{"female", "male", "other"}){
-                mains.addLine(s)
-                        .setUnderlined()
-                        .applyChatColor(ChatColor.WHITE)
-                        .setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select")
-                        .setClickEvent(ChatBoxAction.RUN_COMMAND, s)
-                        .addLine(",  ");
+            	mains.addExtra(MessageUtil.CommandButton(s, s, "Click to select"));
+                mains.addExtra("  ");
             }
 
-            mains.sendTo(p);
+            p.spigot().sendMessage(mains);
             return DIVIDER;
         }
 
@@ -319,27 +324,26 @@ public class CreationDialog {
         public String getPromptText(ConversationContext context) {
             Player p = (Player) context.getForWhom();
 
-            ChatMessage mains = new ArcheMessage("Main Races: ").applyChatColor(ChatColor.YELLOW);
+            BaseComponent mains = new TextComponent("Main Races: ");
+            mains.setColor(MessageUtil.convertColor(ChatColor.YELLOW));
 
             for(int i = 0; i < 5; i++){
                 Race race = Race.values()[i];
                 if(p.hasPermission("archecore.race." + race.toString().toLowerCase())){
-                    mains.addLine(race.getName())
-                            .setUnderlined()
-                            .applyChatColor(ChatColor.WHITE)
-                            .setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
-                            .setClickEvent(ChatBoxAction.RUN_COMMAND, race.getName())
-                            .addLine(",  ");
+                	mains.addExtra(MessageUtil.CommandButton(race.getName(), race.getName(), "Click to select this Race"));
+                    mains.addExtra("  ");
                 }
             }
 
-            mains.addLine("more...")
-                    .setItalic()
-                    .applyChatColor(ChatColor.GRAY)
-                    .setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click for more races")
-                    .setClickEvent(ChatBoxAction.RUN_COMMAND, "more");
+            mains.addExtra( new ComponentBuilder("more...")
+            		.italic(true)
+            		.color(MessageUtil.convertColor(ChatColor.GRAY))
+            		.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "more"))
+            		.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click for more races"))
+            		.create()[0]
+            		);
 
-            mains.sendTo(p);
+            p.spigot().sendMessage(mains);
 
             String pretext = ChatColor.YELLOW + "Please type your Persona's race, or type " + ChatColor.WHITE + "more"
                     + ChatColor.YELLOW + " to see all available races.";
@@ -391,35 +395,29 @@ public class CreationDialog {
             Player p = (Player) context.getForWhom();
 
             Race selected = findRace(string);
-
-            ChatMessage subraces = new ArcheMessage("Sub Race Options: ").applyChatColor(ChatColor.YELLOW);
-            subraces.addLine(selected.getName())
-                    .setUnderlined()
-                    .setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
-                    .setClickEvent(ChatBoxAction.RUN_COMMAND, selected.getName())
-                    .addLine(", ");
+            BaseComponent subraces = new TextComponent("Sub Race Options: ");
+            subraces.setColor(MessageUtil.convertColor(ChatColor.YELLOW));
+            
+        	subraces.addExtra(MessageUtil.CommandButton(selected.getName(), selected.getName(), "Click to select this Race"));
 
             for (Race race : Race.values()){
                 if (Objects.equals(race.getParentRace(), selected.getName())
                         && race != selected){
-                    subraces.addLine(race.getName())
-                            .setUnderlined()
-                            .setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
-                            .setClickEvent(ChatBoxAction.RUN_COMMAND, race.getName())
-                            .addLine(", ");
+                	subraces.addExtra("  ");
+                	subraces.addExtra(MessageUtil.CommandButton(race.getName(), race.getName(), "Click to select this Race"));
                 }
             }
 
-            subraces.addLine("back...")
-                    .setItalic()
-                    .applyChatColor(ChatColor.GRAY)
-                    .setHoverEvent(ChatBoxAction.SHOW_TEXT, "Go back to Race selection")
-                    .setClickEvent(ChatBoxAction.RUN_COMMAND, "back");
+            subraces.addExtra( new ComponentBuilder("back...")
+            		.italic(true)
+            		.color(MessageUtil.convertColor(ChatColor.GRAY))
+            		.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "back"))
+            		.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click for more races"))
+            		.create()[0]
+            		);
 
-            subraces.sendTo(p);
-
+            p.spigot().sendMessage(subraces);
             String pretext = "You have selected "+ChatColor.WHITE+selected.getName()+ChatColor.YELLOW+". These are the available subraces to you, should you choose them. Type the name of the subrace or click to select.";
-
             return pretext + DIVIDER;
         }
 
@@ -457,21 +455,18 @@ public class CreationDialog {
         @Override
         public String getPromptText(ConversationContext context) {
 
-            ChatMessage m = new ArcheMessage("Available Races: ").applyChatColor(ChatColor.YELLOW);
-
+            BaseComponent m = new TextComponent("Available Races: ");
+            m.setColor(MessageUtil.convertColor(ChatColor.YELLOW));
             Player p = (Player) context.getForWhom();
-
+            
             for(Race race : Race.values()){
                 if(p.hasPermission("archecore.race." + race.toString().toLowerCase())){
-                    m.addLine(race.getName())
-                            .applyChatColor(ChatColor.WHITE)
-                            .setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select this Race")
-                            .setClickEvent(ChatBoxAction.RUN_COMMAND, race.getName())
-                            .addLine(",  ");
+                	m.addExtra(MessageUtil.CommandButton(race.getName(), race.getName(), "Click to select this Race"));
+                    m.addExtra("  ");
                 }
             }
 
-            m.sendTo(p);
+            p.spigot().sendMessage(m);
             return DIVIDER;
         }
 

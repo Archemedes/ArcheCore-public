@@ -1,8 +1,13 @@
 package net.lordofthecraft.arche.commands;
 
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.enums.ChatBoxAction;
-import net.lordofthecraft.arche.help.ArcheMessage;
+import net.lordofthecraft.arche.util.MessageUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
+
 import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -74,31 +79,23 @@ public class CommandAttribute implements CommandExecutor {
                     sender.sendMessage(ChatColor.AQUA + "Displaying attribute modifiers of " + ChatColor.GOLD + attr.name() + ChatColor.AQUA + " for the player " + ChatColor.GOLD + p.getName());
                     int count = 0;
                     for (AttributeModifier mod : mods) {
-                        ArcheMessage m = new ArcheMessage("");
-                        m.addLine(String.valueOf(count) + ". ")
-                                .applyChatColor(ChatColor.GOLD)
-                                .addLine("Name: ")
-                                .applyChatColor(ChatColor.DARK_AQUA)
-                                .addLine(mod.getName() + ", ");
-                        m.addLine("UUID: ")
-                                .applyChatColor(ChatColor.DARK_AQUA)
-                                .addLine(mod.getUniqueId().toString() + ", ")
-                                .setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to paste to your chat.")
-                                .setClickEvent(ChatBoxAction.SUGGEST_COMMAND, mod.getUniqueId().toString());
-                        m.addLine("Amt: ")
-                                .applyChatColor(ChatColor.DARK_AQUA)
-                                .addLine(mod.getAmount() + ", ");
-                        m.addLine("Operation: ")
-                                .applyChatColor(ChatColor.DARK_AQUA)
-                                .addLine(mod.getOperation().name())
-                                .setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to paste to your chat")
-                                .setClickEvent(ChatBoxAction.SUGGEST_COMMAND, mod.getOperation().name());
-                        m.sendTo(send);
-                        /*sender.sendMessage(ChatColor.AQUA.toString()+(count) + "."
-                                + ChatColor.DARK_AQUA+" Name: " + ChatColor.RESET + mod.getName() + ","
-                                + ChatColor.DARK_AQUA+" UUID: " + ChatColor.RESET + mod.getUniqueId() + ","
-                                + ChatColor.DARK_AQUA+" Amt: " + ChatColor.RESET + mod.getAmount() + ","
-                                + ChatColor.DARK_AQUA+ " Operation: " + ChatColor.RESET + mod.getOperation().name());*/
+                        BaseComponent[] comps = new ComponentBuilder(count + ". ")
+                        .color(MessageUtil.convertColor(ChatColor.GOLD))
+                        .append("Name: ").color(MessageUtil.convertColor(ChatColor.DARK_AQUA))
+                        .append(mod.getName() + ", ", FormatRetention.NONE)
+                        .append("UUID: ").color(MessageUtil.convertColor(ChatColor.DARK_AQUA))
+                        .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, mod.getUniqueId().toString()))
+                        .event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to paste to your chat."))
+                        .append(mod.getUniqueId().toString() + ", ", FormatRetention.EVENTS)
+                        .append("Amt: ", FormatRetention.NONE).color(MessageUtil.convertColor(ChatColor.DARK_AQUA))
+                        .append(mod.getAmount() + ", ", FormatRetention.NONE)
+                        .append("Operation: ").color(MessageUtil.convertColor(ChatColor.DARK_AQUA))
+                        .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, mod.getOperation().name()))
+                        .event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to paste to your chat."))
+                        .append(mod.getOperation().name() + ", ", FormatRetention.EVENTS)
+                        .create();
+                        
+                        send.spigot().sendMessage(comps);
                         count++;
                     }
                     return true;
@@ -259,13 +256,14 @@ public class CommandAttribute implements CommandExecutor {
 
         @Override
         public String getPromptText(ConversationContext conversationContext) {
-            ArcheMessage m = new ArcheMessage("");
-            m.addLine(DIVIDER);
-            m.addLine("Click me to generate a random UUID.")
-                    .setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click me to generate a random UUID.")
-                    .setClickEvent(ChatBoxAction.SUGGEST_COMMAND, UUID.randomUUID().toString())
-                    .applyChatColor(ChatColor.DARK_GRAY);
-            m.sendTo((Player) conversationContext.getForWhom());
+            BaseComponent[] create = new ComponentBuilder(DIVIDER)
+            .append("Click me to generate a random UUID.")
+            .event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click me to generate a random UUID."))
+            .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, UUID.randomUUID().toString()))
+            .color(MessageUtil.convertColor(ChatColor.DARK_GRAY))
+            .create();
+            
+            ((Player) conversationContext.getForWhom()).spigot().sendMessage(create);
             return "Please enter a UUID or click above to generate a random one." + DIVIDER;
         }
 
@@ -304,18 +302,20 @@ public class CommandAttribute implements CommandExecutor {
 
         @Override
         public String getPromptText(ConversationContext conversationContext) {
-            ArcheMessage m = new ArcheMessage("");
-            m.addLine(DIVIDER);
-            m.addLine("Valid Operations: ");
+        	ComponentBuilder b = new ComponentBuilder(DIVIDER);
+        	b.append("Valid Operations: ");
+        	
             String ss = "";
             for (AttributeModifier.Operation op : AttributeModifier.Operation.values()) {
-                m.addLine(ss);
-                m.addLine(op.name())
-                        .setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to select")
-                        .setClickEvent(ChatBoxAction.RUN_COMMAND, op.name());
+                if(!ss.isEmpty()) b.append(ss);
+                b.append(op.name())
+                .event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to select"))
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, op.name()));
+               
                 ss = ", ";
             }
-            m.sendTo((Player) conversationContext.getForWhom());
+        	
+            ((Player) conversationContext.getForWhom()).spigot().sendMessage(b.create());
             return "Please select what operation this attribute modifier will be using." + DIVIDER;
         }
     }

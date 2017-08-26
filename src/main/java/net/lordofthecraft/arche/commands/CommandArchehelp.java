@@ -1,9 +1,10 @@
 package net.lordofthecraft.arche.commands;
 
-import net.lordofthecraft.arche.enums.ChatBoxAction;
-import net.lordofthecraft.arche.help.ArcheMessage;
 import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.interfaces.ChatMessage;
+import net.lordofthecraft.arche.util.MessageUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
+
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -17,7 +18,8 @@ public class CommandArchehelp implements CommandExecutor {
 	private final HelpDesk helpdesk;
 	private final boolean overridden;
 	
-	private ChatMessage topics = null;
+	private BaseComponent topics = null;
+	private int knownTopics = 0;
 	
 	public CommandArchehelp(HelpDesk helpdesk, boolean overridden){
 		this.helpdesk = helpdesk;
@@ -34,17 +36,17 @@ public class CommandArchehelp implements CommandExecutor {
 			
 			if(sender instanceof Player){
 				Set<String> tops = helpdesk.getTopics();
-				if(topics == null || topics.size() < tops.size()){
-					topics = new ArcheMessage("");
-					for(String x : tops){
-						topics.addLine(x)
-							//.setUnderlined()
-							.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click for help")
-							.setClickEvent(ChatBoxAction.RUN_COMMAND, "/archehelp " + x)
-							.addLine(", ");
-					}
+				if(topics == null || knownTopics < tops.size()){
+					knownTopics = 0;
+					topics = new TextComponent();
+					tops.forEach(t -> {
+						knownTopics++;
+						topics.addExtra(" ");
+						topics.addExtra(MessageUtil.ArcheHelpButton(t));
+						topics.addExtra(" ");
+					});
 				}
-				topics.sendTo((Player) sender);
+				((Player) sender).spigot().sendMessage(topics);
 			} else {
 				sender.sendMessage(helpdesk.getTopics().toString());
 			}

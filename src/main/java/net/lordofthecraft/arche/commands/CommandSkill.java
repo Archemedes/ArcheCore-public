@@ -3,11 +3,9 @@ package net.lordofthecraft.arche.commands;
 import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SkillTome;
-import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.enums.ProfessionSlot;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.enums.SkillTier;
-import net.lordofthecraft.arche.help.ArcheMessage;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
@@ -15,6 +13,9 @@ import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.BonusExpModifier;
+import net.lordofthecraft.arche.util.MessageUtil;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
@@ -165,9 +166,11 @@ public class CommandSkill implements CommandExecutor {
 							if (!s.achievedTier(who, max)
 									&& sender instanceof Player){
 								SkillTier next = s.getSkillTier(who).getNext();
-								new ArcheMessage(txt + xp)
-								.setHoverEvent(ChatBoxAction.SHOW_TEXT," Next tier: " + (next == SkillTier.SUPER ? "???" : (next.getTitle() + " " + WordUtils.capitalize(s.getName()))))
-								.sendTo((Player) sender);
+								MessageUtil.send(
+								new ComponentBuilder(txt + xp)
+								.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, " Next tier: " + (next == SkillTier.SUPER ? "???" : (next.getTitle() + " " + WordUtils.capitalize(s.getName())))))
+								.create(), sender);
+								
 							} else
 								sender.sendMessage(txt + xp);
 						}else sender.sendMessage(txt);

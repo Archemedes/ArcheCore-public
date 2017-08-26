@@ -32,15 +32,12 @@ import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.enums.ChatBoxAction;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.PersonaActivateEvent;
 import net.lordofthecraft.arche.event.PersonaCreateEvent;
 import net.lordofthecraft.arche.event.PersonaDeactivateEvent;
 import net.lordofthecraft.arche.event.PersonaRemoveEvent;
 import net.lordofthecraft.arche.event.PersonaSwitchEvent;
-import net.lordofthecraft.arche.help.ArcheMessage;
-import net.lordofthecraft.arche.interfaces.ChatMessage;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
@@ -54,6 +51,12 @@ import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.TopData;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
+import net.lordofthecraft.arche.util.MessageUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class ArchePersonaHandler implements PersonaHandler {
 	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
@@ -340,8 +343,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	@Override
-	public List<ChatMessage> whois(Persona p, boolean mod) {
-		List<ChatMessage> result = Lists.newArrayList();
+	public List<BaseComponent> whois(Persona p, boolean mod) {
+		List<BaseComponent> result = Lists.newArrayList();
 
 		if(p == null) return result;
 
@@ -349,58 +352,61 @@ public class ArchePersonaHandler implements PersonaHandler {
 		String c = ChatColor.BLUE+"";
 		String l = ChatColor.GRAY+"";
 
-		result.add(new ArcheMessage(l+"~~~~ " + r + p.getPlayerName() + "'s Roleplay Persona" + l + " ~~~~"));
+		result.add(new TextComponent(l+"~~~~ " + r + p.getPlayerName() + "'s Roleplay Persona" + l + " ~~~~"));
 
 		if(p.getTotalPlaytime() < ArcheCore.getPlugin().getNewbieProtectDelay()){
 			Player player = ArcheCore.getPlayer(p.getPlayerUUID());
 			if(player != null && !player.hasPermission("archecore.persona.nonewbie"))
-				result.add(new ArcheMessage(ChatColor.LIGHT_PURPLE + "((Persona was recently made and can't engage in PvP))"));
+				result.add(new TextComponent(ChatColor.LIGHT_PURPLE + "((Persona was recently made and can't engage in PvP))"));
 			else
-				result.add(new ArcheMessage(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
+				result.add(new TextComponent(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
 		} else if (ArcheCore.getPlugin().getNewbieNotificationDelay() > 0 && p.getTotalPlaytime() < 600){
 			Player player = ArcheCore.getPlayer(p.getPlayerUUID());
 			long age = player == null? Integer.MAX_VALUE : System.currentTimeMillis() - player.getFirstPlayed();
 			int mins = (int) (age / DateUtils.MILLIS_PER_MINUTE);
 			if(ArcheCore.getPlugin().getNewbieNotificationDelay() > mins && !player.hasPermission("archecore.persona.nonewbie"))
-				result.add(new ArcheMessage(ChatColor.AQUA + "((This player is new to the server))"));
+				result.add(new TextComponent(ChatColor.AQUA + "((This player is new to the server))"));
 			else 
-				result.add(new ArcheMessage(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
-		} else result.add(new ArcheMessage(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
+				result.add(new TextComponent(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
+		} else result.add(new TextComponent(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
 
-		result.add(new ArcheMessage(c + "Name: " + r + p.getName()));
+		result.add(new TextComponent(c + "Name: " + r + p.getName()));
 
 		String race = p.getRaceString();
 		if (!race.equals("Unset")) {
-			result.add(new ArcheMessage(c + "Race: " + r + race + 
+			result.add(new TextComponent(c + "Race: " + r + race + 
 					((!p.getRace().getName().equalsIgnoreCase(race) && mod) ? ChatColor.DARK_GRAY + " (" + p.getRace().getName() + ")" : "")));
 		}
 
 		String gender = p.getGender();
-		if(gender != null) result.add(new ArcheMessage(c + "Gender: " + r + p.getGender()));
+		if(gender != null) result.add(new TextComponent(c + "Gender: " + r + p.getGender()));
 
 		boolean aa = p.doesAutoAge();
 		if(p.getAge() > 0 || aa)
-			result.add(new ArcheMessage((aa? c : (ChatColor.DARK_RED)) + "Age: " + r + p.getAge()));
+			result.add(new TextComponent((aa? c : (ChatColor.DARK_RED)) + "Age: " + r + p.getAge()));
 		String desc = p.getDescription();
 
 		if(desc != null)
-			result.add(new ArcheMessage(c + "Description: " + r + desc));
+			result.add(new TextComponent(c + "Description: " + r + desc));
 		
-		result.add(new ArcheMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Click for more...")
-						.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to show extended persona information.")
-						.setClickEvent(ChatBoxAction.RUN_COMMAND, "/pers more " + p.getPlayerName() + "@" + p.getId()));
+		result.add(new ComponentBuilder("Click for more...")
+			.color(MessageUtil.convertColor(ChatColor.GRAY))
+			.italic(true)
+			.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pers more " + p.getPlayerName() + "@" + p.getId()))
+			.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to show extended persona information."))
+			.create()[0]);
 
 		return result;
 	}
 
 	@Override
-	public List<ChatMessage> whois(Player p, boolean mod) {
+	public List<BaseComponent> whois(Player p, boolean mod) {
 		return whois(getPersona(p), mod);
 	}
 
 	@Override
-	public List<ChatMessage> whoisMore(Persona p, boolean mod, boolean self) {
-		List<ChatMessage> result = Lists.newArrayList();
+	public List<BaseComponent> whoisMore(Persona p, boolean mod, boolean self) {
+		List<BaseComponent> result = Lists.newArrayList();
 
 		if(p == null) return result;
 
@@ -409,8 +415,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		String l = ChatColor.GRAY+"";
 		//String i = ChatColor.ITALIC+"";
 
-		result.add(new ArcheMessage(l+"~~~~ " + r + p.getPlayerName() + "'s Extended Roleplay Persona" + l + " ~~~~"));
-		result.add(new ArcheMessage(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
+		result.add(new TextComponent(l+"~~~~ " + r + p.getPlayerName() + "'s Extended Roleplay Persona" + l + " ~~~~"));
+		result.add(new TextComponent(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
 
 		Skill prof = p.getMainSkill();
 		String title = "";
@@ -419,16 +425,18 @@ public class ArchePersonaHandler implements PersonaHandler {
 			title = prof.getSkillTier(p).getTitle() + " ";
 			profname = WordUtils.capitalize(prof.getName());
 		}
-			result.add(new ArcheMessage(b + "Profession: " + r + title + profname)
-					.setHoverEvent(ChatBoxAction.SHOW_TEXT, ChatColor.GRAY + "Click for info...")
-					.setClickEvent(ChatBoxAction.RUN_COMMAND, "/archehelp " + (profname.equals("None") ? "professions" : profname)));
-		
+			result.add(new ComponentBuilder(b + "Profession: " + r + title + profname)
+					.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/archehelp " + (profname.equals("None") ? "professions" : profname)))
+					.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, ChatColor.GRAY + "Click for info..."))
+					.create()[0]);
 		//Will add more eventually
 		
-		result.add(new ArcheMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Click for less...")
-						.setHoverEvent(ChatBoxAction.SHOW_TEXT, "Click to show basic persona information.")
-						.setClickEvent(ChatBoxAction.RUN_COMMAND, "/pers view " + p.getPlayerName() + "@" + p.getId()));
-		
+		result.add(new ComponentBuilder("Click for less...")
+				.color(MessageUtil.convertColor(ChatColor.GRAY))
+				.italic(true)
+				.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pers view " + p.getPlayerName() + "@" + p.getId()))
+				.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to show basic persona information."))
+				.create()[0]);
 		return result;
 	}
 
