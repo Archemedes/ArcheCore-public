@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche.attributes;
+package net.lordofthecraft.arche.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
