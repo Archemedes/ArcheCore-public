@@ -2,7 +2,6 @@ package net.lordofthecraft.arche;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import io.github.archemedes.customitem.Customizer;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.CasketTask;
 import org.apache.commons.lang.RandomStringUtils;
@@ -48,12 +47,13 @@ public class TreasureChest {
 			for (Entry<String, Object> entry : c.getConfigurationSection("index").getValues(false).entrySet()) {
 				Integer in = (Integer) entry.getValue();
 				ItemStack item = c.getItemStack(entry.getKey());
-				if (item.getType() != Material.EMPTY_MAP)
+				loot.put(item, in);
+/*				if (item.getType() != Material.EMPTY_MAP)
 					loot.put(item, in);
 				else {
 					String tag = "nexusrecipe#"+item.getItemMeta().getDisplayName();
 					loot.put(Customizer.giveCustomTag(item, tag), in);
-				}
+				}*/
 			}
 		}
 	}

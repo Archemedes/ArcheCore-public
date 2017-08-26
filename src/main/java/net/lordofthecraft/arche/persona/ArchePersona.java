@@ -650,11 +650,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		PlayerInventory pinv = p.getInventory();
 		if(inv != null){ //Grab inv from Persona file
 			pinv.setContents(inv.getContents());
-
-			// Legacy code. This is only here to make sure personas that are pre 1.11 load
-			if (inv.getArmorContents() != null) {
-				pinv.setArmorContents(inv.getArmorContents());
-			}
 			inv = null; //Protect against dupes just in case
 		} else { //Clears the inv
 			pinv.clear();

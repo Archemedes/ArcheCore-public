@@ -609,6 +609,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			try {
 				persona.inv = PersonaInventory.restore(invString);
 			} catch (InvalidConfigurationException e) {
+				ArcheCore.getPlugin().getLogger().severe("Unable to restore Persona Inventory from database: (" + p.getName() + ";" + name + ")");
 				e.printStackTrace();
 			}
 		}
@@ -619,7 +620,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.professions[1] = ArcheSkillFactory.getSkill(res.getString(24));
 		persona.professions[2] = ArcheSkillFactory.getSkill(res.getString(25));
 		persona.pastPlayTime = res.getInt(28);
-
 
 		//We now let all Personas load their skills (albeit lazily). Let's do this now
 		persona.loadSkills();

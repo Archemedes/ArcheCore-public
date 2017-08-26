@@ -49,12 +49,10 @@ import net.lordofthecraft.arche.interfaces.SkillFactory;
 import net.lordofthecraft.arche.listener.ArmorPreventionListener;
 import net.lordofthecraft.arche.listener.BeaconMenuListener;
 import net.lordofthecraft.arche.listener.BlockRegistryListener;
-import net.lordofthecraft.arche.listener.DebugListener;
 import net.lordofthecraft.arche.listener.EconomyListener;
 import net.lordofthecraft.arche.listener.ExperienceOrbListener;
 import net.lordofthecraft.arche.listener.HelpMenuListener;
 import net.lordofthecraft.arche.listener.HelpOverrideListener;
-import net.lordofthecraft.arche.listener.JistumaCollectionListener;
 import net.lordofthecraft.arche.listener.LegacyCommandsListener;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
 import net.lordofthecraft.arche.listener.PersonaInventoryListener;
@@ -350,8 +348,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		pm.registerEvents(new PlayerChatListener(), this);
 		pm.registerEvents(new TreasureChestListener(), this);
 		pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
-		pm.registerEvents(new JistumaCollectionListener(), this);
-		pm.registerEvents(new DebugListener(), this);
 		pm.registerEvents(new PersonaInventoryListener(), this);
 		//if (permissions) pm.registerEvents(new PersonaPermissionListener(personaHandler.getPermHandler()), this);
 
