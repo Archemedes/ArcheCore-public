@@ -2,7 +2,6 @@ package net.lordofthecraft.arche.util;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import net.lordofthecraft.arche.ArcheCore;
