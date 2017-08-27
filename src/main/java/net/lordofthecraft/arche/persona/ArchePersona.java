@@ -89,7 +89,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private int food = 0;
 	private double health = 0;
 
-	private ArchePersona(int id, String name, Race race, int gender, int age,long creationTimeMS) {
+/*	private ArchePersona(int id, String name, Race race, int gender, int age,long creationTimeMS) {
 		key = new ArchePersonaKey(UUID.randomUUID(),id);
 		player = name;
 		this.race = race;
@@ -106,7 +106,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		sqlCriteria = Maps.newHashMap();
 		sqlCriteria.put("player", getPlayerUUID().toString());
 		sqlCriteria.put("id", id);
-	}
+	}*/
 
 	ArchePersona(OfflinePlayer p, int id, String name, Race race, int gender, int age,long creationTimeMS){
 		this.key = new ArchePersonaKey(p.getUniqueId(), id);
@@ -653,13 +653,14 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		}
 
 		//Heal them so their Persona is fresh
+		double maxHp = p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
 		if (health == 0) {
-			health = p.getMaxHealth();
+			health = maxHp;
 		}
 		if (food == 0) {
 			food = 20;
 		}
-		if (p.getMaxHealth() < health) p.setHealth(p.getMaxHealth());
+		if (maxHp < health) p.setHealth(maxHp);
 		else p.setHealth(health);
 		p.setFoodLevel(food);
 	}
