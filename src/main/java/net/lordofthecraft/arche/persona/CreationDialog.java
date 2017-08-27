@@ -408,7 +408,7 @@ public class CreationDialog {
                 }
             }
 
-            subraces.addExtra( new ComponentBuilder("back...")
+            subraces.addExtra( new ComponentBuilder("  back...")
             		.italic(true)
             		.color(MessageUtil.convertColor(ChatColor.GRAY))
             		.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "back"))

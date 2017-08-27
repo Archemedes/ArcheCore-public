@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.help;
 
 import com.google.common.collect.Lists;
 
+import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -88,7 +89,7 @@ public abstract class HelpFile {
 				StringPair sp = StringPair.parseSyntax(segment);
 
 				//Format the link into the chatmessage
-				message.addExtra(sp.vis);
+				MessageUtil.legacyAdd(message, sp.vis);
 				message.setUnderlined(true);
 
 				HoverEvent hEv = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
@@ -109,7 +110,7 @@ public abstract class HelpFile {
 
 						BaseComponent[] cmp = new BaseComponent[]{new TextComponent("Run Command")};
 
-						BaseComponent vis = new TextComponent(sp.vis);
+						BaseComponent vis = MessageUtil.legacyText(sp.vis);
 						HoverEvent hEv = new HoverEvent(HoverEvent.Action.SHOW_TEXT, cmp);
 						ClickEvent cEv = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, sp.url);
 
@@ -117,9 +118,8 @@ public abstract class HelpFile {
 						vis.setClickEvent(cEv);
 						message.addExtra(vis);
 					} else {
-						message.addExtra(miniSegment);
+						MessageUtil.legacyAdd(message, miniSegment);
 					}
-
 					sugg = !sugg;
 				}
 			}

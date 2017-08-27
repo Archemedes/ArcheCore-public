@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 /**
  * Set of utility methods to quickly retrieve often-used BaseComponents compositions
- * or convenience methods making the spigot BaseComponent API slightly more bearable
+ * or convenience methods making the spigot ChatMessage API slightly more bearable
  * @author Sporadic
  */
 public class MessageUtil {
@@ -34,6 +34,16 @@ public class MessageUtil {
 		return comp;
 	}
 
+	public static BaseComponent legacyText(String legacy) {
+		return legacyAdd(new TextComponent(), legacy);
+	}
+	
+	public static BaseComponent legacyAdd(BaseComponent m, String toAdd) {
+		Arrays.stream(TextComponent.fromLegacyText(toAdd))
+			.forEach(bc->m.addExtra(bc));
+		return m;
+	}
+	
 	public static HoverEvent hoverEvent(String text) {
 		return hoverEvent(HoverEvent.Action.SHOW_TEXT, text);
 	}

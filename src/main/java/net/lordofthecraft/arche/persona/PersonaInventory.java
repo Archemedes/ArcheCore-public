@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.persona;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -25,8 +26,12 @@ public class PersonaInventory {
 
         config.loadFromString(str);
         if(config.getKeys(false).contains("contents")) {
-        	List<?> result = config.getList("contents");
-            ItemStack[] contents = result.toArray(new ItemStack[result.size()]);
+        	@SuppressWarnings("unchecked")
+			List<ItemStack> result = config.getList("contents").stream()
+        	.map(Map.class::cast)
+        	.map(o -> o== null? null : ItemStack.deserialize(o))
+        	.collect(Collectors.toList());
+        	ItemStack[] contents = result.toArray(new ItemStack[result.size()]);
             return new PersonaInventory(contents);
         } else throw new InvalidConfigurationException("Config node 'contents' not found! Should always be there and should always be the only tag!");
     }
@@ -50,7 +55,8 @@ public class PersonaInventory {
         YamlConfiguration config = new YamlConfiguration();
         List<Map<String, Object>> contentslist = Lists.newArrayList();
         for (ItemStack i : contents) {
-            contentslist.add(i.serialize());
+        	if(i == null) contentslist.add(null);
+        	else contentslist.add(i.serialize());
         }
         config.set("contents", contentslist);
         return config.saveToString();

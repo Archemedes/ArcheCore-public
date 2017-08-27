@@ -54,7 +54,7 @@ public class BonusExpModifierHandler {
 	}
 	
 	public void endNow(BonusExpModifier m) {
-		modifiers.remove(m);
+		modifiers.remove(m.getId());
 		m.setDuration(System.currentTimeMillis() - m.getStartTime());
 		SaveHandler.getInstance().put(new BonusExpModifierTask(m, true));
 	}
@@ -159,7 +159,7 @@ public class BonusExpModifierHandler {
 
 	public ArrayList<BonusExpModifier> getModifiers(UUID playerUUID) {
 		ArrayList<BonusExpModifier> gmodifiers = Lists.newArrayList();
-		for (BonusExpModifier m : this.modifiers.values()) {
+		for (BonusExpModifier m : modifiers.values()) {
 			if (playerUUID.equals(m.getUUID())) gmodifiers.add(m);
 		}
 		return gmodifiers;

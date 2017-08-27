@@ -26,7 +26,7 @@ public class PersonaSwitchTask extends StatementTask {
 		stat.setInt(2, l.getBlockX());
 		stat.setInt(3, l.getBlockY());
 		stat.setInt(4, l.getBlockZ());
-		stat.setString(5, inv.getAsString());
+		stat.setString(5, inv == null? null : inv.getAsString());
 		stat.setString(6, uuid.toString());
 		stat.setInt(7, id);
 	}

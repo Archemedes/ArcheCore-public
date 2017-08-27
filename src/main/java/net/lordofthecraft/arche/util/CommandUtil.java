@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche.commands;
+package net.lordofthecraft.arche.util;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;

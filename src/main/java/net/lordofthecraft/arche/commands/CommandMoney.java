@@ -4,6 +4,8 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.util.CommandUtil;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
