@@ -128,10 +128,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		sqlCriteria.put("id", id);
 	}
 
-	public static ArchePersona buildTestPersona() {
-		return new ArchePersona(0, "test", Race.UNSET, 0, 0,0);
-	}
-
 	public void addSkill(ArcheSkill skill, FutureTask<SkillData> future){
 		if(profs.size() != skill.getId()){
 			Logger log = ArcheCore.getPlugin().getLogger();

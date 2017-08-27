@@ -84,24 +84,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 		return preloading;
 	}
 
-	public boolean testPersona() {
-		try {
-			ArchePersona persona = ArchePersona.buildTestPersona();
-			if (persona != null && buffer != null) {
-				persona.setName("test2");
-				persona.setAge(10);
-				persona.setRace(Race.HUMAN);
-				persona.setDescription("Kowaman is stupid");
-				persona.addTimePlayed(5);
-				persona.setXPGain(false);
-				persona.remove();
-			}
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
 	@Override
 	public TopData getTopHandler() { return topData; }
 
