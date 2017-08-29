@@ -57,31 +57,16 @@ public class ArcheBeacon {
 			if(current < 0){
 				if(count == 0) log.warning("[Beacon] Zero personas for: " + p.getName());
 				else log.warning("[Beacon] no current persona for: " + p.getName());
+			} else if(ArcheCore.getControls().showEnderchestInMenu()) {
+				is = new ItemStack(Material.ENDER_CHEST);
+				buildItem(is, r + "Ender Chest", g + "Open your Ender Chest");
+				inv.setItem(1, is);
 			}
-			else{
-				boolean xp = prs[current].getXPGain();
-
-				is = new ItemStack(xp? Material.EYE_OF_ENDER : Material.ENDER_PEARL);
-				String xpGain = xp ? ChatColor.GREEN + "" + ChatColor.ITALIC + "ON" :
-					ChatColor.DARK_RED + "" + ChatColor.ITALIC + "OFF";
-
-				buildItem(is, r + "XP gain: " + xpGain, g + "Click to toggle");
-				inv.setItem(0, is);
-
-				is = new ItemStack(Material.ENCHANTED_BOOK);
-				buildItem(is, r + "Read Skill Tomes", g + "Consume all skill tomes", g + "in your Persona's inventory.");
-				inv.setItem(3, is);
-			}
-
+			
 			//Everybody gets these buttons
 			is = new ItemStack(Material.BOOK);
 			buildItem(is, r + "Help", g + "Receive help on", g + "various topics.");
-			inv.setItem(1, is);
-
-			is = new ItemStack(Material.ENDER_CHEST);
-			buildItem(is, r + "Ender Chest", g + "Open your Ender Chest");
-			inv.setItem(2, is);
-
+			inv.setItem(0, is);
 
 			int max = handler.getAllowedPersonas(p);
 
@@ -92,7 +77,7 @@ public class ArcheBeacon {
 			//Buttons for switching Personas
 			boolean mayMakeMore = count < max;
 
-			for(int i = 0; i < 4; i++){
+			for(int i = 0; i < prs.length; i++){
 				ArchePersona a = prs[i];
 				if(a == null){
 					is = new ItemStack(Material.SKULL_ITEM, 1, mayMakeMore ? (short)0 : (short)1);

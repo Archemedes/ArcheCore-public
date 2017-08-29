@@ -3,7 +3,6 @@ package net.lordofthecraft.arche.interfaces;
 import net.lordofthecraft.arche.BlockRegistry;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.help.HelpFile;
-import net.lordofthecraft.arche.skill.BonusExpModifierHandler;
 import net.lordofthecraft.arche.skin.SkinCache;
 
 import org.bukkit.Material;
@@ -109,16 +108,8 @@ public interface IArcheCore {
     /**
      * @return If ArcheCore has a DB clone scheduled
      */
-
 	boolean isCloning();
 
-	/**
-	 * Convenience method to create a Skill Tome for the specified skill.
-	 * Players can consume skill tomes at beacons for an XP boost in the given skill.
-	 * @param skill the skill for which you want this Skill Tome to work.
-	 * @return The Skill Tome itemstack
-	 */
-	ItemStack giveSkillTome(Skill skill);
 
 	/**
 	 * Convenience method to Create a Treasure Chest which draws from a predefined Loot
@@ -205,16 +196,14 @@ public interface IArcheCore {
 	 */
 	boolean isRacialSwingEnabled();
 
-	
 	/**
-	 * @return The bonus exp modifier handler
+	 * @return Whether or not the Persona menu will have a button in the menu
 	 */
-	BonusExpModifierHandler getBonusExpModifierHandler();
-
+	boolean showEnderchestInMenu();
+	
 	/**
 	 * @return If damage bonuses are enabled for races
 	 */
-	
 	boolean areRacialDamageBonusesEnabled();
 	
 	/**

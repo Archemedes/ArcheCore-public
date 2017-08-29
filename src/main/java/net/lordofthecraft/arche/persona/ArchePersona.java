@@ -29,9 +29,7 @@ import com.google.common.collect.Maps;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.WeakBlock;
-import net.lordofthecraft.arche.enums.ProfessionSlot;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.enums.SkillTier;
 import net.lordofthecraft.arche.event.PersonaRemoveEvent;
 import net.lordofthecraft.arche.event.PersonaRenameEvent;
 import net.lordofthecraft.arche.event.PersonaSwitchEvent;
@@ -63,7 +61,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private final ArchePersonaKey key;
 	private int gender;
 	private final List<SkillAttachment> profs = Lists.newArrayList();
-	public Skill[] professions = new Skill[3];
 	int age;
 	String description = null;
 	volatile String prefix = null;
@@ -80,8 +77,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	WeakBlock location = null;
 	PersonaInventory inv = null;
 	double money = 0;
-	boolean gainsXP = true;
-	Skill profession = null; /*professionPrimary = null, professionSecondary = null, professionAdditional = null;*/
+	boolean gainsXP = false;
+	Skill profession = null;
 	private Race race;
 	private volatile String name;
 	private WeakReference<Player> playerObject;
@@ -160,47 +157,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	@Override
-	public void racialReassign(Race r){
-		setRace(r);
-		this.reskillRacialReassignment();
-	}
-
-	public double reskillRacialReassignment() {
-		List<Skill> skills = getOrderedProfessions();
-		boolean canHaveBonus = this.getTimePlayed() / 60 >= 250;
-		double lostXP = 0;
-		boolean main = false;
-		boolean second = false;
-		boolean bonus = false;
-		this.professions = new Skill[3];
-		for (Skill sk : skills) {
-			System.out.println(sk.getName() + " " + sk.getXp(this));
-			if (sk.getXp(this) <= 0) {
-				//System.out.println("inept");
-			} else if (sk.isProfessionFor(race)) {
-				System.out.println("racial");
-			} else if (sk.getXp(this) <= sk.getCapTier(this).getXp()) {
-			} else if (!bonus && canHaveBonus) {
-				this.setProfession(ProfessionSlot.ADDITIONAL, sk);
-				//System.out.println("setting bonus");
-				bonus = true;
-			} else if (!main) {
-				this.setProfession(ProfessionSlot.PRIMARY, sk);
-				main = true;
-			} else if (!second) {
-				this.setProfession(ProfessionSlot.SECONDARY, sk);
-				//System.out.println("setting second");
-				second = true;
-			} else {
-				lostXP += sk.getXp(this);
-				//System.out.println("adding to pool");
-			}
-		}
-		this.handleProfessionSelection();
-		return lostXP;
-	}
-
-	@Override
 	public double withdraw(double amount, Transaction cause) {
 		ArcheCore.getControls().getEconomy().withdrawPersona(this, amount);
 		return money;
@@ -246,54 +202,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		buffer.put(new UpdateTask(this,PersonaField.SKILL_SELECTED, name));
 	}
 
-	@Override
-	public Skill getProfession(ProfessionSlot slot){
-		switch(slot){
-		case PRIMARY: return professions[0];
-		case SECONDARY: return professions[1];
-		case ADDITIONAL: return professions[2];
-		default: throw new IllegalArgumentException();
-		}
-	}
-
-	@Override
-	public void setProfession(ProfessionSlot slot, Skill profession){
-		if(professions[slot.getSlot()] == profession) return;
-		professions[slot.getSlot()] = profession;
-
-		String name = profession == null? null : profession.getName();
-		buffer.put(new UpdateTask(this, slot.getPersonaField(), name));
-	}
-
-	public double getXpLost(){
-		double xp = 0;
-		for(SkillAttachment att : profs){
-			if(!att.isInitialized()) att.initialize();
-			SkillTier tier = att.skill.getCapTier(this);
-
-			if(tier == SkillTier.RUSTY) {
-				xp+= att.getXp();
-			} else if(att.getXp() > tier.getXp()) {
-				xp+= att.getXp() - tier.getXp();
-			}
-		}
-		return xp;
-	}
-
-	public void handleProfessionSelection(){
-		for(SkillAttachment att : profs){
-			if(!att.isInitialized()) att.initialize();
-
-			if (att.skill.getName().equalsIgnoreCase("internal_drainxp")) continue;
-
-			SkillTier tier = att.skill.getCapTier(this);
-
-			if (att.getXp() > tier.getXp())
-				att.setXp(tier.getXp());
-			else if(att.getXp() < 0 && tier != SkillTier.RUSTY)
-				att.setXp(0);
-		}
-	}
 
 	@Override
 	public int getId(){

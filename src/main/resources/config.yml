@@ -26,7 +26,7 @@ name.change.delay: 2880
 
 #Provide, in minutes, the cooldown between switching Personas
 #Permission node 'archecore.persona.quickswitch' ignores this delay.
-persona.change.delay: 120
+persona.change.delay: 30
 
 #If this is true, Personas that have switched (and are thus teleported to their new location)
 #Will be re-teleported if they happen to take damage within 40 ticks of arriving at their new location
@@ -40,11 +40,6 @@ show.exp.values: false
 #Whether or not to use the packaged Racial Bonuses in this plugin
 enable.racial.bonuses: true
 
-#You can also select which Skill XP bonuses to activate or deactivate
-bonus.xp.racial: true
-bonus.xp.playtime: true
-bonus.xp.autoage: true
-
 #Provide a time, in days, within which Persona files will be preloaded (Personas will not be unloaded if >0)
 persona.cache.time: 0
 
@@ -53,6 +48,9 @@ server.world.name: world
 
 #Whether or not to adjust the swing timer for races
 racial.swing.timer: true
+
+#Whether or not to add an ender chest to the Persona menu for easy access
+persona.menu.enderchest: false
 
 #########################
 ## New Persona Options ##
@@ -115,6 +113,3 @@ mysql:
 
 #Debug mode outputs internal information and timings to console
 enable.debug.mode: false
-
-# Amount of free xp granted!
-free.xp: 75000

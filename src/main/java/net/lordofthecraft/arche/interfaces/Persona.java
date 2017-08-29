@@ -5,7 +5,6 @@ import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
-import net.lordofthecraft.arche.enums.ProfessionSlot;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.PersonaInventory;
 
@@ -42,26 +41,6 @@ public interface Persona {
 	 */
 
 	double resetSkills(float mod);
-
-	/**
-	 * Assign a persona's race to the specified race as well as resets the user's racial skill in raw experience for distribution.
-	 * @param r The new persona's race.
-	 */
-	void racialReassign(Race r);
-
-	/**
-	 * A method that retrieves the Persona's 'main' skill or profession, which they can set for their Persona's RP professions
-	 * @param slot The chosen slot to query
-	 * @return A player's self-set 'main' skill.
-	 */
-	Skill getProfession(ProfessionSlot slot);
-
-	/**
-	 * Set a Persona's choice of professions. Chosen professions can be levelled to their maximum
-	 * @param slot The chosen slot to query
-	 * @param profession The skill to be set as main.
-	 */
-	void setProfession(ProfessionSlot slot, Skill profession);
 
 	/**
 	 * A method that retrieves the Persona's 'main' skill or profession, which they can set for RP purposes.

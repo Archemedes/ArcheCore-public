@@ -8,12 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 public interface Skill {
-
-	/**
-	 * Represents the required time in minutes for a persona to unlock the ability to level all skills to the maximum tier. Currently 200 days.
-	 */
-	int ALL_SKILL_UNLOCK_TIME = 288000;
-
 	/**
 	 * Skill is Visible
 	 */
@@ -111,23 +105,9 @@ public interface Skill {
 	 * have xp added, unless adding xp reveals this skill (Discoverable)
 	 * @param p The Persona in question
 	 * @param xp Amount of XP to add
-	 * @param modify Whether or not to modify experience with modifiers
 	 * @return the amount added
 	 */
-	double addRawXp(Player p, double xp, boolean modify);
-
 	double addRawXp(Persona p, double xp);
-
-	/**
-	 * Method to add XP to a Persona. This method will add XP whether or not XP gain
-	 * is turned off and does not deduce XP from other skills. Hidden skills will not 
-	 * have xp added, unless adding xp reveals this skill (Discoverable)
-	 * @param p The Persona in question
-	 * @param xp Amount of XP to add
-	 * @param modify whether or not to apply XP modifiers (such as Racial bonuses)
-     * @return the amount added
-	 */
-	double addRawXp(Persona p, double xp, boolean modify);
 
 	/**
 	 * Method to retrieve the xp in this skill for the Player's current Persona
@@ -175,7 +155,7 @@ public interface Skill {
 
 	/**
 	 * See if the Persona can gain XP in this skill.
-	 * Return boolean not affected if Persona XP gain was turned off by the Player.
+	 * Returned boolean not affected if Persona XP gain was turned off by the Player.
 	 * @param p The Persona in question
 	 * @return If the Player can currently gain XP in this skill.
 	 */
@@ -187,21 +167,6 @@ public interface Skill {
 	 * @return Whether or not this Race has this Skill for a profession.
 	 */
 	boolean isProfessionFor(Race race);
-
-	/**
-	 * Persona's are limited in their maximum proficiency based on the professions selected. The maximum can be checked with this method
-	 * @param p The Persona in question
-	 * @return The maximum SkillTier obtainable by this Persona
-	 */
-	SkillTier getCapTier(Persona p);
-
-	/**
-	 * An intensive skill can only be set as the primary profession and selecting it will act as if
-	 * both a primary and secondary profession are set, capping xp accordingly and disallowing a secondary profession
-	 * an additional profession can still be set, however
-	 * @return if the skill is intensive.
-	 */
-	boolean isIntensiveProfession();
 
 	/**
 	 * Resets a skill to zero xp, assuming the skill has more than zero xp currently.

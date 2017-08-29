@@ -23,7 +23,6 @@ public class ArcheSkillFactory implements SkillFactory {
 	private static final Map<String, String> VALS;
 	
 	private static final Map<String, ArcheSkill> skills = Maps.newLinkedHashMap();
-	static Set<ExpModifier> xpMods = EnumSet.noneOf(ExpModifier.class);
 	private static int count = 0;
 	
 	static{
@@ -45,7 +44,6 @@ public class ArcheSkillFactory implements SkillFactory {
 	private final Map<Race, Double> raceMods = new EnumMap<>(Race.class);
 	private int strategy = Skill.VISIBILITY_VISIBLE;
 	private boolean inert = false;
-	private boolean intensive = false;
 	private boolean unlockedByTime = false;
 	private String helpText = null;
 	private Material helpIcon = null;
@@ -53,10 +51,6 @@ public class ArcheSkillFactory implements SkillFactory {
 	private ArcheSkillFactory(String name) {
 		this.name = name;
 		this.id = count++;
-	}
-	
-	public static void activateXpMod(ExpModifier mod){
-		xpMods.add(mod);
 	}
 	
 	/**
@@ -134,12 +128,6 @@ public class ArcheSkillFactory implements SkillFactory {
 		this.helpIcon = helpIcon;
 		return this;
 	}
-	
-	@Override
-	public SkillFactory setIntensiveProfession(boolean intensive){
-		this.intensive = intensive;
-		return this;
-	}
 
 	@Override
 	public SkillFactory setUnlockedByTime(boolean unlockByTime) {
@@ -149,7 +137,6 @@ public class ArcheSkillFactory implements SkillFactory {
 
 	@Override
 	public Skill register(){
-		
 		
 		try {
 			SQLHandler handler = ArcheCore.getControls().getSQLHandler();
@@ -161,7 +148,7 @@ public class ArcheSkillFactory implements SkillFactory {
 			//And the SQL statement to provide values to it
 			PreparedStatement statement = con.prepareStatement("INSERT INTO sk_"+ name + " VALUES (?,?,?,?)");
 
-			ArcheSkill skill = new ArcheSkill(id, name, strategy, inert, mains, raceMods, statement, intensive, unlockedByTime);
+			ArcheSkill skill = new ArcheSkill(id, name, strategy, inert, mains, raceMods, statement, unlockedByTime);
 			
 			//Make sure skill is registered for Plugins.
 			skills.put(name, skill);

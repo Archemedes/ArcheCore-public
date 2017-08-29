@@ -449,9 +449,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 				if(plug.debugMode()) plug.getLogger().info("[DEBUG] Player " +p.getName()+ " was preloaded and did not have current persona.");
 				ensureValidPersonaRecord(p, perses, false);
 			}
-
-			giveXP(perses);
-
 			return;	//Don't need to take further action on this
 		}
 
@@ -470,8 +467,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 				ArchePersona persona = buildPersona(res, p);
 				prs[persona.getId()] = persona;
-
-				giveXP(prs);
 
 				if(persona.current){ 
 					if(!hasCurrent){
@@ -509,19 +504,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 			//Crucial that this part happens for obvious reasons.
 			personas.put(p.getUniqueId(), prs);
 		}	
-	}
-
-	private void giveXP(ArchePersona[] perses) {
-		for (Persona persona : perses) {
-			if (persona != null) {
-				int xp = 0;
-
-				for (Skill sk : ArcheSkillFactory.getSkills().values()) {
-					if (sk != null) xp += sk.getXp(persona);
-				}
-				if (xp == 0) ArcheCore.getControls().getSkill("internal_drainxp").addRawXp(persona, ArcheCore.getPlugin().getConfig().getInt("free.xp"));
-			}
-		}
 	}
 
 	private void ensureValidPersonaRecord(final Player p, ArchePersona[] prs, boolean hasCurrent){

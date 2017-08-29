@@ -1,10 +1,8 @@
 package net.lordofthecraft.arche.listener;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheBeacon;
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.SkillTome;
 import net.lordofthecraft.arche.executables.OpenEnderRunnable;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -21,12 +19,10 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class BeaconMenuListener implements Listener {
-	private final List<String> switchCooldowns = Lists.newArrayList();
 	private final Map<UUID, Long> switchCooldown = Maps.newConcurrentMap();
 	
 	private final ArcheCore plugin;
@@ -53,38 +49,16 @@ public class BeaconMenuListener implements Listener {
 			
 			switch(s){
 				
-			case 1: 
+			case 0: 
 				new BukkitRunnable(){
 					@Override public void run(){ helpdesk.openHelpMenu(p);}
 				}.runTask(plugin);
-				break;
-			case 2:
-					new BukkitRunnable(){
-						@Override
-						public void run() {
-							p.closeInventory();
-							Persona pers = handler.getPersona(p);
-							if (pers != null) {
-								if (p.hasPermission("archecore.enderchest") && pers.getTimePlayed() >= 1200)
-									OpenEnderRunnable.begin(pers);
-								else
-									p.sendMessage(ChatColor.RED + "You do not have access to your Ender Chest.");
-							} else {
-								p.sendMessage(ChatColor.RED + "You must be attuned to a persona to use your enderchest.");
-							}
-						}
-					}.runTask(plugin);
-				break;
-			
-			case 3:
-				SkillTome.consumeTomes(p);
-				new BukkitRunnable(){@Override public void run(){ p.closeInventory();}}.runTask(plugin);
 				break;
 			case 4:
 				helpdesk.outputHelp("persona", p);
 				new BukkitRunnable(){@Override public void run(){ p.closeInventory();}}.runTask(plugin);
 				break;
-			case 0: case 5: case 6: case 7: case 8:
+			case 1: case 5: case 6: case 7: case 8:
 				ArchePersona[] prs = handler.getAllPersonas(p);
 				if(prs == null){
 					plugin.getLogger().severe(" [Event] Player walking around without registered Personas File!");
@@ -101,11 +75,22 @@ public class BeaconMenuListener implements Listener {
 					} 
 				}
 				
-				if(s == 0 && current >= 0){
-					ArchePersona a = prs[current];
-					a.setXPGain(!a.getXPGain());
-					p.sendMessage(ChatColor.GRAY + "Toggled XP Gain for: " + a.getName());
-					new BukkitRunnable(){@Override public void run(){ p.closeInventory();}}.runTask(plugin);
+				if(s == 1 && ArcheCore.getControls().showEnderchestInMenu()){
+					new BukkitRunnable(){
+						@Override
+						public void run() {
+							p.closeInventory();
+							Persona pers = handler.getPersona(p);
+							if (pers != null) {
+								if (p.hasPermission("archecore.enderchest") && pers.getTimePlayed() >= 1200)
+									OpenEnderRunnable.begin(pers);
+								else 
+									p.sendMessage(ChatColor.RED + "You do not have access to your Ender Chest.");
+							} else { 
+								p.sendMessage(ChatColor.RED + "You must be attuned to a persona to use your enderchest."); 
+							}
+						}
+					}.runTask(plugin);
 				} else if (s > 4){
 					int t = s - 5;
 					
@@ -133,37 +118,24 @@ public class BeaconMenuListener implements Listener {
 								}
 							}
 						} else if(current != t){ //Tried to switch Personas
-							final String pname = p.getName();
-							if (((switchCooldown.containsKey(p.getUniqueId()) && System.currentTimeMillis() - switchCooldown.get(p.getUniqueId()) > 1800000)) || (switchCooldown.containsKey(p.getUniqueId()) &&  p.hasPermission("archecore.persona.quickswitch"))) {
+							if (((switchCooldown.containsKey(p.getUniqueId()) && System.currentTimeMillis() - switchCooldown.get(p.getUniqueId()) > 60*1000*switchCooldownMinutes)) 
+									|| (switchCooldown.containsKey(p.getUniqueId()) &&  p.hasPermission("archecore.persona.quickswitch"))) {
 								switchCooldown.remove(p.getUniqueId());
 							}
 							if (switchCooldown.containsKey(p.getUniqueId())) {
-							//if(switchCooldowns.contains(pname)){
-								p.sendMessage(ChatColor.RED+"You must wait another " + getMinutesFromMilli((switchCooldown.get(p.getUniqueId()) + 1800000) - System.currentTimeMillis())+" minutes before you can switch personas.");
-								//p.sendMessage(ChatColor.RED + "You have a " + switchCooldownMinutes + " minute delay between switching Personas.");
+								p.sendMessage(ChatColor.RED+"You must wait another " + getMinutesFromMilli((switchCooldown.get(p.getUniqueId()) + 60*1000*switchCooldownMinutes) - System.currentTimeMillis())+" minutes before you can switch personas.");
 							}else {
 								if(!p.hasPermission("archecore.persona.quickswitch")){
 									switchCooldown.put(p.getUniqueId(), System.currentTimeMillis());
-									//switchCooldowns.add(pname); //Cooldown if the Player does not have the appropriate permission
-									//new BukkitRunnable(){@Override public void run(){switchCooldowns.remove(pname);}}.runTaskLater(plugin, switchCooldownMinutes * 60 * 20);
 								}
 								
 								final boolean suc = handler.switchPersona(p, t);
-								/* Move this within the scope of switchPersona
-								p.setHealth(p.getMaxHealth());
-								p.setFoodLevel(20);
-								for(PotionEffectType pet : PotionEffectType.values()) p.removePotionEffect(pet);
-								*/
-								
 								if (suc) p.sendMessage(ChatColor.AQUA + "You are now Roleplaying as: " + ChatColor.YELLOW + "" + ChatColor.ITALIC + prs[t].getName());
 							}
 							new BukkitRunnable(){@Override public void run(){ p.closeInventory();}}.runTask(plugin);
 						}
-						
 					}
-					
 				}
-				
 			default: break;	
 			}
 		}

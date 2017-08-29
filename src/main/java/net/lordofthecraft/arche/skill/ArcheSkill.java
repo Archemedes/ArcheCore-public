@@ -2,7 +2,6 @@ package net.lordofthecraft.arche.skill;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
-import net.lordofthecraft.arche.enums.ProfessionSlot;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.enums.SkillTier;
 import net.lordofthecraft.arche.event.GainXPEvent;
@@ -19,13 +18,11 @@ import org.bukkit.entity.Player;
 
 import java.sql.PreparedStatement;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class ArcheSkill implements Skill {
 	
-	private static Set<ExpModifier> xpMods = ArcheSkillFactory.xpMods;
 	private static ArcheTimer timer;
 	
 	private final int id;
@@ -35,14 +32,11 @@ public class ArcheSkill implements Skill {
 	
 	private final Set<Race> mains;
 	private final Map<Race, Double> raceMods;
-	
-	private final boolean intensive;
-	private final boolean unlockedByTime;
 
 	private final PreparedStatement statement;
 
 	ArcheSkill(int id, String name, int displayStrategy, boolean inert,
-			   Set<Race> mains, Map<Race, Double> raceMods, PreparedStatement state, boolean intensive, boolean unlockedByTime) {
+			   Set<Race> mains, Map<Race, Double> raceMods, PreparedStatement state, boolean unlockedByTime) {
 		
 		timer = ArcheCore.getPlugin().getMethodTimer();
 		
@@ -53,8 +47,6 @@ public class ArcheSkill implements Skill {
 		this.mains =  mains;
 		this.raceMods = raceMods;
 		this.statement = state;
-		this.intensive = intensive;
-		this.unlockedByTime = unlockedByTime;
 	}
 	
 	public PreparedStatement getUpdateStatement(){
@@ -64,12 +56,7 @@ public class ArcheSkill implements Skill {
 	@Override
 	public boolean isProfessionFor(Race race){
 		return mains.contains(race);
-	}
-	
-	@Override
-	public boolean isIntensiveProfession(){
-		return intensive;
-	}
+	}	
 	
 	@Override
 	public String getName(){
@@ -138,19 +125,6 @@ public class ArcheSkill implements Skill {
 		//Add some XP to the skill in question
 		addRawXp(p, xp);
 		
-		/*//Deduce XP from other skills
-		if( !inert && xp > 0){ //Inert skills do not cause Personas to forget other skills
-			
-			Collection<ArcheSkill> all = ArcheSkillFactory.getSkills().values();
-			double deduct = -xp / all.size();
-			
-			for(Skill s : all){
-				if(s != this && s.canForget(p)){ //Deduce from all other applicable skills
-					s.addRawXp(p, deduct, false);
-				}
-			}	
-		}*/
-		
 		if(timer != null) timer.stopTiming("xp_" + name);
 	}
 	
@@ -160,29 +134,16 @@ public class ArcheSkill implements Skill {
 	}
 	
 	@Override
-	public double addRawXp(Player p, double xp, boolean modify){
-		return addRawXp(getPersona(p), xp, modify);
-	}
-	
-	@Override
 	public double addRawXp(Persona p, double xp){
-		return addRawXp(p, xp, true);
-	}
-	
-	@Override
-	public double addRawXp(Persona p, double xp, boolean modify){
 		SkillAttachment attach = getAttachment(p);
-		if(modify){ //Add xp modifiers
-            double mod = getXPModifier(p, attach);
-            if(mod > 0) xp *=  xp > 0?  mod : 1/mod;
-		}
+
 		GainXPEvent event = new GainXPEvent(p, this, xp); 
 		Bukkit.getPluginManager().callEvent(event);
 		if(event.isCancelled()) return 0;
 		
 		xp = event.getAmountGained();
 		double oldXp = attach.getXp();
-		final SkillTier cap = this.getCapTier(p);
+		final SkillTier cap = SkillTier.values()[SkillTier.values().length-1];
 		double newXp = Math.min(cap.getXp(), oldXp + xp);
 		
 		if(getVisibility() == VISIBILITY_DISCOVERABLE)
@@ -192,28 +153,14 @@ public class ArcheSkill implements Skill {
 		attach.setXp(newXp);
 		
 		if(!attach.isVisible())
-			return 0;
-		
-		Player player = p.getPlayer();
-		if(player != null){
-			SkillTier now = this.getSkillTier(p);
-			
-			if(now != SkillTier.RUSTY 
-					&& !(now == SkillTier.INEXPERIENCED 
-					&& newXp < 0)
-					&& !p.getPlayer().hasMetadata("magic")){
-				int nxp = now == SkillTier.INEXPERIENCED? 0 : now.getXp();
-				player.setExp(now == cap? 0f : (float) ( (newXp - nxp) / (now.getNext().getXp() - nxp) ));
-				player.setLevel(now == cap? 0 : (int) (now.getNext().getXp() - newXp));
-			}
-		}
+			return xp;
 		
 		//Level up? If so display message
 		if(xp > 0 ){
 			SkillTier current = getSkillTier(p);
 			int treshold = current.getXp();
 			if(oldXp < treshold && newXp >= treshold ){ //This XP gain made player pass treshold
-				
+				Player player = p.getPlayer();
 				if(player != null){
 					char n = this.getName().charAt(0);
 					String an = (n == 'e' || n == 'o' || n == 'i' || n == 'a')? "an" : "a";
@@ -224,84 +171,6 @@ public class ArcheSkill implements Skill {
 		}
 		return xp;
 	}
-	
-	private double getXPModifier(Persona p, SkillAttachment att){
-		
-		BonusExpModifierHandler handler = ArcheCore.getControls().getBonusExpModifierHandler();
-		
-		if(xpMods.isEmpty() || this.getName().equalsIgnoreCase("internal_drainxp")) return 1;
-		double mod = att.getModifier();
-		if(mod > 0) return mod; //Cached value
-		Race r = p.getRace();
-		mod = xpMods.contains(ExpModifier.RACIAL)? (raceMods.containsKey(r)? raceMods.get(p.getRace()) : r.getBaseXpMultiplier()) : 1;
-		if(xpMods.contains(ExpModifier.PLAYTIME) && mod > 0){
-			int mins = p.getTimePlayed();
-			if(mins >= 1200){ 
-				double f = 0.05 * (mins / 12000 + Math.pow(mins, 1.5) / 700000);
-				double dmod = Math.min(0.20, f);
-				mod += dmod;
-			}
-		}
-		if(xpMods.contains(ExpModifier.AUTOAGE)){
-			if(p.doesAutoAge()){
-				if(r == Race.HUMAN || r == Race.HALFLING || r == Race.NORTHENER || r == Race.SOUTHERON || r == Race.HEARTLANDER)
-					mod += 0.10;
-			}
-		}
-		
-		double amod = 1;
-		if (xpMods.contains(ExpModifier.ACCOUNT)) {
-			List<BonusExpModifier> mods = handler.getAccountModifiers(p.getPlayer());
-			for (BonusExpModifier m : mods) {
-				amod = applyModifier(m, amod);
-			}
-		}
-		
-		if (xpMods.contains(ExpModifier.PERSONA)) {
-			List<BonusExpModifier> mods = handler.getPersonaModifiers(p);
-			for (BonusExpModifier m : mods) {
-				amod = applyModifier(m, amod);
-			}
-		}
-		
-		if (xpMods.contains(ExpModifier.GLOBAL)) {
-			List<BonusExpModifier> mods = handler.getGlobalModifiers();
-			for (BonusExpModifier m : mods) {
-				amod = applyModifier(m, amod);
-			}
-		}
-		
-		mod *= amod;
-		
-		att.setModifier(mod);
-		return mod;
-	}
-	
-	private double applyModifier(BonusExpModifier m, double amod) {
-		if ((m.getSkill() == this || m.getSkill() == null) && !m.isExpired() && m.getModifer() > amod)
-		return m.getModifer(); 
-		else return amod;
-	}
-
-	@Override
-	public SkillTier getCapTier(Persona p){
-		if(this.isInert()) return SkillTier.SUPER;
-
-		if (this.isProfessionFor(p.getRace()) || (p.getTimePlayed() > Skill.ALL_SKILL_UNLOCK_TIME && unlockedByTime))
-			return SkillTier.SUPER;
-		
-		for(ProfessionSlot slot : ProfessionSlot.values()){
-			if(p.getProfession(slot) == this) return SkillTier.SUPER;
-		}
-		
-		SkillTier t = p.getProfession(ProfessionSlot.PRIMARY) == null? SkillTier.ADEQUATE :
-			p.getProfession(ProfessionSlot.SECONDARY) == null && !p.getProfession(ProfessionSlot.PRIMARY).isIntensiveProfession()? SkillTier.CLUMSY : SkillTier.RUSTY;
-		
-		Race r = p.getRace();
-		if(t != SkillTier.RUSTY && (r == Race.HUMAN || r == Race.NORTHENER || r == Race.SOUTHERON || r == Race.HEARTLANDER))
-			return t.getNext().getNext();
-		else return t;
-	}	
 
 	@Override
 	public double getXp(Player p){
@@ -333,7 +202,7 @@ public class ArcheSkill implements Skill {
 	@Override
 	public SkillTier getSkillTier(Persona p){
 		double xp = getXp(p);
-		SkillTier result = SkillTier.RUSTY;
+		SkillTier result = SkillTier.DEFAULT;
 		for(SkillTier st : SkillTier.values()){
 			if(st.getXp() <= xp) result = st;
 			else return result;
@@ -370,6 +239,4 @@ public class ArcheSkill implements Skill {
 		
 		return attach;
 	}
-	
-	
 }

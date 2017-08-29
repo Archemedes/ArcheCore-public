@@ -1,40 +1,10 @@
 package net.lordofthecraft.arche.enums;
 
-public enum SkillTier {
-/*	RUSTY(0,Integer.MIN_VALUE,"Inept"),
-	INEXPERIENCED(1,-3000,"Promising"),
-	BUNGLING(2,250,"Bungling"),
-	CLUMSY(3, 600, "Clumsy"),
-	APPRENTICE(4,1500,"Apprentice"),
-	FAIR(5,3000,"Fair"),
-	ADEQUATE(6,6500,"Adequate"),
-	JOURNEYMAN(7, 14000, "Journeyman"),
-	PRACTICED(8, 30000, "Practiced"),
-	PROFICIENT(9, 70000,"Proficient"),
-	ADEPT(10, 150000,"Adept"),
-	EXCELLENT(11, 350000, "Excellent"),
-	VETERAN(12, 1000000 ,"Veteran"),
-	MASTERFUL(13, 3000000,"Masterful"),
-	LEGENDARY(14, 10000000,"Legendary"),
-	AENGULIC(15, 35000000,"Aengulic");*/
-	
-	RUSTY(0,Integer.MIN_VALUE,"Inept"),
-	INEXPERIENCED(1,-3000,"Promising"),
-	BUNGLING(2,250,"Bungling"),
-	CLUMSY(3, 600, "Clumsy"),
-	APPRENTICE(4,1500,"Apprentice"),
-	FAIR(5,3000,"Fair"),
-	ADEQUATE(6,6500,"Adequate"),
-	PROFICIENT(7, 14000,"Proficient"),
-	ADEPT(8, 30000,"Adept"),
-	VETERAN(9, 70000,"Veteran"),
-	MASTERFUL(10, 150000,"Masterful"),
-	LEGENDARY(11, 350000,"Legendary"),
-	AENGULIC(12, 1000000,"Aengulic"),
-	DAEMONIC(13, 2500000, "Enlightened"),
-	ILLUMINATED(14, 6000000, "Mythological"),
-	GODSENT(15, 14000000, "Otherworldly"),
-	SUPER(16, 30000000, "Lord of the");
+public enum SkillTier {	
+	DEFAULT(0,0,"Inactive"),
+	SELECTED(0,1,""),
+	RENOWNED(0,100,"Renowned"),
+	MASTERFUL(0,1000,"Masterful");
 	
 	final int xp;
 	final int tier;

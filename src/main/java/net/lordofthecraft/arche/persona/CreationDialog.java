@@ -7,7 +7,6 @@ import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -137,9 +136,7 @@ public class CreationDialog {
 		 */
         //1 week in ms = 604800000
         final long weekSinceCreation = pers.getCreationTime() + 432000000;
-        if ((weekSinceCreation < System.currentTimeMillis()) // It's been longer than a 5 days
-                || (ArcheSkillFactory.getSkill("internal_drainxp").getXp(pers) == plugin.getConfig().getInt("free.xp")
-                && (weekSinceCreation > System.currentTimeMillis()))) { // Player has not used their bonus xp && It's been less than 5 days
+        if ((weekSinceCreation < System.currentTimeMillis())) { // It's been more than 5 days
             return true;
         }
         p.sendMessage(ChatColor.RED + "You must wait at least five days before deleting your persona " + pers.getName() + ".");
@@ -564,7 +561,6 @@ public class CreationDialog {
             boolean autoAge = (Boolean) context.getSessionData("autoage");
             long creationTimeMS = System.currentTimeMillis();
             Persona pers = ArchePersonaHandler.getInstance().createPersona(p, id, name, race, gender, age, autoAge, creationTimeMS);
-            ArcheSkillFactory.getSkill("internal_drainxp").addRawXp(pers,plugin.getConfig().getInt("free.xp"));
 
             if(pers != null && context.getSessionData("first") != null){
                 Economy econ = ArcheCore.getControls().getEconomy();

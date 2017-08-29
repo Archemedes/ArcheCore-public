@@ -49,17 +49,6 @@ public interface SkillFactory {
 	 * @return itself
 	 */
 	SkillFactory withHelpFile(String helpText, Material helpIcon);
-	
-	/**
-	 * Defaults to false.
-	 * An intensive skill can only be set as the primary profession and selecting it will act as if
-	 * both a primary and secondary profession are set, capping xp accordingly and disallowing a secondary profession
-	 * an additional profession can still be set, however.
-	 *
-	 * @param intensive If the profession will be intensive (take two skill slots instead of one)
-	 * @return itself
-	 */
-	SkillFactory setIntensiveProfession(boolean intensive);
 
 	/**
 	 * Sets whether or not the skill will be unlocked when a user has reached a certain number of minutes on a persona.
