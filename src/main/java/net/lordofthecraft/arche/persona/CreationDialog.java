@@ -231,8 +231,8 @@ public class CreationDialog {
         @Override
         public String getPromptText(ConversationContext context) {
             Player p = (Player) context.getForWhom();
-   		 p.sendTitle(ChatColor.BOLD + "" + ChatColor.GOLD + "Welcome to Lord of the Craft", 
-				 ChatColor.YELLOW + "Please type your Persona's name to continue",
+   		 p.sendTitle(ChatColor.BOLD + "" + ChatColor.GOLD + "Welcome", 
+				 ChatColor.YELLOW + "Type your Persona's name to continue",
 				 20, 3600*20, 20); //Aka a long-ass time
             String pretext = "Please type a name for your Roleplay Persona!";
             String affix = "\n" + NOTE + "You may only change your Persona's name every 2 hours.";

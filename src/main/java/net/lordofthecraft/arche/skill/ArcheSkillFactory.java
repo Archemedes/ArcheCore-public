@@ -38,6 +38,7 @@ public class ArcheSkillFactory implements SkillFactory {
 	}
 
 	private final String name;
+	private String maleName, femaleName;
 	private final Set<Race> mains = EnumSet.noneOf(Race.class);
 	private final Map<Race, Double> raceMods = new EnumMap<>(Race.class);
 	private int strategy = Skill.VISIBILITY_VISIBLE;
@@ -138,7 +139,7 @@ public class ArcheSkillFactory implements SkillFactory {
 			//And the SQL statement to provide values to it
 			PreparedStatement statement = con.prepareStatement("INSERT INTO sk_"+ name + " VALUES (?,?,?,?)");
 
-			ArcheSkill skill = new ArcheSkill(name, strategy, inert, mains, raceMods, statement);
+			ArcheSkill skill = new ArcheSkill(name, maleName, femaleName, strategy, inert, mains, raceMods, statement);
 			
 			//Make sure skill is registered for Plugins.
 			skills.put(name, skill);
@@ -186,6 +187,18 @@ public class ArcheSkillFactory implements SkillFactory {
 		private DuplicateSkillException(String message) {
 			super(message);
 		}
+	}
+
+	@Override
+	public SkillFactory withProfessionalName(String name) {
+		this.maleName = name;
+		return this;
+	}
+
+	@Override
+	public SkillFactory withFemaleProfessionalName(String name) {
+		this.femaleName = name;
+		return this;
 	}
 	
 }

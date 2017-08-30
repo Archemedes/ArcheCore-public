@@ -6,6 +6,20 @@ import org.bukkit.Material;
 public interface SkillFactory {
 
 	/**
+	 * A noun for a practitioner of this particular skill
+	 * @param name Noun to use for male/default professional
+	 * @return itself
+	 */
+	SkillFactory withProfessionalName(String name);
+	
+	/**
+	 * A noun for a female practitioner of this particular skill
+	 * @param name Noun to use for female professional
+	 * @return itself
+	 */
+	SkillFactory withFemaleProfessionalName(String name);
+	
+	/**
 	 * Sets the Visbility strategy of this skill, as defined by the static constants in the Skill class.
 	 * This value is set as VISIBLE (1) by default
 	 * <p>

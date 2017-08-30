@@ -51,7 +51,6 @@ public class CommandArchehelp implements CommandExecutor {
 				sender.sendMessage(helpdesk.getTopics().toString());
 			}
 			sender.sendMessage(ChatColor.AQUA + "View help on a Topic with: " + ChatColor.ITALIC +  "/" + cmd + " [topic]");
-			sender.sendMessage(ChatColor.AQUA + "Find info on Skills with: " + ChatColor.ITALIC +  "/skill [skill]");
 		}else {
 			String topic = StringUtils.join(args, ' ');
 			if(sender instanceof Player){

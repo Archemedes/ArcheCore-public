@@ -235,7 +235,7 @@ public class CommandPersona implements CommandExecutor {
 							sender.sendMessage(ChatColor.RED + "Error: This profession could not be found!");
 						} else {
 							pers.setMainSkill(skill);
-							sender.sendMessage(ChatColor.GOLD + "You have dedicated yourself to be a " + ChatColor.RESET + skill.getName());
+							sender.sendMessage(ChatColor.GOLD + "You have dedicated yourself to " + ChatColor.RESET + skill.getName());
 						}
 					} else {
 						sender.sendMessage(ChatColor.RED + "You have already selected a profession!");

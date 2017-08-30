@@ -26,10 +26,25 @@ public interface Skill {
 	int VISIBILITY_HIDDEN = 4;
 
 	/**
-	 * Fetch the Name of the Skill
+	 * Fetch the human-readable name of the act of practicing a skill
 	 * @return name of the Skill
 	 */
 	String getName();
+	
+	/**
+	 * Gets a human-readable name of a professional for this skill
+	 * If this has not been set at creation, returns {@link #getName()} instead
+	 * @return noun of person that practices this skill
+	 */
+	String getProfessionalName();
+	
+	/**
+	 * Gets a human-readable name of a professional for this skill
+	 * If this has not been set at creation, returns {@link #getName()} instead
+	 * @param female should be for a female character?
+	 * @return noun of person that practices this skill
+	 */
+	String getProfessionalName(boolean female);
 
 	/**
 	 * Retrieves the Visbility strategy of this skill, as defined by the static constants in this class.

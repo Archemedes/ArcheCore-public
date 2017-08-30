@@ -1,5 +1,15 @@
 package net.lordofthecraft.arche.skill;
 
+import java.sql.PreparedStatement;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.enums.Race;
@@ -10,22 +20,12 @@ import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.SkillAttachment;
-import org.apache.commons.lang.WordUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Sound;
-import org.bukkit.entity.Player;
-
-import java.sql.PreparedStatement;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 
 public class ArcheSkill implements Skill {
 	
 	private static ArcheTimer timer;
 	
-	private final String name;
+	private final String name,maleName,femaleName;
 	private final int displayStrategy;
 	private final boolean inert;
 	
@@ -35,12 +35,14 @@ public class ArcheSkill implements Skill {
 	private final PreparedStatement statement;
 	//TODO add a statement_remove when you want to remove an entry from the skill tables altogether
 	
-	ArcheSkill(String name, int displayStrategy, boolean inert,
+	ArcheSkill(String name, String maleName, String femaleName, int displayStrategy, boolean inert,
 			   Set<Race> mains, Map<Race, Double> raceMods, PreparedStatement state) {
 		
 		timer = ArcheCore.getPlugin().getMethodTimer();
 
 		this.name = name;
+		this.maleName = maleName;
+		this.femaleName = femaleName;
 		this.displayStrategy = displayStrategy;
 		this.inert = inert;
 		this.mains =  mains;
@@ -150,9 +152,11 @@ public class ArcheSkill implements Skill {
 			if(oldXp < treshold && newXp >= treshold ){ //This XP gain made player pass treshold
 				Player player = p.getPlayer();
 				if(player != null){
-					char n = this.getName().charAt(0);
+					boolean female = "Female".equals(p.getGender());
+					String professional = this.getProfessionalName(female);
+					char n = professional.charAt(0);
 					String an = (n == 'e' || n == 'o' || n == 'i' || n == 'a')? "an" : "a";
-					player.sendMessage(ChatColor.BOLD + "" + ChatColor.GOLD + "You have improved your skill as " + an + " " + ChatColor.AQUA + WordUtils.capitalize(this.getName()));
+					player.sendMessage(ChatColor.BOLD + "" + ChatColor.GOLD + "You have improved your skill as " + an + " " + ChatColor.AQUA + professional);
 					player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 3f, 1f);
 				}
 			}
@@ -234,5 +238,23 @@ public class ArcheSkill implements Skill {
 			attach.initialize();
 		
 		return attach;
+	}
+
+	@Override
+	public String getProfessionalName() {
+		return getProfessionalName(false);
+	}
+
+	@Override
+	public String getProfessionalName(boolean female) {
+		return female?
+			femaleName != null? femaleName :
+			maleName != null? maleName :
+			getName()			
+				: //male
+			maleName != null? maleName :
+			femaleName != null? femaleName :
+			getName();
+				
 	}
 }

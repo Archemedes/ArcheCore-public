@@ -12,7 +12,6 @@ import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
-import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -399,7 +398,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 		String profname = "None";
 		if(prof != null){
 			title = prof.getSkillTier(p).getTitle() + " ";
-			profname = WordUtils.capitalize(prof.getName());
+			if(title.length() == 1) title = "";
+			boolean female = p.getGender().equals("Female");
+			profname = prof.getProfessionalName(female);
 		}
 			result.add(new ComponentBuilder(b + "Profession: " + r + title + profname)
 					.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/archehelp " + (profname.equals("None") ? "professions" : profname)))

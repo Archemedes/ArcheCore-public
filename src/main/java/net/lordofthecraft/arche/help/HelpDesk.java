@@ -80,7 +80,8 @@ public class HelpDesk {
 		//System.out.println(infoTopics);
 		topic = topic.toLowerCase();
 		HelpFile h = findHelpFile(topic);
-
+		
+		
 		if(h == null){ //Help not found in internal db (help+info)
 			if(ArcheCore.getPlugin().getWikiUsage()){ //Lookup from LotC Wiki maybe
 				p.sendMessage(ChatColor.LIGHT_PURPLE + "Fetching help file, please wait...");
@@ -102,9 +103,8 @@ public class HelpDesk {
 		topic = topic.toLowerCase();
 		HelpFile h = findHelpFile(topic);
 
-		if(h==null){
-			return null;
-		}else return h.outputHelp();
+		if(h==null)return getSkillHelpText(topic);
+		else return h.outputHelp();
 	}
 
 	public String getSkillHelpText(String topic){
@@ -146,6 +146,7 @@ public class HelpDesk {
 	public HelpFile findHelpFile(String topic){
 		HelpFile h = normalTopics.get(topic);
 		if(h == null) h = infoTopics.get(topic);
+		if(h == null) h = skillTopics.get(topic);
 
 /*		while(h != null && h.outputHelp().startsWith("@") && h.outputHelp().endsWith("@")
 				&& StringUtils.countMatches(h.outputHelp(), "@") == 2){
