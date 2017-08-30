@@ -85,6 +85,11 @@ public interface Persona {
 	 */
 	boolean hasPrefix();
 
+	public double getFatigue();
+	
+	public void setFatigue(double fatigue);
+	
+	
 	/**
 	 * Clears a Personas prefix. If Prefixes are disabled, calling this will change
 	 * the prefix, but not display it anywhere in the current session.

@@ -77,6 +77,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private SaveHandler saveHandler;
 	private BlockRegistry blockRegistry;
 	private ArchePersonaHandler personaHandler;
+	private ArcheFatigueHandler fatigueHandler;
 	private HelpDesk helpdesk;
 	private SkinCache skinCache;
 	private ArcheTimer timer;
@@ -193,6 +194,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		saveHandler = SaveHandler.getInstance();
 		blockRegistry = new BlockRegistry();
 		personaHandler = ArchePersonaHandler.getInstance();
+		fatigueHandler = ArcheFatigueHandler.getInstance();
 		helpdesk = HelpDesk.getInstance();
 		skinCache = SkinCache.getInstance();
 
@@ -447,6 +449,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	@Override
 	public ArchePersonaHandler getPersonaHandler(){
 		return personaHandler;
+	}
+	
+	@Override
+	public ArcheFatigueHandler getFatigueHandler() {
+		return fatigueHandler;
 	}
 
 	@Override

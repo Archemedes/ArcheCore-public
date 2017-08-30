@@ -21,6 +21,12 @@ public interface IArcheCore {
 	PersonaHandler getPersonaHandler();
 	
 	/**
+	 * Fatigue of Personas ties into skills and is done by the FatigueHandler
+	 * @return The FatigueHandler singleton
+	 */
+	FatigueHandler getFatigueHandler();
+	
+	/**
 	 * Each Persona is uniquely identified with a composite key that consists of
 	 * the Mojang Player UUID and a integer that refers to the Persona of the player.
 	 * The PersonaKey pairs these two objects, and can be used to compare Personas and as keys in HashMaps.

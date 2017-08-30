@@ -50,7 +50,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
 	private static final SaveHandler buffer = SaveHandler.getInstance();
 
-	
 	final PersonaSkills skills = new PersonaSkills(this);
 	
 	final Map<String,Object> sqlCriteria;
@@ -69,31 +68,13 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	WeakBlock location = null;
 	PersonaInventory inv = null;
 	double money = 0;
+	double fatigue = 0.; //TODO needs PersonaField
 	private Race race;
 	private volatile String name;
 	private WeakReference<Player> playerObject;
 	private int hash = 0;
 	private int food = 0;
 	private double health = 0;
-
-/*	private ArchePersona(int id, String name, Race race, int gender, int age,long creationTimeMS) {
-		key = new ArchePersonaKey(UUID.randomUUID(),id);
-		player = name;
-		this.race = race;
-		this.name = name;
-		this.gender = gender;
-		this.age = age;
-		this.creationTimeMS = creationTimeMS;
-
-		timePlayed = new AtomicInteger();
-		charactersSpoken = new AtomicInteger();
-		lastRenamed = 0;
-		pastPlayTime = 0;
-
-		sqlCriteria = Maps.newHashMap();
-		sqlCriteria.put("player", getPlayerUUID().toString());
-		sqlCriteria.put("id", id);
-	}*/
 
 	ArchePersona(OfflinePlayer p, int id, String name, Race race, int gender,long creationTimeMS){
 		this.key = new ArchePersonaKey(p.getUniqueId(), id);
@@ -586,5 +567,16 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	@Override
 	public int getTotalPlaytime(){
 		return pastPlayTime + getTimePlayed();
+	}
+
+	@Override
+	public double getFatigue() {
+		return fatigue;
+	}
+
+	@Override
+	public void setFatigue(double fatigue) {
+		this.fatigue = fatigue;		
+		//TODO sql update. Needs to be extra fast since this will be used often
 	}
 }
