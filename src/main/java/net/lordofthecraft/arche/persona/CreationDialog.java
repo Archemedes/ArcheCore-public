@@ -231,6 +231,9 @@ public class CreationDialog {
         @Override
         public String getPromptText(ConversationContext context) {
             Player p = (Player) context.getForWhom();
+   		 p.sendTitle(ChatColor.BOLD + "" + ChatColor.GOLD + "Welcome to Lord of the Craft", 
+				 ChatColor.YELLOW + "Please type your persona name to continue",
+				 20, 3600*20, 20); //Aka a long-ass time
             String pretext = "Please type a name for your Roleplay Persona!";
             String affix = "\n" + NOTE + "You may only change your Persona's name every 2 hours.";
 
@@ -272,6 +275,10 @@ public class CreationDialog {
         protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
         	 if (input) {
         		 context.setSessionData("name", name);
+        		 Player p = (Player) context.getForWhom();
+        		 p.sendTitle(ChatColor.BOLD + name, 
+        				 ChatColor.YELLOW + "Welcome to the realm of " + ArcheCore.getControls().getServerWorldName(),
+        				 10, 70, 20);
         		 return new PickSexPrompt();
         	 } else {
         		 return new PickNamePrompt();
