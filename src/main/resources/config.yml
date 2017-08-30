@@ -9,7 +9,7 @@ override.help.command: true
 #Enable a tertiary lookup mode for help files, namely the Wikipages
 enable.wiki.lookup: true
 
-#Setting this to true allows players to use the 'old' LotC commands such as /char, /card, /setage
+#Setting this to true allows players to use the 'old' LotC commands such as /char, /card, /setname
 #The /persona command and all its parameters will work regardless, and have identical function.
 enable.legacy.commands: true
 

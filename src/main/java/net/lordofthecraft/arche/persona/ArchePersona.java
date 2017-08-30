@@ -58,11 +58,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	final AtomicInteger charactersSpoken;
 	private final ArchePersonaKey key;
 	private int gender;
-	int age;
 	String description = null;
 	volatile String prefix = null;
 	boolean current = true;
-	boolean autoAge;
 	String raceHeader = null;
 	long lastRenamed;
 	long creationTimeMS;
@@ -97,14 +95,13 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		sqlCriteria.put("id", id);
 	}*/
 
-	ArchePersona(OfflinePlayer p, int id, String name, Race race, int gender, int age,long creationTimeMS){
+	ArchePersona(OfflinePlayer p, int id, String name, Race race, int gender,long creationTimeMS){
 		this.key = new ArchePersonaKey(p.getUniqueId(), id);
 
 		player = p.getName();
 		this.race = race;
 		this.name = name;
 		this.gender = gender;
-		this.age = age;
 		this.creationTimeMS = creationTimeMS;
 
 		timePlayed = new AtomicInteger();
@@ -428,30 +425,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	 
 	 buffer.put(new UpdateTask(this, PersonaField.GENDER, gender));
 	 }
-
-
-	@Override
-	public int getAge(){
-		return age;
-	}
-
-	@Override
-	public void setAge(int age){
-		this.age = age;
-
-		buffer.put(new UpdateTask(this, PersonaField.AGE, age));
-	}
-
-	@Override
-	public boolean doesAutoAge(){
-		return autoAge;
-	}
-
-	@Override
-	public void setAutoAge(boolean autoAge){
-		this.autoAge = autoAge;
-		buffer.put(new UpdateTask(this, PersonaField.AUTOAGE, autoAge));
-	}
 
 	void saveMinecraftSpecifics(final Player p){
 		//Store and switch Persona-related specifics: Location and Inventory.

@@ -156,8 +156,7 @@ public interface PersonaHandler {
 	 * @param autoAge Whether or not this Persona's age should automatically increase
 	 * @return The resulting persona
 	 */
-	Persona createPersona(Player p, int id, String name, Race race,
-			int gender, int age, boolean autoAge, long creationTimeMS);
+	Persona createPersona(Player p, int id, String name, Race race, int gender, long creationTimeMS);
 
 	/**
 	 * Method that provides a human-readable list of information about a Persona, to be used in prints
@@ -185,12 +184,6 @@ public interface PersonaHandler {
 	 */
 
 	List<BaseComponent> whoisMore(Persona p, boolean mod, boolean self);
-
-
-	/**
-	 * Call to the SQLite database to age all Personas by one year.
-	 */
-	void ageUs();
 
 	/**
 	 * Gets the value of the luck attribute for a player

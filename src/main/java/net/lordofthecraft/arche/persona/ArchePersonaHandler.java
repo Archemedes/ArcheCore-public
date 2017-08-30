@@ -256,7 +256,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 
 	@Override
-	public ArchePersona createPersona(Player p, int id, String name, Race race, int gender, int age, boolean autoAge, long creationTime){
+	public ArchePersona createPersona(Player p, int id, String name, Race race, int gender, long creationTime){
 
 		ArchePersona[] prs = personas.computeIfAbsent(p.getUniqueId(), k -> new ArchePersona[4]);
 
@@ -276,8 +276,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			SkinCache.getInstance().clearSkin(prs[id]);
 		}
 
-		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age,creationTime);
-		persona.autoAge = autoAge;
+		ArchePersona persona = new ArchePersona(p, id, name, race, gender,creationTime);
 
 		PersonaCreateEvent event = new PersonaCreateEvent(persona, prs[id]);
 		Bukkit.getPluginManager().callEvent(event);
@@ -294,7 +293,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		for(PotionEffect ps : p.getActivePotionEffects())
 			p.removePotionEffect(ps.getType());
 
-		ArcheTask task = new InsertTask(uuid, id, name, age, race, gender, autoAge,creationTime);
+		ArcheTask task = new InsertTask(uuid, id, name, race, gender,creationTime);
 		buffer.put(task);
 
 		RaceBonusHandler.apply(p, race);
@@ -361,9 +360,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 		String gender = p.getGender();
 		if(gender != null) result.add(new TextComponent(c + "Gender: " + r + p.getGender()));
 
-		boolean aa = p.doesAutoAge();
-		if(p.getAge() > 0 || aa)
-			result.add(new TextComponent((aa? c : (ChatColor.DARK_RED)) + "Age: " + r + p.getAge()));
 		String desc = p.getDescription();
 
 		if(desc != null)
@@ -531,16 +527,16 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	private ArchePersona buildPersona(ResultSet res, OfflinePlayer p) throws SQLException{
+		//TODO will need some serious updating
 		int id = res.getInt(2);
 		String name = res.getString(3);
-		int age = res.getInt(4);
 		Race race = Race.valueOf(res.getString(5));
 		String rheader = res.getString(6);
 		int gender = res.getInt(7);
 		long creationTimeMS = res.getLong(27);
 
 
-		ArchePersona persona = new ArchePersona(p, id, name, race, gender, age,creationTimeMS);
+		ArchePersona persona = new ArchePersona(p, id, name, race, gender, creationTimeMS);
 		//prs[id] = persona;
 
 		if(rheader != null && !rheader.equals("null") && !rheader.isEmpty()){
@@ -551,7 +547,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.prefix = res.getString(9);
 		persona.current = res.getBoolean(10);
 
-		persona.autoAge = res.getBoolean(11);
 		persona.timePlayed.set(res.getInt(12));
 		persona.charactersSpoken.set(res.getInt(13));
 		persona.lastRenamed = res.getLong(14);
@@ -685,19 +680,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 		for(String sname : ArcheSkillFactory.getSkills().keySet()){
 			buffer.put(new DataTask(DataTask.DELETE, "sk_" + sname, null, p.sqlCriteria));
 
-		}
-	}
-
-	@Override
-	public void ageUs(){
-		for(ArchePersona[] prs : getPersonas()){
-			if(prs == null) continue;
-			for(ArchePersona p : prs){
-				if(p == null) continue;
-				if(p.doesAutoAge()){
-					p.setAge(p.getAge() + 1);
-				}
-			}
 		}
 	}
 

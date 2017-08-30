@@ -25,7 +25,6 @@ import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.commands.CommandArchehelp;
 import net.lordofthecraft.arche.commands.CommandAttribute;
 import net.lordofthecraft.arche.commands.CommandAttributeTabCompleter;
-import net.lordofthecraft.arche.commands.CommandAutoage;
 import net.lordofthecraft.arche.commands.CommandBeaconme;
 import net.lordofthecraft.arche.commands.CommandHelpMenu;
 import net.lordofthecraft.arche.commands.CommandMoney;
@@ -299,7 +298,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("beaconme").setExecutor(new CommandBeaconme());
 		getCommand("treasurechest").setExecutor(new CommandTreasurechest());
 		getCommand("realname").setExecutor(new CommandRealname(this));
-		getCommand("autoage").setExecutor(new CommandAutoage(this));
 		getCommand("money").setExecutor(new CommandMoney(helpdesk, economy));
 		getCommand("namelog").setExecutor(new CommandNamelog());
 		getCommand("arsql").setExecutor(new CommandSql());

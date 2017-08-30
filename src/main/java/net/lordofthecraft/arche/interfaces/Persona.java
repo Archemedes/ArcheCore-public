@@ -214,31 +214,6 @@ public interface Persona {
 	 */
 
 	void setGender(String gender);
-	
-	/**
-	 * Get the current Age of this Persona.
-	 * @return the Persona's age
-	 */
-	int getAge();
-
-	/**
-	 * Set the current age of this Persona.
-	 * @param age the age to set.
-	 */
-	void setAge(int age);
-
-	/**
-	 * Get whether or not this Persona's age is set to.
-	 * automatically increase (with ingame years).
-	 * @return If the Persona automatically ages
-	 */
-	boolean doesAutoAge();
-
-	/**
-	 * Set whether or not this Persona should age automatically.
-	 * @param autoAge If the persona should auto-age.
-	 */
-	void setAutoAge(boolean autoAge);
 
 	/**
 	 * Delete the Persona from the Plugin records.

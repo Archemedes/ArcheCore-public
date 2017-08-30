@@ -130,17 +130,6 @@ public class CommandPersona implements CommandExecutor {
 							.forEach(o->MessageUtil.send(o, sender));
 				}
 				return true;
-			}else if (args[0].equalsIgnoreCase("autoage")) {
-				boolean auto = pers.doesAutoAge();
-
-				if (auto && !sender.hasPermission("archecore.stopautoage")) {
-					sender.sendMessage(ChatColor.RED + "Error: You may not turn off Auto-aging once on.");
-				} else {
-					sender.sendMessage(ChatColor.AQUA + "Turned " + ChatColor.GOLD + "" + ChatColor.BOLD + (auto ? "OFF" : "ON") + ChatColor.AQUA + " auto aging for " + pers.getName() + ".");
-					pers.setAutoAge(!auto);
-				}
-
-				return true;
 			} else if (args[0].equalsIgnoreCase("time")) {
 				sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int)Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + pers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
 				sender.sendMessage(ChatColor.AQUA + "You have a total of " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int)Math.floor(pers.getTotalPlaytime() / 60) + ChatColor.AQUA + " hours on " + pers.getName() + "!");
@@ -238,26 +227,6 @@ public class CommandPersona implements CommandExecutor {
 					}
 
 					return true;
-				} else if (args[0].equalsIgnoreCase("age")) {
-					if (StringUtils.isNumeric(args[1])) {
-						int ageNow = pers.getAge();
-						int age = Integer.parseInt(args[1]);
-
-
-						if (sender.hasPermission("archecore.ageless")) {
-							pers.setAge(age);
-							sender.sendMessage(ChatColor.AQUA + "Set the age of " + pers.getName() + " to: " + ChatColor.RESET + age);
-						} else if (ageNow > age) {
-							sender.sendMessage(ChatColor.RED + "Error: You cannot become younger");
-						} else if (age < 5 || age > pers.getRace().getMaximumAge()) {
-							sender.sendMessage(ChatColor.RED + "Error: Age must be between 5 and " + pers.getRace().getMaximumAge());
-						} else {
-							pers.setAge(age);
-							sender.sendMessage(ChatColor.AQUA + "Set the age of " + pers.getName() + " to: " + ChatColor.RESET + age);
-						}
-
-						return true;
-					}
 				} else if (args[0].equalsIgnoreCase("profession") || args[0].equalsIgnoreCase("skill")) {
 					Persona target = pers;
 					if(target.getMainSkill() == null || sender.hasPermission("archecore.persona.switchprofession")){

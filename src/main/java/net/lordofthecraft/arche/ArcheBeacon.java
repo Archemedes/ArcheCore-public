@@ -93,7 +93,7 @@ public class ArcheBeacon {
 					
 					String name = ChatColor.YELLOW + "" + ChatColor.ITALIC + a.getName();
 					String gender = a.getGender() == null? "" : a.getGender();
-					String desc = ChatColor.GRAY + a.getRaceString() + " " + gender + ", " + a.getAge();
+					String desc = ChatColor.GRAY + a.getRaceString() + " " + gender;
 					String d2 = (i == current? ChatColor.DARK_GREEN + "Selected!": ChatColor.GREEN + "Click to select");
 					buildItem(is, name, desc, d2);
 				}

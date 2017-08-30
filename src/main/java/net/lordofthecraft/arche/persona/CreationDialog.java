@@ -368,7 +368,7 @@ public class CreationDialog {
         protected Prompt acceptValidatedInput(ConversationContext context, String input) {
             if(input.equalsIgnoreCase("more")) return new PickMoreRacePrompt();
             if(findRace(input).hasChildren()) return new PickSubRacePrompt(input);
-            else return new SetAgePrompt();
+            else return new PersonaConfirmPrompt();
         }
 
         private Race findRace(String s){
@@ -435,7 +435,7 @@ public class CreationDialog {
         @Override
         protected Prompt acceptValidatedInput(ConversationContext context, String input) {
             if ("back".equalsIgnoreCase(input)) return new PickRacePrompt();
-            return new SetAgePrompt();
+            return new PersonaConfirmPrompt();
         }
 
         private Race findRace(String s){
@@ -484,7 +484,7 @@ public class CreationDialog {
 
         @Override
         protected Prompt acceptValidatedInput(ConversationContext context, String input) {
-            return new SetAgePrompt();
+            return new PersonaConfirmPrompt();
         }
 
         private Race findRace(String s){
@@ -495,52 +495,7 @@ public class CreationDialog {
             return null;
         }
     }
-
-    private class SetAgePrompt extends NumericPrompt{
-
-        @Override
-        public String getPromptText(ConversationContext context) {
-            Player p = (Player) context.getForWhom();
-            int nr = ((Race) context.getSessionData("race")).getMaximumAge();
-            String pretext = "Please specify the age of your Persona.\n";
-            String affix = "\n" + NOTE + "Age must be between 5 and "+nr+" and "
-                    + "make sense with the lore of your chosen race.";
-
-            return pretext + (p.hasPermission("archecore.ageless")? "" : affix) + DIVIDER;
-        }
-
-        @Override
-        public boolean isNumberValid(ConversationContext context, Number input){
-            Player p = (Player) context.getForWhom();
-
-            if(p.hasPermission("archecore.ageless")) return true;
-
-            int nr = ((Race) context.getSessionData("race")).getMaximumAge();
-            int age = input.intValue();
-            return (age >= 5 && age <= nr);
-        }
-
-        @Override
-        protected Prompt acceptValidatedInput(ConversationContext context,	Number age) {
-            context.setSessionData("age", age.intValue());
-            return new AutoAgePrompt();
-        }
-    }
-
-    private class AutoAgePrompt extends BooleanPrompt{
-
-        @Override
-        public String getPromptText(ConversationContext context) {
-            return "Automatically age your Persona: yes(recommended) or no?" + DIVIDER;
-        }
-
-        @Override
-        protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
-            context.setSessionData("autoage", input);
-            return new PersonaConfirmPrompt();
-        }
-    }
-
+    
     private class PersonaConfirmPrompt extends MessagePrompt{
 
         @Override
@@ -557,10 +512,8 @@ public class CreationDialog {
             String name = (String) context.getSessionData("name");
             int gender = (Integer) context.getSessionData("gender");
             Race race = (Race) context.getSessionData("race");
-            int age = (Integer) context.getSessionData("age");
-            boolean autoAge = (Boolean) context.getSessionData("autoage");
             long creationTimeMS = System.currentTimeMillis();
-            Persona pers = ArchePersonaHandler.getInstance().createPersona(p, id, name, race, gender, age, autoAge, creationTimeMS);
+            Persona pers = ArchePersonaHandler.getInstance().createPersona(p, id, name, race, gender, creationTimeMS);
 
             if(pers != null && context.getSessionData("first") != null){
                 Economy econ = ArcheCore.getControls().getEconomy();
