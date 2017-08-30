@@ -1,10 +1,10 @@
 package net.lordofthecraft.arche.enums;
 
 public enum SkillTier {	
-	DEFAULT(0,0,"Inactive"),
-	SELECTED(0,1,""),
-	RENOWNED(0,100,"Renowned"),
-	MASTERFUL(0,1000,"Masterful");
+	INACTIVE(0,Integer.MIN_VALUE,"Inactive"), //Not actually reachable 'normally' but returned when skill is unselected
+	SELECTED(1,0,""),
+	RENOWNED(2,100,"Renowned"),
+	MASTERFUL(3,1000,"Masterful");
 	
 	final int xp;
 	final int tier;

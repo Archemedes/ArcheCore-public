@@ -15,6 +15,7 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.save.SaveHandler;
@@ -41,6 +42,7 @@ public class CommandPersona implements CommandExecutor {
 				+ i + "$</persona view >view {player}$: " + a + "View the current Character Card of {Player}.\n"
 				+ i + "$</persona name >name [new name]$: " + a + "Rename your Persona to the given name.\n"
 				+ (prefix ? (i + "$</persona prefix >prefix [prefix]$: " + a + "Sets Persona Prefix (delete with $</persona clearprefix>clearprefix$).\n") : "")
+				+ i + "$</persona profession >profession [skill]$: " + a + "Sets your Persona's profession.\n"
 				+ i + "$</persona age >age [new age]$: " + a + "Set your character's age.\n"
 				+ i + "$</persona autoage>autoage$: " + a + "Toggle automatic aging for this persona.\n"
 				+ i + "$</persona addbio >addinfo$: " + a + "Add a line of text to your Persona's description..\n"
@@ -256,6 +258,20 @@ public class CommandPersona implements CommandExecutor {
 
 						return true;
 					}
+				} else if (args[0].equalsIgnoreCase("profession") || args[0].equalsIgnoreCase("skill")) {
+					Persona target = pers;
+					if(target.getMainSkill() == null || sender.hasPermission("archecore.persona.switchprofession")){
+						Skill skill = ArcheCore.getControls().getSkill(args[1]);
+						if(skill == null) {
+							sender.sendMessage(ChatColor.RED + "Error: This profession could not be found!");
+						} else {
+							pers.setMainSkill(skill);
+							sender.sendMessage(ChatColor.GOLD + "You have dedicated yourself to be a " + ChatColor.RESET + skill.getName());
+						}
+					} else {
+						sender.sendMessage(ChatColor.RED + "You have already selected a profession!");
+					}
+					return true;
 				} else if (args[0].equalsIgnoreCase("setbio") || args[0].equalsIgnoreCase("setinfo") || args[0].equalsIgnoreCase("setdesc") || args[0].equalsIgnoreCase("setdescription")) {
 					int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
 					String line = StringUtils.join(args, ' ', 1, parseTo);

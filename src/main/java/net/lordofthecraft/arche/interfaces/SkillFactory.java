@@ -26,17 +26,16 @@ public interface SkillFactory {
 	SkillFactory withXpGainWhileHidden(boolean inert);
 
 	/**
-	 * A racial profession will allow players of this race to level the skill to maximum level no matter what. This method can be chained multiple times.
+	 * A racial profession will allow players to have this skill even if they don't select it as their main profession.
 	 * @param race The race to set this profession for.
 	 * @return itself
 	 */
 	SkillFactory asRacialProfession(Race race);
 	
 	/**
-	 * Add an XP modifier that is dependent on the Persona's race. All XP gained will be multiplied by this provided factor.
-	 * XP lost is multiplied by the reciprocal of this factor, although XP lost through the forgettable mechanic is not modified
-	 * @param race The race for which to modify all gained XP.
-	 * @param modifier The factor to modify by
+	 * Add an Fatigue modifier that is dependent on the Persona's race. Values higher than 1 are beneficial for the player.
+	 * @param race The race for which to modify all gained fatigue.
+	 * @param modifier The effective factor by which to modify the total fatigue a player can accumulate before losing skill benefits
 	 * @return itself
 	 */
 	SkillFactory withRacialModifier(Race race, double modifier);
@@ -49,14 +48,6 @@ public interface SkillFactory {
 	 * @return itself
 	 */
 	SkillFactory withHelpFile(String helpText, Material helpIcon);
-
-	/**
-	 * Sets whether or not the skill will be unlocked when a user has reached a certain number of minutes on a persona.
-	 * @see Skill#ALL_SKILL_UNLOCK_TIME
-	 * @param unlockByTime If the skill will be unlocked at the stated time.
-	 * @return itself
-	 */
-	SkillFactory setUnlockedByTime(boolean unlockByTime);
 
 	/**
 	 * Process the SkillFactory object to create a new skill. This method

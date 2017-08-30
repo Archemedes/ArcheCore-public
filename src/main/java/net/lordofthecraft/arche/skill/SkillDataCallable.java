@@ -20,6 +20,7 @@ public class SkillDataCallable implements Callable<SkillData> {
 	
 	@Override
 	public SkillData call() throws SQLException {
+		//TODO update this statement
 		String query = "SELECT xp,visible FROM sk_" + skill + " WHERE player='" + persona.getPlayerUUID().toString() + "' AND id=" + persona.getId() +";"; 
 		SkillData data;
 		

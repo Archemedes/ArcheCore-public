@@ -4,7 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public enum PersonaField {
+public enum PersonaField { 
+	//TODO: make sure this is properly cleaned up and reflects the new table structure
 	PREFIX("prefix"),
 	NAME("name"),
 	RACE("rheader"),

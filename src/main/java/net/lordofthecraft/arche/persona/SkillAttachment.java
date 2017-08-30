@@ -1,38 +1,53 @@
 package net.lordofthecraft.arche.persona;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.ArcheTask;
-import net.lordofthecraft.arche.save.tasks.UpdateSkillTask;
-import net.lordofthecraft.arche.skill.ArcheSkill;
-import net.lordofthecraft.arche.skill.SkillData;
-import org.bukkit.entity.Player;
-
 import java.util.UUID;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
+import org.bukkit.entity.Player;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.ArcheTask;
+import net.lordofthecraft.arche.save.tasks.UpdateSkillTask;
+import net.lordofthecraft.arche.skill.ArcheSkill;
+import net.lordofthecraft.arche.skill.SkillData;
+
 public class SkillAttachment {
+	private static final double DEFAULT_XP = 0.0;
+	
 	private static final SaveHandler buffer = SaveHandler.getInstance();
 	final ArcheSkill skill;
+	private final PersonaSkills handle;
 	private final String uuid;
 	private final int id;
 	private FutureTask<SkillData> call;
 	private double xp;
 	private boolean canSee;
-	private double modifier = -1;
 	private boolean error = false;
+	private boolean inPersonaSkills = true;
+
+	//NB: This constructor is ONLY called from PersonaSkills when it is NEWLY INITIALIZED
+	//it is NOT called when loaded from SQL. If called, the PersonaSkills will NOT hold a reference to this attachment
+	//We set inPersonaSkills to false in this constructor. We only add it if there is a need to.
+	//That is, if the persona's xp/visibility values are non-default and we need to keep track of itw
+	SkillAttachment(Skill skill, Persona persona){
+		this(skill, persona, null);
+		inPersonaSkills = false;
+	}
 	
-	SkillAttachment(ArcheSkill skill, ArchePersona persona, FutureTask<SkillData> call){
+	SkillAttachment(Skill skill, Persona persona, FutureTask<SkillData> call){
 		this.call = call;
+		this.handle = persona.getPersonaSkills();
 		
-		xp = 0;
+		xp = DEFAULT_XP;
 		canSee = skill.getVisibility() == Skill.VISIBILITY_VISIBLE;
 		
-		this.skill = skill;
+		this.skill = (ArcheSkill) skill;
 		this.uuid = persona.getPlayerUUID().toString();
 		this.id = persona.getId();
 	}
@@ -72,24 +87,21 @@ public class SkillAttachment {
 		}
 	}
 	
+	private boolean hasDefaultValues() {
+		return (xp == DEFAULT_XP) && skill.getVisibility() == Skill.VISIBILITY_VISIBLE;
+	}
+	
 	public boolean isInitialized(){
 		return call == null;
 	}
-	
-	public double getModifier(){
-		return modifier;
-	}
-	
-	public void setModifier(double modifier){
-		this.modifier = modifier;
-	}
-	
+
 	public double getXp(){
 		return xp;
 	}
 
 	public void setXp(double xp) {
 		this.xp = xp;
+		if(this.xp < DEFAULT_XP) this.xp = 0;
 		performSQLUpdate();
 	}
 	
@@ -112,14 +124,25 @@ public class SkillAttachment {
 	
 	public void removeXP(double removed){
 		xp -= removed;
-
+		if(this.xp < DEFAULT_XP) this.xp = 0;
 		performSQLUpdate();
 	}
 	
 	private void performSQLUpdate(){
 		if(error) return;
-		ArcheTask task = new UpdateSkillTask(skill, uuid, id, xp, canSee);
-		buffer.put(task);
+		
+		if(inPersonaSkills && hasDefaultValues()) {
+			//TODO: call a RemoveSkillTask object that will remove this from the persona skills table
+			handle.removeSkillAttachment(this);
+			inPersonaSkills = false;
+		} else {
+			ArcheTask task = new UpdateSkillTask(skill, uuid, id, xp, canSee);
+			buffer.put(task);
+			if(!inPersonaSkills) { //Start tracking this skill in PersonaSkills
+				handle.addSkillAttachment(this);
+				inPersonaSkills = true;
+			}
+		}
 	}
 	
 }

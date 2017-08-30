@@ -481,10 +481,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 						else
 							RaceBonusHandler.reset(p);
 
-						if (persona.getTimePlayed() > Skill.ALL_SKILL_UNLOCK_TIME) {
-							ArcheSkillFactory.getSkills().values().stream().filter(sk -> sk.getXp(persona) < 0).forEach(sk -> sk.reset(persona));
-						}
-
 					} else {
 						ArcheCore.getPlugin().getLogger().warning("Player " + p.getName() + " has simultaneous current Personas. Fixing now...");
 						persona.setCurrent(false);
@@ -561,8 +557,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.timePlayed.set(res.getInt(12));
 		persona.charactersSpoken.set(res.getInt(13));
 		persona.lastRenamed = res.getLong(14);
-		persona.gainsXP = res.getBoolean(15);
-		persona.profession = ArcheSkillFactory.getSkill(res.getString(16));
+		//persona.gainsXP = res.getBoolean(15);
+		persona.skills.setMainProfession(ArcheSkillFactory.getSkill(res.getString(16)));
 
 		String wstr = res.getString(17);
 		if(!res.wasNull()){
@@ -587,10 +583,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 		}
 
 		if(ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble(22);
-
-		persona.professions[0] = ArcheSkillFactory.getSkill(res.getString(23));
-		persona.professions[1] = ArcheSkillFactory.getSkill(res.getString(24));
-		persona.professions[2] = ArcheSkillFactory.getSkill(res.getString(25));
 		persona.pastPlayTime = res.getInt(28);
 
 		//We now let all Personas load their skills (albeit lazily). Let's do this now

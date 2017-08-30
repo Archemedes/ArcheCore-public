@@ -1,14 +1,10 @@
 package net.lordofthecraft.arche.persona;
 
 import java.lang.ref.WeakReference;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
@@ -24,7 +20,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import net.lordofthecraft.arche.ArcheCore;
@@ -55,12 +50,14 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
 	private static final SaveHandler buffer = SaveHandler.getInstance();
 
+	
+	final PersonaSkills skills = new PersonaSkills(this);
+	
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger timePlayed;
 	final AtomicInteger charactersSpoken;
 	private final ArchePersonaKey key;
 	private int gender;
-	private final List<SkillAttachment> profs = Lists.newArrayList();
 	int age;
 	String description = null;
 	volatile String prefix = null;
@@ -70,15 +67,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	long lastRenamed;
 	long creationTimeMS;
 	int pastPlayTime; //stat_playtime_past
-	//Player name no longer final or private
-	//We must be able to change it in case of relogs/preloads
-	//Where the player has changed their username with Mojang
-	String player;
+	String player; //Last known minecraft name of the owning player
 	WeakBlock location = null;
 	PersonaInventory inv = null;
 	double money = 0;
-	boolean gainsXP = false;
-	Skill profession = null;
 	private Race race;
 	private volatile String name;
 	private WeakReference<Player> playerObject;
@@ -126,34 +118,16 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	public void addSkill(ArcheSkill skill, FutureTask<SkillData> future){
-		if(profs.size() != skill.getId()){
-			Logger log = ArcheCore.getPlugin().getLogger();
-			log.severe("Incorrect skill ordering in Persona LinkedList!");
-			log.severe("Expect length " + skill.getId() + " but got " + profs.size() + " for Persona: " + player + "_" + getId());
-			log.severe("Will see errors and incorrect xp assignments of skills!");
-		}
-
 		SkillAttachment attach = new SkillAttachment(skill, this, future);
-		profs.add(attach);
+		skills.addSkillAttachment(attach);
 	}
 
-	public SkillAttachment getSkill(int skillId){
-		return profs.get(skillId);
+	public PersonaSkills getPersonaSkills() {
+		return skills;
 	}
-
-	@Override
-	public double resetSkills(float mod){
-		if (mod > 1) mod = 1f;
-		double xp = 0;
-		for(Skill s : ArcheSkillFactory.getSkills().values()){
-			if(s.isVisible(this)){
-				final double val = s.reset(this);
-				xp += val;
-			}
-		}
-		xp = xp*mod;
-		ArcheSkillFactory.getSkill("internal_drainxp").addRawXp(this, xp, false);
-		return xp;
+	
+	public SkillAttachment getSkill(Skill skill){
+		return skills.getSkill(skill);
 	}
 
 	@Override
@@ -182,22 +156,14 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		return money;
 	}
 
-
-	public List<Skill> getOrderedProfessions() {
-		List<Skill> skills = Lists.newArrayList();
-		skills.addAll(profs.stream().filter(sk -> sk.skill.isVisible(this)).map(sk -> sk.skill).collect(Collectors.toList()));
-		skills.sort(new SkillComparator(this));
-		return skills;
-	}
-
 	@Override
 	public Skill getMainSkill(){
-		return profession;
+		return skills.getMainProfession();
 	}
 
 	@Override
 	public void setMainSkill(Skill profession){
-		this.profession = profession;
+		skills.setMainProfession(profession);
 		String name = profession == null? null : profession.getName();
 		buffer.put(new UpdateTask(this,PersonaField.SKILL_SELECTED, name));
 	}
@@ -233,20 +199,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 				} else {
 					ArcheCore.getPlugin().getLogger().info("Player " + player + " was not found (null) as her Persona was switched.");
 				}
-
-				/*
-				//Start loading the skills for the current Persona ONLY
-				if(!profs.isEmpty()){
-					profs.clear();
-					ArcheCore.getPlugin().getLogger().warning("Skills for persona " + player + "_" + getId() + " expected empty, but wasn't. Resource leak?");
-				}
-
-
-				//Current Persona gets the skills loaded into memory
-				loadSkills();
-				 */
-
-				//Should now have been done already at player login time for all Personas
 			}
 		}
 	}
@@ -293,20 +245,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 				p.setDisplayName("[" + getPrefix() + "] " + name);
 			else
 				p.setDisplayName(name);
-		}
-	}
-
-	@Override
-	public boolean getXPGain() {
-		return gainsXP;
-	}
-
-	@Override
-	public void setXPGain(boolean gainsXP){
-		if(this.gainsXP != gainsXP){
-			this.gainsXP = gainsXP;
-
-			buffer.put(new UpdateTask(this, PersonaField.XP_GAIN, gainsXP));
 		}
 	}
 
@@ -665,19 +603,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	@Override
 	public boolean isNewbie() {
 		return getTimePlayed() < ArcheCore.getControls().getNewbieDelay();
-	}
-
-	private class SkillComparator implements Comparator<Skill> {
-		Persona p;
-
-		public SkillComparator(Persona p) {
-			this.p = p;
-		}
-
-		@Override
-		public int compare(Skill o1, Skill o2) {
-			return Double.compare(o2.getXp(p), o1.getXp(p));
-		}
 	}
 
 	@Override

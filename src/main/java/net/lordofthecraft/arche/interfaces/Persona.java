@@ -7,6 +7,7 @@ import org.bukkit.inventory.Inventory;
 
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.PersonaInventory;
+import net.lordofthecraft.arche.persona.PersonaSkills;
 
 public interface Persona {
 
@@ -35,13 +36,11 @@ public interface Persona {
 	double deposit(double amount, Transaction cause);
 
 	/**
-	 * Reset a persona's visible skills (drainXp and Magic skills not effected) to 0 and allow it to be redistributed
-	 * @param mod The amount to return. 1 for 100% of experience, 0.50 for 50% of experience returned, etc.
-	 * @return The amount of Xp now open to be assigned
+	 * The PersonaSkills objects hold the fields and methods related to a particular persona's skills
+	 * @return The PersonaSkills object
 	 */
-
-	double resetSkills(float mod);
-
+	PersonaSkills getPersonaSkills();
+	
 	/**
 	 * A method that retrieves the Persona's 'main' skill or profession, which they can set for RP purposes.
 	 * @return A player's self-set 'main' skill.
@@ -49,7 +48,7 @@ public interface Persona {
 	Skill getMainSkill();
 
 	/**
-	 * Set a Persona's main skill or profession. Purely for aestethic purposes.
+	 * Set a Persona's main skill or profession. Purely for aesthetic purposes.
 	 * @param profession The skill to be set as main.
 	 */
 	void setMainSkill(Skill profession);
@@ -91,20 +90,6 @@ public interface Persona {
 	 * the prefix, but not display it anywhere in the current session.
 	 */
 	void clearPrefix();
-
-	/**
-	 * Retrieve if this Player is gaining skill experience. If false, skill experience is
-	 * not gained by the player for normal actions, but can still be retrieved through teaching
-	 * or skill tomes.
-	 * @return If the player gains XP.
-	 */
-	boolean getXPGain();
-
-	/**
-	 * Sets whether or not this Player should gain XP.
-	 * @param gainsXP Whether or not to gain XP
-	 */
-	void setXPGain(boolean gainsXP);
 
 	/**
 	 * Retrieve the total Playtime this Persona has seen since its creation.

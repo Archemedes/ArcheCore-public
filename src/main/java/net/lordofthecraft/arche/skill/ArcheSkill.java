@@ -25,7 +25,6 @@ public class ArcheSkill implements Skill {
 	
 	private static ArcheTimer timer;
 	
-	private final int id;
 	private final String name;
 	private final int displayStrategy;
 	private final boolean inert;
@@ -34,13 +33,13 @@ public class ArcheSkill implements Skill {
 	private final Map<Race, Double> raceMods;
 
 	private final PreparedStatement statement;
-
-	ArcheSkill(int id, String name, int displayStrategy, boolean inert,
-			   Set<Race> mains, Map<Race, Double> raceMods, PreparedStatement state, boolean unlockedByTime) {
+	//TODO add a statement_remove when you want to remove an entry from the skill tables altogether
+	
+	ArcheSkill(String name, int displayStrategy, boolean inert,
+			   Set<Race> mains, Map<Race, Double> raceMods, PreparedStatement state) {
 		
 		timer = ArcheCore.getPlugin().getMethodTimer();
-		
-		this.id = id;
+
 		this.name = name;
 		this.displayStrategy = displayStrategy;
 		this.inert = inert;
@@ -61,11 +60,6 @@ public class ArcheSkill implements Skill {
 	@Override
 	public String getName(){
 		return name;
-	}
-	
-	@Override
-	public int getId(){
-		return id;
 	}
 	
 	@Override
@@ -116,9 +110,6 @@ public class ArcheSkill implements Skill {
 	public void addXp(Persona p, double xp){
 		if(timer != null) timer.startTiming("xp_" + name);
 		
-		//Don't hand XP to people who turned it off
-		if(!p.getXPGain()) return;
-		
 		//Also don't hand XP to people who cannot gain it in this skill
 		if(!this.canGainXp(p)) return;
 		
@@ -151,12 +142,9 @@ public class ArcheSkill implements Skill {
 		
 		if(newXp == oldXp) return 0;
 		attach.setXp(newXp);
-		
-		if(!attach.isVisible())
-			return xp;
-		
+
 		//Level up? If so display message
-		if(xp > 0 ){
+		if(attach.isVisible() && xp > 0 ){
 			SkillTier current = getSkillTier(p);
 			int treshold = current.getXp();
 			if(oldXp < treshold && newXp >= treshold ){ //This XP gain made player pass treshold
@@ -190,6 +178,7 @@ public class ArcheSkill implements Skill {
 
 	@Override
 	public boolean achievedTier(Persona p, SkillTier tier){
+		if(!hasSkill(p)) return false;
 		SkillAttachment att = getAttachment(p);
 		return att.getXp() >= tier.getXp();
 	}
@@ -201,8 +190,10 @@ public class ArcheSkill implements Skill {
 
 	@Override
 	public SkillTier getSkillTier(Persona p){
+		if(!hasSkill(p)) return SkillTier.INACTIVE;
+		
 		double xp = getXp(p);
-		SkillTier result = SkillTier.DEFAULT;
+		SkillTier result = SkillTier.SELECTED;
 		for(SkillTier st : SkillTier.values()){
 			if(st.getXp() <= xp) result = st;
 			else return result;
@@ -210,11 +201,16 @@ public class ArcheSkill implements Skill {
 		
 		return result;
 	}
+	
+	private boolean hasSkill(Persona p) {
+		return p.getMainSkill() == this || this.isProfessionFor(p.getRace());
+	}
 
 	@Override
 	public boolean canGainXp(Persona p){
+		if(inert || getVisibility() == VISIBILITY_DISCOVERABLE) return true;
 		SkillAttachment att = getAttachment(p);
-		return inert || att.isVisible() || getVisibility() == VISIBILITY_DISCOVERABLE;
+		return att.isVisible();
 	}
 
 	@Override
@@ -232,7 +228,7 @@ public class ArcheSkill implements Skill {
 	}
 	
 	private SkillAttachment getAttachment(Persona pers){
-		SkillAttachment attach = ((ArchePersona) pers).getSkill(getId());
+		SkillAttachment attach = ((ArchePersona) pers).getSkill(this);
 		
 		if(!attach.isInitialized())
 			attach.initialize();

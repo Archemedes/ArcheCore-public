@@ -12,6 +12,7 @@ public class SelectSkillTask extends ArcheTask {
 
 	private final FutureTask<SkillData> future;
 	
+	//TODO this needs to be rewritten to the new database structure
 	public SelectSkillTask(ArchePersona persona, Skill s){
 		super();
 		SkillDataCallable callable = new SkillDataCallable(persona, s.getName(), handle);

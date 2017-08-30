@@ -23,7 +23,6 @@ public class ArcheSkillFactory implements SkillFactory {
 	private static final Map<String, String> VALS;
 	
 	private static final Map<String, ArcheSkill> skills = Maps.newLinkedHashMap();
-	private static int count = 0;
 	
 	static{
 		Map<String, String> vals = Maps.newLinkedHashMap();
@@ -39,18 +38,15 @@ public class ArcheSkillFactory implements SkillFactory {
 	}
 
 	private final String name;
-	private final int id;
 	private final Set<Race> mains = EnumSet.noneOf(Race.class);
 	private final Map<Race, Double> raceMods = new EnumMap<>(Race.class);
 	private int strategy = Skill.VISIBILITY_VISIBLE;
 	private boolean inert = false;
-	private boolean unlockedByTime = false;
 	private String helpText = null;
 	private Material helpIcon = null;
 
 	private ArcheSkillFactory(String name) {
 		this.name = name;
-		this.id = count++;
 	}
 	
 	/**
@@ -130,12 +126,6 @@ public class ArcheSkillFactory implements SkillFactory {
 	}
 
 	@Override
-	public SkillFactory setUnlockedByTime(boolean unlockByTime) {
-		unlockedByTime = unlockByTime;
-		return this;
-	}
-
-	@Override
 	public Skill register(){
 		
 		try {
@@ -148,7 +138,7 @@ public class ArcheSkillFactory implements SkillFactory {
 			//And the SQL statement to provide values to it
 			PreparedStatement statement = con.prepareStatement("INSERT INTO sk_"+ name + " VALUES (?,?,?,?)");
 
-			ArcheSkill skill = new ArcheSkill(id, name, strategy, inert, mains, raceMods, statement, unlockedByTime);
+			ArcheSkill skill = new ArcheSkill(name, strategy, inert, mains, raceMods, statement);
 			
 			//Make sure skill is registered for Plugins.
 			skills.put(name, skill);

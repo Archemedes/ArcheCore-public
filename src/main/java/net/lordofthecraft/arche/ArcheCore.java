@@ -34,7 +34,6 @@ import net.lordofthecraft.arche.commands.CommandNewbies;
 import net.lordofthecraft.arche.commands.CommandPersona;
 import net.lordofthecraft.arche.commands.CommandRaceSpawn;
 import net.lordofthecraft.arche.commands.CommandRealname;
-import net.lordofthecraft.arche.commands.CommandSkill;
 import net.lordofthecraft.arche.commands.CommandSkin;
 import net.lordofthecraft.arche.commands.CommandSql;
 import net.lordofthecraft.arche.commands.CommandSqlClone;
@@ -87,7 +86,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	//Config settings
 	private boolean helpOverriden;
 	private boolean legacyCommands;
-	private boolean showXpToPlayers;
+	private boolean showXpToPlayers; //currently unused. Reintroduce when tiers do
 	private boolean racialBonuses;
 	private boolean damageBonuses;
 	private int nameChangeDelay;
@@ -255,12 +254,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		//Init treasurechest logging
 		TreasureChest.initSQL();
-		
-		//Create internally handled skill that holds Xp given from skill resets
-		registerNewSkill("internal_drainxp")
-		.withVisibilityType(Skill.VISIBILITY_HIDDEN)
-		.withXpGainWhileHidden(true)
-		.register();
 	}
 
 	private void initConfig(){
@@ -303,7 +296,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("archehelp").setExecutor(new CommandArchehelp(helpdesk, helpOverriden));
 		getCommand("helpmenu").setExecutor(new CommandHelpMenu(helpdesk));
 		getCommand("persona").setExecutor(new CommandPersona(helpdesk, personaHandler, nameChangeDelay, enablePrefixes));
-		getCommand("skill").setExecutor(new CommandSkill(helpdesk, showXpToPlayers));
 		getCommand("beaconme").setExecutor(new CommandBeaconme());
 		getCommand("treasurechest").setExecutor(new CommandTreasurechest());
 		getCommand("realname").setExecutor(new CommandRealname(this));

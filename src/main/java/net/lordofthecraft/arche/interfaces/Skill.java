@@ -32,12 +32,6 @@ public interface Skill {
 	String getName();
 
 	/**
-	 * Gain the session-dependent internal id of the skill
-	 * @return id of the skill
-	 */
-	int getId();
-
-	/**
 	 * Retrieves the Visbility strategy of this skill, as defined by the static constants in this class.
 	 * Skills can me made visible or kept invisible to Personas, or 'revealed' based on certain conditions.
 	 * @return The visibility strategy of the skill
@@ -76,7 +70,7 @@ public interface Skill {
 	/**
 	 * Method to add XP to a Player's current Persona, provided the Player is able to gain XP in this skill.
 	 * Calling this method also reduces the XP of all skills, if and where applicable.
-	 * @param p The Player in question
+		 * @param p The Player in question
 	 * @param xp Amount of XP to add
 	 */
 	void addXp(Player p, double xp);
