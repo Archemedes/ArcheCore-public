@@ -240,7 +240,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		new TimeTrackerRunnable(personaHandler).runTaskTimerAsynchronously(this, 2203, 1200);
 
 		//Start gradually reducing the fatigue of Personas in 20-minute intervals
-		new FatigueDecreaser(fullFatigueRestore).runTaskTimer(this, 173, 20*60*20);
+		if(fullFatigueRestore > 0) new FatigueDecreaser(fullFatigueRestore).runTaskTimer(this, 173, 20*60*20);
 		
 		//Some racial bonus stuff
 		/*		if(this.areRacialBonusesEnabled())

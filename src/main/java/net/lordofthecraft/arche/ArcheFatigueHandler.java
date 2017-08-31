@@ -16,7 +16,7 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 
 //TODO this will need to hook into SQL
 public class ArcheFatigueHandler implements FatigueHandler {
-	int fatigueDecreaseHours = 24;
+	int fatigueDecreaseHours = 24; //Will be set by ArcheCore onEnable
 	private static final ArcheFatigueHandler INSTANCE = new ArcheFatigueHandler();
 	
 	private final Set<PersonaKey> prompted = new HashSet<>();
@@ -31,6 +31,7 @@ public class ArcheFatigueHandler implements FatigueHandler {
 	
 	@Override
 	public void addFatigue(Persona pers, double add, Skill skill) {
+		if(fatigueDecreaseHours == 0) return;
 		double fat = pers.getFatigue();
 		
 		if(skill != null && skill.getRaceMods().containsKey(pers.getRace())) 
@@ -42,6 +43,8 @@ public class ArcheFatigueHandler implements FatigueHandler {
 
 	@Override
 	public void reduceFatigue(Persona pers, double remove) {
+		if(fatigueDecreaseHours == 0) return;
+		
 		double fat = pers.getFatigue();
 		fat = Math.max(0.0, fat - remove);
 		pers.setFatigue(fat);
@@ -49,6 +52,8 @@ public class ArcheFatigueHandler implements FatigueHandler {
 
 	@Override
 	public void setFatigue(Persona pers, double fatigue) {
+		if(fatigueDecreaseHours == 0) return;
+		
 		double toSet = fatigue;
 		if(fatigue < 0) toSet = 0.0;
 		else if (fatigue > FatigueHandler.MAXIMUM_FATIGUE) toSet = FatigueHandler.MAXIMUM_FATIGUE;
@@ -70,6 +75,8 @@ public class ArcheFatigueHandler implements FatigueHandler {
 	
 	@Override
 	public void showFatigueBar(Player p, Persona pers) {
+		if(fatigueDecreaseHours == 0) return;
+		
 		float factor = 1.0f - ((float)(pers.getFatigue() / FatigueHandler.MAXIMUM_FATIGUE));
 		p.setExp(factor);
 		p.setLevel((int)factor*100); 
@@ -82,12 +89,16 @@ public class ArcheFatigueHandler implements FatigueHandler {
 
 	@Override
 	public boolean hasEnoughEnergy(Persona pers, double needed) {
+		if(fatigueDecreaseHours == 0) return true;
+		
 		double curr = pers.getFatigue();
 		return curr + needed <= FatigueHandler.MAXIMUM_FATIGUE;
 	}
 	
 	@Override
 	public boolean handleFatigue(final Persona pers, double add, Skill skill) {
+		if(fatigueDecreaseHours == 0) return true;
+		
 		ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
 		if(timer != null) timer.startTiming("fatigue_" + pers.getName());
 		
