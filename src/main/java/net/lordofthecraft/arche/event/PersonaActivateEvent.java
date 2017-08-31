@@ -23,5 +23,5 @@ public class PersonaActivateEvent extends PersonaEvent{
 
 	@Override public HandlerList getHandlers() { return handlers ; }
 	
-	public enum Reason { LOGIN, SWITCH }
+	public static enum Reason { LOGIN, SWITCH }
 }

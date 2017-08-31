@@ -25,6 +25,7 @@ import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.event.PersonaFatigueEvent;
 import net.lordofthecraft.arche.event.PersonaRemoveEvent;
 import net.lordofthecraft.arche.event.PersonaRenameEvent;
 import net.lordofthecraft.arche.event.PersonaSwitchEvent;
@@ -576,7 +577,11 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	@Override
 	public void setFatigue(double fatigue) {
-		this.fatigue = fatigue;		
-		//TODO sql update. Needs to be extra fast since this will be used often
+		PersonaFatigueEvent event = new PersonaFatigueEvent(this, fatigue);
+		Bukkit.getPluginManager().callEvent(event);
+		if(!event.isCancelled()) {
+			this.fatigue = event.getNewFatigue();		
+			//TODO sql update. Needs to be extra fast since this will be used often
+		}
 	}
 }

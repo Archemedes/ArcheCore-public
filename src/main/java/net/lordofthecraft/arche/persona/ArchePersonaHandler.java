@@ -38,6 +38,8 @@ import net.lordofthecraft.arche.event.PersonaCreateEvent;
 import net.lordofthecraft.arche.event.PersonaDeactivateEvent;
 import net.lordofthecraft.arche.event.PersonaRemoveEvent;
 import net.lordofthecraft.arche.event.PersonaSwitchEvent;
+import net.lordofthecraft.arche.event.PersonaWhoisEvent;
+import net.lordofthecraft.arche.event.PersonaWhoisEvent.Query;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
@@ -246,6 +248,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 			//Transfer fatigue from previous persona to new persona IF previous value was higher
 			//This should prevent some alt abuse where players chain their fatigue bars to grind
 			if(before.getFatigue() > after.getFatigue()) {
+				//This will call a set fatigue event this way
+				//Field can be changed directly, but this wont do SQL
 				after.setFatigue(before.getFatigue());
 			}
 		}
@@ -361,65 +365,105 @@ public class ArchePersonaHandler implements PersonaHandler {
 				result.add(new TextComponent(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
 		} else result.add(new TextComponent(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
 
-		result.add(new TextComponent(c + "Name: " + r + p.getName()));
+		//----End of header----
+		//Now we add all the actual relevant Persona tags in a list called subresult.
+		
+		List<BaseComponent> subresult = Lists.newArrayList();
+		
+		subresult.add(new TextComponent(c + "Name: " + r + p.getName()));
 
 		String race = p.getRaceString();
 		if (!race.equals("Unset")) {
-			result.add(new TextComponent(c + "Race: " + r + race + 
+			subresult.add(new TextComponent(c + "Race: " + r + race + 
 					((!p.getRace().getName().equalsIgnoreCase(race) && mod) ? ChatColor.DARK_GRAY + " (" + p.getRace().getName() + ")" : "")));
 		}
 
 		String gender = p.getGender();
-		if(gender != null) result.add(new TextComponent(c + "Gender: " + r + p.getGender()));
+		if(gender != null) subresult.add(new TextComponent(c + "Gender: " + r + p.getGender()));
 
+		BaseComponent profession = getProfessionWhois(p);
+		if(profession != null) subresult.add(profession);
+		
 		String desc = p.getDescription();
 
 		if(desc != null)
-			result.add(new TextComponent(c + "Description: " + r + desc));
+			subresult.add(new TextComponent(c + "Description: " + r + desc));
 		
-		result.add(new ComponentBuilder("Click for more...")
-			.color(MessageUtil.convertColor(ChatColor.GRAY))
-			.italic(true)
-			.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pers more " + p.getPlayerName() + "@" + p.getId()))
-			.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to show extended persona information."))
-			.create()[0]);
+		//Having added EVERYTHING relevant into subresult, we call the event around
+		//Plugins are allowed to modify the info in the event tags, though not in the header
+		//They can cancel the event also in which case we show nothing (return empty list)
+		PersonaWhoisEvent event = new PersonaWhoisEvent(p, subresult, Query.BASIC, mod);
+		Bukkit.getPluginManager().callEvent(event);
+		if(event.isCancelled()) { //Event is cancelled show nothing
+			result = Lists.newArrayList();
+		} else {
+			result.addAll(subresult);
+			
+			//Check if we should show a "click for more..." button
+			//Aka check if there is any extended info for this Persona
+			List<BaseComponent> extendedWhois = getExtendedWhoisInfo(p, mod);
+			event = new PersonaWhoisEvent(p, extendedWhois, Query.EXTENDED_PROBE, mod);
+			Bukkit.getPluginManager().callEvent(event);
 
+			if(!event.isCancelled() && !event.getSent().isEmpty()) {
+				result.add(new ComponentBuilder("Click for more...")
+						.color(MessageUtil.convertColor(ChatColor.GRAY))
+						.italic(true)
+						.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pers more " + p.getPlayerName() + "@" + p.getId()))
+						.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to show extended persona information."))
+						.create()[0]);
+			}
+		}
+		
 		return result;
+
 	}
 
 	@Override
 	public List<BaseComponent> whois(Player p, boolean mod) {
 		return whois(getPersona(p), mod);
 	}
+	
+	private BaseComponent getProfessionWhois(Persona p) {
+		String r = ChatColor.RESET+"";
+		String b = ChatColor.BLUE+"";
+		
+		Skill prof = p.getMainSkill();
+		if(prof != null){
+			String title = prof.getSkillTier(p).getTitle() + " ";
+			if(title.length() == 1) title = "";
+			boolean female = p.getGender().equals("Female");
+			String profname = prof.getProfessionalName(female);
+		
+			return new ComponentBuilder(b + "Profession: " + r + title + profname)
+					.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/archehelp " + (profname.equals("None") ? "professions" : profname)))
+					.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, ChatColor.GRAY + "Click for info..."))
+					.create()[0];
+		} else {
+			return null;
+		}
+	}
 
 	@Override
 	public List<BaseComponent> whoisMore(Persona p, boolean mod, boolean self) {
-		List<BaseComponent> result = Lists.newArrayList();
+		List<BaseComponent> extendedWhois = getExtendedWhoisInfo(p, mod);
+		PersonaWhoisEvent event = new PersonaWhoisEvent(p, extendedWhois, Query.EXTENDED_PROBE, mod);
+		Bukkit.getPluginManager().callEvent(event);
 
+		if(event.isCancelled() || event.getSent().isEmpty()) {
+			return Lists.newArrayList(); //Event was cancelled, so sent an empty list
+		}
+		
+		List<BaseComponent> result = Lists.newArrayList();
 		if(p == null) return result;
 
 		String r = ChatColor.RESET+"";
-		String b = ChatColor.BLUE+"";
 		String l = ChatColor.GRAY+"";
-		//String i = ChatColor.ITALIC+"";
 
 		result.add(new TextComponent(l+"~~~~ " + r + p.getPlayerName() + "'s Extended Roleplay Persona" + l + " ~~~~"));
 		result.add(new TextComponent(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
-
-		Skill prof = p.getMainSkill();
-		String title = "";
-		String profname = "None";
-		if(prof != null){
-			title = prof.getSkillTier(p).getTitle() + " ";
-			if(title.length() == 1) title = "";
-			boolean female = p.getGender().equals("Female");
-			profname = prof.getProfessionalName(female);
-		}
-			result.add(new ComponentBuilder(b + "Profession: " + r + title + profname)
-					.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/archehelp " + (profname.equals("None") ? "professions" : profname)))
-					.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, ChatColor.GRAY + "Click for info..."))
-					.create()[0]);
-		//Will add more eventually
+		
+		result.addAll(event.getSent());
 		
 		result.add(new ComponentBuilder("Click for less...")
 				.color(MessageUtil.convertColor(ChatColor.GRAY))
@@ -428,6 +472,11 @@ public class ArchePersonaHandler implements PersonaHandler {
 				.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to show basic persona information."))
 				.create()[0]);
 		return result;
+	}
+	
+	private List<BaseComponent> getExtendedWhoisInfo(Persona p, boolean mod){
+		//Possible to move 'profession' back here
+		return Lists.newArrayList(); 
 	}
 
 	public void initPlayer(Player p){
