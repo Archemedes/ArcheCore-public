@@ -89,17 +89,17 @@ public abstract class HelpFile {
 				StringPair sp = StringPair.parseSyntax(segment);
 
 				//Format the link into the chatmessage
-				MessageUtil.legacyAdd(message, sp.vis);
-				message.setUnderlined(true);
+				BaseComponent theLink = MessageUtil.legacyText(sp.vis);
+				theLink.setUnderlined(true);
 
 				HoverEvent hEv = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
 						TextComponent.fromLegacyText("Link to Topic: "
 								+ ChatColor.ITALIC + sp.url.replace('+', ' ')));
 				ClickEvent cEv = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/archehelp " + sp.url);
 
-				message.setHoverEvent(hEv);
-				message.setClickEvent(cEv);
-
+				theLink.setHoverEvent(hEv);
+				theLink.setClickEvent(cEv);
+				message.addExtra(theLink);
 			} else {//Not a link, maybe a command suggest?
 				boolean sugg = segment.startsWith("$");
 

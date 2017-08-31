@@ -359,30 +359,29 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		String persHelp = ChatColor.YELLOW + "Your " + ChatColor.ITALIC + "Persona" + ChatColor.YELLOW + " is an uncouth sailor, fair Elven maiden or parent-slaying Orc. " +
 				"in Lord of the Craft, you speak and act as your current Persona, and know only what they know." +
 				div + ChatColor.GREEN + "Once accepted, creating your Persona is the first step of your adventure."
-				+ " You can later remove or create new Personas, by finding a " + ChatColor.ITALIC + "@Beacon@"
-				+ ChatColor.GREEN + " and right-clicking it.";
+				+ " You can later remove or create new Personas by using the $/bme$ command.";
 
 		String commandHelp = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Your essential commands are as follows: "
 				+ div + ChatColor.GRAY + "" + ChatColor.ITALIC +  (helpOverriden? "$/help$":"$/archehelp$") + ChatColor.GRAY + ": Provides a useful database of help topics.\n"
 				+ ChatColor.GOLD + "" + ChatColor.ITALIC + "$/helpmenu$" + ChatColor.GOLD + ": The same help topics, provided in a menu form.\n"
 				+ ChatColor.BLUE + "" + ChatColor.ITALIC + "$/persona$" + ChatColor.BLUE + ": See others' Personas and modify your own.\n"
-				+ ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "$/skill$" + ChatColor.LIGHT_PURPLE + ": See the Skills your Persona can learn"
-				+ ChatColor.DARK_GREEN+ "" + ChatColor.ITALIC + "$/me$"+ChatColor.DARK_GREEN+": Opens the nexus-menu";
+				+ ChatColor.DARK_GREEN+ "" + ChatColor.ITALIC + "$/me$"+ChatColor.DARK_GREEN+": Opens the Persona selection menu";
 
-		String beaconInfo = "A " + ChatColor.ITALIC + "Beacon" + ChatColor.RESET + " lets you control most Persona-related tasks. Finding and right-clicking a beacon"
-				+ " grants access to, among other things, Persona modification and the plugin help files (which are also accessible via @commands@). Knowing where Beacons are located will be crucial for "
-				+ " orienting yourself with the ArcheCore plugin.";
+		String profession = ChatColor.GRAY + "/persona profession [skill]: " + ChatColor.GOLD + "Select a profession.\n"
+				+ ChatColor.GREEN + "You can select only a single profession and only ONCE, so choose very carefully.\n"
+				+ ChatColor.BLUE  + "Depending on your Persona's race, some professions may come easier to you than others.\n"
+				+ ChatColor.GRAY  + "You receive special perks for your chosen profession, but beware, as these perks cause @Fatigue@.";
 
-		String profession = ChatColor.GRAY + "/sk [skill] select {main/second/bonus}: " + ChatColor.GOLD + "Select a profession.\n"
-				+ ChatColor.GREEN + "You have to select a profession to raise that skill to the maximum possible tier. You can, however, experiment with any skill before committing to a profession.\n"
-				+ ChatColor.BLUE  + "Depending on your Persona's race, you might also have a Racial Skill. Racial skills can be freelly leveled and do not need to be selected.\n"
-				+ ChatColor.GRAY  + "Normally, you can be Adequate in any non-selected skill. If you pick a primary profession, this cap is tightened down to let you be Clumsy. If you also pick a secondary, your other skills will be locked at the Inept tier.";
-
+		String fatigue = ChatColor.GRAY + "Fatigue accumulates when practicing your chosen @<Professions>profession@.\n"
+				+ ChatColor.GREEN + "You can still do everything while fatigued, but will not have access to your profession-related perks.\n"
+				+ ChatColor.LIGHT_PURPLE  + "your fatigue will reset over time, so it's best to simply take a break and wait it out. "
+						+ "If you are inpatient, having a drink at a tavern will also reduce a Persona's fatigue.\n";
+		
 		addHelp("Persona", persHelp, Material.REDSTONE_COMPARATOR);
 		addHelp("Commands", commandHelp, Material.COMMAND);
 		addHelp("Professions", profession, Material.BEDROCK);
-		addInfo("Beacon", beaconInfo);
-
+		addHelp("Fatigue", fatigue, Material.BED);
+		
 		//Create config-set Help Files
 		if(!(new File(getDataFolder(), "helpfiles.yml").exists()))
 			saveResource("helpfiles.yml", false);

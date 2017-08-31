@@ -276,9 +276,9 @@ public class CreationDialog {
         	 if (input) {
         		 context.setSessionData("name", name);
         		 Player p = (Player) context.getForWhom();
-        		 p.sendTitle(ChatColor.BOLD + name, 
+        		 p.sendTitle(ChatColor.GOLD + "" + ChatColor.ITALIC + name, 
         				 ChatColor.YELLOW + "Welcome to the realm of " + ArcheCore.getControls().getServerWorldName(),
-        				 10, 70, 20);
+        				 30, 120, 30);
         		 return new PickSexPrompt();
         	 } else {
         		 return new PickNamePrompt();
