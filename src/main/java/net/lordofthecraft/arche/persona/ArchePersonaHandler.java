@@ -235,9 +235,15 @@ public class ArchePersonaHandler implements PersonaHandler {
 		Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(after, PersonaActivateEvent.Reason.SWITCH));
 		if(before != null) Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(before, PersonaDeactivateEvent.Reason.SWITCH));
 
-		//Store and switch Persona-related specifics: Location and Inventory.
 		if(before != null && before != after){
+			//Store and switch Persona-related specifics: Location and Inventory.
 			before.saveMinecraftSpecifics(p);
+			
+			//Transfer fatigue from previous persona to new persona IF previous value was higher
+			//This should prevent some alt abuse where players chain their fatigue bars to grind
+			if(before.getFatigue() > after.getFatigue()) {
+				after.setFatigue(before.getFatigue());
+			}
 		}
 
 		after.restoreMinecraftSpecifics(p);

@@ -14,6 +14,8 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.EnumWrappers.Difficulty;
 import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
 
+import net.lordofthecraft.arche.ArcheFatigueHandler;
+
 public class ProtocolUtil {
 
 	@SuppressWarnings("deprecation")
@@ -49,6 +51,9 @@ public class ProtocolUtil {
 				p.setHealth(p.getHealth());
 				p.setHealthScaled(toggle);
 			}
+			
+			//Should still show a Player's fatigue on respawn.
+			ArcheFatigueHandler.getInstance().showFatigueBar(p);
 			
 			//Some wizardry here to prevent unintended speedhacking
 			p.setWalkSpeed(p.getWalkSpeed());
