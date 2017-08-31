@@ -52,6 +52,10 @@ racial.swing.timer: true
 #Whether or not to add an ender chest to the Persona menu for easy access
 persona.menu.enderchest: false
 
+#Provide a time, in hours, within which a Persona's full fatigue bar should decrease down to 0
+#If provided time is 0, the Fatigue system is disabled (fatigue handler calls will do nothing)
+persona.fatigue.restore: 22
+
 #########################
 ## New Persona Options ##
 #########################

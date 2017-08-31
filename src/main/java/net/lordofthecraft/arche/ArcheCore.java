@@ -62,6 +62,7 @@ import net.lordofthecraft.arche.listener.TreasureChestListener;
 import net.lordofthecraft.arche.persona.ArcheEconomy;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.ArchePersonaKey;
+import net.lordofthecraft.arche.persona.FatigueDecreaser;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import net.lordofthecraft.arche.save.DataSaveRunnable;
 import net.lordofthecraft.arche.save.SaveHandler;
@@ -105,6 +106,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private boolean racialSwingTimer;
 	private boolean enderchestInMenu;
 	private boolean usingMySQL;
+	private int fullFatigueRestore;
 
 	private Thread saverThread = null;
 
@@ -198,10 +200,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		helpdesk = HelpDesk.getInstance();
 		skinCache = SkinCache.getInstance();
 
+		fatigueHandler.fatigueDecreaseHours = this.fullFatigueRestore;
 		timer = debugMode? new ArcheTimer(this) : null;
 		personaHandler.setModifyDisplayNames(modifyDisplayNames);
-
-		
 
 		try{
 			ResultSet res = sqlHandler.query("SELECT * FROM blockregistry");
@@ -226,7 +227,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             }
 
             //Incase of a reload, load all Personas for currently logged in players
-            //People that still reload deserve to be dunked in acid, though.
             for(Player p : Bukkit.getOnlinePlayers()){
                 personaHandler.initPlayer(p);
             }
@@ -234,12 +234,14 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             //Start saving our data
             saverThread = new Thread(new DataSaveRunnable(saveHandler, timer, sqlHandler), "ArcheCore SQL Consumer");
             saverThread.start();
-
         });
 
 		//Start tracking Personas and their playtime.
-		new TimeTrackerRunnable(personaHandler).runTaskTimerAsynchronously(this, 2400, 1200);
+		new TimeTrackerRunnable(personaHandler).runTaskTimerAsynchronously(this, 2203, 1200);
 
+		//Start gradually reducing the fatigue of Personas in 20-minute intervals
+		new FatigueDecreaser(fullFatigueRestore).runTaskTimer(this, 173, 20*60*20);
+		
 		//Some racial bonus stuff
 		/*		if(this.areRacialBonusesEnabled())
 			new RacialBonusRunnable().runTaskTimer(this, 2400, 100);*/
@@ -282,6 +284,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		racialSwingTimer = config.getBoolean("racial.swing.timer");
 		enderchestInMenu = config.getBoolean("persona.menu.enderchest");
 		usingMySQL = config.getBoolean("enable.mysql");
+		fullFatigueRestore = config.getInt("persona.fatigue.restore");
 
 		if(teleportNewbies){
 			World w = Bukkit.getWorld(config.getString("preferred.spawn.world"));

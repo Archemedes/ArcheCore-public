@@ -49,7 +49,7 @@ public class SkinCache {
 	private static final SkinCache INSTANCE = new SkinCache();
 	
 	private Multimap<UUID, ArcheSkin> skinCache = HashMultimap.create();
-	private Map<PersonaKey, ArcheSkin> applied = Maps.newHashMap();
+	private Map<PersonaKey, ArcheSkin> applied = Maps.newHashMap(); //TODO add as a field of Persona and update SQL?
 	
 	//private final SkinRefresher refreshTask;
 	
@@ -220,7 +220,7 @@ public class SkinCache {
 		
 		final ProtocolManager manager = ProtocolLibrary.getProtocolManager();
 		
-		WrappedGameProfile profile = WrappedGameProfile.fromPlayer(p); //Protocollib for version independence	}
+		WrappedGameProfile profile = WrappedGameProfile.fromPlayer(p); //Protocollib for version independence
 		List<PlayerInfoData> lpid = Lists.newArrayList();
 		
 		lpid.add(new PlayerInfoData(profile, 
