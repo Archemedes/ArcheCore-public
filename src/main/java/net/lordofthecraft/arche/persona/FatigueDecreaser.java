@@ -27,6 +27,7 @@ public class FatigueDecreaser extends BukkitRunnable {
 		
 		for(Persona[] prs: handler.getPersonas()) {
 			for(Persona pr : prs) {
+				if(pr == null) continue;
 				fatigue.reduceFatigue(pr, toDecrease);
 				if(pr.isCurrent()) fatigue.showFatigueBar(pr);
 			}

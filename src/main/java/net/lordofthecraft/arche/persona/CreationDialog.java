@@ -70,6 +70,9 @@ public class CreationDialog {
         data.put("slot", 0);
         data.put("first", new Object());
 
+  		 p.sendTitle(ChatColor.BOLD + "" + ChatColor.GOLD + "Welcome", 
+				 ChatColor.YELLOW + "Type your Persona's name to continue",
+				 20, 60*20, 20);
 
         factory.withFirstPrompt(new WelcomePrompt())
                 .withInitialSessionData(data)
@@ -232,9 +235,6 @@ public class CreationDialog {
         @Override
         public String getPromptText(ConversationContext context) {
             Player p = (Player) context.getForWhom();
-   		 p.sendTitle(ChatColor.BOLD + "" + ChatColor.GOLD + "Welcome", 
-				 ChatColor.YELLOW + "Type your Persona's name to continue",
-				 20, 3600*20, 20); //Aka a long-ass time
             String pretext = "Please type a name for your Roleplay Persona!";
             String affix = "\n" + NOTE + "You may only change your Persona's name every 2 hours.";
 
