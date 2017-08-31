@@ -222,4 +222,11 @@ public interface IArcheCore {
 	 * @return The SkinCache singleton
 	 */
 	SkinCache getSkinCache();
+
+	/**
+	 * How much persona slots a player is able to unlock.
+	 * amount of slots that are locked is dependent on permission nodes instead.
+	 * @return maximum number of persona slots
+	 */
+	int personaSlots();
 }

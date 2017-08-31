@@ -85,6 +85,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private Economy economy;
 
 	//Config settings
+	private int maxPersonaSlots;
 	private boolean helpOverriden;
 	private boolean legacyCommands;
 	private boolean showXpToPlayers; //currently unused. Reintroduce when tiers do
@@ -265,6 +266,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		FileConfiguration config = getConfig(); // Get the config file either out of our .jar our datafolder
 		saveDefaultConfig(); //Save the config file to disk if it doesn't exist yet.
 
+		maxPersonaSlots = Math.min(15, config.getInt("persona.slots.maximum"));
 		helpOverriden = config.getBoolean("override.help.command");
 		legacyCommands = config.getBoolean("enable.legacy.commands");
 		nameChangeDelay = config.getInt("name.change.delay");
@@ -615,5 +617,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	@Override
 	public int getNewPersonaPermakillDelay() {
 		return personaPermakillDelay;
+	}
+	
+	@Override
+	public int personaSlots() {
+		return this.maxPersonaSlots;
 	}
 }

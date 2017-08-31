@@ -13,6 +13,10 @@ enable.wiki.lookup: true
 #The /persona command and all its parameters will work regardless, and have identical function.
 enable.legacy.commands: true
 
+#How much persona slots a player is able to unlock.
+#amount of slots that are locked is dependent on permission nodes instead.
+persona.slots.maximum: 6
+
 #If true, Players can set a 16 character 'prefix' that will precede their Persona name in Chat.
 enable.persona.prefix: true
 

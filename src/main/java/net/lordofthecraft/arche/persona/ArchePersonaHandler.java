@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
@@ -103,7 +104,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public int getAllowedPersonas(Player p){
 		if(!mayUse(p)) return 0;
 
-		for(int i = 4; i > 1; i--){
+		int max = ArcheCore.getControls().personaSlots();
+		
+		for(int i = max; i > 1; i--){
 			if(p.hasPermission("archecore.personas." + i))
 				return i;
 		}
@@ -178,7 +181,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	@Override
 	public ArchePersona[] getAllPersonas(UUID uuid){
 		ArchePersona[] prs = this.personas.get(uuid);     
-		if (prs == null) return new ArchePersona[4];    
+		if (prs == null) return new ArchePersona[ArcheCore.getControls().personaSlots()];    
 		else return prs;
 	}
 
@@ -213,7 +216,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	@Override
 	public boolean switchPersona(final Player p, int id){
-		if(id < 0 || id > 3) throw new IllegalArgumentException("Only Persona IDs 0-3 are allowed.");
+		int slots = ArcheCore.getControls().personaSlots();
+		if(id < 0 || id > slots) throw new IllegalArgumentException("Only Persona IDs higher than 0 and at most "+slots+" are allowed.");
 
 		ArchePersona before=null;
 		ArchePersona[] prs = personas.get(p.getUniqueId());
@@ -263,7 +267,10 @@ public class ArchePersonaHandler implements PersonaHandler {
 	@Override
 	public ArchePersona createPersona(Player p, int id, String name, Race race, int gender, long creationTime){
 
-		ArchePersona[] prs = personas.computeIfAbsent(p.getUniqueId(), k -> new ArchePersona[4]);
+		ArchePersona[] prs = personas.computeIfAbsent(
+				p.getUniqueId(), 
+				k -> new ArchePersona[ArcheCore.getControls().personaSlots()]
+						);
 
 		//Check for old Persona
 		if(prs[id] != null){
@@ -453,7 +460,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			return;	//Don't need to take further action on this
 		}
 
-		ArchePersona[] prs = new ArchePersona[4];
+		ArchePersona[] prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
 
 		SQLHandler handler = ArcheCore.getPlugin().getSQLHandler();
 		boolean hasCurrent = false;
@@ -467,24 +474,32 @@ public class ArchePersonaHandler implements PersonaHandler {
 			while(res.next()){
 
 				ArchePersona persona = buildPersona(res, p);
-				prs[persona.getId()] = persona;
-
-				if(persona.current){ 
-					if(!hasCurrent){
-						hasCurrent = true;
-
-						//Update the display name, if enabled
-						persona.updateDisplayName(p);
-
-						//CURRENT persona gets racial bonuses applied
-						if(ArcheCore.getPlugin().areRacialBonusesEnabled())
-							RaceBonusHandler.apply(p, persona.getRace());
-						else
-							RaceBonusHandler.reset(p);
-
-					} else {
-						ArcheCore.getPlugin().getLogger().warning("Player " + p.getName() + " has simultaneous current Personas. Fixing now...");
-						persona.setCurrent(false);
+				if(persona.getId() >= prs.length) {
+					Logger logger = ArcheCore.getPlugin().getLogger();
+					logger.severe(p.getName() + " has personas that go above the server's set maximum persona count at: " + persona.getId());
+					logger.severe("We currently have no good way to solve this. "
+							+ "Consider raising the max persona slots in config. "
+							+ "Persona has NOT been loaded from the database and is inaccessible");
+				}else {
+					prs[persona.getId()] = persona;
+	
+					if(persona.current){ 
+						if(!hasCurrent){
+							hasCurrent = true;
+	
+							//Update the display name, if enabled
+							persona.updateDisplayName(p);
+	
+							//CURRENT persona gets racial bonuses applied
+							if(ArcheCore.getPlugin().areRacialBonusesEnabled())
+								RaceBonusHandler.apply(p, persona.getRace());
+							else
+								RaceBonusHandler.reset(p);
+	
+						} else {
+							ArcheCore.getPlugin().getLogger().warning("Player " + p.getName() + " has simultaneous current Personas. Fixing now...");
+							persona.setCurrent(false);
+						}
 					}
 				}
 			}
@@ -610,7 +625,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 					if(days > range) continue; //Player file too old, don't preload.
 
 					//Preload, generate a Persona file
-					prs = new ArchePersona[4];
+					prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
 					personas.put(uuid, prs);
 				}
 

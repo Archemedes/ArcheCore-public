@@ -14,9 +14,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Map;
@@ -47,6 +49,11 @@ public class BeaconMenuListener implements Listener {
 			final Player p = (Player) e.getWhoClicked();
 			final int s = e.getRawSlot();
 			
+			if(e.getClickedInventory() instanceof PlayerInventory 
+					|| e.getAction() == InventoryAction.NOTHING 
+					|| e.getCurrentItem() == null) 
+				return;
+			
 			switch(s){
 				
 			case 0: 
@@ -54,11 +61,11 @@ public class BeaconMenuListener implements Listener {
 					@Override public void run(){ helpdesk.openHelpMenu(p);}
 				}.runTask(plugin);
 				break;
-			case 4:
+			case 2:
 				helpdesk.outputHelp("persona", p);
 				new BukkitRunnable(){@Override public void run(){ p.closeInventory();}}.runTask(plugin);
 				break;
-			case 1: case 5: case 6: case 7: case 8:
+			default:
 				ArchePersona[] prs = handler.getAllPersonas(p);
 				if(prs == null){
 					plugin.getLogger().severe(" [Event] Player walking around without registered Personas File!");
@@ -91,8 +98,8 @@ public class BeaconMenuListener implements Listener {
 							}
 						}
 					}.runTask(plugin);
-				} else if (s > 4){
-					int t = s - 5;
+				} else if (s > 2){
+					int t = s - 3;
 					
 					//Prepare the object necessary for Persona creation.
 					CreationDialog dialog = new CreationDialog();
@@ -136,7 +143,6 @@ public class BeaconMenuListener implements Listener {
 						}
 					}
 				}
-			default: break;	
 			}
 		}
 	}
