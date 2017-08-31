@@ -92,6 +92,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private boolean damageBonuses;
 	private int nameChangeDelay;
 	private int personaChangeDelay;
+	private int personaPermakillDelay;
 	private boolean enablePrefixes;
 	private boolean modifyDisplayNames;
 	private boolean debugMode;
@@ -268,6 +269,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		legacyCommands = config.getBoolean("enable.legacy.commands");
 		nameChangeDelay = config.getInt("name.change.delay");
 		personaChangeDelay = config.getInt("persona.change.delay");
+		personaPermakillDelay = config.getInt("persona.permakill.delay");
 		showXpToPlayers = config.getBoolean("show.exp.values");
 		racialBonuses = config.getBoolean("enable.racial.bonuses");
 		damageBonuses = config.getBoolean("enable.racial.damage.bonuses");
@@ -608,5 +610,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	@Override
 	public boolean showEnderchestInMenu() {
 		return enderchestInMenu;
+	}
+
+	@Override
+	public int getNewPersonaPermakillDelay() {
+		return personaPermakillDelay;
 	}
 }

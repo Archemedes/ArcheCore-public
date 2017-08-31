@@ -192,6 +192,11 @@ public interface IArcheCore {
 	int getNewbieDelay();
 	
 	/**
+	 * @return the delay in days within which newly created Personas cannot be permakilled by their owners.
+	 */
+	int getNewPersonaPermakillDelay();
+	
+	/**
 	 * @return The current name of the world of LotC
 	 */
 

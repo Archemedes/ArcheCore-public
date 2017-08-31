@@ -28,6 +28,11 @@ name.change.delay: 2880
 #Permission node 'archecore.persona.quickswitch' ignores this delay.
 persona.change.delay: 30
 
+#Provide, in days, the time within which recently created Personas cannot be deleted
+#Creation dialog will output an error message if delete attempts are made in this time period
+#Permission node 'archecore.persona.quickkill' ignores this delay.
+persona.permakill.delay: 7
+
 #If this is true, Personas that have switched (and are thus teleported to their new location)
 #Will be re-teleported if they happen to take damage within 40 ticks of arriving at their new location
 #This is to save them from possible danger or vastly changed terrain since their last session
@@ -42,6 +47,8 @@ enable.racial.bonuses: true
 
 #Provide a time, in days, within which Persona files will be preloaded (Personas will not be unloaded if >0)
 persona.cache.time: 0
+
+
 
 #The current roleplay name of the world we are in
 server.world.name: world

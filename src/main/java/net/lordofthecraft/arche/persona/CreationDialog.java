@@ -130,16 +130,17 @@ public class CreationDialog {
 
     private boolean canDelete(Persona pers, Player p, boolean nullPersona) {
         if (nullPersona || pers == null) return true;
+        if(p.hasPermission("archecore.persona.quickkill")) return true;
 
-		/*cancel persona deletion if persona was created less than a week ago to prevent people from creating and
-		deleting personas to just get the free skill xp
-		 */
-        //1 week in ms = 604800000
-        final long weekSinceCreation = pers.getCreationTime() + 432000000;
-        if ((weekSinceCreation < System.currentTimeMillis())) { // It's been more than 5 days
+        int permakillDays = ArcheCore.getControls().getNewPersonaPermakillDelay();
+        if(permakillDays <= 0) return true;
+        
+        long permakillMs = permakillDays * 24 * 3600 * 1000;
+        final long goodTimeSinceCreation = pers.getCreationTime() + permakillMs;
+        if ((goodTimeSinceCreation < System.currentTimeMillis())) {
             return true;
         }
-        p.sendMessage(ChatColor.RED + "You must wait at least five days before deleting your persona " + pers.getName() + ".");
+        p.sendMessage(ChatColor.RED + "You must wait at least "+ChatColor.WHITE + permakillDays + ChatColor.RED + " days before deleting your persona " + ChatColor.WHITE + pers.getName() + ChatColor.RED + ".");
         p.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "Type /persona created to see when you made this persona.");
         return false;
 
