@@ -8,6 +8,7 @@ import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventoryView;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
+import org.bukkit.entity.Animals;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -40,10 +41,6 @@ public class InventoryUtil {
 		for(ItemStack is : inv.getContents()) {
 			if(is != null) return false;
 		}
-		return true;
-	}
-	
-	public static boolean mightItemGetMoved(InventoryClickEvent e, ItemStack is) {
 		return true;
 	}
 	
@@ -101,9 +98,15 @@ public class InventoryUtil {
 					break;
 				case COLLECT_TO_CURSOR: 
 					is = ev.getCursor();
+					//Full stack can't collect other items
+					if(is.getAmount() >= is.getMaxStackSize()) return result;
+					
+					//Doing the double click over an occuplied slot doesn't cause a collect
+					if(ev.getCurrentItem().getType() != Material.AIR) return result;
+					
 					InventoryView v = ev.getView();
 					InventoryType type = v.getType();
-					int upper = v.countSlots() - (v.getType() == InventoryType.CRAFTING? 5 : 0);
+					int upper = v.countSlots() - (v.getType() == InventoryType.CRAFTING? 0 : 5);
 					int count = is.getAmount();
 					List<Integer> collected = Lists.newArrayList();
 					//Goes in 2 phases: First collect from non-maxed stacks, then also maxed stacks
@@ -134,7 +137,7 @@ public class InventoryUtil {
 					result.add(new MovedItem(is, MovedItem.CURSOR_SLOT, MovedItem.DROPPED_SLOT));
 					break;
 				case DROP_ALL_SLOT: case DROP_ONE_SLOT:
-					is = ev.getCurrentItem();
+					is = ev.getCurrentItem().clone();
 					if(a == DROP_ONE_SLOT) is.setAmount(1);
 					result.add(new MovedItem(is, ev.getRawSlot(), MovedItem.DROPPED_SLOT));
 					break;
@@ -151,15 +154,47 @@ public class InventoryUtil {
 					if(ev.getView().getType() == InventoryType.CRAFTING) hotbarRawSlot += 4;
 					raw = ev.getRawSlot();
 					is = ev.getView().getItem(hotbarRawSlot);
+
 					if(raw != hotbarRawSlot && isItemAllowed(raw, is, ev.getView())) {
-						
-						//Enchanting table item slot only accepts count 1
-						if(is.getAmount() > 1 && isEnchantingSlot(raw, ev.getView())) {
+						//Enchanting table / horse armor item slot only accepts count 1
+						boolean enchanting = isEnchantingSlot(raw, ev.getView());
+						if(is.getAmount() > 1 && enchanting) {
 							if(a == HOTBAR_SWAP) {
+								System.out.println("OK");
 								is = is.clone();
 								is.setAmount(1);
 							} else { //HOTBAR_MOVE_AND_READD.
-								return result; //Both slots occupied but hotbar is full. Event can't move items.
+								if(is.getAmount() > is.getMaxStackSize()) { //Very rare fringe case
+									v = ev.getView();
+									int spot = MovedItem.DROPPED_SLOT;
+									int topSize = ev.getView().getTopInventory().getSize();
+									int[] slotsToCheck = new int[37];
+									ItemStack target = ev.getCurrentItem();
+									slotsToCheck[0] = ev.getWhoClicked().getInventory().getHeldItemSlot() + topSize + 27;
+									for(int i = 0; i < 9; i++) slotsToCheck[i+1] = topSize + 27 + i;
+									for(int i = 0; i < 27; i++) slotsToCheck[i+10] = topSize + i;
+									for(int phase = 0; phase < 2; phase++) {
+										for(int i = 0; i < slotsToCheck.length; i++) {
+											int slotToCheck = slotsToCheck[i];
+											if(i != 0 && slotToCheck == slotsToCheck[0]) continue;
+											ItemStack toCheck = v.getItem(slotToCheck);
+											if( (phase == 0 && target.isSimilar(toCheck) && toCheck.getAmount() < toCheck.getMaxStackSize())
+												|| (phase == 1 &&  toCheck.getType() == Material.AIR)) {
+												System.out.println("yes");
+												spot = slotToCheck;
+												break;
+											}
+										}
+										
+										if(spot > 0) break;
+									}
+									result.add(new MovedItem(target.clone(), raw, spot));
+									is = is.clone();
+									is.setAmount(1);
+									result.add(new MovedItem(is, hotbarRawSlot, raw));
+								}
+								
+								return result; //Both slots occupied but hotbar is full
 							}
 						}
 						
@@ -189,10 +224,13 @@ public class InventoryUtil {
 					is = ev.getCursor().clone(); //Item in cursor is gonna be placed;
 					raw = ev.getRawSlot();
 					if(isItemAllowed(raw, is, ev.getView())) {
-						amount = isEnchantingSlot(raw, ev.getView())? 1 :
+						boolean enchanting = isEnchantingSlot(raw, ev.getView());
+						if(enchanting && ev.getCurrentItem().getType() != Material.AIR) return result;
+						amount = enchanting? 1 :
 							a == PLACE_ALL? is.getAmount() :
 							a == PLACE_ONE? 1 : //else it's place some
 								Math.min(is.getMaxStackSize(), ev.getClickedInventory().getMaxStackSize()) - ev.getCurrentItem().getAmount();
+						
 						is.setAmount(amount);
 						result.add(new MovedItem(is, MovedItem.CURSOR_SLOT, raw));
 					}
@@ -222,17 +260,23 @@ public class InventoryUtil {
 	}
 	
 	private static boolean isEnchantingSlot(int raw, InventoryView v) {
-		return raw == 0 && v.getType() == InventoryType.ENCHANTING;
+		return (raw == 0 && v.getType() == InventoryType.ENCHANTING) 
+				|| (raw == 1 && v.getType() == InventoryType.CHEST &&
+				v.getTopInventory().getHolder() instanceof Animals);
 	}
 	
 	//TODO not nms stuff
 	private static boolean isItemAllowed(int rawSlot, ItemStack is, InventoryView view) {
+		if(is.getType() == Material.AIR) return true;
+		
 		Container container = ((CraftInventoryView) view).getHandle();
 		Slot slot = container.getSlot(rawSlot);
 		return slot.isAllowed(CraftItemStack.asNMSCopy(is));
 	}
 	
 	private static void handleMoveToOther(List<MovedItem> result, int raw, InventoryView view) {
+		final int topSize = view.getTopInventory().getSize();
+	
 		switch(view.getType()) {
 		case ANVIL:
 		case BEACON:
@@ -247,45 +291,146 @@ public class InventoryUtil {
 		case DROPPER:
 		case HOPPER:
 		case SHULKER_BOX:
-			final int topSize = view.getTopInventory().getSize();
-			boolean topToBottom = raw < view.getTopInventory().getSize();
-			ItemStack is = view.getItem(raw);
+			boolean topToBottom = raw < topSize;
 			int initialValue = topToBottom?  view.countSlots() - 6 : 0;
-			int finalValue = topToBottom? topSize : topSize - 1;
+			int finalValue = topToBottom? topSize-1 : topSize;
 			int modder = topToBottom? -1 : 1;
 			
-			int amount = is.getAmount(); //Amount to move to the next inventory
-			int maxRoom = Math.min(is.getMaxStackSize(), 
-					topToBottom? view.getBottomInventory().getMaxStackSize() : view.getTopInventory().getMaxStackSize());
-			//Moving goes in 2 phases: First fill up existing stacks, then look for empty slots
-			for(int phase = 0; phase < 2; phase++) {
-				for(int i = initialValue; i != finalValue; i += modder) {
-					ItemStack slot = view.getItem(i);
-					if( (phase == 0 && slot.isSimilar(is)) || (phase == 1 && slot.getType() == Material.AIR)) {
-						int room = maxRoom - slot.getAmount();
-						if(room > 0) {
-							int toMove = Math.min(room, amount);
-							ItemStack moved = is.clone();
-							moved.setAmount(toMove);
-							result.add(new MovedItem(moved, raw, i));
-							amount -= toMove;
-							if(amount <= 0) return;
+			//Could be donkey or lama. Some special code needed to handle this
+			ItemStack hacker = null;
+			int removed = -1;
+			if(!topToBottom && view.getTopInventory().getHolder() instanceof Animals) {
+				hacker = view.getItem(raw);
+				for(int i = 0; i < 2; i++) {
+					if(view.getItem(i).getType() == Material.AIR && isItemAllowed(i, hacker, view)) {
+						//Single item will probably moved here
+						ItemStack equipable = hacker.clone();
+						result.add(new MovedItem(equipable, raw, i));
+						if( i == 0 && hacker.getAmount() > 64) { //65+ saddles wtf you should never reach this unless you are trying to piss me off
+							equipable.setAmount(64);
+							hacker.setAmount(hacker.getAmount() - 64); //This is propagated to the InventoryView
+							removed = 64;
+							break; //Don't do i == 1 since there's no way the item matches both horse slots
+						}else if( (i == 1 && hacker.getAmount() > 1) ) {
+							equipable.setAmount(1);
+							hacker.setAmount(hacker.getAmount() - 1); //This is propagated to the InventoryView
+							removed = 1;
+						} else {
+							return;
+						}
+						
+					}
+				}
+				
+				initialValue = 2;
+			}
+			
+			moveToOtherMainLoop(result, view, raw, topToBottom, initialValue, finalValue, modder);
+			if(removed > 0) hacker.setAmount(hacker.getAmount()+removed);
+			break;
+		case CRAFTING: //This is the player inventory view
+			//Behavior MOSTLY like MERCHANT and WORKBENCH
+			//Exception is that some special equippables in the bottom inventory work differently
+			if(raw == 0) { //Crafting result slot
+				initialValue = view.countSlots() - 6;
+				finalValue = topSize-1;
+				modder = -1;
+				moveToOtherMainLoop(result, view, raw, true, initialValue, finalValue, modder);
+			} else if(raw < 9) { //topSize == 5 here, this moves a crafting ingredient slot OR an armor slot
+				initialValue = 9; //Skips armor slots as target slots
+				finalValue = 45; //Cannot move into the shield slot so skip slot 45
+				modder = 1;
+				moveToOtherMainLoop(result, view, raw, true, initialValue, finalValue, modder);
+			} else { 
+				//Inventory slot, move hotbar to invspace or vice-versa
+				ItemStack is = view.getItem(raw);
+				
+				//Special pre-treatment of shields, which get moved to offhand
+				if(is.getType() == Material.SHIELD && view.getItem(45).getType() == Material.AIR) {
+					result.add(new MovedItem(is.clone(), raw, 45));
+					return;
+				}
+				
+				//Special treatment of armor
+				boolean performAnUglyHack = false;
+				for(int i = 5; i < 9; i++) {
+					if(view.getItem(i).getType() == Material.AIR && isItemAllowed(i, is, view)) {
+						ItemStack armor = is.clone();
+						result.add(new MovedItem(armor, raw, i));
+						int amount = is.getAmount(); //Amount to move to the next inventory
+						if(amount > 1) { //mod has stacked armor. Must keep going through  main loop
+							armor.setAmount(1);
+							is.setAmount(amount - 1); //This is propagated to the InventoryView
+							performAnUglyHack = true;
+							break;
+						} else { //armor was moved to armor slot, no further action needed
+							return;
 						}
 					}
 				}
+				
+				//Now contraints are taken care of handle like the main loop		
+				int invSpaceSize = 36; //The 27 slots over the armor slot
+				boolean toHotbar = raw < invSpaceSize; //clicked spots in the invspace get moved to hotbar
+				initialValue = toHotbar? invSpaceSize : 9;
+				finalValue = toHotbar? invSpaceSize + 9: invSpaceSize;
+				moveToOtherMainLoop(result, view, raw, true, initialValue, finalValue, 1);
+				if(performAnUglyHack) is.setAmount(is.getAmount() + 1);
 			}
 			break;
-		case CRAFTING: //This is the player inventory view
-			//Complex stuff here
 		case MERCHANT:
 		case WORKBENCH:
 		//Behavior of these inventories:
 		//Anything in the bottom (player) inv is moved from hotbar to invspace or invspace to hotbar
 		//The crafting result slot (raw slot 0) gets moved to inventory in reverse order
-			throw new UnsupportedOperationException("MOVE_TO_OTHER_INVENTORY functionality unclear for InventoryType " + view.getType());
+		if(raw == 0) { //Crafting result slot
+			initialValue = view.countSlots() - 6;
+			finalValue = topSize-1;
+			modder = -1;
+			moveToOtherMainLoop(result, view, raw, true, initialValue, finalValue, modder);
+		} else if(raw < topSize) { //One of the crafting slots
+			initialValue = topSize;
+			finalValue = view.countSlots() - 5;
+			modder = 1;
+			moveToOtherMainLoop(result, view, raw, true, initialValue, finalValue, modder);
+		} else { //Inventory slot, move hotbar to inspace or vice-versa
+			int invSpaceSize = topSize + 27;
+			boolean toHotbar = raw < invSpaceSize; //clicked spots in the invspace get moved to hotbar
+			initialValue = toHotbar? invSpaceSize : topSize;
+			finalValue = toHotbar? invSpaceSize + 9: invSpaceSize;
+			moveToOtherMainLoop(result, view, raw, true, initialValue, finalValue, 1);
+		}
+		break;
 		default:
 			break;
 		
+		}
+	}
+	
+	private static void moveToOtherMainLoop(List<MovedItem> result, InventoryView view, int raw,
+			boolean topToBottom, int initialValue, int finalValue, int modder) {
+		ItemStack is = view.getItem(raw);
+		int amount = is.getAmount(); //Amount to move to the next inventory
+		boolean oversized = amount > is.getMaxStackSize();
+		int maxInvRoom = topToBottom? view.getBottomInventory().getMaxStackSize() : view.getTopInventory().getMaxStackSize(); 
+		int maxRoom = oversized? maxInvRoom : Math.min(is.getMaxStackSize(), maxInvRoom); 
+				
+		//Moving goes in 2 phases: First fill up existing stacks, then look for empty slots
+		for(int phase = (oversized? 1 : 0); phase < 2; phase++) {
+			for(int i = initialValue; i != finalValue; i += modder) {
+				ItemStack slot = view.getItem(i);
+				if( (phase == 0 && slot.isSimilar(is)) || (phase == 1 && slot.getType() == Material.AIR)) {
+					int room = maxRoom - slot.getAmount();
+					if(room > 0) {
+						int toMove = Math.min(room, amount);
+						ItemStack moved = is.clone();
+						moved.setAmount(toMove);
+						result.add(new MovedItem(moved, raw, i));
+						amount -= toMove;
+						if(amount <= 0) return;
+					}
+				}
+			}
 		}
 	}
 }
