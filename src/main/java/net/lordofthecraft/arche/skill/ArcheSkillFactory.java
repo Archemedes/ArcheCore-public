@@ -9,15 +9,12 @@ import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.interfaces.SkillFactory;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.SelectSkillTask;
 import org.bukkit.Material;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.FutureTask;
 
 public class ArcheSkillFactory implements SkillFactory {
 	private static final Map<String, String> VALS;
@@ -128,8 +125,8 @@ public class ArcheSkillFactory implements SkillFactory {
 
 	@Override
 	public Skill register(){
-		
-		try {
+
+        try {
 			SQLHandler handler = ArcheCore.getControls().getSQLHandler();
 			Connection con = handler.getConnection();
 			
@@ -156,11 +153,11 @@ public class ArcheSkillFactory implements SkillFactory {
 					if(p != null && p.isCurrent()){
 						
 						//Start loading this Persona's Skill data for this one particular skill
-						SelectSkillTask task = new SelectSkillTask(p, skill);
-						FutureTask<SkillData> fut = task.getFuture();
-						SaveHandler.getInstance().put(task);
-						
-						p.addSkill(skill, fut);
+						//SelectSkillTask task = new SelectSkillTask(p, skill);
+						//FutureTask<SkillData> fut = task.getFuture();
+						//SaveHandler.getInstance().put(task);
+
+						//p.addSkill(skill, fut);
 						break;
 					}
 				}
@@ -200,5 +197,5 @@ public class ArcheSkillFactory implements SkillFactory {
 		this.femaleName = name;
 		return this;
 	}
-	
+
 }

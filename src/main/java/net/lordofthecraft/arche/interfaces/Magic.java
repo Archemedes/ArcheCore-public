@@ -1,0 +1,50 @@
+package net.lordofthecraft.arche.interfaces;
+
+import org.bukkit.entity.Player;
+
+/**
+ * Created on 7/12/2017
+ *
+ * @author 501warhead
+ */
+public interface Magic {
+    boolean isWeakAgainst(Magic m);
+
+    int getWeaknessModifier(Magic m);
+
+    String getLabel();
+
+    String getDescription();
+
+    boolean isTeachable();
+
+    int getDaysToMaxTier();
+
+    int getDaysToBonusTier();
+
+    MagicType getType();
+
+    String getName();
+
+    int getMaxTier();
+
+    boolean isSelfTeachable();
+
+    boolean hasLearned(Player p);
+
+    boolean hasLearned(Persona p);
+
+    boolean isVisible(Player p);
+
+    boolean isVisible(Persona p);
+
+    int getTier(Player p);
+
+    int getTier(Persona p);
+
+    boolean achievedTier(Player p, int tier);
+
+    boolean achievedTier(Persona p, int tier);
+
+    void setTier(Persona p, int tier);
+}

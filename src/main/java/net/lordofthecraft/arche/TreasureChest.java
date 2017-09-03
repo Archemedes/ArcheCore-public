@@ -2,8 +2,6 @@ package net.lordofthecraft.arche;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.CasketTask;
 import org.apache.commons.lang.RandomStringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -120,7 +118,7 @@ public class TreasureChest {
 	public static void giveLoot(Player p){
 		ItemStack[] items = rollItems(ArcheCore.getControls().getPersonaHandler().getLuck(p));
 		if(items == null) return;
-		SaveHandler.getInstance().put(new CasketTask(ArcheCore.getControls().getPersonaHandler().getPersona(p), ArcheCore.getControls().getPersonaHandler().getLuck(p), items));
+		//SaveHandler.getInstance().put(new CasketTask(ArcheCore.getControls().getPersonaHandler().getPersona(p), ArcheCore.getControls().getPersonaHandler().getLuck(p), items));
 		//Give items to player, drop what's left
 		for(ItemStack leftover : p.getInventory().addItem(items).values())
 			p.getWorld().dropItem(p.getLocation(), leftover);

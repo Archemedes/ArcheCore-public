@@ -1,8 +1,9 @@
-package net.lordofthecraft.arche.save.tasks;
+package net.lordofthecraft.arche.save.tasks.persona;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.event.AsyncPlayerUnloadEvent;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.save.tasks.ArcheTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;

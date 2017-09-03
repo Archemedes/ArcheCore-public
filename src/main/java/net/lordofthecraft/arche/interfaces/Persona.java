@@ -1,13 +1,17 @@
 package net.lordofthecraft.arche.interfaces;
 
-import java.util.UUID;
-
+import net.lordofthecraft.arche.enums.PersonaType;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.persona.MagicAttachment;
+import net.lordofthecraft.arche.persona.PersonaInventory;
+import net.lordofthecraft.arche.persona.PersonaSkills;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.persona.PersonaInventory;
-import net.lordofthecraft.arche.persona.PersonaSkills;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.Future;
 
 public interface Persona {
 
@@ -21,6 +25,13 @@ public interface Persona {
 	@Deprecated()
 	double withdraw(double amount);
 
+	/**
+	 * Take money from a Persona. Negative amounts possible, but consider using {@link #deposit(double, Transaction)} instead.
+	 *
+	 * @param amount The amount of money to modify the Persona account by
+	 * @param cause  The reason this money is being removed
+	 * @return Amount of minas persona possess after the transaction
+	 */
 	double withdraw(double amount, Transaction cause);
 
 	/**
@@ -33,14 +44,26 @@ public interface Persona {
 	@Deprecated()
 	double deposit(double amount);
 
+	/**
+	 * Give money to a Persona. Negative amounts possible, but consider using {@link #withdraw(double, Transaction)} instead.
+	 * @param amount The amount of money to modify the Persona account by
+	 * @param cause The reason this money is being added
+	 * @return Amount of minas persona possess after the transaction
+	 */
 	double deposit(double amount, Transaction cause);
 
 	/**
-	 * The PersonaSkills objects hold the fields and methods related to a particular persona's skills
-	 * @return The PersonaSkills object
-	 */
-	PersonaSkills getPersonaSkills();
-	
+     * Retrieve the persona-specific integer that uniquely defines this persona.
+     * @return The immutable int persona id
+     */
+    int getPersonaId();
+
+    /**
+     * The PersonaSkills objects hold the fields and methods related to a particular persona's skills
+     * @return The PersonaSkills object
+     */
+    PersonaSkills getPersonaSkills();
+
 	/**
 	 * A method that retrieves the Persona's 'main' skill or profession, which they can set for RP purposes.
 	 * @return A player's self-set 'main' skill.
@@ -67,6 +90,36 @@ public interface Persona {
 	boolean isCurrent();
 
 	/**
+	 * See if this persona has a specific magic
+	 *
+	 * @param magic The magic to check for
+	 * @return Whether or not the persona has this Magic
+	 */
+	boolean hasMagic(Magic magic);
+
+	/**
+	 * Check to see if this persona has reached a specific tier of a specific magic
+	 *
+	 * @param magic The magic to check the tier of
+	 * @param tier  The tier level to check if it has been achieved
+	 * @return Whether or not the persona has achieved this tier. Will return false if the persona doesn't have this magic.
+	 */
+	boolean hasAchievedMagicTier(Magic magic, int tier);
+
+	/**
+	 * Teach a persona a magic.
+	 *
+	 * @param magic   The magic for the persona to learn
+	 * @param tier    The tier the persona should be at in this magic
+	 * @param teacher The nullable persona which taught this persona
+	 * @param visible Whether or not this magic should be visible on the character card
+	 * @return An Optional wrapped Future value of the MagicAttachment
+	 * @see java.util.Optional View this to see more information on Optionals and how they work
+	 * @see java.util.concurrent.Future View this to see more information on Futures and how they work
+	 */
+	Optional<Future<MagicAttachment>> createAttachment(Magic magic, int tier, Persona teacher, boolean visible);
+
+	/**
 	 * Gets a Personas prefix.
 	 * @return the Persona's current Prefix
 	 */
@@ -85,11 +138,10 @@ public interface Persona {
 	 */
 	boolean hasPrefix();
 
-	public double getFatigue();
-	
-	public void setFatigue(double fatigue);
-	
-	
+	double getFatigue();
+
+	void setFatigue(double fatigue);
+
 	/**
 	 * Clears a Personas prefix. If Prefixes are disabled, calling this will change
 	 * the prefix, but not display it anywhere in the current session.
@@ -215,16 +267,67 @@ public interface Persona {
 
 	/**
 	 * Assign a persona's gender to the specified gender.
-	 * @param r The persona's new gender.
+	 * @param gender The persona's new gender.
 	 */
-
 	void setGender(String gender);
+
+	/**
+	 * See if a persona has a tag for the specific key
+	 *
+	 * @param key The key to check for
+	 * @return Whether or not it has an entry for the key
+	 */
+	boolean hasTagKey(String key);
+
+	/**
+	 * Get the value of a tag by it's key.
+	 *
+	 * @param key The key to fetch a value for
+	 * @return The value of the Key wrapped in an Optional
+	 * @see java.util.Optional
+	 */
+	Optional<String> getTagValue(String key);
+
+	/**
+	 * Get the list of tags for this persona
+	 *
+	 * @return A map of tags, Key mapped to value.
+	 */
+	Map<String, String> getTags();
+
+	/**
+	 * Set the value of a tag,
+	 *
+	 * @param key   The key to set, will overwrite existing keys.
+	 * @param value The value of the key to set
+	 */
+	void setTag(String key, String value);
+
+	/**
+	 * Removes a tag from a Persona
+	 *
+	 * @param key The key to remove
+	 */
+	void removeTag(String key);
+
+	/**
+	 * Retrieves the Type of this persona.
+	 *
+	 * @return The type of persona this is
+	 */
+	PersonaType getPersonaType();
+
+	/**
+	 * Set the underlying type of this persona
+	 * @param type The type of persona it should be.
+	 */
+	void setPersonaType(PersonaType type);
+
 
 	/**
 	 * Delete the Persona from the Plugin records.
 	 * @return whether or not the removal was successful.
 	 */
-
 	boolean remove();
 
 	/**
@@ -237,10 +340,6 @@ public interface Persona {
 	 */
 	PersonaInventory getPInv();
 
-	/** Get the current head icon of this persona.
-	 * @return The Persona's icon.
-	 */
-
 	/**
 	 * @return the inventory of this persona as an Inventory object
 	 */
@@ -250,8 +349,6 @@ public interface Persona {
 	 * @return the creation time of this persona in milliseconds
 	 */
 	long getCreationTime();
-
-
 
 	/**
 	 * @return the total playtime of this persona(all maps added)

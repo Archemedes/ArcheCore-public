@@ -187,10 +187,10 @@ public interface Skill {
 	/**
 	 * @return The list of registered racial mods for this skill.
 	 */
-	Map<Race, Double> getRaceMods();
+    Map<Race, Double> getRaceMods();
 
 	/**
 	 * @return The list of races who call this skill their racial profession, or one of them.
 	 */
-	Set<Race> getMains();
+    Set<Race> getMains();
 }

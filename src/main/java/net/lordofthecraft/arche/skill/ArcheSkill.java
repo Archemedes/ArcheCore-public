@@ -1,15 +1,5 @@
 package net.lordofthecraft.arche.skill;
 
-import java.sql.PreparedStatement;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Sound;
-import org.bukkit.entity.Player;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.enums.Race;
@@ -20,9 +10,18 @@ import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.SkillAttachment;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+
+import java.sql.PreparedStatement;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 public class ArcheSkill implements Skill {
-	
+
 	private static ArcheTimer timer;
 	
 	private final String name,maleName,femaleName;
@@ -34,7 +33,7 @@ public class ArcheSkill implements Skill {
 
 	private final PreparedStatement statement;
 	//TODO add a statement_remove when you want to remove an entry from the skill tables altogether
-	
+
 	ArcheSkill(String name, String maleName, String femaleName, int displayStrategy, boolean inert,
 			   Set<Race> mains, Map<Race, Double> raceMods, PreparedStatement state) {
 		
@@ -57,14 +56,14 @@ public class ArcheSkill implements Skill {
 	@Override
 	public boolean isProfessionFor(Race race){
 		return mains.contains(race);
-	}	
-	
+    }
+
 	@Override
 	public String getName(){
 		return name;
 	}
-	
-	@Override
+
+    @Override
 	public int getVisibility(){
 		return displayStrategy;
 	}
@@ -111,22 +110,22 @@ public class ArcheSkill implements Skill {
 	@Override
 	public void addXp(Persona p, double xp){
 		if(timer != null) timer.startTiming("xp_" + name);
-		
-		//Also don't hand XP to people who cannot gain it in this skill
+
+        //Also don't hand XP to people who cannot gain it in this skill
 		if(!this.canGainXp(p)) return;
 		
 		//Add some XP to the skill in question
 		addRawXp(p, xp);
-		
-		if(timer != null) timer.stopTiming("xp_" + name);
+
+        if(timer != null) timer.stopTiming("xp_" + name);
 	}
 	
 	@Override
 	public double addRawXp(Player p, double xp){
 		return addRawXp(getPersona(p), xp);
 	}
-	
-	@Override
+
+    @Override
 	public double addRawXp(Persona p, double xp){
 		SkillAttachment attach = getAttachment(p);
 
@@ -195,8 +194,8 @@ public class ArcheSkill implements Skill {
 	@Override
 	public SkillTier getSkillTier(Persona p){
 		if(!hasSkill(p)) return SkillTier.INACTIVE;
-		
-		double xp = getXp(p);
+
+        double xp = getXp(p);
 		SkillTier result = SkillTier.SELECTED;
 		for(SkillTier st : SkillTier.values()){
 			if(st.getXp() <= xp) result = st;
@@ -205,8 +204,8 @@ public class ArcheSkill implements Skill {
 		
 		return result;
 	}
-	
-	private boolean hasSkill(Persona p) {
+
+    private boolean hasSkill(Persona p) {
 		return p.getMainSkill() == this || this.isProfessionFor(p.getRace());
 	}
 
@@ -250,11 +249,11 @@ public class ArcheSkill implements Skill {
 		return female?
 			femaleName != null? femaleName :
 			maleName != null? maleName :
-			getName()			
-				: //male
+                    getName()
+                : //male
 			maleName != null? maleName :
 			femaleName != null? femaleName :
 			getName();
-				
-	}
+
+    }
 }

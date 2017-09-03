@@ -8,6 +8,7 @@ import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.help.HelpFile;
 import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.listener.*;
+import net.lordofthecraft.arche.magic.Archenomicon;
 import net.lordofthecraft.arche.persona.*;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.BeginTransactionTask;
@@ -42,6 +43,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private BlockRegistry blockRegistry;
 	private ArchePersonaHandler personaHandler;
 	private ArcheFatigueHandler fatigueHandler;
+	private Archenomicon archenomicon;
 	private HelpDesk helpdesk;
 	private SkinCache skinCache;
 	private ArcheTimer timer;
@@ -76,7 +78,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	//private Thread saverThread = null;
 
 	private boolean shouldClone = false;
-	
+
 	public static PersonaKey getPersonaKey(UUID uuid, int pid) {
 		return new ArchePersonaKey(uuid, pid);
 	}
@@ -87,6 +89,30 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 	public static ArcheCore getPlugin() {
 		return instance;
+	}
+
+	public static PersonaHandler getPersonaControls() {
+		return getControls().getPersonaHandler();
+	}
+
+	public static Economy getEconomyControls() {
+		return getControls().getEconomy();
+	}
+
+	public static SQLHandler getSQLControls() {
+		return getControls().getSQLHandler();
+	}
+
+	public static Archenomicon getMagicControls() {
+		return getControls().getArchenomicon();
+	}
+
+	public static Persona getPersona(Player p) {
+		return instance.getPersonaHandler().getPersona(p);
+	}
+
+	public static boolean hasPersona(Player p) {
+		return instance.getPersonaHandler().hasPersona(p);
 	}
 
 	/**
@@ -156,12 +182,13 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		} else {
 			sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
 		}
-		
+
 		ArcheTables.setUpSQLTables(sqlHandler);
-		
+
 		saveHandler = SaveHandler.getInstance();
 		saveHandler.put(new BeginTransactionTask());
 		blockRegistry = new BlockRegistry();
+		archenomicon = Archenomicon.getInstance();
 		personaHandler = ArchePersonaHandler.getInstance();
 		fatigueHandler = ArcheFatigueHandler.getInstance();
 		helpdesk = HelpDesk.getInstance();
@@ -170,6 +197,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		fatigueHandler.fatigueDecreaseHours = this.fullFatigueRestore;
 		timer = debugMode? new ArcheTimer(this) : null;
 		personaHandler.setModifyDisplayNames(modifyDisplayNames);
+		archenomicon.createTomeFromKnowledge(sqlHandler);
 
 		try{
 			ResultSet res = sqlHandler.query("SELECT * FROM blockregistry");
@@ -186,7 +214,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 
 		Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
-            if(willCachePersonas()){
+
+			if(willCachePersonas()){
                 long time = System.currentTimeMillis();
                 getLogger().info("Preloading Personas as far back as " + cachePersonas + " days");
                 personaHandler.initPreload(cachePersonas);
@@ -208,7 +237,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		//Start gradually reducing the fatigue of Personas in 20-minute intervals
 		if(fullFatigueRestore > 0) new FatigueDecreaser(fullFatigueRestore).runTaskTimer(this, 173, 20*60*20);
-		
+
 		//Some racial bonus stuff
 		/*		if(this.areRacialBonusesEnabled())
 			new RacialBonusRunnable().runTaskTimer(this, 2400, 100);*/
@@ -345,12 +374,12 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 				+ ChatColor.GREEN + "You can still do everything while fatigued, but will not have access to your profession-related perks.\n"
 				+ ChatColor.LIGHT_PURPLE  + "your fatigue will reset over time, so it's best to simply take a break and wait it out. "
 						+ "If you are inpatient, having a drink at a tavern will also reduce a Persona's fatigue.\n";
-		
+
 		addHelp("Persona", persHelp, Material.REDSTONE_COMPARATOR);
 		addHelp("Commands", commandHelp, Material.COMMAND);
 		addHelp("Professions", profession, Material.BEDROCK);
 		addHelp("Fatigue", fatigue, Material.BED);
-		
+
 		//Create config-set Help Files
 		if(!(new File(getDataFolder(), "helpfiles.yml").exists()))
 			saveResource("helpfiles.yml", false);
@@ -395,6 +424,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	}
 
 	@Override
+	public Archenomicon getArchenomicon() {
+		return archenomicon;
+	}
+
+	@Override
 	public PersonaKey composePersonaKey(UUID uuid, int pid){
 		return getPersonaKey(uuid, pid);
 	}
@@ -421,7 +455,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	public ArchePersonaHandler getPersonaHandler(){
 		return personaHandler;
 	}
-	
+
 	@Override
 	public ArcheFatigueHandler getFatigueHandler() {
 		return fatigueHandler;
@@ -431,7 +465,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	public SQLHandler getSQLHandler(){
 		return sqlHandler;
 	}
-	
+
 	@Override
 	public SkinCache getSkinCache(){
 		return skinCache;
@@ -573,7 +607,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	public boolean isRacialSwingEnabled() {
 		return racialSwingTimer;
 	}
-	
+
 	@Override
 	public boolean showEnderchestInMenu() {
 		return enderchestInMenu;
@@ -583,7 +617,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	public int getNewPersonaPermakillDelay() {
 		return personaPermakillDelay;
 	}
-	
+
 	@Override
 	public int personaSlots() {
 		return this.maxPersonaSlots;

@@ -8,7 +8,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.UnloadTask;
+import net.lordofthecraft.arche.save.tasks.persona.UnloadTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,14 +19,14 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerJoinListener implements Listener {
 	private final ArchePersonaHandler handler;
-	private final SaveHandler buffer;
-	private final ArcheTimer timer;
-	
-	public PlayerJoinListener(ArchePersonaHandler handler){
+    private final SaveHandler buffer;
+    private final ArcheTimer timer;
+
+    public PlayerJoinListener(ArchePersonaHandler handler){
 		this.handler = handler;
-		this.buffer = SaveHandler.getInstance();
-		timer = ArcheCore.getPlugin().getMethodTimer();
-	}
+        this.buffer = SaveHandler.getInstance();
+        timer = ArcheCore.getPlugin().getMethodTimer();
+    }
 	
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onJoin(PlayerJoinEvent e){
@@ -57,7 +57,7 @@ public class PlayerJoinListener implements Listener {
 		
 		//If Personas are not cached, send a signal into the consumer queue
 		//To unload the Personas as soon as all save operations are done
-		if(!plug.willCachePersonas()) buffer.put(new UnloadTask(p));
+        if (!plug.willCachePersonas()) buffer.put(new UnloadTask(p));
 
 		RaceBonusHandler.reset(p);
 		

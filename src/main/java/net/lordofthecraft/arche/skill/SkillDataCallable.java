@@ -30,7 +30,7 @@ public class SkillDataCallable implements Callable<SkillData> {
 			if(res.next()){
 				double xp = res.getDouble(1);
 				boolean visible = res.getBoolean(2);
-				data = new SkillData(xp, visible);
+				data = new SkillData(xp, visible, 0);
 			} else {
 				data = null;
 			}

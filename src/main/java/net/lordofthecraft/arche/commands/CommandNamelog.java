@@ -29,9 +29,9 @@ public class CommandNamelog implements CommandExecutor {
 			} else {
 				final UUID uuid = play.getUniqueId();
 				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Retrieving a Persona name history for " + ChatColor.WHITE + play.getName());
-				SaveHandler.getInstance().put(new ArcheTask(){
-					@Override
-					public void run(){
+                SaveHandler.getInstance().put(new ArcheTask() {
+                    @Override
+                    public void run(){
 						try{
 							ResultSet res = handle.query("SELECT id,name FROM persona_names WHERE player='" + uuid.toString() + "' ORDER BY id;");
 							int id = 0;

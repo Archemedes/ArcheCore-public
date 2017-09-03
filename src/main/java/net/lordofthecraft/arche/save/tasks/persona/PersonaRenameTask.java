@@ -1,7 +1,8 @@
-package net.lordofthecraft.arche.save.tasks;
+package net.lordofthecraft.arche.save.tasks.persona;
 
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
+import net.lordofthecraft.arche.save.tasks.StatementTask;
 
 import java.sql.SQLException;
 
