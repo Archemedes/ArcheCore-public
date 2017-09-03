@@ -7,7 +7,7 @@ import net.lordofthecraft.arche.interfaces.MagicType;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.MagicAttachment;
-import net.lordofthecraft.arche.save.SaveExecutorManager;
+import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.magic.ArcheMagicDeleteTask;
 import net.lordofthecraft.arche.save.tasks.magic.ArcheMagicInsertTask;
 import net.lordofthecraft.arche.save.tasks.magic.ArcheMagicUpdateTask;
@@ -82,7 +82,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         }
         ArcheMagic m = new ArcheMagic(name, maxTier, selfTeachable);
         ArcheCore.getMagicControls().registerArcana(m);
-        SaveExecutorManager.getInstance().submit(new ArcheMagicInsertTask(m));
+        SaveHandler.getInstance().put(new ArcheMagicInsertTask(m));
         return m;
     }
 
@@ -242,12 +242,12 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     }
 
     protected void performSQLUpdate(Field f, Object data) {
-        SaveExecutorManager.getInstance().submit(new ArcheMagicUpdateTask(this, f, data));
+        SaveHandler.getInstance().put(new ArcheMagicUpdateTask(this, f, data));
     }
 
     public void remove() {
         ArcheCore.getMagicControls().banishMagic(this);
-        SaveExecutorManager.getInstance().submit(new ArcheMagicDeleteTask(name));
+        SaveHandler.getInstance().put(new ArcheMagicDeleteTask(name));
     }
 
 }

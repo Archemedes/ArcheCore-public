@@ -4,7 +4,6 @@ import net.lordofthecraft.arche.save.tasks.StatementTask;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.UUID;
 
 /**
  * Created on 7/5/2017
@@ -17,10 +16,10 @@ public class MagicUpdateTask extends StatementTask {
     private final int tier;
     private final long learned;
     private final long last_advanced;
-    private final UUID teacher;
+    private final int teacher;
     private final boolean visible;
 
-    public MagicUpdateTask(int magic_id, int tier, long learned, long last_advanced, UUID teacher, boolean visible) {
+    public MagicUpdateTask(int magic_id, int tier, long learned, long last_advanced, int teacher, boolean visible) {
         this.magic_id = magic_id;
         this.tier = tier;
         this.learned = learned;
@@ -51,7 +50,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         stat.setInt(1, tier);
         stat.setTimestamp(2, new Timestamp(learned));
         stat.setTimestamp(3, new Timestamp(last_advanced));
-        stat.setString(4, (teacher == null ? null : teacher.toString()));
+        stat.setInt(4, teacher);
         stat.setBoolean(5, visible);
         stat.setInt(6, magic_id);
     }

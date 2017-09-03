@@ -1,7 +1,14 @@
 package net.lordofthecraft.arche.commands;
 
-import java.util.concurrent.TimeUnit;
-
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.util.CommandUtil;
+import net.lordofthecraft.arche.util.MessageUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -11,17 +18,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.PersonaRenameTask;
-import net.lordofthecraft.arche.util.CommandUtil;
-import net.lordofthecraft.arche.util.MessageUtil;
+import java.util.concurrent.TimeUnit;
 
 public class CommandPersona implements CommandExecutor {
 	private final HelpDesk helpdesk;
@@ -195,8 +192,9 @@ public class CommandPersona implements CommandExecutor {
 					} else if (name.length() <= 32 || sender.hasPermission("archecore.persona.longname")) {
 						pers.setName(name);
 						sender.sendMessage(ChatColor.AQUA + "Persona name was set to: " + ChatColor.RESET + name);
-						if (sender == pers.getPlayer()) //Player renamed by his own accord
-							SaveHandler.getInstance().put(new PersonaRenameTask(pers));
+						if (sender == pers.getPlayer()) {
+						} //Player renamed by his own accord
+						//SaveHandler.getInstance().put(new PersonaRenameTask(pers));
 					} else {
 						sender.sendMessage(ChatColor.RED + "Error: Name too long. Max length 32 characters");
 					}

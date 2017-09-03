@@ -3,6 +3,7 @@ CREATE DATABASE IF NOT EXISTS archecore;
 USE archecore;
 
 /* parent */
+/* This is a players tables and its intention is to perform referential integrity. */
 CREATE TABLE IF NOT EXISTS players (
     player 		    CHAR(36),
     preload_force   BOOLEAN DEFAULT FALSE,

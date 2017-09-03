@@ -1,21 +1,18 @@
 package net.lordofthecraft.arche.persona;
 
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.skill.ArcheSkill;
+import net.lordofthecraft.arche.skill.SkillData;
+import org.bukkit.entity.Player;
+
 import java.util.UUID;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
-
-import org.bukkit.entity.Player;
-
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.ArcheTask;
-import net.lordofthecraft.arche.save.tasks.UpdateSkillTask;
-import net.lordofthecraft.arche.skill.ArcheSkill;
-import net.lordofthecraft.arche.skill.SkillData;
 
 public class SkillAttachment {
 	private static final double DEFAULT_XP = 0.0;
@@ -136,8 +133,8 @@ public class SkillAttachment {
 			handle.removeSkillAttachment(this);
 			inPersonaSkills = false;
 		} else {
-			ArcheTask task = new UpdateSkillTask(skill, uuid, id, xp, canSee);
-			buffer.put(task);
+			//ArcheTask task = new UpdateSkillTask(skill, uuid, id, xp, canSee);
+			//buffer.put(task);
 			if(!inPersonaSkills) { //Start tracking this skill in PersonaSkills
 				handle.addSkillAttachment(this);
 				inPersonaSkills = true;

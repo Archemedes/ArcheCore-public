@@ -53,10 +53,16 @@ public interface Persona {
 	double deposit(double amount, Transaction cause);
 
 	/**
-	 * The PersonaSkills objects hold the fields and methods related to a particular persona's skills
-	 * @return The PersonaSkills object
-	 */
-	PersonaSkills getPersonaSkills();
+     * Retrieve the persona-specific integer that uniquely defines this persona.
+     * @return The immutable int persona id
+     */
+    int getPersonaId();
+
+    /**
+     * The PersonaSkills objects hold the fields and methods related to a particular persona's skills
+     * @return The PersonaSkills object
+     */
+    PersonaSkills getPersonaSkills();
 
 	/**
 	 * A method that retrieves the Persona's 'main' skill or profession, which they can set for RP purposes.

@@ -12,7 +12,6 @@ import net.lordofthecraft.arche.magic.Archenomicon;
 import net.lordofthecraft.arche.persona.*;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.BeginTransactionTask;
-import net.lordofthecraft.arche.save.tasks.DatabaseCreateTask;
 import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
@@ -198,7 +197,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		fatigueHandler.fatigueDecreaseHours = this.fullFatigueRestore;
 		timer = debugMode? new ArcheTimer(this) : null;
 		personaHandler.setModifyDisplayNames(modifyDisplayNames);
-		saveManager.submit(new DatabaseCreateTask());
 		archenomicon.createTomeFromKnowledge(sqlHandler);
 
 		try{

@@ -3,11 +3,9 @@ package net.lordofthecraft.arche.persona;
 import net.lordofthecraft.arche.interfaces.Magic;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.magic.MagicData;
-import net.lordofthecraft.arche.save.SaveExecutorManager;
+import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.magic.MagicUpdateTask;
 
-import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -16,20 +14,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author 501warhead
  */
 public class MagicAttachment {
-    private static final SaveExecutorManager buffer = SaveExecutorManager.getInstance();
+    private static final SaveHandler buffer = SaveHandler.getInstance();
     private final Magic magic;
     private final int id;
-    private final UUID persona_id;
+    private final int persona_id;
     //private FutureTask<MagicData> call;
     private int tier;
     private AtomicBoolean visible;
     private AtomicBoolean taught;
-    private UUID teacher;
+    private int teacher;
     private long learned;
     private long lastAdvanced;
 
 
-    public MagicAttachment(Magic magic, UUID persona_id, MagicData data) {
+    public MagicAttachment(Magic magic, int persona_id, MagicData data) {
         this.magic = magic;
         this.persona_id = persona_id;
         id = data.id;
@@ -64,7 +62,7 @@ public class MagicAttachment {
 
     public void clearTeacher() {
         taught.set(false);
-        teacher = null;
+        teacher = -1;
         performSQLUpdate();
     }
 
@@ -76,7 +74,7 @@ public class MagicAttachment {
         return magic;
     }
 
-    public UUID getPersonaId() {
+    public int getPersonaId() {
         return persona_id;
     }
 
@@ -92,11 +90,8 @@ public class MagicAttachment {
         return taught.get();
     }
 
-    public Optional<UUID> getTeacherID() {
-        if (teacher == null) {
-            return Optional.empty();
-        }
-        return Optional.of(teacher);
+    public int getTeacherID() {
+        return teacher;
     }
 
     public long getWhenLearned() {
@@ -108,6 +103,6 @@ public class MagicAttachment {
     }
 
     protected void performSQLUpdate() {
-        buffer.submit(new MagicUpdateTask(id, tier, learned, lastAdvanced, teacher, visible.get()));
+        buffer.put(new MagicUpdateTask(id, tier, learned, lastAdvanced, teacher, visible.get()));
     }
 }

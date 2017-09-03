@@ -3,7 +3,7 @@ package net.lordofthecraft.arche.persona;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.SaveExecutorManager;
+import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.persona.UpdateTask;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -39,19 +39,19 @@ public class ArcheEconomy implements Economy {
 	@Override
 	public void setPersona(Persona p, double amount){
 		((ArchePersona) p).money = amount;
-        SaveExecutorManager.getInstance().submit(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
+        SaveHandler.getInstance().put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
     }
 
     @Override
 	public void depositPersona(Persona p, double amount){
 		((ArchePersona) p).money += amount;
-        SaveExecutorManager.getInstance().submit(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
+        SaveHandler.getInstance().put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
     }
 
     @Override
 	public void withdrawPersona(Persona p, double amount){
 		((ArchePersona) p).money -= amount;
-        SaveExecutorManager.getInstance().submit(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
+        SaveHandler.getInstance().put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
     }
 
     @Override

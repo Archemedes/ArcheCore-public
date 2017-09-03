@@ -116,6 +116,11 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		sqlCriteria.put("id", id);
 	}
 
+	@Override
+	public int getPersonaId() {
+		return persona_id;
+	}
+
 	public void addSkill(ArcheSkill skill, FutureTask<SkillData> future){
 		SkillAttachment attach = new SkillAttachment(skill, this, future);
 		skills.addSkillAttachment(attach);
@@ -262,10 +267,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			attachment = task.get(200, TimeUnit.MILLISECONDS);
 
 		} catch (TimeoutException e) {
-			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We timed out while trying to fetch the persona " + persona_id.toString() + "'s tags!", e);
+			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We timed out while trying to fetch the persona " + persona_id + "'s tags!", e);
 			attachment = new TagAttachment(Maps.newConcurrentMap(), persona_id, false);
 		} catch (Exception e) {
-			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We threw an exception while trying to fetch the persona " + persona_id.toString() + "'s tags!", e);
+			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We threw an exception while trying to fetch the persona " + persona_id + "'s tags!", e);
 			attachment = new TagAttachment(Maps.newConcurrentMap(), persona_id, false);
 		}
 	}
@@ -285,9 +290,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 					int tier = rs.getInt("tier");
 					Timestamp last_advanced = rs.getTimestamp("last_advanced");
 					Timestamp learned = rs.getTimestamp("learned");
-					String teacher = rs.getString("teacher");
+					int teacher = rs.getInt("teacher");
 					boolean visible = rs.getBoolean("visible");
-					data = new MagicData(armagic.get(), it, tier, visible, teacher == null, (teacher == null ? null : UUID.fromString(teacher)), learned.toInstant().toEpochMilli(), last_advanced.toInstant().toEpochMilli());
+					data = new MagicData(armagic.get(), it, tier, visible, teacher > -1, (teacher <= 0 ? -1 : teacher), learned.toInstant().toEpochMilli(), last_advanced.toInstant().toEpochMilli());
 					magics.add(new MagicAttachment(armagic.get(), persona_id, data));
 				}
 			}

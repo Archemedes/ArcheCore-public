@@ -11,9 +11,7 @@ import net.lordofthecraft.arche.event.*;
 import net.lordofthecraft.arche.event.PersonaWhoisEvent.Query;
 import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.ArcheTask;
 import net.lordofthecraft.arche.save.tasks.DataTask;
-import net.lordofthecraft.arche.save.tasks.persona.InsertTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.TopData;
@@ -287,8 +285,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		for(PotionEffect ps : p.getActivePotionEffects())
 			p.removePotionEffect(ps.getType());
 
-		ArcheTask task = new InsertTask(uuid, id, name, race, gender,creationTime);
-		buffer.put(task);
+		//ArcheTask task = new InsertTask(uuid, id, name, race, gender,creationTime);
+		//buffer.put(task);
 
 		RaceBonusHandler.apply(p, race);
 		persona.updateDisplayName(p);
