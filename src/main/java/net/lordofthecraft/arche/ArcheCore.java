@@ -1,11 +1,20 @@
 package net.lordofthecraft.arche;
 
-import java.io.File;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.UUID;
-import java.util.logging.Level;
-
+import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
+import net.lordofthecraft.arche.commands.*;
+import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.help.HelpFile;
+import net.lordofthecraft.arche.interfaces.*;
+import net.lordofthecraft.arche.listener.*;
+import net.lordofthecraft.arche.persona.*;
+import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.BeginTransactionTask;
+import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
+import net.lordofthecraft.arche.skin.SkinCache;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -19,57 +28,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
-import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.WhySQLHandler;
-import net.lordofthecraft.arche.commands.CommandArchehelp;
-import net.lordofthecraft.arche.commands.CommandAttribute;
-import net.lordofthecraft.arche.commands.CommandAttributeTabCompleter;
-import net.lordofthecraft.arche.commands.CommandBeaconme;
-import net.lordofthecraft.arche.commands.CommandHelpMenu;
-import net.lordofthecraft.arche.commands.CommandMoney;
-import net.lordofthecraft.arche.commands.CommandNamelog;
-import net.lordofthecraft.arche.commands.CommandNewbies;
-import net.lordofthecraft.arche.commands.CommandPersona;
-import net.lordofthecraft.arche.commands.CommandRaceSpawn;
-import net.lordofthecraft.arche.commands.CommandRealname;
-import net.lordofthecraft.arche.commands.CommandSkin;
-import net.lordofthecraft.arche.commands.CommandSql;
-import net.lordofthecraft.arche.commands.CommandSqlClone;
-import net.lordofthecraft.arche.commands.CommandTreasurechest;
-import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.help.HelpFile;
-import net.lordofthecraft.arche.interfaces.Economy;
-import net.lordofthecraft.arche.interfaces.IArcheCore;
-import net.lordofthecraft.arche.interfaces.PersonaKey;
-import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.interfaces.SkillFactory;
-import net.lordofthecraft.arche.listener.ArmorPreventionListener;
-import net.lordofthecraft.arche.listener.BeaconMenuListener;
-import net.lordofthecraft.arche.listener.BlockRegistryListener;
-import net.lordofthecraft.arche.listener.EconomyListener;
-import net.lordofthecraft.arche.listener.ExperienceOrbListener;
-import net.lordofthecraft.arche.listener.HelpMenuListener;
-import net.lordofthecraft.arche.listener.HelpOverrideListener;
-import net.lordofthecraft.arche.listener.LegacyCommandsListener;
-import net.lordofthecraft.arche.listener.NewbieProtectListener;
-import net.lordofthecraft.arche.listener.PersonaInventoryListener;
-import net.lordofthecraft.arche.listener.PlayerChatListener;
-import net.lordofthecraft.arche.listener.PlayerInteractListener;
-import net.lordofthecraft.arche.listener.PlayerJoinListener;
-import net.lordofthecraft.arche.listener.RacialBonusListener;
-import net.lordofthecraft.arche.listener.TreasureChestListener;
-import net.lordofthecraft.arche.persona.ArcheEconomy;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.ArchePersonaKey;
-import net.lordofthecraft.arche.persona.FatigueDecreaser;
-import net.lordofthecraft.arche.persona.RaceBonusHandler;
-import net.lordofthecraft.arche.save.DataSaveRunnable;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
-import net.lordofthecraft.arche.skin.SkinCache;
+import java.io.File;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.UUID;
+import java.util.logging.Level;
 
 public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private static ArcheCore instance;
@@ -110,7 +73,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private boolean usingMySQL;
 	private int fullFatigueRestore;
 
-	private Thread saverThread = null;
+	//private Thread saverThread = null;
 
 	private boolean shouldClone = false;
 	
@@ -139,7 +102,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		saveHandler.put(new EndOfStreamTask());
 
-		Bukkit.getOnlinePlayers().stream().forEach(p -> {
+		Bukkit.getOnlinePlayers().forEach(p -> {
 			//This part must be done for safety reasons.
 			//Disables are messy, and in the brief period of Bukkit downtime
 			//Players may shift inventories around and dupe items they shouldn't dupe
@@ -150,14 +113,15 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			RaceBonusHandler.reset(p);
 		});
 
-		if (saverThread != null) {
+		/*if (saveHandler != null) {
 			try {
-				saverThread.join();}
+				saverThread.join();
+			}
 			catch (InterruptedException e) {
 				getLogger().severe("ArcheCore was interrupted prematurely while waiting for its saver thread to resolve.");
 				e.printStackTrace();
 			}
-		}
+		}*/
 		sqlHandler.close();
 		if (shouldClone && sqlHandler instanceof ArcheSQLiteHandler) {
 			((ArcheSQLiteHandler) sqlHandler).cloneDB();
@@ -196,6 +160,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		ArcheTables.setUpSQLTables(sqlHandler);
 		
 		saveHandler = SaveHandler.getInstance();
+		saveHandler.put(new BeginTransactionTask());
 		blockRegistry = new BlockRegistry();
 		personaHandler = ArchePersonaHandler.getInstance();
 		fatigueHandler = ArcheFatigueHandler.getInstance();
@@ -234,9 +199,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             }
 
             //Start saving our data
-            saverThread = new Thread(new DataSaveRunnable(saveHandler, timer, sqlHandler), "ArcheCore SQL Consumer");
-            saverThread.start();
-        });
+			//saverThread = new Thread(new DataSaveRunnable(saveHandler, timer, sqlHandler), "ArcheCore SQL Consumer");
+			//saverThread.start();
+		});
 
 		//Start tracking Personas and their playtime.
 		new TimeTrackerRunnable(personaHandler).runTaskTimerAsynchronously(this, 2203, 1200);
