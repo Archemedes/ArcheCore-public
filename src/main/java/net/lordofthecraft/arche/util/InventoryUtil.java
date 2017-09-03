@@ -168,11 +168,11 @@ public class InventoryUtil {
 									v = ev.getView();
 									int spot = MovedItem.DROPPED_SLOT;
 									int topSize = ev.getView().getTopInventory().getSize();
-									int[] slotsToCheck = new int[37];
+									int[] slotsToCheck = new int[36];
 									ItemStack target = ev.getCurrentItem();
-									slotsToCheck[0] = ev.getWhoClicked().getInventory().getHeldItemSlot() + topSize + 27;
-									for(int i = 0; i < 9; i++) slotsToCheck[i+1] = topSize + 27 + i;
-									for(int i = 0; i < 27; i++) slotsToCheck[i+10] = topSize + i;
+									//slotsToCheck[0] = ev.getWhoClicked().getInventory().getHeldItemSlot() + topSize + 27;
+									for(int i = 0; i < 9; i++) slotsToCheck[i] = topSize + 27 + i;
+									for(int i = 0; i < 27; i++) slotsToCheck[i+9] = topSize + i;
 									for(int phase = 0; phase < 2; phase++) {
 										for(int i = 0; i < slotsToCheck.length; i++) {
 											int slotToCheck = slotsToCheck[i];
