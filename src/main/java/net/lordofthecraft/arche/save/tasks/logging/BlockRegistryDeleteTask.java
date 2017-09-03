@@ -7,8 +7,8 @@ import java.sql.SQLException;
 
 public class BlockRegistryDeleteTask extends StatementTask {
     private final WeakBlock wb;
-	
-	public BlockRegistryDeleteTask(WeakBlock wb){
+
+    public BlockRegistryDeleteTask(WeakBlock wb){
 		this.wb = wb;
 	}
 	

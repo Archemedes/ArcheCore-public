@@ -21,12 +21,12 @@ public class PlayerJoinListener implements Listener {
 	private final ArchePersonaHandler handler;
     private final SaveExecutorManager buffer;
     private final ArcheTimer timer;
-	
-	public PlayerJoinListener(ArchePersonaHandler handler){
+
+    public PlayerJoinListener(ArchePersonaHandler handler){
 		this.handler = handler;
         this.buffer = SaveExecutorManager.getInstance();
         timer = ArcheCore.getPlugin().getMethodTimer();
-	}
+    }
 	
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onJoin(PlayerJoinEvent e){

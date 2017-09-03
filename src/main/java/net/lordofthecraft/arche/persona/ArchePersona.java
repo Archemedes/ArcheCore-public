@@ -1,29 +1,10 @@
 package net.lordofthecraft.arche.persona;
 
-import java.lang.ref.WeakReference;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
-
 import com.google.common.collect.Maps;
-
+import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.WeakBlock;
+import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.PersonaFatigueEvent;
 import net.lordofthecraft.arche.event.PersonaRemoveEvent;
@@ -37,11 +18,9 @@ import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.DataTask;
 import net.lordofthecraft.arche.save.tasks.magic.MagicCreateCallable;
-import net.lordofthecraft.arche.save.tasks.persona.PersonaSwitchTask;
 import net.lordofthecraft.arche.save.tasks.persona.SelectSkillTask;
 import net.lordofthecraft.arche.save.tasks.persona.TagAttachmentCallable;
 import net.lordofthecraft.arche.save.tasks.persona.UpdateTask;
-import net.lordofthecraft.arche.save.tasks.skills.UpdateSkillSlotTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.SkillData;
@@ -62,15 +41,16 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.ref.WeakReference;
 import java.sql.*;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public final class ArchePersona implements Persona, InventoryHolder {
 	private static final String TABLE = "persona";
@@ -78,9 +58,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
 	private static final SaveHandler buffer = SaveHandler.getInstance();
 
-    private static CallableStatement deleteCall = null;
+	private static CallableStatement deleteCall = null;
 
-    private int persona_id;
+	//The immutable auto-increment ID of this persona.
+	private int persona_id;
 
 	final PersonaSkills skills = new PersonaSkills(this);
 
@@ -108,9 +89,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private int hash = 0;
 	private int food = 0;
 	private double health = 0;
-    private TagAttachment attachment;
-    private Map<String,String> tags;
-    private String type;
+	private TagAttachment attachment;
+	private Map<String, String> tags;
+	private PersonaType type;
+	private Set<MagicAttachment> magics = Sets.newConcurrentHashSet();
 
 	ArchePersona(OfflinePlayer p, int id, String name, Race race, int gender,long creationTimeMS){
 		this.key = new ArchePersonaKey(p.getUniqueId(), id);
@@ -120,6 +102,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		this.name = name;
 		this.gender = gender;
 		this.creationTimeMS = creationTimeMS;
+		this.type = PersonaType.NORMAL;
 
 		timePlayed = new AtomicInteger();
 		charactersSpoken = new AtomicInteger();
@@ -146,47 +129,47 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		return skills.getSkill(skill);
 	}
 
-    @Override
-    public boolean hasTagKey(String s) {
-        return tags.containsKey(s);
-    }
+	@Override
+	public boolean hasTagKey(String s) {
+		return tags.containsKey(s);
+	}
 
-    @Override
-    public Optional<String> getTagValue(String tag) {
-        String s = attachment.getValue(tag);
-        if (s == null) {
-            return Optional.empty();
-        } else {
-            return Optional.of(s);
-        }
-    }
+	@Override
+	public Optional<String> getTagValue(String tag) {
+		String s = attachment.getValue(tag);
+		if (s == null) {
+			return Optional.empty();
+		} else {
+			return Optional.of(s);
+		}
+	}
 
-    @Override
-    public Map<String, String> getTags() {
-        return attachment.getTags();
-    }
+	@Override
+	public Map<String, String> getTags() {
+		return attachment.getTags();
+	}
 
-    @Override
-    public void setTag(String name, String value) {
-        attachment.setValue(name, value);
-    }
+	@Override
+	public void setTag(String name, String value) {
+		attachment.setValue(name, value);
+	}
 
-    @Override
-    public void removeTag(String name) {
-        attachment.delValue(name);
-    }
+	@Override
+	public void removeTag(String name) {
+		attachment.delValue(name);
+	}
 
-    @Override
-    public String getPersonaType() {
-        return type;
-    }
+	@Override
+	public PersonaType getPersonaType() {
+		return type;
+	}
 
-    @Override
-    public void setPersonaType(String type) {
-        this.type = type;
+	@Override
+	public void setPersonaType(PersonaType type) {
+		this.type = type;
 
-        exe.submit(new UpdateTask(this, PersonaField.TYPE, type));
-    }
+		buffer.put(new UpdateTask(this, PersonaField.TYPE, type));
+	}
 
 	@Override
 	public double withdraw(double amount, Transaction cause) {
@@ -279,10 +262,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			attachment = task.get(200, TimeUnit.MILLISECONDS);
 
 		} catch (TimeoutException e) {
-			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We timed out while trying to fetch the persona "+persona_id.toString()+"'s tags!", e);
+			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We timed out while trying to fetch the persona " + persona_id.toString() + "'s tags!", e);
 			attachment = new TagAttachment(Maps.newConcurrentMap(), persona_id, false);
 		} catch (Exception e) {
-			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We threw an exception while trying to fetch the persona "+persona_id.toString()+"'s tags!", e);
+			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We threw an exception while trying to fetch the persona " + persona_id.toString() + "'s tags!", e);
 			attachment = new TagAttachment(Maps.newConcurrentMap(), persona_id, false);
 		}
 	}
@@ -291,7 +274,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		String sql = "SELECT magic_id,magic_fk,tier,last_advanced,teacher,learned,visible FROM persona_magic WHERE persona_fk=?";
 		try {
 			PreparedStatement stat = ArcheCore.getSQLControls().getConnection().prepareStatement(sql);
-			stat.setString(1, persona_id.toString());
+			stat.setInt(1, persona_id);
 			ResultSet rs = stat.executeQuery();
 			while (rs.next()) {
 				MagicData data = null;
@@ -344,7 +327,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			return Optional.empty();
 		}
 		MagicCreateCallable call = new MagicCreateCallable(persona_id, (ArcheMagic) m, tier, (teacher == null ? null : teacher.getPersonaId()), visible, ArcheCore.getSQLControls());
-		Future<MagicAttachment> future = exe.call(call);
+		Future<MagicAttachment> future = buffer.prepareCallable(call);
 		try {
 			MagicAttachment attach = future.get(200, TimeUnit.MILLISECONDS);
 
@@ -578,8 +561,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		health = p.getHealth();
 		inv = PersonaInventory.store(p);
 		location = new WeakBlock(p.getLocation());
-
-		buffer.put(new PersonaSwitchTask(this));
 	}
 
 	void restoreMinecraftSpecifics(final Player p){
@@ -650,9 +631,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		if(event.isCancelled()) return false;
 
 
-		exe.submit(new DataTask(DataTask.DELETE, TABLE, null, sqlCriteria));
+		buffer.put(new DataTask(DataTask.DELETE, TABLE, null, sqlCriteria));
 		//		Both could be commented out once cascading db is setup!
-		exe.submit(new DataTask(DataTask.DELETE, "persona_names", null, sqlCriteria));
+		buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, sqlCriteria));
 		handler.deleteSkills(this);
 
 		ArchePersona[] prs = handler.getAllPersonas(this.getPlayerUUID());
@@ -677,7 +658,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			}
 
 			boolean cleared = cache.clearSkin(this);
-			if(!success){
+			if (!success) {
 				Plugin plugin = ArcheCore.getPlugin();
 				plugin.getLogger().warning("Player " + player + " removed his final usable Persona!");
 				RaceBonusHandler.reset(p); //Clear Racial bonuses, for now...
@@ -700,7 +681,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			if (inv == null || inv.getContents() == null) {
 				return null;
 			}
-			Inventory binv = Bukkit.createInventory(this, 45, "Persona Inventory: " + getPlayerName()+"@"+getId());
+			Inventory binv = Bukkit.createInventory(this, 45, "Persona Inventory: " + getPlayerName() + "@" + getId());
 			binv.setContents(inv.getContents());
 			return binv;
 		}

@@ -1,13 +1,11 @@
 package net.lordofthecraft.arche.magic;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Magic;
 import net.lordofthecraft.arche.interfaces.MagicType;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.save.SaveExecutorManager;
 import net.lordofthecraft.arche.save.tasks.magic.ArcheMagicDeleteTask;
@@ -17,10 +15,8 @@ import org.bukkit.entity.Player;
 
 import java.sql.JDBCType;
 import java.sql.SQLType;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Created on 7/3/2017
@@ -192,7 +188,9 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     }
 
     @Override
-    public boolean isVisible(Player p) { return isVisible(ArcheCore.getPersona(p)); }
+    public boolean isVisible(Player p) {
+        return isVisible(ArcheCore.getPersona(p));
+    }
 
     @Override
     public boolean isVisible(Persona p) {
@@ -200,7 +198,9 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     }
 
     @Override
-    public int getTier(Player p) { return getTier(ArcheCore.getPersona(p));}
+    public int getTier(Player p) {
+        return getTier(ArcheCore.getPersona(p));
+    }
 
     @Override
     public int getTier(Persona p) {

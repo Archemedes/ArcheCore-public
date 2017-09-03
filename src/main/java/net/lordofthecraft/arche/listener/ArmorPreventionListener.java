@@ -28,7 +28,7 @@ public class ArmorPreventionListener implements Listener {
 	public void onPersonaSwitch(PersonaSwitchEvent e) {
         if (e.getPersona().getRace().idEquals("SPECTRE") || e.getPersona().getRace().idEquals("CONSTRUCT")) {
             boolean flag = false;
-			for (final ItemStack is : e.getPlayer().getInventory().getArmorContents())
+            for (final ItemStack is : e.getPlayer().getInventory().getArmorContents())
 				if (is != null)
 					if (is.getType() != Material.AIR && is.getType() != Material.ELYTRA) {
 						flag = true; break;

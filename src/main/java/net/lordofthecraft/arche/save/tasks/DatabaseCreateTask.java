@@ -1,7 +1,6 @@
 package net.lordofthecraft.arche.save.tasks;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -10,7 +9,7 @@ import java.sql.Statement;
  *
  * @author 501warhead
  */
-public class DatabaseCreateTask extends ArcheTask{
+public class DatabaseCreateTask extends ArcheTask {
 
     public DatabaseCreateTask() {
     }

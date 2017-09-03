@@ -42,6 +42,6 @@ CREATE INDEX idx_magic ON magics (name);
 
     @Override
     protected String getQuery() {
-        return "UPDATE magics SET "+field.field+"=? WHERE name=?";
+        return "UPDATE magics SET " + field.field + "=? WHERE name=?";
     }
 }

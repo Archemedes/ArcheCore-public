@@ -204,7 +204,6 @@ public class Archenomicon {
      */
 
 
-
     public void registerArcana(ArcheMagic m) {
         if (!magics.contains(m)) {
             magics.add(m);

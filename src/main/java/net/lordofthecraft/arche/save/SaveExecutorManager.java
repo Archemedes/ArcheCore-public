@@ -20,6 +20,7 @@ public class SaveExecutorManager {
     public static SaveExecutorManager getInstance() {
         return SaveExecutorManager.SingletonHolder.INSTANCE;
     }
+
     private final ExecutorService SAVESERVICE;
 
     protected SaveExecutorManager() {
@@ -28,7 +29,7 @@ public class SaveExecutorManager {
 
     public void submit(ArcheTask t) {
         if (SAVESERVICE.isShutdown()) {
-            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "ArcheCore caught a task being submitted after the save executor service has been shutdown. Type: "+t.toString());
+            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "ArcheCore caught a task being submitted after the save executor service has been shutdown. Type: " + t.toString());
             return;
         }
         SAVESERVICE.submit(t);
@@ -39,7 +40,7 @@ public class SaveExecutorManager {
 
     public <V> Future<V> call(Callable<V> call) {
         if (SAVESERVICE.isShutdown()) {
-            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "ArcheCore caught a task being submitted after the save executor service has been shutdown. Type: "+call.toString());
+            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "ArcheCore caught a task being submitted after the save executor service has been shutdown. Type: " + call.toString());
             return null;
         }
         return SAVESERVICE.submit(call);

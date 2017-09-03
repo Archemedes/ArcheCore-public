@@ -30,7 +30,7 @@ public class TagAttachmentCallable implements Callable<TagAttachment> {
         PreparedStatement stat = handler.getConnection().prepareStatement("SELECT tag_name,tag FROM persona_tags WHERE persona_id_fk=?");
         stat.setString(1, persona_id.toString());
         ResultSet rs = stat.executeQuery();
-        Map<String,String> tags = Maps.newConcurrentMap();
+        Map<String, String> tags = Maps.newConcurrentMap();
         while (rs.next()) {
             tags.put(rs.getString("tag_name"), rs.getString("tag"));
         }

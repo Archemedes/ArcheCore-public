@@ -1,6 +1,5 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.magic.ArcheType;
 import org.bukkit.entity.Player;
 
 /**

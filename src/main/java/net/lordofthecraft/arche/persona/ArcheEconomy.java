@@ -41,20 +41,20 @@ public class ArcheEconomy implements Economy {
 		((ArchePersona) p).money = amount;
         SaveExecutorManager.getInstance().submit(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
     }
-	
-	@Override
+
+    @Override
 	public void depositPersona(Persona p, double amount){
 		((ArchePersona) p).money += amount;
         SaveExecutorManager.getInstance().submit(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
     }
-	
-	@Override
+
+    @Override
 	public void withdrawPersona(Persona p, double amount){
 		((ArchePersona) p).money -= amount;
         SaveExecutorManager.getInstance().submit(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
     }
-	
-	@Override
+
+    @Override
 	public String currencyNameSingular(){
 		return singular;
 	}

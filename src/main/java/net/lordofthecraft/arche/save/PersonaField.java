@@ -5,9 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public enum PersonaField {
-	//TODO: make sure this is properly cleaned up and reflects the new table structure
-	/*PREFIX("prefix"),
-	NAME("name"),
+    //TODO: make sure this is properly cleaned up and reflects the new table structure
+    /*PREFIX("prefix"),
+    NAME("name"),
 	RACE("rheader"),
 	RACE_REAL("race"),
 	DESCRIPTION("desc"),
@@ -55,18 +55,19 @@ public enum PersonaField {
 	private static final String STATEMENT_SUFFIX = " = ? WHERE player = ? AND id = ?";
 	
 	private final String field;
-	private final PersonaTable table;
-	public final boolean timestamp;
-	private PreparedStatement stat = null;
+    private final PersonaTable table;
+    public final boolean timestamp;
+    private PreparedStatement stat = null;
 
-	PersonaField(String field, PersonaTable table, boolean timestamp) {
-		this.field = field;
-		this.table = table;
-		this.timestamp = timestamp;
-	}
+    PersonaField(String field, PersonaTable table, boolean timestamp) {
+        this.field = field;
+        this.table = table;
+        this.timestamp = timestamp;
+    }
 
 	public PreparedStatement getStatement(Connection c) throws SQLException{
-		if(stat == null) stat = c.prepareStatement("UPDATE " + table.getTable() + " SET " + field + STATEMENT_SUFFIX + (table == PersonaTable.MASTER ? "=?" : "_fk=?"));
-		return stat;
+        if (stat == null)
+            stat = c.prepareStatement("UPDATE " + table.getTable() + " SET " + field + STATEMENT_SUFFIX + (table == PersonaTable.MASTER ? "=?" : "_fk=?"));
+        return stat;
 	}
 }

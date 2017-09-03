@@ -129,7 +129,7 @@ public class ArcheSkillFactory implements SkillFactory {
 	@Override
 	public Skill register(){
 
-		try {
+        try {
 			SQLHandler handler = ArcheCore.getControls().getSQLHandler();
 			Connection con = handler.getConnection();
 			

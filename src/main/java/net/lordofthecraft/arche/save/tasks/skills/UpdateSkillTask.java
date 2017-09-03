@@ -7,23 +7,23 @@ import java.sql.SQLException;
 
 public class UpdateSkillTask extends StatementTask {
 
-	//private final PreparedStatement stat;
-	private final String uuid;
-	private final double xp;
-	private final boolean visible;
-	private final int slot;
-	private final String skillId;
-	
-	public UpdateSkillTask(ArcheSkill skill, String uuid, double xp, boolean visible, int slot){
-		super();
-		this.uuid = uuid;
-		//stat = skill.getUpdateStatement();
-		this.skillId = skill.getName();
-		this.xp = xp;
-		this.visible = visible;
-		this.slot = slot;
-	}
-	
+    //private final PreparedStatement stat;
+    private final String uuid;
+    private final double xp;
+    private final boolean visible;
+    private final int slot;
+    private final String skillId;
+
+    public UpdateSkillTask(ArcheSkill skill, String uuid, double xp, boolean visible, int slot) {
+        super();
+        this.uuid = uuid;
+        //stat = skill.getUpdateStatement();
+        this.skillId = skill.getName();
+        this.xp = xp;
+        this.visible = visible;
+        this.slot = slot;
+    }
+
 	/*@Override
 	public void run(){
 		
@@ -41,12 +41,12 @@ public class UpdateSkillTask extends StatementTask {
 		}
 	}*/
 
-	@Override
-	protected void setValues() throws SQLException {
-		stat.setInt(1, slot);
-		stat.setDouble(2, xp);
-		stat.setBoolean(3, visible);
-	}
+    @Override
+    protected void setValues() throws SQLException {
+        stat.setInt(1, slot);
+        stat.setDouble(2, xp);
+        stat.setBoolean(3, visible);
+    }
 
 	/*
 	    skill_id 		INT UNSIGNED AUTO_INCREMENT,
@@ -62,8 +62,8 @@ public class UpdateSkillTask extends StatementTask {
     CONSTRAINT unique_skills UNIQUE (persona_id_fk, skill_fk)
 	 */
 
-	@Override
-	protected String getQuery() {
-		return "UPDATE persona_skills SET skill_slot=? AND xp=? AND visible=? WHERE persona_id_fk=? AND skill_fk=?";
-	}
+    @Override
+    protected String getQuery() {
+        return "UPDATE persona_skills SET skill_slot=? AND xp=? AND visible=? WHERE persona_id_fk=? AND skill_fk=?";
+    }
 }

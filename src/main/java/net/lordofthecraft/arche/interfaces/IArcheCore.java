@@ -4,10 +4,7 @@ import net.lordofthecraft.arche.BlockRegistry;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.help.HelpFile;
 import net.lordofthecraft.arche.magic.Archenomicon;
-import net.lordofthecraft.arche.save.SaveExecutorManager;
-import net.lordofthecraft.arche.skill.BonusExpModifierHandler;
 import net.lordofthecraft.arche.skin.SkinCache;
-
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -29,12 +26,14 @@ public interface IArcheCore {
 	 */
 	FatigueHandler getFatigueHandler();
 
-    /**
-     *
-     * @return
-     */
-    Archenomicon getArchenomicon();
-    /**
+	/**
+	 * Get the magic controller
+	 *
+	 * @return The Archenomicon - Use with care!
+	 */
+	Archenomicon getArchenomicon();
+
+	/**
 	 * Each Persona is uniquely identified with a composite key that consists of
 	 * the Mojang Player UUID and a integer that refers to the Persona of the player.
 	 * The PersonaKey pairs these two objects, and can be used to compare Personas and as keys in HashMaps.

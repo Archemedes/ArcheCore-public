@@ -1,6 +1,5 @@
 package net.lordofthecraft.arche.enums;
 
-@Deprecated
 public enum Race {
     HUMAN("Human", "Human", 100, 1.05, 0d),
     ELF("Elf", "Elf", 1000, 0d),

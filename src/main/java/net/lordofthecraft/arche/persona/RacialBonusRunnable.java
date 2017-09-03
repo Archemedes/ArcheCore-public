@@ -24,7 +24,7 @@ public class RacialBonusRunnable extends BukkitRunnable {
 					Persona ps = handle.getPersona(p);
                     if (ps != null && ps.getRace().idEquals("SPECTRE") && p.getEyeLocation().getBlock().getLightFromSky() > 6) {
                         p.addPotionEffect(pe);
-						@SuppressWarnings("deprecation")
+                        @SuppressWarnings("deprecation")
 						EntityDamageEvent event = new EntityDamageEvent(p, DamageCause.FIRE_TICK, 2);
 						Bukkit.getPluginManager().callEvent(event);
 						if(!event.isCancelled()) p.damage(event.getDamage());

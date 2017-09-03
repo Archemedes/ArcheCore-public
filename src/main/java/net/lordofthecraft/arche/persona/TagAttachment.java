@@ -14,11 +14,11 @@ import java.util.UUID;
  */
 public class TagAttachment {
     private static final SaveExecutorManager buffer = SaveExecutorManager.getInstance();
-    private final Map<String,String> tags;
+    private final Map<String, String> tags;
     private final UUID persona_id;
     private final boolean save;
 
-    public TagAttachment(Map<String,String> tags, UUID persona_id, boolean save) {
+    public TagAttachment(Map<String, String> tags, UUID persona_id, boolean save) {
         this.tags = tags;
         this.persona_id = persona_id;
         this.save = save;
@@ -45,7 +45,7 @@ public class TagAttachment {
         }
     }
 
-    public Map<String,String> getTags() {
+    public Map<String, String> getTags() {
         return Collections.unmodifiableMap(tags);
     }
 
