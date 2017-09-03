@@ -1,18 +1,16 @@
 package net.lordofthecraft.arche.persona;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.Lists;
+import net.lordofthecraft.arche.util.InventoryUtil;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import com.google.common.collect.Lists;
-
-import net.lordofthecraft.arche.util.InventoryUtil;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PersonaInventory {
     private ItemStack[] contents;
@@ -26,7 +24,8 @@ public class PersonaInventory {
 
         config.loadFromString(str);
         if(config.getKeys(false).contains("contents")) {
-        	@SuppressWarnings("unchecked")
+            //501 - This is giving me compile errors. Incompatible types: Object cannot be cast to List<ItemStack>.
+            @SuppressWarnings("unchecked")
 			List<ItemStack> result = config.getList("contents").stream()
         	.map(Map.class::cast)
         	.map(o -> o== null? null : ItemStack.deserialize(o))
