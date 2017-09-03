@@ -22,7 +22,7 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.SkillAttachment;
 
 public class ArcheSkill implements Skill {
-	
+
 	private static ArcheTimer timer;
 	
 	private final String name,maleName,femaleName;
@@ -34,7 +34,7 @@ public class ArcheSkill implements Skill {
 
 	private final PreparedStatement statement;
 	//TODO add a statement_remove when you want to remove an entry from the skill tables altogether
-	
+
 	ArcheSkill(String name, String maleName, String femaleName, int displayStrategy, boolean inert,
 			   Set<Race> mains, Map<Race, Double> raceMods, PreparedStatement state) {
 		
@@ -57,13 +57,13 @@ public class ArcheSkill implements Skill {
 	@Override
 	public boolean isProfessionFor(Race race){
 		return mains.contains(race);
-	}	
-	
+	}
+
 	@Override
 	public String getName(){
 		return name;
 	}
-	
+
 	@Override
 	public int getVisibility(){
 		return displayStrategy;
@@ -111,13 +111,13 @@ public class ArcheSkill implements Skill {
 	@Override
 	public void addXp(Persona p, double xp){
 		if(timer != null) timer.startTiming("xp_" + name);
-		
+
 		//Also don't hand XP to people who cannot gain it in this skill
 		if(!this.canGainXp(p)) return;
 		
 		//Add some XP to the skill in question
 		addRawXp(p, xp);
-		
+
 		if(timer != null) timer.stopTiming("xp_" + name);
 	}
 	
@@ -125,7 +125,7 @@ public class ArcheSkill implements Skill {
 	public double addRawXp(Player p, double xp){
 		return addRawXp(getPersona(p), xp);
 	}
-	
+
 	@Override
 	public double addRawXp(Persona p, double xp){
 		SkillAttachment attach = getAttachment(p);
@@ -195,7 +195,7 @@ public class ArcheSkill implements Skill {
 	@Override
 	public SkillTier getSkillTier(Persona p){
 		if(!hasSkill(p)) return SkillTier.INACTIVE;
-		
+
 		double xp = getXp(p);
 		SkillTier result = SkillTier.SELECTED;
 		for(SkillTier st : SkillTier.values()){
@@ -205,7 +205,7 @@ public class ArcheSkill implements Skill {
 		
 		return result;
 	}
-	
+
 	private boolean hasSkill(Persona p) {
 		return p.getMainSkill() == this || this.isProfessionFor(p.getRace());
 	}
@@ -250,11 +250,11 @@ public class ArcheSkill implements Skill {
 		return female?
 			femaleName != null? femaleName :
 			maleName != null? maleName :
-			getName()			
+			getName()
 				: //male
 			maleName != null? maleName :
 			femaleName != null? femaleName :
 			getName();
-				
+
 	}
 }

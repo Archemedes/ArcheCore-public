@@ -1,8 +1,11 @@
 package net.lordofthecraft.arche;
 
-import java.util.List;
-import java.util.logging.Logger;
-
+import com.google.common.collect.Lists;
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.CreationDialog;
+import net.lordofthecraft.arche.skin.ArcheSkin;
+import net.lordofthecraft.arche.skin.SkinCache;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -11,13 +14,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.google.common.collect.Lists;
-
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.CreationDialog;
-import net.lordofthecraft.arche.skin.ArcheSkin;
-import net.lordofthecraft.arche.skin.SkinCache;
+import java.util.List;
+import java.util.logging.Logger;
 
 public class ArcheBeacon {
 	public static final String BEACON_HEADER = ChatColor.AQUA + "" + ChatColor.BOLD + "Your settings:";
@@ -54,12 +52,12 @@ public class ArcheBeacon {
 				}
 			}
 
-			
+
 			int max = handler.getAllowedPersonas(p);
 			int absmax = ArcheCore.getControls().personaSlots();
 			int requiredSize = requiredSize(highestUsed, max, absmax, firstFree);
 			Inventory inv = Bukkit.createInventory(p, 9*(1 + (requiredSize + 2)/9 ), BEACON_HEADER);
-			
+
 			ItemStack is;
 			final String r = ChatColor.RESET.toString();
 			final String g = ChatColor.DARK_GRAY.toString();
@@ -72,10 +70,9 @@ public class ArcheBeacon {
 				buildItem(is, r + "Ender Chest", g + "Open your Ender Chest");
 				inv.setItem(1, is);
 			}
-			
 
-			
-			//Everybody gets these buttons
+
+            //Everybody gets these buttons
 			is = new ItemStack(Material.BOOK);
 			buildItem(is, r + "Help", g + "Receive help on", g + "various topics.");
 			inv.setItem(0, is);
@@ -100,12 +97,12 @@ public class ArcheBeacon {
 						is = new ItemStack(Material.SKULL_ITEM, 1, (short) 1);
 						if(i > 5) mayMakeMore = false;
 						buildItem(is, "Locked Slot", g + "Please " + ChatColor.GREEN+""+ChatColor.ITALIC + "Purchase", g + "You may purchase more personas in the store");
-					} 
-				} else {
+                    }
+                } else {
 					ArcheSkin sk = SkinCache.getInstance().getSkinFor(a);
 					is = (sk != null ? sk.getHeadItem() : new ItemStack(Material.SKULL_ITEM, 1, (short) 3));
-					
-					String name = ChatColor.YELLOW + "" + ChatColor.ITALIC + a.getName();
+
+                    String name = ChatColor.YELLOW + "" + ChatColor.ITALIC + a.getName();
 					String gender = a.getGender() == null? "" : a.getGender();
 					String desc = ChatColor.GRAY + a.getRaceString() + " " + gender;
 					String d2 = (i == current? ChatColor.DARK_GREEN + "Selected!": ChatColor.GREEN + "Click to select");
@@ -133,11 +130,11 @@ public class ArcheBeacon {
 			result++;
 		}
 		//Need an extra slot to tell people they can buy MORE
-		
-		return result < 6? 6 : result;
+
+        return result < 6? 6 : result;
 	}
-	
-	private static ItemStack buildItem(ItemStack is, String title, String... lore){
+
+    private static ItemStack buildItem(ItemStack is, String title, String... lore){
 		ItemMeta meta = is.getItemMeta();
 		meta.setDisplayName(title);
 		List<String> loreList = Lists.newLinkedList();

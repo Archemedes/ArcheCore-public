@@ -1,5 +1,7 @@
 package net.lordofthecraft.arche.interfaces;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.bukkit.entity.Player;
@@ -40,7 +42,7 @@ public interface Persona {
 	 * @return The PersonaSkills object
 	 */
 	PersonaSkills getPersonaSkills();
-	
+
 	/**
 	 * A method that retrieves the Persona's 'main' skill or profession, which they can set for RP purposes.
 	 * @return A player's self-set 'main' skill.
@@ -66,6 +68,12 @@ public interface Persona {
 	 */
 	boolean isCurrent();
 
+    boolean hasMagic(Magic m);
+
+    boolean hasAchievedMagicTier(Magic m, int tier);
+
+    Optional<Future<MagicAttachment>> createAttachment(Magic m, int tier, Persona teacher, boolean visible);
+
 	/**
 	 * Gets a Personas prefix.
 	 * @return the Persona's current Prefix
@@ -86,10 +94,10 @@ public interface Persona {
 	boolean hasPrefix();
 
 	public double getFatigue();
-	
+
 	public void setFatigue(double fatigue);
-	
-	
+
+
 	/**
 	 * Clears a Personas prefix. If Prefixes are disabled, calling this will change
 	 * the prefix, but not display it anywhere in the current session.
@@ -217,6 +225,20 @@ public interface Persona {
 	 * Assign a persona's gender to the specified gender.
 	 * @param r The persona's new gender.
 	 */
+
+    boolean hasTagKey(String s);
+
+    Optional<String> getTagValue(String tag);
+
+    Map<String, String> getTags();
+
+    void setTag(String name, String value);
+
+    void removeTag(String name);
+
+    String getPersonaType();
+
+    void setPersonaType(String type);
 
 	void setGender(String gender);
 

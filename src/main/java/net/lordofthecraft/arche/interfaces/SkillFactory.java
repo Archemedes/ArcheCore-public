@@ -1,6 +1,6 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.persona.Race;
 import org.bukkit.Material;
 
 public interface SkillFactory {

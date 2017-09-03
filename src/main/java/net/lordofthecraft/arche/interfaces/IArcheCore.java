@@ -3,6 +3,9 @@ package net.lordofthecraft.arche.interfaces;
 import net.lordofthecraft.arche.BlockRegistry;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.help.HelpFile;
+import net.lordofthecraft.arche.magic.Archenomicon;
+import net.lordofthecraft.arche.save.SaveExecutorManager;
+import net.lordofthecraft.arche.skill.BonusExpModifierHandler;
 import net.lordofthecraft.arche.skin.SkinCache;
 
 import org.bukkit.Material;
@@ -25,8 +28,13 @@ public interface IArcheCore {
 	 * @return The FatigueHandler singleton
 	 */
 	FatigueHandler getFatigueHandler();
-	
-	/**
+
+    /**
+     *
+     * @return
+     */
+    Archenomicon getArchenomicon();
+    /**
 	 * Each Persona is uniquely identified with a composite key that consists of
 	 * the Mojang Player UUID and a integer that refers to the Persona of the player.
 	 * The PersonaKey pairs these two objects, and can be used to compare Personas and as keys in HashMaps.
@@ -175,7 +183,7 @@ public interface IArcheCore {
 	 * @return The Economy object
 	 */
 	Economy getEconomy();
-	
+
 	/**
 	 * @return If new Personas will be teleported to spawn after creation
 	 */
@@ -195,7 +203,7 @@ public interface IArcheCore {
 	 * @return the delay in days within which newly created Personas cannot be permakilled by their owners.
 	 */
 	int getNewPersonaPermakillDelay();
-	
+
 	/**
 	 * @return The current name of the world of LotC
 	 */
@@ -211,12 +219,12 @@ public interface IArcheCore {
 	 * @return Whether or not the Persona menu will have a button in the menu
 	 */
 	boolean showEnderchestInMenu();
-	
+
 	/**
 	 * @return If damage bonuses are enabled for races
 	 */
 	boolean areRacialDamageBonusesEnabled();
-	
+
 	/**
 	 * Skin Cache keeps track of skins belonging to players, and custom skins applied to persona
 	 * @return The SkinCache singleton

@@ -1,6 +1,5 @@
 package net.lordofthecraft.arche.persona;
 
-import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import org.bukkit.Bukkit;
@@ -23,8 +22,8 @@ public class RacialBonusRunnable extends BukkitRunnable {
 			if(w.getEnvironment() == Environment.NORMAL && (w.getTime() > 23000 || w.getTime() < 13000) ){
 				for(Player p : w.getPlayers()){
 					Persona ps = handle.getPersona(p);
-					if(ps != null && ps.getRace() == Race.SPECTRE && p.getEyeLocation().getBlock().getLightFromSky() > 6){
-						p.addPotionEffect(pe);
+                    if (ps != null && ps.getRace().idEquals("SPECTRE") && p.getEyeLocation().getBlock().getLightFromSky() > 6) {
+                        p.addPotionEffect(pe);
 						@SuppressWarnings("deprecation")
 						EntityDamageEvent event = new EntityDamageEvent(p, DamageCause.FIRE_TICK, 2);
 						Bukkit.getPluginManager().callEvent(event);

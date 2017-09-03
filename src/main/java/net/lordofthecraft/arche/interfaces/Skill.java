@@ -1,7 +1,7 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.enums.SkillTier;
+import net.lordofthecraft.arche.persona.Race;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
@@ -187,10 +187,10 @@ public interface Skill {
 	/**
 	 * @return The list of registered racial mods for this skill.
 	 */
-	Map<Race, Double> getRaceMods();
+	Map<net.lordofthecraft.arche.persona.Race, Double> getRaceMods();
 
 	/**
 	 * @return The list of races who call this skill their racial profession, or one of them.
 	 */
-	Set<Race> getMains();
+	Set<net.lordofthecraft.arche.persona.Race> getMains();
 }

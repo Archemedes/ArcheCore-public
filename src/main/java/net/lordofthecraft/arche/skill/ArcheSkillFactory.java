@@ -128,7 +128,7 @@ public class ArcheSkillFactory implements SkillFactory {
 
 	@Override
 	public Skill register(){
-		
+
 		try {
 			SQLHandler handler = ArcheCore.getControls().getSQLHandler();
 			Connection con = handler.getConnection();
@@ -200,5 +200,5 @@ public class ArcheSkillFactory implements SkillFactory {
 		this.femaleName = name;
 		return this;
 	}
-	
+
 }
