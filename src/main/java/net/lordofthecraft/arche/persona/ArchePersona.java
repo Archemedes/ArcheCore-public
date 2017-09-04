@@ -20,6 +20,7 @@ import net.lordofthecraft.arche.save.tasks.DataTask;
 import net.lordofthecraft.arche.save.tasks.magic.MagicCreateCallable;
 import net.lordofthecraft.arche.save.tasks.persona.SelectSkillTask;
 import net.lordofthecraft.arche.save.tasks.persona.TagAttachmentCallable;
+import net.lordofthecraft.arche.save.tasks.persona.UpdateFatigueTask;
 import net.lordofthecraft.arche.save.tasks.persona.UpdateTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
@@ -29,7 +30,6 @@ import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -37,7 +37,6 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.ref.WeakReference;
 import java.sql.*;
@@ -61,7 +60,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private static CallableStatement deleteCall = null;
 
 	//The immutable auto-increment ID of this persona.
-	private int persona_id;
+	private final int persona_id;
 
 	final PersonaSkills skills = new PersonaSkills(this);
 
@@ -74,46 +73,52 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	volatile String prefix = null;
 	boolean current = true;
 	String raceHeader = null;
-	long lastRenamed;
-	long creationTimeMS;
+	Timestamp lastRenamed;
+	Timestamp creationTimeMS;
 	int pastPlayTime; //stat_playtime_past
 	String player; //Last known minecraft name of the owning player
 	WeakBlock location = null;
 	PersonaInventory inv = null;
 	double money = 0;
-	double fatigue = 0.; //TODO needs PersonaField
+	double fatigue = 0;
+	double maxFatigue = 100;
+	int food = 0;
+	int saturation = 0;
+	double health = 0;
+	Timestamp lastPlayed;
 	private Race race;
 	private Creature creature;
 	private volatile String name;
 	private WeakReference<Player> playerObject;
 	private int hash = 0;
-	private int food = 0;
-	private double health = 0;
 	private TagAttachment attachment;
 	private Map<String, String> tags;
 	private PersonaType type;
 	private Set<MagicAttachment> magics = Sets.newConcurrentHashSet();
 
-	ArchePersona(OfflinePlayer p, int id, String name, Race race, int gender,long creationTimeMS){
-		this.key = new ArchePersonaKey(p.getUniqueId(), id);
+	ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int gender, Timestamp creationTimeMS) {
+		this(persona_id, player, slot, name, race, gender, creationTimeMS, PersonaType.NORMAL);
+	}
 
-		player = p.getName();
+	ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int gender, Timestamp creationTimeMS, PersonaType type) {
+		this.key = new ArchePersonaKey(player, slot);
+
+		this.persona_id = persona_id;
 		this.race = race;
 		this.name = name;
 		this.gender = gender;
 		this.creationTimeMS = creationTimeMS;
-		this.type = PersonaType.NORMAL;
+		this.type = type;
 
 		timePlayed = new AtomicInteger();
 		charactersSpoken = new AtomicInteger();
-		lastRenamed = 0;
+		lastRenamed = new Timestamp(0);
 		pastPlayTime = 0;
 
 		tags = Maps.newConcurrentMap();
 
-		sqlCriteria = Maps.newHashMap();
-		sqlCriteria.put("player", getPlayerUUID().toString());
-		sqlCriteria.put("id", id);
+		sqlCriteria = Maps.newConcurrentMap();
+		sqlCriteria.put("persona_id", persona_id);
 	}
 
 	@Override
@@ -132,6 +137,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	public SkillAttachment getSkill(Skill skill){
 		return skills.getSkill(skill);
+	}
+
+	public void setPlayerName(String name) {
+		this.name = name;
 	}
 
 	@Override
@@ -463,7 +472,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		if (event.isCancelled()) return;
 
 		this.name = name;
-		lastRenamed = System.currentTimeMillis();
+		lastRenamed = new Timestamp(System.currentTimeMillis());
 
 		buffer.put(new UpdateTask(this, PersonaField.NAME, name));
 		buffer.put(new UpdateTask(this, PersonaField.STAT_RENAMED, lastRenamed));
@@ -509,7 +518,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	@Override
-	public long getRenamed(){
+	public Timestamp getRenamed() {
 		return lastRenamed;
 	}
 
@@ -586,11 +595,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		//Do we protect incase of bad teleport?
 		if (ArcheCore.getPlugin().teleportProtectively()) {
 			NewbieProtectListener.bonusProtects.add(p.getUniqueId());
-			// TODO: This doesn't actually do anything lmao
-			new BukkitRunnable(){
-				public void run(){
-					NewbieProtectListener.bonusProtects.remove(p.getUniqueId());
-				}};
+			Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> {
+				NewbieProtectListener.bonusProtects.remove(p.getUniqueId());
+			});
 		}
 
 		//Give them an inventory.
@@ -686,7 +693,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			if (inv == null || inv.getContents() == null) {
 				return null;
 			}
-			Inventory binv = Bukkit.createInventory(this, 45, "Persona Inventory: " + getPlayerName() + "@" + getId());
+			Inventory binv = Bukkit.createInventory(this, 45, "Persona Inventory: " + player + "@" + getId());
 			binv.setContents(inv.getContents());
 			return binv;
 		}
@@ -714,7 +721,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		if(object == null) return false;
 		if(!(object instanceof ArchePersona)) return false;
 		ArchePersona p = (ArchePersona) object;
-		return this.player.equals(p.player) && this.getId() == p.getId();
+		return this.persona_id == p.persona_id;
 	}
 	//
 	@Override
@@ -723,7 +730,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	@Override
-	public long getCreationTime(){
+	public Timestamp getCreationTime() {
 		return this.creationTimeMS;
 	}
 
@@ -743,7 +750,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		Bukkit.getPluginManager().callEvent(event);
 		if(!event.isCancelled()) {
 			this.fatigue = event.getNewFatigue();
-			//TODO sql update. Needs to be extra fast since this will be used often
+			buffer.put(new UpdateFatigueTask(fatigue, persona_id, player));
 		}
 	}
 }

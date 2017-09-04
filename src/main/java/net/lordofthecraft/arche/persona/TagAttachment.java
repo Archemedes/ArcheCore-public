@@ -1,6 +1,6 @@
 package net.lordofthecraft.arche.persona;
 
-import net.lordofthecraft.arche.save.SaveExecutorManager;
+import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.persona.PersonaTagTask;
 
 import java.util.Collections;
@@ -12,7 +12,7 @@ import java.util.Map;
  * @author 501warhead
  */
 public class TagAttachment {
-    private static final SaveExecutorManager buffer = SaveExecutorManager.getInstance();
+    private static final SaveHandler buffer = SaveHandler.getInstance();
     private final Map<String, String> tags;
     private final int persona_id;
     private final boolean save;
@@ -30,17 +30,17 @@ public class TagAttachment {
     public void setValue(String name, String value) {
         if (tags.containsKey(name)) {
             tags.replace(name, value);
-            if (save) buffer.submit(new PersonaTagTask(false, persona_id, name, value));
+            if (save) buffer.put(new PersonaTagTask(false, persona_id, name, value));
         } else {
             tags.put(name, value);
-            if (save) buffer.submit(new PersonaTagTask(true, persona_id, name, value));
+            if (save) buffer.put(new PersonaTagTask(true, persona_id, name, value));
         }
     }
 
     public void delValue(String name) {
         if (tags.containsKey(name)) {
             tags.remove(name);
-            if (save) buffer.submit(new PersonaTagTask(false, persona_id, name, null));
+            if (save) buffer.put(new PersonaTagTask(false, persona_id, name, null));
         }
     }
 

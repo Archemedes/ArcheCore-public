@@ -8,6 +8,7 @@ import net.lordofthecraft.arche.persona.PersonaSkills;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
+import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -234,7 +235,7 @@ public interface Persona {
 	 * Get the time this Persona was last renamed (as fetched by the System's currentTimeMillis on the time of the last rename)
 	 * @return The moment of this Persona's last renaming.
 	 */
-	long getRenamed();
+    Timestamp getRenamed();
 
 	/**
 	 * Clear the biopgraphy of this Persona.
@@ -348,7 +349,7 @@ public interface Persona {
 	/**
 	 * @return the creation time of this persona in milliseconds
 	 */
-	long getCreationTime();
+    Timestamp getCreationTime();
 
 	/**
 	 * @return the total playtime of this persona(all maps added)

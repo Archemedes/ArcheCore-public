@@ -28,9 +28,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 
 import javax.annotation.Nonnull;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -40,6 +38,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	private final Map<UUID, ArchePersona[]> personas = new HashMap<>(Bukkit.getServer().getMaxPlayers());
 	//private final ArchePersonaExtender extender = new ArchePersonaExtender();
 	private SaveHandler buffer = SaveHandler.getInstance();
+	private Connection personaConnection = null;
 	private boolean displayName = false;
 	private PreparedStatement selectStatement = null;
 	private Map<Race, Location> racespawns = Maps.newHashMap();
@@ -52,6 +51,12 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	public static ArchePersonaHandler getInstance(){
 		return instance;
+	}
+
+	public void setPersonaConnection(Connection connection) {
+		if (personaConnection == null) {
+			personaConnection = connection;
+		}
 	}
 
 	public boolean isPreloading() {
@@ -241,38 +246,28 @@ public class ArchePersonaHandler implements PersonaHandler {
 		return true;
 	}
 
-
-	@Override
-	public ArchePersona createPersona(Player p, int id, String name, Race race, int gender, long creationTime){
-
+	public boolean registerPersona(Player p, ArchePersona persona) {
 		ArchePersona[] prs = personas.computeIfAbsent(
 				p.getUniqueId(),
 				k -> new ArchePersona[ArcheCore.getControls().personaSlots()]
-						);
+		);
 
-		//Check for old Persona
-		if(prs[id] != null){
-			PersonaRemoveEvent event2 = new PersonaRemoveEvent(prs[id], true);
+		if (prs[persona.getId()] != null) {
+			PersonaRemoveEvent event2 = new PersonaRemoveEvent(prs[persona.getId()], true);
 			Bukkit.getPluginManager().callEvent(event2);
 
-			if(event2.isCancelled()) return null;
+			if (event2.isCancelled()) return false;
 
 			//This should no longer be necessary because of unique constraints
 			//buffer.put(new DataTask(DataTask.DELETE, "persona", null, prs[id].sqlCriteria));
-			buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, prs[id].sqlCriteria));
+			buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, prs[persona.getId()].sqlCriteria));
 
 			//delete all skill records
-			deleteSkills(prs[id]);
-			SkinCache.getInstance().clearSkin(prs[id]);
+			deleteSkills(prs[persona.getId()]);
+			SkinCache.getInstance().clearSkin(prs[persona.getId()]);
 		}
-
-		ArchePersona persona = new ArchePersona(p, id, name, race, gender,creationTime);
-
-		PersonaCreateEvent event = new PersonaCreateEvent(persona, prs[id]);
-		Bukkit.getPluginManager().callEvent(event);
-
 		//Add this Persona into its slot
-		prs[id] = persona;
+		prs[persona.getId()] = persona;
 
 		//Load skills for the Persona
 		for(ArcheSkill s : ArcheSkillFactory.getSkills().values()){
@@ -288,19 +283,19 @@ public class ArchePersonaHandler implements PersonaHandler {
 		//ArcheTask task = new InsertTask(uuid, id, name, race, gender,creationTime);
 		//buffer.put(task);
 
-		RaceBonusHandler.apply(p, race);
+		RaceBonusHandler.apply(p, persona.getRace());
 		persona.updateDisplayName(p);
 
-		switchPersona(p, id); //This teleport will fail due to the Location being null still
+		switchPersona(p, persona.getId()); //This teleport will fail due to the Location being null still
 
 		if (ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
 			Location to;
 			try {
-				if (!racespawns.containsKey(race)) {
+				if (!racespawns.containsKey(persona.getRace())) {
 					World w = ArcheCore.getControls().getNewPersonaWorld();
 					to = w == null ? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
 				} else {
-					to = racespawns.get(race);
+					to = racespawns.get(persona.getRace());
 				}
 				p.teleport(to);
 			}catch (Exception e){
@@ -308,9 +303,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			}
 		}
 
-
-
-		return persona;
+		return true;
 	}
 
 	@Override
@@ -496,7 +489,15 @@ public class ArchePersonaHandler implements PersonaHandler {
 		ResultSet res = null;
 		try {
 			if (selectStatement == null)
-				selectStatement = handler.getConnection().prepareStatement("SELECT * FROM persona WHERE player_fk = ?");
+				selectStatement = personaConnection.prepareStatement("SELECT " +
+						"persona_id,slot,race_key,gender" +
+						",name,curr,race_header,descr,prefix,money,skin,profession,fatigue,max_fatigue" +
+						",world,x,y,z,inv,enderinv,health,hunger,saturation" +
+						",played,chars,renamed,playtime_past,date_created,last_played " +
+						"FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
+						"JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
+						"WHERE player_fk=?");
+			selectStatement.clearParameters();
 			selectStatement.setString(1, p.getUniqueId().toString());
 			res = selectStatement.executeQuery();
 
@@ -578,45 +579,55 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	private ArchePersona buildPersona(ResultSet res, OfflinePlayer p) throws SQLException{
-		//TODO will need some serious updating
-		int id = res.getInt(2);
-		String name = res.getString(3);
-		Race race = Race.valueOf(res.getString(5));
-		String rheader = res.getString(6);
-		int gender = res.getInt(7);
-		long creationTimeMS = res.getLong(27);
+		int persona_id = res.getInt("persona_id");
+		int slot = res.getInt("slot");
+		String name = res.getString("name");
+		Race race = Race.valueOf(res.getString("race"));
+		String rheader = res.getString("race_header");
+		int gender = res.getInt("gender");
+		Timestamp creationTimeMS = res.getTimestamp("date_created");
+		String type = res.getString("p_type");
+		PersonaType ptype = PersonaType.valueOf(type);
 
 
-		ArchePersona persona = new ArchePersona(p, id, name, race, gender, creationTimeMS);
+		ArchePersona persona = new ArchePersona(persona_id, p.getUniqueId(), slot, name, race, gender, creationTimeMS, ptype);
+		persona.player = p.getName();
 		//prs[id] = persona;
 
 		if(rheader != null && !rheader.equals("null") && !rheader.isEmpty()){
 			persona.raceHeader = rheader;
 		}
 
-		persona.description = res.getString(8);
-		persona.prefix = res.getString(9);
-		persona.current = res.getBoolean(10);
+		persona.description = res.getString("descr");
+		persona.prefix = res.getString("prefix");
+		persona.current = res.getBoolean("curr");
+		persona.fatigue = res.getInt("fatigue");
+		persona.maxFatigue = res.getInt("max_fatigue");
+		persona.health = res.getDouble("health");
+		persona.food = res.getInt("food");
+		persona.saturation = res.getInt("saturation");
 
-		persona.timePlayed.set(res.getInt(12));
-		persona.charactersSpoken.set(res.getInt(13));
-		persona.lastRenamed = res.getLong(14);
+		persona.timePlayed.set(res.getInt("played"));
+		persona.charactersSpoken.set(res.getInt("chars"));
+		persona.lastRenamed = res.getTimestamp("renamed");
+		persona.lastPlayed = res.getTimestamp("last_played");
 		//persona.gainsXP = res.getBoolean(15);
-		persona.skills.setMainProfession(ArcheSkillFactory.getSkill(res.getString(16)));
+		persona.skills.setMainProfession(ArcheSkillFactory.getSkill(res.getString("profession")));
 
-		String wstr = res.getString(17);
+		String wstr = res.getString("world");
 		if(!res.wasNull()){
 			UUID wuuid = UUID.fromString(wstr);
 			World w = Bukkit.getWorld(wuuid);
 			if(w != null){
-				int x = res.getInt(18);
-				int y = res.getInt(19);
-				int z = res.getInt(20);
+				int x = res.getInt("x");
+				int y = res.getInt("y");
+				int z = res.getInt("z");
 				persona.location = new WeakBlock(w, x, y, z);
 			}
 		}
 
-		String invString = res.getString(21);
+		String invString = res.getString("inv");
+		String enderinvString = res.getString("enderinv"); //TODO implement
 		if(!res.wasNull()){
 			try {
 				persona.inv = PersonaInventory.restore(invString);
@@ -626,8 +637,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 			}
 		}
 
-		if(ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble(22);
-		persona.pastPlayTime = res.getInt(28);
+		if (ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble("money");
+		persona.pastPlayTime = res.getInt("playtime_past");
 
 		//We now let all Personas load their skills (albeit lazily). Let's do this now
 		persona.loadSkills();
@@ -644,18 +655,18 @@ public class ArchePersonaHandler implements PersonaHandler {
 		long time = System.currentTimeMillis();
 		preloading = true;
 		try{
-			PreparedStatement persona_prep = handler.getConnection().prepareStatement("SELECT " +
-					"persona_id,id,race_key_fk,gender" +
-					",persona_name,curr,rheader,autoage,age,xpgain,descr,pref,money,skindata" +
-					",world,x,y,z,inv" +
-					",stat_played,stat_chars,stat_renamed,stat_playtime_past,date_created,last_played " +
-					"FROM persona JOIN persona_extras ON persona.persona_id=persona_extras.persona_id_fk " +
-					"JOIN persona_world ON persona.persona_id=persona_world.persona_id_fk " +
-					"JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
-					"WHERE player_fk=?");
+			if (selectStatement == null)
+				selectStatement = personaConnection.prepareStatement("SELECT " +
+						"persona_id,slot,race_key,gender" +
+						",name,curr,race_header,descr,prefix,money,skin,profession,fatigue,max_fatigue" +
+						",world,x,y,z,inv,enderinv,health,hunger,saturation" +
+						",played,chars,renamed,playtime_past,date_created,last_played " +
+						"FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
+						"JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
+						"WHERE player_fk=?");
 
 
-			ResultSet res = handler.query("SELECT player,preload_force FROM players");
+			ResultSet res = personaConnection.createStatement().executeQuery("SELECT player,preload_force FROM players");
 			while(res.next()){
 				UUID uuid = UUID.fromString(res.getString("player"));
 				OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
@@ -672,8 +683,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 					prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
 					personas.put(uuid, prs);
 				}
-				persona_prep.setString(1, p.getUniqueId().toString());
-				ArchePersona persona = buildPersona(persona_prep.executeQuery(), p);
+				selectStatement.clearParameters();
+				selectStatement.setString(1, p.getUniqueId().toString());
+				ArchePersona persona = buildPersona(selectStatement.executeQuery(), p);
 				prs[persona.getId()] = persona;
 			}
 		}catch(SQLException e){e.printStackTrace();}

@@ -1,20 +1,18 @@
 package net.lordofthecraft.arche.interfaces;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.annotation.Nonnull;
-
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.skill.TopData;
 import net.md_5.bungee.api.chat.BaseComponent;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+
+import javax.annotation.Nonnull;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public interface PersonaHandler {
 
@@ -142,21 +140,6 @@ public interface PersonaHandler {
 	 * @return If the switch was successful
 	 */
 	boolean switchPersona(Player p, int id);
-
-	/**
-	 * Creates a Persona for a Player, removing any Persona previously existing
-	 * with the given ID for that Player, and sets the Player's current Persona
-	 * to the one newly created
-	 * @param p The player for which to create the Persona
-	 * @param id Id of the Persona (0-3)
-	 * @param name RP Name of the Persona
-	 * @param race Race of the Persona
-	 * @param gender Gender, with 0 = female, 1 = male, any other value counts as 'unset'
-	 * @param age The Age of the RP persona
-	 * @param autoAge Whether or not this Persona's age should automatically increase
-	 * @return The resulting persona
-	 */
-	Persona createPersona(Player p, int id, String name, Race race, int gender, long creationTimeMS);
 
 	/**
 	 * Method that provides a human-readable list of information about a Persona, to be used in prints

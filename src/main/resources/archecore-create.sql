@@ -13,36 +13,68 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE INDEX idx_player ON players (player);
 
-/* parent */
-CREATE TABLE IF NOT EXISTS races (
-    race_key 		VARCHAR(255),
-    max_age 		INT UNSIGNED,
-    r_name 			TEXT,
-    base_xp_mult 	DOUBLE(10,2) DEFAULT 1.0,
-    luck_value 		DOUBLE(10,2) DEFAULT 0.0,
-    special         BOOLEAN DEFAULT FALSE,
-    parent_race 	VARCHAR(255) DEFAULT NULL,
-    PRIMARY KEY (race_key)
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE INDEX idx_race_key ON races (race_key);
-
 /* Parent & Child */
 CREATE TABLE IF NOT EXISTS persona (
-    persona_id 		CHAR(36),
+    persona_id 		INT UNSIGNED AUTO_INCREMENT,
     player_fk 		CHAR(36) NOT NULL,
-    id 				INT UNSIGNED NOT NULL,
-    race_key_fk 	VARCHAR(255) NOT NULL,
-    gender 			ENUM('m','f','o') DEFAULT 'o',
+    slot 			INT UNSIGNED NOT NULL,
+    race_key 	    VARCHAR(255) NOT NULL,
+    name            TEXT,
+    gender 			TEXT NOT NULL,
     p_type          TEXT DEFAULT 'NORMAL',
+    race_header     TEXT DEFAULT NULL,
+    descr           TEXT DEFAULT NULL,
+    prefix          TEXT DEFAULT NULL,
+    curr            BOOLEAN DEFAULT FALSE,
+    skin            TEXT DEFAULT NULL,
+    money           DOUBLE DEFAULT 0.0,
+    profession      VARCHAR(255) DEFAULT NULL,
+    fatigue         DOUBLE DEFAULT 0.0,
+    max_fatigue     DOUBLE DEFAULT 100.0,
     PRIMARY KEY (persona_id),
-    FOREIGN KEY (player_fk) REFERENCES players (player),
-    FOREIGN KEY (race_key_fk) REFERENCES races (race_key)
+    FOREIGN KEY (player_fk) REFERENCES players (player)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE INDEX idx_persona_id ON persona (persona_id);
+/* Child */
+CREATE TABLE IF NOT EXISTS persona_vitals (
+    persona_id_fk 	INT UNSIGNED,
+    world 			VARCHAR(255),
+    x 				INT NOT NULL,
+    y 				INT NOT NULL,
+    z 				INT NOT NULL,
+    inv 			TEXT,
+    ender_inv       TEXT,
+    health          DOUBLE DEFAULT 10.0,
+    hunger          INT DEFAULT 0,
+    saturation      INT DEFAULT 0,
+    PRIMARY KEY (persona_id_fk),
+    FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/* Child */
+CREATE TABLE IF NOT EXISTS persona_tags (
+    persona_id_fk 	INT UNSIGNED NOT NULL,
+    tag_name 		TEXT NOT NULL,
+    tag 			TEXT,
+    FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/* Child */
+CREATE TABLE IF NOT EXISTS persona_stats (
+    persona_id_fk 		INT UNSIGNED,
+    played       		INT UNSIGNED DEFAULT 0,
+    chars 	    		INT UNSIGNED DEFAULT 0,
+    renamed      		TIMESTAMP DEFAULT NOW(),
+    playtime_past    	INT UNSIGNED DEFAULT 0,
+    date_created 		TIMESTAMP NOT NULL DEFAULT NOW(),
+    last_played 		TIMESTAMP DEFAULT NOW(),
+    PRIMARY KEY (persona_id_fk),
+    FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* parent */
 CREATE TABLE IF NOT EXISTS skills (
@@ -51,8 +83,6 @@ CREATE TABLE IF NOT EXISTS skills (
     PRIMARY KEY (skill)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE INDEX idx_skill ON skills (skill);
 
 CREATE TABLE IF NOT EXISTS magic_archetypes (
     id_key      VARCHAR(255),
@@ -118,15 +148,6 @@ CREATE TABLE IF NOT EXISTS creature_abilities (
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/* parent */
-CREATE TABLE IF NOT EXISTS bonus_exp_types (
-    exp_type 		VARCHAR(255),
-    PRIMARY KEY (exp_type)
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE INDEX idx_exp_type ON bonus_exp_types (exp_type);
-
 /* parent & child */
 CREATE TABLE IF NOT EXISTS persona_log (
     log_id INT UNSIGNED AUTO_INCREMENT,
@@ -168,80 +189,13 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* Child */
 CREATE TABLE IF NOT EXISTS race_spawns (
-    race_key_fk 	VARCHAR(255),
+    race_key     	VARCHAR(255),
     world 			VARCHAR(255) NOT NULL,
     x 				INT NOT NULL,
     y 				INT NOT NULL,
     z 				INT NOT NULL,
     PRIMARY KEY (race_key_fk),
     FOREIGN KEY (race_key_fk) REFERENCES races (race_key) ON UPDATE CASCADE
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/* Child */
-CREATE TABLE IF NOT EXISTS persona_extras (
-    persona_id_fk 	CHAR(36),
-    persona_name 	TEXT NOT NULL,
-    curr 			BOOLEAN NOT NULL,
-    rheader 		TEXT,
-    autoage 		BOOLEAN,
-    age 			INT UNSIGNED NOT NULL,
-    xpgain 			BOOLEAN,
-    descr 			TEXT,
-    pref 			TEXT,
-    money 			DOUBLE(10,2),
-    skindata		TEXT,
-    skill_fk        VARCHAR(255) DEFAULT NULL,
-    creature_fk     VARCHAR(255) DEFAULT NULL,
-    PRIMARY KEY (persona_id_fk),
-    FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE,
-    FOREIGN KEY (skill_fk) REFERENCES skill (skill_id) ON UPDATE CASCADE,
-    FOREIGN KEY (creature_fk) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/* Child */
-CREATE TABLE IF NOT EXISTS persona_world (
-    persona_id_fk 	CHAR(36),
-    world 			VARCHAR(255),
-    x 				INT NOT NULL,
-    y 				INT NOT NULL,
-    z 				INT NOT NULL,
-    inv 			TEXT,
-    PRIMARY KEY (persona_id_fk),
-    FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/* Child */
-CREATE TABLE IF NOT EXISTS persona_tags (
-    persona_id_fk 	CHAR(36) NOT NULL,
-    tag_name 		TEXT NOT NULL,
-    tag 			TEXT,
-    FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/* Child */
-CREATE TABLE IF NOT EXISTS persona_stats (
-    persona_id_fk 		CHAR(36),
-    stat_played 		INT UNSIGNED,
-    stat_chars 			INT UNSIGNED,
-    stat_renamed 		TIMESTAMP,
-    stat_playtime_past 	INT UNSIGNED,
-    date_created 		TIMESTAMP NOT NULL,
-    last_played 		TIMESTAMP,
-    PRIMARY KEY (persona_id_fk),
-    FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/* Child */
-CREATE TABLE IF NOT EXISTS accs (
-    persona_id_fk 	CHAR(36),
-    money 			DOUBLE(10,2),
-    PRIMARY KEY (persona_id_fk),
-    FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -275,18 +229,6 @@ CREATE TABLE IF NOT EXISTS persona_skill_log (
     slot TINYINT(1) NOT NULL DEFAULT 3,
     PRIMARY KEY (log_id_fk,skill),
     FOREIGN KEY (log_id_fk) REFERENCES persona_log (log_id)
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/* Junction */
-CREATE TABLE IF NOT EXISTS race_xp (
-    race_key_fk 	VARCHAR(255),
-    skill_fk 		VARCHAR(255),
-    xp_mult 		DOUBLE(10,2) DEFAULT 1.0,
-    racial_skill	BOOLEAN DEFAULT FALSE,
-    PRIMARY KEY (race_key_fk, skill_fk),
-    FOREIGN KEY (race_key_fk) REFERENCES races (race_key),
-    FOREIGN KEY (skill_fk) REFERENCES skills (skill)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

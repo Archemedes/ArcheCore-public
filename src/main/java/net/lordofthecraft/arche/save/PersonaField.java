@@ -3,28 +3,6 @@ package net.lordofthecraft.arche.save;
 import java.sql.*;
 
 public enum PersonaField {
-    //TODO: make sure this is properly cleaned up and reflects the new table structure
-    /*PREFIX("prefix"),
-    NAME("name"),
-	RACE("rheader"),
-	RACE_REAL("race"),
-	DESCRIPTION("desc"),
-	SKILL_SELECTED("skill_selected"),
-	AGE("age"),
-	AUTOAGE("autoage"),
-	CURRENT("current"),
-	XP_GAIN("skill_xpgain"),
-	STAT_PLAYED("stat_played"),
-	STAT_CHARS("stat_chars"),
-	STAT_RENAMED("stat_renamed"),
-	SKILL_PRIMARY("skill_primary"),
-	SKILL_SECONDARY("skill_secondary"),
-	SKILL_ADDITIONAL("skill_tertiary"),
-	STAT_CREATION("stat_creation"),
-	STAT_PLAYTIME_PAST("stat_playtime_past"),
-	MONEY("money"),
-	ICON("skindata"),
-	GENDER("gender");*/
     PREFIX("prefix", PersonaTable.EXTRAS, JDBCType.VARCHAR),
     NAME("name", PersonaTable.EXTRAS, JDBCType.VARCHAR),
     RACE("rheader", PersonaTable.EXTRAS, JDBCType.VARCHAR),

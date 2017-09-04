@@ -30,6 +30,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
@@ -168,19 +169,25 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		initConfig();
 
 		//Find our Singletons and assign them.
+		Connection personaConnection = null;
 		getLogger().info("Loading " + (usingMySQL ? "MySQL" : "SQLite") + " handler now.");
 		if (usingMySQL) {
 			String username = getConfig().getString("mysql.user");
 			String password = getConfig().getString("mysql.password");
 			try {
 				getLogger().info("Logging into MySQL at " + WhySQLHandler.getUrl() + ", Username: " + username);
-				sqlHandler = new WhySQLHandler(username, password);
+				WhySQLHandler wsql = new WhySQLHandler(username, password);
+				sqlHandler = wsql;
+				personaConnection = wsql.getDataSource().getConnection();
 			} catch (Exception e) {
 				getLogger().log(Level.SEVERE, "Failed to initialize MySQL DB on url " + WhySQLHandler.getUrl() + " with username " + username + " and password " + password, e);
 				sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
 			}
 		} else {
 			sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
+		}
+		if (personaConnection == null) {
+			personaConnection = sqlHandler.getConnection();
 		}
 
 		ArcheTables.setUpSQLTables(sqlHandler);
@@ -190,6 +197,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		blockRegistry = new BlockRegistry();
 		archenomicon = Archenomicon.getInstance();
 		personaHandler = ArchePersonaHandler.getInstance();
+		personaHandler.setPersonaConnection(personaConnection);
 		fatigueHandler = ArcheFatigueHandler.getInstance();
 		helpdesk = HelpDesk.getInstance();
 		skinCache = SkinCache.getInstance();

@@ -1,60 +1,94 @@
 package net.lordofthecraft.arche;
 
-import java.util.Map;
-
 import com.google.common.collect.Maps;
-
 import net.lordofthecraft.arche.SQL.SQLHandler;
+
+import java.util.Map;
 
 public class ArcheTables {
 
 	
 	public static void setUpSQLTables(SQLHandler sqlHandler) {
+		createPlayerTable(sqlHandler);
 		createPersonaTable(sqlHandler);
+		createPersonaVitalsTable(sqlHandler);
+		createPersonaStatsTable(sqlHandler);
+		createPersonaTagsTable(sqlHandler);
 		createPersonaNamesTable(sqlHandler);
 		createPersonaSpawnsTable(sqlHandler);
 		createBlockRegistryTable(sqlHandler);
 		createPersonaSkinsTable(sqlHandler);
 	}
-	
-	
+
+	private static void createPlayerTable(SQLHandler sqlHandler) {
+		Map<String, String> cols = Maps.newLinkedHashMap();
+		cols.put("player", "CHAR(36)");
+		cols.put("force_preload", "BOOLEAN DEFAULT FALSE");
+		cols.put("PRIMARY KEY (persona_id)", "");
+		sqlHandler.createTable("players", cols);
+	}
+
 	private static void createPersonaTable(SQLHandler sqlHandler) {
 		//Create the Persona table
 		Map<String,String> cols = Maps.newLinkedHashMap();
-		cols.put("player", "TEXT"); //1
-		cols.put("id", "INT");
+		cols.put("persona_id", "INT UNSIGNED AUTO_INCREMENT");
+		cols.put("player_fk", "CHAR(36) NOT NULL");
+		cols.put("slot", "INT UNSIGNED NOT NULL");
 		cols.put("name", "TEXT");
-		cols.put("age", "INT");
-		cols.put("race", "TEXT"); //5
-		cols.put("rheader", "TEXT");
-		cols.put("gender", "INT");
-		cols.put("desc", "TEXT");
-		cols.put("prefix", "TEXT");
-		cols.put("current", "INT DEFAULT 1"); //10
-		cols.put("autoage", "INT DEFAULT 1");
-		cols.put("stat_played", "INT DEFAULT 0");
-		cols.put("stat_chars", "INT DEFAULT 0");
-		cols.put("stat_renamed", "INT DEFAULT 0");
-		cols.put("skill_xpgain", "INT DEFAULT 1"); //15
-		cols.put("skill_selected", "TEXT");
-		cols.put("world", "TEXT");
-		cols.put("x", "INT");
-		cols.put("y", "INT");
-		cols.put("z", "INT"); //20
-		//cols.put("health", "REAL");
-		//cols.put("hunger", "REAL");
-		//cols.put("saturation", "REAL");
-		cols.put("inv", "TEXT");
-		cols.put("money", "REAL DEFAULT 0");
-		cols.put("skill_primary", "TEXT");
-		cols.put("skill_secondary", "TEXT");
-		cols.put("skill_tertiary", "TEXT");
-		//cols.put("skin","TEXT");
-		cols.put("stat_creation", "LONG");
-		cols.put("stat_playtime_past","INT");
-		cols.put("skindata","TEXT");
-		cols.put("PRIMARY KEY (player, id)", "ON CONFLICT REPLACE");
+		cols.put("race_key", "VARCHAR(255) NOT NULL");
+		cols.put("race_header", "TEXT DEFAULT NULL");
+		cols.put("gender", "INT UNSIGNED DEFAULT 2");
+		cols.put("p_type", "TEXT DEFAULT 'NORMAL'");
+		cols.put("descr", "TEXT DEFAULT NULL");
+		cols.put("prefix", "TEXT DEFAULT NULL");
+		cols.put("curr", "BOOLEAN DEFAULT FALSE");
+		cols.put("money", "DOUBLE DEFAULT 0.0");
+		cols.put("skin", "TEXT DEFAULT NULL");
+		cols.put("profession", "TEXT DEFAULT NULL");
+		cols.put("PRIMARY KEY (persona_id)", "");
+		cols.put("FOREIGN KEY (player_fk)", "REFERENCES players (player)");
 		sqlHandler.createTable("persona", cols);
+	}
+
+	private static void createPersonaVitalsTable(SQLHandler sqlHandler) {
+		Map<String, String> cols = Maps.newLinkedHashMap();
+		cols.put("persona_id_fk", "INT UNSIGNED");
+		cols.put("world", "VARCHAR(255) NOT NULL");
+		cols.put("x", "INT NOT NULL");
+		cols.put("y", "INT NOT NULL");
+		cols.put("z", "INT NOT NULL");
+		cols.put("inv", "TEXT");
+		cols.put("ender_inv", "TEXT");
+		cols.put("health", "DOUBLE DEFAULT 10.0");
+		cols.put("hunger", "INT DEFAULT 20");
+		cols.put("saturation", "INT DEFAULT 0");
+		cols.put("PRIMARY KEY (persona_id_fk)", "");
+		cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE");
+		sqlHandler.createTable("persona_vitals", cols);
+	}
+
+	private static void createPersonaTagsTable(SQLHandler sqlHandler) {
+		Map<String, String> cols = Maps.newLinkedHashMap();
+		cols.put("persona_id_fk", "INT UNSIGNED");
+		cols.put("key", "TEXT NOT NULL");
+		cols.put("value", "TEXT");
+		cols.put("PRIMARY KEY (persona_id_fk,key)", "");
+		cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id)");
+		sqlHandler.createTable("persona_tags", cols);
+	}
+
+	protected static void createPersonaStatsTable(SQLHandler sqlHandler) {
+		Map<String, String> cols = Maps.newLinkedHashMap();
+		cols.put("persona_id_fk", "INT UNSIGNED");
+		cols.put("played", "INT UNSIGNED DEFAULT 0");
+		cols.put("chars", "INT UNSIGNED DEFAULT 0");
+		cols.put("renamed", "TIMESTAMP DEFAULT NOW()");
+		cols.put("playtime_past", "INT UNSIGNED DEFAULT 0");
+		cols.put("date_created", "TIMESTAMP NOT NULL DEFAULT NOW()");
+		cols.put("last_played", "TIMESTAMP DEFAULT NOW()");
+		cols.put("PRIMARY KEY (persona_id_fk)", "");
+		cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE");
+		sqlHandler.createTable("persona_stats", cols);
 	}
 	
 	private static void createPersonaNamesTable(SQLHandler sqlHandler) {
@@ -63,7 +97,7 @@ public class ArcheTables {
 		cols.put("id", "INT NOT NULL");
 		cols.put("name", "TEXT NOT NULL");
 		//cols.put("FOREIGN KEY (player, id)", "REFERENCES persona(player, id) ON DELETE CASCADE");
-		cols.put("UNIQUE (player, id, name)", "ON CONFLICT IGNORE");
+		cols.put("PRIMARY KEY (player,id,name)", "");
 		sqlHandler.createTable("persona_names", cols);
 	}
 	
@@ -85,7 +119,7 @@ public class ArcheTables {
 		cols.put("x", "INT");
 		cols.put("y", "INT");
 		cols.put("z", "INT");
-		cols.put("UNIQUE (world, x, y, z)", "ON CONFLICT IGNORE");
+		cols.put("PRIMARY KEY (world, x, y, z)", "");
 		sqlHandler.createTable("blockregistry", cols);
 
 		sqlHandler.execute("DELETE FROM blockregistry WHERE ROWID IN (SELECT ROWID FROM blockregistry ORDER BY ROWID DESC LIMIT -1 OFFSET 5000)");
@@ -102,14 +136,16 @@ public class ArcheTables {
 		cols.put("skinValue", "TEXT");
 		cols.put("skinSignature", "TEXT");
 		cols.put("refresh", "INT");
-		cols.put("UNIQUE (player, slot)", "ON CONFLICT REPLACE");
+		//TODO proper update syntax
+		cols.put("PRIMARY KEY (player, slot)", "");
 		sqlHandler.createTable("persona_skins", cols);
 
 		cols = Maps.newLinkedHashMap();
 		cols.put("player", "TEXT NOT NULL");
 		cols.put("id", "INT NOT NULL");
 		cols.put("slot", "INT");
-		cols.put("UNIQUE (player, id)", "ON CONFLICT REPLACE");
+		//TODO update syntax
+		cols.put("PRIMARY KEY (player, id)", "");
 		sqlHandler.createTable("persona_skins_used", cols);
 		
 	}

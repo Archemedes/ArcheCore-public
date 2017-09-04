@@ -8,6 +8,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.general.PlayerRegisterTask;
 import net.lordofthecraft.arche.save.tasks.persona.UnloadTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -40,7 +41,8 @@ public class PlayerJoinListener implements Listener {
 		handler.initPlayer(p);
 		Persona ps = handler.getPersona(p);
 		if(ps != null) Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
-		//if(logger != null) logger.putPair(p.getUniqueId(), p.getName());
+        else SaveHandler.getInstance().put(new PlayerRegisterTask(p.getUniqueId()));
+        //if(logger != null) logger.putPair(p.getUniqueId(), p.getName());
 		if(timer != null) timer.stopTiming("login");
 		if(ArcheCore.getPlugin().debugMode()) ArcheCore.getPlugin().getLogger().info("{Login} Currently have " + handler.getPersonas().size() + " persona files for " + Bukkit.getOnlinePlayers().size() + " players." );
 
