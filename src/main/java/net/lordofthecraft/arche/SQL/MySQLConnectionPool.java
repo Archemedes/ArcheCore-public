@@ -27,6 +27,7 @@ public class MySQLConnectionPool implements Closeable {
         ds.addDataSourceProperty("useUnicode", "true");
         ds.addDataSourceProperty("characterEncoding", "utf-8");
         ds.addDataSourceProperty("rewriteBatchedStatements", "true");
+        ds.addDataSourceProperty("useServerPrepStmts", "true");
 
         ds.addDataSourceProperty("cachePrepStmts", "true");
         ds.addDataSourceProperty("prepStmtCacheSize", "250");
