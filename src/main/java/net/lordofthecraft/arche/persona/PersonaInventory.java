@@ -27,9 +27,9 @@ public class PersonaInventory {
             //501 - This is giving me compile errors. Incompatible types: Object cannot be cast to List<ItemStack>.
             @SuppressWarnings("unchecked")
 			List<ItemStack> result = config.getList("contents").stream()
-        	.map(Map.class::cast)
-        	.map(o -> o== null? null : ItemStack.deserialize(o))
-        	.collect(Collectors.toList());
+                    .map(ent -> (Map<String, Object>) ent)
+                    .map(ItemStack::deserialize)
+                    .collect(Collectors.toList());
         	ItemStack[] contents = result.toArray(new ItemStack[result.size()]);
             return new PersonaInventory(contents);
         } else throw new InvalidConfigurationException("Config node 'contents' not found! Should always be there and should always be the only tag!");
