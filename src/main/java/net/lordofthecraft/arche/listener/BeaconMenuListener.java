@@ -89,8 +89,8 @@ public class BeaconMenuListener implements Listener {
 							p.closeInventory();
 							Persona pers = handler.getPersona(p);
 							if (pers != null) {
-								if (p.hasPermission("archecore.enderchest") && pers.getTimePlayed() >= 1200)
-									OpenEnderRunnable.begin(pers);
+                                if (p.hasPermission("archecore.enderchest") && pers.getTimePlayed() >= 200)
+                                    OpenEnderRunnable.begin(pers);
 								else 
 									p.sendMessage(ChatColor.RED + "You do not have access to your Ender Chest.");
 							} else { 

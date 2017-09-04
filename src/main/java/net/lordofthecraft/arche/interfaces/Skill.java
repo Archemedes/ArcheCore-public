@@ -30,9 +30,11 @@ public interface Skill {
 	 * @return name of the Skill
 	 */
 	String getName();
-	
-	/**
-	 * Gets a human-readable name of a professional for this skill
+
+    boolean hasController();
+
+    /**
+     * Gets a human-readable name of a professional for this skill
 	 * If this has not been set at creation, returns {@link #getName()} instead
 	 * @return noun of person that practices this skill
 	 */

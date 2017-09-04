@@ -78,9 +78,37 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* parent */
 CREATE TABLE IF NOT EXISTS skills (
-    skill 		VARCHAR(255),
+    skill_id    VARCHAR(255),
     hidden 		INT DEFAULT 0,
-    PRIMARY KEY (skill)
+    help_text   TEXT,
+    help_icon   TEXT,
+    inert       BOOLEAN DEFAULT FALSE,
+    male_name   TEXT,
+    female_name TEXT,
+    PRIMARY KEY (skill_id)
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS skill_races (
+    skill_id_fk     VARCHAR(255),
+    race            TEXT NOT NULL,
+    racial_skill    BOOLEAN DEFAULT FALSE,
+    racial_mod      DOUBLE DEFAULT 1.0,
+    PRIMARY KEY (skill_id_fk,race),
+    FOREIGN KEY (skill_id_fk) REFERENCES skills (skill_id) ON UPDATE CASCADE
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/* Junction */
+CREATE TABLE IF NOT EXISTS persona_skills (
+    persona_id_fk       INT UNSIGNED,
+    skill_id_fk         VARCHAR(255),
+    xp                  DOUBLE DEFAULT 0.0,
+    visible             BOOLEAN DEFAULT TRUE,
+    slot                INT UNSIGNED,
+    PRIMARY KEY (persona_id_fk,skill_id_fk),
+    FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE,
+    FOREIGN KEY (skill_id_fk) REFERENCES skills (skill_id) ON UPDATE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -88,7 +116,7 @@ CREATE TABLE IF NOT EXISTS magic_archetypes (
     id_key      VARCHAR(255),
     name        TEXT,
     parent_type VARCHAR(255),
-    descr       TEXT
+    descr       TEXT,
     PRIMARY KEY (id_key)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;

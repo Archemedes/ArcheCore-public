@@ -14,8 +14,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
-import java.sql.PreparedStatement;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -31,13 +31,14 @@ public class ArcheSkill implements Skill {
 	private final Set<Race> mains;
 	private final Map<Race, Double> raceMods;
 
-	private final PreparedStatement statement;
 	//TODO add a statement_remove when you want to remove an entry from the skill tables altogether
 
+    private Plugin controllingPlugin = null;
+
 	ArcheSkill(String name, String maleName, String femaleName, int displayStrategy, boolean inert,
-			   Set<Race> mains, Map<Race, Double> raceMods, PreparedStatement state) {
-		
-		timer = ArcheCore.getPlugin().getMethodTimer();
+               Set<Race> mains, Map<Race, Double> raceMods) {
+
+        timer = ArcheCore.getPlugin().getMethodTimer();
 
 		this.name = name;
 		this.maleName = maleName;
@@ -46,11 +47,6 @@ public class ArcheSkill implements Skill {
 		this.inert = inert;
 		this.mains =  mains;
 		this.raceMods = raceMods;
-		this.statement = state;
-	}
-	
-	public PreparedStatement getUpdateStatement(){
-		return statement;
 	}
 	
 	@Override
@@ -225,6 +221,17 @@ public class ArcheSkill implements Skill {
 	public Set<Race> getMains() {
 		return Collections.unmodifiableSet(mains);
 	}
+
+    public void setControllingPlugin(Plugin pl) {
+        controllingPlugin = pl;
+    }
+
+    //Intentionally no #getControllingPlugin
+
+    @Override
+    public boolean hasController() {
+        return controllingPlugin != null && !(controllingPlugin instanceof ArcheCore);
+    }
 
 	private Persona getPersona(Player p){
 		return ArchePersonaHandler.getInstance().getPersona(p);

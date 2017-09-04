@@ -26,6 +26,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -205,7 +206,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		fatigueHandler.fatigueDecreaseHours = this.fullFatigueRestore;
 		timer = debugMode? new ArcheTimer(this) : null;
 		personaHandler.setModifyDisplayNames(modifyDisplayNames);
-		archenomicon.createTomeFromKnowledge(sqlHandler);
+        //Preloads our skills from SQL so that they are persistent at all times.
+        //May also create a command/field to flag a skill as forcibly disabled.
+        //-501
+        ArcheSkillFactory.preloadSkills(sqlHandler);
+        archenomicon.createTomeFromKnowledge(sqlHandler);
 
 		try{
 			ResultSet res = sqlHandler.query("SELECT * FROM blockregistry");
@@ -504,25 +509,18 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		return ArcheSkillFactory.getSkill(skillName);
 	}
 
-	@Override
-	public Skill createSkill(String skillName){
-		try {
-			return ArcheSkillFactory.createSkill(skillName);
-		} catch (DuplicateSkillException e) {
-			getLogger().severe("Duplicate skill detected: " + skillName);
-			return ArcheSkillFactory.getSkill(skillName);
-		}
-	}
+    //These should just throw an exception in the method signature to allow for skills to handle them appropriately.
+    //Especially with some being loaded from SQL this is important.
 
 	@Override
-	public SkillFactory registerNewSkill(String skillName){
-		try {
-			return ArcheSkillFactory.registerNewSkill(skillName);
-		} catch (DuplicateSkillException e) {
-			getLogger().severe("Duplicate skill detected: " + skillName);
-			return null;
-		}
-	}
+    public Skill createSkill(String skillName, Plugin controller) throws DuplicateSkillException {
+        return ArcheSkillFactory.createSkill(skillName, controller);
+    }
+
+	@Override
+    public SkillFactory registerNewSkill(String skillName, Plugin controller) throws DuplicateSkillException {
+        return ArcheSkillFactory.registerNewSkill(skillName, controller);
+    }
 
     @Override
 	public void setShouldClone(boolean val) { this.shouldClone = val; }

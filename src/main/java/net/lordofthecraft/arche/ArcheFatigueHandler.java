@@ -1,20 +1,18 @@
 package net.lordofthecraft.arche;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.FatigueHandler;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
-//TODO this will need to hook into SQL
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 public class ArcheFatigueHandler implements FatigueHandler {
 	int fatigueDecreaseHours = 24; //Will be set by ArcheCore onEnable
 	private static final ArcheFatigueHandler INSTANCE = new ArcheFatigueHandler();
@@ -36,9 +34,9 @@ public class ArcheFatigueHandler implements FatigueHandler {
 		
 		if(skill != null && skill.getRaceMods().containsKey(pers.getRace())) 
 			add /= skill.getRaceMods().get(pers.getRace());
-		
-		fat = Math.min(FatigueHandler.MAXIMUM_FATIGUE, fat + add);
-		pers.setFatigue(fat);
+
+        fat = Math.min(pers.getMaximumFatigue(), fat + add);
+        pers.setFatigue(fat);
 	}
 
 	@Override
@@ -56,9 +54,9 @@ public class ArcheFatigueHandler implements FatigueHandler {
 		
 		double toSet = fatigue;
 		if(fatigue < 0) toSet = 0.0;
-		else if (fatigue > FatigueHandler.MAXIMUM_FATIGUE) toSet = FatigueHandler.MAXIMUM_FATIGUE;
-		
-		if(toSet != fatigue) pers.setFatigue(toSet);
+        else if (fatigue > pers.getMaximumFatigue()) toSet = pers.getMaximumFatigue();
+
+        if(toSet != fatigue) pers.setFatigue(toSet);
 	}
 
 	@Override
@@ -76,9 +74,9 @@ public class ArcheFatigueHandler implements FatigueHandler {
 	@Override
 	public void showFatigueBar(Player p, Persona pers) {
 		if(fatigueDecreaseHours == 0) return;
-		
-		float factor = 1.0f - ((float)(pers.getFatigue() / FatigueHandler.MAXIMUM_FATIGUE));
-		p.setExp(factor);
+
+        float factor = 1.0f - ((float) (pers.getFatigue() / pers.getMaximumFatigue()));
+        p.setExp(factor);
 		p.setLevel((int)factor*100); 
 	}
 
@@ -92,8 +90,8 @@ public class ArcheFatigueHandler implements FatigueHandler {
 		if(fatigueDecreaseHours == 0) return true;
 		
 		double curr = pers.getFatigue();
-		return curr + needed <= FatigueHandler.MAXIMUM_FATIGUE;
-	}
+        return curr + needed <= pers.getMaximumFatigue();
+    }
 	
 	@Override
 	public boolean handleFatigue(final Persona pers, double add, Skill skill) {
@@ -108,8 +106,8 @@ public class ArcheFatigueHandler implements FatigueHandler {
 		Player p = pers.getPlayer();
 		boolean able = hasEnoughEnergy(pers, add);
 		if(able) {
-			double newFatigue = Math.min(MAXIMUM_FATIGUE, add+pers.getFatigue());
-			pers.setFatigue(newFatigue);
+            double newFatigue = Math.min(pers.getMaximumFatigue(), add + pers.getFatigue());
+            pers.setFatigue(newFatigue);
 			if(p!= null) showFatigueBar(p, pers);
 		} else if(p != null && !prompted.contains(pers.getPersonaKey())) {
 			prompted.add(pers.getPersonaKey());

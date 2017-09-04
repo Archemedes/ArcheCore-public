@@ -54,7 +54,12 @@ public interface PersonaHandler {
 	 */
 	int getAllowedPersonas(Player p);
 
-	Collection<ArchePersona[]> getPersonas();
+    /**
+     * Retrieve an <b>unmodifiable</b> collection of all active personas.
+     *
+     * @return A <b>unmodifiable</b> collection of personas which are loaded.
+     */
+    Collection<ArchePersona[]> getPersonas();
 
 	/**
 	 * Attempts to find a Persona uniquely corresponding to a Persona Key. Persona may not exist or may not be loaded

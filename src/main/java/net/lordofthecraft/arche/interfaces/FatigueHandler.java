@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 public interface FatigueHandler {
     String NO_FATIGUE_MESSAGE = ChatColor.DARK_RED + "Warning: "
             + ChatColor.YELLOW + " You're fatigued and unable to perform your profession effectively. Either wait it out or recover at a tavern.";
-    double MAXIMUM_FATIGUE = 100.0;
 
     /**
 	 * Add a certain amount of fatigue, respecting the upper limit
@@ -67,8 +66,8 @@ public interface FatigueHandler {
     double getFatigue(Persona pers);
 
     /**
-	 * Whether
-	 * @param pers Persona to check
+     * Whether or not the persona has enough energy to accomplish a task
+     * @param pers Persona to check
 	 * @param needed amount of fatigue you want to check against
 	 * @return Whether the personas fatigue is at least 'needed' away from maximum
 	 */

@@ -16,12 +16,8 @@ import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.DataTask;
 import net.lordofthecraft.arche.save.tasks.magic.MagicCreateCallable;
-import net.lordofthecraft.arche.save.tasks.persona.SelectSkillTask;
-import net.lordofthecraft.arche.save.tasks.persona.TagAttachmentCallable;
-import net.lordofthecraft.arche.save.tasks.persona.UpdateFatigueTask;
-import net.lordofthecraft.arche.save.tasks.persona.UpdateTask;
+import net.lordofthecraft.arche.save.tasks.persona.*;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.SkillData;
@@ -39,7 +35,10 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.ref.WeakReference;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -57,8 +56,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
 	private static final SaveHandler buffer = SaveHandler.getInstance();
 
-	private static CallableStatement deleteCall = null;
-
 	//The immutable auto-increment ID of this persona.
 	private final int persona_id;
 
@@ -74,8 +71,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	boolean current = true;
 	String raceHeader = null;
 	Timestamp lastRenamed;
-	Timestamp creationTimeMS;
-	int pastPlayTime; //stat_playtime_past
+    private Timestamp creationTimeMS;
+    int pastPlayTime; //stat_playtime_past
 	String player; //Last known minecraft name of the owning player
 	WeakBlock location = null;
 	PersonaInventory inv = null;
@@ -83,8 +80,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	double fatigue = 0;
 	double maxFatigue = 100;
 	int food = 0;
-	int saturation = 0;
-	double health = 0;
+    float saturation = 0;
+    double health = 0;
 	Timestamp lastPlayed;
 	private Race race;
 	private Creature creature;
@@ -573,7 +570,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		//Store and switch Persona-related specifics: Location and Inventory.
 		food = p.getFoodLevel();
 		health = p.getHealth();
-		inv = PersonaInventory.store(p);
+        saturation = p.getSaturation();
+        inv = PersonaInventory.store(p);
 		location = new WeakBlock(p.getLocation());
 	}
 
@@ -602,12 +600,15 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 		//Give them an inventory.
 		PlayerInventory pinv = p.getInventory();
-		if(inv != null){ //Grab inv from Persona file
+        Inventory einv = p.getEnderChest();
+        if(inv != null){ //Grab inv from Persona file
 			pinv.setContents(inv.getContents());
-			inv = null; //Protect against dupes just in case
+            einv.setContents(inv.getEnderContents());
+            inv = null; //Protect against dupes just in case
 		} else { //Clears the inv
 			pinv.clear();
-			pinv.setArmorContents(new ItemStack[4]);
+            einv.clear();
+            pinv.setArmorContents(new ItemStack[4]);
 		}
 
 		//Heal them so their Persona is fresh
@@ -621,18 +622,11 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		if (maxHp < health) p.setHealth(maxHp);
 		else p.setHealth(health);
 		p.setFoodLevel(food);
-	}
+        p.setSaturation(saturation);
+    }
 
 	@Override
 	public boolean remove() {
-		if (deleteCall == null) {
-			try {
-				deleteCall = ArcheCore.getControls().getSQLHandler().getConnection().prepareCall("{call delete_persona(?, ?)}");
-			} catch (SQLException e) {
-				e.printStackTrace();
-				return false;
-			}
-		}
 		Player p = Bukkit.getPlayer(getPlayerUUID());
 
 		//We enforce Player is online to do this right now
@@ -642,11 +636,11 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		Bukkit.getPluginManager().callEvent(event);
 		if(event.isCancelled()) return false;
 
-
-        buffer.put(new DataTask(DataTask.DELETE, TABLE, null, sqlCriteria));
+        buffer.put(new PersonaDeleteCallTask(persona_id));
+        //buffer.put(new DataTask(DataTask.DELETE, TABLE, null, sqlCriteria));
         //		Both could be commented out once cascading db is setup!
-		buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, sqlCriteria));
-		handler.deleteSkills(this);
+        //buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, sqlCriteria));
+        handler.deleteSkills(this);
 
 		ArchePersona[] prs = handler.getAllPersonas(this.getPlayerUUID());
 		prs[getId()] = null;
@@ -699,6 +693,20 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		}
 	}
 
+    @Override
+    public Inventory getEnderChest() {
+        if (current && getPlayer() != null) {
+            return getPlayer().getEnderChest();
+        } else {
+            if (inv == null || inv.getEnderContents() == null) {
+                return null;
+            }
+            Inventory einv = Bukkit.createInventory(this, 27, "Persona Enderchest: " + player + "@" + getId());
+            einv.setContents(inv.getEnderContents());
+            return einv;
+        }
+    }
+
 	public PersonaInventory getPInv() {
 		return inv;
 	}
@@ -738,6 +746,16 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public int getTotalPlaytime(){
 		return pastPlayTime + getTimePlayed();
 	}
+
+    @Override
+    public double getMaximumFatigue() {
+        return maxFatigue;
+    }
+
+    @Override
+    public void setMaximumFatigue(double maxFatigue) {
+        this.maxFatigue = maxFatigue;
+    }
 
 	@Override
 	public double getFatigue() {

@@ -24,7 +24,11 @@ public class PersonaInventoryListener implements Listener {
                         for (int i = 0; i < e.getWhoClicked().getInventory().getSize(); ++i) {
                             contents[i] = inv.getContents()[i];
                         }
-                        pers.getPInv().setContents(contents);
+                        if (e.getInventory().getTitle().contains("ender")) {
+                            pers.getPInv().setEnderContents(contents);
+                        } else {
+                            pers.getPInv().setContents(contents);
+                        }
                     }
 
                 }

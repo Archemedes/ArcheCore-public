@@ -276,7 +276,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		persona.createEmptyTags();
 
-		String uuid = p.getUniqueId().toString();
 		for(PotionEffect ps : p.getActivePotionEffects())
 			p.removePotionEffect(ps.getType());
 
@@ -332,8 +331,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 			Player player = ArcheCore.getPlayer(p.getPlayerUUID());
 			long age = player == null? Integer.MAX_VALUE : System.currentTimeMillis() - player.getFirstPlayed();
 			int mins = (int) (age / DateUtils.MILLIS_PER_MINUTE);
-			if(ArcheCore.getPlugin().getNewbieNotificationDelay() > mins && !player.hasPermission("archecore.persona.nonewbie"))
-				result.add(new TextComponent(ChatColor.AQUA + "((This player is new to the server))"));
+            if (ArcheCore.getPlugin().getNewbieNotificationDelay() > mins && !(player != null && player.hasPermission("archecore.persona.nonewbie")))
+                result.add(new TextComponent(ChatColor.AQUA + "((This player is new to the server))"));
 			else
 				result.add(new TextComponent(p.getPersonaType().personaViewLine));
 		} else result.add(new TextComponent(p.getPersonaType().personaViewLine));
@@ -484,7 +483,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		ArchePersona[] prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
 
-		SQLHandler handler = ArcheCore.getPlugin().getSQLHandler();
 		boolean hasCurrent = false;
 		ResultSet res = null;
 		try {
@@ -605,7 +603,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.maxFatigue = res.getInt("max_fatigue");
 		persona.health = res.getDouble("health");
 		persona.food = res.getInt("food");
-		persona.saturation = res.getInt("saturation");
+        persona.saturation = res.getFloat("saturation");
 
 		persona.timePlayed.set(res.getInt("played"));
 		persona.charactersSpoken.set(res.getInt("chars"));
@@ -630,8 +628,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		String enderinvString = res.getString("enderinv"); //TODO implement
 		if(!res.wasNull()){
 			try {
-				persona.inv = PersonaInventory.restore(invString);
-			} catch (InvalidConfigurationException e) {
+                persona.inv = PersonaInventory.restore(invString, enderinvString);
+            } catch (InvalidConfigurationException e) {
 				ArcheCore.getPlugin().getLogger().severe("Unable to restore Persona Inventory from database: (" + p.getName() + ";" + name + ")");
 				e.printStackTrace();
 			}
@@ -729,8 +727,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 				while (rs.next()) {
 					Race r = Race.valueOf(rs.getString(1));
 					World w = Bukkit.getWorld(rs.getString(2));
-					if (r == null || w == null) {
-						toRemove.add(rs.getString(1));
+                    if (w == null) {
+                        toRemove.add(rs.getString(1));
 					} else {
 						int x = rs.getInt(3);
 						int y = rs.getInt(4);

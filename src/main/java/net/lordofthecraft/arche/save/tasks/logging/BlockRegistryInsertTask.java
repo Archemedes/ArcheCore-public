@@ -22,7 +22,7 @@ public class BlockRegistryInsertTask extends StatementTask {
 
 	@Override
 	protected String getQuery() {
-		return "INSERT INTO blockregistry VALUES (?,?,?,?)";
-	}
+        return "INSERT IGNORE INTO blockregistry VALUES (?,?,?,?)";
+    }
 
 }

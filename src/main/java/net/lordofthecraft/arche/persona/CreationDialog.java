@@ -241,7 +241,7 @@ public class CreationDialog {
             String pretext = "Please type a name for your Roleplay Persona!";
             String affix = "\n" + NOTE + "You may only change your Persona's name every 2 hours.";
 
-            return pretext + (p.hasPermission("archecore.quickrename")? "" : affix) + DIVIDER;
+            return pretext + (p.hasPermission("archecore.persona.quickrename") ? "" : affix) + DIVIDER;
         }
 
         @Override
