@@ -7,6 +7,9 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.save.PersonaField;
+import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.persona.UpdateTask;
 import net.lordofthecraft.arche.util.CommandUtil;
 import net.lordofthecraft.arche.util.MessageUtil;
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +21,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
+import java.sql.Timestamp;
 import java.util.concurrent.TimeUnit;
 
 public class CommandPersona implements CommandExecutor {
@@ -132,8 +136,8 @@ public class CommandPersona implements CommandExecutor {
 				sender.sendMessage(ChatColor.AQUA + "You have a total of " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int)Math.floor(pers.getTotalPlaytime() / 60) + ChatColor.AQUA + " hours on " + pers.getName() + "!");
 				return true;
 			} else if (args[0].equalsIgnoreCase("created")) {
-				String time = millsToDaysHours(System.currentTimeMillis() - pers.getCreationTime());
-				sender.sendMessage(ChatColor.AQUA + "You created " + pers.getName() + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
+                String time = millsToDaysHours(System.currentTimeMillis() - pers.getCreationTime().getTime());
+                sender.sendMessage(ChatColor.AQUA + "You created " + pers.getName() + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
 				return true;
 			} else if (args[0].equalsIgnoreCase("clearprefix") && prefix) {
 				pers.clearPrefix();
@@ -186,14 +190,15 @@ public class CommandPersona implements CommandExecutor {
 					int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
 					String name = StringUtils.join(args, ' ', 1, parseTo);
 
-					long timeLeft = (pers.getRenamed() / 60000) - (System.currentTimeMillis() / 60000) + delay;
-					if (timeLeft > 0 && !sender.hasPermission("archecore.persona.quickrename")) {
+                    long timeLeft = (pers.getRenamed().getTime() / 60000) - (System.currentTimeMillis() / 60000) + delay;
+                    if (timeLeft > 0 && !sender.hasPermission("archecore.persona.quickrename")) {
 						sender.sendMessage(ChatColor.RED + "You must wait " + timeLeft + " minutes before renaming again");
 					} else if (name.length() <= 32 || sender.hasPermission("archecore.persona.longname")) {
 						pers.setName(name);
 						sender.sendMessage(ChatColor.AQUA + "Persona name was set to: " + ChatColor.RESET + name);
 						if (sender == pers.getPlayer()) {
-						} //Player renamed by his own accord
+                            SaveHandler.getInstance().put(new UpdateTask(pers, PersonaField.STAT_RENAMED, new Timestamp(System.currentTimeMillis())));
+                        } //Player renamed by his own accord
 						//SaveHandler.getInstance().put(new PersonaRenameTask(pers));
 					} else {
 						sender.sendMessage(ChatColor.RED + "Error: Name too long. Max length 32 characters");

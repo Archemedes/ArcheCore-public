@@ -291,15 +291,9 @@ BEGIN
 	DECLARE p_date_created TIMESTAMP;
 	DECLARE p_inv TEXT;
 	DECLARE mon_pers DOUBLE(10,2);
-	DECLARE mon_bank DOUBLE(10,2);
 	
 	DECLARE done INT DEFAULT FALSE;
 	DECLARE new_log_id INT UNSIGNED;
-	DECLARE skill_name VARCHAR(255);
-	DECLARE skill_xp DOUBLE(10,2);
-	DECLARE skill_select BOOLEAN;
-	DECLARE skill_slot_num TINYINT(1);
-	DECLARE skill_visible BOOLEAN;
 	
 	DECLARE skill_curs CURSOR FOR SELECT skill_fk,skill_selected,skill_slot,xp,visible FROM persona_skills WHERE persona_id_fk=pers_id;
 	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;

@@ -643,7 +643,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		if(event.isCancelled()) return false;
 
 
-		buffer.put(new DataTask(DataTask.DELETE, TABLE, null, sqlCriteria));
+		deleteCall.
+				buffer.put(new DataTask(DataTask.DELETE, TABLE, null, sqlCriteria));
 		//		Both could be commented out once cascading db is setup!
 		buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, sqlCriteria));
 		handler.deleteSkills(this);

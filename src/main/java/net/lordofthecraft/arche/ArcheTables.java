@@ -45,6 +45,8 @@ public class ArcheTables {
 		cols.put("money", "DOUBLE DEFAULT 0.0");
 		cols.put("skin", "TEXT DEFAULT NULL");
 		cols.put("profession", "TEXT DEFAULT NULL");
+		cols.put("fatigue", "DOUBLE DEFAULT 0.0");
+		cols.put("max_fatigue", "DOUBLE DEFAULT 100.00");
 		cols.put("PRIMARY KEY (persona_id)", "");
 		cols.put("FOREIGN KEY (player_fk)", "REFERENCES players (player)");
 		sqlHandler.createTable("persona", cols);

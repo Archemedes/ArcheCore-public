@@ -8,9 +8,8 @@ package net.lordofthecraft.arche.save;
 public enum PersonaTable {
 
     MASTER("persona"),
-    WORLD("persona_world"),
     STATS("persona_stats"),
-    EXTRAS("persona_extras"),
+    VITALS("persona_vitals"),
     TAGS("persona_tags"),
     SKILLS("persona_skills");
 
