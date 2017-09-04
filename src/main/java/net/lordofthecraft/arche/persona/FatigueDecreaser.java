@@ -1,11 +1,12 @@
 package net.lordofthecraft.arche.persona;
 
-import org.bukkit.scheduler.BukkitRunnable;
-
 import net.lordofthecraft.arche.ArcheFatigueHandler;
 import net.lordofthecraft.arche.interfaces.FatigueHandler;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
+import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.persona.FatigueReduceTask;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class FatigueDecreaser extends BukkitRunnable {
 	private final PersonaHandler handler;
@@ -22,10 +23,10 @@ public class FatigueDecreaser extends BukkitRunnable {
 	public void run() {
 		//Assumes it runs every 20 minutes
 		double toDecrease = FatigueHandler.MAXIMUM_FATIGUE / (fatigueRestoreHours * 3);
-		
-		// TODO SQL Task call here
-		
-		for(Persona[] prs: handler.getPersonas()) {
+
+        SaveHandler.getInstance().put(new FatigueReduceTask());
+
+        for(Persona[] prs: handler.getPersonas()) {
 			for(Persona pr : prs) {
 				if(pr == null) continue;
 				fatigue.reduceFatigue(pr, toDecrease);
