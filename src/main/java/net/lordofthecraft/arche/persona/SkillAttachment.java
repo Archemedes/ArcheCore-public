@@ -4,10 +4,15 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.ArcheTask;
+import net.lordofthecraft.arche.save.tasks.skills.SkillDeleteTask;
+import net.lordofthecraft.arche.save.tasks.skills.SkillUpdateTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.SkillData;
 import org.bukkit.entity.Player;
 
+import java.sql.JDBCType;
+import java.sql.SQLType;
 import java.util.UUID;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -15,11 +20,26 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 public class SkillAttachment {
+
+	public enum Field {
+		XP("xp", JDBCType.DOUBLE),
+		VISIBLE("visible", JDBCType.BOOLEAN);
+
+		public final String field;
+		public final SQLType type;
+
+		Field(String field, SQLType type) {
+			this.field = field;
+			this.type = type;
+		}
+	}
+
 	private static final double DEFAULT_XP = 0.0;
 	
 	private static final SaveHandler buffer = SaveHandler.getInstance();
 	final ArcheSkill skill;
 	private final PersonaSkills handle;
+	private final int persona_id;
 	private final String uuid;
 	private final int id;
 	private FutureTask<SkillData> call;
@@ -47,6 +67,7 @@ public class SkillAttachment {
 		this.skill = (ArcheSkill) skill;
 		this.uuid = persona.getPlayerUUID().toString();
 		this.id = persona.getId();
+		this.persona_id = persona.getPersonaId();
 	}
 	
 	
@@ -99,7 +120,7 @@ public class SkillAttachment {
 	public void setXp(double xp) {
 		this.xp = xp;
 		if(this.xp < DEFAULT_XP) this.xp = 0;
-		performSQLUpdate();
+		performSQLUpdate(Field.XP);
 	}
 	
 	public boolean isVisible(){
@@ -109,32 +130,43 @@ public class SkillAttachment {
 	public void reveal(){
 		if(!canSee){
 			canSee = true;
-			performSQLUpdate();
+			performSQLUpdate(Field.VISIBLE);
 		}
 	}
 	
 	public void addXp(double added){
 		xp += added;
 
-		performSQLUpdate();
+		performSQLUpdate(Field.XP);
 	}
 	
 	public void removeXP(double removed){
 		xp -= removed;
 		if(this.xp < DEFAULT_XP) this.xp = 0;
-		performSQLUpdate();
+		performSQLUpdate(Field.XP);
+	}
+
+	private Object getValueForField(Field f) {
+		switch (f) {
+			case XP:
+				return xp;
+			case VISIBLE:
+				return canSee;
+			default:
+				return null;
+		}
 	}
 	
-	private void performSQLUpdate(){
+	private void performSQLUpdate(Field f){
 		if(error) return;
 		
 		if(inPersonaSkills && hasDefaultValues()) {
-			//TODO: call a RemoveSkillTask object that will remove this from the persona skills table
+			buffer.put(new SkillDeleteTask(skill.getName(), persona_id));
 			handle.removeSkillAttachment(this);
 			inPersonaSkills = false;
 		} else {
-			//ArcheTask task = new UpdateSkillTask(skill, uuid, id, xp, canSee);
-			//buffer.put(task);
+			ArcheTask task = new SkillUpdateTask(persona_id, skill.getName(), f, getValueForField(f));
+			buffer.put(task);
 			if(!inPersonaSkills) { //Start tracking this skill in PersonaSkills
 				handle.addSkillAttachment(this);
 				inPersonaSkills = true;

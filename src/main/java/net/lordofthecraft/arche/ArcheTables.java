@@ -18,6 +18,9 @@ public final class ArcheTables {
 		createPersonaVitalsTable(sqlHandler);
 		createPersonaStatsTable(sqlHandler);
 		createPersonaTagsTable(sqlHandler);
+		createSkillsTable(sqlHandler);
+		createRacialSkillsTable(sqlHandler);
+		createPersonaSkillsTable(sqlHandler);
 		createPersonaNamesTable(sqlHandler);
 		createPersonaSpawnsTable(sqlHandler);
 		createBlockRegistryTable(sqlHandler);
@@ -95,6 +98,42 @@ public final class ArcheTables {
 		cols.put("PRIMARY KEY (persona_id_fk)", "");
 		cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE");
 		sqlHandler.createTable("persona_stats", cols);
+	}
+
+	protected static void createSkillsTable(SQLHandler sqlHandler) {
+		Map<String, String> cols = Maps.newLinkedHashMap();
+		cols.put("skill_id", "VARCHAR(255)");
+		cols.put("hidden", "INT DEFAULT 0");
+		cols.put("help_text", "TEXT");
+		cols.put("help_icon", "TEXT");
+		cols.put("inert", "BOOLEAN DEFAULT FALSE");
+		cols.put("male_name", "TEXT");
+		cols.put("female_name", "TEXT");
+		cols.put("PRIMARY KEY (persona_id_fk,skill_id_fk)", "");
+		sqlHandler.createTable("persona_skills", cols);
+	}
+
+	protected static void createRacialSkillsTable(SQLHandler sqlHandler) {
+		Map<String, String> cols = Maps.newLinkedHashMap();
+		cols.put("skill_id_fk", "VARCHAR(255)");
+		cols.put("race", "TEXT NOT NULL");
+		cols.put("racial_skill", "BOOLEAN DEFAULT FALSE");
+		cols.put("racial_mod", "DOUBLE DEFAULT 1.0");
+		cols.put("PRIMARY KEY (skill_id_fk,race)", "");
+		cols.put("FOREIGN KEY (skill_id_fk)", "REFERENCES skills (skill_id) ON UPDATE CASCADE");
+		sqlHandler.createTable("persona_skills", cols);
+	}
+
+	protected static void createPersonaSkillsTable(SQLHandler sqlHandler) {
+		Map<String, String> cols = Maps.newLinkedHashMap();
+		cols.put("persona_id_fk", "INT UNSIGNED");
+		cols.put("skill_id_fk", "VARCHAR(255)");
+		cols.put("xp", "DOUBLE DEFAULT 0.0");
+		cols.put("visible", "BOOLEAN DEFAULT TRUE");
+		cols.put("PRIMARY KEY (persona_id_fk,skill_id_fk)", "");
+		cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE");
+		cols.put("FOREIGN KEY (skill_id_fk)", "REFERENCES skills (skill_id) ON UPDATE CASCADE");
+		sqlHandler.createTable("persona_skills", cols);
 	}
 
     protected static void createPersonaNamesTable(SQLHandler sqlHandler) {

@@ -12,6 +12,7 @@ import net.lordofthecraft.arche.event.PersonaWhoisEvent.Query;
 import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.DataTask;
+import net.lordofthecraft.arche.save.tasks.skills.SkillDeleteTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.TopData;
@@ -625,7 +626,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		}
 
 		String invString = res.getString("inv");
-		String enderinvString = res.getString("enderinv"); //TODO implement
+		String enderinvString = res.getString("enderinv");
 		if(!res.wasNull()){
 			try {
                 persona.inv = PersonaInventory.restore(invString, enderinvString);
@@ -754,8 +755,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	void deleteSkills(ArchePersona p){
 		for(String sname : ArcheSkillFactory.getSkills().keySet()){
-			buffer.put(new DataTask(DataTask.DELETE, "persona_skills", null, p.sqlCriteria));
-
+			buffer.put(new SkillDeleteTask(sname, p.getPersonaId()));
 		}
 	}
 

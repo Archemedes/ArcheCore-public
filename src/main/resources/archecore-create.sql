@@ -105,7 +105,6 @@ CREATE TABLE IF NOT EXISTS persona_skills (
     skill_id_fk         VARCHAR(255),
     xp                  DOUBLE DEFAULT 0.0,
     visible             BOOLEAN DEFAULT TRUE,
-    slot                INT UNSIGNED,
     PRIMARY KEY (persona_id_fk,skill_id_fk),
     FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE,
     FOREIGN KEY (skill_id_fk) REFERENCES skills (skill_id) ON UPDATE CASCADE
@@ -228,26 +227,6 @@ CREATE TABLE IF NOT EXISTS race_spawns (
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* Child */
-CREATE TABLE IF NOT EXISTS bonus_exp_modifiers (
-    mod_id INT UNSIGNED AUTO_INCREMENT,
-    xp_type_fk VARCHAR(255) NOT NULL,
-    duration INT UNSIGNED,
-    starttime TIMESTAMP NOT NULL,
-    startxp DOUBLE(10,2) NOT NULL,
-    capxp DOUBLE(10,2),
-    persona_id_fk CHAR(36) NOT NULL,
-    skill_id_fk INT UNSIGNED,
-    multiplier DOUBLE(10,2) NOT NULL,
-    PRIMARY KEY (mod_id),
-    FOREIGN KEY (xp_type_fk) REFERENCES bonus_exp_types (exp_type),
-    FOREIGN KEY (skill_id_fk) REFERENCES persona_skills (skill_id) ON DELETE CASCADE,
-    FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON DELETE CASCADE
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE INDEX idx_mod_id ON bonus_exp_modifiers (mod_id);
-
-/* Child */
 CREATE TABLE IF NOT EXISTS persona_skill_log (
     log_id_fk INT UNSIGNED,
     skill VARCHAR(255),
@@ -278,17 +257,6 @@ CREATE TABLE IF NOT EXISTS persona_names (
     name TEXT,
     PRIMARY KEY (player_fk,id),
     FOREIGN KEY (player_fk) REFERENCES players (player)
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS sktome_log (
-    log_id INT UNSIGNED AUTO_INCREMENT,
-    log_time TIMESTAMP DEFAULT NOW(),
-    persona_id_fk CHAR(36) NOT NULL,
-    xp DOUBLE(10,2),
-    skill VARCHAR(255) NOT NULL,
-    PRIMARY KEY (log_id),
-    FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
