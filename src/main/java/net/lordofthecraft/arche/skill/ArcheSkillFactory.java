@@ -3,24 +3,106 @@ package net.lordofthecraft.arche.skill;
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.interfaces.SkillFactory;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import org.bukkit.Material;
+import org.bukkit.plugin.Plugin;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Level;
 
 public class ArcheSkillFactory implements SkillFactory {
 	private static final Map<String, String> VALS;
 	
 	private static final Map<String, ArcheSkill> skills = Maps.newLinkedHashMap();
-	
+
+    /**
+     * This method fetches all skills that are in SQL and establishes them early.
+     * Any changes made to skill that are preloaded <b>will not</b> be effective unless FORCE = true on {@link #register()}
+     *
+     * @see #withForceUpdate(boolean) For setting a skill to force update
+     */
+    public static void preloadSkills(SQLHandler handler) {
+        /*
+	    CREATE TABLE IF NOT EXISTS skills (
+        skill_id    VARCHAR(255),
+        hidden 		INT DEFAULT 0,
+        help_text   TEXT DEFAULT 'UNSET',
+        help_icon   TEXT DEFAULT 'BARRIER',
+        PRIMARY KEY (skill_id)
+        )
+        ENGINE=InnoDB DEFAULT CHARSET=utf8;
+	     */
+
+	    /*
+	    CREATE TABLE IF NOT EXISTS skill_races (
+        skill_id_fk     VARCHAR(255),
+        race            TEXT NOT NULL,
+        racial_skill    BOOLEAN DEFAULT FALSE,
+        racial_mod      DOUBLE DEFAULT 1.0,
+        PRIMARY KEY (skill_id_fk,race),
+        FOREIGN KEY (skill_id_fk) REFERENCES skills (skill_id) ON UPDATE CASCADE
+        )
+        ENGINE=InnoDB DEFAULT CHARSET=utf8;
+	     */
+        if (!skills.isEmpty()) {
+            return;
+        }
+        try {
+            Connection fetcherConn = handler.getConnection();
+
+            PreparedStatement fetcher = fetcherConn.prepareStatement("SELECT skill_id,hidden,help_text,help_icon,inert,male_name,female_name FROM skills");
+            PreparedStatement racialFetch = fetcherConn.prepareStatement("SELECT race,racial_skill,racial_mod FROM skill_races WHERE skill_id_fk=?");
+
+            ResultSet rs = fetcher.executeQuery();
+            while (rs.next()) {
+                String name = rs.getString("skill_id");
+                int hidden = rs.getInt("hidden");
+                String text = rs.getString("help_text");
+                String helpIconInfo = rs.getString("help_icon");
+                boolean inert = rs.getBoolean("inert");
+                String maleName = rs.getString("male_name");
+                String femaleName = rs.getString("female_name");
+                SkillFactory factory = ArcheSkillFactory.registerNewSkill(name, ArcheCore.getPlugin())
+                        .withFemaleProfessionalName(femaleName)
+                        .withVisibilityType(hidden)
+                        .withXpGainWhileHidden(inert);
+                if (helpIconInfo != null && text != null) {
+                    factory.withHelpFile(text, Material.valueOf(helpIconInfo));
+                }
+
+                racialFetch.setString(1, name);
+                ResultSet rrs = racialFetch.executeQuery();
+                racialFetch.clearParameters();
+                while (rrs.next()) {
+                    Race race = Race.valueOf(rrs.getString("race"));
+                    if (rrs.getBoolean("racial_skill")) {
+                        factory.asRacialProfession(race);
+                    }
+                    factory.withRacialModifier(race, rrs.getDouble("racial_mod"));
+                }
+                rrs.close();
+                ((ArcheSkillFactory) factory).internal = true;
+                factory.register();
+            }
+            rs.close();
+            fetcher.close();
+            racialFetch.close();
+            if (handler instanceof WhySQLHandler) {
+                fetcherConn.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 	static{
 		Map<String, String> vals = Maps.newLinkedHashMap();
 		vals.put("player", "TEXT");
@@ -42,10 +124,15 @@ public class ArcheSkillFactory implements SkillFactory {
 	private boolean inert = false;
 	private String helpText = null;
 	private Material helpIcon = null;
+    private boolean force = false;
+    private final Plugin controller;
+    //This value is here to flag
+    private boolean internal = false;
 
-	private ArcheSkillFactory(String name) {
-		this.name = name;
-	}
+    private ArcheSkillFactory(String name, Plugin controller) {
+        this.name = name;
+        this.controller = controller;
+    }
 	
 	/**
 	 * Method to retrieve an existing Skill object
@@ -71,10 +158,13 @@ public class ArcheSkillFactory implements SkillFactory {
 	 * @param name The name of the Skill to be created.
 	 * @return the Created Skill
 	 * @throws DuplicateSkillException If a skill with the same name already exists
-	 */
-	public static Skill createSkill(String name){
-		return registerNewSkill(name).register();
-	}
+     */
+    public static Skill createSkill(String name, Plugin controller) {
+        if (getSkill(name) != null) {
+            return getSkill(name);
+        }
+        return registerNewSkill(name, controller).register();
+    }
 	
 	/**
 	 * Method to create a Skill with arbitrary settings, each of them initialised
@@ -82,14 +172,19 @@ public class ArcheSkillFactory implements SkillFactory {
 	 * @param name The name of the Skill to be created.
 	 * @return the constructed SkillFactory object
 	 * @throws DuplicateSkillException If a skill with the same name already exists
-	 */
-	public static SkillFactory registerNewSkill(String name){
-		name = name.toLowerCase();
+     */
+    public static SkillFactory registerNewSkill(String name, Plugin controller){
+        name = name.toLowerCase();
 
-		Skill test = skills.get(name);
-		if(test != null) throw new DuplicateSkillException("Skill " + name + " already exists");
+        //This is commented out.
+        //DuplicateException will be fired under other circumstances.
+        /*Skill test = skills.get(name);
+		if(test != null) {
 
-		return new ArcheSkillFactory(name);
+		    throw new DuplicateSkillException("Skill " + name + " already exists");
+        }*/
+
+        return new ArcheSkillFactory(name, controller);
 	}
 	
 	@Override
@@ -117,38 +212,71 @@ public class ArcheSkillFactory implements SkillFactory {
 	}
 	
 	@Override
-	public SkillFactory withHelpFile(String helpText, Material helpIcon){
-		this.helpText = helpText;
-		this.helpIcon = helpIcon;
-		return this;
-	}
+    public SkillFactory withHelpFile(String helpText, Material helpIcon){
+        this.helpText = helpText;
+        this.helpIcon = helpIcon;
+        return this;
+    }
+
+    @Override
+    public SkillFactory withForceUpdate(boolean force) {
+        this.force = force;
+        return this;
+    }
 
 	@Override
-	public Skill register(){
-
+	public Skill register() {
+        if (skills.containsKey(name) && !force) {
+            ArcheSkill skill = skills.get(name);
+            if (!(controller instanceof ArcheCore)) {
+                if (!skill.hasController()) {
+                    skill.setControllingPlugin(controller);
+                } else {
+                    return skill;
+                }
+            }
+            return skill;
+        }
         try {
-			SQLHandler handler = ArcheCore.getControls().getSQLHandler();
-			Connection con = handler.getConnection();
-			
-			//Creates the underlying SQL table, if necessary
-			ArcheCore.getPlugin().getSQLHandler().createTable("sk_" + name, VALS);
-			
-			//And the SQL statement to provide values to it
-			PreparedStatement statement = con.prepareStatement("INSERT INTO sk_"+ name + " VALUES (?,?,?,?)");
+            //While potentially internal could be replaced with !(controller instanceof ArcheCore)
+            //I worry that jistuma-like programmers will decide to put ArcheCore in for their controller.
+            //Better safe than sorry. -501
+            if ((skills.containsKey(name) && force) || (!internal && !skills.containsKey(name))) {
+                SQLHandler handler = ArcheCore.getControls().getSQLHandler();
+                Connection con = handler.getConnection();
 
-			ArcheSkill skill = new ArcheSkill(name, maleName, femaleName, strategy, inert, mains, raceMods, statement);
-			
-			//Make sure skill is registered for Plugins.
+                PreparedStatement insertSkillStatement = con.prepareStatement("INSERT IGNORE INTO skills(skill_id,hidden,help_text,help_text,help_icon,male_name,female_name) VALUES (?,?,?,?,?,?)");
+                PreparedStatement insertRacialSkillData = con.prepareStatement("INSERT IGNORE INTO skill_races(skill_id_fk,race,racial_skill,");
+
+                /* skill_id,hidden,help_text,help_text,help_icon,male_name,female_name */
+                insertSkillStatement.setString(1, name);
+                insertSkillStatement.setInt(2, strategy);
+                insertSkillStatement.setString(3, helpText);
+                insertSkillStatement.setString(4, helpIcon.name());
+                insertSkillStatement.setString(5, maleName);
+                insertSkillStatement.setString(6, femaleName);
+                insertSkillStatement.executeQuery();
+                insertSkillStatement.clearParameters();
+                //TODO Racial skills
+            }
+
+
+            ArcheSkill skill = new ArcheSkill(name, maleName, femaleName, strategy, inert, mains, raceMods);
+
+            //Make sure skill is registered for Plugins.
 			skills.put(name, skill);
 			
 			//Create the Help File, if it was specified
 			if(helpText != null && helpIcon != null)
 				HelpDesk.getInstance().addSkillTopic(name, helpText, helpIcon);
-			
+
+            //Honestly not even needed anymore since we're going with a COMPLETELY optional setup
+            //Instances will be generated and removed on a situational basis
+
 			//Add the Skill in question to all currently logged in Personas
 			//(if a skill gets added after server startup; shouldn't happen, but might)
-			ArchePersonaHandler ph = ArchePersonaHandler.getInstance();
-			for(ArchePersona[] prs : ph.getPersonas()){
+            /*ArchePersonaHandler ph = ArchePersonaHandler.getInstance();
+            for(ArchePersona[] prs : ph.getPersonas()){
 				for(ArchePersona p : prs){
 					if(p != null && p.isCurrent()){
 						
@@ -161,15 +289,14 @@ public class ArcheSkillFactory implements SkillFactory {
 						break;
 					}
 				}
-			}
+			}*/
 			
 			//ArcheCore.getPlugin().getSktop().registerTop(skill);
 			return skill;
 			
 		} catch (SQLException e) {
-			ArcheCore.getPlugin().getLogger().severe("Error while preparing SQL statement for Skill xp gains");
-			e.printStackTrace();
-		}
+            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Error while preparing SQL statement for Skill xp gains", e);
+        }
 		
 		return null;
 	}

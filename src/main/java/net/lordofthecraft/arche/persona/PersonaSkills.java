@@ -1,11 +1,11 @@
 package net.lordofthecraft.arche.persona;
 
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Skill;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.Skill;
 
 
 public class PersonaSkills {
@@ -35,8 +35,8 @@ public class PersonaSkills {
 	}
 	
 	public boolean hasSkill(Skill skill) {
-		return profs.stream().filter( s -> s.skill == skill ).findAny().isPresent();
-	}
+        return profs.stream().anyMatch(s -> s.skill == skill);
+    }
 	
 	
 	public SkillAttachment getSkill(Skill skill) {

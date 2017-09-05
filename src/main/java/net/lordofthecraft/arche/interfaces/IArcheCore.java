@@ -4,11 +4,13 @@ import net.lordofthecraft.arche.BlockRegistry;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.help.HelpFile;
 import net.lordofthecraft.arche.magic.Archenomicon;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.SkinCache;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
 import java.util.UUID;
 
@@ -99,17 +101,21 @@ public interface IArcheCore {
 	 * Method to create and register a new Skill with the default settings. This
 	 * skill must not yet exist. Use {@link #getSkill(String)} to retrieve an already registered Skill
 	 * @param skillName The name of the Skill to be created.
-	 * @return the Created Skill
-	 */
-	Skill createSkill(String skillName);
+     * @param controller The plugin which is registering this skill and will be controlling it's implementation
+     * @return the Created Skill
+     * @throws ArcheSkillFactory.DuplicateSkillException If a skill with the same name already exists
+     */
+    Skill createSkill(String skillName, Plugin controller);
 
 	/**
 	 * Method to create a Skill with arbitrary settings, each of them initialised
 	 * with the help of the SkillFactory object.
 	 * @param skillName The name of the Skill to be created.
-	 * @return the constructed SkillFactory object
-	 */
-	SkillFactory registerNewSkill(String skillName);
+     * @param controller The plugin which is registering this skill and will be controlling it's implementation
+     * @return the constructed SkillFactory object
+     * @throws ArcheSkillFactory.DuplicateSkillException If a skill with the same name already exists
+     */
+    SkillFactory registerNewSkill(String skillName, Plugin controller);
 
     /**
      * Sets if ArcheCore will attempt to clone it's database on a restart

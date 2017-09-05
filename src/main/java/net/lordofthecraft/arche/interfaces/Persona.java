@@ -139,9 +139,34 @@ public interface Persona {
 	 */
 	boolean hasPrefix();
 
-	double getFatigue();
+    /**
+     * Get the fatigue that when reached will prevent the player from performing certain actions
+     *
+     * @return The maximum fatigue of this player
+     */
+    double getMaximumFatigue();
 
-	void setFatigue(double fatigue);
+    /**
+     * Sets the level of fatigue this persona has to reach before it prevents certain actions from being performed
+     *
+     * @param maxFatigue The new maximum fatigue
+     */
+    void setMaximumFatigue(double maxFatigue);
+
+    /**
+     * Gets the current level of Fatigue this persona has, between 0 and {@link #getMaximumFatigue()}
+     *
+     * @return The current level of fatigue
+     * @see net.lordofthecraft.arche.ArcheFatigueHandler
+     */
+    double getFatigue();
+
+    /**
+     * Sets the current level of Fatigue for this persona and performs a quick {@link net.lordofthecraft.arche.save.tasks.persona.UpdateFatigueTask}
+     *
+     * @param fatigue The new level of fatigue
+     */
+    void setFatigue(double fatigue);
 
 	/**
 	 * Clears a Personas prefix. If Prefixes are disabled, calling this will change
@@ -333,11 +358,16 @@ public interface Persona {
 
 	/**
 	 * @return if the player is below the new persona timer
-	 */
-	boolean isNewbie();
+     */
+    boolean isNewbie();
 
-	/**
-	 * @return The PersonaInventory for this persona
+    /**
+     * @return The EnderChest inventory for this persona
+     */
+    Inventory getEnderChest();
+
+    /**
+     * @return The PersonaInventory for this persona
 	 */
 	PersonaInventory getPInv();
 

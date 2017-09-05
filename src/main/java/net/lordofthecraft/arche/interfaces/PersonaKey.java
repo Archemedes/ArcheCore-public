@@ -12,8 +12,8 @@ public interface PersonaKey {
 	
 	/**
 	 * Retrieve an ArcheCore-issued (session)-consistent id to identify a Persona belonging to a certain player
-	 * @return The immutable integer id (0-3) corresponding to a player's persona.
-	 */
+     * @return The immutable integer id (0-15) corresponding to a player's persona.
+     */
 	int getPersonaId();
 	
 	/**

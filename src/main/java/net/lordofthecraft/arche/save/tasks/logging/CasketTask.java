@@ -34,6 +34,6 @@ public class CasketTask extends StatementTask {
 
     @Override
     protected String getQuery() {
-        return "INSERT INTO casket_log VALUES (?,?,?,?,?)";
+        return "INSERT IGNORE INTO casket_log VALUES (?,?,?,?,?)";
     }
 }

@@ -86,4 +86,114 @@ commands:
    skin:
       usage: Please see /<command> help for a list of commands
       description: store and load skins
-      
+
+permissions:
+  archecore.arsql:
+    description: Do not use unless you understand EXPLICITLY what you are doing. If you read this permission and do not next to instantly recognise it, don't fucking give it to yourself. Thanks.
+  archecore.vanillabeacon:
+    description: Override the beacon menu of Archecore and access a vanilla beacon when interacting with them.
+  archecore.admin:
+    description: Gives access to all facilities within Archecore
+    default: op
+    children:
+      archecore.mod: true
+      archecore.mod.economy: true
+      archecore.persona.gender: true
+      archecore.command.treasurechest: true
+      archecore.persona.switchprofession: true
+      archecore.exempt: true
+      archecore.personas.15: true
+  archecore.exempt:
+    description: Exempts a player from being required to have a persona. Dangerous, high-level permission - use with caution
+  archecore.mod:
+    description: Gives moderator level access to facilities within archecore.
+    children:
+      archecore.mod.persona: true
+      archecore.mod.sign: true
+      archecore.money: true
+      archecore.money.seeother: true
+      archecore.command.newbies: true
+      archecore.command.beaconme: true
+      archecore.persona.setrace: true
+      archecore.persona.realrace: true
+      archecore.mayuse: true
+  archecore.command.skin.nocooldown:
+    description: Removes the cooldown on being able to switch skins
+  archecore.command.skin.4:
+    description: Unlocks 4 skins for a player to be able to use
+    children:
+      archecore.command.skin.3: true
+  archecore.command.skin.3:
+    description: Unlocks 3 skins for a player to be able to use
+    children:
+      archecore.command.skin.2: true
+  archecore.command.skin.2:
+    description: Unlocks 2 skins for a player to be able to use
+    children:
+      archecore.command.skin.1: true
+  archecore.command.skin.1:
+    description: Gives the player an additional skin they can use freely.
+  archecore.mod.economy:
+    description: Grants moderator-level access over economy facilities
+    children:
+      archecore.money: true
+      archecore.money.seeother: true
+  archecore.mod.persona:
+    description: Gives the ability to edit personas as a moderator
+    children:
+      archecore.mod.other: true
+      archecore.persona.realrace: true
+      archecore.command.construct: true
+      archecore.command.spectre: true
+      archecore.command.necrolyte: true
+      archecore.command.ascended: true
+      archecore.persona.longbio: true
+      archecore.persona.longname: true
+      archecore.persona.quickrename: true
+      archecore.persona.quickswitch: true
+      archecore.persona.nonnewbie: true
+      archecore.persona.quickkill: true
+  archecore.mod.other:
+    description: Allows the editting of persona cards which aren't your own.
+  archecore.persona.quickkill:
+    description: Allows the ability to bypass the no-permakill timer of creating a new persona
+  archecore.persona.nonnewbie:
+    description: Prevents a player from having the PvP protection a new persona has.
+  archecore.persona.quickswitch:
+    description: Gives the ability to switch personas quickly.
+  archecore.persona.quickrename:
+    description: Gives the ability to change your name quickly
+  archecore.persona.longname:
+    description: Gives the ability to have a longer than usual name
+  archecore.persona.longbio:
+    description: Gives the ability to have a longer than usual biography
+  archecore.persona.switchprofession:
+    description: Gives the ability to switch the profession of either your or another persona
+  archecore.persona.gender:
+    description: Gives the ability to change the gender of a persona.
+  archecore.persona.realrace:
+    description: Gives the ability to view the real race of a persona
+  archecore.persona.setrace:
+    description: Gives the ability to set the race of a persona
+  archecore.command.construct:
+    description: Gives the ability to set a persona to a construct
+  archecore.command.spectre:
+    description: Gives the ability to set a persona to a spectre
+  archecore.command.necrolyte:
+    description: Gives the ability to set a persona to a necrolyte
+  archecore.command.ascended:
+    description: Gives the ability to set a persona to an Aengulbound
+  archecore.money:
+    description: Gives access to use /money and it's aliases for managing money if the Economy module is enabled.
+    default: yes
+  archecore.money.seeother:
+    description: Gives the ability to view the funds of another persona than your own
+  archecore.command.beaconme:
+    description: Gives accesss to the command /beaconme or accessing a beacon menu to edit and create personas.
+    default: yes
+  archecore.enderchest:
+    description: Gives access to your personal ender chest which can be used freely on the run after you have achieved a certain number of hours on a persona.
+    default: yes
+  archecore.mayuse:
+    description: The base permission required for nearly all facilities of Archecore, the Persona Framework.
+    default: yes

@@ -6,6 +6,7 @@ import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -16,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.util.Vector;
 
 import java.util.Set;
 import java.util.UUID;
@@ -91,14 +93,10 @@ public class NewbieProtectListener implements Listener {
 	}
 	
 	private void barrier(Player target, Player damager){
-		/*Location l = target.getLocation();
-		Vector v = damager.getLocation().subtract(l).getDirection().multiply(0.5);
+        Location l = target.getLocation();
+        Vector v = damager.getLocation().subtract(l).getDirection().multiply(0.5);
 		l.add(v);
-		double x = l.getX();
-		double y = l.getY();
-		double z = l.getZ();
-		
-		String cmd = String.format("particle barrier %.1f %.1f %.1f 0 0 0 1", x, y, z);
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);*/
-	}
+
+        damager.spawnParticle(Particle.BARRIER, l, 1);
+    }
 }

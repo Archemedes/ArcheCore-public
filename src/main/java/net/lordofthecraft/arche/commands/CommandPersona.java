@@ -100,7 +100,8 @@ public class CommandPersona implements CommandExecutor {
 					|| args[0].equalsIgnoreCase("realrace")
 					|| args[0].equalsIgnoreCase("wiperace")
 					|| args[0].equalsIgnoreCase("openinv")
-					|| args[0].equalsIgnoreCase("head")
+                    || args[0].equalsIgnoreCase("openender")
+                    || args[0].equalsIgnoreCase("head")
 					|| args[0].equalsIgnoreCase("icon")
 					|| args[0].equalsIgnoreCase("created"))
 					&& args.length > 1
@@ -309,55 +310,78 @@ public class CommandPersona implements CommandExecutor {
 						}
 					}
 					return true;
-				} else if (args[0].equalsIgnoreCase("openinv")) {
-					if (!sender.hasPermission("archecore.admin")) {
-						if (sender.hasPermission("archecore.mod.persona")) 
-							sender.sendMessage(ChatColor.RED + "Error: This command is currently suspended from moderators until we can sort out some bugs - Dev Team");
-						else 
-							sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-					} else {
-						if (sender instanceof Player) {
-							Player pl = (Player) sender;
-							pl.closeInventory();
-							Inventory inv = pers.getInventory();
-							if (inv == null) sender.sendMessage(ChatColor.RED + "This persona is currently active! Please use /openinv <player>");
-							else { 
-								sender.sendMessage(ChatColor.AQUA + "Opening invenotry contents for " + pers.getName() + ".");
-								pl.openInventory(pers.getInventory());
-							}
+                } else if (args[0].equalsIgnoreCase("openinv")) {
+                    if (!sender.hasPermission("archecore.admin")) {
+                        if (sender.hasPermission("archecore.mod.persona"))
+                            sender.sendMessage(ChatColor.RED + "Error: This command is currently suspended from moderators until we can sort out some bugs - Dev Team");
+                        else
+                            sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
+                    } else {
+                        if (sender instanceof Player) {
+                            Player pl = (Player) sender;
+                            pl.closeInventory();
+                            Inventory inv = pers.getInventory();
+                            if (inv == null) sender.sendMessage(ChatColor.RED + "This persona is currently active! Please use /openinv <player>");
+                            else {
+                                sender.sendMessage(ChatColor.AQUA + "Opening inventory contents for " + pers.getName() + ".");
+                                pl.openInventory(pers.getInventory());
+                            }
 
-						} else {
-							sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
-						}
-					}
-					return true;
-				} else if (args[0].equalsIgnoreCase("construct") || args[0].equalsIgnoreCase("golem")) {
-					if (!sender.hasPermission("archecore.command.construct") && !sender.hasPermission("archecore.admin")) {
-						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-						return true;
-					} else
-						return doRaceChange(sender, pers, Race.CONSTRUCT);
-				} else if (args[0].equalsIgnoreCase("spectre") || args[0].equalsIgnoreCase("spectral") || args[0].equalsIgnoreCase("specter")) {
-					if (!sender.hasPermission("archecore.command.spectre") && !sender.hasPermission("archecore.admin")) {
-						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-						return true;
-					} else
-						return doRaceChange(sender, pers, Race.SPECTRE);
-				} else if (args[0].equalsIgnoreCase("necrolyte") || args[0].equalsIgnoreCase("necro")) {
-					if (!sender.hasPermission("archecore.command.necrolyte") && !sender.hasPermission("archecore.admin")) {
-						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-						return true;
-					} else
-						return doRaceChange(sender, pers, Race.NECROLYTE);
-				} else if (args[0].equalsIgnoreCase("aengulbound")
-						|| args[0].equalsIgnoreCase("keeper")
-						|| args[0].equalsIgnoreCase("ascended")) {
-					if (!sender.hasPermission("archecore.command.ascended") && !sender.hasPermission("archecore.admin")) {
-						sender.sendMessage(ChatColor.RED + "Error: Permission denied");
-						return true;
-					} else
-						return doRaceChange(sender, pers, Race.ASCENDED);
-				}
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
+                        }
+                    }
+                    return true;
+                } else if (args[0].equalsIgnoreCase("openender")) {
+                    if (!sender.hasPermission("archecore.admin")) {
+                        if (sender.hasPermission("archecore.mod.persona"))
+                            sender.sendMessage(ChatColor.RED + "Error: This command is currently suspended from moderators until we can sort out some bugs - Dev Team");
+                        else
+                            sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
+                    } else {
+                        if (sender instanceof Player) {
+                            Player pl = (Player) sender;
+                            pl.closeInventory();
+                            Inventory inv = pers.getEnderChest();
+                            if (inv == null) {
+                                sender.sendMessage(ChatColor.RED + "Something went wrong opening the enderchest.");
+                            } else {
+                                sender.sendMessage(ChatColor.AQUA + "Opening enderchest contents for " + pers.getName() + ".");
+                                pl.openInventory(inv);
+                            }
+
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
+                        }
+                    }
+                    return true;
+                } else if (args[0].equalsIgnoreCase("construct") || args[0].equalsIgnoreCase("golem")) {
+                    if (!sender.hasPermission("archecore.command.construct") && !sender.hasPermission("archecore.admin")) {
+                        sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
+                        return true;
+                    } else
+                        return doRaceChange(sender, pers, Race.CONSTRUCT);
+                } else if (args[0].equalsIgnoreCase("spectre") || args[0].equalsIgnoreCase("spectral") || args[0].equalsIgnoreCase("specter")) {
+                    if (!sender.hasPermission("archecore.command.spectre") && !sender.hasPermission("archecore.admin")) {
+                        sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
+                        return true;
+                    } else
+                        return doRaceChange(sender, pers, Race.SPECTRE);
+                } else if (args[0].equalsIgnoreCase("necrolyte") || args[0].equalsIgnoreCase("necro")) {
+                    if (!sender.hasPermission("archecore.command.necrolyte") && !sender.hasPermission("archecore.admin")) {
+                        sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
+                        return true;
+                    } else
+                        return doRaceChange(sender, pers, Race.NECROLYTE);
+                } else if (args[0].equalsIgnoreCase("aengulbound")
+                        || args[0].equalsIgnoreCase("keeper")
+                        || args[0].equalsIgnoreCase("ascended")) {
+                    if (!sender.hasPermission("archecore.command.ascended") && !sender.hasPermission("archecore.admin")) {
+                        sender.sendMessage(ChatColor.RED + "Error: Permission denied");
+                        return true;
+                    } else
+                        return doRaceChange(sender, pers, Race.ASCENDED);
+                }
 			}
 		}
 		return false;

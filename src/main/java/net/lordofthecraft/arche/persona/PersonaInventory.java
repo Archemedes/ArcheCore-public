@@ -14,48 +14,78 @@ import java.util.stream.Collectors;
 
 public class PersonaInventory {
     private ItemStack[] contents;
+    private ItemStack[] enderContents;
 
-    private PersonaInventory(ItemStack[] contents) {
+    public PersonaInventory(ItemStack[] contents, ItemStack[] enderContents) {
         this.contents = contents;
+        this.enderContents = enderContents;
     }
 
-    public static PersonaInventory restore(String str) throws InvalidConfigurationException {
+    public static PersonaInventory restore(String inv, String enderinv) throws InvalidConfigurationException {
         YamlConfiguration config = new YamlConfiguration();
+        YamlConfiguration enderconfig = new YamlConfiguration();
 
-        config.loadFromString(str);
+        config.loadFromString(inv);
+        enderconfig.loadFromString(enderinv);
         if(config.getKeys(false).contains("contents")) {
-            //501 - This is giving me compile errors. Incompatible types: Object cannot be cast to List<ItemStack>.
             @SuppressWarnings("unchecked")
 			List<ItemStack> result = config.getList("contents").stream()
                     .map(ent -> (Map<String, Object>) ent)
                     .map(ItemStack::deserialize)
                     .collect(Collectors.toList());
         	ItemStack[] contents = result.toArray(new ItemStack[result.size()]);
-            return new PersonaInventory(contents);
+            if (enderconfig.getKeys(false).contains("contents")) {
+                List<ItemStack> enderresult = config.getList("contents").stream()
+                        .map(ent -> (Map<String, Object>) ent)
+                        .map(ItemStack::deserialize)
+                        .collect(Collectors.toList());
+                ItemStack[] endercontents = enderresult.toArray(new ItemStack[enderresult.size()]);
+                return new PersonaInventory(contents, endercontents);
+            }
+            return new PersonaInventory(contents, new ItemStack[27]);
         } else throw new InvalidConfigurationException("Config node 'contents' not found! Should always be there and should always be the only tag!");
+
     }
 
     public static PersonaInventory store(Player p) {
     	PlayerInventory pinv = p.getInventory();
     	return InventoryUtil.isEmpty(pinv)?
-    			null : new PersonaInventory(pinv.getContents());
+                null : new PersonaInventory(pinv.getContents(), p.getEnderChest().getContents());
     }
 
     public ItemStack[] getContents() {
         return contents;
     }
 
-    public PersonaInventory setContents(ItemStack[] contents) {
-        this.contents = contents;
-        return this;
+    public ItemStack[] getEnderContents() {
+        return enderContents;
     }
 
-    public String getAsString() {
+    public void setContents(ItemStack[] contents) {
+        this.contents = contents;
+    }
+
+    public void setEnderContents(ItemStack[] contents) {
+        this.enderContents = enderContents;
+    }
+
+    public String getInvAsString() {
         YamlConfiguration config = new YamlConfiguration();
         List<Map<String, Object>> contentslist = Lists.newArrayList();
         for (ItemStack i : contents) {
         	if(i == null) contentslist.add(null);
         	else contentslist.add(i.serialize());
+        }
+        config.set("contents", contentslist);
+        return config.saveToString();
+    }
+
+    public String getEnderInvAsString() {
+        YamlConfiguration config = new YamlConfiguration();
+        List<Map<String, Object>> contentslist = Lists.newArrayList();
+        for (ItemStack i : enderContents) {
+            if (i == null) contentslist.add(null);
+            else contentslist.add(i.serialize());
         }
         config.set("contents", contentslist);
         return config.saveToString();

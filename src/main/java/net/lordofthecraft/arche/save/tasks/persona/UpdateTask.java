@@ -27,7 +27,8 @@ public class UpdateTask extends ArcheTask {
 			stat.setObject(1, value, field.type);
 			stat.setInt(2, persona.getPersonaId());
 			stat.execute();
-		}catch(SQLException e){e.printStackTrace();}
+            stat.close();
+        }catch(SQLException e){e.printStackTrace();}
 	}
 	
 

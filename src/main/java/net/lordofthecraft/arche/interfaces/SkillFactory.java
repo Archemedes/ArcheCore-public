@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.interfaces;
 
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.Race;
 import org.bukkit.Material;
 
@@ -63,11 +64,23 @@ public interface SkillFactory {
 	 */
 	SkillFactory withHelpFile(String helpText, Material helpIcon);
 
-	/**
-	 * Process the SkillFactory object to create a new skill. This method
+    /**
+     * Skills, once created once, will be saved in SQL and loaded in {@link ArcheCore#onEnable()}
+     * After this has completed skills will be loaded from SQL and will be in a read state, edits made VIA SkillFactory will not be applied
+     * <i>however</i> if you wish to have the skill forced with your data (and be incapable of being editted without uploading a new version) you can set this to {@code 'true'}
+     * This is discouraged, as we wish to be able to change values without recompiling plugins.
+     *
+     * @param force Whether or not to force an update of this skill
+     * @return itself
+     */
+    SkillFactory withForceUpdate(boolean force);
+
+    /**
+     * Process the SkillFactory object to create a new skill. This method
 	 * will automatically do all the required back-end work to make the skill
 	 * immediately accessible and usable as per your used settings.
-	 * @return The new Skill object, registered with your provided settings.
+     *
+     * @return The new Skill object, registered with your provided settings.
 	 */
 	Skill register();
 
