@@ -11,19 +11,22 @@ import java.sql.SQLException;
  */
 public class MagicDeleteTask extends StatementTask {
 
-    private final int magicid;
+    private final int persona_id;
+    private final String magic_name;
 
-    public MagicDeleteTask(int magicid) {
-        this.magicid = magicid;
+    public MagicDeleteTask(int persona_id, String magic_name) {
+        this.persona_id = persona_id;
+        this.magic_name = magic_name;
     }
 
     @Override
     protected void setValues() throws SQLException {
-        stat.setInt(1, magicid);
+        stat.setInt(1, persona_id);
+        stat.setString(2, magic_name);
     }
 
     @Override
     protected String getQuery() {
-        return "DELETE FROM persona_magic WHERE magic_id=?";
+        return "DELETE FROM persona_magic WHERE persona_id_fk=? AND magic_fk=?";
     }
 }

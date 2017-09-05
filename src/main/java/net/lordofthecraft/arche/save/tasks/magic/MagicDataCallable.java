@@ -44,7 +44,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
     @Override
     public MagicData call() throws Exception {
-        String sql = "SELECT magic_id,tier,last_advanced,teacher,learned FROM persona_magics WHERE persona_fk=? AND magic_fk=?";
+        String sql = "SELECT tier,last_advanced,teacher,learned FROM persona_magics WHERE persona_id_fk=? AND magic_fk=?";
         MagicData data = null;
         synchronized (handler) {
             PreparedStatement stat = handler.getConnection().prepareStatement(sql);
@@ -56,7 +56,6 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
                 int ss = rs.getInt("teacher");
                 data = new MagicData(
                         magic,
-                        rs.getInt("magic_id"),
                         rs.getInt("tier"),
                         rs.getBoolean("visible"),
                         ss != -1,

@@ -1,7 +1,6 @@
 package net.lordofthecraft.arche.persona;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.enums.PersonaType;
@@ -17,10 +16,15 @@ import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.magic.MagicCreateCallable;
-import net.lordofthecraft.arche.save.tasks.persona.*;
+import net.lordofthecraft.arche.save.tasks.persona.PersonaDeleteCallTask;
+import net.lordofthecraft.arche.save.tasks.persona.TagAttachmentCallable;
+import net.lordofthecraft.arche.save.tasks.persona.UpdateFatigueTask;
+import net.lordofthecraft.arche.save.tasks.persona.UpdateTask;
+import net.lordofthecraft.arche.save.tasks.skills.SelectSkillTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.SkillData;
+import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
@@ -41,7 +45,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -60,13 +63,14 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private final int persona_id;
 
 	final PersonaSkills skills = new PersonaSkills(this);
+    final PersonaMagics magics = new PersonaMagics(this);
 
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger timePlayed;
 	final AtomicInteger charactersSpoken;
 	private final ArchePersonaKey key;
-	private int gender;
-	String description = null;
+    private String gender;
+    String description = null;
 	volatile String prefix = null;
 	boolean current = true;
 	String raceHeader = null;
@@ -91,14 +95,14 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private TagAttachment attachment;
 	private Map<String, String> tags;
 	private PersonaType type;
-	private Set<MagicAttachment> magics = Sets.newConcurrentHashSet();
+    private ArcheSkin skin;
 
-	ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int gender, Timestamp creationTimeMS) {
-		this(persona_id, player, slot, name, race, gender, creationTimeMS, PersonaType.NORMAL);
+    ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS) {
+        this(persona_id, player, slot, name, race, gender, creationTimeMS, PersonaType.NORMAL);
 	}
 
-	ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int gender, Timestamp creationTimeMS, PersonaType type) {
-		this.key = new ArchePersonaKey(player, slot);
+    ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS, PersonaType type) {
+        this.key = new ArchePersonaKey(player, slot);
 
 		this.persona_id = persona_id;
 		this.race = race;
@@ -231,8 +235,13 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		return current;
 	}
 
-	void setCurrent(boolean current) {
-		if (this.current != current) {
+    @Override
+    public PersonaMagics getMagics() {
+        return magics;
+    }
+
+    void setCurrent(boolean current) {
+        if (this.current != current) {
 
 			this.current = current;
 
@@ -282,8 +291,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	void loadMagics() {
-		String sql = "SELECT magic_id,magic_fk,tier,last_advanced,teacher,learned,visible FROM persona_magic WHERE persona_fk=?";
-		try {
+        String sql = "SELECT magic_fk,tier,last_advanced,teacher,learned,visible FROM persona_magic WHERE persona_id_fk=?";
+        try {
 			PreparedStatement stat = ArcheCore.getSQLControls().getConnection().prepareStatement(sql);
 			stat.setInt(1, persona_id);
 			ResultSet rs = stat.executeQuery();
@@ -292,15 +301,14 @@ public final class ArchePersona implements Persona, InventoryHolder {
 				String magic = rs.getString("magic_fk");
 				Optional<Magic> armagic = ArcheCore.getMagicControls().researchMagic(magic);
 				if (armagic.isPresent()) {
-					int it = rs.getInt("magic_id");
 					int tier = rs.getInt("tier");
 					Timestamp last_advanced = rs.getTimestamp("last_advanced");
 					Timestamp learned = rs.getTimestamp("learned");
 					int teacher = rs.getInt("teacher");
 					boolean visible = rs.getBoolean("visible");
-					data = new MagicData(armagic.get(), it, tier, visible, teacher > -1, (teacher <= 0 ? -1 : teacher), learned.toInstant().toEpochMilli(), last_advanced.toInstant().toEpochMilli());
-					magics.add(new MagicAttachment(armagic.get(), persona_id, data));
-				}
+                    data = new MagicData(armagic.get(), tier, visible, teacher > -1, (teacher <= 0 ? -1 : teacher), learned.toInstant().toEpochMilli(), last_advanced.toInstant().toEpochMilli());
+                    magics.addMagicAttachment(new MagicAttachment(armagic.get(), persona_id, data));
+                }
 			}
 			rs.close();
 			stat.close();
@@ -314,36 +322,37 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	void removeMagicAttachment(Magic magic) {
-		magics.removeIf(mag -> mag.getMagic().equals(magic));
-	}
+        magics.removeMagicAttachment(magic);
+    }
 
 	public Optional<MagicAttachment> getMagicAttachment(Magic m) {
-		return magics.stream().filter(at -> at.getMagic().equals(m)).findFirst();
-	}
+        return magics.getMagicAttachment(m);
+    }
 
 	@Override
 	public boolean hasMagic(Magic m) {
-		return magics.stream().anyMatch(at -> at.getMagic().equals(m));
-	}
+        return magics.hasMagic(m);
+    }
 
 	@Override
 	public boolean hasAchievedMagicTier(Magic m, int tier) {
-		Optional<MagicAttachment> omat = magics.stream().filter(at -> at.getMagic().equals(m)).findFirst();
-		return omat.filter(magicAttachment -> magicAttachment.getTier() >= tier).isPresent();
+        /*Optional<MagicAttachment> omat = magics.stream().filter(at -> at.getMagic().equals(m)).findFirst();
+		return omat.filter(magicAttachment -> magicAttachment.getTier() >= tier).isPresent();*/
+        return false;
 	}
 
 	@Override
 	public Optional<Future<MagicAttachment>> createAttachment(Magic m, int tier, Persona teacher, boolean visible) {
-		if (magics.stream().anyMatch(at -> at.getMagic().equals(m))) {
-			return Optional.empty();
+        if (magics.hasMagic(m)) {
+            return Optional.empty();
 		}
-		MagicCreateCallable call = new MagicCreateCallable(persona_id, (ArcheMagic) m, tier, (teacher == null ? null : teacher.getPersonaId()), visible, ArcheCore.getSQLControls());
-		Future<MagicAttachment> future = buffer.prepareCallable(call);
+        MagicCreateCallable call = new MagicCreateCallable(persona_id, (ArcheMagic) m, tier, (teacher == null ? -1 : teacher.getPersonaId()), visible, ArcheCore.getSQLControls());
+        Future<MagicAttachment> future = buffer.prepareCallable(call);
 		try {
 			MagicAttachment attach = future.get(200, TimeUnit.MILLISECONDS);
 
-			magics.add(attach);
-			return Optional.of(future);
+            magics.addMagicAttachment(attach);
+            return Optional.of(future);
 		} catch (TimeoutException e) {
 			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Timed out while adding a magic to the persona " + persona_id + " (" + player + "). Magic: " + m.getName(), e);
 		} catch (Exception e) {
@@ -448,6 +457,36 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		return key.getPlayerUUID();
 	}
 
+    @Override
+    public String getRaceString(boolean mod) {
+        StringBuilder sb = new StringBuilder();
+        if (magics.hasCreature()) {
+            sb.append(magics.getCreature().getName()).append(" ");
+            if (mod) {
+                sb.append(ChatColor.GRAY);
+                String end = "";
+                if (raceHeader != null && !raceHeader.isEmpty()) {
+                    sb.append("[").append(raceHeader).append(" ");
+                    end = ChatColor.GRAY + "]";
+                }
+                sb.append(ChatColor.DARK_GRAY).append("(").append(race.getName()).append(")");
+                sb.append(end);
+            }
+        } else if (raceHeader != null && !raceHeader.isEmpty()) {
+            sb.append(raceHeader).append(" ");
+            if (mod) {
+                sb.append(ChatColor.GRAY).append("(").append(race.getName()).append(") ");
+            }
+        } else {
+            if (race != Race.UNSET) {
+                sb.append(race.getName());
+            } else if (mod) {
+                sb.append(ChatColor.GRAY).append(race.getName());
+            }
+        }
+        return sb.toString();
+    }
+
 	@Override
 	public String getChatName(){
 		if(prefix == null || prefix.isEmpty()){
@@ -501,13 +540,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	@Override
-	public String getRaceString(){
-		if(raceHeader == null || raceHeader.isEmpty()){
-			return race.getName();
-		} else return raceHeader;
-	}
-
-	@Override
 	public void setApparentRace(String race){
 		raceHeader = race;
 
@@ -547,24 +579,14 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	@Override
 	public String getGender(){
-		switch(gender){
-		case 0: return "Female";
-		case 1: return "Male";
-		default: return null;
-		}
-	}
+        return gender;
+    }
 
 	@Override
 	 public void setGender(String gender) {
-	 switch(gender.toLowerCase()){
-	 case "female": this.gender = 0; break;
-	 case "male": this.gender = 1; break;
-	 case "other": this.gender = 2; break;
-	 default: return;
-	 }
-
-	 buffer.put(new UpdateTask(this, PersonaField.GENDER, gender));
-	 }
+        this.gender = gender;
+        buffer.put(new UpdateTask(this, PersonaField.GENDER, gender));
+    }
 
 	void saveMinecraftSpecifics(final Player p){
 		//Store and switch Persona-related specifics: Location and Inventory.
@@ -658,8 +680,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 					pr.setCurrent(true);
 					pr.restoreMinecraftSpecifics(p);
 					success = true;
-					newPersonaHasSkin = cache.getSkinFor(pr) != null;
-					break;
+                    newPersonaHasSkin = pr.hasSkin();
+                    break;
 				}
 			}
 
@@ -771,4 +793,28 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			buffer.put(new UpdateFatigueTask(fatigue, persona_id, player));
 		}
 	}
+
+    @Override
+    public void setSkin(ArcheSkin skin) {
+        this.skin = skin;
+        skin.addPersona(this);
+        buffer.put(new UpdateTask(this, PersonaField.ICON, skin.getSkinId()));
+    }
+
+    @Override
+    public void removeSkin() {
+        skin.removePersona(this);
+        this.skin = null;
+        buffer.put(new UpdateTask(this, PersonaField.ICON, -1));
+    }
+
+    @Override
+    public ArcheSkin getSkin() {
+        return skin;
+    }
+
+    @Override
+    public boolean hasSkin() {
+        return skin != null;
+    }
 }

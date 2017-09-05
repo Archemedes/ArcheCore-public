@@ -5,15 +5,11 @@ import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.util.CommandUtil;
-
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
 
 public class CommandMoney implements CommandExecutor {
 	private final static double PAYMENT_PROXIMITY = 8;
@@ -53,30 +49,6 @@ public class CommandMoney implements CommandExecutor {
 			return true;
 		}else if (args[0].equalsIgnoreCase("help")) {
 			sendHelp(sender);
-			return true;
-		}else if (args[0].equalsIgnoreCase("top")) {
-			LinkedHashMap<Persona, Double> top = ArcheCore.getControls().getPersonaHandler().getTopHandler().getTopMoney();
-			
-			sender.sendMessage(ChatColor.BLUE+""+ChatColor.BOLD+".:: Money Top ::.");
-			if (!top.isEmpty()) {
-				Persona t;
-				double total;
-				String pr;
-				int count = 0;
-				for (Entry<Persona, Double> e : top.entrySet()) {
-					pr = count == 0 ? ChatColor.GOLD+""+ChatColor.BOLD : ChatColor.DARK_GREEN+"";
-					t = e.getKey();
-					total = e.getValue();
-					sender.sendMessage(pr+(count+1)+". "
-							+ ChatColor.BLUE + t.getName()
-							+ ChatColor.AQUA + ChatColor.ITALIC + " ("+t.getPlayerName()+"@"+t.getId()+") "
-                            + ChatColor.RESET + "" + ChatColor.GOLD + "" + Math.round(total) + " " + (total == 1 ? econ.currencyNameSingular() : econ.currencyNamePlural()));
-                    ++count;
-				}
-			} else {
-				sender.sendMessage(ChatColor.RED+"Everyone is poor! How unfortunate.");
-			}
-			
 			return true;
         } else if (args[0].equalsIgnoreCase("pay")) {
             if (args.length >= 3) {

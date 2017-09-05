@@ -22,6 +22,7 @@ public class FatigueDecreaser extends BukkitRunnable {
 	@Override
 	public void run() {
 		//Assumes it runs every 20 minutes
+        //TODO fix
         double toDecrease = 100 / (fatigueRestoreHours * 3);
 
         SaveHandler.getInstance().put(new FatigueReduceTask());

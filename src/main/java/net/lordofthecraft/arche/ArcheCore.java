@@ -141,15 +141,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			RaceBonusHandler.reset(p);
 		});
 
-		/*if (saveHandler != null) {
-			try {
-				saverThread.join();
-			}
-			catch (InterruptedException e) {
-				getLogger().severe("ArcheCore was interrupted prematurely while waiting for its saver thread to resolve.");
-				e.printStackTrace();
-			}
-		}*/
 		sqlHandler.close();
 		if (shouldClone && sqlHandler instanceof ArcheSQLiteHandler) {
 			((ArcheSQLiteHandler) sqlHandler).cloneDB();

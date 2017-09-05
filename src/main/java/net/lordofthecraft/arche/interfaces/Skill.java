@@ -76,8 +76,10 @@ public interface Skill {
 	 */
 	boolean isVisible(Persona p);
 
-	/**
-	 * Force to reveal the skill to the given Persona, after which 
+    boolean isEnabled();
+
+    /**
+     * Force to reveal the skill to the given Persona, after which
 	 * it is treated as 'visible' for that Persona.
 	 * @param p The Persona to reveal for.
 	 * @return whether or not this skill was already visible.

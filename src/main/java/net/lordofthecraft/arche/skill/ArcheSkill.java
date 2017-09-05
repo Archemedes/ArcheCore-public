@@ -34,6 +34,7 @@ public class ArcheSkill implements Skill {
 	//TODO add a statement_remove when you want to remove an entry from the skill tables altogether
 
     private Plugin controllingPlugin = null;
+    private boolean enabled = true;
 
 	ArcheSkill(String name, String maleName, String femaleName, int displayStrategy, boolean inert,
                Set<Race> mains, Map<Race, Double> raceMods) {
@@ -78,8 +79,17 @@ public class ArcheSkill implements Skill {
 	public boolean isVisible(Persona p){
 		return getAttachment(p).isVisible();
 	}
-	
-	@Override
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean value) {
+        this.enabled = value;
+    }
+
+    @Override
 	public boolean reveal(Persona p){
 		boolean vis = isVisible(p);
 		getAttachment(p).reveal();
@@ -141,11 +151,11 @@ public class ArcheSkill implements Skill {
 		attach.setXp(newXp);
 
 		//Level up? If so display message
-		if(attach.isVisible() && xp > 0 ){
-			SkillTier current = getSkillTier(p);
+        if (attach.isVisible() && xp > 0) {
+            SkillTier current = getSkillTier(p);
 			int treshold = current.getXp();
-			if(oldXp < treshold && newXp >= treshold ){ //This XP gain made player pass treshold
-				Player player = p.getPlayer();
+            if (oldXp < treshold && newXp >= treshold) { //This XP gain made player pass threshold
+                Player player = p.getPlayer();
 				if(player != null){
 					boolean female = "Female".equals(p.getGender());
 					String professional = this.getProfessionalName(female);

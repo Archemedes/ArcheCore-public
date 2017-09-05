@@ -15,7 +15,6 @@ import net.lordofthecraft.arche.save.tasks.DataTask;
 import net.lordofthecraft.arche.save.tasks.skills.SkillDeleteTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-import net.lordofthecraft.arche.skill.TopData;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.MessageUtil;
@@ -35,7 +34,6 @@ import java.util.logging.Logger;
 
 public class ArchePersonaHandler implements PersonaHandler {
 	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
-	private static TopData topData;
 	private final Map<UUID, ArchePersona[]> personas = new HashMap<>(Bukkit.getServer().getMaxPlayers());
 	//private final ArchePersonaExtender extender = new ArchePersonaExtender();
 	private SaveHandler buffer = SaveHandler.getInstance();
@@ -63,9 +61,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public boolean isPreloading() {
 		return preloading;
 	}
-
-	@Override
-	public TopData getTopHandler() { return topData; }
 
 	@Override
 	public void setModifyDisplayNames(boolean will){
@@ -100,6 +95,14 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public Collection<ArchePersona[]> getPersonas(){
 		return Collections.unmodifiableCollection(personas.values());
 	}
+
+    @Override
+    public Optional<ArchePersona> getPersona(int persona_id) {
+        return personas.values().stream()
+                .flatMap(Arrays::stream)
+                .filter(p -> p.getPersonaId() == persona_id)
+                .findFirst();
+    }
 
 	@Override
 	public ArchePersona getPersona(Player p){
@@ -238,9 +241,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		//Check if switched-to Persona will require a different skin from storage
 		SkinCache cache = ArcheCore.getControls().getSkinCache();
-		ArcheSkin skBefore = cache.getSkinFor(before);
-		ArcheSkin skAfter = cache.getSkinFor(after);
-		if( skBefore != skAfter ) {
+        ArcheSkin skBefore = (before == null ? null : before.getSkin());
+        ArcheSkin skAfter = after.getSkin();
+        if( skBefore != skAfter ) {
 			cache.refreshPlayer(p);
 		}
 
@@ -345,11 +348,10 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		subresult.add(new TextComponent(c + "Name: " + r + p.getName()));
 
-		String race = p.getRaceString();
-		if (!race.equals("Unset")) {
-			subresult.add(new TextComponent(c + "Race: " + r + race +
-					((!p.getRace().getName().equalsIgnoreCase(race) && mod) ? ChatColor.DARK_GRAY + " (" + p.getRace().getName() + ")" : "")));
-		}
+        String race = p.getRaceString(mod);
+        if (race != null && !race.isEmpty()) {
+            subresult.add(new TextComponent(c + "Race: " + r + race));
+        }
 
 		String gender = p.getGender();
 		if(gender != null) subresult.add(new TextComponent(c + "Gender: " + r + p.getGender()));
@@ -449,8 +451,10 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	private List<BaseComponent> getExtendedWhoisInfo(Persona p, boolean mod){
 		//Possible to move 'profession' back here
-		return Lists.newArrayList();
-	}
+        List<BaseComponent> components = Lists.newArrayList();
+        components.addAll(Arrays.asList(p.getMagics().getMagicText()));
+        return components;
+    }
 
 	public void initPlayer(Player p){
 
@@ -488,15 +492,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		ResultSet res = null;
 		try {
 			if (selectStatement == null)
-				selectStatement = personaConnection.prepareStatement("SELECT " +
-						"persona_id,slot,race_key,gender" +
-						",name,curr,race_header,descr,prefix,money,skin,profession,fatigue,max_fatigue" +
-						",world,x,y,z,inv,enderinv,health,hunger,saturation" +
-						",played,chars,renamed,playtime_past,date_created,last_played " +
-						"FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
-						"JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
-						"WHERE player_fk=?");
-			selectStatement.clearParameters();
+                selectStatement = personaConnection.prepareStatement(personaSelect);
+            selectStatement.clearParameters();
 			selectStatement.setString(1, p.getUniqueId().toString());
 			res = selectStatement.executeQuery();
 
@@ -583,11 +580,15 @@ public class ArchePersonaHandler implements PersonaHandler {
 		String name = res.getString("name");
 		Race race = Race.valueOf(res.getString("race"));
 		String rheader = res.getString("race_header");
-		int gender = res.getInt("gender");
-		Timestamp creationTimeMS = res.getTimestamp("date_created");
+        //I just want to say this triggers the fuck out of me.
+        //It's not that I really care about gender morality, you can go out and be anything you want to be
+        //But if I see literal memes in gender:
+        //I'm going to be SO TRIGGERED :FeelsRageMan: REEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+        //-501
+        String gender = res.getString("gender");
+        Timestamp creationTimeMS = res.getTimestamp("date_created");
 		String type = res.getString("p_type");
 		PersonaType ptype = PersonaType.valueOf(type);
-
 
 		ArchePersona persona = new ArchePersona(persona_id, p.getUniqueId(), slot, name, race, gender, creationTimeMS, ptype);
 		persona.player = p.getName();
@@ -612,6 +613,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.lastPlayed = res.getTimestamp("last_played");
 		//persona.gainsXP = res.getBoolean(15);
 		persona.skills.setMainProfession(ArcheSkillFactory.getSkill(res.getString("profession")));
+        Optional<Creature> creature = ArcheCore.getMagicControls().summonCreature(res.getString("creature"));
+        creature.ifPresent(persona.magics::setCreature);
 
 		String wstr = res.getString("world");
 		if(!res.wasNull()){
@@ -655,14 +658,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		preloading = true;
 		try{
 			if (selectStatement == null)
-				selectStatement = personaConnection.prepareStatement("SELECT " +
-						"persona_id,slot,race_key,gender" +
-						",name,curr,race_header,descr,prefix,money,skin,profession,fatigue,max_fatigue" +
-						",world,x,y,z,inv,enderinv,health,hunger,saturation" +
-						",played,chars,renamed,playtime_past,date_created,last_played " +
-						"FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
-						"JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
-						"WHERE player_fk=?");
+                selectStatement = personaConnection.prepareStatement(personaSelect);
 
 
 			ResultSet res = personaConnection.createStatement().executeQuery("SELECT player,preload_force FROM players");
@@ -714,7 +710,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 					}
 				}
 			}
-			topData = new TopData();
 			/*
 			 * TODO
 			 * Move this out of initPreload, or if presonas aren't preloaded it will throw NPE since racespawns will be null.

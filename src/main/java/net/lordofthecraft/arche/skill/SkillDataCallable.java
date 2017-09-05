@@ -1,8 +1,10 @@
 package net.lordofthecraft.arche.skill;
 
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.persona.ArchePersona;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.Callable;
@@ -20,24 +22,29 @@ public class SkillDataCallable implements Callable<SkillData> {
 	
 	@Override
 	public SkillData call() throws SQLException {
-		//TODO update this statement
-		String query = "SELECT xp,visible FROM sk_" + skill + " WHERE player='" + persona.getPlayerUUID().toString() + "' AND id=" + persona.getId() +";"; 
-		SkillData data;
+        String query = "SELECT xp,visible FROM persona_skills WHERE persona_id_fk=? AND skill_id_fk=?";
+        SkillData data;
 		
 		synchronized(handler){
-			ResultSet res = handler.query(query);
-			
-			if(res.next()){
-				double xp = res.getDouble(1);
-				boolean visible = res.getBoolean(2);
-				data = new SkillData(xp, visible, 0);
+            PreparedStatement stat = handler.getConnection().prepareStatement(query);
+            stat.setInt(1, persona.getPersonaId());
+            stat.setString(2, skill);
+            ResultSet res = stat.executeQuery();
+
+            if(res.next()){
+                double xp = res.getDouble("xp");
+                boolean visible = res.getBoolean("visible");
+                data = new SkillData(xp, visible, 0);
 			} else {
 				data = null;
 			}
 			
 			res.close();
 			res.getStatement().close();
-		}
+            if (handler instanceof WhySQLHandler) {
+                res.getStatement().getConnection().close();
+            }
+        }
 		
 		return data;
 	}

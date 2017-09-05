@@ -14,17 +14,25 @@ public final class ArcheTables {
 
     public static void setUpSQLTables(SQLHandler sqlHandler) {
 		createPlayerTable(sqlHandler);
-		createPersonaTable(sqlHandler);
-		createPersonaVitalsTable(sqlHandler);
+        createPersonaSkinsTable(sqlHandler);
+        createSkillsTable(sqlHandler);
+        createPersonaTable(sqlHandler);
+        createArchetypeTable(sqlHandler);
+        createMagicTable(sqlHandler);
+        createMagicWeaknesses(sqlHandler);
+        createCreaturesTable(sqlHandler);
+        createCreatureCreators(sqlHandler);
+        createCreatureAbilities(sqlHandler);
+        createPersonaVitalsTable(sqlHandler);
 		createPersonaStatsTable(sqlHandler);
 		createPersonaTagsTable(sqlHandler);
-		createSkillsTable(sqlHandler);
 		createRacialSkillsTable(sqlHandler);
 		createPersonaSkillsTable(sqlHandler);
-		createPersonaNamesTable(sqlHandler);
+        createPersonaMagicsTable(sqlHandler);
+        createPersonaNamesTable(sqlHandler);
 		createPersonaSpawnsTable(sqlHandler);
 		createBlockRegistryTable(sqlHandler);
-		createPersonaSkinsTable(sqlHandler);
+
 	}
 
     protected static void createPlayerTable(SQLHandler sqlHandler) {
@@ -35,6 +43,47 @@ public final class ArcheTables {
 		sqlHandler.createTable("players", cols);
 	}
 
+
+    protected static void createPersonaSkinsTable(SQLHandler sqlHandler) {
+        //Skins table
+        Map<String, String> cols = Maps.newLinkedHashMap();
+        cols.put("skin_id", "INT UNSIGNED AUTO_INCREMENT");
+        cols.put("player", "CHAR(36) NOT NULL");
+        cols.put("slot", "INT");
+        cols.put("name", "TEXT");
+        cols.put("skinUrl", "TEXT");
+        cols.put("slim", "BOOLEAN DEFAULT FALSE");
+        cols.put("skinValue", "TEXT");
+        cols.put("skinSignature", "TEXT");
+        cols.put("refresh", "TIMESTAMP");
+        cols.put("PRIMARY KEY (skin_id)", "");
+        sqlHandler.createTable("persona_skins", cols);
+
+        /*cols = Maps.newLinkedHashMap();
+        cols.put("persona_id_fk", "INT UNSIGNED");
+        cols.put("player", "CHAR(36) NOT NULL");
+        cols.put("slot", "INT");
+        //TODO update syntax
+        cols.put("PRIMARY KEY (persona_id_fk)", "");
+        cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE");
+        sqlHandler.createTable("persona_skins_used", cols);*/
+
+    }
+
+
+    protected static void createSkillsTable(SQLHandler sqlHandler) {
+        Map<String, String> cols = Maps.newLinkedHashMap();
+        cols.put("skill_id", "VARCHAR(255)");
+        cols.put("hidden", "INT DEFAULT 0");
+        cols.put("help_text", "TEXT");
+        cols.put("help_icon", "TEXT");
+        cols.put("inert", "BOOLEAN DEFAULT FALSE");
+        cols.put("male_name", "TEXT");
+        cols.put("female_name", "TEXT");
+        cols.put("PRIMARY KEY (skill_id)", "");
+        sqlHandler.createTable("skills", cols);
+    }
+
     protected static void createPersonaTable(SQLHandler sqlHandler) {
         //Create the Persona table
 		Map<String,String> cols = Maps.newLinkedHashMap();
@@ -44,20 +93,91 @@ public final class ArcheTables {
 		cols.put("name", "TEXT");
 		cols.put("race_key", "VARCHAR(255) NOT NULL");
 		cols.put("race_header", "TEXT DEFAULT NULL");
-		cols.put("gender", "INT UNSIGNED DEFAULT 2");
-		cols.put("p_type", "TEXT DEFAULT 'NORMAL'");
+        cols.put("gender", "TEXT DEFAULT 'Other'");
+        cols.put("p_type", "TEXT DEFAULT 'NORMAL'");
 		cols.put("descr", "TEXT DEFAULT NULL");
 		cols.put("prefix", "TEXT DEFAULT NULL");
 		cols.put("curr", "BOOLEAN DEFAULT FALSE");
 		cols.put("money", "DOUBLE DEFAULT 0.0");
-		cols.put("skin", "TEXT DEFAULT NULL");
-		cols.put("profession", "TEXT DEFAULT NULL");
-		cols.put("fatigue", "DOUBLE DEFAULT 0.0");
+        cols.put("skin", "INT DEFAULT -1");
+        cols.put("profession", "VARCHAR(255) DEFAULT NULL");
+        cols.put("fatigue", "DOUBLE DEFAULT 0.0");
 		cols.put("max_fatigue", "DOUBLE DEFAULT 100.00");
 		cols.put("PRIMARY KEY (persona_id)", "");
 		cols.put("FOREIGN KEY (player_fk)", "REFERENCES players (player)");
-		sqlHandler.createTable("persona", cols);
+        cols.put("FOREIGN KEY (profession)", "REFERENCES skills (skill_id)");
+        cols.put("FOREIGN KEY (skin)", "REFERENCES persona_skins (skin_id)");
+        sqlHandler.createTable("persona", cols);
 	}
+
+    protected static void createArchetypeTable(SQLHandler sqlHandler) {
+        Map<String, String> cols = Maps.newLinkedHashMap();
+        cols.put("id_key", "VARCHAR(255)");
+        cols.put("name", "TEXT NOT NULL");
+        cols.put("parent_type", "VARCHAR(255) DEFAULT NULL");
+        cols.put("descr", "TEXT DEFAULT NULL");
+        cols.put("PRIMARY KEY (id_key)", "");
+        sqlHandler.createTable("magic_archetypes", cols);
+
+        //Might work. Might not. Uncertain.
+        sqlHandler.execute("ALTER TABLE magic_archetypes ADD CONSTRAINT fk_parent_type FOREIGN KEY (parent_type) REFERENCES magic_archetypes (id_key)");
+    }
+
+    protected static void createMagicTable(SQLHandler sqlHandler) {
+        Map<String, String> cols = Maps.newLinkedHashMap();
+        cols.put("id_key", "VARCHAR(255)");
+        cols.put("max_tier", "INT DEFAULT 5");
+        cols.put("extra_tier", "BOOLEAN DEFAULT FALSE");
+        cols.put("self_teach", "BOOLEAN DEFAULT FALSE");
+        cols.put("teachable", "BOOLEAN DEFAULT TRUE");
+        cols.put("description", "TEXT DEFAULT NULL");
+        cols.put("label", "TEXT NOT NULL");
+        cols.put("days_to_max", "INT UNSIGNED DEFAULT 120");
+        cols.put("days_to_extra", "INT UNSIGNED DEFAULT 0");
+        cols.put("archetype", "VARCHAR(255) NOT NULL");
+        cols.put("PRIMARY KEY (id_key)", "");
+        cols.put("FOREIGN KEY (archetype)", "REFERENCES magic_archetypes (id_key) ON UPDATE CASCADE");
+        sqlHandler.createTable("magics", cols);
+    }
+
+    protected static void createCreaturesTable(SQLHandler sqlHandler) {
+        Map<String, String> cols = Maps.newLinkedHashMap();
+        cols.put("id_key", "VARCHAR(255)");
+        cols.put("name", "TEXT NOT NULL");
+        cols.put("descr", "TEXT DEFAULT NULL");
+        cols.put("PRIMARY KEY (id_key)", "");
+        sqlHandler.createTable("magic_creatures", cols);
+    }
+
+    protected static void createMagicWeaknesses(SQLHandler sqlHandler) {
+        Map<String, String> cols = Maps.newLinkedHashMap();
+        cols.put("fk_source_magic", "VARCHAR(255)");
+        cols.put("fk_weakness_magic", "VARCHAR(255)");
+        cols.put("modifier", "FLOAT DEFAULT 1.0");
+        cols.put("PRIMARY KEY (fk_source_magic,fk_weakness_magic)", "");
+        cols.put("FOREIGN KEY (fk_source_magic)", "REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE");
+        cols.put("FOREGIN KEY (fk_weakness_magic)", "REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE");
+        sqlHandler.createTable("magic_archetypes", cols);
+    }
+
+    protected static void createCreatureCreators(SQLHandler sqlHandler) {
+        Map<String, String> cols = Maps.newLinkedHashMap();
+        cols.put("magic_id_fk", "VARCHAR(255)");
+        cols.put("creature_fk", "VARCHAR(255)");
+        cols.put("PRIMARY KEY (magic_id_fk,creature_fk)", "");
+        cols.put("FOREIGN KEY (magic_id_fk)", "REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE");
+        cols.put("FOREIGN KEY (creature_fk)", "REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE CASCADE");
+        sqlHandler.createTable("creature_creators", cols);
+    }
+
+    protected static void createCreatureAbilities(SQLHandler sqlHandler) {
+        Map<String, String> cols = Maps.newLinkedHashMap();
+        cols.put("creature_fk", "VARCHAR(255)");
+        cols.put("ability", "TEXT NOT NULL");
+        cols.put("PRIMARY KEY (creature_fk,ability)", "");
+        cols.put("FOREIGN KEY (creature_fk)", "REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE CASCADE");
+        sqlHandler.createTable("creature_abilities", cols);
+    }
 
 	private static void createPersonaVitalsTable(SQLHandler sqlHandler) {
 		Map<String, String> cols = Maps.newLinkedHashMap();
@@ -70,10 +190,12 @@ public final class ArcheTables {
 		cols.put("ender_inv", "TEXT");
 		cols.put("health", "DOUBLE DEFAULT 10.0");
 		cols.put("hunger", "INT DEFAULT 20");
-        cols.put("saturation", "DOUBLE DEFAULT 0");
+        cols.put("saturation", "FLOAT DEFAULT 0.0");
+        cols.put("creature", "VARCHAR(255) DEFAULT NULL");
         cols.put("PRIMARY KEY (persona_id_fk)", "");
 		cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE");
-		sqlHandler.createTable("persona_vitals", cols);
+        cols.put("FOREIGN KEY (creature)", "REFERENCES magic_creatures (id_key) ON UPDATE CASCADE");
+        sqlHandler.createTable("persona_vitals", cols);
 	}
 
     protected static void createPersonaTagsTable(SQLHandler sqlHandler) {
@@ -100,19 +222,6 @@ public final class ArcheTables {
 		sqlHandler.createTable("persona_stats", cols);
 	}
 
-	protected static void createSkillsTable(SQLHandler sqlHandler) {
-		Map<String, String> cols = Maps.newLinkedHashMap();
-		cols.put("skill_id", "VARCHAR(255)");
-		cols.put("hidden", "INT DEFAULT 0");
-		cols.put("help_text", "TEXT");
-		cols.put("help_icon", "TEXT");
-		cols.put("inert", "BOOLEAN DEFAULT FALSE");
-		cols.put("male_name", "TEXT");
-		cols.put("female_name", "TEXT");
-		cols.put("PRIMARY KEY (persona_id_fk,skill_id_fk)", "");
-		sqlHandler.createTable("persona_skills", cols);
-	}
-
 	protected static void createRacialSkillsTable(SQLHandler sqlHandler) {
 		Map<String, String> cols = Maps.newLinkedHashMap();
 		cols.put("skill_id_fk", "VARCHAR(255)");
@@ -121,8 +230,23 @@ public final class ArcheTables {
 		cols.put("racial_mod", "DOUBLE DEFAULT 1.0");
 		cols.put("PRIMARY KEY (skill_id_fk,race)", "");
 		cols.put("FOREIGN KEY (skill_id_fk)", "REFERENCES skills (skill_id) ON UPDATE CASCADE");
-		sqlHandler.createTable("persona_skills", cols);
-	}
+        sqlHandler.createTable("skill_races", cols);
+    }
+
+    protected static void createPersonaMagicsTable(SQLHandler sqlHandler) {
+        Map<String, String> cols = Maps.newLinkedHashMap();
+        cols.put("magic_fk", "VARCHAR(255)");
+        cols.put("persona_id_fk", "INT UNSIGNED");
+        cols.put("tier", "INT DEFAULT 0");
+        cols.put("last_advanced", "TIMESTAMP DEFAULT NOW()");
+        cols.put("teacher", "INT DEFAULT -1");
+        cols.put("learned", "TIMESTAMP DEFAULT NOW()");
+        cols.put("visible", "BOOLEAN DEFAULT TRUE");
+        cols.put("PRIMARY KEY (magic_fk,persona_id_fk)", "");
+        cols.put("FOREIGN KEY (magic_fk)", "REFERENCES magics (id_key) ON UPDATE CASCADE");
+        cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE");
+        sqlHandler.createTable("persona_magics", cols);
+    }
 
 	protected static void createPersonaSkillsTable(SQLHandler sqlHandler) {
 		Map<String, String> cols = Maps.newLinkedHashMap();
@@ -138,23 +262,24 @@ public final class ArcheTables {
 
     protected static void createPersonaNamesTable(SQLHandler sqlHandler) {
         Map<String,String> cols = Maps.newLinkedHashMap();
-		cols.put("player", "TEXT NOT NULL");
-		cols.put("id", "INT NOT NULL");
-		cols.put("name", "TEXT NOT NULL");
-		//cols.put("FOREIGN KEY (player, id)", "REFERENCES persona(player, id) ON DELETE CASCADE");
-		cols.put("PRIMARY KEY (player,id,name)", "");
-		sqlHandler.createTable("persona_names", cols);
+        cols.put("persona_id_fk", "INT UNSIGNED");
+        cols.put("name", "TEXT NOT NULL");
+        //
+        cols.put("PRIMARY KEY (persona_id_fk)", "");
+        cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona(persona_id) ON UPDATE CASCADE ON DELETE CASCADE");
+        sqlHandler.createTable("persona_names", cols);
 	}
 
     protected static void createPersonaSpawnsTable(SQLHandler sqlHandler) {
         Map<String,String> cols = Maps.newLinkedHashMap();
-		cols.put("race", "TEXT PRIMARY KEY");
-		cols.put("world", "TEXT NOT NULL");
+        cols.put("race", "VARCHAR(255)");
+        cols.put("world", "TEXT NOT NULL");
 		cols.put("x", "INT NOT NULL");
 		cols.put("y", "INT NOT NULL");
 		cols.put("z", "INT NOT NULL");
 		cols.put("yaw", "REAL");
-		sqlHandler.createTable("persona_race_spawns", cols);
+        cols.put("PRIMARY KEY (race)", "");
+        sqlHandler.createTable("persona_race_spawns", cols);
 	}
 
     protected static void createBlockRegistryTable(SQLHandler sqlHandler) {
@@ -171,6 +296,7 @@ public final class ArcheTables {
 	}
 
     protected static void createDeleteProcedure(SQLHandler handler) {
+        //TODO fix this with the new table structure and log... more.
         try {
             handler.getConnection().createStatement().executeUpdate("DELIMITER $$" +
                     "CREATE PROCEDURE delete_persona(" +
@@ -220,30 +346,4 @@ public final class ArcheTables {
             e.printStackTrace();
         }
     }
-
-    protected static void createPersonaSkinsTable(SQLHandler sqlHandler) {
-        //Skins table
-		Map<String,String> 	cols = Maps.newLinkedHashMap();
-		cols.put("player", "TEXT NOT NULL");
-		cols.put("slot", "INT");
-		cols.put("name", "TEXT");
-		cols.put("skinUrl", "TEXT");
-		cols.put("slim", "INT");
-		cols.put("skinValue", "TEXT");
-		cols.put("skinSignature", "TEXT");
-		cols.put("refresh", "INT");
-		//TODO proper update syntax
-		cols.put("PRIMARY KEY (player, slot)", "");
-		sqlHandler.createTable("persona_skins", cols);
-
-		cols = Maps.newLinkedHashMap();
-		cols.put("player", "TEXT NOT NULL");
-		cols.put("id", "INT NOT NULL");
-		cols.put("slot", "INT");
-		//TODO update syntax
-		cols.put("PRIMARY KEY (player, id)", "");
-		sqlHandler.createTable("persona_skins_used", cols);
-		
-	}
-	
 }

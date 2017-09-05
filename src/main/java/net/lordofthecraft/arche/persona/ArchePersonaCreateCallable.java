@@ -20,7 +20,7 @@ public class ArchePersonaCreateCallable implements Callable<ArchePersona> {
 
     private final UUID player;
     private final int slot;
-    private final int gender;
+    private final String gender;
     private final Race race;
     private final String name;
     private final Timestamp creationtime;
@@ -29,7 +29,7 @@ public class ArchePersonaCreateCallable implements Callable<ArchePersona> {
     private final int z;
     private final String world;
 
-    public ArchePersonaCreateCallable(UUID player, int slot, int gender, Race race, String name, Timestamp creationtime, int x, int y, int z, String world) {
+    public ArchePersonaCreateCallable(UUID player, int slot, String gender, Race race, String name, Timestamp creationtime, int x, int y, int z, String world) {
         this.player = player;
         this.slot = slot;
         this.gender = gender;
@@ -50,7 +50,7 @@ public class ArchePersonaCreateCallable implements Callable<ArchePersona> {
         insertPrimary.setString(1, player.toString());
         insertPrimary.setInt(2, slot);
         insertPrimary.setString(3, race.name());
-        insertPrimary.setString(4, gender == 0 ? "m" : gender == 1 ? "f" : "o");
+        insertPrimary.setString(4, gender);
         insertPrimary.setString(5, name);
         insertPrimary.executeUpdate();
         ResultSet rs = insertPrimary.getGeneratedKeys();

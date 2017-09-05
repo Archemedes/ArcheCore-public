@@ -1,6 +1,5 @@
 package net.lordofthecraft.arche.magic;
 
-import net.lordofthecraft.arche.interfaces.MagicFactory;
 import org.bukkit.Material;
 
 /**
@@ -8,7 +7,7 @@ import org.bukkit.Material;
  *
  * @author 501warhead
  */
-public class ArcheMagicFactory implements MagicFactory {
+public class ArcheMagicFactory {
 
     /*
         private static Set<ArcheMagic> MAGICS = Sets.newConcurrentHashSet();

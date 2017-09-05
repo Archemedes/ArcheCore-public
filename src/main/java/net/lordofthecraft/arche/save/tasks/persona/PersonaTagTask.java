@@ -37,6 +37,6 @@ public class PersonaTagTask extends StatementTask {
 
     @Override
     protected String getQuery() {
-        return (insert ? "INSERT INTO persona_tags(key,value,persona_id_fk) VALUES (?,?,?)" : (value == null ? "DELETE FROM persona_tags WHERE persona_id_fk=? AND key=?" : "UPDATE persona_tags SET value=? WHERE key=? AND persona_id_fk=?"));
+        return (insert ? "INSERT INTO persona_tags(tag_key,tag_value,persona_id_fk) VALUES (?,?,?)" : (value == null ? "DELETE FROM persona_tags WHERE persona_id_fk=? AND tag_key=?" : "UPDATE persona_tags SET value=? WHERE tag_key=? AND persona_id_fk=?"));
     }
 }

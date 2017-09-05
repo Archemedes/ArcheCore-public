@@ -1,45 +1,57 @@
 package net.lordofthecraft.arche.skin;
 
-import java.lang.reflect.Field;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.UUID;
-
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.Persona;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.google.common.collect.Maps;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.properties.PropertyMap;
-
-import net.lordofthecraft.arche.ArcheCore;
+import java.lang.reflect.Field;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public class ArcheSkin {
-	private int index;
-	private UUID owner; //Player this cached skin belongs to
-	private String skinUrl; //We use mojang url to refresh the validated skin data.
-	private boolean slim;
-	
-	long timeLastRefreshed; //We need this to make sure we refresh every 24 hrs.
-	PropertyMap mojangSkinData; //This is valid data to add to GameProfile
+    private final int skin_id;
+    private int index;
+    private UUID owner; //Player this cached skin belongs to
+    private String skinUrl; //We use mojang url to refresh the validated skin data.
+    private boolean slim;
+
+    Timestamp timeLastRefreshed; //We need this to make sure we refresh every 24 hrs.
+    PropertyMap mojangSkinData; //This is valid data to add to GameProfile
 	
 	String name;
-	
-	public ArcheSkin(UUID uuid, int index, String url, boolean isSlim) {
-		this.index = index;
+
+    Set<Persona> inUse = Sets.newConcurrentHashSet();
+
+    public ArcheSkin(int skin_id, UUID uuid, int index, String url, boolean isSlim) {
+        this.skin_id = skin_id;
+        this.index = index;
 		this.skinUrl = url;
 		this.slim = isSlim;
 		this.owner = uuid;
 	}
-	
-	private ArcheSkin() {};
-	
-	
-	public String getName() {
-		return name;
+
+    protected ArcheSkin(int skin_id) {
+        this.skin_id = skin_id;
+    }
+
+    public int getSkinId() {
+        return skin_id;
+    }
+
+    public String getName() {
+        return name;
 	}
 	
 	public void setName(String name) {
@@ -49,9 +61,13 @@ public class ArcheSkin {
 	public String getURL() {
 		return skinUrl;
 	}
-	
-	public UUID getOwner() {
-		return owner;
+
+    public Set<Persona> getPersonas() {
+        return Collections.unmodifiableSet(inUse);
+    }
+
+    public UUID getOwner() {
+        return owner;
 	}
 	
 	public int getIndex() {
@@ -61,9 +77,9 @@ public class ArcheSkin {
 	public boolean isSlim() {
 		return slim;
 	}
-	
-	public long getLastRefreshed() {
-		return timeLastRefreshed;
+
+    public Timestamp getLastRefreshed() {
+        return timeLastRefreshed;
 	}
 	
 	public PropertyMap getMojangSkinData() {
@@ -73,9 +89,22 @@ public class ArcheSkin {
 	private Property getProperty() {
 		return this.mojangSkinData.get("textures").iterator().next();	
 	}
-	
-	public ItemStack getHeadItem(){ //Kowaman
-		ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+
+    public void removeAllPersonas() {
+        inUse.forEach(Persona::removeSkin);
+        inUse = Sets.newConcurrentHashSet();
+    }
+
+    public void addPersona(Persona persona) {
+        inUse.add(persona);
+    }
+
+    public void removePersona(Persona persona) {
+        inUse.remove(persona);
+    }
+
+    public ItemStack getHeadItem() { //Kowaman
+        ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
 		//return skull;
 		ItemMeta skullMeta = skull.getItemMeta();
 		
@@ -102,8 +131,8 @@ public class ArcheSkin {
 		toIn.put("slot", this.index);
 		toIn.put("name", this.name);
 		toIn.put("skinUrl", this.skinUrl);
-		toIn.put("slim", slim? 1:0);
-		Property textures = getProperty();
+        toIn.put("slim", slim);
+        Property textures = getProperty();
 		toIn.put("skinValue", textures.getValue());
 		toIn.put("skinSignature", textures.getSignature());
 		toIn.put("refresh", this.timeLastRefreshed);
@@ -129,23 +158,48 @@ public class ArcheSkin {
 		crit.put("slot", this.index);
 		ArcheCore.getControls().getSQLHandler().remove("persona_skins", crit);
 	}
-	
-	public static ArcheSkin fromSQL(ResultSet res) throws SQLException {
-		ArcheSkin skin = new ArcheSkin();
-		skin.owner = UUID.fromString(res.getString(1));
-		skin.index = res.getInt(2);
-		skin.name = res.getString(3);
-		skin.skinUrl = res.getString(4);
-		skin.slim = res.getInt(5) != 0;
-		
-		String value = res.getString(6);
-		String signature = res.getString(7);
-		skin.mojangSkinData = new PropertyMap();
+
+
+    /*
+        protected static void createPersonaSkinsTable(SQLHandler sqlHandler) {
+        //Skins table
+        Map<String,String> 	cols = Maps.newLinkedHashMap();
+        cols.put("player", "TEXT NOT NULL");
+        cols.put("slot", "INT");
+        cols.put("name", "TEXT");
+        cols.put("skinUrl", "TEXT");
+        cols.put("slim", "INT");
+        cols.put("skinValue", "TEXT");
+        cols.put("skinSignature", "TEXT");
+        cols.put("refresh", "INT");
+        cols.put("PRIMARY KEY (player, slot)", "");
+        sqlHandler.createTable("persona_skins", cols);
+
+        cols = Maps.newLinkedHashMap();
+        cols.put("player", "TEXT NOT NULL");
+        cols.put("id", "INT NOT NULL");
+        cols.put("slot", "INT");
+        cols.put("PRIMARY KEY (player, id)", "");
+        sqlHandler.createTable("persona_skins_used", cols);
+
+    }
+     */
+    public static ArcheSkin fromSQL(ResultSet res) throws SQLException {
+        ArcheSkin skin = new ArcheSkin(res.getInt("skin_id"));
+        skin.owner = UUID.fromString(res.getString("player"));
+        skin.index = res.getInt("slot");
+        skin.name = res.getString("name");
+        skin.skinUrl = res.getString("skinUrl");
+        skin.slim = res.getBoolean("slim");
+
+        String value = res.getString("skinValue");
+        String signature = res.getString("skinSignature");
+        skin.mojangSkinData = new PropertyMap();
 		skin.mojangSkinData.put("textures", new Property("textures", value, signature));
-		
-		skin.timeLastRefreshed = res.getLong(8);
-		
-		return skin;
+
+        skin.timeLastRefreshed = res.getTimestamp("refresh");
+
+        return skin;
 	}
 	
 }

@@ -4,7 +4,9 @@ import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.persona.PersonaInventory;
+import net.lordofthecraft.arche.persona.PersonaMagics;
 import net.lordofthecraft.arche.persona.PersonaSkills;
+import net.lordofthecraft.arche.skin.ArcheSkin;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
@@ -90,8 +92,15 @@ public interface Persona {
 	 */
 	boolean isCurrent();
 
-	/**
-	 * See if this persona has a specific magic
+    /**
+     * Retrieve the object which stores a persona's magic data
+     *
+     * @return the PersonaMagic object
+     */
+    PersonaMagics getMagics();
+
+    /**
+     * See if this persona has a specific magic
 	 *
 	 * @param magic The magic to check for
 	 * @return Whether or not the persona has this Magic
@@ -216,9 +225,16 @@ public interface Persona {
 	 */
 	Player getPlayer();
 
+    /**
+     * Gets the player-readable string of the current state of this Persona's races.
+     *
+     * @param mod Whether or not the string should be tailored around a moderator (and include hidden elements)
+     * @return The formatted String with {@link org.bukkit.Color}s, or an empty string if the persona is {@link net.lordofthecraft.arche.enums.Race#UNSET} with nothing else
+     */
+    String getRaceString(boolean mod);
 
-	/**
-	 * Retrieves the Persona's qualified Chat name. That is, it returns a proper concatenation of the prefix and Persona name
+    /**
+     * Retrieves the Persona's qualified Chat name. That is, it returns a proper concatenation of the prefix and Persona name
 	 * @return The name of the Player used for chat
 	 */
 	String getChatName();
@@ -240,14 +256,6 @@ public interface Persona {
 	 * @return Race of the Persona.
 	 */
 	Race getRace();
-
-	/**
-	 * Retrieves the Human-readable Race of this Persona. This String may have been
-	 * custom-set and overrides the actual visible Race of the Persona, but not the
-	 * underlying (Enum-based) race.
-	 * @return The Race of the Persona, or the Custom-set Race if applicable
-	 */
-	String getRaceString();
 
 	/**
 	 * Override the Persona's visible Race with a Custom String. This does not remove
@@ -385,4 +393,30 @@ public interface Persona {
 	 * @return the total playtime of this persona(all maps added)
 	 */
 	int getTotalPlaytime();
+
+    /**
+     * Sets the skin of this persona to use
+     *
+     * @param skin The skin this persona will be using
+     */
+    void setSkin(ArcheSkin skin);
+
+    /**
+     * Removes the current {@link net.lordofthecraft.arche.skin.ArcheSkin} from the persona, regardless of if one is present or not. Extra dead.
+     */
+    void removeSkin();
+
+    /**
+     * Get the current skin on this persona
+     *
+     * @return The skin of this persona. Will be null if there is no skin.
+     */
+    ArcheSkin getSkin();
+
+    /**
+     * Checks to see if this persona has an assigned skin
+     *
+     * @return Returns whether or not this persona has an {@link net.lordofthecraft.arche.skin.ArcheSkin}
+     */
+    boolean hasSkin();
 }

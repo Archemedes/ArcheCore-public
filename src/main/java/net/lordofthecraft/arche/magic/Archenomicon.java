@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.interfaces.Creature;
 import net.lordofthecraft.arche.interfaces.Magic;
-import net.lordofthecraft.arche.interfaces.MagicFactory;
 import net.lordofthecraft.arche.interfaces.MagicType;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 
@@ -64,17 +63,6 @@ public class Archenomicon {
                        *    *
                       .   *    *
      */
-
-    public MagicFactory conjourMagicForge(String id) {
-        id = id.toUpperCase();
-
-        if (researchMagic(id).isPresent()) {
-
-            return null;
-        }
-
-        return new ArcheMagicFactory(id);
-    }
 
     public Optional<Magic> researchMagic(String id) {
         return magics.stream().filter(m -> m.getName().equalsIgnoreCase(id)).findFirst();

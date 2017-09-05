@@ -1,9 +1,9 @@
 package net.lordofthecraft.arche.save.tasks.magic;
 
+import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.save.tasks.StatementTask;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
 /**
  * Created on 7/5/2017
@@ -12,20 +12,16 @@ import java.sql.Timestamp;
  */
 public class MagicUpdateTask extends StatementTask {
 
-    private final int magic_id;
-    private final int tier;
-    private final long learned;
-    private final long last_advanced;
-    private final int teacher;
-    private final boolean visible;
+    private final int persona_id;
+    private final String magic_name;
+    private final MagicAttachment.Field field;
+    private final Object toSet;
 
-    public MagicUpdateTask(int magic_id, int tier, long learned, long last_advanced, int teacher, boolean visible) {
-        this.magic_id = magic_id;
-        this.tier = tier;
-        this.learned = learned;
-        this.last_advanced = last_advanced;
-        this.teacher = teacher;
-        this.visible = visible;
+    public MagicUpdateTask(int persona_id, String magic_name, MagicAttachment.Field field, Object toSet) {
+        this.persona_id = persona_id;
+        this.magic_name = magic_name;
+        this.field = field;
+        this.toSet = toSet;
     }
 
     /*
@@ -47,16 +43,14 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
     @Override
     protected void setValues() throws SQLException {
-        stat.setInt(1, tier);
-        stat.setTimestamp(2, new Timestamp(learned));
-        stat.setTimestamp(3, new Timestamp(last_advanced));
-        stat.setInt(4, teacher);
-        stat.setBoolean(5, visible);
-        stat.setInt(6, magic_id);
+        stat.setString(1, field.field);
+        stat.setObject(2, toSet, field.type);
+        stat.setInt(3, persona_id);
+        stat.setString(4, magic_name);
     }
 
     @Override
     protected String getQuery() {
-        return "UPDATE persona_magic SET tier=? AND last_advanced=? AND teacher=? AND learned=? AND visible=? WHERE magic_id=?";
+        return "UPDATE persona_magic SET ?=? WHERE persona_id_fk=? AND magic_fk=?";
     }
 }

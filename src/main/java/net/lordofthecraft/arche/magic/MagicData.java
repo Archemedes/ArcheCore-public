@@ -10,7 +10,6 @@ import net.lordofthecraft.arche.interfaces.Magic;
 public class MagicData {
 
     public final Magic magic;
-    public final int id;
     public final int tier;
     public final boolean visible;
     public final boolean taught;
@@ -18,9 +17,8 @@ public class MagicData {
     public final long learned;
     public final long lastAdvanced;
 
-    public MagicData(Magic magic, int id, int tier, boolean visible, boolean taught, int teacher, long learned, long lastAdvanced) {
+    public MagicData(Magic magic, int tier, boolean visible, boolean taught, int teacher, long learned, long lastAdvanced) {
         this.magic = magic;
-        this.id = id;
         this.tier = tier;
         this.visible = visible;
         this.taught = taught;

@@ -26,7 +26,7 @@ public class TagAttachmentCallable implements Callable<TagAttachment> {
 
     @Override
     public TagAttachment call() throws Exception {
-        PreparedStatement stat = handler.getConnection().prepareStatement("SELECT key,value FROM persona_tags WHERE persona_id_fk=?");
+        PreparedStatement stat = handler.getConnection().prepareStatement("SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=?");
         stat.setInt(1, persona_id);
         ResultSet rs = stat.executeQuery();
         Map<String, String> tags = Maps.newConcurrentMap();

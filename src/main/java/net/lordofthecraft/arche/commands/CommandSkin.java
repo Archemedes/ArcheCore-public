@@ -1,19 +1,6 @@
 package net.lordofthecraft.arche.commands;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Set;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.json.simple.parser.ParseException;
-
 import com.google.common.collect.Sets;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.skin.ArcheSkin;
@@ -23,6 +10,17 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.json.simple.parser.ParseException;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Set;
+import java.util.UUID;
 
 public class CommandSkin implements CommandExecutor {
 	final private ArcheCore plugin;
@@ -74,8 +72,8 @@ public class CommandSkin implements CommandExecutor {
 				if(sk == null) msg.addExtra(ChatColor.GRAY + "" + ChatColor.ITALIC + "Empty...");
 				else {
 					Persona pers = plugin.getPersonaHandler().getPersona(p);
-					boolean current = cache.getSkinFor(pers) == sk;
-					msg.addExtra((current ? ChatColor.LIGHT_PURPLE : ChatColor.GOLD) + sk.getName());
+                    boolean current = pers.getSkin() == sk;
+                    msg.addExtra((current ? ChatColor.LIGHT_PURPLE : ChatColor.GOLD) + sk.getName());
 					if(current) msg.setHoverEvent(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, ChatColor.LIGHT_PURPLE + "Currently in use for " + pers.getName() + "."));
 					else {
 						msg.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/skin apply " + i));
@@ -107,15 +105,19 @@ public class CommandSkin implements CommandExecutor {
 				}
 
 				Persona pers = plugin.getPersonaHandler().getPersona(p);
-				ArcheSkin other = cache.getSkinFor(pers);
-				if(other != null) {
+                ArcheSkin other = pers.getSkin();
+                if(other != null) {
 					p.sendMessage(ChatColor.RED + "Can't store skins while using a custom skin!");
 					return true;
 				}
 
 				String name = args[2];
 				int index = cache.storeSkin(p, i, name);
-				if(index > 0) {
+                if (index == -2) {
+                    p.sendMessage(ChatColor.RED + "An error occurred while saving your skin. Please try again or report on our bug tracker.");
+                    return true;
+                }
+                if(index > 0) {
 					p.sendMessage("You already have this skin saved in slot: " + ChatColor.RESET + index);
 					return true;
 				}

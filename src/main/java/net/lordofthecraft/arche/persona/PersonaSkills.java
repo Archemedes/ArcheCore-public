@@ -37,9 +37,8 @@ public class PersonaSkills {
 	public boolean hasSkill(Skill skill) {
         return profs.stream().anyMatch(s -> s.skill == skill);
     }
-	
-	
-	public SkillAttachment getSkill(Skill skill) {
+
+    public SkillAttachment getSkill(Skill skill) {
 		Optional<SkillAttachment> attach = profs.stream()
 				.filter( s -> s.skill == skill )
 				.findFirst();

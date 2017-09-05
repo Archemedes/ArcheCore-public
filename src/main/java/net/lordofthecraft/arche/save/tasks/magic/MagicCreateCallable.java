@@ -6,8 +6,6 @@ import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.persona.MagicAttachment;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.concurrent.Callable;
 
 /**
@@ -66,21 +64,17 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         if (result != null) {
             return result;
         }
-        String sql = "INSERT INTO persona_magic(magic_fk,persona_fk,tier,teacher,visible) VALUES (?,?,?,?,?);";
-        PreparedStatement stat = handler.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        String sql = "INSERT INTO persona_magic(magic_fk,persona_id_fk,tier,teacher,visible) VALUES (?,?,?,?,?);";
+        PreparedStatement stat = handler.getConnection().prepareStatement(sql);
         stat.setString(1, magic.getName());
         stat.setInt(2, persona_id);
         stat.setInt(3, tier);
         stat.setInt(4, (teacher <= 0 ? 0 : teacher));
         stat.setBoolean(5, visible);
         stat.executeUpdate();
-        ResultSet rs = stat.getGeneratedKeys();
-        rs.next();
-        int key = rs.getInt(1);
         //public MagicData(ArcheMagic magic, int id, int tier, boolean visible, boolean taught, UUID teacher, long learned, long lastAdvanced) {
-        MagicData data = new MagicData(magic, key, tier, visible, teacher > 0, teacher, System.currentTimeMillis(), System.currentTimeMillis());
+        MagicData data = new MagicData(magic, tier, visible, teacher > 0, teacher, System.currentTimeMillis(), System.currentTimeMillis());
         result = new MagicAttachment(magic, persona_id, data);
-        rs.close();
         stat.close();
         return result;
     }

@@ -2,31 +2,29 @@ package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.skill.TopData;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public interface PersonaHandler {
+    String personaSelect = "SELECT " +
+            "persona_id,slot,race_key,gender" +
+            ",name,curr,race_header,descr,prefix,money,skin,profession,fatigue,max_fatigue" +
+            ",world,x,y,z,inv,enderinv,health,hunger,saturation,creature" +
+            ",played,chars,renamed,playtime_past,date_created,last_played " +
+            "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
+            "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
+            "WHERE player_fk=?";
 
 	/**
 	 * @return If archecore is currently preloading personas
 	 */
 
 	boolean isPreloading();
-
-	/**
-	 * @return A handler to obtain data
-	 */
-
-	TopData getTopHandler();
 
 	/**
 	 * Set whether or not ArcheCore should continue to modify Bukkit Display Names to reflect Persona names
@@ -83,8 +81,10 @@ public interface PersonaHandler {
 	 */
 	Persona getPersona(OfflinePlayer p);
 
-	/**
-	 * Fetch a Player's current Persona
+    Optional<ArchePersona> getPersona(int persona_id);
+
+    /**
+     * Fetch a Player's current Persona
 	 * @param p Player in question
 	 * @return Current Persona, or 'null' if not found.
 	 */

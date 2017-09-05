@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche.save.tasks.persona;
+package net.lordofthecraft.arche.save.tasks.skills;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Skill;
@@ -12,9 +12,8 @@ import java.util.concurrent.FutureTask;
 public class SelectSkillTask extends ArcheTask {
 
 	private final FutureTask<SkillData> future;
-	
-	//TODO this needs to be rewritten to the new database structure
-	public SelectSkillTask(ArchePersona persona, Skill s){
+
+    public SelectSkillTask(ArchePersona persona, Skill s){
 		super();
 		SkillDataCallable callable = new SkillDataCallable(persona, s.getName(), handle);
 		future = new FutureTask<>(callable);

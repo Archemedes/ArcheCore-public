@@ -21,6 +21,7 @@ public class CommandSql implements CommandExecutor {
 		Player p = (Player) sender;
 		if(p.hasPermission("archecore.arsql")){
 			String statement = StringUtils.join(args, ' ', 0, args.length);
+            //TODO further injection prevention
             //This removes comments from the SQL command.
             //Things like DR/**/OP DATABASE archecore; would be possible otherwise.
             statement = statement.replace("/*", "").replace("*/", "");

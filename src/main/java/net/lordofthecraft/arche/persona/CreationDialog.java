@@ -293,7 +293,7 @@ public class CreationDialog {
     private class PickSexPrompt extends FixedSetPrompt {
 
         private PickSexPrompt(){
-            super("female", "male", "other");
+            super("Female", "Male", "Other");
         }
 
         @Override
@@ -307,8 +307,8 @@ public class CreationDialog {
             BaseComponent mains = new TextComponent("Available Options: ");
             mains.setColor(MessageUtil.convertColor(ChatColor.YELLOW));
 
-            for(String s : new String[]{"female", "male", "other"}){
-            	mains.addExtra(MessageUtil.CommandButton(s, s, "Click to select"));
+            for (String s : new String[]{"Female", "Male", "Other"}) {
+                mains.addExtra(MessageUtil.CommandButton(s, s, "Click to select"));
                 mains.addExtra("  ");
             }
 
@@ -318,8 +318,7 @@ public class CreationDialog {
 
         @Override
         public Prompt acceptValidatedInput(ConversationContext context, String input) {
-            int gender = input.equals("female")? 0 : input.equals("male")? 1:2;
-            context.setSessionData("gender", gender);
+            context.setSessionData("gender", input);
             return new PickRacePrompt();
         }
 
@@ -521,7 +520,7 @@ public class CreationDialog {
 
             int id = (Integer) context.getSessionData("slot");
             String name = (String) context.getSessionData("name");
-            int gender = (Integer) context.getSessionData("gender");
+            String gender = (String) context.getSessionData("gender");
             Race race = (Race) context.getSessionData("race");
             long creationTimeMS = System.currentTimeMillis();
             Block b = p.getLocation().getBlock();
