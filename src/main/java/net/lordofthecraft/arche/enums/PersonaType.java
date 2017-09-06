@@ -11,7 +11,7 @@ public enum PersonaType {
     LORE("Lore", ChatColor.YELLOW + "((This is a notable Lore Character))"),
     STAFF("Staff", ChatColor.RED + "((This is a Staff Persona, used for Staff-related matters))"),
     EVENT("Event", ChatColor.DARK_GREEN + "((This is an Event Character))"),
-    NORMAL("Normal", ChatColor.DARK_RED + "((Please remember not to metagame this information))");
+    NORMAL("Normal", ChatColor.DARK_RED + "((Please remember not to meta-game this information))");
 
     public final String readableName;
     public final String personaViewLine;
