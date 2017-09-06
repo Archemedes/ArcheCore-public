@@ -28,6 +28,12 @@ import net.minecraft.server.v1_12_R1.Slot;
 
 public class InventoryUtil {
 
+	/**
+	 * Counts all instances of an itemstack across an inventory using {@link ItemStack#isSimilar(ItemStack)} as a comparator
+	 * @param inv inventory to check in
+	 * @param is item to check for
+	 * @return count of item in all stacks
+	 */
 	public static int countInventory(Inventory inv, ItemStack is) {
 		int count = 0;
 		for(ItemStack other : inv.getContents()) {
@@ -37,6 +43,11 @@ public class InventoryUtil {
 		return count;
 	}
 	
+	/**
+	 * Checks if the inventory has no items at all
+	 * @param inv Inventory to check
+	 * @return if any ItemStack (non-null content) was found
+	 */
 	public static boolean isEmpty(Inventory inv) {
 		for(ItemStack is : inv.getContents()) {
 			if(is != null) return false;
@@ -44,6 +55,11 @@ public class InventoryUtil {
 		return true;
 	}
 	
+	/**
+	 * Convenience method for checking if an ItemStack is non-null and non-AIR
+	 * @param is ItemStack to check
+	 * @return is != null && is.getType() != Material.AIR;
+	 */
 	public static boolean exists(ItemStack is) {
 		return is != null && is.getType() != Material.AIR;
 	}
@@ -153,6 +169,14 @@ public class InventoryUtil {
 		return result;
 	}
 	
+	/**
+	 * Predictive method to study an event and returning a list of ItemStacks being affected as well as the inventory slots they are moved from and to).
+	 * The itemstacks returned by this method are non-reflective. Changing them does not alter the event or involved inventories
+	 * This method should be accurate for everything except MOVE_TO_OTHER_INVENTORY
+	 * which has issues for {@link InventoryType} ANVIL, BEACON, BREWING, ENCHANTING and FURNACE 
+	 * @param e Event to handle
+	 * @return a list of MovedItems for this event given vanilla Minecraft behavior
+	 */
 	public static List<MovedItem> getResultOfEvent(InventoryInteractEvent e){
 		ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
 		String dbg = null;
@@ -366,7 +390,6 @@ public class InventoryUtil {
 		case BEACON:
 		case BREWING:
 		case ENCHANTING:
-		case CREATIVE: //Shouldn't reach here in the first place
 		case FURNACE:
 			//Honestly for most I don't have the slightest clue what's gonna happen
 			//Assume that the clicked item goes to the other inventory, but leave it there.
