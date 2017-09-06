@@ -7,6 +7,7 @@ import net.lordofthecraft.arche.save.tasks.ArcheTask;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.UUID;
 import java.util.logging.Level;
 
 /**
@@ -17,10 +18,10 @@ import java.util.logging.Level;
 public class UpdateFatigueTask extends ArcheTask {
 
     private final double fatigue;
-    private final int personaid;
+    private final UUID personaid;
     private final String username;
 
-    public UpdateFatigueTask(double fatigue, int personaid, String username) {
+    public UpdateFatigueTask(double fatigue, UUID personaid, String username) {
         this.fatigue = fatigue;
         this.personaid = personaid;
         this.username = username;
@@ -32,7 +33,7 @@ public class UpdateFatigueTask extends ArcheTask {
         try {
             PreparedStatement stat = newConn.prepareStatement("UPDATE persona SET fatigue=? WHERE persona_id=?");
             stat.setDouble(1, fatigue);
-            stat.setInt(2, personaid);
+            stat.setString(2, personaid.toString());
             stat.executeUpdate();
             stat.close();
             if (handle instanceof WhySQLHandler) {

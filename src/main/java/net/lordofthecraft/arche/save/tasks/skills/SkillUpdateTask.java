@@ -1,10 +1,11 @@
 package net.lordofthecraft.arche.save.tasks.skills;
 
-import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.persona.SkillAttachment;
 import net.lordofthecraft.arche.save.tasks.StatementTask;
 
 import java.sql.SQLException;
+import java.util.UUID;
 
 /**
  * Created on 9/4/2017
@@ -13,12 +14,12 @@ import java.sql.SQLException;
  */
 public class SkillUpdateTask extends StatementTask {
 
-    private final int persona_id;
+    private final UUID persona_id;
     private final String skill;
     private final SkillAttachment.Field field;
     private final Object value;
 
-    public SkillUpdateTask(int persona_id, String skill, SkillAttachment.Field field, Object value) {
+    public SkillUpdateTask(UUID persona_id, String skill, SkillAttachment.Field field, Object value) {
         this.persona_id = persona_id;
         this.skill = skill;
         this.field = field;
@@ -28,8 +29,19 @@ public class SkillUpdateTask extends StatementTask {
     @Override
     protected void setValues() throws SQLException {
         stat.setString(1, field.field);
-        stat.setObject(2, value, field.type);
-        stat.setInt(3, persona_id);
+        if (handle instanceof ArcheSQLiteHandler) {
+            switch (field) {
+                case XP:
+                    stat.setDouble(2, (double) value);
+                    break;
+                case VISIBLE:
+                    stat.setBoolean(2, (boolean) value);
+                    break;
+            }
+        } else {
+            stat.setObject(2, value, field.type);
+        }
+        stat.setString(3, persona_id.toString());
         stat.setString(4, skill);
     }
 

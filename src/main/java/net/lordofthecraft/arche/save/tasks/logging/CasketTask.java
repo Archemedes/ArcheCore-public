@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.save.tasks.logging;
 
+import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.tasks.StatementTask;
 import org.bukkit.inventory.ItemStack;
@@ -34,6 +35,9 @@ public class CasketTask extends StatementTask {
 
     @Override
     protected String getQuery() {
+        if (handle instanceof ArcheSQLiteHandler) {
+            return "INSERT OR IGNORE INTO casket_log VALUES (?,?,?,?,?)";
+        }
         return "INSERT IGNORE INTO casket_log VALUES (?,?,?,?,?)";
     }
 }

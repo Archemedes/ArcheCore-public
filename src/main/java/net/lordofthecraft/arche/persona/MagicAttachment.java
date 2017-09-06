@@ -13,6 +13,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 
 import java.sql.JDBCType;
 import java.sql.SQLType;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -55,17 +56,17 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
     private static final SaveHandler buffer = SaveHandler.getInstance();
     private final Magic magic;
-    private final int persona_id;
+    private final UUID persona_id;
     //private FutureTask<MagicData> call;
     private int tier;
     private AtomicBoolean visible;
     private AtomicBoolean taught;
-    private int teacher;
+    private UUID teacher;
     private long learned;
     private long lastAdvanced;
 
 
-    public MagicAttachment(Magic magic, int persona_id, MagicData data) {
+    public MagicAttachment(Magic magic, UUID persona_id, MagicData data) {
         this.magic = magic;
         this.persona_id = persona_id;
         tier = data.tier;
@@ -102,7 +103,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
     public void clearTeacher() {
         taught.set(false);
-        teacher = -1;
+        teacher = null;
         performSQLUpdate(Field.TEACHER, -1);
     }
 
@@ -115,7 +116,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         return magic;
     }
 
-    public int getPersonaId() {
+    public UUID getPersonaId() {
         return persona_id;
     }
 
@@ -131,7 +132,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         return taught.get();
     }
 
-    public int getTeacherID() {
+    public UUID getTeacherID() {
         return teacher;
     }
 

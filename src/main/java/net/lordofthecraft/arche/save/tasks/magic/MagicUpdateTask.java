@@ -1,9 +1,12 @@
 package net.lordofthecraft.arche.save.tasks.magic;
 
+import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.save.tasks.StatementTask;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.UUID;
 
 /**
  * Created on 7/5/2017
@@ -12,12 +15,12 @@ import java.sql.SQLException;
  */
 public class MagicUpdateTask extends StatementTask {
 
-    private final int persona_id;
+    private final UUID persona_id;
     private final String magic_name;
     private final MagicAttachment.Field field;
     private final Object toSet;
 
-    public MagicUpdateTask(int persona_id, String magic_name, MagicAttachment.Field field, Object toSet) {
+    public MagicUpdateTask(UUID persona_id, String magic_name, MagicAttachment.Field field, Object toSet) {
         this.persona_id = persona_id;
         this.magic_name = magic_name;
         this.field = field;
@@ -44,8 +47,25 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     @Override
     protected void setValues() throws SQLException {
         stat.setString(1, field.field);
-        stat.setObject(2, toSet, field.type);
-        stat.setInt(3, persona_id);
+        if (handle instanceof ArcheSQLiteHandler) {
+            switch (field) {
+                case TIER:
+                case TEACHER:
+                    stat.setInt(2, (int) toSet);
+                    break;
+                case LAST_ADVANCED:
+                case LEARNED:
+                    stat.setTimestamp(2, (Timestamp) toSet);
+                    break;
+                case VISIBLE:
+                    stat.setBoolean(2, (boolean) toSet);
+                    break;
+            }
+        } else {
+            stat.setObject(2, toSet, field.type);
+        }
+
+        stat.setString(3, persona_id.toString());
         stat.setString(4, magic_name);
     }
 

@@ -280,10 +280,8 @@ public class CreationDialog {
         	 if (input) {
         		 context.setSessionData("name", name);
         		 Player p = (Player) context.getForWhom();
-        		 p.sendTitle(ChatColor.GOLD + "" + ChatColor.ITALIC + name, 
-        				 ChatColor.YELLOW + "Welcome to the realm of " + ArcheCore.getControls().getServerWorldName(),
-        				 30, 120, 30);
-        		 return new PickSexPrompt();
+                 //TODO move to the end of the process.
+                 return new PickSexPrompt();
         	 } else {
         		 return new PickNamePrompt();
         	 }
@@ -511,7 +509,7 @@ public class CreationDialog {
         @Override
         public String getPromptText(ConversationContext context) {
             String name = (String) context.getSessionData("name");
-            return ChatColor.GOLD + "" + ChatColor.UNDERLINE + "Created your new Persona: " + ChatColor.GREEN + name;
+            return ChatColor.BLUE + "Creating your persona, this may take a bit so please hold on...";
         }
 
         @Override
@@ -527,7 +525,7 @@ public class CreationDialog {
 
             context.getForWhom().sendRawMessage(ChatColor.BLUE + "Creating your persona, this may take a bit so please hold on...");
 
-            ArchePersonaCreateCallable creator = new ArchePersonaCreateCallable(p.getUniqueId(), id, gender, race, name, new Timestamp(creationTimeMS), b.getX(), b.getY(), b.getZ(), b.getWorld().getName());
+            ArchePersonaCreateCallable creator = new ArchePersonaCreateCallable(p.getUniqueId(), id, gender, race, name, new Timestamp(creationTimeMS), b.getX(), b.getY(), b.getZ(), b.getWorld().getUID());
 
             Future<ArchePersona> futurepersona = SaveHandler.getInstance().prepareCallable(creator);
 
@@ -545,6 +543,11 @@ public class CreationDialog {
                 } else {
                     persona.setPlayerName(p.getName());
                 }
+                p.sendMessage(ChatColor.GOLD + "" + ChatColor.UNDERLINE + "Created your new Persona: " + ChatColor.GREEN + name + ChatColor.GOLD + "!");
+
+                p.sendTitle(ChatColor.GOLD + "" + ChatColor.ITALIC + name,
+                        ChatColor.YELLOW + "Welcome to the realm of " + ArcheCore.getControls().getServerWorldName(),
+                        30, 120, 30);
 
                 if (context.getSessionData("first") != null) {
                     Economy econ = ArcheCore.getControls().getEconomy();

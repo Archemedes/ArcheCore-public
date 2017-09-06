@@ -8,7 +8,7 @@ public final class EndOfStreamTask extends ArcheTask {
 	
 	@Override
 	public void run(){
-		handle.execute("END TRANSACTION");
-	}
+        //handle.execute("END TRANSACTION");
+    }
 	
 }

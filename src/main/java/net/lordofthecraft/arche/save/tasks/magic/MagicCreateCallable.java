@@ -6,6 +6,7 @@ import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.persona.MagicAttachment;
 
 import java.sql.PreparedStatement;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 /**
@@ -15,15 +16,15 @@ import java.util.concurrent.Callable;
  */
 public class MagicCreateCallable implements Callable<MagicAttachment> {
 
-    private final int persona_id;
+    private final UUID persona_id;
     private final ArcheMagic magic;
     private final int tier;
-    private final int teacher;
+    private final UUID teacher;
     private final boolean visible;
     private final SQLHandler handler;
     private MagicAttachment result = null;
 
-    public MagicCreateCallable(int persona_id, ArcheMagic magic, int tier, int teacher, boolean visible, SQLHandler handler) {
+    public MagicCreateCallable(UUID persona_id, ArcheMagic magic, int tier, UUID teacher, boolean visible, SQLHandler handler) {
         this.persona_id = persona_id;
         this.magic = magic;
         this.tier = tier;
@@ -32,7 +33,7 @@ public class MagicCreateCallable implements Callable<MagicAttachment> {
         this.handler = handler;
     }
 
-    public MagicCreateCallable(int persona_id, ArcheMagic magic, int tier, int teacher, boolean visible, SQLHandler handler, MagicAttachment result) {
+    public MagicCreateCallable(UUID persona_id, ArcheMagic magic, int tier, UUID teacher, boolean visible, SQLHandler handler, MagicAttachment result) {
         this.persona_id = persona_id;
         this.magic = magic;
         this.tier = tier;
@@ -67,13 +68,13 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         String sql = "INSERT INTO persona_magic(magic_fk,persona_id_fk,tier,teacher,visible) VALUES (?,?,?,?,?);";
         PreparedStatement stat = handler.getConnection().prepareStatement(sql);
         stat.setString(1, magic.getName());
-        stat.setInt(2, persona_id);
+        stat.setString(2, persona_id.toString());
         stat.setInt(3, tier);
-        stat.setInt(4, (teacher <= 0 ? 0 : teacher));
+        stat.setString(4, (teacher == null ? null : teacher.toString()));
         stat.setBoolean(5, visible);
         stat.executeUpdate();
         //public MagicData(ArcheMagic magic, int id, int tier, boolean visible, boolean taught, UUID teacher, long learned, long lastAdvanced) {
-        MagicData data = new MagicData(magic, tier, visible, teacher > 0, teacher, System.currentTimeMillis(), System.currentTimeMillis());
+        MagicData data = new MagicData(magic, tier, visible, teacher != null, teacher, System.currentTimeMillis(), System.currentTimeMillis());
         result = new MagicAttachment(magic, persona_id, data);
         stat.close();
         return result;

@@ -59,7 +59,7 @@ public interface Persona {
      * Retrieve the persona-specific integer that uniquely defines this persona.
      * @return The immutable int persona id
      */
-    int getPersonaId();
+    UUID getPersonaId();
 
     /**
      * The PersonaSkills objects hold the fields and methods related to a particular persona's skills

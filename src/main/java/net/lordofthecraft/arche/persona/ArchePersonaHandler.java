@@ -97,7 +97,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
     @Override
-    public Optional<ArchePersona> getPersona(int persona_id) {
+    public Optional<ArchePersona> getPersonaById(UUID persona_id) {
         return personas.values().stream()
                 .flatMap(Arrays::stream)
                 .filter(p -> p.getPersonaId() == persona_id)
@@ -575,8 +575,12 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	private ArchePersona buildPersona(ResultSet res, OfflinePlayer p) throws SQLException{
-		int persona_id = res.getInt("persona_id");
-		int slot = res.getInt("slot");
+        String preid = res.getString("persona_id");
+        if (preid == null) {
+            return null;
+        }
+        UUID persona_id = UUID.fromString(preid);
+        int slot = res.getInt("slot");
 		String name = res.getString("name");
 		Race race = Race.valueOf(res.getString("race"));
 		String rheader = res.getString("race_header");
@@ -604,8 +608,20 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.fatigue = res.getInt("fatigue");
 		persona.maxFatigue = res.getInt("max_fatigue");
 		persona.health = res.getDouble("health");
-		persona.food = res.getInt("food");
+        persona.food = res.getInt("hunger");
         persona.saturation = res.getFloat("saturation");
+
+        /*
+            String personaSelect = "SELECT " +
+            "persona_id,slot,race,gender" +
+            ",name,curr,race_header,descr,p_type,prefix,money,skin,profession,fatigue,max_fatigue" +
+            ",world,x,y,z,inv,ender_inv,health,hunger,saturation,creature" +
+            ",played,chars,renamed,playtime_past,date_created,last_played " +
+            "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
+            "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
+            "WHERE player_fk=?";
+
+         */
 
 		persona.timePlayed.set(res.getInt("played"));
 		persona.charactersSpoken.set(res.getInt("chars"));
@@ -629,8 +645,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		}
 
 		String invString = res.getString("inv");
-		String enderinvString = res.getString("enderinv");
-		if(!res.wasNull()){
+        String enderinvString = res.getString("ender_inv");
+        if(!res.wasNull()){
 			try {
                 persona.inv = PersonaInventory.restore(invString, enderinvString);
             } catch (InvalidConfigurationException e) {

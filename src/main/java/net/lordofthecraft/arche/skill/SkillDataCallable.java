@@ -27,7 +27,7 @@ public class SkillDataCallable implements Callable<SkillData> {
 		
 		synchronized(handler){
             PreparedStatement stat = handler.getConnection().prepareStatement(query);
-            stat.setInt(1, persona.getPersonaId());
+            stat.setString(1, persona.getPersonaId().toString());
             stat.setString(2, skill);
             ResultSet res = stat.executeQuery();
 

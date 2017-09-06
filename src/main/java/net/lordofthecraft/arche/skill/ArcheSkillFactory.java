@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.skill;
 
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.enums.Race;
@@ -245,8 +246,8 @@ public class ArcheSkillFactory implements SkillFactory {
                 SQLHandler handler = ArcheCore.getControls().getSQLHandler();
                 Connection con = handler.getConnection();
 
-                PreparedStatement insertSkillStatement = con.prepareStatement("INSERT IGNORE INTO skills(skill_id,hidden,help_text,help_text,help_icon,male_name,female_name) VALUES (?,?,?,?,?,?)");
-                PreparedStatement insertRacialSkillData = con.prepareStatement("INSERT IGNORE INTO skill_races(skill_id_fk,race,racial_skill,");
+                PreparedStatement insertSkillStatement = con.prepareStatement("INSERT " + (handler instanceof ArcheSQLiteHandler ? "OR" : "") + " IGNORE INTO skills(skill_id,hidden,help_text,help_text,help_icon,male_name,female_name) VALUES (?,?,?,?,?,?)");
+                PreparedStatement insertRacialSkillData = con.prepareStatement("INSERT " + (handler instanceof ArcheSQLiteHandler ? "OR" : "") + " IGNORE INTO skill_races(skill_id_fk,race,racial_skill,");
 
                 /* skill_id,hidden,help_text,help_text,help_icon,male_name,female_name */
                 insertSkillStatement.setString(1, name);

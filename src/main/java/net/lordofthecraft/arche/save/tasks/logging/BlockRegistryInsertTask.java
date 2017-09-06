@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.save.tasks.logging;
 
+import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.save.tasks.StatementTask;
 
@@ -22,6 +23,9 @@ public class BlockRegistryInsertTask extends StatementTask {
 
 	@Override
 	protected String getQuery() {
+        if (handle instanceof ArcheSQLiteHandler) {
+            return "INSERT OR IGNORE INTO blockregistry VALUES (?,?,?,?)";
+        }
         return "INSERT IGNORE INTO blockregistry VALUES (?,?,?,?)";
     }
 

@@ -1,9 +1,9 @@
 package net.lordofthecraft.arche.save.tasks.skills;
 
-import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.tasks.StatementTask;
 
 import java.sql.SQLException;
+import java.util.UUID;
 
 /**
  * Deletes a skill from {@code 'persona_skills'}
@@ -14,16 +14,16 @@ import java.sql.SQLException;
 public class SkillDeleteTask extends StatementTask{
 
     private final String toDelete;
-    private final int persona_id;
+    private final UUID persona_id;
 
-    public SkillDeleteTask(String toDelete, int persona_id) {
+    public SkillDeleteTask(String toDelete, UUID persona_id) {
         this.toDelete = toDelete;
         this.persona_id = persona_id;
     }
 
     @Override
     protected void setValues() throws SQLException {
-        stat.setInt(1, persona_id);
+        stat.setString(1, persona_id.toString());
         stat.setString(2, toDelete);
     }
 

@@ -242,4 +242,11 @@ public interface IArcheCore {
 	 * @return maximum number of persona slots
 	 */
 	int personaSlots();
+
+    /**
+     * Checks whether or not ArcheCore is using SQLite.
+     *
+     * @return If the SQLhandler is an instance of {@link net.lordofthecraft.arche.SQL.ArcheSQLiteHandler}
+     */
+    boolean isUsingSQLite();
 }
