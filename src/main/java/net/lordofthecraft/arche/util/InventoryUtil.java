@@ -44,6 +44,10 @@ public class InventoryUtil {
 		return true;
 	}
 	
+	public static boolean exists(ItemStack is) {
+		return is != null && is.getType() != Material.AIR;
+	}
+	
 	/**
 	 * Represents an item that was moved during a certain InventoryInteractEvent
 	 * Magic values CURSOR_SLOT and DROPPED_SLOT represent items moved from 
@@ -68,6 +72,87 @@ public class InventoryUtil {
 		public int getFinalSlot() { return finalSlot; }
 	}
 	
+	/**
+	 * Gets a list of ItemStacks that is potentially affected by this Inventory Event if not modified or cancelled.
+	 * This method is much coarser than {@link InventoryUtil#getResultOfEvent(InventoryInteractEvent)} and should execute faster, but is less accurate and provides less information
+	 * Note that while this method may potentially return items that won't be moved, it should never fail to include ItemStacks that will be touched 
+	 * @param e The inventory event to study
+	 * @return A list of ItemStacks this event MIGHT affect in vanilla. Note that the itemstacks in this list are mutable and modifying them will affect the provided event
+	 */
+	public static List<ItemStack> getTouchedByEvent(InventoryInteractEvent e){
+		ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
+		List<ItemStack> result = new ArrayList<>();
+		String dbg = null;
+		
+		if(timer != null) {
+			dbg = "[Debug] InventoryUtil touched items " + (e instanceof InventoryClickEvent? 
+					((InventoryClickEvent) e).getAction() : ((InventoryDragEvent) e).getType());
+			timer.startTiming(dbg);
+		}
+		
+		if(e instanceof InventoryClickEvent) {
+			InventoryClickEvent ev = (InventoryClickEvent) e;
+			InventoryAction a = ev.getAction();
+			switch(a) {
+			case CLONE_STACK:
+				//Cloning of stacks OUTSIDE of creative inventory (so player in creative mode but e.g. in chest)
+				//Since this doesn't move any items (just makes them out of thin air), do nothing
+				break;
+			case COLLECT_TO_CURSOR:
+				result.add(ev.getCursor());
+				break;
+			case DROP_ONE_CURSOR:
+			case DROP_ALL_CURSOR:
+				result.add(ev.getCursor());
+				break;
+			case DROP_ALL_SLOT:
+			case DROP_ONE_SLOT:
+				result.add(ev.getCurrentItem());
+				break;
+			case HOTBAR_MOVE_AND_READD:
+			case HOTBAR_SWAP:
+				int hotbar = ev.getHotbarButton();
+				int hotbarRawSlot = e.getView().countSlots() - 14 + hotbar;
+				if(ev.getView().getType() == InventoryType.CRAFTING) hotbarRawSlot += 4;
+				ItemStack moved = ev.getCurrentItem();
+				if(moved.getType() != Material.AIR) result.add(moved);
+				moved = ev.getView().getItem(hotbarRawSlot);
+				if(moved.getType() != Material.AIR) result.add(moved);
+				break;
+			case MOVE_TO_OTHER_INVENTORY:
+				result.add(ev.getCurrentItem());
+				break;
+			case PICKUP_ALL:
+			case PICKUP_HALF:
+			case PICKUP_ONE:
+			case PICKUP_SOME:
+				result.add(ev.getCurrentItem());
+				break;
+			case PLACE_ALL:
+				//For some reason this is the action for all creative menu actions
+				//We don't want to mess with this or add items unnecessarily.
+				if(ev.getView().getType() == InventoryType.CREATIVE) break;
+			case PLACE_ONE:
+			case PLACE_SOME:
+				result.add(ev.getCursor());
+				break;
+			case SWAP_WITH_CURSOR:
+				if(ev.getCurrentItem().getType() != Material.AIR) result.add(ev.getCurrentItem());
+				result.add(ev.getCursor());
+				break;
+			default:
+				break;
+			}
+		} else { //Must be DragEvent
+			InventoryDragEvent ev = (InventoryDragEvent) e;
+			result.add(ev.getCursor()); //Cursor dragged along multiple spots
+		}
+		
+		
+		if(timer != null) timer.stopTiming(dbg);
+		return result;
+	}
+	
 	public static List<MovedItem> getResultOfEvent(InventoryInteractEvent e){
 		ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
 		String dbg = null;
@@ -76,7 +161,7 @@ public class InventoryUtil {
 		
 		try {		
 			if(timer != null) {
-				dbg = "getResultOfEvent " + (e instanceof InventoryClickEvent? 
+				dbg = "[Debug] InventoryUtil moved items " + (e instanceof InventoryClickEvent? 
 						((InventoryClickEvent) e).getAction() : ((InventoryDragEvent) e).getType());
 				timer.startTiming(dbg);
 			}
@@ -160,7 +245,6 @@ public class InventoryUtil {
 						boolean enchanting = isEnchantingSlot(raw, ev.getView());
 						if(is.getAmount() > 1 && enchanting) {
 							if(a == HOTBAR_SWAP) {
-								System.out.println("OK");
 								is = is.clone();
 								is.setAmount(1);
 							} else { //HOTBAR_MOVE_AND_READD.
@@ -284,7 +368,11 @@ public class InventoryUtil {
 		case ENCHANTING:
 		case CREATIVE: //Shouldn't reach here in the first place
 		case FURNACE:
-			throw new UnsupportedOperationException("MOVE_TO_OTHER_INVENTORY functionality unclear for InventoryType " + view.getType());
+			//Honestly for most I don't have the slightest clue what's gonna happen
+			//Assume that the clicked item goes to the other inventory, but leave it there.
+			int possibleTargetSpot = raw < view.getTopInventory().getSize()? 
+					view.getTopInventory().getSize() : 0;
+			result.add(new MovedItem(view.getItem(raw).clone(), raw, possibleTargetSpot));
 		case CHEST:
 		case ENDER_CHEST:
 		case DISPENSER:
