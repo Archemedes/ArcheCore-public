@@ -284,15 +284,15 @@ public class CommandPersona implements CommandExecutor {
 						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
 					} else {
 						sender.sendMessage(ChatColor.AQUA + "Underlying for " + pers.getName() + " is: " + ChatColor.GOLD + pers.getRace().getName());
-						sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "(Visible: " + pers.getRaceString() + ")");
-					}
+                        sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "(Visible: " + pers.getRaceString(sender.hasPermission("archecore.mod.persona")) + ")");
+                    }
 					return true;
 				} else if (args[0].equalsIgnoreCase("wiperace")) {
 					if (!sender.hasPermission("archecore.admin") && !sender.hasPermission("archecore.mod.persona") && !sender.hasPermission("archecore.persona.setrace")) {
 						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
 					} else {
-						sender.sendMessage(ChatColor.AQUA + "Visible race of " + pers.getName() + " has been reset to from '"  + pers.getRaceString() + "' to: "+ ChatColor.RESET + pers.getRace().getName());
-						pers.setApparentRace(null);
+                        sender.sendMessage(ChatColor.AQUA + "Visible race of " + pers.getName() + " has been reset to from '" + pers.getRaceString(sender.hasPermission("archecore.mod.persona")) + "' to: " + ChatColor.RESET + pers.getRace().getName());
+                        pers.setApparentRace(null);
 					}
 					return true;
 				} else if (args[0].equalsIgnoreCase("assignrace")) {

@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.SQL;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import net.lordofthecraft.arche.ArcheCore;
 
 import javax.sql.DataSource;
 import java.io.Closeable;
@@ -38,10 +39,14 @@ public abstract class SQLHandler {
             buffer.append(div);
             div = ", ";
             buffer.append(entry.getKey()).append(" ");
-            buffer.append(entry.getValue().toUpperCase());
+            //.toUpperCase actually screws this.
+            buffer.append(entry.getValue()/*.toUpperCase()*/);
         }
-
-        execute(pretext + "(" + buffer.toString() + ");");
+        String createStatement = pretext + "(" + buffer.toString() + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+        if (ArcheCore.getPlugin().debugMode()) {
+            ArcheCore.getPlugin().getLogger().info("Creating the following table: " + createStatement);
+        }
+        execute(createStatement);
     }
 
     public abstract DataSource getDataSource();

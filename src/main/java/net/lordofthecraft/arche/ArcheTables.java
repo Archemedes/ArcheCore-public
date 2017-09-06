@@ -2,9 +2,11 @@ package net.lordofthecraft.arche;
 
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import org.bukkit.Bukkit;
 
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.logging.Level;
 
 public final class ArcheTables {
 
@@ -13,25 +15,57 @@ public final class ArcheTables {
     }
 
     public static void setUpSQLTables(SQLHandler sqlHandler) {
-		createPlayerTable(sqlHandler);
-        createPersonaSkinsTable(sqlHandler);
-        createSkillsTable(sqlHandler);
-        createPersonaTable(sqlHandler);
-        createArchetypeTable(sqlHandler);
-        createMagicTable(sqlHandler);
-        createMagicWeaknesses(sqlHandler);
-        createCreaturesTable(sqlHandler);
-        createCreatureCreators(sqlHandler);
-        createCreatureAbilities(sqlHandler);
-        createPersonaVitalsTable(sqlHandler);
-		createPersonaStatsTable(sqlHandler);
-		createPersonaTagsTable(sqlHandler);
-		createRacialSkillsTable(sqlHandler);
-		createPersonaSkillsTable(sqlHandler);
-        createPersonaMagicsTable(sqlHandler);
-        createPersonaNamesTable(sqlHandler);
-		createPersonaSpawnsTable(sqlHandler);
-		createBlockRegistryTable(sqlHandler);
+        try {
+            ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
+            if (timer != null) {
+                timer.startTiming("Database Creation");
+            }
+            ArcheCore.getPlugin().getLogger().info("Creating player table...");
+            createPlayerTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with Player! Creating skins table...");
+            createPersonaSkinsTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with Skins! Creating skills table...");
+            createSkillsTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with skills! Creating persona...");
+            createPersonaTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with persona! Creating archetypes...");
+            createArchetypeTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with archetypes! Creating magics...");
+            createMagicTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with magics! Creating weaknesses....");
+            createMagicWeaknesses(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with weaknesses! Creating creatures...");
+            createCreaturesTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with creatures! Creating creature creators...");
+            createCreatureCreators(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with creature creators! Creating creature abilities...");
+            createCreatureAbilities(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with creature abilities! Creating persona vitals...");
+            createPersonaVitalsTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with persona vitals! Creating persona stats...");
+            createPersonaStatsTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with persona stats! Creating persona tags...");
+            createPersonaTagsTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with persona tags! Creating racial skills...");
+            createRacialSkillsTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with racial skills! Creating persona skills...");
+            createPersonaSkillsTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with persona skills! Creating persona magics...");
+            createPersonaMagicsTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with persona magics! Creating persona names...");
+            createPersonaNamesTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with persona names! Creating persona spawns...");
+            createPersonaSpawnsTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with persona spawns! Creating block registry...");
+            createBlockRegistryTable(sqlHandler);
+            ArcheCore.getPlugin().getLogger().info("Done with block registry! All done!");
+            if (timer != null) {
+                timer.stopTiming("Database Creation");
+            }
+        } catch (Exception e) {
+            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to create Archecore.db! Stopping!", e);
+            Bukkit.getPluginManager().disablePlugin(ArcheCore.getPlugin());
+        }
 
 	}
 
@@ -39,15 +73,15 @@ public final class ArcheTables {
         Map<String, String> cols = Maps.newLinkedHashMap();
 		cols.put("player", "CHAR(36)");
 		cols.put("force_preload", "BOOLEAN DEFAULT FALSE");
-		cols.put("PRIMARY KEY (persona_id)", "");
-		sqlHandler.createTable("players", cols);
+        cols.put("PRIMARY KEY (player)", "");
+        sqlHandler.createTable("players", cols);
 	}
 
 
     protected static void createPersonaSkinsTable(SQLHandler sqlHandler) {
         //Skins table
         Map<String, String> cols = Maps.newLinkedHashMap();
-        cols.put("skin_id", "INT UNSIGNED AUTO_INCREMENT");
+        cols.put("skin_id", "INT AUTO_INCREMENT");
         cols.put("player", "CHAR(36) NOT NULL");
         cols.put("slot", "INT");
         cols.put("name", "TEXT");
@@ -58,15 +92,6 @@ public final class ArcheTables {
         cols.put("refresh", "TIMESTAMP");
         cols.put("PRIMARY KEY (skin_id)", "");
         sqlHandler.createTable("persona_skins", cols);
-
-        /*cols = Maps.newLinkedHashMap();
-        cols.put("persona_id_fk", "INT UNSIGNED");
-        cols.put("player", "CHAR(36) NOT NULL");
-        cols.put("slot", "INT");
-        //TODO update syntax
-        cols.put("PRIMARY KEY (persona_id_fk)", "");
-        cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE");
-        sqlHandler.createTable("persona_skins_used", cols);*/
 
     }
 
@@ -90,9 +115,9 @@ public final class ArcheTables {
 		cols.put("persona_id", "INT UNSIGNED AUTO_INCREMENT");
 		cols.put("player_fk", "CHAR(36) NOT NULL");
 		cols.put("slot", "INT UNSIGNED NOT NULL");
-		cols.put("name", "TEXT");
 		cols.put("race_key", "VARCHAR(255) NOT NULL");
-		cols.put("race_header", "TEXT DEFAULT NULL");
+        cols.put("name", "TEXT");
+        cols.put("race_header", "TEXT DEFAULT NULL");
         cols.put("gender", "TEXT DEFAULT 'Other'");
         cols.put("p_type", "TEXT DEFAULT 'NORMAL'");
 		cols.put("descr", "TEXT DEFAULT NULL");
@@ -104,9 +129,9 @@ public final class ArcheTables {
         cols.put("fatigue", "DOUBLE DEFAULT 0.0");
 		cols.put("max_fatigue", "DOUBLE DEFAULT 100.00");
 		cols.put("PRIMARY KEY (persona_id)", "");
-		cols.put("FOREIGN KEY (player_fk)", "REFERENCES players (player)");
-        cols.put("FOREIGN KEY (profession)", "REFERENCES skills (skill_id)");
-        cols.put("FOREIGN KEY (skin)", "REFERENCES persona_skins (skin_id)");
+        cols.put("FOREIGN KEY (player_fk)", "REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT");
+        cols.put("FOREIGN KEY (profession)", "REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE SET NULL");
+        cols.put("FOREIGN KEY (skin)", "REFERENCES persona_skins (skin_id) ON UPDATE CASCADE ON DELETE SET NULL");
         sqlHandler.createTable("persona", cols);
 	}
 
@@ -120,7 +145,7 @@ public final class ArcheTables {
         sqlHandler.createTable("magic_archetypes", cols);
 
         //Might work. Might not. Uncertain.
-        sqlHandler.execute("ALTER TABLE magic_archetypes ADD CONSTRAINT fk_parent_type FOREIGN KEY (parent_type) REFERENCES magic_archetypes (id_key)");
+        sqlHandler.execute("ALTER TABLE magic_archetypes ADD CONSTRAINT fk_parent_type FOREIGN KEY (parent_type) REFERENCES magic_archetypes (id_key) ON UPDATE CASCADE ON DELETE RESTRICT");
     }
 
     protected static void createMagicTable(SQLHandler sqlHandler) {
@@ -136,7 +161,7 @@ public final class ArcheTables {
         cols.put("days_to_extra", "INT UNSIGNED DEFAULT 0");
         cols.put("archetype", "VARCHAR(255) NOT NULL");
         cols.put("PRIMARY KEY (id_key)", "");
-        cols.put("FOREIGN KEY (archetype)", "REFERENCES magic_archetypes (id_key) ON UPDATE CASCADE");
+        cols.put("FOREIGN KEY (archetype)", "REFERENCES magic_archetypes (id_key) ON UPDATE CASCADE ON DELETE RESTRICT");
         sqlHandler.createTable("magics", cols);
     }
 
@@ -156,7 +181,7 @@ public final class ArcheTables {
         cols.put("modifier", "FLOAT DEFAULT 1.0");
         cols.put("PRIMARY KEY (fk_source_magic,fk_weakness_magic)", "");
         cols.put("FOREIGN KEY (fk_source_magic)", "REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE");
-        cols.put("FOREGIN KEY (fk_weakness_magic)", "REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE");
+        cols.put("FOREIGN KEY (fk_weakness_magic)", "REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE");
         sqlHandler.createTable("magic_archetypes", cols);
     }
 
@@ -173,7 +198,7 @@ public final class ArcheTables {
     protected static void createCreatureAbilities(SQLHandler sqlHandler) {
         Map<String, String> cols = Maps.newLinkedHashMap();
         cols.put("creature_fk", "VARCHAR(255)");
-        cols.put("ability", "TEXT NOT NULL");
+        cols.put("ability", "VARCHAR(255)");
         cols.put("PRIMARY KEY (creature_fk,ability)", "");
         cols.put("FOREIGN KEY (creature_fk)", "REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE CASCADE");
         sqlHandler.createTable("creature_abilities", cols);
@@ -193,8 +218,8 @@ public final class ArcheTables {
         cols.put("saturation", "FLOAT DEFAULT 0.0");
         cols.put("creature", "VARCHAR(255) DEFAULT NULL");
         cols.put("PRIMARY KEY (persona_id_fk)", "");
-		cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE");
-        cols.put("FOREIGN KEY (creature)", "REFERENCES magic_creatures (id_key) ON UPDATE CASCADE");
+        cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT");
+        cols.put("FOREIGN KEY (creature)", "REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE RESTRICT");
         sqlHandler.createTable("persona_vitals", cols);
 	}
 
@@ -225,8 +250,8 @@ public final class ArcheTables {
 	protected static void createRacialSkillsTable(SQLHandler sqlHandler) {
 		Map<String, String> cols = Maps.newLinkedHashMap();
 		cols.put("skill_id_fk", "VARCHAR(255)");
-		cols.put("race", "TEXT NOT NULL");
-		cols.put("racial_skill", "BOOLEAN DEFAULT FALSE");
+        cols.put("race", "VARCHAR(255) NOT NULL");
+        cols.put("racial_skill", "BOOLEAN DEFAULT FALSE");
 		cols.put("racial_mod", "DOUBLE DEFAULT 1.0");
 		cols.put("PRIMARY KEY (skill_id_fk,race)", "");
 		cols.put("FOREIGN KEY (skill_id_fk)", "REFERENCES skills (skill_id) ON UPDATE CASCADE");

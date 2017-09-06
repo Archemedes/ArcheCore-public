@@ -47,8 +47,15 @@ public class SaveHandler {
 	}
 
 	protected void shutdown() {
-
-	}
+        service.shutdown();
+        try {
+            if (!service.awaitTermination(5, TimeUnit.SECONDS)) {
+                service.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            service.shutdownNow();
+        }
+    }
 
 	@Deprecated
 	public ArcheTask take(){

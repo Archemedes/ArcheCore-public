@@ -6,12 +6,63 @@ USE archecore;
 /* This is a players tables and its intention is to perform referential integrity. */
 CREATE TABLE IF NOT EXISTS players (
     player 		    CHAR(36),
-    preload_force   BOOLEAN DEFAULT FALSE,
+    force_preload   BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (player)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE INDEX idx_player ON players (player);
+CREATE TABLE IF NOT EXISTS persona_skins (
+    skin_id         INT AUTO_INCREMENT,
+    player          CHAR(36) NOT NULL,
+    slot            INT,
+    name            TEXT,
+    skinUrl         TEXT,
+    slim            BOOLEAN DEFAULT FALSE,
+    skinValue       TEXT,
+    skinSignature   TEXT,
+    refresh         TIMESTAMP,
+    PRIMARY KEY (skin_id)
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/* parent */
+CREATE TABLE IF NOT EXISTS skills (
+    skill_id    VARCHAR(255),
+    hidden 		INT DEFAULT 0,
+    help_text   TEXT,
+    help_icon   TEXT,
+    inert       BOOLEAN DEFAULT FALSE,
+    male_name   TEXT,
+    female_name TEXT,
+    PRIMARY KEY (skill_id)
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/* Parent & Child */
+CREATE TABLE IF NOT EXISTS persona (
+    persona_id 		INT UNSIGNED AUTO_INCREMENT,
+    player_fk 		CHAR(36) NOT NULL,
+    slot 			INT UNSIGNED NOT NULL,
+    race_key 	    VARCHAR(255) NOT NULL,
+    name            TEXT,
+    race_header     TEXT DEFAULT NULL,
+    gender 			TEXT DEFAULT 'Other',
+    p_type          TEXT DEFAULT 'NORMAL',
+    descr           TEXT DEFAULT NULL,
+    prefix          TEXT DEFAULT NULL,
+    curr            BOOLEAN DEFAULT FALSE,
+    money           DOUBLE DEFAULT 0.0,
+    skin            INT DEFAULT -1,
+    profession      VARCHAR(255) DEFAULT NULL,
+    fatigue         DOUBLE DEFAULT 0.0,
+    max_fatigue     DOUBLE DEFAULT 100.0,
+    PRIMARY KEY (persona_id),
+    FOREIGN KEY (player_fk) REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (profession) REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE SET NULL,
+    FOREIGN KEY (skin) REFERENCES persona_skins (skin_id) ON UPDATE CASCADE ON DELETE SET NULL
+
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS magic_archetypes (
     id_key      VARCHAR(255),
@@ -23,8 +74,6 @@ CREATE TABLE IF NOT EXISTS magic_archetypes (
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE magic_archetypes ADD CONSTRAINT fk_parent_type FOREIGN KEY (parent_type) REFERENCES magic_archetypes (id_key);
-
-CREATE INDEX idx_magic_archetypes ON magic_archetypes (id_key);
 
 CREATE TABLE IF NOT EXISTS magics (
     id_key          VARCHAR(255),
@@ -39,6 +88,7 @@ CREATE TABLE IF NOT EXISTS magics (
     archetype       VARCHAR(255) NOT NULL,
     PRIMARY KEY (id_key),
     FOREIGN KEY (archetype) REFERENCES magic_archetypes(id_key) ON UPDATE CASCADE
+)
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS magic_weaknesses (
@@ -73,43 +123,6 @@ CREATE TABLE IF NOT EXISTS creature_abilities (
     ability     TEXT,
     PRIMARY KEY (creature_fk,ability),
     FOREIGN KEY (creature_fk) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE CASCADE
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/* parent */
-CREATE TABLE IF NOT EXISTS skills (
-    skill_id    VARCHAR(255),
-    hidden 		INT DEFAULT 0,
-    help_text   TEXT,
-    help_icon   TEXT,
-    inert       BOOLEAN DEFAULT FALSE,
-    male_name   TEXT,
-    female_name TEXT,
-    PRIMARY KEY (skill_id)
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/* Parent & Child */
-CREATE TABLE IF NOT EXISTS persona (
-    persona_id 		INT UNSIGNED AUTO_INCREMENT,
-    player_fk 		CHAR(36) NOT NULL,
-    slot 			INT UNSIGNED NOT NULL,
-    race_key 	    VARCHAR(255) NOT NULL,
-    name            TEXT,
-    gender 			TEXT NOT NULL,
-    p_type          TEXT DEFAULT 'NORMAL',
-    race_header     TEXT DEFAULT NULL,
-    descr           TEXT DEFAULT NULL,
-    prefix          TEXT DEFAULT NULL,
-    curr            BOOLEAN DEFAULT FALSE,
-    skin            TEXT DEFAULT NULL,
-    money           DOUBLE DEFAULT 0.0,
-    profession      VARCHAR(255) DEFAULT NULL,
-    fatigue         DOUBLE DEFAULT 0.0,
-    max_fatigue     DOUBLE DEFAULT 100.0,
-    PRIMARY KEY (persona_id),
-    FOREIGN KEY (player_fk) REFERENCES players (player),
-    FOREIGN KEY (profession) REFERENCES skills (skill_id)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -164,14 +177,14 @@ CREATE TABLE IF NOT EXISTS persona_magics (
     learned         TIMESTAMP DEFAULT NOW(),
     visible         BOOLEAN DEFAULT TRUE,
     PRIMARY KEY (magic_fk,persona_id_fk),
-    FOREIGN KEY (magic_fk) REFERENCES magics (name) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (magic_fk) REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS skill_races (
     skill_id_fk     VARCHAR(255),
-    race            TEXT NOT NULL,
+    race            VARCHAR(255) NOT NULL,
     racial_skill    BOOLEAN DEFAULT FALSE,
     racial_mod      DOUBLE DEFAULT 1.0,
     PRIMARY KEY (skill_id_fk,race),
@@ -213,17 +226,14 @@ CREATE TABLE IF NOT EXISTS persona_log (
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE INDEX idx_log_id ON persona_log (log_id);
-
 /* Child */
 CREATE TABLE IF NOT EXISTS race_spawns (
-    race_key     	VARCHAR(255),
+    race     	    VARCHAR(255),
     world 			VARCHAR(255) NOT NULL,
     x 				INT NOT NULL,
     y 				INT NOT NULL,
     z 				INT NOT NULL,
-    PRIMARY KEY (race_key_fk),
-    FOREIGN KEY (race_key_fk) REFERENCES races (race_key) ON UPDATE CASCADE
+    PRIMARY KEY (race),
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

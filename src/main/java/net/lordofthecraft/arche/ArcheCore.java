@@ -13,6 +13,7 @@ import net.lordofthecraft.arche.persona.*;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.BeginTransactionTask;
 import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
+import net.lordofthecraft.arche.save.tasks.general.CreateDatabaseTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
 import net.lordofthecraft.arche.skin.SkinCache;
@@ -182,11 +183,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			personaConnection = sqlHandler.getConnection();
 		}
 
-		ArcheTables.setUpSQLTables(sqlHandler);
-
 		saveHandler = SaveHandler.getInstance();
 		saveHandler.put(new BeginTransactionTask());
-		blockRegistry = new BlockRegistry();
+        saveHandler.put(new CreateDatabaseTask());
+        blockRegistry = new BlockRegistry();
 		archenomicon = Archenomicon.getInstance();
 		personaHandler = ArchePersonaHandler.getInstance();
 		personaHandler.setPersonaConnection(personaConnection);
