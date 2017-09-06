@@ -5,9 +5,8 @@ import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
-
+import net.md_5.bungee.api.chat.HoverEvent;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -56,9 +55,9 @@ public class CommandAttribute implements CommandExecutor {
                     AttributeInstance ai = p.getAttribute(a);
                     if (ai != null) {
                         sender.sendMessage(ChatColor.GOLD + a.name() + ":"
-                                + ChatColor.DARK_AQUA + " Base Value: " + ChatColor.RESET + ai.getBaseValue() + ","
-                                + ChatColor.DARK_AQUA + " Current Value: " + ChatColor.RESET + ai.getValue() + ","
-                                + ChatColor.DARK_AQUA + " Modifier count: " + ChatColor.RESET + ai.getModifiers().size());
+                                + "\n" + ChatColor.DARK_AQUA + " Base Value: " + ChatColor.RESET + ai.getBaseValue() + ","
+                                + "\n" + ChatColor.DARK_AQUA + " Current Value: " + ChatColor.RESET + ai.getValue() + ","
+                                + "\n" + ChatColor.DARK_AQUA + " Modifier count: " + ChatColor.RESET + ai.getModifiers().size());
                     } else {
                         sender.sendMessage(ChatColor.RED + "No instance for " + ChatColor.AQUA + a.name());
                     }
