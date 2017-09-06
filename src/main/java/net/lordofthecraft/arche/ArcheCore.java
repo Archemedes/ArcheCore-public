@@ -4,6 +4,8 @@ import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.commands.*;
+import net.lordofthecraft.arche.commands.tab.CommandAttributeTabCompleter;
+import net.lordofthecraft.arche.commands.tab.CommandPersonaTabCompleter;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.help.HelpFile;
 import net.lordofthecraft.arche.interfaces.*;
@@ -306,6 +308,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         getCommand("archehelp").setExecutor(new CommandArchehelp(helpdesk, helpOverriden));
         getCommand("helpmenu").setExecutor(new CommandHelpMenu(helpdesk));
         getCommand("persona").setExecutor(new CommandPersona(helpdesk, personaHandler, nameChangeDelay, enablePrefixes));
+        getCommand("persona").setTabCompleter(new CommandPersonaTabCompleter());
         getCommand("beaconme").setExecutor(new CommandBeaconme());
         getCommand("treasurechest").setExecutor(new CommandTreasurechest());
         getCommand("realname").setExecutor(new CommandRealname(this));
@@ -384,7 +387,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
                 + "If you are inpatient, having a drink at a tavern will also reduce a Persona's fatigue.\n";
 
         addHelp("Persona", persHelp, Material.REDSTONE_COMPARATOR);
-        addHelp("Commands", commandHelp, Material.COMMAND);
+        addHelp("PersonaCommand", commandHelp, Material.COMMAND);
         addHelp("Professions", profession, Material.BEDROCK);
         addHelp("Fatigue", fatigue, Material.BED);
 
