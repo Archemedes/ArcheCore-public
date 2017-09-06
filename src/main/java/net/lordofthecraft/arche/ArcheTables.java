@@ -1,11 +1,11 @@
 package net.lordofthecraft.arche;
 
-import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.SQL.SQLHandler;
-import org.bukkit.Bukkit;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
 
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
+import java.sql.Statement;
 import java.util.logging.Level;
 
 public final class ArcheTables {
@@ -20,67 +20,89 @@ public final class ArcheTables {
             if (timer != null) {
                 timer.startTiming("Database Creation");
             }
+            Connection conn = sqlHandler.getConnection();
+            conn.setAutoCommit(false);
+            Statement statement = conn.createStatement();
             ArcheCore.getPlugin().getLogger().info("Creating player table...");
-            createPlayerTable(sqlHandler);
+            createPlayerTable(statement);
             ArcheCore.getPlugin().getLogger().info("Done with Player! Creating skins table...");
-            createPersonaSkinsTable(sqlHandler);
+            createPersonaSkinsTable(statement);
             ArcheCore.getPlugin().getLogger().info("Done with Skins! Creating skills table...");
-            createSkillsTable(sqlHandler);
+            createSkillsTable(statement);
             ArcheCore.getPlugin().getLogger().info("Done with skills! Creating persona...");
-            createPersonaTable(sqlHandler);
-            ArcheCore.getPlugin().getLogger().info("Done with persona! Creating archetypes...");
-            createArchetypeTable(sqlHandler);
-            ArcheCore.getPlugin().getLogger().info("Done with archetypes! Creating magics...");
-            createMagicTable(sqlHandler);
-            ArcheCore.getPlugin().getLogger().info("Done with magics! Creating weaknesses....");
-            createMagicWeaknesses(sqlHandler);
-            ArcheCore.getPlugin().getLogger().info("Done with weaknesses! Creating creatures...");
-            createCreaturesTable(sqlHandler);
-            ArcheCore.getPlugin().getLogger().info("Done with creatures! Creating creature creators...");
-            createCreatureCreators(sqlHandler);
-            ArcheCore.getPlugin().getLogger().info("Done with creature creators! Creating creature abilities...");
-            createCreatureAbilities(sqlHandler);
-            ArcheCore.getPlugin().getLogger().info("Done with creature abilities! Creating persona vitals...");
-            createPersonaVitalsTable(sqlHandler);
-            ArcheCore.getPlugin().getLogger().info("Done with persona vitals! Creating persona stats...");
-            createPersonaStatsTable(sqlHandler);
+            createPersonaTable(statement);
+            ArcheCore.getPlugin().getLogger().info("Done with persona! Creating persona stats...");
+            createPersonaStatsTable(statement);
             ArcheCore.getPlugin().getLogger().info("Done with persona stats! Creating persona tags...");
-            createPersonaTagsTable(sqlHandler);
-            ArcheCore.getPlugin().getLogger().info("Done with persona tags! Creating racial skills...");
-            createRacialSkillsTable(sqlHandler);
+            createPersonaTagsTable(statement);
+            ArcheCore.getPlugin().getLogger().info("Done with persona tags! Creating archetypes...");
+            createArchetypeTable(statement);
+            ArcheCore.getPlugin().getLogger().info("Done with archetypes! Creating magics...");
+            createMagicTable(statement);
+            ArcheCore.getPlugin().getLogger().info("Done with magics! Creating weaknesses....");
+            createMagicWeaknesses(statement);
+            ArcheCore.getPlugin().getLogger().info("Done with weaknesses! Creating creatures...");
+            createCreaturesTable(statement);
+            ArcheCore.getPlugin().getLogger().info("Done with creatures! Creating creature creators...");
+            createCreatureCreators(statement);
+            ArcheCore.getPlugin().getLogger().info("Done with creature creators! Creating creature abilities...");
+            createCreatureAbilities(statement);
+            ArcheCore.getPlugin().getLogger().info("Done with creature abilities! Creating persona vitals...");
+            createPersonaVitalsTable(statement);
+            ArcheCore.getPlugin().getLogger().info("Done with persona vitals! Creating racial skills...");
+            createRacialSkillsTable(statement);
             ArcheCore.getPlugin().getLogger().info("Done with racial skills! Creating persona skills...");
-            createPersonaSkillsTable(sqlHandler);
+            createPersonaSkillsTable(statement);
             ArcheCore.getPlugin().getLogger().info("Done with persona skills! Creating persona magics...");
-            createPersonaMagicsTable(sqlHandler);
+            createPersonaMagicsTable(statement);
             ArcheCore.getPlugin().getLogger().info("Done with persona magics! Creating persona names...");
-            createPersonaNamesTable(sqlHandler);
+            createPersonaNamesTable(statement);
             ArcheCore.getPlugin().getLogger().info("Done with persona names! Creating persona spawns...");
-            createPersonaSpawnsTable(sqlHandler);
+            createPersonaSpawnsTable(statement);
             ArcheCore.getPlugin().getLogger().info("Done with persona spawns! Creating block registry...");
-            createBlockRegistryTable(sqlHandler);
+            createBlockRegistryTable(statement);
             ArcheCore.getPlugin().getLogger().info("Done with block registry! All done!");
+            conn.commit();
+            statement.close();
+            if (sqlHandler instanceof WhySQLHandler) {
+                conn.close();
+            }
             if (timer != null) {
                 timer.stopTiming("Database Creation");
             }
         } catch (Exception e) {
             ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to create Archecore.db! Stopping!", e);
-            Bukkit.getPluginManager().disablePlugin(ArcheCore.getPlugin());
+            //Bukkit.getPluginManager().disablePlugin(ArcheCore.getPlugin());
         }
 
 	}
 
-    protected static void createPlayerTable(SQLHandler sqlHandler) {
-        Map<String, String> cols = Maps.newLinkedHashMap();
-		cols.put("player", "CHAR(36)");
-		cols.put("force_preload", "BOOLEAN DEFAULT FALSE");
-        cols.put("PRIMARY KEY (player)", "");
-        sqlHandler.createTable("players", cols);
-	}
+    protected static void createPlayerTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS players (" +
+                "player CHAR(36)," +
+                "force_preload BOOLEAN DEFAULT FALSE," +
+                "PRIMARY KEY (player)" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+    }
 
 
-    protected static void createPersonaSkinsTable(SQLHandler sqlHandler) {
+    protected static void createPersonaSkinsTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_skins (" +
+                "skin_id INT AUTO_INCREMENT," +
+                "player CHAR(36) NOT NULL," +
+                "slot INT," +
+                "name TEXT," +
+                "skinUrl TEXT," +
+                "slim BOOLEAN DEFAULT FALSE," +
+                "skinValue TEXT," +
+                "skinSignature TEXT," +
+                "refresh TIMESTAMP," +
+                "PRIMARY KEY (skin_id)" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
         //Skins table
-        Map<String, String> cols = Maps.newLinkedHashMap();
+        /*Map<String, String> cols = Maps.newLinkedHashMap();
         cols.put("skin_id", "INT AUTO_INCREMENT");
         cols.put("player", "CHAR(36) NOT NULL");
         cols.put("slot", "INT");
@@ -91,13 +113,25 @@ public final class ArcheTables {
         cols.put("skinSignature", "TEXT");
         cols.put("refresh", "TIMESTAMP");
         cols.put("PRIMARY KEY (skin_id)", "");
-        sqlHandler.createTable("persona_skins", cols);
+        sqlHandler.createTable("persona_skins", cols);*/
 
     }
 
 
-    protected static void createSkillsTable(SQLHandler sqlHandler) {
-        Map<String, String> cols = Maps.newLinkedHashMap();
+    protected static void createSkillsTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS skills (" +
+                "skill_id VARCHAR(255)," +
+                "hidden INT DEFAULT 0," +
+                "help_text TEXT," +
+                "help_icon TEXT," +
+                "inert BOOLEAN DEFAULT FALSE," +
+                "male_name TEXT," +
+                "female_name TEXT," +
+                "PRIMARY KEY (skill_id)" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+        /*Map<String, String> cols = Maps.newLinkedHashMap();
         cols.put("skill_id", "VARCHAR(255)");
         cols.put("hidden", "INT DEFAULT 0");
         cols.put("help_text", "TEXT");
@@ -106,13 +140,36 @@ public final class ArcheTables {
         cols.put("male_name", "TEXT");
         cols.put("female_name", "TEXT");
         cols.put("PRIMARY KEY (skill_id)", "");
-        sqlHandler.createTable("skills", cols);
+        sqlHandler.createTable("skills", cols);*/
     }
 
-    protected static void createPersonaTable(SQLHandler sqlHandler) {
+    protected static void createPersonaTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS persona (" +
+                "persona_id INT UNSIGNED AUTO_INCREMENT," +
+                "player_fk CHAR(36) NOT NULL," +
+                "slot INT UNSIGNED NOT NULL," +
+                "race_key VARCHAR(255) NOT NULL," +
+                "name TEXT," +
+                "race_header TEXT DEFAULT NULL," +
+                "gender TEXT DEFAULT 'Other'," +
+                "p_type TEXT DEFAULT 'NORMAL'," +
+                "descr TEXT DEFAULT NULL," +
+                "prefix TEXT DEFAULT NULL," +
+                "curr BOOLEAN DEFAULT FALSE," +
+                "money DOUBLE DEFAULT 0.0," +
+                "skin INT DEFAULT -1," +
+                "profession VARCHAR(255) DEFAULT NULL," +
+                "fatigue DOUBLE DEFAULT 0.0," +
+                "max_fatigue DOUBLE DEFAULT 100.00," +
+                "PRIMARY KEY (persona_id)," +
+                "FOREIGN KEY (player_fk) REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT," +
+                "FOREIGN KEY (profession) REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE SET NULL," +
+                "FOREIGN KEY (skin) REFERENCES persona_skins (skin_id) ON UPDATE CASCADE ON DELETE SET NULL" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
         //Create the Persona table
-		Map<String,String> cols = Maps.newLinkedHashMap();
-		cols.put("persona_id", "INT UNSIGNED AUTO_INCREMENT");
+        /*Map<String,String> cols = Maps.newLinkedHashMap();
+        cols.put("persona_id", "INT UNSIGNED AUTO_INCREMENT");
 		cols.put("player_fk", "CHAR(36) NOT NULL");
 		cols.put("slot", "INT UNSIGNED NOT NULL");
 		cols.put("race_key", "VARCHAR(255) NOT NULL");
@@ -132,11 +189,21 @@ public final class ArcheTables {
         cols.put("FOREIGN KEY (player_fk)", "REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT");
         cols.put("FOREIGN KEY (profession)", "REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE SET NULL");
         cols.put("FOREIGN KEY (skin)", "REFERENCES persona_skins (skin_id) ON UPDATE CASCADE ON DELETE SET NULL");
-        sqlHandler.createTable("persona", cols);
-	}
+        sqlHandler.createTable("persona", cols);*/
+    }
 
-    protected static void createArchetypeTable(SQLHandler sqlHandler) {
-        Map<String, String> cols = Maps.newLinkedHashMap();
+    protected static void createArchetypeTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS magic_archetypes (" +
+                "id_key VARCHAR(255)," +
+                "name TEXT NOT NULL," +
+                "parent_type VARCHAR(255) DEFAULT NULL," +
+                "descr TEXT DEFAULT NULL," +
+                "PRIMARY KEY (id_key)" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+        statement.executeUpdate("ALTER TABLE magic_archetypes ADD CONSTRAINT fk_parent_type FOREIGN KEY (parent_type) REFERENCES magic_archetypes (id_key) ON UPDATE CASCADE ON DELETE RESTRICT");
+        /*Map<String, String> cols = Maps.newLinkedHashMap();
         cols.put("id_key", "VARCHAR(255)");
         cols.put("name", "TEXT NOT NULL");
         cols.put("parent_type", "VARCHAR(255) DEFAULT NULL");
@@ -145,11 +212,26 @@ public final class ArcheTables {
         sqlHandler.createTable("magic_archetypes", cols);
 
         //Might work. Might not. Uncertain.
-        sqlHandler.execute("ALTER TABLE magic_archetypes ADD CONSTRAINT fk_parent_type FOREIGN KEY (parent_type) REFERENCES magic_archetypes (id_key) ON UPDATE CASCADE ON DELETE RESTRICT");
+        sqlHandler.execute("ALTER TABLE magic_archetypes ADD CONSTRAINT fk_parent_type FOREIGN KEY (parent_type) REFERENCES magic_archetypes (id_key) ON UPDATE CASCADE ON DELETE RESTRICT");*/
     }
 
-    protected static void createMagicTable(SQLHandler sqlHandler) {
-        Map<String, String> cols = Maps.newLinkedHashMap();
+    protected static void createMagicTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS magics (" +
+                "id_key VARCHAR(255)," +
+                "max_tier INT DEFAULT 5," +
+                "extra_tier BOOLEAN DEFAULT FALSE," +
+                "self_teach BOOLEAN DEFAULT FALSE," +
+                "teachable BOOLEAN DEFAULT TRUE," +
+                "description TEXT DEFAULT NULL," +
+                "label TEXT NOT NULL," +
+                "days_to_max INT UNSIGNED DEFAULT 120," +
+                "days_to_extra INT UNSIGNED DEFAULT 0," +
+                "archetype VARCHAR(255) NOT NULL," +
+                "PRIMARY KEY (id_key)," +
+                "FOREIGN KEY (archetype) REFERENCES magic_archetypes (id_key) ON UPDATE CASCADE ON DELETE RESTRICT" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        /*Map<String, String> cols = Maps.newLinkedHashMap();
         cols.put("id_key", "VARCHAR(255)");
         cols.put("max_tier", "INT DEFAULT 5");
         cols.put("extra_tier", "BOOLEAN DEFAULT FALSE");
@@ -162,51 +244,99 @@ public final class ArcheTables {
         cols.put("archetype", "VARCHAR(255) NOT NULL");
         cols.put("PRIMARY KEY (id_key)", "");
         cols.put("FOREIGN KEY (archetype)", "REFERENCES magic_archetypes (id_key) ON UPDATE CASCADE ON DELETE RESTRICT");
-        sqlHandler.createTable("magics", cols);
+        sqlHandler.createTable("magics", cols);*/
     }
 
-    protected static void createCreaturesTable(SQLHandler sqlHandler) {
-        Map<String, String> cols = Maps.newLinkedHashMap();
+    protected static void createCreaturesTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS magic_creatures (" +
+                "id_key VARCHAR(255)," +
+                "name TEXT NOT NULL," +
+                "descr TEXT DEFAULT NULL," +
+                "PRIMARY KEY (id_key)" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        /*Map<String, String> cols = Maps.newLinkedHashMap();
         cols.put("id_key", "VARCHAR(255)");
         cols.put("name", "TEXT NOT NULL");
         cols.put("descr", "TEXT DEFAULT NULL");
         cols.put("PRIMARY KEY (id_key)", "");
-        sqlHandler.createTable("magic_creatures", cols);
+        sqlHandler.createTable("magic_creatures", cols);*/
     }
 
-    protected static void createMagicWeaknesses(SQLHandler sqlHandler) {
-        Map<String, String> cols = Maps.newLinkedHashMap();
+    protected static void createMagicWeaknesses(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS magic_weaknesses (" +
+                "fk_source_magic VARCHAR(255)," +
+                "fk_weakness_magic VARCHAR(255)," +
+                "modifier FLOAT DEFAULT 1.0," +
+                "PRIMARY KEY (fk_source_magic,fk_weakness_magic)," +
+                "FOREIGN KEY (fk_source_magic) REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE," +
+                "FOREIGN KEY (fk_weakness_magic) REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        /*Map<String, String> cols = Maps.newLinkedHashMap();
         cols.put("fk_source_magic", "VARCHAR(255)");
         cols.put("fk_weakness_magic", "VARCHAR(255)");
         cols.put("modifier", "FLOAT DEFAULT 1.0");
         cols.put("PRIMARY KEY (fk_source_magic,fk_weakness_magic)", "");
         cols.put("FOREIGN KEY (fk_source_magic)", "REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE");
         cols.put("FOREIGN KEY (fk_weakness_magic)", "REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE");
-        sqlHandler.createTable("magic_archetypes", cols);
+        sqlHandler.createTable("magic_archetypes", cols);*/
     }
 
-    protected static void createCreatureCreators(SQLHandler sqlHandler) {
-        Map<String, String> cols = Maps.newLinkedHashMap();
+    protected static void createCreatureCreators(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS creature_creators (" +
+                "magic_id_fk VARCHAR(255)," +
+                "creature_fk VARCHAR(255)," +
+                "PRIMARY KEY (magic_id_fk,creature_fk)," +
+                "FOREIGN KEY (magic_id_fk) REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE," +
+                "FOREIGN KEY (creature_fk) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE CASCADE" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        /*Map<String, String> cols = Maps.newLinkedHashMap();
         cols.put("magic_id_fk", "VARCHAR(255)");
         cols.put("creature_fk", "VARCHAR(255)");
         cols.put("PRIMARY KEY (magic_id_fk,creature_fk)", "");
         cols.put("FOREIGN KEY (magic_id_fk)", "REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE");
         cols.put("FOREIGN KEY (creature_fk)", "REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE CASCADE");
-        sqlHandler.createTable("creature_creators", cols);
+        sqlHandler.createTable("creature_creators", cols);*/
     }
 
-    protected static void createCreatureAbilities(SQLHandler sqlHandler) {
-        Map<String, String> cols = Maps.newLinkedHashMap();
+    protected static void createCreatureAbilities(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS creature_abilities (" +
+                "creature_fk VARCHAR(255)," +
+                "ability VARCHAR(255)," +
+                "PRIMARY KEY (creature_fk,ability)," +
+                "FOREIGN KEY (creature_fk) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE CASCADE" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        /*Map<String, String> cols = Maps.newLinkedHashMap();
         cols.put("creature_fk", "VARCHAR(255)");
         cols.put("ability", "VARCHAR(255)");
         cols.put("PRIMARY KEY (creature_fk,ability)", "");
         cols.put("FOREIGN KEY (creature_fk)", "REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE CASCADE");
-        sqlHandler.createTable("creature_abilities", cols);
+        sqlHandler.createTable("creature_abilities", cols);*/
     }
 
-	private static void createPersonaVitalsTable(SQLHandler sqlHandler) {
-		Map<String, String> cols = Maps.newLinkedHashMap();
-		cols.put("persona_id_fk", "INT UNSIGNED");
+    private static void createPersonaVitalsTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_vitals (" +
+                "persona_id_fk INT UNSIGNED," +
+                "world VARCHAR(255) NOT NULL," +
+                "x INT NOT NULL," +
+                "y INT NOT NULL," +
+                "z INT NOT NULL," +
+                "inv TEXT," +
+                "ender_inv TEXT," +
+                "health DOUBLE DEFAULT 10.0," +
+                "hunger INT DEFAULT 20," +
+                "saturation FLOAT DEFAULT 0.0," +
+                "creature VARCHAR(255) DEFAULT NULL," +
+                "PRIMARY KEY (persona_id_fk)," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT," +
+                "FOREIGN KEY (creature) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE RESTRICT" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        /*Map<String, String> cols = Maps.newLinkedHashMap();
+        cols.put("persona_id_fk", "INT UNSIGNED");
 		cols.put("world", "VARCHAR(255) NOT NULL");
 		cols.put("x", "INT NOT NULL");
 		cols.put("y", "INT NOT NULL");
@@ -220,22 +350,42 @@ public final class ArcheTables {
         cols.put("PRIMARY KEY (persona_id_fk)", "");
         cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT");
         cols.put("FOREIGN KEY (creature)", "REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE RESTRICT");
-        sqlHandler.createTable("persona_vitals", cols);
-	}
+        sqlHandler.createTable("persona_vitals", cols);*/
+    }
 
-    protected static void createPersonaTagsTable(SQLHandler sqlHandler) {
-        Map<String, String> cols = Maps.newLinkedHashMap();
-		cols.put("persona_id_fk", "INT UNSIGNED");
+    protected static void createPersonaTagsTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_tags (" +
+                "persona_id_fk INT UNSIGNED," +
+                "tag_key VARCHAR(255) NOT NULL," +
+                "tag_value TEXT," +
+                "PRIMARY KEY (persona_id_fk,tag_key)," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id)" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        /*Map<String, String> cols = Maps.newLinkedHashMap();
+        cols.put("persona_id_fk", "INT UNSIGNED");
 		cols.put("key", "TEXT NOT NULL");
 		cols.put("value", "TEXT");
 		cols.put("PRIMARY KEY (persona_id_fk,key)", "");
 		cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id)");
-		sqlHandler.createTable("persona_tags", cols);
-	}
+		sqlHandler.createTable("persona_tags", cols);*/
+    }
 
-	protected static void createPersonaStatsTable(SQLHandler sqlHandler) {
-		Map<String, String> cols = Maps.newLinkedHashMap();
-		cols.put("persona_id_fk", "INT UNSIGNED");
+    protected static void createPersonaStatsTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_stats (" +
+                "persona_id_fk INT UNSIGNED," +
+                "played INT UNSIGNED DEFAULT 0," +
+                "chars INT UNSIGNED DEFAULT 0," +
+                "renamed TIMESTAMP DEFAULT NOW()," +
+                "playtime_past INT UNSIGNED DEFAULT 0," +
+                "date_created TIMESTAMP DEFAULT NOW()," +
+                "last_played TIMESTAMP DEFAULT NOW()," +
+                "PRIMARY KEY (persona_id_fk)," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        /*Map<String, String> cols = Maps.newLinkedHashMap();
+        cols.put("persona_id_fk", "INT UNSIGNED");
 		cols.put("played", "INT UNSIGNED DEFAULT 0");
 		cols.put("chars", "INT UNSIGNED DEFAULT 0");
 		cols.put("renamed", "TIMESTAMP DEFAULT NOW()");
@@ -244,22 +394,45 @@ public final class ArcheTables {
 		cols.put("last_played", "TIMESTAMP DEFAULT NOW()");
 		cols.put("PRIMARY KEY (persona_id_fk)", "");
 		cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE");
-		sqlHandler.createTable("persona_stats", cols);
-	}
+		sqlHandler.createTable("persona_stats", cols);*/
+    }
 
-	protected static void createRacialSkillsTable(SQLHandler sqlHandler) {
-		Map<String, String> cols = Maps.newLinkedHashMap();
-		cols.put("skill_id_fk", "VARCHAR(255)");
+    protected static void createRacialSkillsTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS skill_races (" +
+                "skill_id_fk VARCHAR(255)," +
+                "race VARCHAR(255) NOT NULL," +
+                "racial_skill BOOLEAN DEFAULT FALSE," +
+                "racial_mod DOUBLE DEFAULT 1.0," +
+                "PRIMARY KEY (skill_id_fk,race)," +
+                "FOREIGN KEY (skill_id_fk) REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE CASCADE" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        /*Map<String, String> cols = Maps.newLinkedHashMap();
+        cols.put("skill_id_fk", "VARCHAR(255)");
         cols.put("race", "VARCHAR(255) NOT NULL");
         cols.put("racial_skill", "BOOLEAN DEFAULT FALSE");
 		cols.put("racial_mod", "DOUBLE DEFAULT 1.0");
 		cols.put("PRIMARY KEY (skill_id_fk,race)", "");
 		cols.put("FOREIGN KEY (skill_id_fk)", "REFERENCES skills (skill_id) ON UPDATE CASCADE");
-        sqlHandler.createTable("skill_races", cols);
+        sqlHandler.createTable("skill_races", cols);*/
     }
 
-    protected static void createPersonaMagicsTable(SQLHandler sqlHandler) {
-        Map<String, String> cols = Maps.newLinkedHashMap();
+    protected static void createPersonaMagicsTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_magics (" +
+                "magic_fk VARCHAR(255)," +
+                "persona_id_fk INT UNSIGNED," +
+                "tier INT DEFAULT 0," +
+                "last_advanced TIMESTAMP DEFAULT NOW()," +
+                "teacher INT UNSIGNED," +
+                "learned TIMESTAMP DEFAULT NOW()," +
+                "visible BOOLEAN DEFAULT TRUE," +
+                "PRIMARY KEY (magic_fk,persona_id_fk)," +
+                "FOREIGN KEY (magic_fk) REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE RESTRICT," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT," +
+                "FOREIGN KEY (teacher) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE SET NULL" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        /*Map<String, String> cols = Maps.newLinkedHashMap();
         cols.put("magic_fk", "VARCHAR(255)");
         cols.put("persona_id_fk", "INT UNSIGNED");
         cols.put("tier", "INT DEFAULT 0");
@@ -270,33 +443,60 @@ public final class ArcheTables {
         cols.put("PRIMARY KEY (magic_fk,persona_id_fk)", "");
         cols.put("FOREIGN KEY (magic_fk)", "REFERENCES magics (id_key) ON UPDATE CASCADE");
         cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE");
-        sqlHandler.createTable("persona_magics", cols);
+        sqlHandler.createTable("persona_magics", cols);*/
     }
 
-	protected static void createPersonaSkillsTable(SQLHandler sqlHandler) {
-		Map<String, String> cols = Maps.newLinkedHashMap();
-		cols.put("persona_id_fk", "INT UNSIGNED");
+    protected static void createPersonaSkillsTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_skills (" +
+                "persona_id_fk INT UNSIGNED," +
+                "skill_id_fk VARCHAR(255)," +
+                "xp DOUBLE DEFAULT 0.0," +
+                "visible BOOLEAN DEFAULT TRUE," +
+                "PRIMARY KEY (persona_id_fk,skill_id_fk)," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT," +
+                "FOREIGN KEY (skill_id_fk) REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE RESTRICT" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        /*Map<String, String> cols = Maps.newLinkedHashMap();
+        cols.put("persona_id_fk", "INT UNSIGNED");
 		cols.put("skill_id_fk", "VARCHAR(255)");
 		cols.put("xp", "DOUBLE DEFAULT 0.0");
 		cols.put("visible", "BOOLEAN DEFAULT TRUE");
 		cols.put("PRIMARY KEY (persona_id_fk,skill_id_fk)", "");
 		cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE");
 		cols.put("FOREIGN KEY (skill_id_fk)", "REFERENCES skills (skill_id) ON UPDATE CASCADE");
-		sqlHandler.createTable("persona_skills", cols);
-	}
+		sqlHandler.createTable("persona_skills", cols);*/
+    }
 
-    protected static void createPersonaNamesTable(SQLHandler sqlHandler) {
-        Map<String,String> cols = Maps.newLinkedHashMap();
+    protected static void createPersonaNamesTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_name (" +
+                "persona_id_fk INT UNSIGNED," +
+                "name TEXT NOT NULL," +
+                "PRIMARY KEY (persona_id_fk)," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        /*Map<String,String> cols = Maps.newLinkedHashMap();
         cols.put("persona_id_fk", "INT UNSIGNED");
         cols.put("name", "TEXT NOT NULL");
         //
         cols.put("PRIMARY KEY (persona_id_fk)", "");
         cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona(persona_id) ON UPDATE CASCADE ON DELETE CASCADE");
-        sqlHandler.createTable("persona_names", cols);
-	}
+        sqlHandler.createTable("persona_names", cols);*/
+    }
 
-    protected static void createPersonaSpawnsTable(SQLHandler sqlHandler) {
-        Map<String,String> cols = Maps.newLinkedHashMap();
+    protected static void createPersonaSpawnsTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_race_spawns (" +
+                "race VARCHAR(255)," +
+                "world TEXT NOT NULL," +
+                "x INT NOT NULL," +
+                "y INT NOT NULL," +
+                "z INT NOT NULL," +
+                "yaw REAL," +
+                "PRIMARY KEY (race)" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        /*Map<String,String> cols = Maps.newLinkedHashMap();
         cols.put("race", "VARCHAR(255)");
         cols.put("world", "TEXT NOT NULL");
 		cols.put("x", "INT NOT NULL");
@@ -304,23 +504,34 @@ public final class ArcheTables {
 		cols.put("z", "INT NOT NULL");
 		cols.put("yaw", "REAL");
         cols.put("PRIMARY KEY (race)", "");
-        sqlHandler.createTable("persona_race_spawns", cols);
-	}
+        sqlHandler.createTable("persona_race_spawns", cols);*/
+    }
 
-    protected static void createBlockRegistryTable(SQLHandler sqlHandler) {
+    protected static void createBlockRegistryTable(Statement statement) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS blockregistry (" +
+                "world CHAR(36) NOT NULL," +
+                "x INT," +
+                "y INT," +
+                "z INT," +
+                "PRIMARY KEY (world,x,y,z)" +
+                ")" +
+                "ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+        //TODO reimplement
+        //statement.execute("DELETE FROM blockregistry WHERE ROWID IN (SELECT ROWID FROM blockregistry ORDER BY ROWID DESC LIMIT -1 OFFSET 5000);");
         //Blockregistry persistence stuff
-		Map<String,String> 	cols = Maps.newLinkedHashMap();
-		cols.put("world", "TEXT NOT NULL");
+        /*Map<String,String> 	cols = Maps.newLinkedHashMap();
+        cols.put("world", "TEXT NOT NULL");
 		cols.put("x", "INT");
 		cols.put("y", "INT");
 		cols.put("z", "INT");
 		cols.put("PRIMARY KEY (world, x, y, z)", "");
 		sqlHandler.createTable("blockregistry", cols);
 
-		sqlHandler.execute("DELETE FROM blockregistry WHERE ROWID IN (SELECT ROWID FROM blockregistry ORDER BY ROWID DESC LIMIT -1 OFFSET 5000)");
-	}
+		sqlHandler.execute("DELETE FROM blockregistry WHERE ROWID IN (SELECT ROWID FROM blockregistry ORDER BY ROWID DESC LIMIT -1 OFFSET 5000)");*/
+    }
 
-    protected static void createDeleteProcedure(SQLHandler handler) {
+    protected static void createDeleteProcedure(SQLHandler handler) throws SQLException {
         //TODO fix this with the new table structure and log... more.
         try {
             handler.getConnection().createStatement().executeUpdate("DELIMITER $$" +

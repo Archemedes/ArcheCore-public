@@ -14,7 +14,7 @@ public interface PersonaHandler {
     String personaSelect = "SELECT " +
             "persona_id,slot,race_key,gender" +
             ",name,curr,race_header,descr,prefix,money,skin,profession,fatigue,max_fatigue" +
-            ",world,x,y,z,inv,enderinv,health,hunger,saturation,creature" +
+            ",world,x,y,z,inv,ender_inv,health,hunger,saturation,creature" +
             ",played,chars,renamed,playtime_past,date_created,last_played " +
             "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
             "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
