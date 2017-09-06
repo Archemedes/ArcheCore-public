@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.commands;
 
+import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.help.HelpDesk;
@@ -22,6 +23,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class CommandPersona implements CommandExecutor {
@@ -29,6 +34,80 @@ public class CommandPersona implements CommandExecutor {
 	private final ArchePersonaHandler handler;
 	private final int delay;
 	private final boolean prefix;
+
+
+    public enum PersonaCommand {
+        HELP("archecore.command.persona.help", false, "help", "viewhelp"),
+        VIEW("archecore.command.persona.view", false, "view", "see", "card"),
+        MORE("archecore.command.persona.view.more", false, "more", "extrainfo", "viewmore"),
+        NAME("archecore.command.persona.name", false, "name", "rename", "setname"),
+        PREFIX("archecore.command.persona.prefix", false, "prefix", "setprefix"),
+        CLEARPREFIX("archcecore.command.persona.prefix.clear", false, "clearprefix", "delprefix", "rmprefix", "noprefix", "removeprefix"),
+        AGE("archecore.command.persona.age", false, "age", "setage"),
+        CLEARINFO("archecore.command.persona.desc.clear", false, "clearbio", "cleardesc", "deldesc", "delinfo", "clearinfo", "delbio", "cleardescription"),
+        ADDINFO("archecore.command.persona.desc", false, "addinfo", "addbio", "bioadd"),
+        SETINFO("archecore.command.persona.desc", false, "setbio", "setinfo", "info", "bio"),
+        LIST("archecore.command.persona.list", false, "list", "listpersonas", "viewpersonas"),
+        PROFESSION("archecore.command.persona.profession", false, "profession", "setprofession", "setprof", "skill", "setskill", "sk"),
+        PERMAKILL("archecore.admin.command.persona.permakill", true, "permakill", "pk", "remove", "delete"),
+        TIME("archecore.command.persona.time", true, "time", "timeplayed", "played", "viewtime", "viewplayed"),
+        SETRACE("archecore.command.persona.setrace", false, "setrace", "setvisiblerace", "setapparentrace"),
+        REALRACE("archecore.command.persona.realrace", false, "realrace", "viewrealrace", "underlyingrace", "viewunderrace"),
+        WIPERACE("archecore.command.persona.wiperace", false, "wiperace", "clearrace", "clearvisrace", "clearoverlying"),
+        OPENINV("archecore.command.persona.openinv", true, "openinv", "inv", "viewinv"),
+        OPENENDER("archecore.command.persona.openender", true, "openender", "ender", "viewender"),
+        ICON("archecore.command.persona.icon", true, "icon", "head", "seticon", "sethead"),
+        CREATED("archecore.command.persona.created", true, "created", "viewcreateddate", "viewcreation"),
+        CONSTRUCT("archecore.command.persona.construct", true, "construct", "setconstruct"),
+        NECROLYTE("archecore.command.persona.necrolyte", true, "necrolyte", "setnecrolyte"),
+        SPECTRE("archecore.command.persona.spectre", true, "spectre", "setspectre"),
+        ASCENDED("archecore.command.persona.ascended", true, "aengulbound", "setaengulbound"),
+        ASSIGNRACE("archecore.admin.command.persona.assignrace", false, "assignrace", "setunderlyingrace", "setunder"),
+        ASSIGNGENDER("archecore.admin.command.persona.assigngender", false, "assigngender", "setgender");
+
+        public final String permission;
+        private final String[] aliases;
+        public final boolean onearg;
+
+        PersonaCommand(String permission, boolean onearg, String... aliases) {
+            this.permission = permission;
+            this.aliases = aliases;
+            this.onearg = onearg;
+        }
+
+        public static PersonaCommand getCommand(String alias) {
+            for (PersonaCommand c : PersonaCommand.values()) {
+                if (Arrays.asList(c.aliases).contains(alias)) {
+                    return c;
+                }
+            }
+            return null;
+        }
+
+        public static List<String> getCommandsFromPartial(String partial, CommandSender sender) {
+            ArrayList<String> strings = Lists.newArrayList();
+            for (PersonaCommand c : PersonaCommand.values()) {
+                if (sender.hasPermission(c.permission)) {
+                    strings.addAll(Arrays.asList(c.aliases));
+                }
+            }
+            if (!partial.isEmpty()) {
+                strings.removeIf(s -> !s.startsWith(partial));
+            }
+            strings.sort(Comparator.naturalOrder());
+            return strings;
+        }
+
+        public static List<String> getAllCommands(CommandSender sender) {
+            List<String> strings = Lists.newArrayList();
+            for (PersonaCommand c : PersonaCommand.values()) {
+                if (sender.hasPermission(c.permission)) {
+                    strings.addAll(Arrays.asList(c.aliases));
+                }
+            }
+            return strings;
+        }
+    }
 
 	public CommandPersona(HelpDesk helpdesk, ArchePersonaHandler handler, int delay, boolean prefix) {
 		this.helpdesk = helpdesk;
@@ -53,8 +132,8 @@ public class CommandPersona implements CommandExecutor {
 				+ i + "$</persona icon>icon$: " + a + "Save your current skin as your persona icon.\n"
 				+ i + "$</persona list>list$: " + a + "View all your Personas with names + IDs.\n";
 
-		helpdesk.addInfoTopic("Persona Command", output);
-	}
+        helpdesk.addInfoTopic("Persona PersonaCommand", output);
+    }
 
 
 	@Override
@@ -78,15 +157,34 @@ public class CommandPersona implements CommandExecutor {
 			}
 			return true;
 		} else {
+            PersonaCommand cmd = PersonaCommand.getCommand(args[0]);
+            if (cmd == null || cmd == PersonaCommand.HELP) {
+                if (sender instanceof Player) helpdesk.outputHelp("persona command", (Player) sender);
+                else sender.sendMessage(helpdesk.getHelpText("persona command"));
 
-			//Go through process to find the Persona we want
-			Persona pers = null;
-			if ((args[0].equalsIgnoreCase("view") || args[0].equalsIgnoreCase("more") ||
-					args[0].equalsIgnoreCase("list"))
-					&& args.length > 1) {
-				pers = CommandUtil.personaFromArg(args[1]);
-			} else if ((args[0].equalsIgnoreCase("permakill")
-					|| args[0].equalsIgnoreCase("time")
+                if (sender.hasPermission("archecore.mod.persona")) {
+                    sender.sendMessage(ChatColor.DARK_AQUA + "[M] Change apparant race with 'setrace'. This changes visible race, but not the underlying race.");
+                    sender.sendMessage(ChatColor.DARK_AQUA + "[M] View the real race of a persona with 'realrace' and reset the apparent race with 'wiperace.");
+                    sender.sendMessage(ChatColor.DARK_AQUA + "[M] Open the inventory of a persona with openinv [player]@[personaid]");
+                    sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can add the flag '-p {player}' to the end of the command to modify someone's current Persona.");
+                    sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can use [player]@[personaid] to modify a different Persona");
+                }
+
+                if (sender.hasPermission("archecore.admin")) {
+                    sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Force a permakill with 'permakill [persona]'. Default on your current Persona");
+                    sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Reassign the underlying race with 'assignrace'");
+                    sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Perform gender reassignment surgery with 'assigngender'.");
+                }
+                return true;
+            }
+
+            if (!sender.hasPermission(cmd.permission)) {
+                sender.sendMessage(ChatColor.RED + "Error: You do not have permission to do this.");
+                return true;
+            }
+
+            /*(args[0].equalsIgnoreCase("permakill")
+                    || args[0].equalsIgnoreCase("time")
 					|| args[0].equalsIgnoreCase("construct")
 					|| args[0].equalsIgnoreCase("spectre")
 					|| args[0].equalsIgnoreCase("necrolyte")
@@ -103,12 +201,19 @@ public class CommandPersona implements CommandExecutor {
                     || args[0].equalsIgnoreCase("openender")
                     || args[0].equalsIgnoreCase("head")
 					|| args[0].equalsIgnoreCase("icon")
-					|| args[0].equalsIgnoreCase("created"))
-					&& args.length > 1
-					&& (sender.hasPermission("archecore.mod.persona") || sender.hasPermission("archecore.mod.other"))) {
-				pers = CommandUtil.personaFromArg(args[1]);
-			} else if (args.length > 2 && args[args.length - 2].equalsIgnoreCase("-p") && (sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.persona"))) {
-				pers = CommandUtil.personaFromArg(args[args.length - 1]);
+					|| args[0].equalsIgnoreCase("created")*/
+
+			//Go through process to find the Persona we want
+			Persona pers = null;
+            if (cmd == PersonaCommand.VIEW || cmd == PersonaCommand.MORE || cmd == PersonaCommand.LIST
+                    && args.length > 2) {
+                pers = CommandUtil.personaFromArg(args[1]);
+            } else if (cmd.onearg
+                    && args.length > 1
+                    && sender.hasPermission("archecore.mod.other")) {
+                pers = CommandUtil.personaFromArg(args[1]);
+            } else if (args.length > 2 && args[args.length - 2].equalsIgnoreCase("-p") && (sender.hasPermission("archecore.mod.other"))) {
+                pers = CommandUtil.personaFromArg(args[args.length - 1]);
 			} else if (sender instanceof Player) {
 				pers = handler.getPersona((Player) sender);
 			}
@@ -118,8 +223,8 @@ public class CommandPersona implements CommandExecutor {
 				return true;
 			}
 
-			if (args[0].equalsIgnoreCase("view") || args[0].equalsIgnoreCase("more")) {
-				boolean extendedInfo = args[0].equalsIgnoreCase("more");
+            if (cmd == PersonaCommand.VIEW || cmd == PersonaCommand.MORE) {
+                boolean extendedInfo = args[0].equalsIgnoreCase("more");
 				
 				Player t = Bukkit.getPlayer(pers.getPlayerUUID());
 				if (t != null && !handler.mayUse(t)) {
@@ -132,24 +237,24 @@ public class CommandPersona implements CommandExecutor {
 							.forEach(o->MessageUtil.send(o, sender));
 				}
 				return true;
-			} else if (args[0].equalsIgnoreCase("time")) {
-				sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int)Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + pers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
+            } else if (cmd == PersonaCommand.TIME) {
+                sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int)Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + pers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
 				sender.sendMessage(ChatColor.AQUA + "You have a total of " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int)Math.floor(pers.getTotalPlaytime() / 60) + ChatColor.AQUA + " hours on " + pers.getName() + "!");
 				return true;
-			} else if (args[0].equalsIgnoreCase("created")) {
+            } else if (cmd == PersonaCommand.CREATED) {
                 String time = millsToDaysHours(System.currentTimeMillis() - pers.getCreationTime().getTime());
                 sender.sendMessage(ChatColor.AQUA + "You created " + pers.getName() + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
 				return true;
-			} else if (args[0].equalsIgnoreCase("clearprefix") && prefix) {
-				pers.clearPrefix();
+            } else if (cmd == PersonaCommand.CLEARPREFIX && prefix) {
+                pers.clearPrefix();
 				sender.sendMessage(ChatColor.AQUA + "Persona prefix was cleared for " + pers.getName() + ".");
 				return true;
-			} else if (args[0].equalsIgnoreCase("clearbio") || args[0].equalsIgnoreCase("clearinfo") || args[0].equalsIgnoreCase("cleardesc") || args[0].equalsIgnoreCase("cleardescription")) {
-				pers.clearDescription();
+            } else if (cmd == PersonaCommand.CLEARINFO) {
+                pers.clearDescription();
 				sender.sendMessage(ChatColor.AQUA + "Persona description was cleared for " + pers.getName() + ".");
 				return true;
-			} else if (args[0].equalsIgnoreCase("list")) {
-				ArchePersona[] personas = handler.getAllPersonas(pers.getPlayerUUID());
+            } else if (cmd == PersonaCommand.LIST) {
+                ArchePersona[] personas = handler.getAllPersonas(pers.getPlayerUUID());
 				sender.sendMessage(ChatColor.AQUA + ArcheCore.getPlugin().getServer().getOfflinePlayer(pers.getPlayerUUID()).getName() + "'s personas:");
 				for (int i = 0; i <= 3; i++ ) {
 					Persona persona = personas[i];
@@ -160,35 +265,31 @@ public class CommandPersona implements CommandExecutor {
 					}
 				}
 				return true;
-			} else if (args[0].equalsIgnoreCase("permakill")) {
-				if (!sender.hasPermission("archecore.admin")) {
-					sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-				} else {
-					Player other = pers.getPlayer();
+            } else if (cmd == PersonaCommand.PERMAKILL) {
+                Player other = pers.getPlayer();
 
-					if (!(args.length > 1)) {
-						sender.sendMessage(ChatColor.RED + "Don't delete yourself by mistake friend!");
-						return true;
-					}
+                if (!(args.length > 1)) {
+                    sender.sendMessage(ChatColor.RED + "Don't delete yourself by mistake friend!");
+                    return true;
+                }
 
-					//Only do if online else problems
-					else if (other == null) {
-						sender.sendMessage(ChatColor.RED + "Too risky to remove personas of offline players");
-						return true;
-					}
+                //Only do if online else problems
+                else if (other == null) {
+                    sender.sendMessage(ChatColor.RED + "Too risky to remove personas of offline players");
+                    return true;
+                }
 
-					if (pers.remove()) {
-						if (handler.countPersonas(other) == 0 && !other.hasPermission("archecore.exempt"))
-							other.kickPlayer("Your final Persona was Permakilled. Please relog.");
-						else
-							other.sendMessage(ChatColor.AQUA+ "A persona of yours was Permakilled: " + ChatColor.RESET + pers.getName());
-						sender.sendMessage(ChatColor.AQUA + "You have permakilled Persona " + ChatColor.WHITE + pers.getName() + ChatColor.AQUA + " belonging to " + ChatColor.WHITE + pers.getPlayerName());
-					} else sender.sendMessage(ChatColor.RED + "I'm afraid I can't do that.");
-				}
-				return true;
+                if (pers.remove()) {
+                    if (handler.countPersonas(other) == 0 && !other.hasPermission("archecore.exempt"))
+                        other.kickPlayer("Your final Persona was Permakilled. Please relog.");
+                    else
+                        other.sendMessage(ChatColor.AQUA + "A persona of yours was Permakilled: " + ChatColor.RESET + pers.getName());
+                    sender.sendMessage(ChatColor.AQUA + "You have permakilled Persona " + ChatColor.WHITE + pers.getName() + ChatColor.AQUA + " belonging to " + ChatColor.WHITE + pers.getPlayerName());
+                } else sender.sendMessage(ChatColor.RED + "I'm afraid I can't do that.");
+                return true;
 			} else if (args.length > 1) {
-				if (args[0].equalsIgnoreCase("name")) {
-					int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
+                if (cmd == PersonaCommand.NAME) {
+                    int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
 					String name = StringUtils.join(args, ' ', 1, parseTo);
 
                     long timeLeft = (pers.getRenamed().getTime() / 60000) - (System.currentTimeMillis() / 60000) + delay;
@@ -206,8 +307,8 @@ public class CommandPersona implements CommandExecutor {
 					}
 					return true;
 
-				} else if (args[0].equalsIgnoreCase("prefix") && prefix) {
-					int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
+                } else if (cmd == PersonaCommand.PREFIX && prefix) {
+                    int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
 					String name = StringUtils.join(args, ' ', 1, parseTo);
 
 					if (name.length() <= 16) {
@@ -217,8 +318,8 @@ public class CommandPersona implements CommandExecutor {
 						sender.sendMessage(ChatColor.RED + "Error: Prefix too long. Max length 16 characters");
 					}
 					return true;
-				} else if (args[0].equalsIgnoreCase("addbio") || args[0].equalsIgnoreCase("addinfo") || args[0].equalsIgnoreCase("adddesc") || args[0].equalsIgnoreCase("adddescription")) {
-					int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
+                } else if (cmd == PersonaCommand.ADDINFO) {
+                    int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
 					String line = StringUtils.join(args, ' ', 1, parseTo);
 
 					int length = line.length();
@@ -231,10 +332,9 @@ public class CommandPersona implements CommandExecutor {
 					}
 
 					return true;
-				} else if (args[0].equalsIgnoreCase("profession") || args[0].equalsIgnoreCase("skill")) {
-					Persona target = pers;
-					if(target.getMainSkill() == null || sender.hasPermission("archecore.persona.switchprofession")){
-						Skill skill = ArcheCore.getControls().getSkill(args[1]);
+                } else if (cmd == PersonaCommand.PROFESSION) {
+                    if (pers.getMainSkill() == null || sender.hasPermission("archecore.persona.switchprofession")) {
+                        Skill skill = ArcheCore.getControls().getSkill(args[1]);
 						if(skill == null) {
 							sender.sendMessage(ChatColor.RED + "Error: This profession could not be found!");
 						} else {
@@ -245,142 +345,92 @@ public class CommandPersona implements CommandExecutor {
 						sender.sendMessage(ChatColor.RED + "You have already selected a profession!");
 					}
 					return true;
-				} else if (args[0].equalsIgnoreCase("setbio") || args[0].equalsIgnoreCase("setinfo") || args[0].equalsIgnoreCase("setdesc") || args[0].equalsIgnoreCase("setdescription")) {
-					int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
+                } else if (cmd == PersonaCommand.SETINFO) {
+                    int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
 					String line = StringUtils.join(args, ' ', 1, parseTo);
 
 					pers.setDescription(line);
 					sender.sendMessage(ChatColor.AQUA + pers.getName() + "'s description now reads: " + line);
 					return true;
-				} else if (args[0].equalsIgnoreCase("setrace")) {
-					if (!sender.hasPermission("archecore.admin") && !sender.hasPermission("archecore.mod.persona") && !sender.hasPermission("archecore.persona.setrace")) {
-						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-					} else {
-						int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
-						String race = StringUtils.join(args, ' ', 1, parseTo);
-						pers.setApparentRace(race);
-						sender.sendMessage(ChatColor.AQUA + "Set visible race of " + pers.getName() + " to: " + ChatColor.RESET + race);
-					}
-					return true;
-				} else if (args[0].equalsIgnoreCase("assigngender")) {
-					if (!sender.hasPermission("archecore.admin") && !sender.hasPermission("archecore.persona.gender")) {
-						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-					} else {
-						String gender = args[1].toLowerCase();
-						switch (gender) {
-							case "male": case "female" : case "other" : {
-								pers.setGender(gender);
-								sender.sendMessage(ChatColor.AQUA + "Set gender of " + pers.getName() + " to: " + ChatColor.RESET + gender);
-								return true;
-							}
-							default :
-								sender.sendMessage(ChatColor.RED + "Please enter 'male', 'female', or 'other'.");
-								return true;
-						}  
-					}
-					return true;
-				} else if (args[0].equalsIgnoreCase("realrace")) {
-					if (!sender.hasPermission("archecore.admin") && !sender.hasPermission("archecore.mod.persona") && !sender.hasPermission("archecore.persona.realrace")) {
-						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-					} else {
-						sender.sendMessage(ChatColor.AQUA + "Underlying for " + pers.getName() + " is: " + ChatColor.GOLD + pers.getRace().getName());
-                        sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "(Visible: " + pers.getRaceString(sender.hasPermission("archecore.mod.persona")) + ")");
-                    }
-					return true;
-				} else if (args[0].equalsIgnoreCase("wiperace")) {
-					if (!sender.hasPermission("archecore.admin") && !sender.hasPermission("archecore.mod.persona") && !sender.hasPermission("archecore.persona.setrace")) {
-						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-					} else {
-                        sender.sendMessage(ChatColor.AQUA + "Visible race of " + pers.getName() + " has been reset to from '" + pers.getRaceString(sender.hasPermission("archecore.mod.persona")) + "' to: " + ChatColor.RESET + pers.getRace().getName());
-                        pers.setApparentRace(null);
-					}
-					return true;
-				} else if (args[0].equalsIgnoreCase("assignrace")) {
-					if (!sender.hasPermission("archecore.admin")) {
-						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-					} else {
-						int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
-						Race race = findRace(StringUtils.join(args, ' ', 1, parseTo));
-						if (race == null) {
-							sender.sendMessage(ChatColor.RED + "Please enter a valid race.");
-						} else if (pers.getRace() == race) {
-							sender.sendMessage(ChatColor.RED + "Race for " + pers.getName() + " is already " + race.getName());
-						} else {
-							doRaceChange(sender, pers, race);
-						}
-					}
-					return true;
-                } else if (args[0].equalsIgnoreCase("openinv")) {
-                    if (!sender.hasPermission("archecore.admin")) {
-                        if (sender.hasPermission("archecore.mod.persona"))
-                            sender.sendMessage(ChatColor.RED + "Error: This command is currently suspended from moderators until we can sort out some bugs - Dev Team");
-                        else
-                            sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-                    } else {
-                        if (sender instanceof Player) {
-                            Player pl = (Player) sender;
-                            pl.closeInventory();
-                            Inventory inv = pers.getInventory();
-                            if (inv == null) sender.sendMessage(ChatColor.RED + "This persona is currently active! Please use /openinv <player>");
-                            else {
-                                sender.sendMessage(ChatColor.AQUA + "Opening inventory contents for " + pers.getName() + ".");
-                                pl.openInventory(pers.getInventory());
-                            }
-
-                        } else {
-                            sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
+                } else if (cmd == PersonaCommand.SETRACE) {
+                    int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
+                    String race = StringUtils.join(args, ' ', 1, parseTo);
+                    pers.setApparentRace(race);
+                    sender.sendMessage(ChatColor.AQUA + "Set visible race of " + pers.getName() + " to: " + ChatColor.RESET + race);
+                    return true;
+                } else if (cmd == PersonaCommand.ASSIGNGENDER) {
+                    String gender = args[1].toLowerCase();
+                    switch (gender) {
+                        case "male":
+                        case "female":
+                        case "other": {
+                            pers.setGender(gender);
+                            sender.sendMessage(ChatColor.AQUA + "Set gender of " + pers.getName() + " to: " + ChatColor.RESET + gender);
+                            return true;
                         }
+                        default:
+                            sender.sendMessage(ChatColor.RED + "Please enter 'male', 'female', or 'other'.");
+                            return true;
+                    }
+                } else if (cmd == PersonaCommand.REALRACE) {
+                    sender.sendMessage(ChatColor.AQUA + "Underlying for " + pers.getName() + " is: " + ChatColor.GOLD + pers.getRace().getName());
+                    sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "(Visible: " + pers.getRaceString(sender.hasPermission("archecore.mod.persona")) + ")");
+                    return true;
+                } else if (cmd == PersonaCommand.WIPERACE) {
+                    sender.sendMessage(ChatColor.AQUA + "Visible race of " + pers.getName() + " has been reset to from '" + pers.getRaceString(sender.hasPermission("archecore.mod.persona")) + "' to: " + ChatColor.RESET + pers.getRace().getName());
+                    pers.setApparentRace(null);
+                    return true;
+                } else if (cmd == PersonaCommand.ASSIGNRACE) {
+                    int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
+                    Race race = findRace(StringUtils.join(args, ' ', 1, parseTo));
+                    if (race == null) {
+                        sender.sendMessage(ChatColor.RED + "Please enter a valid race.");
+                    } else if (pers.getRace() == race) {
+                        sender.sendMessage(ChatColor.RED + "Race for " + pers.getName() + " is already " + race.getName());
+                    } else {
+                        doRaceChange(sender, pers, race);
                     }
                     return true;
-                } else if (args[0].equalsIgnoreCase("openender")) {
-                    if (!sender.hasPermission("archecore.admin")) {
-                        if (sender.hasPermission("archecore.mod.persona"))
-                            sender.sendMessage(ChatColor.RED + "Error: This command is currently suspended from moderators until we can sort out some bugs - Dev Team");
-                        else
-                            sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-                    } else {
-                        if (sender instanceof Player) {
-                            Player pl = (Player) sender;
-                            pl.closeInventory();
-                            Inventory inv = pers.getEnderChest();
-                            if (inv == null) {
-                                sender.sendMessage(ChatColor.RED + "Something went wrong opening the enderchest.");
-                            } else {
-                                sender.sendMessage(ChatColor.AQUA + "Opening enderchest contents for " + pers.getName() + ".");
-                                pl.openInventory(inv);
-                            }
-
-                        } else {
-                            sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
+                } else if (cmd == PersonaCommand.OPENINV) {
+                    if (sender instanceof Player) {
+                        Player pl = (Player) sender;
+                        pl.closeInventory();
+                        Inventory inv = pers.getInventory();
+                        if (inv == null)
+                            sender.sendMessage(ChatColor.RED + "This persona is currently active! Please use /openinv <player>");
+                        else {
+                            sender.sendMessage(ChatColor.AQUA + "Opening inventory contents for " + pers.getName() + ".");
+                            pl.openInventory(pers.getInventory());
                         }
+
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
                     }
                     return true;
-                } else if (args[0].equalsIgnoreCase("construct") || args[0].equalsIgnoreCase("golem")) {
-                    if (!sender.hasPermission("archecore.command.construct") && !sender.hasPermission("archecore.admin")) {
-                        sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-                        return true;
-                    } else
-                        return doRaceChange(sender, pers, Race.CONSTRUCT);
-                } else if (args[0].equalsIgnoreCase("spectre") || args[0].equalsIgnoreCase("spectral") || args[0].equalsIgnoreCase("specter")) {
-                    if (!sender.hasPermission("archecore.command.spectre") && !sender.hasPermission("archecore.admin")) {
-                        sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-                        return true;
-                    } else
-                        return doRaceChange(sender, pers, Race.SPECTRE);
-                } else if (args[0].equalsIgnoreCase("necrolyte") || args[0].equalsIgnoreCase("necro")) {
-                    if (!sender.hasPermission("archecore.command.necrolyte") && !sender.hasPermission("archecore.admin")) {
-                        sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
-                        return true;
-                    } else
-                        return doRaceChange(sender, pers, Race.NECROLYTE);
-                } else if (args[0].equalsIgnoreCase("aengulbound")
-                        || args[0].equalsIgnoreCase("keeper")
-                        || args[0].equalsIgnoreCase("ascended")) {
-                    if (!sender.hasPermission("archecore.command.ascended") && !sender.hasPermission("archecore.admin")) {
-                        sender.sendMessage(ChatColor.RED + "Error: Permission denied");
-                        return true;
-                    } else
-                        return doRaceChange(sender, pers, Race.ASCENDED);
+                } else if (cmd == PersonaCommand.OPENENDER) {
+                    if (sender instanceof Player) {
+                        Player pl = (Player) sender;
+                        pl.closeInventory();
+                        Inventory inv = pers.getEnderChest();
+                        if (inv == null) {
+                            sender.sendMessage(ChatColor.RED + "Something went wrong opening the enderchest.");
+                        } else {
+                            sender.sendMessage(ChatColor.AQUA + "Opening enderchest contents for " + pers.getName() + ".");
+                            pl.openInventory(inv);
+                        }
+
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
+                    }
+                    return true;
+                } else if (cmd == PersonaCommand.CONSTRUCT) {
+                    return doRaceChange(sender, pers, Race.CONSTRUCT);
+                } else if (cmd == PersonaCommand.SPECTRE) {
+                    return doRaceChange(sender, pers, Race.SPECTRE);
+                } else if (cmd == PersonaCommand.NECROLYTE) {
+                    return doRaceChange(sender, pers, Race.NECROLYTE);
+                } else if (cmd == PersonaCommand.ASCENDED) {
+                    return doRaceChange(sender, pers, Race.ASCENDED);
                 }
 			}
 		}

@@ -143,16 +143,17 @@ permissions:
     children:
       archecore.mod.other: true
       archecore.persona.realrace: true
-      archecore.command.construct: true
-      archecore.command.spectre: true
-      archecore.command.necrolyte: true
-      archecore.command.ascended: true
+      archecore.command.persona.construct: true
+      archecore.command.persona.spectre: true
+      archecore.command.persona.necrolyte: true
+      archecore.command.persona.ascended: true
       archecore.persona.longbio: true
       archecore.persona.longname: true
       archecore.persona.quickrename: true
       archecore.persona.quickswitch: true
       archecore.persona.nonnewbie: true
       archecore.persona.quickkill: true
+      archecore.command.persona.*: true
   archecore.mod.other:
     description: Allows the editting of persona cards which aren't your own.
   archecore.persona.quickkill:
@@ -169,20 +170,70 @@ permissions:
     description: Gives the ability to have a longer than usual biography
   archecore.persona.switchprofession:
     description: Gives the ability to switch the profession of either your or another persona
-  archecore.persona.gender:
-    description: Gives the ability to change the gender of a persona.
-  archecore.persona.realrace:
-    description: Gives the ability to view the real race of a persona
-  archecore.persona.setrace:
+  archecore.admin.command.persona.permakill:
+    description: No description
+  archecore.admin.command.persona.assignrace:
+    description: No description
+  archecore.admin.command.persona.assigngender:
+    description: No description
+  archecore.command.persona.setrace:
+    description: Gain access to /persona setrace
+    default: op
+  archecore.command.persona.openinv:
+    description: Gain access to /persona openinv
+    default: op
+  archecore.command.persona.openender:
+    description: Gain access to /persona openender
+    default: op
+  archecore.command.persona.setrace:
     description: Gives the ability to set the race of a persona
-  archecore.command.construct:
+  archecore.command.persona.construct:
     description: Gives the ability to set a persona to a construct
-  archecore.command.spectre:
+  archecore.command.persona.spectre:
     description: Gives the ability to set a persona to a spectre
-  archecore.command.necrolyte:
+  archecore.command.persona.necrolyte:
     description: Gives the ability to set a persona to a necrolyte
-  archecore.command.ascended:
+  archecore.command.persona.ascended:
     description: Gives the ability to set a persona to an Aengulbound
+  archecore.command.persona.name:
+    description: Gain access to /persona name
+    default: yes
+  archecore.command.persona.prefix:
+    description: Gain access to /persona prefix if prefixes are enabled.
+    default: yes
+  archcecore.command.persona.prefix.clear:
+    description: Gain access to /persona clearprefix if prefixes are enabled
+    default: yes
+  archecore.command.persona.time:
+    description: Gain access to /persona time
+    default: yes
+  archecore.command.persona.age:
+    description: Gain access to /persona age
+  archecore.command.persona.profession:
+    description: Gain access to /persona profession
+    default: yes
+  archecore.command.persona.list:
+    description: Gain access to /persona list
+    default: yes
+  archecore.command.persona.desc:
+    description: Gain access to /persona setinfo and /persona addinfo
+    default: yes
+  archecore.command.persona.icon:
+    description: Give access to /persona icon
+    default: yes
+  archecore.command.persona.created:
+    description: Give access to /persona created
+    default: yes
+
+  archecore.command.persona.view.more:
+    description: Gain access to view more persona info with /persona more
+    default: yes
+  archecore.command.persona.view:
+    description: Gain access to /persona view
+    default: yes
+  archecore.command.persona.help:
+    description: Gain access to /persona help.
+    default: yes
   archecore.money:
     description: Gives access to use /money and it's aliases for managing money if the Economy module is enabled.
     default: yes
