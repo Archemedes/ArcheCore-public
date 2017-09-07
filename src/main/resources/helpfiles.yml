@@ -1,5 +1,6 @@
 basic-help:
   topic: Help on Help files
+  permission: archecore.mayuse
   content: '&4&lI am a Helpful help file!
   
   &3I came from the config file &ohelpfiles.yml &3which is automatically read when the ArcheCore plugin starts up. This file is customizable! You can use the config file to make me a few friends!

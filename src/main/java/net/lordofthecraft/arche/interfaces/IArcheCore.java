@@ -75,6 +75,15 @@ public interface IArcheCore {
 	 */
 	void addHelp(String topic, String output);
 
+    /**
+     * Adds a Topic to the HelpDesk, revealing it to all players via the GUI and command
+     *
+     * @param topic      the topic to add
+     * @param output     the text provided to the player when this topic is accessed
+     * @param permission The permission needed to view this topic
+     */
+    void addHelp(String topic, String output, String permission);
+
 	/**
 	 * Adds a Topic to the HelpDesk, revealing it to all players via the GUI and command
 	 * @param topic the topic to add
@@ -83,12 +92,31 @@ public interface IArcheCore {
 	 */
 	void addHelp(String topic, String output, Material icon);
 
+    /**
+     * Adds a Topic to the HelpDesk, revealing it to all players via the GUI and command
+     *
+     * @param topic      the topic to add
+     * @param output     the text provided
+     * @param icon       the clickable item to display on the help GUI
+     * @param permission The permission needed to read this help topic
+     */
+    void addHelp(String topic, String output, Material icon, String permission);
+
 	/**
 	 * Adds a Topic to the HelpDesk as an info topic, allowing linking to the topic but not revealing it
 	 * @param topic the info topic to add
 	 * @param output the text provided
 	 */
 	void addInfo(String topic, String output);
+
+    /**
+     * Adds a Topic to the HelpDesk as an info topic, allowing linking to the topic but not revealing it
+     *
+     * @param topic      the info topic to add
+     * @param output     the text provided
+     * @param permission The permission needed to view this help topic
+     */
+    void addInfo(String topic, String output, String permission);
 
 	/**
 	 * Method to retrieve an existing Skill object

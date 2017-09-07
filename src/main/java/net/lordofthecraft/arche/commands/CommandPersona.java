@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.commands;
 
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -13,6 +14,8 @@ import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.persona.UpdateTask;
 import net.lordofthecraft.arche.util.CommandUtil;
 import net.lordofthecraft.arche.util.MessageUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -38,8 +41,8 @@ public class CommandPersona implements CommandExecutor {
 
     public enum PersonaCommand {
         HELP("archecore.command.persona.help", false, "help", "viewhelp"),
-        VIEW("archecore.command.persona.view", false, "view", "see", "card"),
-        MORE("archecore.command.persona.view.more", false, "more", "extrainfo", "viewmore"),
+        VIEW("archecore.command.persona.view", true, "view", "see", "card"),
+        MORE("archecore.command.persona.view.more", true, "more", "extrainfo", "viewmore"),
         NAME("archecore.command.persona.name", false, "name", "rename", "setname"),
         PREFIX("archecore.command.persona.prefix", false, "prefix", "setprefix"),
         CLEARPREFIX("archcecore.command.persona.prefix.clear", false, "clearprefix", "delprefix", "rmprefix", "noprefix", "removeprefix"),
@@ -47,7 +50,7 @@ public class CommandPersona implements CommandExecutor {
         CLEARINFO("archecore.command.persona.desc.clear", false, "clearbio", "cleardesc", "deldesc", "delinfo", "clearinfo", "delbio", "cleardescription"),
         ADDINFO("archecore.command.persona.desc", false, "addinfo", "addbio", "bioadd"),
         SETINFO("archecore.command.persona.desc", false, "setbio", "setinfo", "info", "bio"),
-        LIST("archecore.command.persona.list", false, "list", "listpersonas", "viewpersonas"),
+        LIST("archecore.command.persona.list", true, "list", "listpersonas", "viewpersonas"),
         PROFESSION("archecore.command.persona.profession", false, "profession", "setprofession", "setprof", "skill", "setskill", "sk"),
         PERMAKILL("archecore.admin.command.persona.permakill", true, "permakill", "pk", "remove", "delete"),
         TIME("archecore.command.persona.time", true, "time", "timeplayed", "played", "viewtime", "viewplayed"),
@@ -63,7 +66,8 @@ public class CommandPersona implements CommandExecutor {
         SPECTRE("archecore.command.persona.spectre", true, "spectre", "setspectre"),
         ASCENDED("archecore.command.persona.ascended", true, "aengulbound", "setaengulbound"),
         ASSIGNRACE("archecore.admin.command.persona.assignrace", false, "assignrace", "setunderlyingrace", "setunder"),
-        ASSIGNGENDER("archecore.admin.command.persona.assigngender", false, "assigngender", "setgender");
+        ASSIGNGENDER("archecore.admin.command.persona.assigngender", false, "assigngender", "setgender"),
+        SETTYPE("archecore.admin.command.persona.settype", false, "settype", "type", "assigntype");
 
         public final String permission;
         private final String[] aliases;
@@ -117,8 +121,12 @@ public class CommandPersona implements CommandExecutor {
 
 		String i = ChatColor.BLUE + "" + ChatColor.ITALIC;
 		String a = ChatColor.AQUA + "";
-		String output = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "How to use the command: " + i + "/persona\n"
-				+ ChatColor.BLUE + "Type " + i + "/persona [par]" + ChatColor.BLUE + " where " + i + "'[par]'" + ChatColor.BLUE + " is any of the following:\n" + a
+        String b = ChatColor.DARK_RED + "";
+        String r = ChatColor.RESET + "";
+        String d = ChatColor.DARK_AQUA + "";
+        String l = ChatColor.BOLD + "";
+        String output = d + "" + l + "How to use the command: " + i + "/persona\n"
+                + ChatColor.BLUE + "Type " + i + "/persona [par]" + ChatColor.BLUE + " where " + i + "'[par]'" + ChatColor.BLUE + " is any of the following:\n" + a
 				+ i + "$</persona view >view {player}$: " + a + "View the current Character Card of {Player}.\n"
 				+ i + "$</persona name >name [new name]$: " + a + "Rename your Persona to the given name.\n"
 				+ (prefix ? (i + "$</persona prefix >prefix [prefix]$: " + a + "Sets Persona Prefix (delete with $</persona clearprefix>clearprefix$).\n") : "")
@@ -132,7 +140,32 @@ public class CommandPersona implements CommandExecutor {
 				+ i + "$</persona icon>icon$: " + a + "Save your current skin as your persona icon.\n"
 				+ i + "$</persona list>list$: " + a + "View all your Personas with names + IDs.\n";
 
-        helpdesk.addInfoTopic("Persona PersonaCommand", output);
+        String modOutput = d + "[M]" + i + " $</persona setrace >setrace [visiblerace]$: " + a + "Chance the apparent race of a persona. Changes the visible race but not the mechanical race. " +
+                "(view real race with $</persona realrace >realrace$ or wipe this race with $</persona wiperace >wiperace$)\n" +
+                d + "[M]" + i + " $</persona openinv >openinv {player}@{personaid}$: " + a + "Open the inventory of a persona/player.\n" +
+                d + "[M]" + i + " $</persona openender>openender {player}@{personaid}$: " + a + "Open the enderchest of this persona/player.\n" +
+                d + "[M] @@<Persona Target>Click to view how to run commands on other players.@@\n" +
+                d + "[M] @@<Persona Target Other>Click to learn how to run commands on a players other personas.";
+
+        String targetOtherPlayers = d + "[M] You can use the flag '-p {player}' to modify another player's persona, e.g. " + a + "/persona name newname -p GenericMinecrafter" + r + " will change GenericMinecrafter's persona name to newname.";
+
+        String targetOtherPersonas = d + "[M] In order to effect other personas of a player you can use the format {player}@{personaid}, where personaid is the slot # minus 1. E.g. " + i + "/persona name newname -p GenericMinecrafter@0 " + d +
+                "will set GenericMinecrafter's first persona's name to 'newname', while " + i + "/persona name newname -p GenericMinecrafter@3" + d + " will set his fourth persona name to newname.";
+
+        String adminOutput = d + "[" + b + "A" + d + "]" + i + " $</persona permakill >permakill {player}$: " + a + "Force a permakill of a persona. Default your current persona, use with care.\n" +
+                d + "[" + b + "A" + d + "]" + i + " $</persona assignrace >assignrace {race} (-p {player}@{personaid})$: " + a + "Sets the underlying race of a persona, default your current persona. Use with care.\n" +
+                d + "[" + b + "A" + d + "]" + i + " $</persona assigngender >assigngender {gender} (-p {player}@{personaid})$: " + a + "Sets the gender of a persona, default your current persona. Use with care.\n" +
+                d + "[" + b + "A" + d + "]" + i + " $</persona settype >settype {type} (-p {player}@{personaid})$: " + a + "Sets the persona \"type\". Available options: " + r + " NORMAL, EVENT, STAFF, LORE.\n" +
+                d + "[" + b + "A" + d + "] Please be careful and cautious using any of these commands, they make lasting changes to personas and could potentially cause errors. Do not use lightly.";
+
+
+        helpdesk.addInfoTopic("Persona Command", output, "archecore.mayuse");
+        helpdesk.addInfoTopic("Persona Mod", modOutput, "archecore.persona.mod");
+        helpdesk.addInfoTopic("Persona Target", targetOtherPlayers, "archecore.mod.other");
+        helpdesk.addInfoTopic("Persona Target Other", targetOtherPersonas, "archecore.mod.other");
+        helpdesk.addInfoTopic("Persona Admin", adminOutput, "archecore.admin");
+
+
     }
 
 
@@ -142,19 +175,25 @@ public class CommandPersona implements CommandExecutor {
 			if (sender instanceof Player) helpdesk.outputHelp("persona command", (Player) sender);
 			else sender.sendMessage(helpdesk.getHelpText("persona command"));
 
-			if (sender.hasPermission("archecore.mod.persona")) {
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] Change apparant race with 'setrace'. This changes visible race, but not the underlying race.");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] View the real race of a persona with 'realrace' and reset the apparent race with 'wiperace.");
+            if (sender.hasPermission("archecore.mod.persona") && sender instanceof Player) {
+                BaseComponent base = new TextComponent("As a persona moderator you have additional commands. Click to view. ");
+                base.addExtra(MessageUtil.CommandButton("Mod", "/archehelp persona mod", "Click to view help."));
+                /*sender.sendMessage(ChatColor.DARK_AQUA + "[M] Change apparant race with 'setrace'. This changes visible race, but not the underlying race.");
+                sender.sendMessage(ChatColor.DARK_AQUA + "[M] View the real race of a persona with 'realrace' and reset the apparent race with 'wiperace.");
 				sender.sendMessage(ChatColor.DARK_AQUA + "[M] Open the inventory of a persona with openinv [player]@[personaid]");
 				sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can add the flag '-p {player}' to the end of the command to modify someone's current Persona.");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can use [player]@[personaid] to modify a different Persona");
-			}
+				sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can use [player]@[personaid] to modify a different Persona");*/
+                if (sender.hasPermission("archecore.admin")) {
+                    base.addExtra(MessageUtil.CommandButton("Admin", "/archehelp persona admin", "Click to view help."));
+                }
+                ((Player) sender).spigot().sendMessage(base);
+            }
 
-			if (sender.hasPermission("archecore.admin")) {
-				sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Force a permakill with 'permakill [persona]'. Default on your current Persona");
+			/*if (sender.hasPermission("archecore.admin")) {
+                sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Force a permakill with 'permakill [persona]'. Default on your current Persona");
 				sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Reassign the underlying race with 'assignrace'");
 				sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Perform gender reassignment surgery with 'assigngender'.");
-			}
+			}*/
 			return true;
 		} else {
             PersonaCommand cmd = PersonaCommand.getCommand(args[0]);
@@ -162,18 +201,14 @@ public class CommandPersona implements CommandExecutor {
                 if (sender instanceof Player) helpdesk.outputHelp("persona command", (Player) sender);
                 else sender.sendMessage(helpdesk.getHelpText("persona command"));
 
-                if (sender.hasPermission("archecore.mod.persona")) {
-                    sender.sendMessage(ChatColor.DARK_AQUA + "[M] Change apparant race with 'setrace'. This changes visible race, but not the underlying race.");
-                    sender.sendMessage(ChatColor.DARK_AQUA + "[M] View the real race of a persona with 'realrace' and reset the apparent race with 'wiperace.");
-                    sender.sendMessage(ChatColor.DARK_AQUA + "[M] Open the inventory of a persona with openinv [player]@[personaid]");
-                    sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can add the flag '-p {player}' to the end of the command to modify someone's current Persona.");
-                    sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can use [player]@[personaid] to modify a different Persona");
-                }
-
-                if (sender.hasPermission("archecore.admin")) {
-                    sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Force a permakill with 'permakill [persona]'. Default on your current Persona");
-                    sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Reassign the underlying race with 'assignrace'");
-                    sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Perform gender reassignment surgery with 'assigngender'.");
+                if (sender.hasPermission("archecore.mod.persona") && sender instanceof Player) {
+                    BaseComponent base = new TextComponent("As a persona moderator you have additional commands. Click to view.\n");
+                    base.addExtra(MessageUtil.CommandButton("Mod", "/archehelp persona mod", "Click to view help."));
+                    if (sender.hasPermission("archecore.admin")) {
+                        base.addExtra("\n");
+                        base.addExtra(MessageUtil.CommandButton("Admin", "/archehelp persona admin", "Click to view help."));
+                    }
+                    ((Player) sender).spigot().sendMessage(base);
                 }
                 return true;
             }
@@ -205,8 +240,8 @@ public class CommandPersona implements CommandExecutor {
 
 			//Go through process to find the Persona we want
 			Persona pers = null;
-            if (cmd == PersonaCommand.VIEW || cmd == PersonaCommand.MORE || cmd == PersonaCommand.LIST
-                    && args.length > 2) {
+            if ((cmd == PersonaCommand.VIEW || cmd == PersonaCommand.MORE || cmd == PersonaCommand.LIST)
+                    && args.length > 1) {
                 pers = CommandUtil.personaFromArg(args[1]);
             } else if (cmd.onearg
                     && args.length > 1
@@ -389,6 +424,15 @@ public class CommandPersona implements CommandExecutor {
                         sender.sendMessage(ChatColor.RED + "Race for " + pers.getName() + " is already " + race.getName());
                     } else {
                         doRaceChange(sender, pers, race);
+                    }
+                    return true;
+                } else if (cmd == PersonaCommand.SETTYPE) {
+                    PersonaType type = PersonaType.getType(args[1]);
+                    if (type != null) {
+                        pers.setPersonaType(type);
+                        sender.sendMessage(ChatColor.AQUA + "The Persona Type of " + pers.getName() + " has been set to " + type.readableName);
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "Error! Could not set the persona type of " + pers.getName() + "! Acceptable values are: " + ChatColor.RESET + " NORMAL, LORE, EVENT, STAFF");
                     }
                     return true;
                 } else if (cmd == PersonaCommand.OPENINV) {

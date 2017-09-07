@@ -6,12 +6,14 @@ import net.lordofthecraft.arche.help.WikiHelpFile.WikiBrowser;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class HelpDesk {
 	public static final String HELP_HEADER = ChatColor.DARK_AQUA + "Please choose a Topic";
@@ -27,16 +29,33 @@ public class HelpDesk {
 	public Set<String> getTopics(){
 		return Collections.unmodifiableSet(normalTopics.keySet());
 	}
-	
-	public void addTopic(HelpFile help){
+
+    public Set<String> getTopics(CommandSender forwho) {
+        return normalTopics.entrySet().stream().filter(t -> t.getValue().canView(forwho)).map(Map.Entry::getKey).collect(Collectors.toSet());
+    }
+
+    public void addTopic(HelpFile help){
 		normalTopics.put(help.getTopic().toLowerCase(), help);
 	}
-	
-	public void addTopic(String topic, String output){
-		topic = topic.toLowerCase();
-		HelpFile help = constructHelp(topic, output);
-		normalTopics.put(topic, help);
-	}
+
+    public void addTopic(String topic, String output, String permission) {
+        topic = topic.toLowerCase();
+        HelpFile help = constructHelp(topic, output);
+        help.setPerm(permission);
+        normalTopics.put(topic, help);
+    }
+
+    public void addTopic(String topic, String output, Material icon, String permission) {
+        topic = topic.toLowerCase();
+        HelpFile help = constructHelp(topic, output);
+        help.setIcon(icon);
+        help.setPerm(permission);
+        normalTopics.put(topic, help);
+    }
+
+    public void addTopic(String topic, String output) {
+        addTopic(topic, output, "archecore.mayuse");
+    }
 	
 	public void addTopic(String topic, String output, Material icon){
 		topic = topic.toLowerCase();
@@ -54,8 +73,15 @@ public class HelpDesk {
 		HelpFile help = constructHelp(topic, output);
 		infoTopics.put(topic, help);
 	}
-	
-	public void addSkillTopic(HelpFile help){
+
+    public void addInfoTopic(String topic, String output, String permission) {
+        topic = topic.toLowerCase();
+        HelpFile help = constructHelp(topic, output);
+        help.setPerm(permission);
+        infoTopics.put(topic, help);
+    }
+
+    public void addSkillTopic(HelpFile help){
 		skillTopics.put(help.getTopic().toLowerCase(), help);
 	}
 	
@@ -75,9 +101,9 @@ public class HelpDesk {
 	private HelpFile constructHelp(final String topic, final String output){
 		return new LinkedHelpFile(topic, output);
 	}
-	
-	public void outputHelp(String topic, Player p){
-		//System.out.println(infoTopics);
+
+    public boolean outputHelp(String topic, Player p) {
+        //System.out.println(infoTopics);
 		topic = topic.toLowerCase();
 		HelpFile h = findHelpFile(topic);
 		
@@ -87,9 +113,19 @@ public class HelpDesk {
 				p.sendMessage(ChatColor.LIGHT_PURPLE + "Fetching help file, please wait...");
 				WikiHelpFile wh = new WikiHelpFile(topic);
 				new WikiBrowser(p, wh).runTaskAsynchronously(ArcheCore.getPlugin());
-			}else p.sendMessage(ChatColor.RED + "No such help topic: " + ChatColor.GRAY + topic);
-		}else h.output(p);
-	}
+                return true;
+            } else {
+                p.sendMessage(ChatColor.RED + "No such help topic: " + ChatColor.GRAY + topic);
+                return true;
+            }
+        } else {
+            if (!h.canView(p)) {
+                return false;
+            }
+            h.output(p);
+            return true;
+        }
+    }
 	
 	public void outputSkillHelp(String topic, Player p){
 		topic = topic.toLowerCase();
@@ -128,8 +164,10 @@ public class HelpDesk {
 		int i =  0;
 
 		for(HelpFile h : normalTopics.values()){
-			inv.setItem(i++, h.asItem());
-		}
+            if (h.canView(p)) {
+                inv.setItem(i++, h.asItem());
+            }
+        }
 
 		//Put some space between different topics, if possible
 		if(!large){
@@ -137,8 +175,10 @@ public class HelpDesk {
 		}
 
 		for(HelpFile h : skillTopics.values()){
-			inv.setItem(i++, h.asSkillItem());
-		}
+            if (h.canView(p)) {
+                inv.setItem(i++, h.asSkillItem());
+            }
+        }
 
 		p.openInventory(inv);
 	}
