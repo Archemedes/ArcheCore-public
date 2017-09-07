@@ -227,6 +227,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		if(before != null && before != after){
 			//Store and switch Persona-related specifics: Location and Inventory.
 			before.saveMinecraftSpecifics(p);
+            before.attributes.removeFromPlayer();
 
 			//Transfer fatigue from previous persona to new persona IF previous value was higher
 			//This should prevent some alt abuse where players chain their fatigue bars to grind

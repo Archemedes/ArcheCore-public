@@ -58,6 +58,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	final PersonaSkills skills = new PersonaSkills(this);
     final PersonaMagics magics = new PersonaMagics(this);
+    final PersonaAttributes attributes = new PersonaAttributes(this);
 
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger timePlayed;
@@ -270,6 +271,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		}
 	}
 
+    void loadAttributes() {
+
+    }
+
 	void loadTags() {
         Callable<TagAttachment> attachmentCallable = new TagAttachmentCallable(persona_id, ArcheCore.getSQLControls());
         Future<TagAttachment> ft = SaveHandler.getInstance().prepareCallable(attachmentCallable);
@@ -335,10 +340,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	@Override
 	public boolean hasAchievedMagicTier(Magic m, int tier) {
-        /*Optional<MagicAttachment> omat = magics.stream().filter(at -> at.getMagic().equals(m)).findFirst();
-		return omat.filter(magicAttachment -> magicAttachment.getTier() >= tier).isPresent();*/
-        return false;
-	}
+        return magics.achievedTier(m, tier);
+    }
 
 	@Override
 	public Optional<Future<MagicAttachment>> createAttachment(Magic m, int tier, Persona teacher, boolean visible) {
@@ -632,6 +635,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
             einv.clear();
             pinv.setArmorContents(new ItemStack[4]);
 		}
+        attributes.applyToPlayer();
 
 		//Heal them so their Persona is fresh
 		double maxHp = p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();

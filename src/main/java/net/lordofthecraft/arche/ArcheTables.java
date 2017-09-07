@@ -54,7 +54,9 @@ public final class ArcheTables {
             createCreatureAbilities(statement, end);
             ArcheCore.getPlugin().getLogger().info("Done with creature abilities! Creating persona vitals...");
             createPersonaVitalsTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with persona vitals! Creating racial skills...");
+            ArcheCore.getPlugin().getLogger().info("Done with persona vitals! Creating persona attributes...");
+            createPersonaAttributes(statement, end);
+            ArcheCore.getPlugin().getLogger().info("Done with persona attributes! Creating racial skills...");
             createRacialSkillsTable(statement, end);
             ArcheCore.getPlugin().getLogger().info("Done with racial skills! Creating persona skills...");
             createPersonaSkillsTable(statement, end);
@@ -327,7 +329,7 @@ public final class ArcheTables {
         sqlHandler.createTable("creature_abilities", cols);*/
     }
 
-    private static void createPersonaVitalsTable(Statement statement, String end) throws SQLException {
+    protected static void createPersonaVitalsTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS persona_vitals (" +
                 "persona_id_fk CHAR(36)," +
                 "world VARCHAR(255) NOT NULL," +
@@ -361,6 +363,22 @@ public final class ArcheTables {
         cols.put("FOREIGN KEY (persona_id_fk)", "REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT");
         cols.put("FOREIGN KEY (creature)", "REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE RESTRICT");
         sqlHandler.createTable("persona_vitals", cols);*/
+    }
+
+    protected static void createPersonaAttributes(Statement statement, String end) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_attributes (" +
+                "mod_uuid CHAR(36)," +
+                "persona_id_fk CHAR(36)," +
+                "attribute_type VARCHAR(255)," +
+                "mod_name TEXT NOT NULL," +
+                "mod_value DOUBLE DEFAULT 0.0," +
+                "operation TEXT NOT NULL," +
+                "created TIMESTAMP," +
+                "decaytime TIMESTAMP DEFAULT NULL," +
+                "PRIMARY KEY (mod_uuid,persona_id_fk,attribute_type)," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE" +
+                ")" +
+                end);
     }
 
     protected static void createPersonaTagsTable(Statement statement, String end) throws SQLException {
