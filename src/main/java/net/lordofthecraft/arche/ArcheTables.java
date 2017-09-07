@@ -68,9 +68,11 @@ public final class ArcheTables {
             createBlockRegistryTable(statement, end);
             ArcheCore.getPlugin().getLogger().info("Done with block registry! All done!");
             conn.commit();
+            ArcheCore.getPlugin().getLogger().info("We've finished with committing all tables now.");
             statement.close();
             if (sqlHandler instanceof WhySQLHandler) {
-                conn.close();
+                conn.setAutoCommit(true);
+                //conn.close();
             } else {
                 conn.setAutoCommit(true);
             }

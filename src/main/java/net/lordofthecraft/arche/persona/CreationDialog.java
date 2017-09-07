@@ -271,8 +271,14 @@ public class CreationDialog {
 
 		@Override
         public String getPromptText(ConversationContext context) {
-            return "You have entered " +
-                    ChatColor.GREEN + name + ChatColor.YELLOW + " as your character name. Is this correct (yes/no)?";
+            Player p = (Player) context.getForWhom();
+            BaseComponent mains = new TextComponent("You have entered " +
+                    ChatColor.GREEN + name + ChatColor.YELLOW + " as your character name. Is this correct?\n");
+            mains.addExtra(MessageUtil.CommandButton("Yes", "Yes", "Click to select!"));
+            mains.addExtra("  ");
+            mains.addExtra(MessageUtil.CommandButton("No", "No", "Click to select!"));
+            p.spigot().sendMessage(mains);
+            return DIVIDER;
         }
 
         @Override
@@ -280,7 +286,6 @@ public class CreationDialog {
         	 if (input) {
         		 context.setSessionData("name", name);
         		 Player p = (Player) context.getForWhom();
-                 //TODO move to the end of the process.
                  return new PickSexPrompt();
         	 } else {
         		 return new PickNamePrompt();
@@ -522,8 +527,6 @@ public class CreationDialog {
             Race race = (Race) context.getSessionData("race");
             long creationTimeMS = System.currentTimeMillis();
             Block b = p.getLocation().getBlock();
-
-            context.getForWhom().sendRawMessage(ChatColor.BLUE + "Creating your persona, this may take a bit so please hold on...");
 
             ArchePersonaCreateCallable creator = new ArchePersonaCreateCallable(p.getUniqueId(), id, gender, race, name, new Timestamp(creationTimeMS), b.getX(), b.getY(), b.getZ(), b.getWorld().getUID());
 
