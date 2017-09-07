@@ -66,7 +66,7 @@ public class PersonaInventory {
     }
 
     public void setEnderContents(ItemStack[] contents) {
-        this.enderContents = enderContents;
+        this.enderContents = contents;
     }
 
     public String getInvAsString() {
