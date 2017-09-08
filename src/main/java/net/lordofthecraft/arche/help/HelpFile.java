@@ -1,16 +1,15 @@
 package net.lordofthecraft.arche.help;
 
 import com.google.common.collect.Lists;
-
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -18,15 +17,33 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.List;
 
 public abstract class HelpFile {
-	private final String topic; 
-	private Material icon = Material.SIGN;
-	
-	public HelpFile(String topic){
-		this.topic = WordUtils.capitalize(topic);
+    private final String topic;
+    private String perm = "archecore.mayuse";
+    private Material icon = Material.SIGN;
+
+    public HelpFile(String topic, String perm) {
+        this.topic = topic;
+        this.perm = perm;
+    }
+
+    public HelpFile(String topic) {
+        this.topic = WordUtils.capitalize(topic);
 	}
 
-	public Material getIcon(){
-		return icon;
+    public String getPerm() {
+        return perm;
+    }
+
+    public boolean canView(CommandSender sender) {
+        return sender.hasPermission(perm);
+    }
+
+    public void setPerm(String perm) {
+        this.perm = perm;
+    }
+
+    public Material getIcon() {
+        return icon;
 	}
 
 	public void setIcon(Material icon) {
@@ -81,9 +98,9 @@ public abstract class HelpFile {
 	public static BaseComponent parse(String text) {
 		BaseComponent message = new TextComponent();
 
-		boolean link = text.startsWith("@");
+        boolean link = text.startsWith("@@");
 
-		for (String segment : text.split("@")) {
+        for (String segment : text.split("@@")) {
 
 			if (link) { // You're a link
 				StringPair sp = StringPair.parseSyntax(segment);

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
@@ -227,6 +228,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		if(before != null && before != after){
 			//Store and switch Persona-related specifics: Location and Inventory.
 			before.saveMinecraftSpecifics(p);
+            before.attributes.removeFromPlayer();
 
 			//Transfer fatigue from previous persona to new persona IF previous value was higher
 			//This should prevent some alt abuse where players chain their fatigue bars to grind
@@ -750,13 +752,22 @@ public class ArchePersonaHandler implements PersonaHandler {
 						racespawns.put(r, l);
 					}
 				}
-				if (!toRemove.isEmpty()) {
+                rs.next();
+                rs.getStatement().close();
+                if (handler instanceof WhySQLHandler) {
+                    rs.getStatement().getConnection().close();
+                }
+                if (!toRemove.isEmpty()) {
 					PreparedStatement stat = handler.getConnection().prepareStatement("DELETE FROM persona_race_spawns WHERE race=?");
 					for (String ss : toRemove) {
 						stat.setString(1, ss);
 						stat.execute();
 					}
-				}
+                    stat.close();
+                    if (handler instanceof WhySQLHandler) {
+                        stat.getConnection().close();
+                    }
+                }
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

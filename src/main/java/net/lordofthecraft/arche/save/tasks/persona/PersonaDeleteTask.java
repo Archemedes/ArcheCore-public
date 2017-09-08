@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.save.tasks.persona;
 
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
 
@@ -31,6 +32,20 @@ public class PersonaDeleteTask extends ArcheTask {
             deleteStat.clearParameters();
             deleteStat.setString(1, toDelete.toString());
             deleteStat.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void closeConnection() {
+        if (deleteStat == null) {
+            return;
+        }
+        try {
+            deleteStat.closeOnCompletion();
+            if (handle instanceof WhySQLHandler) {
+                deleteStat.getConnection().close();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -39,6 +39,14 @@ public class PersonaMagics {
         return magics.stream().anyMatch(m -> m.getMagic().equals(magic));
     }
 
+    public boolean achievedTier(Magic m, int tier) {
+        if (!hasMagic(m)) {
+            return false;
+        }
+        Optional<MagicAttachment> omag = getMagicAttachment(m);
+        return omag.filter(magicAttachment -> magicAttachment.getTier() >= tier).isPresent();
+    }
+
     public Optional<MagicAttachment> getMagicAttachment(Magic m) {
         return magics.stream().filter(ma -> ma.getMagic().equals(m)).findFirst();
     }

@@ -1,5 +1,6 @@
 basic-info:
   topic: Plugin Info
+  permission: archecore.plugin.info
   content: '&4&lI am a Sneaky Info file!
   
   &3I came from the config file &oinfofiles.yml &3which is automatically read when the ArcheCore plugin starts up. I work like the Help File, except I am invisible!

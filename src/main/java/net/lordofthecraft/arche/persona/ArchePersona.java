@@ -36,10 +36,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.ref.WeakReference;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -58,6 +55,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	final PersonaSkills skills = new PersonaSkills(this);
     final PersonaMagics magics = new PersonaMagics(this);
+    final PersonaAttributes attributes = new PersonaAttributes(this);
 
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger timePlayed;
@@ -270,6 +268,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		}
 	}
 
+    void loadAttributes() {
+
+    }
+
 	void loadTags() {
         Callable<TagAttachment> attachmentCallable = new TagAttachmentCallable(persona_id, ArcheCore.getSQLControls());
         Future<TagAttachment> ft = SaveHandler.getInstance().prepareCallable(attachmentCallable);
@@ -288,7 +290,11 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	void loadMagics() {
         String sql = "SELECT magic_fk,tier,last_advanced,teacher,learned,visible FROM persona_magics WHERE persona_id_fk=?";
         try {
-			PreparedStatement stat = ArcheCore.getSQLControls().getConnection().prepareStatement(sql);
+            Connection conn = ArcheCore.getSQLControls().getConnection();
+            if (!ArcheCore.usingSQLite()) {
+                conn.setReadOnly(true);
+            }
+            PreparedStatement stat = conn.prepareStatement(sql);
             stat.setString(1, persona_id.toString());
             ResultSet rs = stat.executeQuery();
 			while (rs.next()) {
@@ -311,7 +317,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			}
 			rs.close();
 			stat.close();
-		} catch (SQLException e) {
+            if (!ArcheCore.usingSQLite()) {
+                conn.close();
+            }
+        } catch (SQLException e) {
 			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "An error occurred while loading " + player + "'s persona magics!!!", e);
 		}
 	}
@@ -335,10 +344,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	@Override
 	public boolean hasAchievedMagicTier(Magic m, int tier) {
-        /*Optional<MagicAttachment> omat = magics.stream().filter(at -> at.getMagic().equals(m)).findFirst();
-		return omat.filter(magicAttachment -> magicAttachment.getTier() >= tier).isPresent();*/
-        return false;
-	}
+        return magics.achievedTier(m, tier);
+    }
 
 	@Override
 	public Optional<Future<MagicAttachment>> createAttachment(Magic m, int tier, Persona teacher, boolean visible) {
@@ -632,6 +639,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
             einv.clear();
             pinv.setArmorContents(new ItemStack[4]);
 		}
+        attributes.applyToPlayer();
 
 		//Heal them so their Persona is fresh
 		double maxHp = p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();

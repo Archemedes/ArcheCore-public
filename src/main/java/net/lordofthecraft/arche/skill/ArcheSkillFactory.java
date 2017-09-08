@@ -58,7 +58,9 @@ public class ArcheSkillFactory implements SkillFactory {
         }
         try {
             Connection fetcherConn = handler.getConnection();
-
+            if (handler instanceof WhySQLHandler) {
+                fetcherConn.setReadOnly(true);
+            }
             PreparedStatement fetcher = fetcherConn.prepareStatement("SELECT skill_id,hidden,help_text,help_icon,inert,male_name,female_name FROM skills");
             PreparedStatement racialFetch = fetcherConn.prepareStatement("SELECT race,racial_skill,racial_mod FROM skill_races WHERE skill_id_fk=?");
 
@@ -245,7 +247,7 @@ public class ArcheSkillFactory implements SkillFactory {
             if ((skills.containsKey(name) && force) || (!internal && !skills.containsKey(name))) {
                 SQLHandler handler = ArcheCore.getControls().getSQLHandler();
                 Connection con = handler.getConnection();
-
+                con.setAutoCommit(false);
                 PreparedStatement insertSkillStatement = con.prepareStatement("INSERT " + (handler instanceof ArcheSQLiteHandler ? "OR" : "") + " IGNORE INTO skills(skill_id,hidden,help_text,help_text,help_icon,male_name,female_name) VALUES (?,?,?,?,?,?)");
                 PreparedStatement insertRacialSkillData = con.prepareStatement("INSERT " + (handler instanceof ArcheSQLiteHandler ? "OR" : "") + " IGNORE INTO skill_races(skill_id_fk,race,racial_skill,");
 
@@ -258,6 +260,16 @@ public class ArcheSkillFactory implements SkillFactory {
                 insertSkillStatement.setString(6, femaleName);
                 insertSkillStatement.executeQuery();
                 insertSkillStatement.clearParameters();
+
+                con.commit();
+
+                insertSkillStatement.close();
+                insertRacialSkillData.close();
+                if (handler instanceof WhySQLHandler) {
+                    con.close();
+                } else {
+                    con.setAutoCommit(true);
+                }
                 //TODO Racial skills
             }
 

@@ -20,4 +20,13 @@ public enum PersonaType {
         this.readableName = readableName;
         this.personaViewLine = personaViewLine;
     }
+
+    public static PersonaType getType(String type) {
+        for (PersonaType t : values()) {
+            if (t.readableName.equalsIgnoreCase(type)) {
+                return t;
+            }
+        }
+        return null;
+    }
 }

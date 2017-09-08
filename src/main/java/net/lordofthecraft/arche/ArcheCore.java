@@ -5,6 +5,7 @@ import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.commands.*;
 import net.lordofthecraft.arche.commands.tab.CommandAttributeTabCompleter;
+import net.lordofthecraft.arche.commands.tab.CommandHelpTabCompleter;
 import net.lordofthecraft.arche.commands.tab.CommandPersonaTabCompleter;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.help.HelpFile;
@@ -14,6 +15,7 @@ import net.lordofthecraft.arche.magic.Archenomicon;
 import net.lordofthecraft.arche.persona.*;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
+import net.lordofthecraft.arche.save.tasks.persona.PersonaDeleteTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
 import net.lordofthecraft.arche.skin.SkinCache;
@@ -134,7 +136,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     public void onDisable() {
 
+
         saveHandler.put(new EndOfStreamTask());
+        PersonaDeleteTask.closeConnection();
 
         Bukkit.getOnlinePlayers().forEach(p -> {
             //This part must be done for safety reasons.
@@ -220,6 +224,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
                 blockRegistry.playerPlaced.add(wb);
             }
             res.getStatement().close();
+            if (sqlHandler instanceof WhySQLHandler) {
+                res.getStatement().getConnection().close();
+            }
         }catch(SQLException e){e.printStackTrace();}
 
 
@@ -306,6 +313,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     private void initCommands(){
         getCommand("archehelp").setExecutor(new CommandArchehelp(helpdesk, helpOverriden));
+        getCommand("archehelp").setTabCompleter(new CommandHelpTabCompleter(helpdesk));
         getCommand("helpmenu").setExecutor(new CommandHelpMenu(helpdesk));
         getCommand("persona").setExecutor(new CommandPersona(helpdesk, personaHandler, nameChangeDelay, enablePrefixes));
         getCommand("persona").setTabCompleter(new CommandPersonaTabCompleter());
@@ -386,8 +394,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
                 + ChatColor.LIGHT_PURPLE  + "your fatigue will reset over time, so it's best to simply take a break and wait it out. "
                 + "If you are inpatient, having a drink at a tavern will also reduce a Persona's fatigue.\n";
 
-        addHelp("Persona", persHelp, Material.REDSTONE_COMPARATOR);
-        addHelp("PersonaCommand", commandHelp, Material.COMMAND);
+        addHelp("Persona", persHelp, Material.REDSTONE_COMPARATOR, "archecore.mayuse");
+        addHelp("Commands", commandHelp, Material.COMMAND);
         addHelp("Professions", profession, Material.BEDROCK);
         addHelp("Fatigue", fatigue, Material.BED);
 
@@ -399,6 +407,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             if(c.isConfigurationSection(key)){
                 ConfigurationSection section = c.getConfigurationSection(key);
                 String name = section.isString("topic")? section.getString("topic") : key;
+                String permission = section.isString("permission") ? section.getString("permission") : "archecore.mayuse";
 
                 String desc = null;
                 if (section.isString("content")) desc = section.getString("content").replace('&', ChatColor.COLOR_CHAR);
@@ -407,11 +416,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
                 if(section.isString("icon")){
                     try{
                         Material m = Material.valueOf(section.getString("icon"));
-                        addHelp(name, desc, m);
+                        addHelp(name, desc, m, permission);
                     }catch(IllegalArgumentException e){
-                        addHelp(name, desc);
+                        addHelp(name, desc, permission);
                     }
-                } else addHelp(name, desc);
+                } else addHelp(name, desc, permission);
             }
         }
 
@@ -423,12 +432,13 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             if(c.isConfigurationSection(key)){
                 ConfigurationSection section = c.getConfigurationSection(key);
                 String name = section.isString("topic")? section.getString("topic") : key;
+                String permission = section.isString("permission") ? section.getString("permission") : "archecore.mayuse";
 
                 String desc = null;
                 if (section.isString("content")) desc = section.getString("content").replace('&', ChatColor.COLOR_CHAR);
                 else continue;
 
-                addInfo(name, desc);
+                addInfo(name, desc, permission);
             }
         }
 
@@ -488,8 +498,18 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     }
 
     @Override
+    public void addHelp(String topic, String output, String permission) {
+        helpdesk.addTopic(topic, output, permission);
+    }
+
+    @Override
     public void addHelp(String topic, String output){
         helpdesk.addTopic(topic, output);
+    }
+
+    @Override
+    public void addHelp(String topic, String output, Material icon, String permission) {
+        helpdesk.addTopic(topic, output, icon, permission);
     }
 
     @Override
@@ -500,6 +520,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     @Override
     public void addInfo(String topic, String output){
         helpdesk.addInfoTopic(topic, output);
+    }
+
+    @Override
+    public void addInfo(String topic, String output, String permission) {
+        helpdesk.addInfoTopic(topic, output, permission);
     }
 
     @Override

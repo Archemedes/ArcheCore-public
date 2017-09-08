@@ -22,7 +22,7 @@ public class CommandAttributeTabCompleter implements TabCompleter {
             List<String> attrs = Lists.newArrayList();
             List<Attribute> attlist = Lists.newArrayList(Attribute.values());
             String partial = args[1];
-            attlist.removeIf(a -> !a.name().startsWith(partial));
+            attlist.removeIf(a -> !a.name().startsWith(partial.toUpperCase()));
             attlist.forEach(at -> attrs.add(at.name()));
             return attrs;
         }

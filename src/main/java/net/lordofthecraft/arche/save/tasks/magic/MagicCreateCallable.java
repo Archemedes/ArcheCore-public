@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche.save.tasks.magic;
 
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.persona.MagicAttachment;
@@ -77,6 +78,9 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         MagicData data = new MagicData(magic, tier, visible, teacher != null, teacher, System.currentTimeMillis(), System.currentTimeMillis());
         result = new MagicAttachment(magic, persona_id, data);
         stat.close();
+        if (handler instanceof WhySQLHandler) {
+            stat.getConnection().close();
+        }
         return result;
     }
 }

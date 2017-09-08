@@ -4,7 +4,6 @@ import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
-
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -35,8 +34,8 @@ public class CommandArchehelp implements CommandExecutor {
 			sender.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "Available Help Topics (click to view):");
 			
 			if(sender instanceof Player){
-				Set<String> tops = helpdesk.getTopics();
-				if(topics == null || knownTopics < tops.size()){
+                Set<String> tops = helpdesk.getTopics(sender);
+                if(topics == null || knownTopics < tops.size()){
 					knownTopics = 0;
 					topics = new TextComponent();
 					tops.forEach(t -> {
@@ -48,18 +47,22 @@ public class CommandArchehelp implements CommandExecutor {
 				}
 				((Player) sender).spigot().sendMessage(topics);
 			} else {
-				sender.sendMessage(helpdesk.getTopics().toString());
-			}
+                sender.sendMessage(helpdesk.getTopics(sender).toString());
+            }
 			sender.sendMessage(ChatColor.AQUA + "View help on a Topic with: " + ChatColor.ITALIC +  "/" + cmd + " [topic]");
 		}else {
 			String topic = StringUtils.join(args, ' ');
 			if(sender instanceof Player){
-				helpdesk.outputHelp(topic, (Player) sender);
-			}else{
+                if (!helpdesk.outputHelp(topic, (Player) sender)) {
+                    sender.sendMessage(ChatColor.RED + "Error: You do not have permission to view this topic.");
+                }
+            }else{
 				String help = helpdesk.getHelpText(topic);
 				if(help == null) sender.sendMessage(ChatColor.RED + "No such Help Topic: " + ChatColor.GRAY + topic);
-				else sender.sendMessage(help);
-			}
+                else {
+                    sender.sendMessage(help);
+                }
+            }
 		}
 		
 		return true;

@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.commands;
 
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
 import org.bukkit.Bukkit;
@@ -54,8 +55,13 @@ public class CommandNamelog implements CommandExecutor {
 								b.append(n).append(", ");
 							}
 							res.close();
-							
-							if(b.length() > 0){
+                            res.getStatement().close();
+                            if (handle instanceof WhySQLHandler) {
+
+                                res.getStatement().getConnection().close();
+                            }
+
+                            if(b.length() > 0){
 								char a = (char)((int)'1' + id);
 								ChatColor c = ChatColor.getByChar(a);
 								
