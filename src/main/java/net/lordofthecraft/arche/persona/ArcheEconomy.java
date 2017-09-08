@@ -2,8 +2,10 @@ package net.lordofthecraft.arche.persona;
 
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.logging.InsertEconomyLogTask;
 import net.lordofthecraft.arche.save.tasks.persona.UpdateTask;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -12,8 +14,9 @@ public class ArcheEconomy implements Economy {
 	private final double lostOnDeath;
 	private final double beginnerAmount;
 	private final boolean proximity;
-	
-	public ArcheEconomy(FileConfiguration config){
+    private SaveHandler buffer = SaveHandler.getInstance();
+
+    public ArcheEconomy(FileConfiguration config){
 		singular = config.getString("currency.name.singular");
 		plural = config.getString("currency.name.plural");
 		
@@ -37,21 +40,27 @@ public class ArcheEconomy implements Economy {
 	}
 	
 	@Override
-	public void setPersona(Persona p, double amount){
-		((ArchePersona) p).money = amount;
-        SaveHandler.getInstance().put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
+    public void setPersona(Persona p, double amount, Transaction transaction) {
+        double before = getBalance(p);
+        ((ArchePersona) p).money = amount;
+        buffer.put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
+        buffer.put(new InsertEconomyLogTask(p.getId(), transaction, amount, before, getBalance(p)));
     }
 
     @Override
-	public void depositPersona(Persona p, double amount){
-		((ArchePersona) p).money += amount;
-        SaveHandler.getInstance().put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
+    public void depositPersona(Persona p, double amount, Transaction transaction) {
+        double before = getBalance(p);
+        ((ArchePersona) p).money += amount;
+        buffer.put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
+        buffer.put(new InsertEconomyLogTask(p.getId(), transaction, amount, before, getBalance(p)));
     }
 
     @Override
-	public void withdrawPersona(Persona p, double amount){
-		((ArchePersona) p).money -= amount;
-        SaveHandler.getInstance().put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
+    public void withdrawPersona(Persona p, double amount, Transaction transaction) {
+        double before = getBalance(p);
+        ((ArchePersona) p).money -= amount;
+        buffer.put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
+        buffer.put(new InsertEconomyLogTask(p.getId(), transaction, amount, before, getBalance(p)));
     }
 
     @Override

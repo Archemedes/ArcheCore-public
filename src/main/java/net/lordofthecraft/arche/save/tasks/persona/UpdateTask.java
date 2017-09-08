@@ -73,7 +73,7 @@ public class UpdateTask extends ArcheTask {
             } else {
                 stat.setObject(1, value, field.type);
             }
-            stat.setString(2, persona.getPersonaId().toString());
+            stat.setInt(2, persona.getPersonaId());
             stat.executeUpdate();
             stat.close();
             if (handle instanceof WhySQLHandler) {

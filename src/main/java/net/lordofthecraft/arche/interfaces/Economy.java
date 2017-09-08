@@ -19,27 +19,30 @@ public interface Economy {
 	double getBalance(Persona p);
 	
 	/**
-	 * Give money to a Persona. Negative amounts possible, but consider using {@link #withdrawPersona(Persona, double)} instead.
-	 * @param p The Persona to manipulate
+     * Give money to a Persona. Negative amounts possible, but consider using {@link #withdrawPersona(Persona, double, Transaction)} instead.
+     * @param p The Persona to manipulate
 	 * @param amount The amount of money to modify the Persona account by
-	 */
-	void depositPersona(Persona p, double amount);
-	
-	/**
-	 * Take money from a Persona. Negative amounts possible, but consider using {@link #depositPersona(Persona, double)} instead.
-	 * @param p The Persona to manipulate
+     * @param transaction The reason which money is being added to this persona
+     */
+    void depositPersona(Persona p, double amount, Transaction transaction);
+
+    /**
+     * Take money from a Persona. Negative amounts possible, but consider using {@link #depositPersona(Persona, double, Transaction)} instead.
+     * @param p The Persona to manipulate
 	 * @param amount The amount of money to modify the Persona account by
-	 */
-	void withdrawPersona(Persona p, double amount);
-	
-	/**
+     * @param transaction The reason which money is being withdrawn from this persona
+     */
+    void withdrawPersona(Persona p, double amount, Transaction transaction);
+
+    /**
 	 * Set a Persona's money balance to the provided amount
 	 * @param p The Persona to manipulate
 	 * @param amount The amount of money to set this Persona's account to.
-	 */
-	void setPersona(Persona p, double amount);
-	
-	/**
+     * @param transaction The reason for setting the account to this value
+     */
+    void setPersona(Persona p, double amount, Transaction transaction);
+
+    /**
 	 * @return Singular form of the config-set currency name
 	 */
 	String currencyNameSingular();

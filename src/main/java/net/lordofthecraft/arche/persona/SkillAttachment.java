@@ -39,7 +39,7 @@ public class SkillAttachment {
 	private static final SaveHandler buffer = SaveHandler.getInstance();
 	final ArcheSkill skill;
 	private final PersonaSkills handle;
-    private final UUID persona_id;
+    private final int persona_id;
     private final String uuid;
 	private final int id;
 	private FutureTask<SkillData> call;

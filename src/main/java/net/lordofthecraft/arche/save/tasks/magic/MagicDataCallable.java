@@ -7,7 +7,6 @@ import net.lordofthecraft.arche.magic.MagicData;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 
 /**
@@ -17,7 +16,7 @@ import java.util.concurrent.Callable;
  */
 public class MagicDataCallable implements Callable<MagicData> {
 
-    private final UUID persona_id;
+    private final int persona_id;
     private final ArcheMagic magic;
     private final SQLHandler handler;
 
@@ -38,7 +37,7 @@ CREATE TABLE IF NOT EXISTS persona_magics (
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
      */
 
-    public MagicDataCallable(UUID persona_id, ArcheMagic magic, SQLHandler handler) {
+    public MagicDataCallable(int persona_id, ArcheMagic magic, SQLHandler handler) {
         this.persona_id = persona_id;
         this.magic = magic;
         this.handler = handler;
@@ -50,22 +49,18 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         MagicData data = null;
         synchronized (handler) {
             PreparedStatement stat = handler.getConnection().prepareStatement(sql);
-            stat.setString(1, persona_id.toString());
+            stat.setInt(1, persona_id);
             stat.setString(2, magic.getName());
             ResultSet rs = stat.executeQuery();
             if (rs.next()) {
                 //public MagicData(ArcheMagic magic, int id, int tier, boolean visible, boolean taught, UUID teacher, long learned, long lastAdvanced) {
-                String ss = rs.getString("teacher");
-                UUID tuuid = null;
-                if (ss != null) {
-                    tuuid = UUID.fromString(ss);
-                }
+                Integer ss = rs.getInt("teacher");
                 data = new MagicData(
                         magic,
                         rs.getInt("tier"),
                         rs.getBoolean("visible"),
-                        tuuid != null,
-                        tuuid,
+                        ss != null && ss > 0,
+                        ss,
                         rs.getTimestamp("learned").toInstant().toEpochMilli(),
                         rs.getTime("lastAdvanced").toInstant().toEpochMilli()
                 );

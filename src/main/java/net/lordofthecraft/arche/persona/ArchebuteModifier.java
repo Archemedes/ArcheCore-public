@@ -12,11 +12,11 @@ import java.sql.Timestamp;
 
 /**
  * A super interface for {@link org.bukkit.attribute.AttributeModifier} to support {@link net.lordofthecraft.arche.persona.ArchePersona} based {@link org.bukkit.attribute.Attribute}s
- * <p>
+ *
  * Modifiers do not store references to the attribute in which they are created for, and can be used liberally for other {@link org.bukkit.attribute.AttributeInstance}
  *
  * @author 501warhead
- * @see net.lordofthecraft.arche.persona.PersonaAttributes
+ * @see PersonaAttributes
  */
 public class ArchebuteModifier {
 
@@ -63,7 +63,7 @@ public class ArchebuteModifier {
     }
 
     public boolean shouldDecay() {
-        return decayDate == null || System.currentTimeMillis() > decayDate.getTime();
+        return decayDate != null && System.currentTimeMillis() > decayDate.getTime();
     }
 
     public AttributeInstance applyToInstance() {

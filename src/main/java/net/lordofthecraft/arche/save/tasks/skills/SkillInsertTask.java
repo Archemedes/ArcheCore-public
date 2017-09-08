@@ -3,16 +3,15 @@ package net.lordofthecraft.arche.save.tasks.skills;
 import net.lordofthecraft.arche.save.tasks.StatementTask;
 
 import java.sql.SQLException;
-import java.util.UUID;
 
 public class SkillInsertTask extends StatementTask {
 
-    private final UUID persona_id;
+    private final int persona_id;
     private final String skill_name;
     private final double xp;
     private final boolean visible;
 
-    public SkillInsertTask(UUID persona_id, String skill_name, double xp, boolean visible) {
+    public SkillInsertTask(int persona_id, String skill_name, double xp, boolean visible) {
         this.persona_id = persona_id;
         this.skill_name = skill_name;
         this.xp = xp;
@@ -21,7 +20,7 @@ public class SkillInsertTask extends StatementTask {
 
     @Override
     protected void setValues() throws SQLException {
-        stat.setString(1, persona_id.toString());
+        stat.setInt(1, persona_id);
         stat.setString(2, skill_name);
         stat.setDouble(3, xp);
         stat.setBoolean(4, visible);

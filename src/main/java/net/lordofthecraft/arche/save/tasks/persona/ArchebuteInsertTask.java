@@ -16,7 +16,7 @@ public class ArchebuteInsertTask extends StatementTask {
     @Override
     protected void setValues() throws SQLException {
         stat.setString(1, mod.getMod().getUniqueId().toString());
-        stat.setString(2, mod.getPersona().getPersonaId().toString());
+        stat.setInt(2, mod.getPersona().getPersonaId());
         stat.setString(3, mod.getAttribute().name());
         stat.setDouble(4, mod.getMod().getAmount());
         stat.setString(5, mod.getMod().getOperation().name());

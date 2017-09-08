@@ -6,7 +6,6 @@ import net.lordofthecraft.arche.save.tasks.ArcheTask;
 
 import java.sql.CallableStatement;
 import java.sql.SQLException;
-import java.util.UUID;
 
 /**
  * Created on 5/8/2017
@@ -17,7 +16,7 @@ public class PersonaDeleteTask extends ArcheTask {
 
     private static CallableStatement deleteStat = null;
 
-    private final UUID toDelete;
+    private final int toDelete;
 
     public PersonaDeleteTask(Persona toDelete) {
         this.toDelete = toDelete.getPersonaId();
@@ -30,7 +29,7 @@ public class PersonaDeleteTask extends ArcheTask {
                 deleteStat = handle.getConnection().prepareCall("{call persona_delete(?)}");
             }
             deleteStat.clearParameters();
-            deleteStat.setString(1, toDelete.toString());
+            deleteStat.setInt(1, toDelete);
             deleteStat.execute();
         } catch (SQLException e) {
             e.printStackTrace();

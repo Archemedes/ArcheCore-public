@@ -231,9 +231,11 @@ public interface IArcheCore {
 	 * @return The new persona shield delay, if larger than 0
 	 */
 	int getNewbieDelay();
-	
-	/**
-	 * @return the delay in days within which newly created Personas cannot be permakilled by their owners.
+
+    boolean canCreatePersonas();
+
+    /**
+     * @return the delay in days within which newly created Personas cannot be permakilled by their owners.
 	 */
 	int getNewPersonaPermakillDelay();
 

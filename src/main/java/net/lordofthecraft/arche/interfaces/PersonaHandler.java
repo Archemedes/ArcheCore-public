@@ -14,7 +14,7 @@ public interface PersonaHandler {
     String personaSelect = "SELECT " +
             "persona_id,slot,race,gender" +
             ",name,curr,race_header,descr,p_type,prefix,money,skin,profession,fatigue,max_fatigue" +
-            ",world,x,y,z,inv,ender_inv,health,hunger,saturation,creature" +
+            ",world,x,y,z,inv,ender_inv,potions,health,hunger,saturation,creature" +
             ",played,chars,renamed,playtime_past,date_created,last_played " +
             "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
             "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
@@ -84,10 +84,10 @@ public interface PersonaHandler {
     /**
      * Gets the person by the <b>Persona ID</b> - This <i>is not</i> a player UUID. Persona UUID is unique to each persona
      *
-     * @param persona_id The UUID of this persona
+     * @param persona_id The int id of this persona
      * @return The Persona which is wrapped in an Optional
      */
-    Optional<ArchePersona> getPersonaById(UUID persona_id);
+    Optional<ArchePersona> getPersonaById(int persona_id);
 
     /**
      * Fetch a Player's current Persona

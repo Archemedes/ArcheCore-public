@@ -66,6 +66,15 @@ persona.menu.enderchest: false
 persona.fatigue.restore: 22
 
 #########################
+##   Bungee Settings   ##
+#########################
+
+#When multiple ArcheCores are in different bungee servers there will be some desync between them, especially when it comes
+#to maintaining the immutable permanant increasing persona id.
+#While this may change in the future ensure that this is set to FALSE for all but ONE instance of ArcheCore on the network.
+can.create.personas: true
+
+#########################
 ##    Skin Settings    ##
 #########################
 

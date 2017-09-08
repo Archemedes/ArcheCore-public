@@ -5,7 +5,6 @@ import net.lordofthecraft.arche.save.tasks.persona.PersonaTagTask;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Created on 6/16/2017
@@ -15,10 +14,10 @@ import java.util.UUID;
 public class TagAttachment {
     private static final SaveHandler buffer = SaveHandler.getInstance();
     private final Map<String, String> tags;
-    private final UUID persona_id;
+    private final int persona_id;
     private final boolean save;
 
-    public TagAttachment(Map<String, String> tags, UUID persona_id, boolean save) {
+    public TagAttachment(Map<String, String> tags, int persona_id, boolean save) {
         this.tags = tags;
         this.persona_id = persona_id;
         this.save = save;
@@ -49,7 +48,7 @@ public class TagAttachment {
         return Collections.unmodifiableMap(tags);
     }
 
-    public UUID getPersonaid() {
+    public int getPersonaid() {
         return persona_id;
     }
 }

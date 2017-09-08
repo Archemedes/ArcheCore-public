@@ -4,12 +4,14 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.util.CommandUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 public class CommandMoney implements CommandExecutor {
 	private final static double PAYMENT_PROXIMITY = 8;
@@ -86,8 +88,8 @@ public class CommandMoney implements CommandExecutor {
                     sender.sendMessage(ChatColor.AQUA + "You have paid " + p2 + mn);
                     if (pt != null) pt.sendMessage(p1 + "has given you " + mn);
 
-                    econ.withdrawPersona(from, amt);
-                    econ.depositPersona(to, amt);
+                    econ.withdrawPersona(from, amt, new DepositForCommandTransaction(to));
+                    econ.depositPersona(to, amt, new WidthdrawForCommandTransaction(from));
                 }
             } else {
                 sendHelp(sender);
@@ -106,10 +108,10 @@ public class CommandMoney implements CommandExecutor {
 			if(lookup == null) sender.sendMessage(ChatColor.RED + "ERROR: " + ChatColor.DARK_RED + "No valid Persona found");
 			else {
 				if(args[0].equalsIgnoreCase("set"))
-					econ.setPersona(lookup, amt);
-				else
-					econ.depositPersona(lookup, amt);
-				sender.sendMessage("Successfully altered balance.");
+                    econ.setPersona(lookup, amt, new SetCommandTransaction(sender));
+                else
+                    econ.depositPersona(lookup, amt, new GrantCommandTransaction(sender));
+                sender.sendMessage("Successfully altered balance.");
 			}
 			
 			return true;
@@ -155,5 +157,122 @@ public class CommandMoney implements CommandExecutor {
 	private boolean isMod(CommandSender sender){
 		return sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.economy");
 	}
-	
+
+
+    public class WidthdrawForCommandTransaction implements Transaction {
+
+        private final Persona from;
+
+        public WidthdrawForCommandTransaction(Persona from) {
+            this.from = from;
+        }
+
+        @Override
+        public String getCause() {
+            return from.getName() + " HAD MINAS TAKEN VIA COMMAND";
+        }
+
+        @Override
+        public TransactionType getType() {
+            return TransactionType.DEPOSIT;
+        }
+
+        @Override
+        public Plugin getRegisteringPlugin() {
+            return ArcheCore.getPlugin();
+        }
+
+        @Override
+        public String getRegisteringPluginName() {
+            return "ArcheCore-Economy";
+        }
+    }
+
+    public static class DepositForCommandTransaction implements Transaction {
+
+        private final Persona from;
+
+        public DepositForCommandTransaction(Persona from) {
+            this.from = from;
+        }
+
+        @Override
+        public String getCause() {
+            return from.getName() + " OBTAINED MINAS VIA COMMAND";
+        }
+
+        @Override
+        public TransactionType getType() {
+            return TransactionType.WITHDRAW;
+        }
+
+        @Override
+        public Plugin getRegisteringPlugin() {
+            return ArcheCore.getPlugin();
+        }
+
+        @Override
+        public String getRegisteringPluginName() {
+            return "ArcheCore-Economy";
+        }
+    }
+
+    private static class SetCommandTransaction implements Transaction {
+
+        private final CommandSender who;
+
+        public SetCommandTransaction(CommandSender who) {
+            this.who = who;
+        }
+
+        @Override
+        public String getCause() {
+            return who.getName() + " SET MINAS VIA COMMAND";
+        }
+
+        @Override
+        public TransactionType getType() {
+            return TransactionType.SET;
+        }
+
+        @Override
+        public Plugin getRegisteringPlugin() {
+            return ArcheCore.getPlugin();
+        }
+
+        @Override
+        public String getRegisteringPluginName() {
+            return "ArcheCore-Economy";
+        }
+    }
+
+    public static class GrantCommandTransaction implements Transaction {
+
+        private final CommandSender who;
+
+        public GrantCommandTransaction(CommandSender who) {
+            this.who = who;
+        }
+
+        @Override
+        public String getCause() {
+            return who.getName() + " GRANTED MINAS";
+        }
+
+        @Override
+        public TransactionType getType() {
+            return TransactionType.DEPOSIT;
+        }
+
+        @Override
+        public Plugin getRegisteringPlugin() {
+            return ArcheCore.getPlugin();
+        }
+
+        @Override
+        public String getRegisteringPluginName() {
+            return "ArcheCore-Economy";
+        }
+    }
+
 }

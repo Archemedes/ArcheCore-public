@@ -77,11 +77,11 @@ public class ArcheBeacon {
 			inv.setItem(0, is);
 
 			is = new ItemStack(Material.REDSTONE_COMPARATOR);
-			buildItem(is, r + "Your Personas to the right", ChatColor.GRAY + "Max Personas: " + ChatColor.LIGHT_PURPLE + max , g + "Left Click to select", g + "SHIFT + Left Click: Create new", g + "SHIFT + Right Click: Permakill Persona", ChatColor.GRAY + "Click me for more info.");
-			inv.setItem(2, is);
+            buildItem(is, r + "Your Personas to the right", ChatColor.GRAY + "Max Personas: " + ChatColor.LIGHT_PURPLE + max, g + "Left Click to select", (ArcheCore.getControls().canCreatePersonas() ? g + "SHIFT + Left Click: Create new" : ChatColor.RED + "Creating new personas is disabled on this server"), g + "SHIFT + Right Click: Permakill Persona", ChatColor.GRAY + "Click me for more info.");
+            inv.setItem(2, is);
 
 			//Buttons for switching Personas
-			boolean mayMakeMore = count < max;
+            boolean mayMakeMore = (count < max && ArcheCore.getControls().canCreatePersonas());
 
 			for(int i = 0; i < requiredSize; i++){
 				ArchePersona a = prs[i];
