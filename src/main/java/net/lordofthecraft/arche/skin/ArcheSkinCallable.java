@@ -43,6 +43,11 @@ public class ArcheSkinCallable implements Callable<ArcheSkin> {
         ResultSet rs = stat.getGeneratedKeys();
         if (rs.next()) {
             int skinId = rs.getInt(1);
+            rs.close();
+            stat.close();
+            if (!ArcheCore.usingSQLite()) {
+                c.close();
+            }
             return new ArcheSkin(skinId, owner, index, skinUrl, slim);
         }
         return null;

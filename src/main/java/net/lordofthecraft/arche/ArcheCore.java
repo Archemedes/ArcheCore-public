@@ -15,6 +15,7 @@ import net.lordofthecraft.arche.magic.Archenomicon;
 import net.lordofthecraft.arche.persona.*;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
+import net.lordofthecraft.arche.save.tasks.persona.PersonaDeleteTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
 import net.lordofthecraft.arche.skin.SkinCache;
@@ -135,7 +136,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     public void onDisable() {
 
+
         saveHandler.put(new EndOfStreamTask());
+        PersonaDeleteTask.closeConnection();
 
         Bukkit.getOnlinePlayers().forEach(p -> {
             //This part must be done for safety reasons.
@@ -221,6 +224,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
                 blockRegistry.playerPlaced.add(wb);
             }
             res.getStatement().close();
+            if (sqlHandler instanceof WhySQLHandler) {
+                res.getStatement().getConnection().close();
+            }
         }catch(SQLException e){e.printStackTrace();}
 
 

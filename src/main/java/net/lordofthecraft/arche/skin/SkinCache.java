@@ -32,10 +32,7 @@ import org.json.simple.parser.ParseException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -149,15 +146,22 @@ public class SkinCache {
 	
 	private void init() {
 		try {
-            PreparedStatement selectStatement = ArcheCore.getControls().getSQLHandler().getConnection().prepareStatement("SELECT player,slot,name,skinUrl,slim,skinValue,skinSignature,refresh FROM persona_skins");
+            Connection conn = ArcheCore.getSQLControls().getConnection();
+            if (!ArcheCore.usingSQLite()) {
+                conn.setReadOnly(true);
+            }
+            PreparedStatement selectStatement = conn.prepareStatement("SELECT player,slot,name,skinUrl,slim,skinValue,skinSignature,refresh FROM persona_skins");
             ResultSet res = selectStatement.executeQuery();
 			while(res.next()) {
 				ArcheSkin skin = ArcheSkin.fromSQL(res);
 				skinCache.put(skin.getOwner(), skin);
 			}
-
-			selectStatement.close();
-		}catch(SQLException e) {e.printStackTrace();}
+            res.close();
+            selectStatement.close();
+            if (!ArcheCore.usingSQLite()) {
+                conn.close();
+            }
+        }catch(SQLException e) {e.printStackTrace();}
 	}
 	
 	public boolean removeSkin(UUID uuid, int index) {

@@ -26,7 +26,6 @@ public final class ArcheTables {
             Statement statement = conn.createStatement();
 
             String end = getEndingString(sqlHandler);
-            //String auto = sqlHandler instanceof ArcheSQLiteHandler ? "AUTOINCREMENT" : "AUTO_INCREMENT";
 
             ArcheCore.getPlugin().getLogger().info("Creating player table...");
             createPlayerTable(statement, end);
@@ -68,13 +67,17 @@ public final class ArcheTables {
             createPersonaSpawnsTable(statement, end);
             ArcheCore.getPlugin().getLogger().info("Done with persona spawns! Creating block registry...");
             createBlockRegistryTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with block registry! All done!");
+            ArcheCore.getPlugin().getLogger().info("Done with block registry! Creating logging tables...");
+            createLoggingTables(statement, end, (sqlHandler instanceof ArcheSQLiteHandler));
+            ArcheCore.getPlugin().getLogger().info("Done with logging tables! Creating delete procedure...");
+            //createDeleteProcedure(statement);
+            ArcheCore.getPlugin().getLogger().info("Done with delete procedure! All done!");
             conn.commit();
             ArcheCore.getPlugin().getLogger().info("We've finished with committing all tables now.");
             statement.close();
             if (sqlHandler instanceof WhySQLHandler) {
                 conn.setAutoCommit(true);
-                //conn.close();
+                conn.close();
             } else {
                 conn.setAutoCommit(true);
             }
@@ -168,7 +171,7 @@ public final class ArcheTables {
                 "prefix TEXT DEFAULT NULL," +
                 "curr BOOLEAN DEFAULT FALSE," +
                 "money DOUBLE DEFAULT 0.0," +
-                "skin INT DEFAULT -1," +
+                "skin INT NULL," +
                 "profession VARCHAR(255) DEFAULT NULL," +
                 "fatigue DOUBLE DEFAULT 0.0," +
                 "max_fatigue DOUBLE DEFAULT 100.00," +
@@ -374,7 +377,7 @@ public final class ArcheTables {
                 "mod_value DOUBLE DEFAULT 0.0," +
                 "operation TEXT NOT NULL," +
                 "created TIMESTAMP," +
-                "decaytime TIMESTAMP DEFAULT NULL," +
+                "decaytime TIMESTAMP," +
                 "PRIMARY KEY (mod_uuid,persona_id_fk,attribute_type)," +
                 "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE" +
                 ")" +
@@ -561,56 +564,117 @@ public final class ArcheTables {
 		sqlHandler.execute("DELETE FROM blockregistry WHERE ROWID IN (SELECT ROWID FROM blockregistry ORDER BY ROWID DESC LIMIT -1 OFFSET 5000)");*/
     }
 
-    protected static void createDeleteProcedure(SQLHandler handler) throws SQLException {
-        //TODO fix this with the new table structure and log... more.
-        try {
-            handler.getConnection().createStatement().executeUpdate("DELIMITER $$" +
-                    "CREATE PROCEDURE delete_persona(" +
-                    "IN pers_id INT)" +
-                    "LANGUAGE SQL" +
-                    "DETERMINISTIC" +
-                    "COMMENT 'Logs and deletes persona entries based off of a persona ID number.'" +
-                    "BEGIN" +
-                    "DECLARE p_name TEXT;" +
-                    "DECLARE p_race TEXT;" +
-                    "DECLARE p_st_played INT UNSIGNED;" +
-                    "DECLARE p_st_char INT UNSIGNED;" +
-                    "DECLARE p_st_played_old INT UNSIGNED;" +
-                    "DECLARE p_st_renamed INT UNSIGNED;" +
-                    "DECLARE p_date_created TIMESTAMP;" +
-                    "DECLARE p_inv TEXT;" +
-                    "DECLARE p_ender_inv TEXT;" +
-                    "DECLARE mon_pers DOUBLE;" +
-                    "" +
-                    "DECLARE new_log_id INT UNSIGNED;" +
-                    "" +
-                    "SELECT persona_name INTO p_name FROM persona WHERE persona_id_fk=pers_id;" +
-                    "SELECT race INTO p_race FROM persona WHERE persona_id=pers_id;" +
-                    "SELECT played INTO p_st_played FROM persona_stats WHERE persona_id_fk=pers_id;" +
-                    "SELECT chars INTO p_st_char FROM persona_stats WHERE persona_id_fk=pers_id;" +
-                    "SELECT playtime_past INTO p_st_played_old FROM persona_stats WHERE persona_id_fk=pers_id;" +
-                    "SELECT renamed INTO p_st_renamed FROM persona_stats WHERE persona_id_fk=pers_id;" +
-                    "SELECT persona_stats.date_created INTO p_date_created FROM persona_stats WHERE persona_id_fk=pers_id;" +
-                    "SELECT inv INTO p_inv FROM persona_vitals WHERE persona_id_fk=pers_id;" +
-                    "SELECT money INTO mon_pers FROM persona WHERE persona_id_fk=pers_id;" +
-                    "SELECT ender_inv INTO p_ender_inv FROM persona_vitals WHERE persona_id_fk=pers_id;" +
-                    "" +
-                    "INSERT INTO persona_log (player,id,persona_id,pers_name,race,date_created,date_removed,stat_played,stat_chars,stat_renamed,stat_playtime_past,inv,money_personal,money_bank) " +
-                    "VALUES (pl, prid, pers_id, p_name, p_race, p_date_created, NOW(), p_st_played, p_st_char, p_st_renamed, p_st_played_old, p_inv, mon_pers);" +
-                    "SELECT DISTINCT log_id INTO new_log_id FROM persona_log WHERE player=pl AND id=prid ORDER BY date_removed;" +
-                    "" +
-                    "DELETE FROM persona_stats WHERE persona_id_fk=pers_id;" +
-                    "DELETE FROM persona_vitals WHERE persona_id_fk=pers_id;" +
-                    "DELETE FROM persona_tags WHERE persona_id_fk=pers_id;" +
-                    "DELETE FROM persona_skills WHERE persona_id_fk=pers_id;" +
-                    "DELETE FROM persona_tags WHERE persona_id_fk=pers_id;" +
-                    "" +
-                    "DELETE FROM persona WHERE persona_id=pers_id;" +
-                    "END $$" +
-                    "DELIMITER ;");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    protected static void createLoggingTables(Statement statement, String end, boolean sqlite) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_log (" +
+                "persona_id CHAR(36)," +
+                "removed_date TIMESTAMP " + (sqlite ? "DEFAULT DATE('now')," : "DEFAULT NOW(),") +
+                "player_fk CHAR(36) NOT NULL," +
+                "slot INT UNSIGNED NOT NULL," +
+                "race VARCHAR(255) NOT NULL," +
+                "name TEXT," +
+                "race_header TEXT DEFAULT NULL," +
+                "gender TEXT DEFAULT 'Other'," +
+                "p_type TEXT DEFAULT 'NORMAL'," +
+                "descr TEXT DEFAULT NULL," +
+                "prefix TEXT DEFAULT NULL," +
+                "curr BOOLEAN DEFAULT FALSE," +
+                "money DOUBLE DEFAULT 0.0," +
+                "skin INT DEFAULT -1," +
+                "profession VARCHAR(255) DEFAULT NULL," +
+                "fatigue DOUBLE DEFAULT 0.0," +
+                "max_fatigue DOUBLE DEFAULT 100.00," +
+                "world VARCHAR(255) NOT NULL," +
+                "x INT NOT NULL," +
+                "y INT NOT NULL," +
+                "z INT NOT NULL," +
+                "inv TEXT," +
+                "ender_inv TEXT," +
+                "health DOUBLE DEFAULT 10.0," +
+                "hunger INT DEFAULT 20," +
+                "saturation FLOAT DEFAULT 0.0," +
+                "creature VARCHAR(255) DEFAULT NULL," +
+                "played INT UNSIGNED DEFAULT 0," +
+                "chars INT UNSIGNED DEFAULT 0," +
+                "renamed TIMESTAMP," +
+                "playtime_past INT UNSIGNED DEFAULT 0," +
+                "date_created TIMESTAMP," +
+                "last_played TIMESTAMP," +
+                "PRIMARY KEY (persona_id)" +
+                ")" +
+                end);
+
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_skills_log (" +
+                "persona_id_fk CHAR(36)," +
+                "skill_id_fk VARCHAR(255)," +
+                "xp DOUBLE DEFAULT 0.0," +
+                "visible BOOLEAN DEFAULT TRUE," +
+                "PRIMARY KEY (persona_id_fk,skill_id_fk)," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona_log (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT" +
+                ")" +
+                end);
+
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_magics_log (" +
+                "magic_fk VARCHAR(255)," +
+                "persona_id_fk CHAR(36)," +
+                "tier INT DEFAULT 0," +
+                "last_advanced TIMESTAMP," +
+                "teacher CHAR(36)," +
+                "learned TIMESTAMP," +
+                "visible BOOLEAN DEFAULT TRUE," +
+                "PRIMARY KEY (persona_id_fk,magic_fk)," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona_log (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT" +
+                ")" +
+                end);
+
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_tags_log (" +
+                "persona_id_fk CHAR(36)," +
+                "tag_key VARCHAR(255) NOT NULL," +
+                "tag_value TEXT," +
+                "PRIMARY KEY (persona_id_fk,tag_key)," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona_log (persona_id)" +
+                ")" +
+                end);
+
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_attributes_log (" +
+                "mod_uuid CHAR(36)," +
+                "persona_id_fk CHAR(36)," +
+                "attribute_type VARCHAR(255)," +
+                "mod_name TEXT NOT NULL," +
+                "mod_value DOUBLE DEFAULT 0.0," +
+                "operation TEXT NOT NULL," +
+                "created TIMESTAMP," +
+                "decaytime TIMESTAMP," +
+                "PRIMARY KEY (mod_uuid,persona_id_fk,attribute_type)," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona_log (persona_id) ON UPDATE CASCADE ON DELETE CASCADE" +
+                ")" +
+                end);
+
+    }
+
+    protected static void createDeleteProcedure(Statement statement) throws SQLException {
+        statement.execute(
+                "CREATE PROCEDURE delete_persona(IN pers_id CHAR(36)) " +
+                        "LANGUAGE SQL " +
+                        "DETERMINISTIC " +
+                        "COMMENT 'Logs and deletes persona entries based off of a persona ID number.' " +
+                        "BEGIN " +
+                        "INSERT INTO persona_log(persona_id,player_fk,slot,race,name,race_header,gender,p_type,descr,prefix,curr,money,skin,profession,fatigue,world,x,y,z,inv,ender_inv,health,hunger,saturation,creature,played,chars,renamed,playtime_past,date_created,last_played) " +
+                        "SELECT persona_id,player_fk,slot,race,name,race_header,gender,p_type,descr,prefix,curr,money,skin,profession,fatigue,world,x,y,z,inv,ender_inv,health,hunger,saturation,creature,played,chars,renamed,playtime_past,date_created,last_played " +
+                        "FROM persona JOIN persona_vitals ON persona.persona_id = persona_vitals.persona_id_fk " +
+                        "JOIN persona_stats ON persona.persona_id = persona_stats.persona_id_fk " +
+                        "WHERE persona.persona_id = pers_id; " +
+                        "INSERT INTO persona_skills_log(persona_id_fk,skill_id_fk,xp,visible) SELECT persona_id_fk,skill_id_fk,xp,visible FROM persona_skills WHERE persona_id_fk = pers_id; " +
+                        "INSERT INTO persona_magics_log(magic_fk,persona_id_fk,tier,teacher,learned,visible) SELECT magic_fk,persona_id_fk,tier,teacher,learned,visible FROM persona_magics WHERE persona_id_fk = pers_id; " +
+                        "INSERT INTO persona_tags_log(persona_id_fk,tag_key,tag_value) SELECT persona_id_fk,tag_key,tag_value FROM persona_tags WHERE persona_id_fk = pers_id; " +
+                        "INSERT INTO persona_attributes_log(mod_uuid,persona_id_fk,attribute_type,mod_name,mod_value,operation,created,decaytime) SELECT mod_uuid,persona_id_fk,attribute_type,mod_name,operation,created,decaytime FROM persona_attributes WHERE persona_id_fk = pers_id; " +
+                        "DELETE FROM persona_stats WHERE persona_id_fk = pers_id; " +
+                        "DELETE FROM persona_vitals WHERE persona_id_fk = pers_id; " +
+                        "DELETE FROM persona_tags WHERE persona_id_fk = pers_id; " +
+                        "DELETE FROM persona_skills WHERE persona_id_fk = pers_id; " +
+                        "DELETE FROM persona_magics WHERE persona_id_fk = pers_id; " +
+                        "DELETE FROM persona_attributes WHERE persona_id_fk = pers_id; " +
+                        "DELETE FROM persona WHERE persona_id = pers_id; " +
+                        "END");
     }
 
     private static String getEndingString(SQLHandler handler) {

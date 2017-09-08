@@ -2,8 +2,10 @@ package net.lordofthecraft.arche.save.tasks.persona;
 
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.persona.TagAttachment;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Map;
@@ -27,7 +29,12 @@ public class TagAttachmentCallable implements Callable<TagAttachment> {
 
     @Override
     public TagAttachment call() throws Exception {
-        PreparedStatement stat = handler.getConnection().prepareStatement("SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=?");
+        Connection conn = handler.getConnection();
+        if (handler instanceof WhySQLHandler) {
+            conn.setReadOnly(true);
+        }
+        PreparedStatement stat = conn.prepareStatement("SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=?");
+
         stat.setString(1, persona_id.toString());
         ResultSet rs = stat.executeQuery();
         Map<String, String> tags = Maps.newConcurrentMap();
@@ -36,6 +43,9 @@ public class TagAttachmentCallable implements Callable<TagAttachment> {
         }
         rs.close();
         stat.close();
+        if (handler instanceof WhySQLHandler) {
+            conn.close();
+        }
         return new TagAttachment(tags, persona_id, true);
     }
 }

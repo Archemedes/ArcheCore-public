@@ -73,9 +73,7 @@ public class WhySQLHandler extends SQLHandler {
         Connection c = pool.getConnection();
         Statement statement = c.createStatement();
         if (statement.execute(sql)) {
-            ResultSet rs = statement.getResultSet();
-            c.close();
-            return rs;
+            return statement.getResultSet();
         } else {
             statement.close();
             c.close();

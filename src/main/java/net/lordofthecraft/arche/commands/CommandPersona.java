@@ -140,19 +140,20 @@ public class CommandPersona implements CommandExecutor {
 				+ i + "$</persona icon>icon$: " + a + "Save your current skin as your persona icon.\n"
 				+ i + "$</persona list>list$: " + a + "View all your Personas with names + IDs.\n";
 
-        String modOutput = d + "[M]" + i + " $</persona setrace >setrace [visiblerace]$: " + a + "Chance the apparent race of a persona. Changes the visible race but not the mechanical race. " +
+        String modOutput = d + "[M]" + i + " $</persona setrace >setrace [visiblerace]$: " + a + "Chance the apparent race of a persona. Changes the visible race but not the mechanical race. \n" +
                 "(view real race with $</persona realrace >realrace$ or wipe this race with $</persona wiperace >wiperace$)\n" +
                 d + "[M]" + i + " $</persona openinv >openinv {player}@{personaid}$: " + a + "Open the inventory of a persona/player.\n" +
                 d + "[M]" + i + " $</persona openender>openender {player}@{personaid}$: " + a + "Open the enderchest of this persona/player.\n" +
                 d + "[M] @@<Persona Target>Click to view how to run commands on other players.@@\n" +
                 d + "[M] @@<Persona Target Other>Click to learn how to run commands on a players other personas.";
 
-        String targetOtherPlayers = d + "[M] You can use the flag '-p {player}' to modify another player's persona, e.g. " + a + "/persona name newname -p GenericMinecrafter" + r + " will change GenericMinecrafter's persona name to newname.";
+        String targetOtherPlayers = d + "[M]" + a + " You can use the flag '-p {player}' to modify another player's persona, e.g. " + i + "/persona name newname -p GenericMinecrafter" + a + " will change GenericMinecrafter's persona name to newname.";
 
-        String targetOtherPersonas = d + "[M] In order to effect other personas of a player you can use the format {player}@{personaid}, where personaid is the slot # minus 1. E.g. " + i + "/persona name newname -p GenericMinecrafter@0 " + d +
-                "will set GenericMinecrafter's first persona's name to 'newname', while " + i + "/persona name newname -p GenericMinecrafter@3" + d + " will set his fourth persona name to newname.";
+        String targetOtherPersonas = d + "[M]" + a + " In order to effect other personas of a player you can use the format {player}@{personaid}, where personaid is the slot # minus 1. E.g. " + i + "/persona name newname -p GenericMinecrafter@0 " + a +
+                "will set GenericMinecrafter's first persona's name to 'newname', while " + i + "/persona name newname -p GenericMinecrafter@3" + a + " will set his fourth persona name to newname.";
 
-        String adminOutput = d + "[" + b + "A" + d + "]" + i + " $</persona permakill >permakill {player}$: " + a + "Force a permakill of a persona. Default your current persona, use with care.\n" +
+        String adminOutput = d + "" + l + "How to to use Persona Admin commands\n" +
+                d + "[" + b + "A" + d + "]" + i + " $</persona permakill >permakill {player}$: " + a + "Force a permakill of a persona. Default your current persona, use with care.\n" +
                 d + "[" + b + "A" + d + "]" + i + " $</persona assignrace >assignrace {race} (-p {player}@{personaid})$: " + a + "Sets the underlying race of a persona, default your current persona. Use with care.\n" +
                 d + "[" + b + "A" + d + "]" + i + " $</persona assigngender >assigngender {gender} (-p {player}@{personaid})$: " + a + "Sets the gender of a persona, default your current persona. Use with care.\n" +
                 d + "[" + b + "A" + d + "]" + i + " $</persona settype >settype {type} (-p {player}@{personaid})$: " + a + "Sets the persona \"type\". Available options: " + r + " NORMAL, EVENT, STAFF, LORE.\n" +
@@ -176,14 +177,10 @@ public class CommandPersona implements CommandExecutor {
 			else sender.sendMessage(helpdesk.getHelpText("persona command"));
 
             if (sender.hasPermission("archecore.mod.persona") && sender instanceof Player) {
-                BaseComponent base = new TextComponent("As a persona moderator you have additional commands. Click to view. ");
+                BaseComponent base = new TextComponent("As a persona moderator you have additional commands. Click to view. \n");
                 base.addExtra(MessageUtil.CommandButton("Mod", "/archehelp persona mod", "Click to view help."));
-                /*sender.sendMessage(ChatColor.DARK_AQUA + "[M] Change apparant race with 'setrace'. This changes visible race, but not the underlying race.");
-                sender.sendMessage(ChatColor.DARK_AQUA + "[M] View the real race of a persona with 'realrace' and reset the apparent race with 'wiperace.");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] Open the inventory of a persona with openinv [player]@[personaid]");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can add the flag '-p {player}' to the end of the command to modify someone's current Persona.");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[M] You can use [player]@[personaid] to modify a different Persona");*/
                 if (sender.hasPermission("archecore.admin")) {
+                    base.addExtra(" ");
                     base.addExtra(MessageUtil.CommandButton("Admin", "/archehelp persona admin", "Click to view help."));
                 }
                 ((Player) sender).spigot().sendMessage(base);
@@ -202,11 +199,11 @@ public class CommandPersona implements CommandExecutor {
                 else sender.sendMessage(helpdesk.getHelpText("persona command"));
 
                 if (sender.hasPermission("archecore.mod.persona") && sender instanceof Player) {
-                    BaseComponent base = new TextComponent("As a persona moderator you have additional commands. Click to view.\n");
-                    base.addExtra(MessageUtil.CommandButton("Mod", "/archehelp persona mod", "Click to view help."));
+                    BaseComponent base = new TextComponent("As a persona moderator you have additional commands. Click to view. \n");
+                    base.addExtra(MessageUtil.CommandButton("Mod Commands", "/archehelp persona mod", "Click to view help."));
                     if (sender.hasPermission("archecore.admin")) {
-                        base.addExtra("\n");
-                        base.addExtra(MessageUtil.CommandButton("Admin", "/archehelp persona admin", "Click to view help."));
+                        base.addExtra(" ");
+                        base.addExtra(MessageUtil.CommandButton("Admin Commands", "/archehelp persona admin", "Click to view help."));
                     }
                     ((Player) sender).spigot().sendMessage(base);
                 }

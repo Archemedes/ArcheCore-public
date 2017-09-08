@@ -2,11 +2,13 @@ package net.lordofthecraft.arche.magic;
 
 import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.interfaces.Creature;
 import net.lordofthecraft.arche.interfaces.Magic;
 import net.lordofthecraft.arche.interfaces.MagicType;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -88,9 +90,10 @@ public class Archenomicon {
             return;
         }
         try {
-            PreparedStatement stat = handler.getConnection().prepareStatement("SELECT id_key,name,parent_type,descr FROM magic_archetypes");
-            PreparedStatement magicselect = handler.getConnection().prepareStatement("SELECT id_key,max_tier,extra_tier,self_teach,teachable,description,label,days_to_max,days_to_extra FROM magics WHERE archetype=?");
-            PreparedStatement weakselect = handler.getConnection().prepareStatement("SELECT fk_weakness_magic,modifier FROM magic_weaknesses WHERE fk_source_magic=?");
+            Connection conn = handler.getConnection();
+            PreparedStatement stat = conn.prepareStatement("SELECT id_key,name,parent_type,descr FROM magic_archetypes");
+            PreparedStatement magicselect = conn.prepareStatement("SELECT id_key,max_tier,extra_tier,self_teach,teachable,description,label,days_to_max,days_to_extra FROM magics WHERE archetype=?");
+            PreparedStatement weakselect = conn.prepareStatement("SELECT fk_weakness_magic,modifier FROM magic_weaknesses WHERE fk_source_magic=?");
             ResultSet rs = stat.executeQuery();
             while (rs.next()) {
                 String id = rs.getString("id_key");
@@ -142,9 +145,9 @@ public class Archenomicon {
             }
             weakselect.close();
 
-            PreparedStatement creatureselect = handler.getConnection().prepareStatement("SELECT id_key,name,descr FROM magic_creatures");
-            PreparedStatement creaturecreators = handler.getConnection().prepareStatement("SELECT magic_id_fk FROM creature_creators WHERE creature_fk=?");
-            PreparedStatement creatureabilities = handler.getConnection().prepareStatement("SELECT ability FROM creature_abilities WHERE creature_fk=?");
+            PreparedStatement creatureselect = conn.prepareStatement("SELECT id_key,name,descr FROM magic_creatures");
+            PreparedStatement creaturecreators = conn.prepareStatement("SELECT magic_id_fk FROM creature_creators WHERE creature_fk=?");
+            PreparedStatement creatureabilities = conn.prepareStatement("SELECT ability FROM creature_abilities WHERE creature_fk=?");
 
             rs = creatureselect.executeQuery();
             while (rs.next()) {
@@ -174,6 +177,10 @@ public class Archenomicon {
             creatureselect.close();
             creaturecreators.close();
             creatureabilities.close();
+
+            if (handler instanceof WhySQLHandler) {
+                conn.close();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

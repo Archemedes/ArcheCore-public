@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche.save.tasks;
 
 import com.google.common.collect.Maps;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,7 +29,10 @@ public abstract class StatementTask extends ArcheTask {
 			
 			setValues();
 			stat.execute();
-		}catch(SQLException e){e.printStackTrace();}
+            if (handle instanceof WhySQLHandler) {
+                conn.close();
+            }
+        }catch(SQLException e){e.printStackTrace();}
 	}
 	
 	private String simpleName(){

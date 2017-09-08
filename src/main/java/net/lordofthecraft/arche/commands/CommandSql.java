@@ -26,8 +26,9 @@ public class CommandSql implements CommandExecutor {
             //Things like DR/**/OP DATABASE archecore; would be possible otherwise.
             statement = statement.replace("/*", "").replace("*/", "");
             statement = statement.substring(statement.lastIndexOf(';') + 1); //Preventing SELECT * FROM persona;DROP persona;
+            Connection c = null;
             try{
-				Connection c = ArcheCore.getControls().getSQLHandler().getConnection();
+                c = ArcheCore.getControls().getSQLHandler().getConnection();
                 boolean query = statement.toUpperCase().contains("SELECT");
                 boolean dangerous = statement.toUpperCase().contains("DROP") || statement.toUpperCase().contains("DELETE");
                 if (!query) {
@@ -59,8 +60,18 @@ public class CommandSql implements CommandExecutor {
                 }
                 /*boolean result = c.createStatement().execute(statement);
 				sender.sendMessage("Returned boolean: " + result);*/
-			} catch(SQLException e){sender.sendMessage("SQLException: " + e);}
-		}
+            } catch (SQLException e) {
+                sender.sendMessage("SQLException: " + e);
+            } finally {
+                if (c != null && !ArcheCore.usingSQLite()) {
+                    try {
+                        c.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
 		
 		return true;
 	}

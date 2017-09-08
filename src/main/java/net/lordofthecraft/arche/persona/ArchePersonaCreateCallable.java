@@ -7,6 +7,7 @@ import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.enums.Race;
 
 import java.sql.Connection;
+import java.sql.JDBCType;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -87,7 +88,7 @@ public class ArchePersonaCreateCallable implements Callable<ArchePersona> {
                 ")" +
                 end);
          */
-            PreparedStatement insertPrimary = conn.prepareStatement("INSERT INTO persona(persona_id,player_fk,slot,race,gender,name) VALUES (?,?,?,?,?,?)");
+            PreparedStatement insertPrimary = conn.prepareStatement("INSERT INTO persona(persona_id,player_fk,slot,race,gender,name,skin) VALUES (?,?,?,?,?,?,?)");
             ArcheCore.getPlugin().getLogger().info("Statement prepared. Setting values. Time: " + (System.currentTimeMillis() - time) + "ms");
             UUID newPersonaId = UUID.randomUUID();
             insertPrimary.setString(1, newPersonaId.toString());
@@ -96,6 +97,7 @@ public class ArchePersonaCreateCallable implements Callable<ArchePersona> {
             insertPrimary.setString(4, race.name());
             insertPrimary.setString(5, gender);
             insertPrimary.setString(6, name);
+            insertPrimary.setNull(7, JDBCType.INTEGER.getVendorTypeNumber());
             ArcheCore.getPlugin().getLogger().info("values set. Executing. Time: " + (System.currentTimeMillis() - time) + "ms");
             insertPrimary.executeUpdate();
             ArcheCore.getPlugin().getLogger().info("Persona entry has been created. Preparing statements. Time: " + (System.currentTimeMillis() - time) + "ms");

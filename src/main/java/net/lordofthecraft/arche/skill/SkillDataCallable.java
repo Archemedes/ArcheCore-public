@@ -4,6 +4,7 @@ import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.persona.ArchePersona;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,7 +27,11 @@ public class SkillDataCallable implements Callable<SkillData> {
         SkillData data;
 		
 		synchronized(handler){
-            PreparedStatement stat = handler.getConnection().prepareStatement(query);
+            Connection conn = handler.getConnection();
+            if (handler instanceof WhySQLHandler) {
+                conn.setReadOnly(true);
+            }
+            PreparedStatement stat = conn.prepareStatement(query);
             stat.setString(1, persona.getPersonaId().toString());
             stat.setString(2, skill);
             ResultSet res = stat.executeQuery();
@@ -42,7 +47,7 @@ public class SkillDataCallable implements Callable<SkillData> {
 			res.close();
 			res.getStatement().close();
             if (handler instanceof WhySQLHandler) {
-                res.getStatement().getConnection().close();
+                conn.close();
             }
         }
 		

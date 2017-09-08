@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche.save.tasks.magic;
 
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.magic.MagicData;
 
@@ -71,6 +72,9 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
             }
             rs.close();
             stat.close();
+            if (handler instanceof WhySQLHandler) {
+                stat.getConnection().close();
+            }
         }
         return data;
     }

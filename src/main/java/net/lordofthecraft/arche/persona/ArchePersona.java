@@ -36,10 +36,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.ref.WeakReference;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -293,7 +290,11 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	void loadMagics() {
         String sql = "SELECT magic_fk,tier,last_advanced,teacher,learned,visible FROM persona_magics WHERE persona_id_fk=?";
         try {
-			PreparedStatement stat = ArcheCore.getSQLControls().getConnection().prepareStatement(sql);
+            Connection conn = ArcheCore.getSQLControls().getConnection();
+            if (!ArcheCore.usingSQLite()) {
+                conn.setReadOnly(true);
+            }
+            PreparedStatement stat = conn.prepareStatement(sql);
             stat.setString(1, persona_id.toString());
             ResultSet rs = stat.executeQuery();
 			while (rs.next()) {
@@ -316,7 +317,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			}
 			rs.close();
 			stat.close();
-		} catch (SQLException e) {
+            if (!ArcheCore.usingSQLite()) {
+                conn.close();
+            }
+        } catch (SQLException e) {
 			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "An error occurred while loading " + player + "'s persona magics!!!", e);
 		}
 	}
