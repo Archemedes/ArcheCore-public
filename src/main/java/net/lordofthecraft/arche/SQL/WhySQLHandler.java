@@ -70,11 +70,15 @@ public class WhySQLHandler extends SQLHandler {
 
     @Override
     public ResultSet query(String sql) throws SQLException {
-        Statement statement = pool.getConnection().createStatement();
+        Connection c = pool.getConnection();
+        Statement statement = c.createStatement();
         if (statement.execute(sql)) {
-            return statement.getResultSet();
+            ResultSet rs = statement.getResultSet();
+            c.close();
+            return rs;
         } else {
             statement.close();
+            c.close();
             return null;
         }
     }
