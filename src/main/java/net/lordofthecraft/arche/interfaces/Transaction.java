@@ -33,6 +33,7 @@ public interface Transaction {
 
     enum TransactionType {
         WITHDRAW,
-        DEPOSIT
+        DEPOSIT,
+        SET
     }
 }

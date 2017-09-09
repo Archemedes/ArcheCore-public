@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.persona;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.WeakBlock;
@@ -28,21 +29,23 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
 
 import java.lang.ref.WeakReference;
 import java.sql.*;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 public final class ArchePersona implements Persona, InventoryHolder {
 	private static final String TABLE = "persona";
@@ -51,7 +54,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private static final SaveHandler buffer = SaveHandler.getInstance();
 
 	//The immutable auto-increment ID of this persona.
-    private final UUID persona_id;
+    private final int persona_id;
 
 	final PersonaSkills skills = new PersonaSkills(this);
     final PersonaMagics magics = new PersonaMagics(this);
@@ -88,12 +91,13 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private Map<String, String> tags;
 	private PersonaType type;
     private ArcheSkin skin;
+    private ArrayList<PotionEffect> effects = Lists.newArrayList();
 
-    ArchePersona(UUID persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS) {
+    ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS) {
         this(persona_id, player, slot, name, race, gender, creationTimeMS, PersonaType.NORMAL);
 	}
 
-    ArchePersona(UUID persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS, PersonaType type) {
+    ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS, PersonaType type) {
         this.key = new ArchePersonaKey(player, slot);
 
 		this.persona_id = persona_id;
@@ -115,7 +119,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	@Override
-    public UUID getPersonaId() {
+    public int getPersonaId() {
         return persona_id;
 	}
 
@@ -180,28 +184,16 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	@Override
 	public double withdraw(double amount, Transaction cause) {
-		ArcheCore.getControls().getEconomy().withdrawPersona(this, amount);
-		return money;
-	}
-
-	@Override
-	@Deprecated
-	public double withdraw(double amount) {
-		ArcheCore.getControls().getEconomy().withdrawPersona(this, amount);
-		return money;
+        //buffer.put(new InsertEconomyLogTask(persona_id, cause, amount));
+        ArcheCore.getControls().getEconomy().withdrawPersona(this, amount, cause);
+        return money;
 	}
 
 	@Override
 	public double deposit(double amount, Transaction cause){
-		ArcheCore.getControls().getEconomy().depositPersona(this, amount);
-		return money;
-	}
-
-	@Override
-	@Deprecated
-	public double deposit(double amount) {
-		ArcheCore.getControls().getEconomy().depositPersona(this, amount);
-		return money;
+        //buffer.put(new InsertEconomyLogTask(persona_id, cause, amount));
+        ArcheCore.getControls().getEconomy().depositPersona(this, amount, cause);
+        return money;
 	}
 
 	@Override
@@ -295,7 +287,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
                 conn.setReadOnly(true);
             }
             PreparedStatement stat = conn.prepareStatement(sql);
-            stat.setString(1, persona_id.toString());
+            stat.setInt(1, persona_id);
             ResultSet rs = stat.executeQuery();
 			while (rs.next()) {
 				MagicData data = null;
@@ -305,13 +297,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 					int tier = rs.getInt("tier");
 					Timestamp last_advanced = rs.getTimestamp("last_advanced");
 					Timestamp learned = rs.getTimestamp("learned");
-                    String teacher = rs.getString("teacher");
-                    UUID teachu = null;
-                    if (teacher != null) {
-                        teachu = UUID.fromString(teacher);
-                    }
+                    Integer teacher = rs.getInt("teacher");
                     boolean visible = rs.getBoolean("visible");
-                    data = new MagicData(armagic.get(), tier, visible, teachu != null, (teachu), learned.toInstant().toEpochMilli(), last_advanced.toInstant().toEpochMilli());
+                    data = new MagicData(armagic.get(), tier, visible, teacher != null && teacher > 0, (teacher), learned.toInstant().toEpochMilli(), last_advanced.toInstant().toEpochMilli());
                     magics.addMagicAttachment(new MagicAttachment(armagic.get(), persona_id, data));
                 }
 			}
@@ -601,7 +589,42 @@ public final class ArchePersona implements Persona, InventoryHolder {
         saturation = p.getSaturation();
         inv = PersonaInventory.store(p);
 		location = new WeakBlock(p.getLocation());
+        savePotionEffects(p);
         buffer.put(new UpdateVitalsTask(persona_id, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv));
+    }
+
+    public void savePotionEffects(Player pl) {
+        effects = Lists.newArrayList(pl.getActivePotionEffects());
+        YamlConfiguration config = new YamlConfiguration();
+        List<Map<String, Object>> contentslist = Lists.newArrayList();
+        for (PotionEffect pe : effects) {
+            if (pe == null) {
+                contentslist.add(null);
+            } else {
+                contentslist.add(pe.serialize());
+            }
+        }
+        config.set("potions", contentslist);
+        buffer.put(new UpdateTask(this, PersonaField.POTIONS, config.saveToString()));
+    }
+
+    void loadPotionsFromString(String contents) {
+        YamlConfiguration potionconfig = new YamlConfiguration();
+
+        try {
+            potionconfig.loadFromString(contents);
+            if (potionconfig.getKeys(false).contains("potions")) {
+                @SuppressWarnings("unchecked")
+                List<PotionEffect> result = potionconfig.getList("contents").stream()
+                        .map(ent -> (Map<String, Object>) ent)
+                        .map(PotionEffect::new)
+                        .collect(Collectors.toList());
+                effects = Lists.newArrayList(result);
+            }
+        } catch (InvalidConfigurationException e) {
+            e.printStackTrace();
+        }
+
     }
 
 	void restoreMinecraftSpecifics(final Player p){
@@ -622,10 +645,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		//Do we protect incase of bad teleport?
 		if (ArcheCore.getPlugin().teleportProtectively()) {
 			NewbieProtectListener.bonusProtects.add(p.getUniqueId());
-			Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> {
-				NewbieProtectListener.bonusProtects.remove(p.getUniqueId());
-			});
-		}
+            Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> NewbieProtectListener.bonusProtects.remove(p.getUniqueId()));
+        }
 
 		//Give them an inventory.
 		PlayerInventory pinv = p.getInventory();
@@ -653,6 +674,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		else p.setHealth(health);
 		p.setFoodLevel(food);
         p.setSaturation(saturation);
+        p.getActivePotionEffects().parallelStream().forEach(e -> p.removePotionEffect(e.getType()));
+        effects.forEach(e -> e.apply(p));
     }
 
 	@Override

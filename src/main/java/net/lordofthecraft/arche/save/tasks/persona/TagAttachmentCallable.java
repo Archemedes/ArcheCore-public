@@ -9,7 +9,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 
 /**
@@ -19,10 +18,10 @@ import java.util.concurrent.Callable;
  */
 public class TagAttachmentCallable implements Callable<TagAttachment> {
 
-    private final UUID persona_id;
+    private final int persona_id;
     private final SQLHandler handler;
 
-    public TagAttachmentCallable(UUID persona_id, SQLHandler handler) {
+    public TagAttachmentCallable(int persona_id, SQLHandler handler) {
         this.persona_id = persona_id;
         this.handler = handler;
     }
@@ -35,7 +34,7 @@ public class TagAttachmentCallable implements Callable<TagAttachment> {
         }
         PreparedStatement stat = conn.prepareStatement("SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=?");
 
-        stat.setString(1, persona_id.toString());
+        stat.setInt(1, persona_id);
         ResultSet rs = stat.executeQuery();
         Map<String, String> tags = Maps.newConcurrentMap();
         while (rs.next()) {

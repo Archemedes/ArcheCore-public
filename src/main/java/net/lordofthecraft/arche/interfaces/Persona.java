@@ -19,16 +19,6 @@ import java.util.concurrent.Future;
 public interface Persona {
 
 	/**
-	 * Take money from a Persona. Negative amounts possible, but consider using {@link #deposit(double)}  instead.
-	 * @param amount The amount of money to modify the Persona account by
-	 *
-	 * @return Amount of minas persona possess after the transaction
-	 * @deprecated Use {@link #withdraw(double, Transaction)}
-	 */
-	@Deprecated()
-	double withdraw(double amount);
-
-	/**
 	 * Take money from a Persona. Negative amounts possible, but consider using {@link #deposit(double, Transaction)} instead.
 	 *
 	 * @param amount The amount of money to modify the Persona account by
@@ -36,16 +26,6 @@ public interface Persona {
 	 * @return Amount of minas persona possess after the transaction
 	 */
 	double withdraw(double amount, Transaction cause);
-
-	/**
-	 * Give money to a Persona. Negative amounts possible, but consider using {@link #withdraw(double)} instead.
-	 * @param amount The amount of money to modify the Persona account by
-	 *
-	 * @return Amount of minas persona possess after the transaction
-	 * @deprecated Use {@link #deposit(double, Transaction) }
-	 */
-	@Deprecated()
-	double deposit(double amount);
 
 	/**
 	 * Give money to a Persona. Negative amounts possible, but consider using {@link #withdraw(double, Transaction)} instead.
@@ -59,7 +39,7 @@ public interface Persona {
      * Retrieve the persona-specific integer that uniquely defines this persona.
      * @return The immutable int persona id
      */
-    UUID getPersonaId();
+    int getPersonaId();
 
     /**
      * The PersonaSkills objects hold the fields and methods related to a particular persona's skills

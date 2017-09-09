@@ -7,7 +7,6 @@ import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
-import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.*;
 import org.bukkit.Bukkit;
@@ -25,11 +24,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
 
 public class CreationDialog {
 
@@ -528,74 +522,34 @@ public class CreationDialog {
             long creationTimeMS = System.currentTimeMillis();
             Block b = p.getLocation().getBlock();
 
-            ArchePersonaCreateCallable creator = new ArchePersonaCreateCallable(p.getUniqueId(), id, gender, race, name, new Timestamp(creationTimeMS), b.getX(), b.getY(), b.getZ(), b.getWorld().getUID());
-
-            Future<ArchePersona> futurepersona = SaveHandler.getInstance().prepareCallable(creator);
-
-            try {
-                ArchePersona persona = futurepersona.get(500, TimeUnit.MILLISECONDS);
-                if (persona == null) {
-                    context.getForWhom().sendRawMessage(ChatColor.RED + "We apologize, something went wrong while creating your persona. Please try again and if the problem persists please make a thread on our Forums under Support");
-                    ArcheCore.getPlugin().getLogger().severe("We failed to create a persona for " + p.getName() + "! It was Null, error is nondescript!");
-                    return Prompt.END_OF_CONVERSATION;
-                }
-                if (!ArchePersonaHandler.getInstance().registerPersona(p, persona)) {
-                    context.getForWhom().sendRawMessage(ChatColor.RED + "We apologize, something went wrong while creating your persona. Please try again and if the problem persists please make a thread on our Forums under Support");
-                    ArcheCore.getPlugin().getLogger().severe("We failed to create a persona for " + p.getName() + "! It was Null, error is nondescript!");
-                    return Prompt.END_OF_CONVERSATION;
-                } else {
-                    persona.setPlayerName(p.getName());
-                }
-                p.sendMessage(ChatColor.GOLD + "" + ChatColor.UNDERLINE + "Created your new Persona: " + ChatColor.GREEN + name + ChatColor.GOLD + "!");
-
-                p.sendTitle(ChatColor.GOLD + "" + ChatColor.ITALIC + name,
-                        ChatColor.YELLOW + "Welcome to the realm of " + ArcheCore.getControls().getServerWorldName(),
-                        30, 120, 30);
-
-                if (context.getSessionData("first") != null) {
-                    Economy econ = ArcheCore.getControls().getEconomy();
-                    if (econ != null) econ.setPersona(persona, econ.getBeginnerAllowance());
-                    if (ArcheCore.getControls().getPersonaHandler().willModifyDisplayNames()) p.setDisplayName(name);
-
-                    long treshold = System.currentTimeMillis() - (1000 * 90);
-                    if (lastAnnounce < treshold) {
-                        lastAnnounce = System.currentTimeMillis();
-                        String message = ChatColor.DARK_GREEN + "Please welcome " + ChatColor.GOLD + name + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + " (" + p.getName() + ") " + ChatColor.DARK_GREEN + "the " + ChatColor.GOLD + race.getName() + ChatColor.DARK_GREEN + " to Lord of the Craft.";
-                        for (Player x : Bukkit.getOnlinePlayers()) if (x != p) x.sendMessage(message);
-                    }
-
-                }
-            } catch (TimeoutException e) {
-                context.getForWhom().sendRawMessage(ChatColor.AQUA + "We apologize for the inconvenience but something has gone wrong. Please try again, if the problem persists please make a thread in Support on our forums.");
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We timed out while creating a persona for the player " + p.getName() + "!!!", e);
-            } catch (ExecutionException e) {
-                context.getForWhom().sendRawMessage(ChatColor.AQUA + "We apologize for the inconvenience but something has gone wrong. Please try again, if the problem persists please make a thread in Support on our forums.");
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We threw an ExecutionException while creating a persona for the player " + p.getName() + "!", e);
-            } catch (InterruptedException e) {
-                context.getForWhom().sendRawMessage(ChatColor.AQUA + "We apologize for the inconvenience but something has gone wrong. Please try again, if the problem persists please make a thread in Support on our forums.");
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We were inturrupted while creating a persona for the player " + p.getName() + "!?", e);
-            } catch (Exception e) {
-                context.getForWhom().sendRawMessage(ChatColor.AQUA + "We apologize for the inconvenience but something has gone wrong. Please try again, if the problem persists please make a thread in Support on our forums.");
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We encountered an unexpected exception while creating a persona for " + p.getName() + "!", e);
+            //ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS) {
+            ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, gender, new Timestamp(creationTimeMS));
+            if (!ArchePersonaHandler.getInstance().registerPersona(p, persona)) {
+                context.getForWhom().sendRawMessage(ChatColor.RED + "We apologize, something went wrong while creating your persona. Please try again and if the problem persists please make a thread on our Forums under Support");
+                ArcheCore.getPlugin().getLogger().severe("We failed to create a persona for " + p.getName() + "! It was Null, error is nondescript!");
+                return Prompt.END_OF_CONVERSATION;
+            } else {
+                persona.setPlayerName(p.getName());
             }
+            p.sendMessage(ChatColor.GOLD + "" + ChatColor.UNDERLINE + "Created your new Persona: " + ChatColor.GREEN + name + ChatColor.GOLD + "!");
 
+            p.sendTitle(ChatColor.GOLD + "" + ChatColor.ITALIC + name,
+                    ChatColor.YELLOW + "Welcome to the realm of " + ArcheCore.getControls().getServerWorldName(),
+                    30, 120, 30);
 
-            /*Persona pers = ArchePersonaHandler.getInstance().createPersona(p, id, name, race, gender, creationTimeMS);
-
-            if(pers != null && context.getSessionData("first") != null){
+            if (context.getSessionData("first") != null) {
                 Economy econ = ArcheCore.getControls().getEconomy();
-                if(econ != null) econ.setPersona(pers, econ.getBeginnerAllowance());
-                if(ArcheCore.getControls().getPersonaHandler().willModifyDisplayNames()) p.setDisplayName(name);
+                if (econ != null) econ.setPersona(persona, econ.getBeginnerAllowance());
+                if (ArcheCore.getControls().getPersonaHandler().willModifyDisplayNames()) p.setDisplayName(name);
 
-                long treshold = System.currentTimeMillis() - (1000*90);
-                if(lastAnnounce < treshold){
+                long treshold = System.currentTimeMillis() - (1000 * 90);
+                if (lastAnnounce < treshold) {
                     lastAnnounce = System.currentTimeMillis();
                     String message = ChatColor.DARK_GREEN + "Please welcome " + ChatColor.GOLD + name + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + " (" + p.getName() + ") " + ChatColor.DARK_GREEN + "the " + ChatColor.GOLD + race.getName() + ChatColor.DARK_GREEN + " to Lord of the Craft.";
-                    for(Player x : Bukkit.getOnlinePlayers()) if (x != p) x.sendMessage(message);
+                    for (Player x : Bukkit.getOnlinePlayers()) if (x != p) x.sendMessage(message);
                 }
 
-            }*/
-
+            }
             return Prompt.END_OF_CONVERSATION;
         }
     }

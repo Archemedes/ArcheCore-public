@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class UpdateVitalsTask extends StatementTask {
 
-    private final UUID persona_id;
+    private final int persona_id;
     private final UUID world;
     private final int x;
     private final int y;
@@ -19,7 +19,7 @@ public class UpdateVitalsTask extends StatementTask {
     private final PersonaInventory inv;
 
 
-    public UpdateVitalsTask(UUID persona_id, UUID world, int x, int y, int z, double health, float saturation, int hunger, PersonaInventory inv) {
+    public UpdateVitalsTask(int persona_id, UUID world, int x, int y, int z, double health, float saturation, int hunger, PersonaInventory inv) {
         this.persona_id = persona_id;
         this.world = world;
         this.x = x;
@@ -40,7 +40,7 @@ public class UpdateVitalsTask extends StatementTask {
         stat.setDouble(5, health);
         stat.setFloat(6, saturation);
         stat.setInt(7, hunger);
-        stat.setString(8, persona_id.toString());
+        stat.setInt(8, persona_id);
         stat.setString(9, inv.getInvAsString());
         stat.setString(10, inv.getEnderInvAsString());
     }

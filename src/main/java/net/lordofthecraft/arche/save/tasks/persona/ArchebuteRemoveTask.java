@@ -15,7 +15,7 @@ public class ArchebuteRemoveTask extends StatementTask {
 
     @Override
     protected void setValues() throws SQLException {
-        stat.setString(1, mod.getPersona().getPersonaId().toString());
+        stat.setInt(1, mod.getPersona().getPersonaId());
         stat.setString(2, mod.getMod().getUniqueId().toString());
         stat.setString(3, mod.getAttribute().name());
     }

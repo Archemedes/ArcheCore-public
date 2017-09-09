@@ -80,6 +80,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private boolean enderchestInMenu;
     private boolean usingMySQL;
     private int fullFatigueRestore;
+    private boolean canCreatePersonas;
 
     //private Thread saverThread = null;
 
@@ -300,6 +301,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         enderchestInMenu = config.getBoolean("persona.menu.enderchest");
         usingMySQL = config.getBoolean("enable.mysql");
         fullFatigueRestore = config.getInt("persona.fatigue.restore");
+        canCreatePersonas = config.getBoolean("can.create.personas");
 
         if(teleportNewbies){
             World w = Bukkit.getWorld(config.getString("preferred.spawn.world"));
@@ -376,7 +378,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         String persHelp = ChatColor.YELLOW + "Your " + ChatColor.ITALIC + "Persona" + ChatColor.YELLOW + " is an uncouth sailor, fair Elven maiden or parent-slaying Orc. " +
                 "in Lord of the Craft, you speak and act as your current Persona, and know only what they know." +
                 div + ChatColor.GREEN + "Once accepted, creating your Persona is the first step of your adventure."
-                + " You can later remove or create new Personas by using the $/bme$ command.";
+                + " You can later remove or create new Personas by using the $/bme$ " + ChatColor.GREEN + " command.";
 
         String commandHelp = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Your essential commands are as follows: "
                 + div + ChatColor.GRAY + "" + ChatColor.ITALIC +  (helpOverriden? "$/help$":"$/archehelp$") + ChatColor.GRAY + ": Provides a useful database of help topics.\n"
@@ -389,7 +391,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
                 + ChatColor.BLUE  + "Depending on your Persona's race, some professions may come easier to you than others.\n"
                 + ChatColor.GRAY  + "You receive special perks for your chosen profession, but beware, as these perks cause @Fatigue@.";
 
-        String fatigue = ChatColor.GRAY + "Fatigue accumulates when practicing your chosen @<Professions>profession@.\n"
+        String fatigue = ChatColor.GRAY + "Fatigue accumulates when practicing your chosen @@<Professions>profession@@.\n"
                 + ChatColor.GREEN + "You can still do everything while fatigued, but will not have access to your profession-related perks.\n"
                 + ChatColor.LIGHT_PURPLE  + "your fatigue will reset over time, so it's best to simply take a break and wait it out. "
                 + "If you are inpatient, having a drink at a tavern will also reduce a Persona's fatigue.\n";
@@ -640,6 +642,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     @Override
     public boolean showEnderchestInMenu() {
         return enderchestInMenu;
+    }
+
+    @Override
+    public boolean canCreatePersonas() {
+        return canCreatePersonas;
     }
 
     @Override

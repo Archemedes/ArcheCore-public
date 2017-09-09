@@ -7,7 +7,6 @@ import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.persona.MagicAttachment;
 
 import java.sql.PreparedStatement;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 
 /**
@@ -17,15 +16,15 @@ import java.util.concurrent.Callable;
  */
 public class MagicCreateCallable implements Callable<MagicAttachment> {
 
-    private final UUID persona_id;
+    private final int persona_id;
     private final ArcheMagic magic;
     private final int tier;
-    private final UUID teacher;
+    private final Integer teacher;
     private final boolean visible;
     private final SQLHandler handler;
     private MagicAttachment result = null;
 
-    public MagicCreateCallable(UUID persona_id, ArcheMagic magic, int tier, UUID teacher, boolean visible, SQLHandler handler) {
+    public MagicCreateCallable(int persona_id, ArcheMagic magic, int tier, Integer teacher, boolean visible, SQLHandler handler) {
         this.persona_id = persona_id;
         this.magic = magic;
         this.tier = tier;
@@ -34,7 +33,7 @@ public class MagicCreateCallable implements Callable<MagicAttachment> {
         this.handler = handler;
     }
 
-    public MagicCreateCallable(UUID persona_id, ArcheMagic magic, int tier, UUID teacher, boolean visible, SQLHandler handler, MagicAttachment result) {
+    public MagicCreateCallable(int persona_id, ArcheMagic magic, int tier, Integer teacher, boolean visible, SQLHandler handler, MagicAttachment result) {
         this.persona_id = persona_id;
         this.magic = magic;
         this.tier = tier;
@@ -69,7 +68,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         String sql = "INSERT INTO persona_magic(magic_fk,persona_id_fk,tier,teacher,visible) VALUES (?,?,?,?,?);";
         PreparedStatement stat = handler.getConnection().prepareStatement(sql);
         stat.setString(1, magic.getName());
-        stat.setString(2, persona_id.toString());
+        stat.setInt(2, persona_id);
         stat.setInt(3, tier);
         stat.setString(4, (teacher == null ? null : teacher.toString()));
         stat.setBoolean(5, visible);

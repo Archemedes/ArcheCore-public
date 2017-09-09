@@ -106,14 +106,22 @@ public class BeaconMenuListener implements Listener {
 					
 					if(prs[t] == null){ //Clicked Persona does NOT exist
 						if(count < handler.getAllowedPersonas(p)){
-							//Player may make new persona here, let's do so now.
+                            if (!ArcheCore.getControls().canCreatePersonas()) {
+                                p.sendMessage(ChatColor.RED + "Persona creation is disabled for this server, please go to the main server to create your persona.");
+                                return;
+                            }
+                            //Player may make new persona here, let's do so now.
 							dialog.addPersona(p, t, true);
 							new BukkitRunnable(){@Override public void run(){ p.closeInventory();}}.runTask(plugin);
 						}
 					} else { //Clicked Persona does exist
 						if(e.isShiftClick()){ // Tried to modify persona somehow
 							if(e.isLeftClick()){ //Create new
-								dialog.addPersona(p, t, false);
+                                if (!ArcheCore.getControls().canCreatePersonas()) {
+                                    p.sendMessage(ChatColor.RED + "Persona creation is disabled for this server, please go to the main server to create your persona.");
+                                    return;
+                                }
+                                dialog.addPersona(p, t, false);
 								new BukkitRunnable(){@Override public void run(){ p.closeInventory();}}.runTask(plugin);
 							}else if(e.isRightClick()){ //Remove
 								new BukkitRunnable(){@Override public void run(){ p.closeInventory();}}.runTask(plugin);

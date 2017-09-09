@@ -32,7 +32,7 @@ public class SkillDataCallable implements Callable<SkillData> {
                 conn.setReadOnly(true);
             }
             PreparedStatement stat = conn.prepareStatement(query);
-            stat.setString(1, persona.getPersonaId().toString());
+            stat.setInt(1, persona.getPersonaId());
             stat.setString(2, skill);
             ResultSet res = stat.executeQuery();
 

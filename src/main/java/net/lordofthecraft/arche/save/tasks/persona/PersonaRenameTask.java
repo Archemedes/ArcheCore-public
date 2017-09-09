@@ -4,10 +4,9 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.tasks.StatementTask;
 
 import java.sql.SQLException;
-import java.util.UUID;
 
 public class PersonaRenameTask extends StatementTask {
-    private final UUID persona_id;
+    private final int persona_id;
     private final String name;
 	
 	public PersonaRenameTask(Persona pers){
@@ -17,7 +16,7 @@ public class PersonaRenameTask extends StatementTask {
 	
 	@Override
 	protected void setValues() throws SQLException {
-        stat.setString(1, persona_id.toString());
+        stat.setInt(1, persona_id);
         stat.setString(2, name);
     }
 

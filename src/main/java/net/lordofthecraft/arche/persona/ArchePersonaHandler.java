@@ -13,6 +13,7 @@ import net.lordofthecraft.arche.event.PersonaWhoisEvent.Query;
 import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.DataTask;
+import net.lordofthecraft.arche.save.tasks.persona.PersonaInsertTask;
 import net.lordofthecraft.arche.save.tasks.skills.SkillDeleteTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
@@ -24,6 +25,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -35,7 +37,8 @@ import java.util.logging.Logger;
 
 public class ArchePersonaHandler implements PersonaHandler {
 	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
-	private final Map<UUID, ArchePersona[]> personas = new HashMap<>(Bukkit.getServer().getMaxPlayers());
+    private static int max_persona_id = 0;
+    private final Map<UUID, ArchePersona[]> personas = new HashMap<>(Bukkit.getServer().getMaxPlayers());
 	//private final ArchePersonaExtender extender = new ArchePersonaExtender();
 	private SaveHandler buffer = SaveHandler.getInstance();
 	private Connection personaConnection = null;
@@ -57,7 +60,18 @@ public class ArchePersonaHandler implements PersonaHandler {
 		if (personaConnection == null) {
 			personaConnection = connection;
 		}
-	}
+        String sql = "SELECT LAST_INSERT_ID() FROM persona;";
+        try {
+            ResultSet rs = personaConnection.createStatement().executeQuery(sql);
+            if (rs.next()) {
+                max_persona_id = rs.getInt(1);
+            }
+            rs.close();
+            rs.getStatement().close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
 	public boolean isPreloading() {
 		return preloading;
@@ -98,7 +112,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
     @Override
-    public Optional<ArchePersona> getPersonaById(UUID persona_id) {
+    public Optional<ArchePersona> getPersonaById(int persona_id) {
         return personas.values().stream()
                 .flatMap(Arrays::stream)
                 .filter(p -> p.getPersonaId() == persona_id)
@@ -252,6 +266,11 @@ public class ArchePersonaHandler implements PersonaHandler {
 		return true;
 	}
 
+    int getNextPersonaId() {
+        ++max_persona_id;
+        return max_persona_id;
+    }
+
 	public boolean registerPersona(Player p, ArchePersona persona) {
 		ArchePersona[] prs = personas.computeIfAbsent(
 				p.getUniqueId(),
@@ -284,6 +303,11 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		for(PotionEffect ps : p.getActivePotionEffects())
 			p.removePotionEffect(ps.getType());
+
+        Block b = p.getLocation().getBlock();
+        buffer.put(new PersonaInsertTask(persona.getPersonaId(), p.getUniqueId(), persona.getId(), persona.getGender(), persona.getRace(), persona.getName(), persona.getCreationTime(), b.getX(), b.getY(), b.getZ(), b.getWorld().getUID()));
+
+        persona.saveMinecraftSpecifics(p);
 
 		//ArcheTask task = new InsertTask(uuid, id, name, race, gender,creationTime);
 		//buffer.put(task);
@@ -577,11 +601,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	private ArchePersona buildPersona(ResultSet res, OfflinePlayer p) throws SQLException{
-        String preid = res.getString("persona_id");
-        if (preid == null) {
-            return null;
-        }
-        UUID persona_id = UUID.fromString(preid);
+        int persona_id = res.getInt("persona_id");
         int slot = res.getInt("slot");
 		String name = res.getString("name");
 		Race race = Race.valueOf(res.getString("race"));
@@ -656,6 +676,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 				e.printStackTrace();
 			}
 		}
+        String potionsList = res.getString("potions");
+
 
 		if (ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble("money");
 		persona.pastPlayTime = res.getInt("playtime_past");
