@@ -1,6 +1,6 @@
 package net.lordofthecraft.arche.save.tasks.persona;
 
-import net.lordofthecraft.arche.persona.ArchebuteModifier;
+import net.lordofthecraft.arche.attributes.ArchebuteModifier;
 import net.lordofthecraft.arche.save.tasks.StatementTask;
 
 import java.sql.SQLException;
