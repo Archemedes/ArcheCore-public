@@ -1,20 +1,22 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.enums.PersonaType;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.persona.MagicAttachment;
-import net.lordofthecraft.arche.persona.PersonaInventory;
-import net.lordofthecraft.arche.persona.PersonaMagics;
-import net.lordofthecraft.arche.persona.PersonaSkills;
-import net.lordofthecraft.arche.skin.ArcheSkin;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Future;
+
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+
+import net.lordofthecraft.arche.enums.PersonaType;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.persona.MagicAttachment;
+import net.lordofthecraft.arche.persona.PersonaAttributes;
+import net.lordofthecraft.arche.persona.PersonaInventory;
+import net.lordofthecraft.arche.persona.PersonaMagics;
+import net.lordofthecraft.arche.persona.PersonaSkills;
+import net.lordofthecraft.arche.skin.ArcheSkin;
 
 public interface Persona {
 
@@ -46,6 +48,12 @@ public interface Persona {
      * @return The PersonaSkills object
      */
     PersonaSkills getPersonaSkills();
+    
+    /**
+     * The PersonaAttributes objects hold the fields and methods related to a particular persona's attributes
+     * @return The personaAttributes object
+     */
+    PersonaAttributes attributes();
 
 	/**
 	 * A method that retrieves the Persona's 'main' skill or profession, which they can set for RP purposes.
