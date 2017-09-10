@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche;
 
+import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.FatigueHandler;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -35,7 +36,7 @@ public class ArcheFatigueHandler implements FatigueHandler {
 		if(skill != null && skill.getRaceMods().containsKey(pers.getRace())) 
 			add /= skill.getRaceMods().get(pers.getRace());
 
-        fat = Math.min(pers.getMaximumFatigue(), fat + add);
+        fat = Math.min(pers.attributes().getAttributeValue(ArcheAttribute.MAX_FATIGUE), fat + add);
         pers.setFatigue(fat);
 	}
 
@@ -53,9 +54,12 @@ public class ArcheFatigueHandler implements FatigueHandler {
 		if(fatigueDecreaseHours == 0) return;
 		
 		double toSet = fatigue;
-		if(fatigue < 0) toSet = 0.0;
-        else if (fatigue > pers.getMaximumFatigue()) toSet = pers.getMaximumFatigue();
-
+		if(fatigue < 0) toSet = 0.0;		
+        else {
+        	double maxFat = getMaxFatigue(pers);
+        	if (fatigue > maxFat) toSet = maxFat;
+        }
+		
         if(toSet != fatigue) pers.setFatigue(toSet);
 	}
 
@@ -75,7 +79,7 @@ public class ArcheFatigueHandler implements FatigueHandler {
 	public void showFatigueBar(Player p, Persona pers) {
 		if(fatigueDecreaseHours == 0) return;
 
-        float factor = 1.0f - ((float) (pers.getFatigue() / pers.getMaximumFatigue()));
+        float factor = 1.0f - ((float) (pers.getFatigue() / getMaxFatigue(pers)));
         p.setExp(factor);
 		p.setLevel((int)factor*100); 
 	}
@@ -90,7 +94,7 @@ public class ArcheFatigueHandler implements FatigueHandler {
 		if(fatigueDecreaseHours == 0) return true;
 		
 		double curr = pers.getFatigue();
-        return curr + needed <= pers.getMaximumFatigue();
+        return curr + needed <= getMaxFatigue(pers);
     }
 	
 	@Override
@@ -106,7 +110,7 @@ public class ArcheFatigueHandler implements FatigueHandler {
 		Player p = pers.getPlayer();
 		boolean able = hasEnoughEnergy(pers, add);
 		if(able) {
-            double newFatigue = Math.min(pers.getMaximumFatigue(), add + pers.getFatigue());
+            double newFatigue = Math.min(getMaxFatigue(pers), add + pers.getFatigue());
             pers.setFatigue(newFatigue);
 			if(p!= null) showFatigueBar(p, pers);
 		} else if(p != null && !prompted.contains(pers.getPersonaKey())) {
@@ -130,4 +134,7 @@ public class ArcheFatigueHandler implements FatigueHandler {
 		return value;
 	}
 
+	private double getMaxFatigue(Persona p) {
+		return p.attributes().getAttributeValue(ArcheAttribute.MAX_FATIGUE);
+	}
 }

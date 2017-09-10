@@ -1,29 +1,25 @@
 package net.lordofthecraft.arche.persona;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.WeakBlock;
-import net.lordofthecraft.arche.enums.PersonaType;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.event.PersonaFatigueEvent;
-import net.lordofthecraft.arche.event.PersonaRemoveEvent;
-import net.lordofthecraft.arche.event.PersonaRenameEvent;
-import net.lordofthecraft.arche.event.PersonaSwitchEvent;
-import net.lordofthecraft.arche.interfaces.*;
-import net.lordofthecraft.arche.listener.NewbieProtectListener;
-import net.lordofthecraft.arche.magic.ArcheMagic;
-import net.lordofthecraft.arche.magic.MagicData;
-import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.magic.MagicCreateCallable;
-import net.lordofthecraft.arche.save.tasks.persona.*;
-import net.lordofthecraft.arche.save.tasks.skills.SelectSkillTask;
-import net.lordofthecraft.arche.skill.ArcheSkill;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-import net.lordofthecraft.arche.skill.SkillData;
-import net.lordofthecraft.arche.skin.ArcheSkin;
-import net.lordofthecraft.arche.skin.SkinCache;
+import java.lang.ref.WeakReference;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -39,13 +35,40 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 
-import java.lang.ref.WeakReference;
-import java.sql.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.WeakBlock;
+import net.lordofthecraft.arche.enums.PersonaType;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.event.PersonaFatigueEvent;
+import net.lordofthecraft.arche.event.PersonaRemoveEvent;
+import net.lordofthecraft.arche.event.PersonaRenameEvent;
+import net.lordofthecraft.arche.event.PersonaSwitchEvent;
+import net.lordofthecraft.arche.interfaces.Creature;
+import net.lordofthecraft.arche.interfaces.Magic;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.PersonaKey;
+import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.interfaces.Transaction;
+import net.lordofthecraft.arche.listener.NewbieProtectListener;
+import net.lordofthecraft.arche.magic.ArcheMagic;
+import net.lordofthecraft.arche.magic.MagicData;
+import net.lordofthecraft.arche.save.PersonaField;
+import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.magic.MagicCreateCallable;
+import net.lordofthecraft.arche.save.tasks.persona.PersonaDeleteTask;
+import net.lordofthecraft.arche.save.tasks.persona.TagAttachmentCallable;
+import net.lordofthecraft.arche.save.tasks.persona.UpdateFatigueTask;
+import net.lordofthecraft.arche.save.tasks.persona.UpdateTask;
+import net.lordofthecraft.arche.save.tasks.persona.UpdateVitalsTask;
+import net.lordofthecraft.arche.save.tasks.skills.SelectSkillTask;
+import net.lordofthecraft.arche.skill.ArcheSkill;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.skill.SkillData;
+import net.lordofthecraft.arche.skin.ArcheSkin;
+import net.lordofthecraft.arche.skin.SkinCache;
 
 public final class ArchePersona implements Persona, InventoryHolder {
 	private static final String TABLE = "persona";
@@ -77,7 +100,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	PersonaInventory inv = null;
 	double money = 0;
 	double fatigue = 0;
-	double maxFatigue = 100;
 	int food = 0;
     float saturation = 0;
     double health = 0;
@@ -799,16 +821,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public int getTotalPlaytime(){
 		return pastPlayTime + getTimePlayed();
 	}
-
-    @Override
-    public double getMaximumFatigue() {
-        return maxFatigue;
-    }
-
-    @Override
-    public void setMaximumFatigue(double maxFatigue) {
-        this.maxFatigue = maxFatigue;
-    }
 
 	@Override
 	public double getFatigue() {

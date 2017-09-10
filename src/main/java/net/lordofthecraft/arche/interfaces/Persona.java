@@ -137,20 +137,6 @@ public interface Persona {
 	boolean hasPrefix();
 
     /**
-     * Get the fatigue that when reached will prevent the player from performing certain actions
-     *
-     * @return The maximum fatigue of this player
-     */
-    double getMaximumFatigue();
-
-    /**
-     * Sets the level of fatigue this persona has to reach before it prevents certain actions from being performed
-     *
-     * @param maxFatigue The new maximum fatigue
-     */
-    void setMaximumFatigue(double maxFatigue);
-
-    /**
      * Gets the current level of Fatigue this persona has, between 0 and {@link #getMaximumFatigue()}
      *
      * @return The current level of fatigue
