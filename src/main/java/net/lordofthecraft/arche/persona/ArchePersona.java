@@ -154,6 +154,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		return skills;
 	}
 
+	public PersonaAttributes attributes() {
+		return attributes;
+	}
+	
 	public SkillAttachment getSkill(Skill skill){
 		return skills.getSkill(skill);
 	}
