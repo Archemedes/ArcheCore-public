@@ -10,6 +10,8 @@ import org.bukkit.entity.Player;
 
 import com.google.common.collect.Maps;
 
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.ArcheAttributeInstance;
 import net.lordofthecraft.arche.attributes.VanillaAttribute;
@@ -61,6 +63,12 @@ public class PersonaAttributes {
     }
     
     public void addModifier(ArcheAttribute a, AttributeModifier m) {
+    	ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
+    	String timerWhy = null;
+    	if(timer != null) {
+    		timerWhy = String.format("adding attribute to %s (%d)", persona.getName(), persona.getPersonaId());
+    		timer.startTiming(timerWhy);
+    	}
     	
     	ArcheAttributeInstance inst = null;
     	if(!customAttributes.containsKey(a)) {
@@ -77,6 +85,8 @@ public class PersonaAttributes {
     	
     	inst.addModifier(m);
 		a.tryApply(inst);
+		
+    	if(timer != null) timer.stopTiming(timerWhy);
     }
     
     public void removeModifier(Attribute a, AttributeModifier m) {
@@ -84,6 +94,12 @@ public class PersonaAttributes {
     }
     
     public void removeModifier(ArcheAttribute a, AttributeModifier m) {
+    	ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
+    	String timerWhy = null;
+    	if(timer != null) {
+    		timerWhy = String.format("removing attribute from %s (%d)", persona.getName(), persona.getPersonaId());
+    		timer.startTiming(timerWhy);
+    	}
     	
     	if(customAttributes.containsKey(a)) {
     		ArcheAttributeInstance inst = customAttributes.get(a);
@@ -109,6 +125,8 @@ public class PersonaAttributes {
     		}
     		
     	} //Else this modifier does not exist anyway
+    	
+    	if(timer != null) timer.stopTiming(timerWhy);
     }
     
 }
