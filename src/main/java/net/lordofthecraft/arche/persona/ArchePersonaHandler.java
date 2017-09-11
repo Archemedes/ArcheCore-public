@@ -242,7 +242,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 		if(before != null && before != after){
 			//Store and switch Persona-related specifics: Location and Inventory.
 			before.saveMinecraftSpecifics(p);
-            before.attributes.removeFromPlayer();
 
 			//Transfer fatigue from previous persona to new persona IF previous value was higher
 			//This should prevent some alt abuse where players chain their fatigue bars to grind
@@ -254,7 +253,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		}
 
 		after.restoreMinecraftSpecifics(p);
-
+		
 		//Check if switched-to Persona will require a different skin from storage
 		SkinCache cache = ArcheCore.getControls().getSkinCache();
         ArcheSkin skBefore = (before == null ? null : before.getSkin());
@@ -628,7 +627,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.prefix = res.getString("prefix");
 		persona.current = res.getBoolean("curr");
 		persona.fatigue = res.getInt("fatigue");
-		persona.maxFatigue = res.getInt("max_fatigue");
 		persona.health = res.getDouble("health");
         persona.food = res.getInt("hunger");
         persona.saturation = res.getFloat("saturation");

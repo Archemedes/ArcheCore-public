@@ -91,7 +91,8 @@ public class ArcheAttributeInstance implements AttributeInstance {
 	@Override
 	public void removeModifier(AttributeModifier modifier) {
         Preconditions.checkArgument(modifier != null, "modifier");
-        mods.remove(modifier.getUniqueId());
+        ExtendedAttributeModifier remove = mods.remove(modifier.getUniqueId());
+        remove.remove();
 	}
 	
 	public boolean hasModifier(AttributeModifier modifier) {

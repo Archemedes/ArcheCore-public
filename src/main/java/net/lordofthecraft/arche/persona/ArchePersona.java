@@ -618,7 +618,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		location = new WeakBlock(p.getLocation());
         savePotionEffects(p);
         buffer.put(new UpdateVitalsTask(persona_id, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv));
-        
+        attributes.handleSwitch(false);
     }
 
     public void savePotionEffects(Player pl) {
@@ -688,7 +688,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
             einv.clear();
             pinv.setArmorContents(new ItemStack[4]);
 		}
-        attributes.applyToPlayer();
+        attributes.handleSwitch(false);
 
 		//Heal them so their Persona is fresh
 		double maxHp = p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
@@ -812,7 +812,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		ArchePersona p = (ArchePersona) object;
 		return this.persona_id == p.persona_id;
 	}
-	//
+	
 	@Override
 	public boolean isNewbie() {
 		return getTimePlayed() < ArcheCore.getControls().getNewbieDelay();

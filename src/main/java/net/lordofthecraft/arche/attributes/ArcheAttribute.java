@@ -10,8 +10,8 @@ import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.interfaces.Persona;
 
 public class ArcheAttribute {
-	public static final ArcheAttribute MAX_FATIGUE = new ArcheAttribute("Maximum Fatigue",100.0);
-	public static final ArcheAttribute FATIGUE_GAIN = new ArcheAttribute("Fatigue Gained",100.0);
+	public static final ArcheAttribute MAX_FATIGUE = new AttributeMaxFatigue("Maximum Fatigue",100.0);
+	public static final ArcheAttribute FATIGUE_GAIN = new ArcheAttribute("Fatigue Gained",1);
 	public static final ArcheAttribute EXHAUSTION = new ArcheAttribute("Exhaustion", 0);
 	
 	private static final Map<Attribute, VanillaAttribute> VANILLA = Maps.newEnumMap(Attribute.class);

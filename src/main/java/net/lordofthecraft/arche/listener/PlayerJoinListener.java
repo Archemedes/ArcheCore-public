@@ -40,9 +40,13 @@ public class PlayerJoinListener implements Listener {
 		RaceBonusHandler.reset(p);
 		handler.initPlayer(p);
 		Persona ps = handler.getPersona(p);
-		if(ps != null) Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
-        else SaveHandler.getInstance().put(new PlayerRegisterTask(p.getUniqueId()));
-        //if(logger != null) logger.putPair(p.getUniqueId(), p.getName());
+		if(ps != null) {
+			Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
+			ps.attributes().handleLogin();
+		}else {
+			SaveHandler.getInstance().put(new PlayerRegisterTask(p.getUniqueId()));
+		}
+		
 		if(timer != null) timer.stopTiming("login");
 		if(ArcheCore.getPlugin().debugMode()) ArcheCore.getPlugin().getLogger().info("{Login} Currently have " + handler.getPersonas().size() + " persona files for " + Bukkit.getOnlinePlayers().size() + " players." );
 
@@ -62,6 +66,7 @@ public class PlayerJoinListener implements Listener {
         if (!plug.willCachePersonas()) buffer.put(new UnloadTask(p));
 
 		RaceBonusHandler.reset(p);
+		ps.attributes().handleSwitch(true); 
 		
 		//Stop dupe?
 		p.saveData();

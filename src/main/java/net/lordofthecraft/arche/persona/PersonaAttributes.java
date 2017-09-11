@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 
@@ -15,6 +16,7 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.ArcheAttributeInstance;
+import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.attributes.VanillaAttribute;
 import net.lordofthecraft.arche.interfaces.Persona;
 
@@ -129,18 +131,41 @@ public class PersonaAttributes {
     	
     	if(timer != null) timer.stopTiming(timerWhy);
     }
-
-    void performSQLUpdate() {
+    
+    public void handleLogin() {
 		for(Entry<ArcheAttribute, ArcheAttributeInstance> entry : customAttributes.entrySet()) {
+			ArcheAttribute aa = entry.getKey();
+			aa.tryApply(entry.getValue());
+		}
+    }
+
+    public void handleSwitch(boolean logoff) {
+    	//Logoff logic:
+    	//true: player left server or ArcheCore plugin was disabled
+    	//false: persona is being switched to or from.
+    	
+		for(Entry<ArcheAttribute, ArcheAttributeInstance> entry : customAttributes.entrySet()) {
+			ArcheAttribute aa = entry.getKey();
 			ArcheAttributeInstance aai = entry.getValue();
+			
+			aai.getModifiers().stream()
+			.map(ExtendedAttributeModifier.class::cast)
+			.forEach(m -> {if(logoff) m.handleLogoff(); else m.handleSwitch(aa, persona);} );
+			
+			if(aa instanceof VanillaAttribute) {
+				if(logoff || !persona.isCurrent()) deactivateVanilla((VanillaAttribute) aa);
+				else aa.tryApply(aai);
+			} 
 		}
     }
     
-	void applyToPlayer() {
-		for(Entry<ArcheAttribute, ArcheAttributeInstance> entry : customAttributes.entrySet()) {
-			ArcheAttribute a = entry.getKey();
-			a.tryApply(entry.getValue());
-		}
-	}
+    private void deactivateVanilla(VanillaAttribute va) {
+    	Player p = persona.getPlayer();
+    	if(p != null) {
+    		ArcheAttributeInstance aai = customAttributes.get(va);
+    		AttributeInstance ai = p.getAttribute(va.getHandle());
+    		aai.getModifiers().stream().forEach(m -> ai.removeModifier(m));
+    	}
+    }
     
 }

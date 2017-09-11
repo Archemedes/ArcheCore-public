@@ -1,7 +1,6 @@
 package net.lordofthecraft.arche.attributes;
 
 import java.sql.Timestamp;
-import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.attribute.AttributeModifier;
@@ -66,40 +65,55 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 				if(this.ticksRemaining > 0) {
 					setupTask(a, ps);
 				}
-			} else if(task != null) {
-				long progress = System.currentTimeMillis() - task.creation.getTime();
-				this.ticksRemaining -= (progress / 50); //Amount of ticks that 
-				task.cancel();
-				task = null;
+			} else {
+				interruptTask();
 			}
 		}
 		
 		//Most important time to save is as a persona is switched away from
 		//It is thus handled as if it were a Minecraft vitals component
 		//Note however that ACTUAL vanilla attmods are not made persistent in AC
-		if(!ps.isCurrent()) trySave();
+		if(!ps.isCurrent()) {
+			trySave();
+		}
+	}
+	
+	public void handleLogoff() {
+		if(decay == Decay.ACTIVE && task != null) {
+			interruptTask();
+		}
+		trySave();
+	}
+	
+	private void interruptTask() {
+		if(task != null) {
+			long progress = System.currentTimeMillis() - task.creation.getTime();
+			this.ticksRemaining -= (progress / 50); //Amount of ticks that we progressed during active Persona time
+			task.cancel();
+			task = null;
+		}
 	}
 	
 	public void setShouldSave(boolean save) {
 		this.save = save;
 	}
 	
-	public void trySave() {
+	private void trySave() {
 		if(save) {
-			//TODO: mysql logic
+			//TODO: mysql logic to insert this Mod into the db
 		}
 	}
 	
 	public void remove() {
-		if(task != null) task.cancel();
-		
-		//TODO remove this attmod from DB here
+		if(task != null) task.cancel();	
+		if(save) save = true;//TODO remove this attmod from DB here
 	}
 	
 	private void setupTask(ArcheAttribute a, Persona ps) {
 		task = new AttributeModifierRemover(a, this, ps);
 		task.runTaskLater(ArcheCore.getPlugin(), this.ticksRemaining);
 	}
+	
 	
 	public enum Decay { NEVER, ACTIVE, OFFLINE }
 	
