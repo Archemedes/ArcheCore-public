@@ -5,6 +5,7 @@ import net.lordofthecraft.arche.util.InventoryUtil;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -42,7 +43,7 @@ public class PersonaInventory {
                 ItemStack[] endercontents = enderresult.toArray(new ItemStack[enderresult.size()]);
                 return new PersonaInventory(contents, endercontents);
             }
-            return new PersonaInventory(contents, new ItemStack[27]);
+            return new PersonaInventory(contents, new ItemStack[InventoryType.ENDER_CHEST.getDefaultSize()]);
         } else throw new InvalidConfigurationException("Config node 'contents' not found! Should always be there and should always be the only tag!");
 
     }

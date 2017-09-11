@@ -28,6 +28,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -617,6 +618,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		location = new WeakBlock(p.getLocation());
         savePotionEffects(p);
         buffer.put(new UpdateVitalsTask(persona_id, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv));
+        
     }
 
     public void savePotionEffects(Player pl) {
@@ -766,7 +768,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			if (inv == null || inv.getContents() == null) {
 				return null;
 			}
-			Inventory binv = Bukkit.createInventory(this, 45, "Persona Inventory: " + player + "@" + getId());
+			Inventory binv = Bukkit.createInventory(this, InventoryType.CRAFTING.getDefaultSize(), "Persona Inventory: " + player + "@" + getId());
 			binv.setContents(inv.getContents());
 			return binv;
 		}
@@ -780,7 +782,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
             if (inv == null || inv.getEnderContents() == null) {
                 return null;
             }
-            Inventory einv = Bukkit.createInventory(this, 27, "Persona Enderchest: " + player + "@" + getId());
+            Inventory einv = Bukkit.createInventory(this, InventoryType.ENDER_CHEST.getDefaultSize(), "Persona Enderchest: " + player + "@" + getId());
             einv.setContents(inv.getEnderContents());
             return einv;
         }
