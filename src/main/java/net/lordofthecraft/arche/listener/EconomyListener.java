@@ -1,8 +1,12 @@
 package net.lordofthecraft.arche.listener;
 
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.SimpleTransaction;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Transaction.TransactionType;
+import net.lordofthecraft.arche.util.MessageUtil;
+
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,7 +25,7 @@ public class EconomyListener implements Listener {
 		Persona p = ArcheCore.getControls().getPersonaHandler().getPersona(e.getEntity());
 		if(p != null){
 			double penalty = economy.getBalance(p) * economy.getFractionLostOnDeath();
-			economy.withdrawPersona(p, penalty);
+			economy.withdrawPersona(p, penalty, new SimpleTransaction("Death penalty for " + MessageUtil.identifyPersona(p), TransactionType.WITHDRAW));
 		}
 	}
 	

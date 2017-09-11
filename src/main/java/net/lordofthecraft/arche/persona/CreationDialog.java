@@ -1,29 +1,44 @@
 package net.lordofthecraft.arche.persona;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.interfaces.Economy;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
-import net.lordofthecraft.arche.util.MessageUtil;
-import net.md_5.bungee.api.chat.*;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.block.Block;
-import org.bukkit.conversations.*;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.conversations.BooleanPrompt;
+import org.bukkit.conversations.Conversation;
+import org.bukkit.conversations.ConversationContext;
+import org.bukkit.conversations.ConversationFactory;
+import org.bukkit.conversations.ConversationPrefix;
+import org.bukkit.conversations.FixedSetPrompt;
+import org.bukkit.conversations.MessagePrompt;
+import org.bukkit.conversations.Prompt;
+import org.bukkit.conversations.ValidatingPrompt;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.SimpleTransaction;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.interfaces.Economy;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Transaction.TransactionType;
+import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
+import net.lordofthecraft.arche.util.MessageUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class CreationDialog {
 
@@ -279,7 +294,7 @@ public class CreationDialog {
         protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
         	 if (input) {
         		 context.setSessionData("name", name);
-        		 Player p = (Player) context.getForWhom();
+        		 //Player p = (Player) context.getForWhom();
                  return new PickSexPrompt();
         	 } else {
         		 return new PickNamePrompt();
@@ -508,7 +523,7 @@ public class CreationDialog {
         @Override
         public String getPromptText(ConversationContext context) {
             String name = (String) context.getSessionData("name");
-            return ChatColor.BLUE + "Creating your persona, this may take a bit so please hold on...";
+            return ChatColor.BLUE + "We are now creating Persona with name: " + ChatColor.RESET + name;
         }
 
         @Override
@@ -520,7 +535,7 @@ public class CreationDialog {
             String gender = (String) context.getSessionData("gender");
             Race race = (Race) context.getSessionData("race");
             long creationTimeMS = System.currentTimeMillis();
-            Block b = p.getLocation().getBlock();
+            //Block b = p.getLocation().getBlock();
 
             //ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS) {
             ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, gender, new Timestamp(creationTimeMS));
@@ -539,7 +554,8 @@ public class CreationDialog {
 
             if (context.getSessionData("first") != null) {
                 Economy econ = ArcheCore.getControls().getEconomy();
-                if (econ != null) econ.setPersona(persona, econ.getBeginnerAllowance());
+                if (econ != null) econ.setPersona(persona, econ.getBeginnerAllowance(), 
+                		new SimpleTransaction("New persona allowance for " + MessageUtil.identifyPersona(persona), TransactionType.SET));
                 if (ArcheCore.getControls().getPersonaHandler().willModifyDisplayNames()) p.setDisplayName(name);
 
                 long treshold = System.currentTimeMillis() - (1000 * 90);
