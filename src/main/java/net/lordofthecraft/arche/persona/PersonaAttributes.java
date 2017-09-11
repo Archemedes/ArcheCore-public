@@ -3,6 +3,7 @@ package net.lordofthecraft.arche.persona;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -128,5 +129,18 @@ public class PersonaAttributes {
     	
     	if(timer != null) timer.stopTiming(timerWhy);
     }
+
+    void performSQLUpdate() {
+		for(Entry<ArcheAttribute, ArcheAttributeInstance> entry : customAttributes.entrySet()) {
+			ArcheAttributeInstance aai = entry.getValue();
+		}
+    }
+    
+	void applyToPlayer() {
+		for(Entry<ArcheAttribute, ArcheAttributeInstance> entry : customAttributes.entrySet()) {
+			ArcheAttribute a = entry.getKey();
+			a.tryApply(entry.getValue());
+		}
+	}
     
 }
