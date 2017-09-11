@@ -59,7 +59,7 @@ public class SkillAttachment {
 	
 	SkillAttachment(Skill skill, Persona persona, FutureTask<SkillData> call){
 		this.call = call;
-		this.handle = persona.getPersonaSkills();
+		this.handle = persona.skills();
 		
 		xp = DEFAULT_XP;
 		canSee = skill.getVisibility() == Skill.VISIBILITY_VISIBLE;

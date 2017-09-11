@@ -477,7 +477,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	private List<BaseComponent> getExtendedWhoisInfo(Persona p, boolean mod){
 		//Possible to move 'profession' back here
         List<BaseComponent> components = Lists.newArrayList();
-        components.addAll(Arrays.asList(p.getMagics().getMagicText()));
+        components.addAll(Arrays.asList(p.magics().getMagicText()));
         return components;
     }
 

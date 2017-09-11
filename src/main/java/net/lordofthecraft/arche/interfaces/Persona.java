@@ -47,7 +47,7 @@ public interface Persona {
      * The PersonaSkills objects hold the fields and methods related to a particular persona's skills
      * @return The PersonaSkills object
      */
-    PersonaSkills getPersonaSkills();
+    PersonaSkills skills();
     
     /**
      * The PersonaAttributes objects hold the fields and methods related to a particular persona's attributes
@@ -55,6 +55,13 @@ public interface Persona {
      */
     PersonaAttributes attributes();
 
+    /**
+     * Retrieve the object which stores a persona's magic data
+     *
+     * @return the PersonaMagic object
+     */
+    PersonaMagics magics();
+    
 	/**
 	 * A method that retrieves the Persona's 'main' skill or profession, which they can set for RP purposes.
 	 * @return A player's self-set 'main' skill.
@@ -79,13 +86,6 @@ public interface Persona {
 	 * @return Whether or not the Persona is current
 	 */
 	boolean isCurrent();
-
-    /**
-     * Retrieve the object which stores a persona's magic data
-     *
-     * @return the PersonaMagic object
-     */
-    PersonaMagics getMagics();
 
     /**
      * See if this persona has a specific magic

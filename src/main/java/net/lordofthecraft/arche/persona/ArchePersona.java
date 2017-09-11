@@ -151,7 +151,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		skills.addSkillAttachment(attach);
 	}
 
-	public PersonaSkills getPersonaSkills() {
+	public PersonaSkills skills() {
 		return skills;
 	}
 
@@ -247,7 +247,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
     @Override
-    public PersonaMagics getMagics() {
+    public PersonaMagics magics() {
         return magics;
     }
 
