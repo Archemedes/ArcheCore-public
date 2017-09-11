@@ -368,6 +368,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
             return Optional.empty();
 		}
         MagicCreateCallable call = new MagicCreateCallable(persona_id, (ArcheMagic) m, tier, (teacher == null ? null : teacher.getPersonaId()), visible, ArcheCore.getSQLControls());
+        //TODO no waiting.
         Future<MagicAttachment> future = buffer.prepareCallable(call);
 		try {
 			MagicAttachment attach = future.get(200, TimeUnit.MILLISECONDS);

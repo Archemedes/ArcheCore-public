@@ -41,6 +41,7 @@ public class UpdateTask extends ArcheTask {
                     case INV:
                     case ENDERINV:
                     case SKILL_SELECTED:
+                    case POTIONS:
                         stat.setString(1, (String) value);
                         break;
                     case CURRENT:
