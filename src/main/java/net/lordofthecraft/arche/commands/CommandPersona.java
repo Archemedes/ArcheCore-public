@@ -322,71 +322,74 @@ public class CommandPersona implements CommandExecutor {
                     sender.sendMessage(ChatColor.AQUA + "You have permakilled Persona " + ChatColor.WHITE + pers.getName() + ChatColor.AQUA + " belonging to " + ChatColor.WHITE + pers.getPlayerName());
                 } else sender.sendMessage(ChatColor.RED + "I'm afraid I can't do that.");
                 return true;
-			} else if (args.length > 1) {
+            } else if (cmd == PersonaCommand.PROFESSION && args.length == 1 && sender instanceof Player) {
+                sender.sendMessage(ChatColor.BLUE + "Available Professions: " + ChatColor.DARK_GRAY + "[Click for Info]");
+                return true;
+            } else if (args.length > 1) {
                 if (cmd == PersonaCommand.NAME) {
                     int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
-					String name = StringUtils.join(args, ' ', 1, parseTo);
+                    String name = StringUtils.join(args, ' ', 1, parseTo);
 
                     long timeLeft = (pers.getRenamed().getTime() / 60000) - (System.currentTimeMillis() / 60000) + delay;
                     if (timeLeft > 0 && !sender.hasPermission("archecore.persona.quickrename")) {
-						sender.sendMessage(ChatColor.RED + "You must wait " + timeLeft + " minutes before renaming again");
-					} else if (name.length() <= 32 || sender.hasPermission("archecore.persona.longname")) {
-						pers.setName(name);
-						sender.sendMessage(ChatColor.AQUA + "Persona name was set to: " + ChatColor.RESET + name);
-						if (sender == pers.getPlayer()) {
+                        sender.sendMessage(ChatColor.RED + "You must wait " + timeLeft + " minutes before renaming again");
+                    } else if (name.length() <= 32 || sender.hasPermission("archecore.persona.longname")) {
+                        pers.setName(name);
+                        sender.sendMessage(ChatColor.AQUA + "Persona name was set to: " + ChatColor.RESET + name);
+                        if (sender == pers.getPlayer()) {
                             SaveHandler.getInstance().put(new UpdateTask(pers, PersonaField.STAT_RENAMED, new Timestamp(System.currentTimeMillis())));
                         } //Player renamed by his own accord
-						//SaveHandler.getInstance().put(new PersonaRenameTask(pers));
-					} else {
-						sender.sendMessage(ChatColor.RED + "Error: Name too long. Max length 32 characters");
-					}
-					return true;
+                        //SaveHandler.getInstance().put(new PersonaRenameTask(pers));
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "Error: Name too long. Max length 32 characters");
+                    }
+                    return true;
 
                 } else if (cmd == PersonaCommand.PREFIX && prefix) {
                     int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
-					String name = StringUtils.join(args, ' ', 1, parseTo);
+                    String name = StringUtils.join(args, ' ', 1, parseTo);
 
-					if (name.length() <= 16) {
-						pers.setPrefix(name);
-						sender.sendMessage(ChatColor.AQUA + "Set the prefix of " + pers.getName() + " to: " + ChatColor.RESET + name);
-					} else {
-						sender.sendMessage(ChatColor.RED + "Error: Prefix too long. Max length 16 characters");
-					}
-					return true;
+                    if (name.length() <= 16) {
+                        pers.setPrefix(name);
+                        sender.sendMessage(ChatColor.AQUA + "Set the prefix of " + pers.getName() + " to: " + ChatColor.RESET + name);
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "Error: Prefix too long. Max length 16 characters");
+                    }
+                    return true;
                 } else if (cmd == PersonaCommand.ADDINFO) {
                     int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
-					String line = StringUtils.join(args, ' ', 1, parseTo);
+                    String line = StringUtils.join(args, ' ', 1, parseTo);
 
-					int length = line.length();
-					if (pers.getDescription() != null) length += pers.getDescription().length();
-					if (length > 150 && !sender.hasPermission("archecore.persona.longbio")) {
-						sender.sendMessage(ChatColor.RED + "Error: Description too long.");
-					} else {
-						pers.addDescription(line);
-						sender.sendMessage(ChatColor.AQUA + pers.getName() + "'s description now reads: " + ChatColor.RESET + pers.getDescription());
-					}
+                    int length = line.length();
+                    if (pers.getDescription() != null) length += pers.getDescription().length();
+                    if (length > 150 && !sender.hasPermission("archecore.persona.longbio")) {
+                        sender.sendMessage(ChatColor.RED + "Error: Description too long.");
+                    } else {
+                        pers.addDescription(line);
+                        sender.sendMessage(ChatColor.AQUA + pers.getName() + "'s description now reads: " + ChatColor.RESET + pers.getDescription());
+                    }
 
-					return true;
+                    return true;
                 } else if (cmd == PersonaCommand.PROFESSION) {
                     if (pers.getMainSkill() == null || sender.hasPermission("archecore.persona.switchprofession")) {
                         Skill skill = ArcheCore.getControls().getSkill(args[1]);
-						if(skill == null) {
-							sender.sendMessage(ChatColor.RED + "Error: This profession could not be found!");
-						} else {
-							pers.setMainSkill(skill);
-							sender.sendMessage(ChatColor.GOLD + "You have dedicated yourself to " + ChatColor.RESET + skill.getName());
-						}
-					} else {
-						sender.sendMessage(ChatColor.RED + "You have already selected a profession!");
-					}
-					return true;
+                        if(skill == null) {
+                            sender.sendMessage(ChatColor.RED + "Error: This profession could not be found!");
+                        } else {
+                            pers.setMainSkill(skill);
+                            sender.sendMessage(ChatColor.GOLD + "You have dedicated yourself to " + ChatColor.RESET + skill.getName());
+                        }
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "You have already selected a profession!");
+                    }
+                    return true;
                 } else if (cmd == PersonaCommand.SETINFO) {
                     int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
-					String line = StringUtils.join(args, ' ', 1, parseTo);
+                    String line = StringUtils.join(args, ' ', 1, parseTo);
 
-					pers.setDescription(line);
-					sender.sendMessage(ChatColor.AQUA + pers.getName() + "'s description now reads: " + line);
-					return true;
+                    pers.setDescription(line);
+                    sender.sendMessage(ChatColor.AQUA + pers.getName() + "'s description now reads: " + line);
+                    return true;
                 } else if (cmd == PersonaCommand.SETRACE) {
                     int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
                     String race = StringUtils.join(args, ' ', 1, parseTo);
@@ -476,7 +479,7 @@ public class CommandPersona implements CommandExecutor {
                 } else if (cmd == PersonaCommand.ASCENDED) {
                     return doRaceChange(sender, pers, Race.ASCENDED);
                 }
-			}
+            }
 		}
 		return false;
 	}

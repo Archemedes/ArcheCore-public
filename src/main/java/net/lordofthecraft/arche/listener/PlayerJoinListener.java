@@ -55,9 +55,11 @@ public class PlayerJoinListener implements Listener {
 		Player p = e.getPlayer();
 		
 		Persona ps = handler.getPersona(p);
-		if(ps != null) Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(ps, PersonaDeactivateEvent.Reason.LOGOUT));
-		
-		//If Personas are not cached, send a signal into the consumer queue
+        if (ps != null) {
+            Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(ps, PersonaDeactivateEvent.Reason.LOGOUT));
+        }
+
+        //If Personas are not cached, send a signal into the consumer queue
 		//To unload the Personas as soon as all save operations are done
         if (!plug.willCachePersonas()) buffer.put(new UnloadTask(p));
 
