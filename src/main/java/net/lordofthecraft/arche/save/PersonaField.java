@@ -37,7 +37,7 @@ public enum PersonaField {
     private static final String STATEMENT_SUFFIX = " = ? WHERE persona_id";
 
     private final String field;
-    private final PersonaTable table;
+    public final PersonaTable table;
     public final SQLType type;
     private PreparedStatement stat = null;
 

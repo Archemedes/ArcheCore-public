@@ -1,10 +1,12 @@
 package net.lordofthecraft.arche.save.tasks.persona;
 
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
+import net.lordofthecraft.arche.util.MessageUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,7 +26,11 @@ public class UpdateTask extends ArcheTask {
 	
 	@Override
 	public void run(){
-		try{
+        if (field == PersonaField.PERSONA_ID || field == PersonaField.SLOT) {
+            ArcheCore.getPlugin().getLogger().warning("Warning! Attempted to set " + field.field() + " with UpdateTask for " + MessageUtil.identifyPersona(persona) + "! This is not supported!");
+            return;
+        }
+        try{
 			Connection c = handle.getConnection();
             c.setAutoCommit(true);
             PreparedStatement stat = field.getStatement(c);

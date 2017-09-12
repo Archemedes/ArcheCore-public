@@ -13,6 +13,7 @@ import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.listener.*;
 import net.lordofthecraft.arche.magic.Archenomicon;
 import net.lordofthecraft.arche.persona.*;
+import net.lordofthecraft.arche.save.Consumer;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
 import net.lordofthecraft.arche.save.tasks.persona.PersonaDeleteTask;
@@ -82,6 +83,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private boolean usingMySQL;
     private int fullFatigueRestore;
     private boolean canCreatePersonas;
+
+    private Consumer archeConsumer;
 
     //private Thread saverThread = null;
 
@@ -202,6 +205,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 
         saveHandler = SaveHandler.getInstance();
+        archeConsumer = new Consumer(sqlHandler);
+        //Bukkit.getScheduler().runTaskTimerAsynchronously(this, archeConsumer, 20, 1231231); //TODO Config for zis ztuff
         ArcheTables.setUpSQLTables(sqlHandler);
         //saveHandler.put(new CreateDatabaseTask());
         blockRegistry = new BlockRegistry();
