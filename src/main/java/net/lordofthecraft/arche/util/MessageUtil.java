@@ -1,19 +1,15 @@
 package net.lordofthecraft.arche.util;
 
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.md_5.bungee.api.chat.*;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-
-import static org.bukkit.ChatColor.*;
-
 import java.util.Arrays;
+
+import static org.bukkit.ChatColor.BLUE;
+import static org.bukkit.ChatColor.GRAY;
 
 /**
  * Set of utility methods to quickly retrieve often-used BaseComponents compositions
@@ -101,9 +97,9 @@ public class MessageUtil {
 		if(sender instanceof Player) ((Player) sender).spigot().sendMessage(m);
 		else sender.sendMessage(m.toPlainText());
 	}
-	
-	public static String identifyPersona(Persona p) {
-		return p.getPersonaId() + ":" + p.getName() + " (" + p.getPlayerName() + ")";
-	}
+
+    public static String identifyPersona(Persona p) {
+        return p.getPersonaId() + ":" + p.getName() + " (" + p.getPlayerName() + ")";
+    }
 
 }

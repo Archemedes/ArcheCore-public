@@ -4,6 +4,7 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Transaction;
+import net.lordofthecraft.arche.util.MessageUtil;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -44,7 +45,7 @@ public class EconomyListener implements Listener {
 
         @Override
         public String getCause() {
-            return persona.getPlayerName() + "@" + persona.getId() + " DIED. HAHA.";
+            return MessageUtil.identifyPersona(persona) + " Died";
         }
 
         @Override
