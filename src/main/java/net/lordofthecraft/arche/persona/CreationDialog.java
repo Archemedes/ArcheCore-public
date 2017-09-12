@@ -1,29 +1,43 @@
 package net.lordofthecraft.arche.persona;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.interfaces.Economy;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.Transaction;
-import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
-import net.lordofthecraft.arche.util.MessageUtil;
-import net.md_5.bungee.api.chat.*;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.conversations.*;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.conversations.BooleanPrompt;
+import org.bukkit.conversations.Conversation;
+import org.bukkit.conversations.ConversationContext;
+import org.bukkit.conversations.ConversationFactory;
+import org.bukkit.conversations.ConversationPrefix;
+import org.bukkit.conversations.FixedSetPrompt;
+import org.bukkit.conversations.MessagePrompt;
+import org.bukkit.conversations.Prompt;
+import org.bukkit.conversations.ValidatingPrompt;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheCoreTransaction;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.interfaces.Economy;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
+import net.lordofthecraft.arche.util.MessageUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class CreationDialog {
 
@@ -540,7 +554,8 @@ public class CreationDialog {
             if (context.getSessionData("first") != null) {
                 Economy econ = ArcheCore.getControls().getEconomy();
                 if (econ != null)
-                    econ.setPersona(persona, econ.getBeginnerAllowance(), new NewPersonaTransaction(persona));
+                    econ.setPersona(persona, econ.getBeginnerAllowance(),
+                    		new ArcheCoreTransaction(MessageUtil.identifyPersona(persona) + " received beginner allowance"));
                 if (ArcheCore.getControls().getPersonaHandler().willModifyDisplayNames()) p.setDisplayName(name);
 
                 long treshold = System.currentTimeMillis() - (1000 * 90);
@@ -552,34 +567,6 @@ public class CreationDialog {
 
             }
             return Prompt.END_OF_CONVERSATION;
-        }
-    }
-
-    public static class NewPersonaTransaction implements Transaction {
-        private final Persona newpersona;
-
-        private NewPersonaTransaction(Persona newpersona) {
-            this.newpersona = newpersona;
-        }
-
-        @Override
-        public String getCause() {
-            return MessageUtil.identifyPersona(newpersona) + " was created.";
-        }
-
-        @Override
-        public TransactionType getType() {
-            return TransactionType.SET;
-        }
-
-        @Override
-        public Plugin getRegisteringPlugin() {
-            return ArcheCore.getPlugin();
-        }
-
-        @Override
-        public String getRegisteringPluginName() {
-            return "ArcheCore-Economy";
         }
     }
 

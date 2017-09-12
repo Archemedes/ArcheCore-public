@@ -1,26 +1,15 @@
 package net.lordofthecraft.arche.interfaces;
 
-import org.bukkit.plugin.Plugin;
-
+/**
+ * Interface meant to describe logging objects for ArcheCore economy transactions
+ * Calling Economy methods requires that you supply a Transaction implementation
+ */
 public interface Transaction {
 
     /**
      * A short sentence describing the reason for the transaction
      */
     String getCause();
-
-    /**
-     * Returns the type of transaction this is.
-     */
-    TransactionType getType();
-
-    /**
-     * The {@link Plugin} responsible for this transaction.
-     * <br>Use {@code 'Obelisk'} if you are an Obelisk Module.
-     *
-     * @return {@link Plugin}
-     */
-    Plugin getRegisteringPlugin();
 
     /**
      * A human-readable name for the responsible plugin.
@@ -30,10 +19,4 @@ public interface Transaction {
      */
     String getRegisteringPluginName();
 
-
-    enum TransactionType {
-        WITHDRAW,
-        DEPOSIT,
-        SET
-    }
 }

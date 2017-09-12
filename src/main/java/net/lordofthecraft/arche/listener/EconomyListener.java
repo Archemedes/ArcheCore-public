@@ -1,16 +1,16 @@
 package net.lordofthecraft.arche.listener;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.interfaces.Economy;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.Transaction;
-import net.lordofthecraft.arche.util.MessageUtil;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.plugin.Plugin;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheCoreTransaction;
+import net.lordofthecraft.arche.interfaces.Economy;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.util.MessageUtil;
 
 public class EconomyListener implements Listener {
     private final Economy economy;
@@ -24,7 +24,7 @@ public class EconomyListener implements Listener {
         Persona p = ArcheCore.getControls().getPersonaHandler().getPersona(e.getEntity());
         if (p != null) {
             double penalty = economy.getBalance(p) * economy.getFractionLostOnDeath();
-            economy.withdrawPersona(p, penalty, new DeathTaxTransaction(p));
+            economy.withdrawPersona(p, penalty, new ArcheCoreTransaction(MessageUtil.identifyPersona(p) + " received a death penalty"));
         }
     }
 
@@ -33,34 +33,6 @@ public class EconomyListener implements Listener {
         if (e.getRightClicked() instanceof Villager) {
             e.setCancelled(true);
             e.getRightClicked().remove();
-        }
-    }
-
-    public static class DeathTaxTransaction implements Transaction {
-        private final Persona persona;
-
-        protected DeathTaxTransaction(Persona persona) {
-            this.persona = persona;
-        }
-
-        @Override
-        public String getCause() {
-            return MessageUtil.identifyPersona(persona) + " Died";
-        }
-
-        @Override
-        public TransactionType getType() {
-            return TransactionType.WITHDRAW;
-        }
-
-        @Override
-        public Plugin getRegisteringPlugin() {
-            return ArcheCore.getPlugin();
-        }
-
-        @Override
-        public String getRegisteringPluginName() {
-            return "ArcheCore-Economy";
         }
     }
 }
