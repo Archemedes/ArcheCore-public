@@ -3,7 +3,9 @@ package net.lordofthecraft.arche.save;
 import java.sql.*;
 
 public enum PersonaField {
-    PREFIX("prefix", PersonaTable.VITALS, JDBCType.VARCHAR),
+	PERSONA_ID("persona_id", PersonaTable.MASTER, JDBCType.INTEGER),
+	SLOT("slot", PersonaTable.MASTER, JDBCType.INTEGER),
+    PREFIX("prefix", PersonaTable.MASTER, JDBCType.VARCHAR),
     NAME("name", PersonaTable.MASTER, JDBCType.VARCHAR),
     RACE("race_header", PersonaTable.MASTER, JDBCType.VARCHAR),
     RACE_REAL("race", PersonaTable.MASTER, JDBCType.VARCHAR),
@@ -45,6 +47,8 @@ public enum PersonaField {
         this.table = table;
         this.type = type;
     }
+    
+    public String field() { return this.field; }
 
     public PreparedStatement getStatement(Connection c) throws SQLException {
         if (stat == null)

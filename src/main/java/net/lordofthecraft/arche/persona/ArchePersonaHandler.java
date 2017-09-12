@@ -10,6 +10,7 @@ import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.*;
 import net.lordofthecraft.arche.event.PersonaWhoisEvent.Query;
 import net.lordofthecraft.arche.interfaces.*;
+import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.DataTask;
 import net.lordofthecraft.arche.save.tasks.persona.PersonaInsertTask;
@@ -600,19 +601,14 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	private ArchePersona buildPersona(ResultSet res, OfflinePlayer p) throws SQLException{
-        int persona_id = res.getInt("persona_id");
-        int slot = res.getInt("slot");
-		String name = res.getString("name");
-		Race race = Race.valueOf(res.getString("race"));
-		String rheader = res.getString("race_header");
-        //I just want to say this triggers the fuck out of me.
-        //It's not that I really care about gender morality, you can go out and be anything you want to be
-        //But if I see literal memes in gender:
-        //I'm going to be SO TRIGGERED :FeelsRageMan: REEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-        //-501
-        String gender = res.getString("gender");
-        Timestamp creationTimeMS = res.getTimestamp("date_created");
-		String type = res.getString("p_type");
+        int persona_id = res.getInt(PersonaField.PERSONA_ID.field());
+        int slot = res.getInt(PersonaField.SLOT.field());
+		String name = res.getString(PersonaField.NAME.field());
+		Race race = Race.valueOf(res.getString(PersonaField.RACE_REAL.field()));
+		String rheader = res.getString(PersonaField.RACE.field());
+        String gender = res.getString(PersonaField.GENDER.field());
+        Timestamp creationTimeMS = res.getTimestamp(PersonaField.STAT_CREATION.field());
+		String type = res.getString(PersonaField.TYPE.field());
 		PersonaType ptype = PersonaType.valueOf(type);
 
 		ArchePersona persona = new ArchePersona(persona_id, p.getUniqueId(), slot, name, race, gender, creationTimeMS, ptype);
@@ -623,13 +619,13 @@ public class ArchePersonaHandler implements PersonaHandler {
 			persona.raceHeader = rheader;
 		}
 
-		persona.description = res.getString("descr");
-		persona.prefix = res.getString("prefix");
-		persona.current = res.getBoolean("curr");
-		persona.fatigue = res.getInt("fatigue");
-		persona.health = res.getDouble("health");
-        persona.food = res.getInt("hunger");
-        persona.saturation = res.getFloat("saturation");
+		persona.description = res.getString(PersonaField.DESCRIPTION.field());
+		persona.prefix = res.getString(PersonaField.PREFIX.field());
+		persona.current = res.getBoolean(PersonaField.CURRENT.field());
+		persona.fatigue = res.getInt(PersonaField.FATIGUE.field());
+		persona.health = res.getDouble(PersonaField.HEALTH.field());
+        persona.food = res.getInt(PersonaField.FOOD.field());
+        persona.saturation = res.getFloat(PersonaField.SATURATION.field());
 
         /*
             String personaSelect = "SELECT " +
@@ -643,29 +639,29 @@ public class ArchePersonaHandler implements PersonaHandler {
 
          */
 
-		persona.timePlayed.set(res.getInt("played"));
-		persona.charactersSpoken.set(res.getInt("chars"));
-		persona.lastRenamed = res.getTimestamp("renamed");
+		persona.timePlayed.set(res.getInt(PersonaField.STAT_PLAYED.field()));
+		persona.charactersSpoken.set(res.getInt(PersonaField.STAT_CHARS.field()));
+		persona.lastRenamed = res.getTimestamp(PersonaField.STAT_RENAMED.field());
 		persona.lastPlayed = res.getTimestamp("last_played");
 		//persona.gainsXP = res.getBoolean(15);
-		persona.skills.setMainProfession(ArcheSkillFactory.getSkill(res.getString("profession")));
+		persona.skills.setMainProfession(ArcheSkillFactory.getSkill(res.getString(PersonaField.SKILL_SELECTED.field())));
         Optional<Creature> creature = ArcheCore.getMagicControls().getCreatureById(res.getString("creature"));
         creature.ifPresent(persona.magics::setCreature);
 
-		String wstr = res.getString("world");
+		String wstr = res.getString(PersonaField.WORLD.field());
 		if(!res.wasNull()){
 			UUID wuuid = UUID.fromString(wstr);
 			World w = Bukkit.getWorld(wuuid);
 			if(w != null){
-				int x = res.getInt("x");
-				int y = res.getInt("y");
-				int z = res.getInt("z");
+				int x = res.getInt(PersonaField.X.field());
+				int y = res.getInt(PersonaField.Y.field());
+				int z = res.getInt(PersonaField.Z.field());
 				persona.location = new WeakBlock(w, x, y, z);
 			}
 		}
 
-		String invString = res.getString("inv");
-        String enderinvString = res.getString("ender_inv");
+		String invString = res.getString(PersonaField.INV.field());
+        String enderinvString = res.getString(PersonaField.ENDERINV.field());
         if(!res.wasNull()){
 			try {
                 persona.inv = PersonaInventory.restore(invString, enderinvString);
@@ -675,10 +671,10 @@ public class ArchePersonaHandler implements PersonaHandler {
 			}
 		}
 
-        persona.loadPotionsFromString(res.getString("potions"));
+        persona.loadPotionsFromString(res.getString(PersonaField.POTIONS.field()));
 
-		if (ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble("money");
-		persona.pastPlayTime = res.getInt("playtime_past");
+		if (ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble(PersonaField.MONEY.field());
+		persona.pastPlayTime = res.getInt(PersonaField.STAT_PLAYTIME_PAST.field());
 
 		//We now let all Personas load their skills (albeit lazily). Let's do this now
 		persona.loadSkills();
