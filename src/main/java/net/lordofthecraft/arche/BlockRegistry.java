@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.tasks.logging.BlockRegistryDeleteTask;
 import net.lordofthecraft.arche.save.tasks.logging.BlockRegistryInsertTask;
+import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 

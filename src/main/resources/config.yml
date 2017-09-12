@@ -133,10 +133,15 @@ enable.mysql: false
 
 #login info for the MySQL instance, required if the above is true
 mysql:
+  #The username for the mysql connection
   user: user
+  #The port to use for making the connection
   port: 3306
+  #The password for the username for this database
   password: password
+  #The IP address of the database
   host: localhost
+  #The database to use
   database: archecore
 
 #########################

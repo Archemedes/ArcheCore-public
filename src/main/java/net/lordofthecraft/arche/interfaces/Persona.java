@@ -1,22 +1,16 @@
 package net.lordofthecraft.arche.interfaces;
 
+import net.lordofthecraft.arche.enums.PersonaType;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.persona.*;
+import net.lordofthecraft.arche.skin.ArcheSkin;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.Future;
-
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-
-import net.lordofthecraft.arche.enums.PersonaType;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.persona.MagicAttachment;
-import net.lordofthecraft.arche.persona.PersonaAttributes;
-import net.lordofthecraft.arche.persona.PersonaInventory;
-import net.lordofthecraft.arche.persona.PersonaMagics;
-import net.lordofthecraft.arche.persona.PersonaSkills;
-import net.lordofthecraft.arche.skin.ArcheSkin;
 
 public interface Persona {
 
@@ -115,7 +109,7 @@ public interface Persona {
 	 * @see java.util.Optional View this to see more information on Optionals and how they work
 	 * @see java.util.concurrent.Future View this to see more information on Futures and how they work
 	 */
-	Optional<Future<MagicAttachment>> createAttachment(Magic magic, int tier, Persona teacher, boolean visible);
+    Optional<MagicAttachment> createAttachment(Magic magic, int tier, Persona teacher, boolean visible);
 
 	/**
 	 * Gets a Personas prefix.

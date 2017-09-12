@@ -1,27 +1,25 @@
 package net.lordofthecraft.arche.persona;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.google.common.collect.Maps;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheTimer;
+import net.lordofthecraft.arche.attributes.*;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.attribute.ArcheAttributeInsertTask;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 
-import com.google.common.collect.Maps;
-
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheTimer;
-import net.lordofthecraft.arche.attributes.ArcheAttribute;
-import net.lordofthecraft.arche.attributes.ArcheAttributeInstance;
-import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
-import net.lordofthecraft.arche.attributes.VanillaAttribute;
-import net.lordofthecraft.arche.interfaces.Persona;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 
 /**
- * Just fucking end me
+ * Just fucking end me - Sporadic 2k17
  */
 public class PersonaAttributes {
     //N.B: attributes stored here are such for the reason that they need to be saved to SQL
@@ -62,7 +60,11 @@ public class PersonaAttributes {
     }
     
     public void addModifier(Attribute a, AttributeModifier m) {
-    	addModifier(ArcheAttribute.getFromVanilla(a), m);
+        Optional<VanillaAttribute> att = AttributeRegistry.getInstance().getVanillaAttribute(a);
+        if (!att.isPresent()) {
+            return;
+        }
+        addModifier(att.get(), m);
     }
     
     public void addModifier(ArcheAttribute a, AttributeModifier m) {
@@ -88,12 +90,46 @@ public class PersonaAttributes {
     	
     	inst.addModifier(m);
 		a.tryApply(inst);
-		
-    	if(timer != null) timer.stopTiming(timerWhy);
+        if (m instanceof ExtendedAttributeModifier) {
+            SaveHandler.getInstance().put(new ArcheAttributeInsertTask((ExtendedAttributeModifier) m));
+        }
+        //SaveHandler.getInstance().put(new ArcheAttributeInsertTask(m));
+        if(timer != null) timer.stopTiming(timerWhy);
+    }
+
+    void addModifierFromSQL(ArcheAttribute a, AttributeModifier m) {
+        ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
+        String timerWhy = null;
+        if (timer != null) {
+            timerWhy = String.format("adding attribute to %s (%d)", persona.getName(), persona.getPersonaId());
+            timer.startTiming(timerWhy);
+        }
+
+        ArcheAttributeInstance inst = null;
+        if (!customAttributes.containsKey(a)) {
+            inst = new ArcheAttributeInstance(a, persona.getPersonaKey());
+            customAttributes.put(a, inst);
+        } else {
+            inst = customAttributes.get(a);
+        }
+
+        if (inst.hasModifier(m)) {
+            //We remove it because the values for this modifier may have changed
+            inst.removeModifier(m);
+        }
+
+        inst.addModifier(m);
+        a.tryApply(inst);
+
+        if (timer != null) timer.stopTiming(timerWhy);
     }
     
     public void removeModifier(Attribute a, AttributeModifier m) {
-    	removeModifier(ArcheAttribute.getFromVanilla(a), m);
+        Optional<VanillaAttribute> att = AttributeRegistry.getInstance().getVanillaAttribute(a);
+        if (!att.isPresent()) {
+            return;
+        }
+        removeModifier(att.get(), m);
     }
     
     public void removeModifier(ArcheAttribute a, AttributeModifier m) {
@@ -164,8 +200,8 @@ public class PersonaAttributes {
     	if(p != null) {
     		ArcheAttributeInstance aai = customAttributes.get(va);
     		AttributeInstance ai = p.getAttribute(va.getHandle());
-    		aai.getModifiers().stream().forEach(m -> ai.removeModifier(m));
-    	}
+            aai.getModifiers().forEach(ai::removeModifier);
+        }
     }
     
 }

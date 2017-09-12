@@ -263,7 +263,9 @@ public final class ArcheTables {
                 "mod_value DOUBLE DEFAULT 0.0," +
                 "operation TEXT NOT NULL," +
                 "created TIMESTAMP," +
-                "decaytime TIMESTAMP," +
+                "decayticks LONG," +
+                "decaytype TEXT," +
+                "lostondeath BOOLEAN DEFAULT FALSE," +
                 "PRIMARY KEY (mod_uuid,persona_id_fk,attribute_type)," +
                 "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE" +
                 ")" +

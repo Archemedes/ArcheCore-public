@@ -1,6 +1,6 @@
 package net.lordofthecraft.arche;
 
-import net.lordofthecraft.arche.attributes.ArcheAttribute;
+import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.FatigueHandler;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -36,7 +36,7 @@ public class ArcheFatigueHandler implements FatigueHandler {
 		if(skill != null && skill.getRaceMods().containsKey(pers.getRace())) 
 			add /= skill.getRaceMods().get(pers.getRace());
 
-        fat = Math.min(pers.attributes().getAttributeValue(ArcheAttribute.MAX_FATIGUE), fat + add);
+        fat = Math.min(pers.attributes().getAttributeValue(AttributeRegistry.MAX_FATIGUE), fat + add);
         pers.setFatigue(fat);
 	}
 
@@ -135,6 +135,6 @@ public class ArcheFatigueHandler implements FatigueHandler {
 	}
 
 	private double getMaxFatigue(Persona p) {
-		return p.attributes().getAttributeValue(ArcheAttribute.MAX_FATIGUE);
-	}
+        return p.attributes().getAttributeValue(AttributeRegistry.MAX_FATIGUE);
+    }
 }

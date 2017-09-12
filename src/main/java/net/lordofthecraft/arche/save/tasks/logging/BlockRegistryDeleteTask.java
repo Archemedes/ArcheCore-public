@@ -1,7 +1,7 @@
 package net.lordofthecraft.arche.save.tasks.logging;
 
-import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.save.tasks.StatementTask;
+import net.lordofthecraft.arche.util.WeakBlock;
 
 import java.sql.SQLException;
 

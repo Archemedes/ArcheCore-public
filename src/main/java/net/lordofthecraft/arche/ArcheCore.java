@@ -19,6 +19,7 @@ import net.lordofthecraft.arche.save.tasks.persona.PersonaDeleteTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
 import net.lordofthecraft.arche.skin.SkinCache;
+import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -218,7 +219,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         //May also create a command/field to flag a skill as forcibly disabled.
         //-501
         ArcheSkillFactory.preloadSkills(sqlHandler);
-        archenomicon.createTomeFromKnowledge(sqlHandler);
+        archenomicon.init(sqlHandler);
 
         try{
             ResultSet res = sqlHandler.query("SELECT * FROM blockregistry");

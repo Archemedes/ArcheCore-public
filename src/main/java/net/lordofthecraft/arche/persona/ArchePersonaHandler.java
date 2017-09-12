@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
-import net.lordofthecraft.arche.WeakBlock;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.*;
@@ -20,6 +19,7 @@ import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.MessageUtil;
+import net.lordofthecraft.arche.util.WeakBlock;
 import net.md_5.bungee.api.chat.*;
 import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.*;
@@ -649,7 +649,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.lastPlayed = res.getTimestamp("last_played");
 		//persona.gainsXP = res.getBoolean(15);
 		persona.skills.setMainProfession(ArcheSkillFactory.getSkill(res.getString("profession")));
-        Optional<Creature> creature = ArcheCore.getMagicControls().summonCreature(res.getString("creature"));
+        Optional<Creature> creature = ArcheCore.getMagicControls().getCreatureById(res.getString("creature"));
         creature.ifPresent(persona.magics::setCreature);
 
 		String wstr = res.getString("world");
@@ -674,8 +674,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 				e.printStackTrace();
 			}
 		}
-        String potionsList = res.getString("potions");
 
+        persona.loadPotionsFromString(res.getString("potions"));
 
 		if (ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble("money");
 		persona.pastPlayTime = res.getInt("playtime_past");
@@ -686,6 +686,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.loadMagics();
 
 		persona.loadTags();
+
+        persona.loadAttributes();
 
 		return persona;
 	}

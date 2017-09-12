@@ -163,7 +163,7 @@ public class CommandMoney implements CommandExecutor {
 
         private final Persona from;
 
-        public WidthdrawForCommandTransaction(Persona from) {
+        protected WidthdrawForCommandTransaction(Persona from) {
             this.from = from;
         }
 
@@ -192,7 +192,7 @@ public class CommandMoney implements CommandExecutor {
 
         private final Persona from;
 
-        public DepositForCommandTransaction(Persona from) {
+        protected DepositForCommandTransaction(Persona from) {
             this.from = from;
         }
 
@@ -221,7 +221,7 @@ public class CommandMoney implements CommandExecutor {
 
         private final CommandSender who;
 
-        public SetCommandTransaction(CommandSender who) {
+        protected SetCommandTransaction(CommandSender who) {
             this.who = who;
         }
 
@@ -250,7 +250,7 @@ public class CommandMoney implements CommandExecutor {
 
         private final CommandSender who;
 
-        public GrantCommandTransaction(CommandSender who) {
+        protected GrantCommandTransaction(CommandSender who) {
             this.who = who;
         }
 

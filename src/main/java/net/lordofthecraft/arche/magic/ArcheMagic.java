@@ -76,12 +76,12 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     private Map<Magic, Integer> weaknesses;
 
     public static Magic createMagic(String name, int maxTier, boolean selfTeachable) {
-        Optional<Magic> magic = ArcheCore.getMagicControls().researchMagic(name);
+        Optional<Magic> magic = ArcheCore.getMagicControls().getMagic(name);
         if (magic.isPresent()) {
             return magic.get();
         }
         ArcheMagic m = new ArcheMagic(name, maxTier, selfTeachable);
-        ArcheCore.getMagicControls().registerArcana(m);
+        ArcheCore.getMagicControls().registerMagic(m);
         SaveHandler.getInstance().put(new ArcheMagicInsertTask(m));
         return m;
     }
@@ -246,7 +246,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     }
 
     public void remove() {
-        ArcheCore.getMagicControls().banishMagic(this);
+        ArcheCore.getMagicControls().removeMagic(this);
         SaveHandler.getInstance().put(new ArcheMagicDeleteTask(name));
     }
 

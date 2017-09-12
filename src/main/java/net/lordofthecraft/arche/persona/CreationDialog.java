@@ -6,6 +6,7 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.*;
@@ -539,7 +540,8 @@ public class CreationDialog {
 
             if (context.getSessionData("first") != null) {
                 Economy econ = ArcheCore.getControls().getEconomy();
-                if (econ != null) econ.setPersona(persona, econ.getBeginnerAllowance());
+                if (econ != null)
+                    econ.setPersona(persona, econ.getBeginnerAllowance(), new NewPersonaTransaction(persona));
                 if (ArcheCore.getControls().getPersonaHandler().willModifyDisplayNames()) p.setDisplayName(name);
 
                 long treshold = System.currentTimeMillis() - (1000 * 90);
@@ -551,6 +553,34 @@ public class CreationDialog {
 
             }
             return Prompt.END_OF_CONVERSATION;
+        }
+    }
+
+    public static class NewPersonaTransaction implements Transaction {
+        private final Persona newpersona;
+
+        private NewPersonaTransaction(Persona newpersona) {
+            this.newpersona = newpersona;
+        }
+
+        @Override
+        public String getCause() {
+            return newpersona.getPlayerName() + " MADE NEW PERSONA. CONGRATULATIONS, " + newpersona.getName();
+        }
+
+        @Override
+        public TransactionType getType() {
+            return TransactionType.SET;
+        }
+
+        @Override
+        public Plugin getRegisteringPlugin() {
+            return ArcheCore.getPlugin();
+        }
+
+        @Override
+        public String getRegisteringPluginName() {
+            return "ArcheCore-Economy";
         }
     }
 

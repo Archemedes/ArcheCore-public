@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche;
+package net.lordofthecraft.arche.util;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.bukkit.Bukkit;

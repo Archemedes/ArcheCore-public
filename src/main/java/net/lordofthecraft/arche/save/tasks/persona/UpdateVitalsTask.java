@@ -17,9 +17,9 @@ public class UpdateVitalsTask extends StatementTask {
     private final float saturation;
     private final int hunger;
     private final PersonaInventory inv;
+    private final String potions;
 
-
-    public UpdateVitalsTask(int persona_id, UUID world, int x, int y, int z, double health, float saturation, int hunger, PersonaInventory inv) {
+    public UpdateVitalsTask(int persona_id, UUID world, int x, int y, int z, double health, float saturation, int hunger, PersonaInventory inv, String potions) {
         this.persona_id = persona_id;
         this.world = world;
         this.x = x;
@@ -29,6 +29,7 @@ public class UpdateVitalsTask extends StatementTask {
         this.saturation = saturation;
         this.hunger = hunger;
         this.inv = inv;
+        this.potions = potions;
     }
 
     @Override
@@ -40,13 +41,14 @@ public class UpdateVitalsTask extends StatementTask {
         stat.setDouble(5, health);
         stat.setFloat(6, saturation);
         stat.setInt(7, hunger);
-        stat.setInt(8, persona_id);
-        stat.setString(9, inv.getInvAsString());
-        stat.setString(10, inv.getEnderInvAsString());
+        stat.setString(8, inv.getInvAsString());
+        stat.setString(9, inv.getEnderInvAsString());
+        stat.setString(10, potions);
+        stat.setInt(11, persona_id);
     }
 
     @Override
     protected String getQuery() {
-        return "UPDATE persona_vitals SET world=? AND x=? AND y=? AND z=? AND health=? AND saturation=? AND hunger=? AND inv=? AND ender_inv=? WHERE persona_id_fk=?";
+        return "UPDATE persona_vitals SET world=? AND x=? AND y=? AND z=? AND health=? AND saturation=? AND hunger=? AND inv=? AND ender_inv=? AND potions=? WHERE persona_id_fk=?";
     }
 }

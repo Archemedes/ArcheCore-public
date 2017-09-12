@@ -1,17 +1,20 @@
 package net.lordofthecraft.arche.attributes;
 
-import java.sql.Timestamp;
-import java.util.UUID;
-
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.attribute.ArcheAttributeRemoveTask;
+import net.lordofthecraft.arche.save.tasks.attribute.ArcheAttributeUpdateTask;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.interfaces.Persona;
+import java.sql.Timestamp;
+import java.util.UUID;
 
 //Slightly more data for temp atts, which is not serialized through the bukkit method
 //Note that by default this is a permanent attribute
 public class ExtendedAttributeModifier extends AttributeModifier {
+
 	public boolean lostOnDeath = false;
 	public boolean save = true; 
 
@@ -19,17 +22,40 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 	private Decay decay = Decay.NEVER;
 	private AttributeModifierRemover task = null;
 	private long ticksRemaining = -1;
-	
-	public ExtendedAttributeModifier(AttributeModifier other) {
-		super(other.getUniqueId(), other.getName(), other.getAmount(), other.getOperation());
-	}
-	
-	public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation) {
-		super(uuid, name, amount, operation);
-	}
-	
-	public boolean isLostOnDeath() {
-		return lostOnDeath;
+    private final ArcheAttribute attribute;
+    private final int persona_id;
+
+    public ExtendedAttributeModifier(AttributeModifier other, Persona owner, ArcheAttribute attribute) {
+        super(other.getUniqueId(), other.getName(), other.getAmount(), other.getOperation());
+        this.attribute = attribute;
+        this.persona_id = owner.getPersonaId();
+    }
+
+    public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, Persona owner, ArcheAttribute attribute) {
+        super(uuid, name, amount, operation);
+        this.attribute = attribute;
+        this.persona_id = owner.getPersonaId();
+    }
+
+    public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, Persona owner, ArcheAttribute attribute, Decay decay, long ticksRemaining, boolean lostOnDeath) {
+        super(uuid, name, amount, operation);
+        this.attribute = attribute;
+        this.persona_id = owner.getPersonaId();
+        this.decay = decay;
+        this.ticksRemaining = ticksRemaining;
+        this.lostOnDeath = lostOnDeath;
+    }
+
+    public ArcheAttribute getAttribute() {
+        return attribute;
+    }
+
+    public int getPersonaId() {
+        return persona_id;
+    }
+
+    public boolean isLostOnDeath() {
+        return lostOnDeath;
 	}
 	
 	public Decay getDecayStrategy() {
@@ -39,16 +65,21 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 	public void setLostOnDeath(boolean lost) {
 		lostOnDeath = lost;
 	}
-	
-	public void setDecayStrategy(ArcheAttribute a, Persona ps, Decay decay, long ticksFromNow) {
-		if(this.decay != Decay.NEVER) {
-			stopDecay();	
-		}
+
+    public long getTicksRemaining() {
+        return ticksRemaining;
+    }
+
+    public void setDecayStrategy(ArcheAttribute a, Persona ps, Decay decay, long ticksFromNow) {
+        if(this.decay != Decay.NEVER) {
+            stopDecay();
+        }
 		
 		this.decay = decay;
 		this.ticksRemaining = ticksFromNow;
 		setupTask(a, ps);
-	}
+        trySave();
+    }
 	
 	public void stopDecay() {
 		decay = Decay.NEVER;
@@ -100,14 +131,17 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 	
 	private void trySave() {
 		if(save) {
-			//TODO: mysql logic to insert this Mod into the db
-		}
+            SaveHandler.getInstance().put(new ArcheAttributeUpdateTask(this));
+        }
 	}
 	
 	public void remove() {
-		if(task != null) task.cancel();	
-		if(save) save = true;//TODO remove this attmod from DB here
-	}
+		if(task != null) task.cancel();
+        if (save) {
+            save = true;
+            SaveHandler.getInstance().put(new ArcheAttributeRemoveTask(this));
+        }
+    }
 	
 	private void setupTask(ArcheAttribute a, Persona ps) {
 		task = new AttributeModifierRemover(a, this, ps);

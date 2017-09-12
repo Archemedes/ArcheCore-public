@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,7 +67,7 @@ public class Archenomicon {
                       .   *    *
      */
 
-    public Optional<Magic> researchMagic(String id) {
+    public Optional<Magic> getMagic(String id) {
         return magics.stream().filter(m -> m.getName().equalsIgnoreCase(id)).findFirst();
     }
 
@@ -85,7 +86,7 @@ public class Archenomicon {
     private final Set<MagicType> archetypes = Sets.newConcurrentHashSet();
     private final Set<Creature> creatures = Sets.newConcurrentHashSet();
 
-    public void createTomeFromKnowledge(SQLHandler handler) {
+    public void init(SQLHandler handler) {
         if (!archetypes.isEmpty()) {
             return;
         }
@@ -102,13 +103,13 @@ public class Archenomicon {
                 String description = rs.getString("descr");
                 MagicType aparent = null;
                 if (parent != null) {
-                    Optional<MagicType> pt = studyMagicType(parent);
+                    Optional<MagicType> pt = getArchetypeById(parent);
                     if (pt.isPresent()) {
                         aparent = pt.get();
                     }
                 }
                 ArcheType t = new ArcheType(id, name, (aparent == null ? null : (ArcheType) aparent), description);
-                forgeArchetype(t);
+                registerArchetype(t);
                 magicselect.clearParameters();
                 magicselect.setString(1, id);
                 ResultSet magics = magicselect.executeQuery();
@@ -123,7 +124,7 @@ public class Archenomicon {
                     int days_to_max = rs.getInt("days_to_max");
                     int days_to_extra = rs.getInt("days_to_extra");
                     ArcheMagic m = new ArcheMagic(mid, max_tier, self_teach, label, description, teachable, days_to_max, days_to_extra, t);
-                    registerArcana(m);
+                    registerMagic(m);
                 }
                 magics.close();
             }
@@ -138,7 +139,7 @@ public class Archenomicon {
                 while (rs.next()) {
                     String mid = rs.getString("fk_weakness_magic");
                     int modifier = rs.getInt("modifier");
-                    Optional<Magic> weak = researchMagic(mid);
+                    Optional<Magic> weak = getMagic(mid);
                     weak.ifPresent(magic -> ((ArcheMagic) m).addWeakness(magic, modifier));
                 }
                 rs.close();
@@ -155,13 +156,13 @@ public class Archenomicon {
                 String name = rs.getString("name");
                 String description = rs.getString("descr");
                 ArcheCreature creature = new ArcheCreature(cid, name, description);
-                birthCreature(creature);
+                registerCreature(creature);
                 creaturecreators.clearParameters();
                 creaturecreators.setString(1, cid);
                 ResultSet creators = creaturecreators.executeQuery();
                 while (creators.next()) {
                     String smagic = creators.getString("magic_id_fk");
-                    Optional<Magic> omagic = researchMagic(smagic);
+                    Optional<Magic> omagic = getMagic(smagic);
                     omagic.ifPresent(creature::addCreator);
                 }
                 creators.close();
@@ -199,19 +200,19 @@ public class Archenomicon {
      */
 
 
-    public void registerArcana(ArcheMagic m) {
+    public void registerMagic(ArcheMagic m) {
         if (!magics.contains(m)) {
             magics.add(m);
         }
     }
 
-    public void forgeArchetype(ArcheType type) {
+    public void registerArchetype(ArcheType type) {
         if (!archetypes.contains(type)) {
             archetypes.add(type);
         }
     }
 
-    public void birthCreature(ArcheCreature creature) {
+    public void registerCreature(ArcheCreature creature) {
         if (!creatures.contains(creature)) {
             creatures.add(creature);
         }
@@ -229,27 +230,27 @@ public class Archenomicon {
                         '''
      */
 
-    public Optional<Creature> summonCreature(String id) {
+    public Optional<Creature> getCreatureById(String id) {
         return creatures.stream().filter(c -> c.getId().equals(id)).findFirst();
     }
 
-    public Optional<Creature> summonCreatureByName(String name) {
+    public Optional<Creature> getCreatureByName(String name) {
         return creatures.stream().filter(c -> c.getName().equals(name)).findFirst();
     }
 
-    public Optional<Magic> invokeMagic(String id) {
+    public Optional<Magic> getMagicById(String id) {
         return magics.stream().filter(m -> m.getName().equals(id)).findFirst();
     }
 
-    public Optional<Magic> invokeMagicByName(String name) {
+    public Optional<Magic> getMagicByName(String name) {
         return magics.stream().filter(m -> m.getLabel().equals(name)).findFirst();
     }
 
-    public Optional<MagicType> studyMagicType(String id) {
+    public Optional<MagicType> getArchetypeById(String id) {
         return archetypes.stream().filter(a -> a.getKey().equals(id)).findFirst();
     }
 
-    public Optional<MagicType> studyMagicTypeByName(String name) {
+    public Optional<MagicType> getArchetypeByName(String name) {
         return archetypes.stream().filter(a -> a.getName().equals(name)).findFirst();
     }
 
@@ -257,8 +258,19 @@ public class Archenomicon {
         return magics.parallelStream().filter(m -> m.getType().equals(type)).collect(Collectors.toSet());
     }
 
+    public Set<Magic> getMagics() {
+        return Collections.unmodifiableSet(magics);
+    }
 
-    public void banishMagic(Magic m) {
+    public Set<MagicType> getArchetypes() {
+        return Collections.unmodifiableSet(archetypes);
+    }
+
+    public Set<Creature> getCreatures() {
+        return Collections.unmodifiableSet(creatures);
+    }
+
+    public void removeMagic(Magic m) {
         ArchePersonaHandler.getInstance().removeMagic(m);
         magics.remove(m);
     }
