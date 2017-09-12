@@ -16,11 +16,6 @@ public class SaveHandler {
 		return SingletonHolder.INSTANCE;
 	}
 
-	@Deprecated
-	public boolean isEmpty(){
-		return false;
-	}
-
 	public Future<?> put(ArcheTask s) {
 		if (s instanceof EndOfStreamTask) {
 			Future<?> f = service.submit(s);
@@ -56,21 +51,6 @@ public class SaveHandler {
             service.shutdownNow();
         }
     }
-
-	@Deprecated
-	public ArcheTask take(){
-		return null;
-	}
-
-	@Deprecated
-	public boolean contains(ArcheTask task) {
-		return true;
-	}
-
-	@Deprecated
-	public ArcheTask poll(){
-		return null;
-	}
 	
 	private static class SingletonHolder {
 		private static final SaveHandler INSTANCE = new SaveHandler();
