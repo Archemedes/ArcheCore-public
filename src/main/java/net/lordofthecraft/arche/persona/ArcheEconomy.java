@@ -50,7 +50,7 @@ public class ArcheEconomy implements Economy {
         double before = getBalance(p);
         ((ArchePersona) p).money = amount;
         buffer.put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
-        buffer.put(new InsertEconomyLogTask(p.getId(), transaction, TransactionType.SET, amount, before, getBalance(p)));
+        buffer.put(new InsertEconomyLogTask(p.getSlot(), transaction, TransactionType.SET, amount, before, getBalance(p)));
     }
 
     @Override
@@ -58,7 +58,7 @@ public class ArcheEconomy implements Economy {
         double before = getBalance(p);
         ((ArchePersona) p).money += amount;
         buffer.put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
-        buffer.put(new InsertEconomyLogTask(p.getId(), transaction, TransactionType.DEPOSIT, amount, before, getBalance(p)));
+        buffer.put(new InsertEconomyLogTask(p.getSlot(), transaction, TransactionType.DEPOSIT, amount, before, getBalance(p)));
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ArcheEconomy implements Economy {
         double before = getBalance(p);
         ((ArchePersona) p).money -= amount;
         buffer.put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
-        buffer.put(new InsertEconomyLogTask(p.getId(), transaction, TransactionType.WITHDRAW, amount, before, getBalance(p)));
+        buffer.put(new InsertEconomyLogTask(p.getSlot(), transaction, TransactionType.WITHDRAW, amount, before, getBalance(p)));
     }
 
     @Override

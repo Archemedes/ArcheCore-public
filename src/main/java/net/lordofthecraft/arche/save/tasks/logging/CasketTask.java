@@ -28,7 +28,7 @@ public class CasketTask extends StatementTask {
     protected void setValues() throws SQLException {
         stat.setLong(1, time);
         stat.setString(2, pers.getPlayerUUID().toString());
-        stat.setInt(3, pers.getId());
+        stat.setInt(3, pers.getSlot());
         stat.setDouble(4, luck);
         stat.setObject(5, rewards);
     }

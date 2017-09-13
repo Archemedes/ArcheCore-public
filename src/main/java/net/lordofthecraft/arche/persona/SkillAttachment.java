@@ -66,8 +66,8 @@ public class SkillAttachment {
 		
 		this.skill = (ArcheSkill) skill;
 		this.uuid = persona.getPlayerUUID().toString();
-		this.id = persona.getId();
-		this.persona_id = persona.getPersonaId();
+        this.id = persona.getSlot();
+        this.persona_id = persona.getPersonaId();
 	}
 	
 	

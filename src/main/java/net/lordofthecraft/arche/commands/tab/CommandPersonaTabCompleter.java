@@ -99,7 +99,7 @@ public class CommandPersonaTabCompleter implements TabCompleter {
         if (personas != null) {
             for (ArchePersona pers : personas) {
                 if (pers != null) {
-                    vals.add(username + "@" + pers.getId());
+                    vals.add(username + "@" + pers.getSlot());
                 }
             }
         }

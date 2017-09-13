@@ -56,6 +56,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private SkinCache skinCache;
     private ArcheTimer timer;
     private Economy economy;
+    private Consumer archeConsumer;
 
     //Config settings
     private int maxPersonaSlots;
@@ -84,14 +85,19 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private int fullFatigueRestore;
     private boolean canCreatePersonas;
 
-    private Consumer archeConsumer;
+
 
     //private Thread saverThread = null;
 
     private boolean shouldClone = false;
 
     public static PersonaKey getPersonaKey(UUID uuid, int pid) {
-        return new ArchePersonaKey(uuid, pid);
+        Persona pers = getPersonaControls().getPersona(uuid, pid);
+        if (pers != null) {
+            return pers.getPersonaKey();
+        } else {
+            return null;
+        }
     }
 
     public static Player getPlayer(UUID uuid) {
@@ -504,6 +510,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     @Override
     public SkinCache getSkinCache(){
         return skinCache;
+    }
+
+    @Override
+    public IConsumer getConsumer() {
+        return archeConsumer;
     }
 
     @Override

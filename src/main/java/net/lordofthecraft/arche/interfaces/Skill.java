@@ -76,6 +76,11 @@ public interface Skill {
 	 */
 	boolean isVisible(Persona p);
 
+    /**
+     * Whether or not this skill is considered "Enabled". Disabled skills will not show up for players.
+     *
+     * @return Whether or not this skill is enabled
+     */
     boolean isEnabled();
 
     /**

@@ -69,11 +69,11 @@ public interface Persona {
 	void setMainSkill(Skill profession);
 
 	/**
-	 * Returns the session-invariant ID of the Persona. Ids are between 0 and 3.
-	 * IDs are only unique for the same player 
-	 * @return the immutable id of the persona
-	 */
-	int getId();
+     * Returns the session-invariant ID of the Persona. Ids are between 0 and 15.
+     * IDs are only unique for the same player
+     * @return the immutable slot of the persona
+     */
+    int getSlot();
 
 	/**
 	 * See if the Persona is a Player's current Persona
@@ -176,8 +176,6 @@ public interface Persona {
 	 * @return The Persona Key for this persona
 	 */
 	PersonaKey getPersonaKey();
-
-
 
 	/**
 	 * Retrieve the Mojang-issued UUID coupled to this Persona's player
@@ -325,7 +323,6 @@ public interface Persona {
 	 */
 	void setPersonaType(PersonaType type);
 
-
 	/**
 	 * Delete the Persona from the Plugin records.
 	 * @return whether or not the removal was successful.
@@ -387,4 +384,17 @@ public interface Persona {
      * @return Returns whether or not this persona has an {@link net.lordofthecraft.arche.skin.ArcheSkin}
      */
     boolean hasSkin();
+
+    /**
+     * Check whether or not this Persona has had it's SQL removed.
+     * <p>
+     * <b>Why?</b> When performing tasks such as {@link net.lordofthecraft.arche.save.archerows.persona.ArchePersonaRow} there is the chance that
+     * a persona might already be removed. In the efforts to ensure that we are not unneedingly running tasks on personas which have no longer exist
+     * this variable is set.
+     * <p>
+     * P.S. Don't set this value manually. Thanks.
+     *
+     * @return If this persona was successfully deleted
+     */
+    boolean isDeleted();
 }

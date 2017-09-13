@@ -3,6 +3,7 @@ package net.lordofthecraft.arche.save.archerows.persona.insert;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArchePreparedStatementRow;
 import net.lordofthecraft.arche.save.archerows.persona.ArchePersonaRow;
+import net.lordofthecraft.arche.util.MessageUtil;
 import org.bukkit.block.Block;
 
 import java.sql.Connection;
@@ -31,7 +32,7 @@ public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersona
 
         stat.setInt(1, persona.getPersonaId());
         stat.setString(2, persona.getPlayerUUID().toString());
-        stat.setInt(3, persona.getId());
+        stat.setInt(3, persona.getSlot());
         stat.setString(4, persona.getRace().name());
         stat.setString(5, persona.getName());
         stat.setString(6, persona.getGender());
@@ -67,5 +68,12 @@ public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersona
     @Override
     public String[] getInserts() {
         return new String[0];
+    }
+
+    @Override
+    public String toString() {
+        return "PersonaInsertRow{" +
+                "persona=" + MessageUtil.identifyPersona(persona) +
+                '}';
     }
 }

@@ -91,4 +91,12 @@ public class PersonaInventory {
         config.set("contents", contentslist);
         return config.saveToString();
     }
+
+    @Override
+    public String toString() {
+        return "PersonaInventory{" +
+                "contents=" + getInvAsString() +
+                ", enderContents=" + getEnderInvAsString() +
+                '}';
+    }
 }

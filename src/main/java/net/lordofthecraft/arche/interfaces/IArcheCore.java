@@ -60,8 +60,15 @@ public interface IArcheCore {
 	 */
 	SQLHandler getSQLHandler();
 
-	/**
-	 * Adds a Topic to the HelpDesk, revealing it to all players via the GUI and command
+    /**
+     * The ArcheCore consumer is the SQL processor which safely and efficiently saves SQL data for Personas.
+     *
+     * @return The Consumer object
+     */
+    IConsumer getConsumer();
+
+    /**
+     * Adds a Topic to the HelpDesk, revealing it to all players via the GUI and command
 	 * If already instantiated, you can add a HelpFile object directly 
 	 * rather than have the HelpDesk construct it. 
 	 * @param helpfile the HelpFile object that you want to add
@@ -156,7 +163,6 @@ public interface IArcheCore {
      * @return If ArcheCore has a DB clone scheduled
      */
 	boolean isCloning();
-
 
 	/**
 	 * Convenience method to Create a Treasure Chest which draws from a predefined Loot

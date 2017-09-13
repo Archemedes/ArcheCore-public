@@ -23,24 +23,24 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 	private AttributeModifierRemover task = null;
 	private long ticksRemaining = -1;
     private final ArcheAttribute attribute;
-    private final int persona_id;
+    private final Persona persona;
 
     public ExtendedAttributeModifier(AttributeModifier other, Persona owner, ArcheAttribute attribute) {
         super(other.getUniqueId(), other.getName(), other.getAmount(), other.getOperation());
         this.attribute = attribute;
-        this.persona_id = owner.getPersonaId();
+        this.persona = owner;
     }
 
     public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, Persona owner, ArcheAttribute attribute) {
         super(uuid, name, amount, operation);
         this.attribute = attribute;
-        this.persona_id = owner.getPersonaId();
+        this.persona = owner;
     }
 
     public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, Persona owner, ArcheAttribute attribute, Decay decay, long ticksRemaining, boolean lostOnDeath) {
         super(uuid, name, amount, operation);
         this.attribute = attribute;
-        this.persona_id = owner.getPersonaId();
+        this.persona = owner;
         this.decay = decay;
         this.ticksRemaining = ticksRemaining;
         this.lostOnDeath = lostOnDeath;
@@ -51,7 +51,11 @@ public class ExtendedAttributeModifier extends AttributeModifier {
     }
 
     public int getPersonaId() {
-        return persona_id;
+        return persona.getPersonaId();
+    }
+
+    public Persona getPersona() {
+        return persona;
     }
 
     public boolean isLostOnDeath() {

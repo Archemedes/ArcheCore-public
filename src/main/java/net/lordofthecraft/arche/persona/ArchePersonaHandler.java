@@ -139,9 +139,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 	@Override
 	public ArchePersona getPersona(PersonaKey key){
 		if(key == null) return null;
-
-		return getPersona(key.getPlayerUUID(), key.getPersonaId());
-	}
+        Optional<ArchePersona> oper = getPersonaById(key.getPersonaID());
+        return oper.orElse(null);
+    }
 
 	@Override
 	public ArchePersona getPersona(UUID uuid, int id){
@@ -231,8 +231,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		for (ArchePersona pr : prs) {
 			if (pr != null) {
-				boolean setAs = pr.getId() == id;
-				if (before == null && pr.current && !setAs) before = pr;
+                boolean setAs = pr.getSlot() == id;
+                if (before == null && pr.current && !setAs) before = pr;
 				pr.setCurrent(setAs);
 			}
 		}
@@ -277,22 +277,22 @@ public class ArchePersonaHandler implements PersonaHandler {
 				k -> new ArchePersona[ArcheCore.getControls().personaSlots()]
 		);
 
-		if (prs[persona.getId()] != null) {
-			PersonaRemoveEvent event2 = new PersonaRemoveEvent(prs[persona.getId()], true);
-			Bukkit.getPluginManager().callEvent(event2);
+        if (prs[persona.getSlot()] != null) {
+            PersonaRemoveEvent event2 = new PersonaRemoveEvent(prs[persona.getSlot()], true);
+            Bukkit.getPluginManager().callEvent(event2);
 
 			if (event2.isCancelled()) return false;
 
 			//This should no longer be necessary because of unique constraints
 			//buffer.put(new DataTask(DataTask.DELETE, "persona", null, prs[id].sqlCriteria));
-			buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, prs[persona.getId()].sqlCriteria));
+            buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, prs[persona.getSlot()].sqlCriteria));
 
 			//delete all skill records
-			deleteSkills(prs[persona.getId()]);
-			SkinCache.getInstance().clearSkin(prs[persona.getId()]);
-		}
+            deleteSkills(prs[persona.getSlot()]);
+            SkinCache.getInstance().clearSkin(prs[persona.getSlot()]);
+        }
 		//Add this Persona into its slot
-		prs[persona.getId()] = persona;
+        prs[persona.getSlot()] = persona;
 
 		//Load skills for the Persona
 		for(ArcheSkill s : ArcheSkillFactory.getSkills().values()){
@@ -305,7 +305,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			p.removePotionEffect(ps.getType());
 
         Block b = p.getLocation().getBlock();
-        buffer.put(new PersonaInsertTask(persona.getPersonaId(), p.getUniqueId(), persona.getId(), persona.getGender(), persona.getRace(), persona.getName(), persona.getCreationTime(), b.getX(), b.getY(), b.getZ(), b.getWorld().getUID()));
+        buffer.put(new PersonaInsertTask(persona.getPersonaId(), p.getUniqueId(), persona.getSlot(), persona.getGender(), persona.getRace(), persona.getName(), persona.getCreationTime(), b.getX(), b.getY(), b.getZ(), b.getWorld().getUID()));
 
         persona.saveMinecraftSpecifics(p);
 
@@ -315,7 +315,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		RaceBonusHandler.apply(p, persona.getRace());
 		persona.updateDisplayName(p);
 
-		switchPersona(p, persona.getId()); //This teleport will fail due to the Location being null still
+        switchPersona(p, persona.getSlot()); //This teleport will fail due to the Location being null still
 
 		if (ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
 			Location to;
@@ -410,8 +410,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 				result.add(new ComponentBuilder("Click for more...")
 						.color(MessageUtil.convertColor(ChatColor.GRAY))
 						.italic(true)
-						.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pers more " + p.getPlayerName() + "@" + p.getId()))
-						.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to show extended persona information."))
+                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pers more " + p.getPlayerName() + "@" + p.getSlot()))
+                        .event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to show extended persona information."))
 						.create()[0]);
 			}
 		}
@@ -469,8 +469,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		result.add(new ComponentBuilder("Click for less...")
 				.color(MessageUtil.convertColor(ChatColor.GRAY))
 				.italic(true)
-				.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pers view " + p.getPlayerName() + "@" + p.getId()))
-				.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to show basic persona information."))
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pers view " + p.getPlayerName() + "@" + p.getSlot()))
+                .event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to show basic persona information."))
 				.create()[0]);
 		return result;
 	}
@@ -526,14 +526,14 @@ public class ArchePersonaHandler implements PersonaHandler {
 			while(res.next()){
 
 				ArchePersona persona = buildPersona(res, p);
-				if(persona.getId() >= prs.length) {
-					Logger logger = ArcheCore.getPlugin().getLogger();
-					logger.severe(p.getName() + " has personas that go above the server's set maximum persona count at: " + persona.getId());
-					logger.severe("We currently have no good way to solve this. "
+                if (persona.getSlot() >= prs.length) {
+                    Logger logger = ArcheCore.getPlugin().getLogger();
+                    logger.severe(p.getName() + " has personas that go above the server's set maximum persona count at: " + persona.getSlot());
+                    logger.severe("We currently have no good way to solve this. "
 							+ "Consider raising the max persona slots in config. "
 							+ "Persona has NOT been loaded from the database and is inaccessible");
 				}else {
-					prs[persona.getId()] = persona;
+                    prs[persona.getSlot()] = persona;
 
 					if (persona.current) {
 						if(!hasCurrent){
@@ -717,8 +717,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 				selectStatement.clearParameters();
 				selectStatement.setString(1, p.getUniqueId().toString());
 				ArchePersona persona = buildPersona(selectStatement.executeQuery(), p);
-				prs[persona.getId()] = persona;
-			}
+                prs[persona.getSlot()] = persona;
+            }
 		}catch(SQLException e){e.printStackTrace();}
 		finally{
 			for(ArchePersona[] prs : getPersonas()){

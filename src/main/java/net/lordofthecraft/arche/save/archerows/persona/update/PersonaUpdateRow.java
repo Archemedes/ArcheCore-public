@@ -3,9 +3,9 @@ package net.lordofthecraft.arche.save.archerows.persona.update;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.PersonaTable;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.persona.ArchePersonaRow;
+import net.lordofthecraft.arche.util.MessageUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -37,10 +37,7 @@ public class PersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
     public boolean canMerge(ArcheMergeableRow row) {
         return !isUnique()
                 && (row instanceof PersonaUpdateRow
-                && ((((PersonaUpdateRow) row).updatefield.table != PersonaTable.MASTER
-                && updatefield.table != PersonaTable.MASTER)
-                || ((PersonaUpdateRow) row).updatefield.table == PersonaTable.MASTER
-                && updatefield.table == PersonaTable.MASTER));
+                && ((PersonaUpdateRow) row).updatefield.table == updatefield.table);
     }
 
     @Override
@@ -48,7 +45,7 @@ public class PersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
         if (second.isUnique()) {
             throw new IllegalArgumentException("Can't merge a unique row");
         }
-        return new PersonaUpdateMergedRow(this, (PersonaUpdateRow) second);
+        return new MultiPersonaUpdateRow(this, (PersonaUpdateRow) second);
     }
 
     @Override
@@ -119,5 +116,15 @@ public class PersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
     @Override
     public String[] getInserts() {
         return new String[0];
+    }
+
+    @Override
+    public String toString() {
+        return "PersonaUpdateRow{" +
+                "toupdate=" + MessageUtil.identifyPersona(toupdate) +
+                ", updatefield=" + updatefield +
+                ", data=" + data +
+                ", solorun=" + solorun +
+                '}';
     }
 }

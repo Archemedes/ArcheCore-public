@@ -18,9 +18,12 @@ import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.archerows.persona.delete.PersonaDeleteRow;
+import net.lordofthecraft.arche.save.archerows.persona.update.PersonaUpdateRow;
+import net.lordofthecraft.arche.save.archerows.persona.update.VitalsUpdateRow;
 import net.lordofthecraft.arche.save.tasks.magic.MagicCreateCallable;
 import net.lordofthecraft.arche.save.tasks.magic.MagicInsertTask;
-import net.lordofthecraft.arche.save.tasks.persona.*;
+import net.lordofthecraft.arche.save.tasks.persona.TagAttachmentCallable;
 import net.lordofthecraft.arche.save.tasks.skills.SelectSkillTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
@@ -54,13 +57,15 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public final class ArchePersona implements Persona, InventoryHolder {
-	private static final String TABLE = "persona";
 
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
 	private static final SaveHandler buffer = SaveHandler.getInstance();
+    private static final IConsumer consumer = ArcheCore.getControls().getConsumer();
 
 	//The immutable auto-increment ID of this persona.
     private final int persona_id;
+
+    private boolean deleted = false;
 
 	final PersonaSkills skills = new PersonaSkills(this);
     final PersonaMagics magics = new PersonaMagics(this);
@@ -103,7 +108,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
     ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS, PersonaType type) {
-        this.key = new ArchePersonaKey(player, slot);
+        this.key = new ArchePersonaKey(persona_id, player, slot);
 
 		this.persona_id = persona_id;
 		this.race = race;
@@ -188,8 +193,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void setPersonaType(PersonaType type) {
 		this.type = type;
 
-		buffer.put(new UpdateTask(this, PersonaField.TYPE, type));
-	}
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.TYPE, type, false));
+        //buffer.put(new UpdateTask(this, PersonaField.TYPE, type));
+    }
 
 	@Override
 	public double withdraw(double amount, Transaction cause) {
@@ -214,14 +220,15 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void setMainSkill(Skill profession){
 		skills.setMainProfession(profession);
 		String name = profession == null? null : profession.getName();
-		buffer.put(new UpdateTask(this,PersonaField.SKILL_SELECTED, name));
-	}
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.SKILL_SELECTED, name, false));
+        //buffer.put(new UpdateTask(this,PersonaField.SKILL_SELECTED, name));
+    }
 
 
 	@Override
-	public int getId(){
-		return key.getPersonaId();
-	}
+    public int getSlot() {
+        return key.getPersonaSlot();
+    }
 
 	@Override
 	public boolean isCurrent(){
@@ -237,8 +244,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
         if (this.current != current) {
 
 			this.current = current;
-
-			buffer.put(new UpdateTask(this, PersonaField.CURRENT, current));
+            consumer.queueRow(new PersonaUpdateRow(this, PersonaField.CURRENT, current, false));
+            //buffer.put(new UpdateTask(this, PersonaField.CURRENT, current));
 
 			if (current) { // Persona becoming Player's current Persona.
 				Player p = Bukkit.getPlayer(getPlayerUUID());
@@ -258,12 +265,14 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	void loadSkills(){
-		for(ArcheSkill s : ArcheSkillFactory.getSkills().values()){
+        //TODO no lazy loading.
+        for(ArcheSkill s : ArcheSkillFactory.getSkills().values()){
 
 			//Start loading this Persona's Skill data for this one particular skill
 			SelectSkillTask task = new SelectSkillTask(this, s);
 			FutureTask<SkillData> fut = task.getFuture();
-			buffer.put(task);
+
+            //buffer.put(task);
 
 			addSkill(s, fut);
 		}
@@ -411,8 +420,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void setPrefix(String prefix){
 		this.prefix = prefix;
 		updateDisplayName(Bukkit.getPlayer(this.getPlayerUUID()));
-		buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
-	}
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.PREFIX, prefix, false));
+        //buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
+    }
 
 	@Override
 	public boolean hasPrefix(){
@@ -423,8 +433,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void clearPrefix(){
 		prefix = null;
 		updateDisplayName(Bukkit.getPlayer(this.getPlayerUUID()));
-		buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
-	}
+        //buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.PREFIX, prefix, false));
+    }
 
 	void updateDisplayName(Player p){
 		if(handler.willModifyDisplayNames() && p != null){
@@ -447,8 +458,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void addTimePlayed(int timePlayed){
 		int val = this.timePlayed.addAndGet(timePlayed);
 
-		buffer.put(new UpdateTask(this, PersonaField.STAT_PLAYED, val));
-	}
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.STAT_PLAYED, val, false));
+        //buffer.put(new UpdateTask(this, PersonaField.STAT_PLAYED, val));
+    }
 
 	@Override
 	public int getCharactersSpoken(){
@@ -462,8 +474,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void addCharactersSpoken(int charsSpoken){
 		int val = charactersSpoken.addAndGet(charsSpoken);
 
-		buffer.put(new UpdateTask(this, PersonaField.STAT_CHARS, val));
-	}
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.STAT_CHARS, val, false));
+        //buffer.put(new UpdateTask(this, PersonaField.STAT_CHARS, val));
+    }
 
 	//@Override
 	public String getPlayerName(){
@@ -551,8 +564,10 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		this.name = name;
 		lastRenamed = new Timestamp(System.currentTimeMillis());
 
-		buffer.put(new UpdateTask(this, PersonaField.NAME, name));
-		buffer.put(new UpdateTask(this, PersonaField.STAT_RENAMED, lastRenamed));
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.NAME, name, false));
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.STAT_RENAMED, lastRenamed, false));
+        //buffer.put(new UpdateTask(this, PersonaField.NAME, name));
+        //buffer.put(new UpdateTask(this, PersonaField.STAT_RENAMED, lastRenamed));
 
 		if (current) {
 			Player p = Bukkit.getPlayer(getPlayerUUID());
@@ -575,17 +590,20 @@ public final class ArchePersona implements Persona, InventoryHolder {
 				p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 			}
 		}
-		buffer.put(new UpdateTask(this, PersonaField.RACE_REAL, race));
-		buffer.put(new UpdateTask(this, PersonaField.RACE, ""));
-		this.raceHeader = null;
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.RACE_REAL, race, false));
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.RACE, "", false));
+        //buffer.put(new UpdateTask(this, PersonaField.RACE_REAL, race));
+        //buffer.put(new UpdateTask(this, PersonaField.RACE, ""));
+        this.raceHeader = null;
 	}
 
 	@Override
 	public void setApparentRace(String race){
 		raceHeader = race;
 
-		buffer.put(new UpdateTask(this, PersonaField.RACE, race));
-	}
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.RACE, race, false));
+        //buffer.put(new UpdateTask(this, PersonaField.RACE, race));
+    }
 
 	@Override
 	public Timestamp getRenamed() {
@@ -595,16 +613,18 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	@Override
 	public void clearDescription(){
 		description = null;
-		buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, null));
-	}
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.DESCRIPTION, null, false));
+        //buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, null));
+    }
 
 	@Override
 	public void addDescription(String addendum){
 		if(description == null) description = addendum;
 		else description = description + " " + addendum;
 
-		buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
-	}
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.DESCRIPTION, description, false));
+        //buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
+    }
 
 	@Override
 	public String getDescription(){
@@ -615,8 +635,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	public void setDescription(String description) {
 		this.description = description;
 
-		buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
-	}
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.DESCRIPTION, description, false));
+        //buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
+    }
 
 	@Override
 	public String getGender(){
@@ -626,7 +647,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	@Override
 	 public void setGender(String gender) {
         this.gender = gender;
-        buffer.put(new UpdateTask(this, PersonaField.GENDER, gender));
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.GENDER, gender, false));
+        //buffer.put(new UpdateTask(this, PersonaField.GENDER, gender));
     }
 
 	void saveMinecraftSpecifics(final Player p){
@@ -637,7 +659,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
         inv = PersonaInventory.store(p);
 		location = new WeakBlock(p.getLocation());
         String pots = savePotionEffects(p);
-        buffer.put(new UpdateVitalsTask(persona_id, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv, pots));
+        consumer.queueRow(new VitalsUpdateRow(this, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv, pots));
+        //buffer.put(new UpdateVitalsTask(persona_id, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv, pots));
         attributes.handleSwitch(false);
     }
 
@@ -738,11 +761,12 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		Bukkit.getPluginManager().callEvent(event);
 		if(event.isCancelled()) return false;
 
-        buffer.put(new PersonaDeleteTask(this));
+        consumer.queueRow(new PersonaDeleteRow(this));
+        //buffer.put(new PersonaDeleteTask(this));
         handler.deleteSkills(this);
 
 		ArchePersona[] prs = handler.getAllPersonas(this.getPlayerUUID());
-		prs[getId()] = null;
+        prs[getSlot()] = null;
 
 		SkinCache cache = ArcheCore.getControls().getSkinCache();
 		boolean newPersonaHasSkin = false;
@@ -786,7 +810,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			if (inv == null || inv.getContents() == null) {
 				return null;
 			}
-            Inventory binv = Bukkit.createInventory(this, InventoryType.PLAYER.getDefaultSize(), "Persona Inventory: " + player + "@" + getId());
+            Inventory binv = Bukkit.createInventory(this, InventoryType.PLAYER.getDefaultSize(), "Persona Inventory: " + player + "@" + getSlot());
             binv.setContents(inv.getContents());
 			return binv;
 		}
@@ -800,7 +824,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
             if (inv == null || inv.getEnderContents() == null) {
                 return null;
             }
-            Inventory einv = Bukkit.createInventory(this, InventoryType.ENDER_CHEST.getDefaultSize(), "Persona Enderchest: " + player + "@" + getId());
+            Inventory einv = Bukkit.createInventory(this, InventoryType.ENDER_CHEST.getDefaultSize(), "Persona Enderchest: " + player + "@" + getSlot());
             einv.setContents(inv.getEnderContents());
             return einv;
         }
@@ -818,7 +842,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	@Override
 	public int hashCode(){
 		if(hash == 0)
-			hash = (5 * this.player.hashCode()) + getId();
+            hash = (5 * this.player.hashCode()) + getSlot();
 
 		return hash;
 	}
@@ -857,22 +881,27 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		Bukkit.getPluginManager().callEvent(event);
 		if(!event.isCancelled()) {
 			this.fatigue = event.getNewFatigue();
-			buffer.put(new UpdateFatigueTask(fatigue, persona_id, player));
-		}
+            consumer.queueRow(new PersonaUpdateRow(this, PersonaField.FATIGUE, fatigue, false));
+            //buffer.put(new UpdateFatigueTask(fatigue, persona_id, player));
+        }
 	}
 
     @Override
     public void setSkin(ArcheSkin skin) {
         this.skin = skin;
         skin.addPersona(this);
-        buffer.put(new UpdateTask(this, PersonaField.ICON, skin.getSkinId()));
+
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.ICON, skin.getSkinId(), false));
+        //buffer.put(new UpdateTask(this, PersonaField.ICON, skin.getSkinId()));
     }
 
     @Override
     public void removeSkin() {
         skin.removePersona(this);
         this.skin = null;
-        buffer.put(new UpdateTask(this, PersonaField.ICON, -1));
+
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.ICON, -1, false));
+        //buffer.put(new UpdateTask(this, PersonaField.ICON, -1));
     }
 
     @Override
@@ -883,5 +912,14 @@ public final class ArchePersona implements Persona, InventoryHolder {
     @Override
     public boolean hasSkin() {
         return skin != null;
+    }
+
+    @Override
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }
