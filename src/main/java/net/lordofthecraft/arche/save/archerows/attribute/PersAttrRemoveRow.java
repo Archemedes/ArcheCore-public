@@ -1,14 +1,16 @@
-package net.lordofthecraft.arche.save.archerows.persona.attribute;
+package net.lordofthecraft.arche.save.archerows.attribute;
 
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
+import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.util.SQLUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class PersAttrRemoveRow implements ArcheMergeableRow {
+public class PersAttrRemoveRow implements ArcheMergeableRow, ArchePersonaRow {
 
     final ExtendedAttributeModifier mod;
     private Connection connection;
@@ -57,6 +59,8 @@ public class PersAttrRemoveRow implements ArcheMergeableRow {
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        return new String[]{
+                "DELETE FROM persona_attributes WHERE moduuid='" + mod.getUniqueId().toString() + "' AND persona_id_fk=" + mod.getPersonaId() + " AND attribute_type='" + SQLUtil.mysqlTextEscape(mod.getAttribute().getName()) + "';"
+        };
     }
 }

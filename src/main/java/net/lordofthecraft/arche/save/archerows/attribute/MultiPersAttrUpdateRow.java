@@ -1,9 +1,10 @@
-package net.lordofthecraft.arche.save.archerows.persona.attribute;
+package net.lordofthecraft.arche.save.archerows.attribute;
 
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
+import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,13 +13,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
-public class MultiPersAttrRemoveRow implements ArcheMergeableRow {
+public class MultiPersAttrUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
-    private final List<PersAttrRemoveRow> rows = Lists.newArrayList();
+    private final List<PersAttrUpdateRow> rows = Lists.newArrayList();
     private final List<Persona> personas = Lists.newArrayList();
     private Connection connection = null;
 
-    public MultiPersAttrRemoveRow(PersAttrRemoveRow row1, PersAttrRemoveRow row2) {
+    public MultiPersAttrUpdateRow(PersAttrUpdateRow row1, PersAttrUpdateRow row2) {
         rows.add(row1);
         rows.add(row2);
         personas.addAll(Arrays.asList(row1.getPersonas()));
@@ -32,7 +33,7 @@ public class MultiPersAttrRemoveRow implements ArcheMergeableRow {
 
     @Override
     public boolean canMerge(ArcheMergeableRow row) {
-        return !row.isUnique() && row instanceof PersAttrRemoveRow;
+        return !row.isUnique() && row instanceof PersAttrUpdateRow;
     }
 
     @Override
@@ -40,8 +41,8 @@ public class MultiPersAttrRemoveRow implements ArcheMergeableRow {
         if (second.isUnique()) {
             throw new IllegalArgumentException("Cannot merge unique rows");
         }
-        rows.add((PersAttrRemoveRow) second);
-        personas.addAll(Arrays.asList(second.getPersonas()));
+        rows.add((PersAttrUpdateRow) second);
+        personas.addAll(Arrays.asList(((ArchePersonaRow) second).getPersonas()));
         return this;
     }
 
@@ -54,17 +55,20 @@ public class MultiPersAttrRemoveRow implements ArcheMergeableRow {
     public void executeStatements() throws SQLException {
         PreparedStatement statement = null;
         try {
-            statement = connection.prepareStatement("DELETE FROM persona_attributes WHERE moduuid=? AND persona_id_fk=? AND attribute_type=?");
-            for (PersAttrRemoveRow row : rows) {
-                statement.setString(1, row.mod.getUniqueId().toString());
-                statement.setInt(2, row.mod.getPersonaId());
-                statement.setString(3, row.mod.getAttribute().getName());
+            statement = connection.prepareStatement("UPDATE persona_attributes SET decaytype=? AND decaytime=? AND lostondeath=? WHERE persona_id_fk=? AND moduuid=? AND attribute_type=?");
+            for (PersAttrUpdateRow row : rows) {
+                statement.setString(1, row.mod.getDecayStrategy().name());
+                statement.setLong(2, row.mod.getTicksRemaining());
+                statement.setBoolean(3, row.mod.isLostOnDeath());
+                statement.setInt(4, row.mod.getPersonaId());
+                statement.setString(5, row.mod.getUniqueId().toString());
+                statement.setString(6, row.mod.getAttribute().getName());
                 statement.addBatch();
             }
             statement.executeBatch();
         } catch (SQLException ex) {
             if (statement != null) {
-                ArcheCore.getPlugin().getLogger().info("[ArcheCore Consumer] Problematic statement: " + statement.toString());
+                ArcheCore.getPlugin().getLogger().log(Level.INFO, "[ArcheCore Consumer] Problematic Statement: " + statement.toString());
             }
             throw ex;
         } finally {
@@ -73,7 +77,7 @@ public class MultiPersAttrRemoveRow implements ArcheMergeableRow {
                     statement.close();
                 }
             } catch (SQLException ex) {
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] Failed to close statement for ");
+                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] Failed to close statement for MultiPersAttrUpdateRow!: ", ex);
             }
         }
     }
@@ -85,6 +89,10 @@ public class MultiPersAttrRemoveRow implements ArcheMergeableRow {
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        List<String> s = Lists.newArrayList();
+        for (PersAttrUpdateRow row : rows) {
+            s.addAll(Arrays.asList(row.getInserts()));
+        }
+        return (String[]) s.toArray();
     }
 }

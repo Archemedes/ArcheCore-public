@@ -1,9 +1,10 @@
 package net.lordofthecraft.arche.save.archerows.persona.insert;
 
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
 import net.lordofthecraft.arche.save.archerows.ArchePreparedStatementRow;
-import net.lordofthecraft.arche.save.archerows.persona.ArchePersonaRow;
 import net.lordofthecraft.arche.util.MessageUtil;
+import net.lordofthecraft.arche.util.SQLUtil;
 import org.bukkit.block.Block;
 
 import java.sql.Connection;
@@ -67,7 +68,32 @@ public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersona
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        if (persona.getPlayer() == null) {
+            return new String[0];
+        }
+        Block b = persona.getPlayer().getLocation().getBlock();
+        return new String[]{
+                "INSERT INTO persona(persona_id,player_fk,slot,race,name,gender,skin) " +
+                        "VALUES (LAST_INSERT_ID(" + persona.getPersonaId() + "),'"
+                        + persona.getPlayerUUID().toString()
+                        + "'," + persona.getSlot()
+                        + ",'" + persona.getRace().name()
+                        + "','" + SQLUtil.mysqlTextEscape(persona.getName())
+                        + "','" + SQLUtil.mysqlTextEscape(persona.getGender())
+                        + ",'NULL');",
+                "INSERT INTO persona_vitals(persona_id_fk,world,x,y,z,inv,ender_inv) " +
+                        "VALUES (" + persona.getPersonaId()
+                        + ",'" + b.getWorld().getUID().toString()
+                        + "'," + b.getX()
+                        + "," + b.getY()
+                        + "," + b.getZ()
+                        + ",'NULL','NULL');",
+                "INSERT INTO persona_stats(persona_id_fk,renamed,date_created,last_played) VALUES (" + persona.getPersonaId()
+                        + "," + new Timestamp(0).toString()
+                        + "," + new Timestamp(System.currentTimeMillis()).toString()
+                        + "," + new Timestamp(System.currentTimeMillis()).toString()
+                        + ");"
+        };
     }
 
     @Override

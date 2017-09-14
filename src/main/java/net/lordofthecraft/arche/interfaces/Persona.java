@@ -3,6 +3,7 @@ package net.lordofthecraft.arche.interfaces;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.*;
+import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -388,7 +389,7 @@ public interface Persona {
     /**
      * Check whether or not this Persona has had it's SQL removed.
      * <p>
-     * <b>Why?</b> When performing tasks such as {@link net.lordofthecraft.arche.save.archerows.persona.ArchePersonaRow} there is the chance that
+     * <b>Why?</b> When performing tasks such as {@link ArchePersonaRow} there is the chance that
      * a persona might already be removed. In the efforts to ensure that we are not unneedingly running tasks on personas which have no longer exist
      * this variable is set.
      * <p>

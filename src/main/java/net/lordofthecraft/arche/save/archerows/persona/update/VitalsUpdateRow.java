@@ -3,14 +3,16 @@ package net.lordofthecraft.arche.save.archerows.persona.update;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.PersonaInventory;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
+import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
 import net.lordofthecraft.arche.util.MessageUtil;
+import net.lordofthecraft.arche.util.SQLUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class VitalsUpdateRow implements ArcheMergeableRow {
+public class VitalsUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
     final Persona persona;
     final UUID world;
@@ -85,7 +87,9 @@ public class VitalsUpdateRow implements ArcheMergeableRow {
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        return new String[]{
+                "UPDATE persona_vitals SET world='" + world + "' AND x=" + x + " AND y=" + y + " AND z=" + z + " AND health=" + health + " AND saturation=" + saturation + " AND hunger=" + hunger + " AND inv='" + SQLUtil.mysqlTextEscape(inv.getInvAsString()) + "' AND ender_inv='" + SQLUtil.mysqlTextEscape(inv.getEnderInvAsString()) + "' AND potions='" + SQLUtil.mysqlTextEscape(potions) + "' WHERE persona_id_fk=" + persona.getPersonaId() + ";"
+        };
     }
 
     @Override

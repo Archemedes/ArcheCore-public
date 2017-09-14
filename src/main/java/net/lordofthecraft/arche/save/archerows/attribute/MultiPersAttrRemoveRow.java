@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche.save.archerows.persona.insert;
+package net.lordofthecraft.arche.save.archerows.attribute;
 
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
@@ -13,17 +13,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
-public class MultiRenameRow implements ArcheMergeableRow, ArchePersonaRow {
+public class MultiPersAttrRemoveRow implements ArcheMergeableRow, ArchePersonaRow {
 
-    final List<RenameRow> rows = Lists.newArrayList();
-    final List<Persona> personas = Lists.newArrayList();
-    private Connection conn;
+    private final List<PersAttrRemoveRow> rows = Lists.newArrayList();
+    private final List<Persona> personas = Lists.newArrayList();
+    private Connection connection = null;
 
-    public MultiRenameRow(RenameRow row1, RenameRow row2) {
+    public MultiPersAttrRemoveRow(PersAttrRemoveRow row1, PersAttrRemoveRow row2) {
         rows.add(row1);
         rows.add(row2);
-        personas.addAll(Lists.newArrayList(row1.getPersonas()));
-        personas.addAll(Lists.newArrayList(row2.getPersonas()));
+        personas.addAll(Arrays.asList(row1.getPersonas()));
+        personas.addAll(Arrays.asList(row2.getPersonas()));
     }
 
     @Override
@@ -33,35 +33,39 @@ public class MultiRenameRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public boolean canMerge(ArcheMergeableRow row) {
-        return !row.isUnique() && row instanceof RenameRow;
+        return !row.isUnique() && row instanceof PersAttrRemoveRow;
     }
 
     @Override
     public ArcheMergeableRow merge(ArcheMergeableRow second) {
-        rows.add((RenameRow) second);
+        if (second.isUnique()) {
+            throw new IllegalArgumentException("Cannot merge unique rows");
+        }
+        rows.add((PersAttrRemoveRow) second);
         personas.addAll(Arrays.asList(((ArchePersonaRow) second).getPersonas()));
         return this;
     }
 
     @Override
     public void setConnection(Connection connection) {
-        this.conn = connection;
+        this.connection = connection;
     }
 
     @Override
     public void executeStatements() throws SQLException {
         PreparedStatement statement = null;
         try {
-            statement = conn.prepareStatement("INSERT INTO persona_names (persona_id_fk,name) VALUES (?,?)");
-            for (RenameRow row : rows) {
-                statement.setInt(1, row.persona.getPersonaId());
-                statement.setString(2, row.name);
+            statement = connection.prepareStatement("DELETE FROM persona_attributes WHERE moduuid=? AND persona_id_fk=? AND attribute_type=?");
+            for (PersAttrRemoveRow row : rows) {
+                statement.setString(1, row.mod.getUniqueId().toString());
+                statement.setInt(2, row.mod.getPersonaId());
+                statement.setString(3, row.mod.getAttribute().getName());
                 statement.addBatch();
             }
             statement.executeBatch();
         } catch (SQLException ex) {
             if (statement != null) {
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] Problematic MultiRenameRow statement: " + statement.toString());
+                ArcheCore.getPlugin().getLogger().info("[ArcheCore Consumer] Problematic statement: " + statement.toString());
             }
             throw ex;
         } finally {
@@ -70,7 +74,7 @@ public class MultiRenameRow implements ArcheMergeableRow, ArchePersonaRow {
                     statement.close();
                 }
             } catch (SQLException ex) {
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] We failed to close the statement in MultiRenameRow!", ex);
+                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] Failed to close statement for ");
             }
         }
     }
@@ -83,19 +87,9 @@ public class MultiRenameRow implements ArcheMergeableRow, ArchePersonaRow {
     @Override
     public String[] getInserts() {
         List<String> s = Lists.newArrayList();
-        for (RenameRow row : rows) {
+        for (PersAttrRemoveRow row : rows) {
             s.addAll(Arrays.asList(row.getInserts()));
         }
         return (String[]) s.toArray();
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder(getClass().getSimpleName() + "[");
-        for (RenameRow row : rows) {
-            builder.append(" ").append(row.toString()).append(" ");
-        }
-        builder.append("]");
-        return builder.toString();
     }
 }

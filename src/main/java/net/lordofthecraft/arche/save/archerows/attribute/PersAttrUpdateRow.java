@@ -1,14 +1,16 @@
-package net.lordofthecraft.arche.save.archerows.persona.attribute;
+package net.lordofthecraft.arche.save.archerows.attribute;
 
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
+import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.util.SQLUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class PersAttrUpdateRow implements ArcheMergeableRow {
+public class PersAttrUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
     final ExtendedAttributeModifier mod;
     private Connection connection;
@@ -32,7 +34,7 @@ public class PersAttrUpdateRow implements ArcheMergeableRow {
         if (second.isUnique()) {
             throw new IllegalArgumentException("Cannot merge unique rows");
         }
-        return null;
+        return new MultiPersAttrUpdateRow(this, (PersAttrUpdateRow) second);
     }
 
     @Override
@@ -60,6 +62,13 @@ public class PersAttrUpdateRow implements ArcheMergeableRow {
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        return new String[]{
+                "UPDATE persona_attributes SET decaytype='" + mod.getDecayStrategy().name() + "'" +
+                        " AND decaytime=" + mod.getTicksRemaining() + "" +
+                        " AND lostondeath=" + mod.isLostOnDeath() + "" +
+                        " WHERE persona_id_fk=" + mod.getPersonaId() + "" +
+                        " AND moduuid='" + mod.getUniqueId().toString() + "'" +
+                        " AND attribute_type='" + SQLUtil.mysqlTextEscape(mod.getAttribute().getName()) + "';"
+        };
     }
 }

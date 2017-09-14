@@ -8,6 +8,9 @@ import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePreparedStatementRow;
 import net.lordofthecraft.arche.save.archerows.ArcheRow;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -23,10 +26,16 @@ public class Consumer extends TimerTask implements IConsumer {
     private final SQLHandler handler;
     private final Lock lock = new ReentrantLock();
     private final ArcheCore pl;
+    private final int timePerRun;
+    private final int forceToProcess;
+    private final int warningSize;
 
-    public Consumer(SQLHandler handler, ArcheCore pl) {
+    public Consumer(SQLHandler handler, ArcheCore pl, int timePerRun, int forceToProcess, int warningSize) {
         this.handler = handler;
         this.pl = pl;
+        this.timePerRun = timePerRun;
+        this.forceToProcess = forceToProcess;
+        this.warningSize = warningSize;
     }
 
     @Override
@@ -34,6 +43,11 @@ public class Consumer extends TimerTask implements IConsumer {
         if (!queue.contains(row)) {
             queue.add(row);
         }
+    }
+
+    @Override
+    public int getQueueSize() {
+        return queue.size();
     }
 
     @Override
@@ -62,8 +76,11 @@ public class Consumer extends TimerTask implements IConsumer {
             state = conn.createStatement();
 
             process:
-            while (!queue.isEmpty()) {
+            while (!queue.isEmpty() && (System.currentTimeMillis() - starttime < timePerRun || count < forceToProcess)) {
                 ArcheRow row = queue.poll();
+                if (row == null) {
+                    continue;
+                }
                 long taskstart = System.currentTimeMillis();
                 if (pl.debugMode()) {
                     pl.getLogger().info("[ArcheCore Consumer] Beginning process for " + row.toString());
@@ -72,7 +89,9 @@ public class Consumer extends TimerTask implements IConsumer {
                     ArchePreparedStatementRow apsr = (ArchePreparedStatementRow) row;
                     if (row instanceof ArcheMergeableRow) {
                         int batchCount = count;
-
+                        if (count > forceToProcess) {
+                            batchCount = forceToProcess / 2;
+                        }
                         while (!queue.isEmpty()) {
                             ArcheMergeableRow amRow = (ArcheMergeableRow) row;
                             ArcheRow peeked = queue.peek();
@@ -87,7 +106,9 @@ public class Consumer extends TimerTask implements IConsumer {
                                 apsr = amRow.merge((ArcheMergeableRow) queue.poll());
                                 count++;
                                 batchCount++;
-                                //TODO Config setting for forceprocess
+                                if (batchCount > forceToProcess) {
+                                    break;
+                                }
                             } else {
                                 break;
                             }
@@ -141,5 +162,28 @@ public class Consumer extends TimerTask implements IConsumer {
             }
         }
 
+    }
+
+    public void writeToFile() throws FileNotFoundException {
+        final long time = System.currentTimeMillis();
+
+        int counter = 0;
+        new File("plugins/ArcheCore/import/").mkdirs();
+        PrintWriter writer = new PrintWriter(new File("plugins/ArcheCore/import/queue-" + time + "-0.sql"));
+        while (!queue.isEmpty()) {
+            final ArcheRow r = queue.poll();
+            if (r == null) {
+                continue;
+            }
+            for (final String insert : r.getInserts()) {
+                writer.println(insert);
+            }
+            counter++;
+            if (counter % 1000 == 0) {
+                writer.close();
+                writer = new PrintWriter(new File("plugins/ArcheCore/import/queue-" + time + "-" + counter / 1000 + ".sql"));
+            }
+        }
+        writer.close();
     }
 }

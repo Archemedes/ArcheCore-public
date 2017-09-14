@@ -5,6 +5,7 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
+import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -13,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
-public class MultiPersonaDeleteRow implements ArcheMergeableRow {
+public class MultiPersonaDeleteRow implements ArcheMergeableRow, ArchePersonaRow {
 
     final List<PersonaDeleteRow> rows = Lists.newArrayList();
     final List<Persona> personas = Lists.newArrayList();
@@ -42,7 +43,7 @@ public class MultiPersonaDeleteRow implements ArcheMergeableRow {
             throw new IllegalArgumentException("Can't merge a unique row");
         }
         rows.add((PersonaDeleteRow) second);
-        personas.addAll(Arrays.asList(second.getPersonas()));
+        personas.addAll(Arrays.asList(((ArchePersonaRow) second).getPersonas()));
         return this;
     }
 
@@ -87,7 +88,11 @@ public class MultiPersonaDeleteRow implements ArcheMergeableRow {
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        List<String> s = Lists.newArrayList();
+        for (PersonaDeleteRow row : rows) {
+            s.addAll(Arrays.asList(row.getInserts()));
+        }
+        return (String[]) s.toArray();
     }
 
     @Override

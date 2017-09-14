@@ -2,8 +2,9 @@ package net.lordofthecraft.arche.save.archerows.persona.insert;
 
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
-import net.lordofthecraft.arche.save.archerows.persona.ArchePersonaRow;
+import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
 import net.lordofthecraft.arche.util.MessageUtil;
+import net.lordofthecraft.arche.util.SQLUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -57,7 +58,9 @@ public class RenameRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        return new String[]{
+                "INSERT INTO persona_names (persona_id_fk,name) VALUES (" + persona.getPersonaId() + ",'" + SQLUtil.mysqlTextEscape(name) + "');"
+        };
     }
 
     @Override

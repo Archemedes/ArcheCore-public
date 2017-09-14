@@ -3,14 +3,12 @@ package net.lordofthecraft.arche.save.archerows.persona.update;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.PersonaField;
+import net.lordofthecraft.arche.save.PersonaTable;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
-import net.lordofthecraft.arche.save.archerows.persona.ArchePersonaRow;
+import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
 import net.lordofthecraft.arche.util.MessageUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 
 public class PersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
@@ -115,7 +113,7 @@ public class PersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        return new String[]{"UPDATE " + updatefield.table.getTable() + " SET " + updatefield.field() + "=" + (updatefield.type == JDBCType.VARCHAR ? "'" + data + "'" : data) + " WHERE persona_id" + (updatefield.table == PersonaTable.MASTER ? "=" : "_fk=") + toupdate.getPersonaId() + ";"};
     }
 
     @Override

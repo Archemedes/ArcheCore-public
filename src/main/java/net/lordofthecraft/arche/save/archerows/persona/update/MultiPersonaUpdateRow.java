@@ -5,12 +5,13 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.PersonaTable;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
-import net.lordofthecraft.arche.save.archerows.persona.ArchePersonaRow;
+import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -129,7 +130,11 @@ public class MultiPersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        List<String> list = Lists.newArrayList();
+        for (PersonaUpdateRow row : updateRows) {
+            list.addAll(Arrays.asList(row.getInserts()));
+        }
+        return (String[]) list.toArray();
     }
 
     @Override

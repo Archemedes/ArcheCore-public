@@ -14,9 +14,8 @@ import net.lordofthecraft.arche.listener.*;
 import net.lordofthecraft.arche.magic.Archenomicon;
 import net.lordofthecraft.arche.persona.*;
 import net.lordofthecraft.arche.save.Consumer;
+import net.lordofthecraft.arche.save.DumpedDBReader;
 import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.EndOfStreamTask;
-import net.lordofthecraft.arche.save.tasks.persona.PersonaDeleteTask;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
 import net.lordofthecraft.arche.skin.SkinCache;
@@ -36,9 +35,10 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.sql.Connection;
+import java.io.FileNotFoundException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Timer;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -57,6 +57,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private ArcheTimer timer;
     private Economy economy;
     private Consumer archeConsumer;
+    private Timer archeTimer = null;
 
     //Config settings
     private int maxPersonaSlots;
@@ -83,9 +84,16 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private boolean enderchestInMenu;
     private boolean usingMySQL;
     private int fullFatigueRestore;
+
+    //Bungee
     private boolean canCreatePersonas;
 
-
+    //Consumer variables
+    private int consumerRun;
+    private int consumerForceProcessMin;
+    private int consumerRunDelay;
+    private boolean consumerShouldUseBukkitScheduler;
+    private int consumerWarningSize;
 
     //private Thread saverThread = null;
 
@@ -120,6 +128,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         return getControls().getSQLHandler();
     }
 
+    public static IConsumer getConsumerControls() {
+        return getControls().getConsumer();
+    }
+
     public static Archenomicon getMagicControls() {
         return getControls().getArchenomicon();
     }
@@ -146,10 +158,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     }
 
     public void onDisable() {
-
-
-        saveHandler.put(new EndOfStreamTask());
-        PersonaDeleteTask.closeConnection();
+        sqlHandler.close();
 
         Bukkit.getOnlinePlayers().forEach(p -> {
             //This part must be done for safety reasons.
@@ -168,6 +177,35 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             persona.attributes().handleSwitch(true);
         });
 
+        if (archeTimer != null) {
+            archeTimer.cancel();
+        }
+        getServer().getScheduler().cancelTasks(this);
+        if (archeConsumer != null) {
+            getLogger().info("[ArcheCore Consumer] Proceeding to shutdown SQL Consumer...");
+            archeConsumer.run();
+            if (archeConsumer.getQueueSize() > 0) {
+                int tries = 9;
+                while (archeConsumer.getQueueSize() > 0) {
+                    getLogger().info("[ArcheCore Consumer] Remaining queue size: " + archeConsumer.getQueueSize());
+                    if (tries > 0) {
+                        getLogger().info("[ArcheCore Consumer] Remaining Tries: " + tries);
+                    } else {
+                        getLogger().warning("[ArcheCore Consumer] We failed to save the ArcheCore Database!!! This is REALLY BAD!!! We're going to try to write all pending changes to a file!");
+                        try {
+                            archeConsumer.writeToFile();
+                            getLogger().info("[ArcheCore Consumer] We've successfully dumped all pending DB changes into files, we will attempt to parse them on next start up.");
+                        } catch (final FileNotFoundException ex) {
+                            getLogger().severe("[ArcheCore Consumer] Well, this is bad. We've failed to save the Database and failed to write to the database changes to a file. All pending changes have been lost irrevocably. Consider manual refunds.");
+                            break;
+                        }
+                    }
+                    archeConsumer.run();
+                    tries--;
+                }
+            }
+
+        }
         sqlHandler.close();
         if (shouldClone && sqlHandler instanceof ArcheSQLiteHandler) {
             ((ArcheSQLiteHandler) sqlHandler).cloneDB();
@@ -188,16 +226,13 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         initConfig();
 
         //Find our Singletons and assign them.
-        Connection personaConnection = null;
         getLogger().info("Loading " + (usingMySQL ? "MySQL" : "SQLite") + " handler now.");
         if (usingMySQL) {
             String username = getConfig().getString("mysql.user");
             String password = getConfig().getString("mysql.password");
             try {
                 getLogger().info("Logging into MySQL at " + WhySQLHandler.getUrl() + ", Username: " + username);
-                WhySQLHandler wsql = new WhySQLHandler(username, password);
-                sqlHandler = wsql;
-                personaConnection = wsql.getDataSource().getConnection();
+                sqlHandler = new WhySQLHandler(username, password);
             } catch (Exception e) {
                 getLogger().log(Level.SEVERE, "Failed to initialize MySQL DB on url " + WhySQLHandler.getUrl() + " with username " + username + " and password " + password, e);
                 sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
@@ -205,20 +240,30 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         } else {
             sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
         }
-        if (personaConnection == null) {
-            personaConnection = sqlHandler.getConnection();
-        }
-
 
         saveHandler = SaveHandler.getInstance();
-        archeConsumer = new Consumer(sqlHandler);
-        //Bukkit.getScheduler().runTaskTimerAsynchronously(this, archeConsumer, 20, 1231231); //TODO Config for zis ztuff
+        //This will import data that might have failed to save before ArcheCore was last disabled.
+        getServer().getScheduler().runTaskAsynchronously(this, new DumpedDBReader(this));
+        archeConsumer = new Consumer(sqlHandler, this, consumerRun, consumerForceProcessMin, consumerWarningSize);
+        if (consumerShouldUseBukkitScheduler) {
+            if (Bukkit.getScheduler().runTaskTimerAsynchronously(this, archeConsumer, consumerRunDelay < 20 ? 20 : consumerRunDelay, consumerRunDelay).getTaskId() > 0) {
+                getLogger().info("[ArcheCore Consumer] Started using Bukkit Scheduler with a delay of " + consumerRunDelay + " ticks");
+            } else {
+                getLogger().warning("[ArcheCore Consumer] Failed to use the Bukkit Scheduler as specified, task did not register. Using timer now.");
+                archeTimer = new Timer();
+                archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
+                getLogger().info("[ArcheCore Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
+            }
+        } else {
+            archeTimer = new Timer();
+            archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
+            getLogger().info("[ArcheCore Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
+        }
         ArcheTables.setUpSQLTables(sqlHandler);
         //saveHandler.put(new CreateDatabaseTask());
         blockRegistry = new BlockRegistry();
         archenomicon = Archenomicon.getInstance();
         personaHandler = ArchePersonaHandler.getInstance();
-        personaHandler.setPersonaConnection(personaConnection);
         fatigueHandler = ArcheFatigueHandler.getInstance();
         helpdesk = HelpDesk.getInstance();
         skinCache = SkinCache.getInstance();
@@ -320,6 +365,37 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         usingMySQL = config.getBoolean("enable.mysql");
         fullFatigueRestore = config.getInt("persona.fatigue.restore");
         canCreatePersonas = config.getBoolean("can.create.personas");
+
+        //Consumer variables
+        consumerRun = config.getInt("consumer.run.time");
+        consumerForceProcessMin = config.getInt("consumer.force.process.minimum");
+        consumerRunDelay = config.getInt("consumer.run.delay");
+        consumerShouldUseBukkitScheduler = config.getBoolean("consumer.use.bukkit.scheduler");
+        consumerWarningSize = config.getInt("consumer.queue.warning.size");
+        /*
+            private int consumerRun;
+    private int consumerForceProcessMin;
+    private int consumerRunDelay;
+    private boolean consumerShouldUseBukkitScheduler;
+    private int consumerWarningSize;
+         */
+
+        /*
+        #Settings for ArcheCore consumer. These are performance optimization settings and should not be adjusted
+#unless you are very familiar with ArcheCore code.
+#"Changing config settings"
+consumer:
+  #Time for each run of the consumer
+  run.time: 1000
+  #Force the consumer to process a minimum of the following transactions
+  force.process.minimum: 20
+  #Delay between consumer runs.
+  run.delay: 2
+  #Whether or not to create a Java Timer or use AsyncTaskScheduler in Bukkit
+  use.bukkit.scheduler: true
+  #The warning size of the queue, when it reaches this threshhold it will warn about overload.
+  queue.warning.size: 1000
+         */
 
         if(teleportNewbies){
             World w = Bukkit.getWorld(config.getString("preferred.spawn.world"));

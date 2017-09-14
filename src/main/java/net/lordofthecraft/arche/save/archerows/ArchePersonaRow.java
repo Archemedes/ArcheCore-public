@@ -1,7 +1,6 @@
-package net.lordofthecraft.arche.save.archerows.persona;
+package net.lordofthecraft.arche.save.archerows;
 
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.save.archerows.ArcheRow;
 
 public interface ArchePersonaRow extends ArcheRow {
 

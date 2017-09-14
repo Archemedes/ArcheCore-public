@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
+import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
 import net.lordofthecraft.arche.save.tasks.persona.UpdateVitalsTask;
 
 import java.sql.Connection;
@@ -13,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
-public class MultiVitalsUpdateRow implements ArcheMergeableRow {
+public class MultiVitalsUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
     private final List<VitalsUpdateRow> rows = Lists.newArrayList();
     private final List<Persona> personas = Lists.newArrayList();
@@ -95,7 +96,11 @@ public class MultiVitalsUpdateRow implements ArcheMergeableRow {
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        List<String> s = Lists.newArrayList();
+        for (VitalsUpdateRow row : rows) {
+            s.addAll(Arrays.asList(row.getInserts()));
+        }
+        return (String[]) s.toArray();
     }
 
     @Override

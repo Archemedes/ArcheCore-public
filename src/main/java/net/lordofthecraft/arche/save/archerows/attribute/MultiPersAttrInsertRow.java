@@ -1,9 +1,10 @@
-package net.lordofthecraft.arche.save.archerows.persona.attribute;
+package net.lordofthecraft.arche.save.archerows.attribute;
 
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
+import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
-public class MultiPersAttrInsertRow implements ArcheMergeableRow {
+public class MultiPersAttrInsertRow implements ArcheMergeableRow, ArchePersonaRow {
 
     private final List<PersAttrInsertRow> rows = Lists.newArrayList();
     private final List<Persona> personas = Lists.newArrayList();
@@ -42,7 +43,7 @@ public class MultiPersAttrInsertRow implements ArcheMergeableRow {
             throw new IllegalArgumentException("Unique rows cannot be merged");
         }
         rows.add((PersAttrInsertRow) second);
-        personas.addAll(Arrays.asList(second.getPersonas()));
+        personas.addAll(Arrays.asList(((ArchePersonaRow) second).getPersonas()));
         return this;
     }
 
@@ -94,6 +95,10 @@ public class MultiPersAttrInsertRow implements ArcheMergeableRow {
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        List<String> s = Lists.newArrayList();
+        for (PersAttrInsertRow row : rows) {
+            s.addAll(Arrays.asList(row.getInserts()));
+        }
+        return (String[]) s.toArray();
     }
 }

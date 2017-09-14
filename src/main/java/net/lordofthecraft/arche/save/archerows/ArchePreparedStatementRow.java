@@ -1,7 +1,5 @@
 package net.lordofthecraft.arche.save.archerows;
 
-import net.lordofthecraft.arche.save.archerows.persona.ArchePersonaRow;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -13,7 +11,7 @@ import java.sql.SQLException;
  *
  * @author 501warhead
  */
-public interface ArchePreparedStatementRow extends ArchePersonaRow {
+public interface ArchePreparedStatementRow extends ArcheRow {
 
     /**
      * Sets the connection of this row. All ArchePerparedStatementRows should save this connection and use it for all SQL

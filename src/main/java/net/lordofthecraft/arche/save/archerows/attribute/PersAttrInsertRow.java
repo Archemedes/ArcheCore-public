@@ -1,16 +1,18 @@
-package net.lordofthecraft.arche.save.archerows.persona.attribute;
+package net.lordofthecraft.arche.save.archerows.attribute;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
+import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.util.SQLUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
-public class PersAttrInsertRow implements ArcheMergeableRow {
+public class PersAttrInsertRow implements ArcheMergeableRow, ArchePersonaRow {
 
     final ExtendedAttributeModifier mod;
     private Connection connection;
@@ -67,6 +69,19 @@ public class PersAttrInsertRow implements ArcheMergeableRow {
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        return new String[]{
+                "INSERT " + (!ArcheCore.getPlugin().isUsingSQLite() ? "IGNORE " : "OR IGNORE ") + " INTO persona_attributes(mod_uuid,persona_id_fk,attribute_type,mod_name,mod_value,operation,created,decayticks,decaytype,lostondeath) " +
+                        "VALUES ('" + mod.getUniqueId().toString()
+                        + "'," + mod.getPersonaId()
+                        + ",'" + SQLUtil.mysqlTextEscape(mod.getAttribute().getName())
+                        + "','" + SQLUtil.mysqlTextEscape(mod.getName())
+                        + "'," + mod.getAmount()
+                        + ",'" + mod.getOperation().name()
+                        + "',FROM_UNIXTIME(" + System.currentTimeMillis() + ")"
+                        + "," + mod.getTicksRemaining()
+                        + ",'" + mod.getDecayStrategy().name() +
+                        "'," + mod.isLostOnDeath()
+                        + ");"
+        };
     }
 }

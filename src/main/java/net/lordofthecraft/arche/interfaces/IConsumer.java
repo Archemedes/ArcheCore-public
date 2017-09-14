@@ -11,4 +11,6 @@ public interface IConsumer {
      * @param row The ArcheRow to be queued.
      */
     void queueRow(ArcheRow row);
+
+    int getQueueSize();
 }

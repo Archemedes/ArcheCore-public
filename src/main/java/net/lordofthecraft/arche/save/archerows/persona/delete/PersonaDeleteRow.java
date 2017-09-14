@@ -2,13 +2,14 @@ package net.lordofthecraft.arche.save.archerows.persona.delete;
 
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
+import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
 import net.lordofthecraft.arche.util.MessageUtil;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class PersonaDeleteRow implements ArcheMergeableRow {
+public class PersonaDeleteRow implements ArcheMergeableRow, ArchePersonaRow {
 
     final Persona persona;
     private Connection conn = null;
@@ -56,7 +57,7 @@ public class PersonaDeleteRow implements ArcheMergeableRow {
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        return new String[]{"{call persona_delete(" + persona.getPersonaId() + ")}"};
     }
 
     @Override
