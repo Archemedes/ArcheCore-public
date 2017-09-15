@@ -2,6 +2,8 @@ package net.lordofthecraft.arche.interfaces;
 
 import org.bukkit.entity.Player;
 
+import java.util.Map;
+
 /**
  * Represents a magic which can be learned, casted, leveled, and mastered.
  *
@@ -20,12 +22,14 @@ public interface Magic {
      */
     boolean isWeakAgainst(Magic m);
 
+    Map<Magic, Double> getWeaknesses();
+
     /**
      * Check how weak this magic is to another magic
      * @param m The magic to check against
      * @return The weakness modifier against the specified magic.
      */
-    int getWeaknessModifier(Magic m);
+    double getWeaknessModifier(Magic m);
 
     /**
      * Retrieve the readable name of this magic

@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 
 import java.sql.JDBCType;
 import java.sql.SQLType;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -73,7 +74,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     private int daysToMaxTier;
     private int daysToBonusTier;
     private MagicType type;
-    private Map<Magic, Integer> weaknesses;
+    private Map<Magic, Double> weaknesses;
 
     public static Magic createMagic(String name, int maxTier, boolean selfTeachable) {
         Optional<Magic> magic = ArcheCore.getMagicControls().getMagic(name);
@@ -117,7 +118,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         performSQLUpdate(Field.SELF_TEACH, selfTeachable);
     }
 
-    public void addWeakness(Magic m, int mod) {
+    public void addWeakness(Magic m, double mod) {
         weaknesses.put(m, mod);
     }
 
@@ -127,7 +128,12 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     }
 
     @Override
-    public int getWeaknessModifier(Magic m) {
+    public Map<Magic, Double> getWeaknesses() {
+        return Collections.unmodifiableMap(weaknesses);
+    }
+
+    @Override
+    public double getWeaknessModifier(Magic m) {
         if (!weaknesses.containsKey(m)) return 0;
         return weaknesses.get(m);
     }

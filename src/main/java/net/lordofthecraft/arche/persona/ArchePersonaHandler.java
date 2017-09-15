@@ -12,8 +12,7 @@ import net.lordofthecraft.arche.event.PersonaWhoisEvent.Query;
 import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.DataTask;
-import net.lordofthecraft.arche.save.tasks.persona.PersonaInsertTask;
+import net.lordofthecraft.arche.save.archerows.persona.insert.PersonaInsertRow;
 import net.lordofthecraft.arche.save.tasks.skills.SkillDeleteTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
@@ -41,7 +40,8 @@ public class ArchePersonaHandler implements PersonaHandler {
     private static int max_persona_id = 0;
     private final Map<UUID, ArchePersona[]> personas = new HashMap<>(Bukkit.getServer().getMaxPlayers());
 	//private final ArchePersonaExtender extender = new ArchePersonaExtender();
-	private SaveHandler buffer = SaveHandler.getInstance();
+    private final IConsumer consumer = ArcheCore.getControls().getConsumer();
+    private SaveHandler buffer = SaveHandler.getInstance();
 	private Connection personaConnection = null;
 	private boolean displayName = false;
 	private PreparedStatement selectStatement = null;
@@ -285,7 +285,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 			//This should no longer be necessary because of unique constraints
 			//buffer.put(new DataTask(DataTask.DELETE, "persona", null, prs[id].sqlCriteria));
-            buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, prs[persona.getSlot()].sqlCriteria));
+            //buffer.put(new DataTask(DataTask.DELETE, "persona_names", null, prs[persona.getSlot()].sqlCriteria));
+
 
 			//delete all skill records
             deleteSkills(prs[persona.getSlot()]);
@@ -305,7 +306,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 			p.removePotionEffect(ps.getType());
 
         Block b = p.getLocation().getBlock();
-        buffer.put(new PersonaInsertTask(persona.getPersonaId(), p.getUniqueId(), persona.getSlot(), persona.getGender(), persona.getRace(), persona.getName(), persona.getCreationTime(), b.getX(), b.getY(), b.getZ(), b.getWorld().getUID()));
+        //buffer.put(new PersonaInsertTask(persona.getPersonaId(), p.getUniqueId(), persona.getSlot(), persona.getGender(), persona.getRace(), persona.getName(), persona.getCreationTime(), b.getX(), b.getY(), b.getZ(), b.getWorld().getUID()));
+        consumer.queueRow(new PersonaInsertRow(persona));
 
         persona.saveMinecraftSpecifics(p);
 
@@ -795,7 +797,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	void deleteSkills(ArchePersona p){
 		for(String sname : ArcheSkillFactory.getSkills().keySet()){
-			buffer.put(new SkillDeleteTask(sname, p.getPersonaId()));
+            //TODO fix
+            buffer.put(new SkillDeleteTask(sname, p.getPersonaId()));
 		}
 	}
 

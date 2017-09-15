@@ -18,11 +18,10 @@ import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.archerows.magic.insert.MagicInsertRow;
 import net.lordofthecraft.arche.save.archerows.persona.delete.PersonaDeleteRow;
 import net.lordofthecraft.arche.save.archerows.persona.update.PersonaUpdateRow;
 import net.lordofthecraft.arche.save.archerows.persona.update.VitalsUpdateRow;
-import net.lordofthecraft.arche.save.tasks.magic.MagicCreateCallable;
-import net.lordofthecraft.arche.save.tasks.magic.MagicInsertTask;
 import net.lordofthecraft.arche.save.tasks.persona.TagAttachmentCallable;
 import net.lordofthecraft.arche.save.tasks.skills.SelectSkillTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
@@ -59,7 +58,7 @@ import java.util.stream.Collectors;
 public final class ArchePersona implements Persona, InventoryHolder {
 
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
-	private static final SaveHandler buffer = SaveHandler.getInstance();
+    //private static final SaveHandler buffer = SaveHandler.getInstance();
     private static final IConsumer consumer = ArcheCore.getControls().getConsumer();
 
 	//The immutable auto-increment ID of this persona.
@@ -405,9 +404,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
         if (magics.hasMagic(m)) {
             return getMagicAttachment(m);
         }
-        MagicCreateCallable call = new MagicCreateCallable(persona_id, (ArcheMagic) m, tier, (teacher == null ? null : teacher.getPersonaId()), visible, ArcheCore.getSQLControls());
         MagicData data = new MagicData(m, tier, visible, teacher != null, (teacher == null ? null : teacher.getPersonaId()), System.currentTimeMillis(), System.currentTimeMillis());
-        buffer.put(new MagicInsertTask(persona_id, (ArcheMagic) m, tier, (teacher == null ? null : teacher.getPersonaId()), visible));
+        consumer.queueRow(new MagicInsertRow(this, (ArcheMagic) m, tier, (teacher == null ? null : teacher.getPersonaId()), visible));
         return Optional.of(new MagicAttachment(m, persona_id, data));
     }
 

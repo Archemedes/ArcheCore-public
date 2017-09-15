@@ -1,5 +1,7 @@
 package net.lordofthecraft.arche.save.archerows.magic.insert;
 
+import com.google.common.collect.Lists;
+import net.lordofthecraft.arche.interfaces.Magic;
 import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.util.SQLUtil;
@@ -7,6 +9,8 @@ import net.lordofthecraft.arche.util.SQLUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class ArcheMagicInsertRow implements ArcheMergeableRow {
 
@@ -37,24 +41,6 @@ public class ArcheMagicInsertRow implements ArcheMergeableRow {
         this.connection = connection;
     }
 
-    /*
-            statement.execute("CREATE TABLE IF NOT EXISTS magics (" +
-                "id_key VARCHAR(255)," +
-                "max_tier INT DEFAULT 5," +
-                "extra_tier BOOLEAN DEFAULT FALSE," +
-                "self_teach BOOLEAN DEFAULT FALSE," +
-                "teachable BOOLEAN DEFAULT TRUE," +
-                "description TEXT DEFAULT NULL," +
-                "label TEXT NOT NULL," +
-                "days_to_max INT UNSIGNED DEFAULT 120," +
-                "days_to_extra INT UNSIGNED DEFAULT 0," +
-                "archetype VARCHAR(255) NOT NULL," +
-                "PRIMARY KEY (id_key)," +
-                "FOREIGN KEY (archetype) REFERENCES magic_archetypes (id_key) ON UPDATE CASCADE ON DELETE RESTRICT" +
-                ")" +
-                end);
-     */
-
     @Override
     public void executeStatements() throws SQLException {
         PreparedStatement statement = connection.prepareStatement("INSERT INTO magics (id_key,max_tier,self_teach,teachable,description,label,days_to_max,days_to_extra,archetype) " +
@@ -70,21 +56,38 @@ public class ArcheMagicInsertRow implements ArcheMergeableRow {
         statement.setString(9, magic.getType().getKey());
         statement.executeUpdate();
         statement.close();
+
+        if (magic.getWeaknesses().size() > 0) {
+            statement = connection.prepareStatement("INSERT INTO magic_weaknesses(fk_source_magic,fk_weakness_magic,modifier) VALUES (?,?,?)");
+            for (Map.Entry<Magic, Double> ent : magic.getWeaknesses().entrySet()) {
+                statement.setString(1, magic.getName());
+                statement.setString(2, ent.getKey().getName());
+                statement.setDouble(3, ent.getValue());
+                statement.addBatch();
+            }
+            statement.executeBatch();
+            statement.close();
+        }
     }
 
     @Override
     public String[] getInserts() {
-        return new String[]{
-                "INSERT INTO magics (id_key,max_tier,self_teach,teachable,description,label,days_to_max,days_to_extra,archetype) " +
-                        "VALUES ('" + SQLUtil.mysqlTextEscape(magic.getName())
-                        + "'," + magic.getMaxTier()
-                        + "," + magic.isSelfTeachable()
-                        + "," + magic.isTeachable()
-                        + ",'" + SQLUtil.mysqlTextEscape(magic.getDescription())
-                        + "','" + SQLUtil.mysqlTextEscape(magic.getLabel())
-                        + "'," + magic.getDaysToMaxTier()
-                        + "," + magic.getDaysToBonusTier()
-                        + ",'" + SQLUtil.mysqlTextEscape(magic.getType().getKey()) + "');"
-        };
+        ArrayList<String> s = Lists.newArrayList();
+        s.add("INSERT INTO magics (id_key,max_tier,self_teach,teachable,description,label,days_to_max,days_to_extra,archetype) " +
+                "VALUES ('" + SQLUtil.mysqlTextEscape(magic.getName())
+                + "'," + magic.getMaxTier()
+                + "," + magic.isSelfTeachable()
+                + "," + magic.isTeachable()
+                + ",'" + SQLUtil.mysqlTextEscape(magic.getDescription())
+                + "','" + SQLUtil.mysqlTextEscape(magic.getLabel())
+                + "'," + magic.getDaysToMaxTier()
+                + "," + magic.getDaysToBonusTier()
+                + ",'" + SQLUtil.mysqlTextEscape(magic.getType().getKey()) + "');");
+        if (magic.getWeaknesses().size() > 0) {
+            for (Map.Entry<Magic, Double> ent : magic.getWeaknesses().entrySet()) {
+                s.add("INSERT INTO magic_weaknesses(fk_source_magic,fk_weakness_magic,modifier) VALUES ('" + magic.getName() + "','" + ent.getKey().getName() + "'," + ent.getValue() + ")");
+            }
+        }
+        return (String[]) s.toArray();
     }
 }

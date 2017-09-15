@@ -60,6 +60,8 @@ public class MagicInsertRow implements ArcheMergeableRow, ArchePersonaRow {
         statement.setBoolean(7, visible);
         statement.executeUpdate();
         statement.close();
+
+
     }
 
     @Override
@@ -73,10 +75,10 @@ public class MagicInsertRow implements ArcheMergeableRow, ArchePersonaRow {
                 "INSERT INTO persona_magics(magic_fk,persona_id_fk,tier,last_advanced,teacher,learned,visible) VALUES ('" + SQLUtil.mysqlTextEscape(magic.getName())
                         + "'," + persona.getPersonaId()
                         + "," + tier
-                        + ",FROM_UNIXTIME(" + System.currentTimeMillis() + ")" +
-                        "," + teacher
-                        + ",FROM_UNIXTIME(" + System.currentTimeMillis() + ")" +
-                        "," + visible + ");"
+                        + ",FROM_UNIXTIME(" + System.currentTimeMillis() + ")"
+                        + "," + teacher
+                        + ",FROM_UNIXTIME(" + System.currentTimeMillis() + ")"
+                        + "," + visible + ");"
         };
     }
 }

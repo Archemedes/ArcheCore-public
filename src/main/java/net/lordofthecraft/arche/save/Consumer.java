@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche.save;
 
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.interfaces.IConsumer;
@@ -66,6 +67,9 @@ public class Consumer extends TimerTask implements IConsumer {
         final Connection conn = handler.getConnection();
         Statement state = null;
         final long starttime = System.currentTimeMillis();
+        if (queue.size() >= warningSize) {
+            pl.getLogger().warning("[ArcheCore Consumer] Warning! The Consumer Queue is overloaded! The size of the queue is " + queue.size() + " which is " + (queue.size() - warningSize) + " over our set threshold! We're still running, but this should be looked into!");
+        }
         int count = 0;
         try {
             if (conn == null) {
@@ -121,6 +125,30 @@ public class Consumer extends TimerTask implements IConsumer {
                         pl.getLogger().log(Level.SEVERE, "[ArcheCore Consumer] SQL Exception in Consumer: ", ex);
                         break;
                     }
+                    //If you are reading through this code to see how this works
+                    //Understand that if you close or edit a connection in your row it will explode everything violently.
+                    //If this happens, it wont be funny
+                    //And you'll be the one getting fucking stabbed.
+                    //Thanks.
+                    if (conn.isClosed()) {
+                        //I hate you.
+                        pl.getLogger().severe("[ArcheCore Consumer] So we have an acid-dunk worthy individual who closed the connection we gave them in their ArcheRow, despite specific documentation telling them not to. Offender: " + apsr.getClass().getSimpleName());
+
+                        if (handler instanceof ArcheSQLiteHandler) {
+                            pl.getLogger().warning("[ArcheCore Consumer] Mother of god you closed the only connection this thing has because we're in SQLite... I'm going to try to save the connection (the data has been BRUTALLY MURDERED) but you should consider never having kids for the sake of natural selection");
+                            //TODO retard-proof
+                        } else {
+                            pl.getLogger().warning("[ArcheCore Consumer] So we're going to terminate this consumer run. This data is visiting ol' yeller but cant really do anything about it");
+                            pl.getLogger().info("[ArcheCore Consumer] (Whoever did this needs to go find a bridge)");
+                        }
+                        break;
+                    } else if (conn.isReadOnly()) {
+                        pl.getLogger().severe("[ArcheCore Consumer] So some not max level retard but definitely over 9000 level retard set the connection to read only, either maliciously or as a meme. Either way, rapid termination of life should occur. Offender: " + apsr.getClass().getSimpleName());
+                        conn.setReadOnly(false);
+                    } else if (conn.getAutoCommit()) {
+                        pl.getLogger().severe("[ArcheCore Consumer] This might be a genuine mistake but probably not, some idiot set the connection for Consumer to auto commit which will nuke performance into kingdom come. We're fixing this but the idiotic code is here: " + apsr.getClass().getSimpleName());
+                        conn.setAutoCommit(false);
+                    }
                 } else {
                     for (final String toinsert : row.getInserts()) {
                         try {
@@ -152,11 +180,10 @@ public class Consumer extends TimerTask implements IConsumer {
             }
             lock.unlock();
 
-            pl.getLogger().info("[ArcheCore Consumer] Finished saving!");
+            long time = System.currentTimeMillis() - starttime;
+            pl.getLogger().info("[ArcheCore Consumer] Finished saving in " + time + "ms.");
             if (pl.debugMode()) {
-                long time = System.currentTimeMillis() - starttime;
                 float perRowTime = count / time;
-                pl.getLogger().log(Level.INFO, "[ArcheCore Consumer] Finished consumer run in " + time + " ms.");
                 pl.getLogger().log(Level.INFO, "[ArcheCore Consumer] Total rows processed: " + count + ". Row/time: " + String.format("%.4f", perRowTime));
                 pl.getLogger().log(Level.INFO, "[ArcheCore Consumer] We started with a queue size of " + startSize + " which is now " + queue.size());
             }

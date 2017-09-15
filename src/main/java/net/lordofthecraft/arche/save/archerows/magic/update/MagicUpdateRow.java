@@ -1,12 +1,12 @@
 package net.lordofthecraft.arche.save.archerows.magic.update;
 
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class MagicUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
@@ -45,7 +45,29 @@ public class MagicUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public void executeStatements() throws SQLException {
-
+        PreparedStatement statement = connection.prepareStatement("UPDATE persona_magic SET ?=? WHERE persona_id_fk=? AND magic_fk=?");
+        statement.setString(1, field.field);
+        if (ArcheCore.getPlugin().isUsingSQLite()) {
+            switch (field) {
+                case TIER:
+                case TEACHER:
+                    statement.setInt(2, (int) toSet);
+                    break;
+                case LAST_ADVANCED:
+                case LEARNED:
+                    statement.setTimestamp(2, (Timestamp) toSet);
+                    break;
+                case VISIBLE:
+                    statement.setBoolean(2, (boolean) toSet);
+                    break;
+            }
+        } else {
+            statement.setObject(2, toSet, field.type);
+        }
+        statement.setInt(3, persona.getPersonaId());
+        statement.setString(4, magic_name);
+        statement.executeUpdate();
+        statement.close();
     }
 
     @Override
@@ -55,6 +77,8 @@ public class MagicUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        return new String[]{
+                "UPDATE persona_magic SET " + field.field + "=" + (field.type == JDBCType.VARCHAR ? "'" + toSet + "'" : toSet) + " WHERE persona_id_fk=" + persona.getPersonaId() + " AND magic_fk='" + magic_name + "';"
+        };
     }
 }

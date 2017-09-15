@@ -4,6 +4,8 @@ import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.interfaces.Creature;
 import net.lordofthecraft.arche.interfaces.Magic;
 
+import java.sql.JDBCType;
+import java.sql.SQLType;
 import java.util.Collections;
 import java.util.Set;
 
@@ -13,6 +15,25 @@ import java.util.Set;
  * @author 501warhead
  */
 public class ArcheCreature implements Creature {
+
+    public enum Field {
+        NAME("name", "magic_creatures", JDBCType.VARCHAR, false),
+        DESCRIPTION("descr", "magic_creatures", JDBCType.VARCHAR, false),
+        ABILITY("ability", "creature_abilities", JDBCType.VARCHAR, true),
+        CREATOR("magic_id_fk", "creature_creators", JDBCType.VARCHAR, true);
+
+        public final String field;
+        public final String table;
+        public final SQLType type;
+        public final boolean insert;
+
+        Field(String field, String table, SQLType type, boolean insert) {
+            this.field = field;
+            this.table = table;
+            this.type = type;
+            this.insert = insert;
+        }
+    }
 
     private final String id;
     private Set<Magic> creators;

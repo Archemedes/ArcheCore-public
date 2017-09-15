@@ -1,20 +1,26 @@
 package net.lordofthecraft.arche;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.archerows.logging.BlockRegisteryRow;
 import net.lordofthecraft.arche.save.tasks.logging.BlockRegistryDeleteTask;
-import net.lordofthecraft.arche.save.tasks.logging.BlockRegistryInsertTask;
 import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 
 import java.util.EnumSet;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class BlockRegistry {
 	final Set<WeakBlock> playerPlaced = Sets.newHashSetWithExpectedSize(3000);
 	private final Set<Material> watching = EnumSet.noneOf(Material.class);
+    final Map<WeakBlock, String> data = Maps.newConcurrentMap();
     private final SaveHandler buffer = SaveHandler.getInstance();
+    private final IConsumer consumer = ArcheCore.getControls().getConsumer();
 
     BlockRegistry() {
     }
@@ -43,7 +49,21 @@ public class BlockRegistry {
 	public void monitorBlock(Block b){
 		WeakBlock wb = new WeakBlock(b);
 		playerPlaced.add(wb);
-        buffer.put(new BlockRegistryInsertTask(wb));
+        consumer.queueRow(new BlockRegisteryRow(wb));
+        //buffer.put(new BlockRegistryInsertTask(wb));
+    }
+
+    /**
+     * Add a specific block with a String of plugin-specified data to the Block Registry.
+     *
+     * @param b    The block to monitor
+     * @param data The data to add to this weak location
+     */
+    public void monitorBlock(Block b, String data) {
+        WeakBlock wb = new WeakBlock(b);
+        playerPlaced.add(wb);
+        this.data.putIfAbsent(wb, data);
+        consumer.queueRow(new BlockRegisteryRow(wb, data));
     }
 
     /**
@@ -55,6 +75,9 @@ public class BlockRegistry {
 		WeakBlock wb = new WeakBlock(b);
 		boolean res = playerPlaced.remove(wb);
         buffer.put(new BlockRegistryDeleteTask(wb));
+        if (data.containsKey(wb)) {
+            data.remove(wb);
+        }
         return res;
     }
 	
@@ -65,6 +88,16 @@ public class BlockRegistry {
 	 */
 	public boolean isPlayerPlaced(Block b){
 		return playerPlaced.contains(new WeakBlock(b));
-	}
-	
+    }
+
+    /**
+     * Obtain potential data that is attached to this block, a simple string.
+     *
+     * @param b The block to check against
+     * @return The data wrapped in an {@link Optional}
+     */
+    public Optional<String> getData(Block b) {
+        WeakBlock wb = new WeakBlock(b);
+        return data.entrySet().parallelStream().filter(ent -> ent.getKey().equals(wb)).map(Map.Entry::getValue).findFirst();
+    }
 }

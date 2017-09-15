@@ -370,7 +370,7 @@ public final class ArcheTables {
                 "x INT," +
                 "y INT," +
                 "z INT," +
-                "custom_data TEXT DEFAULT NULL," +
+                "data TEXT DEFAULT NULL," +
                 "PRIMARY KEY (world,x,y,z)" +
                 ")" +
                 end);

@@ -278,14 +278,18 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         archenomicon.init(sqlHandler);
 
         try{
-            ResultSet res = sqlHandler.query("SELECT * FROM blockregistry");
+            ResultSet res = sqlHandler.query("SELECT world,x,y,z,data FROM blockregistry");
             while(res.next()){
                 String world = res.getString("world");
                 int x = res.getInt("x");
                 int y = res.getInt("y");
                 int z = res.getInt("z");
+                String data = res.getString("data");
                 WeakBlock wb = new WeakBlock(world, x, y, z);
                 blockRegistry.playerPlaced.add(wb);
+                if (data != null) {
+                    blockRegistry.data.putIfAbsent(wb, data);
+                }
             }
             res.getStatement().close();
             if (sqlHandler instanceof WhySQLHandler) {
@@ -372,30 +376,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         consumerRunDelay = config.getInt("consumer.run.delay");
         consumerShouldUseBukkitScheduler = config.getBoolean("consumer.use.bukkit.scheduler");
         consumerWarningSize = config.getInt("consumer.queue.warning.size");
-        /*
-            private int consumerRun;
-    private int consumerForceProcessMin;
-    private int consumerRunDelay;
-    private boolean consumerShouldUseBukkitScheduler;
-    private int consumerWarningSize;
-         */
-
-        /*
-        #Settings for ArcheCore consumer. These are performance optimization settings and should not be adjusted
-#unless you are very familiar with ArcheCore code.
-#"Changing config settings"
-consumer:
-  #Time for each run of the consumer
-  run.time: 1000
-  #Force the consumer to process a minimum of the following transactions
-  force.process.minimum: 20
-  #Delay between consumer runs.
-  run.delay: 2
-  #Whether or not to create a Java Timer or use AsyncTaskScheduler in Bukkit
-  use.bukkit.scheduler: true
-  #The warning size of the queue, when it reaches this threshhold it will warn about overload.
-  queue.warning.size: 1000
-         */
 
         if(teleportNewbies){
             World w = Bukkit.getWorld(config.getString("preferred.spawn.world"));
@@ -425,6 +405,7 @@ consumer:
         getCommand("racespawn").setExecutor(new CommandRaceSpawn(personaHandler));
         getCommand("attribute").setExecutor(new CommandAttribute());
         getCommand("attribute").setTabCompleter(new CommandAttributeTabCompleter());
+        //But not these
         getCommand("skin").setExecutor(new CommandSkin(this));
     }
 
