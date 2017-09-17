@@ -43,7 +43,7 @@ public class ArmorListener implements Listener {
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.HIGH)
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onInventoryClick(InventoryClickEvent e){		
 		if(e.getInventory().getType() == InventoryType.CRAFTING) { //Can only equip while in the player inv screen
 			switch(e.getAction()) {
@@ -82,7 +82,7 @@ public class ArmorListener implements Listener {
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.HIGH)
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onDrag(InventoryDragEvent e) {
 		if(e.getInventory().getType() == InventoryType.CRAFTING) {
 			List<MovedItem> moved = InventoryUtil.getResultOfEvent(e);
