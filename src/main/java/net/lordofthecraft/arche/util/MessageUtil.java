@@ -89,17 +89,17 @@ public class MessageUtil {
 	}
 
 	public static void addNewlines(BaseComponent x) {
-		breakUp(x, 0);
+		breakUp(x, 0, null);
 	}
 	
-	private static int breakUp(BaseComponent x, int lineLength) {
+	private static int breakUp(BaseComponent x, int lineLength, BaseComponent prev) {
 		if(x instanceof TextComponent) {
 			TextComponent tc = (TextComponent) x;
 			String text = tc.getText();
 			
 			if(text.trim().length() == 0) {
 				lineLength += text.length();
-				if(lineLength >= 52) {
+				if(lineLength >= 60) {
 					tc.setText("\n");
 					lineLength = 0;
 				} else if(lineLength == 0) {
@@ -109,22 +109,36 @@ public class MessageUtil {
 				String[] parts = text.split(" ");
 				StringBuilder recoveredParts = new StringBuilder(text.length() + 4);
 				boolean first = true;
-				
-				
+
 				for(String part : parts) {
-					if(lineLength >= 56 && part.length() != 1) {
-						recoveredParts.append('\n');
+					if(lineLength+part.length() >= 60 && part.length() != 1) {
+						if(prev != null && prev instanceof TextComponent) {
+							TextComponent prev_tc = (TextComponent) prev;
+							String txt = prev_tc.getText();
+							if(txt.length() <2) {
+								prev_tc.setText('\n' + txt);
+							} else {
+								recoveredParts.append('\n');
+							}
+						} else {
+							recoveredParts.append('\n');
+						}
 						lineLength = 0;
 					} else if(!first) {
 						recoveredParts.append(' ');
 						lineLength++;
 					}
 					
-					if(first) first = false;
+					if(first) {
+						first = false;
+						prev = null;
+					}
 					
 					lineLength += part.length();
 					recoveredParts.append(part);
 				}
+				if(text.charAt(text.length() - 1) == ' ')
+					recoveredParts.append(' ');
 				tc.setText(recoveredParts.toString());
 	
 			}
@@ -132,8 +146,11 @@ public class MessageUtil {
 			lineLength += x.toPlainText().length();
 		}
 		
-		if(x.getExtra() != null) for(BaseComponent o : x.getExtra())
-			lineLength = breakUp(o, lineLength);
+		prev = null;
+		if(x.getExtra() != null) for(BaseComponent o : x.getExtra()) {
+			lineLength = breakUp(o, lineLength, prev);
+			prev = o;
+		}
 		
 		return lineLength;
 	}
