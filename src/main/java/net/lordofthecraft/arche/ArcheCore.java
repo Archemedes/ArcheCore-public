@@ -251,12 +251,12 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             } else {
                 getLogger().warning("[ArcheCore Consumer] Failed to use the Bukkit Scheduler as specified, task did not register. Using timer now.");
                 archeTimer = new Timer();
-                archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
+                //archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
                 getLogger().info("[ArcheCore Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
             }
         } else {
             archeTimer = new Timer();
-            archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
+            //archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
             getLogger().info("[ArcheCore Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
         }
         ArcheTables.setUpSQLTables(sqlHandler);
@@ -420,6 +420,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         pm.registerEvents(new TreasureChestListener(), this);
         pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
         pm.registerEvents(new PersonaInventoryListener(), this);
+        pm.registerEvents(new ArmorListener(), this);
         //if (permissions) pm.registerEvents(new PersonaPermissionListener(personaHandler.getPermHandler()), this);
 
         if (showXpToPlayers) {
