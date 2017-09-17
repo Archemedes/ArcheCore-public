@@ -88,6 +88,56 @@ public class MessageUtil {
 		return CommandButton(topic, "/archehelp " + topic, "Click for help");
 	}
 
+	public static void addNewlines(BaseComponent x) {
+		breakUp(x, 0);
+	}
+	
+	private static int breakUp(BaseComponent x, int lineLength) {
+		if(x instanceof TextComponent) {
+			TextComponent tc = (TextComponent) x;
+			String text = tc.getText();
+			
+			if(text.trim().length() == 0) {
+				lineLength += text.length();
+				if(lineLength >= 52) {
+					tc.setText("\n");
+					lineLength = 0;
+				} else if(lineLength == 0) {
+					tc.setText("");
+				}
+			} else {
+				String[] parts = text.split(" ");
+				StringBuilder recoveredParts = new StringBuilder(text.length() + 4);
+				boolean first = true;
+				
+				
+				for(String part : parts) {
+					if(lineLength >= 56 && part.length() != 1) {
+						recoveredParts.append('\n');
+						lineLength = 0;
+					} else if(!first) {
+						recoveredParts.append(' ');
+						lineLength++;
+					}
+					
+					if(first) first = false;
+					
+					lineLength += part.length();
+					recoveredParts.append(part);
+				}
+				tc.setText(recoveredParts.toString());
+	
+			}
+		} else {
+			lineLength += x.toPlainText().length();
+		}
+		
+		if(x.getExtra() != null) for(BaseComponent o : x.getExtra())
+			lineLength = breakUp(o, lineLength);
+		
+		return lineLength;
+	}
+	
 	public static void send(BaseComponent[] m, CommandSender sender) {
 		if(sender instanceof Player) ((Player) sender).spigot().sendMessage(m);
 		else Arrays.stream(m).forEach(o->sender.sendMessage(o.toPlainText()));

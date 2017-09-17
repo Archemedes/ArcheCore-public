@@ -44,6 +44,8 @@ public class CommandArchehelp implements CommandExecutor {
 						topics.addExtra(MessageUtil.ArcheHelpButton(t));
 						topics.addExtra(" ");
 					});
+					
+					MessageUtil.addNewlines(topics);
 				}
 				((Player) sender).spigot().sendMessage(topics);
 			} else {

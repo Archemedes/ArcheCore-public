@@ -361,6 +361,7 @@ public class CreationDialog {
             		.create()[0]
             		);
 
+            MessageUtil.addNewlines(mains);
             p.spigot().sendMessage(mains);
 
             String pretext = ChatColor.YELLOW + "Please type your Persona's race, or type " + ChatColor.WHITE + "more"
@@ -434,6 +435,7 @@ public class CreationDialog {
             		.create()[0]
             		);
 
+            MessageUtil.addNewlines(subraces);
             p.spigot().sendMessage(subraces);
             String pretext = "You have selected "+ChatColor.WHITE+selected.getName()+ChatColor.YELLOW+". These are the available subraces to you, should you choose them. Type the name of the subrace or click to select.";
             return pretext + DIVIDER;
@@ -484,6 +486,7 @@ public class CreationDialog {
                 }
             }
 
+            MessageUtil.addNewlines(m);
             p.spigot().sendMessage(m);
             return DIVIDER;
         }
