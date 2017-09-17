@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche.event;
+package net.lordofthecraft.arche.event.skill;
 
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;

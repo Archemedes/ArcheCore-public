@@ -1,14 +1,14 @@
-package net.lordofthecraft.arche.event;
+package net.lordofthecraft.arche.event.persona;
 
 import net.lordofthecraft.arche.interfaces.Persona;
 import org.bukkit.event.HandlerList;
 
-public class PersonaActivateEvent extends PersonaEvent{
+public class PersonaDeactivateEvent extends PersonaEvent {
 	//HandlerList Boilerplate
 	private static final HandlerList handlers = new HandlerList();
 	private final Reason reason;
 	
-	public PersonaActivateEvent(Persona persona, Reason reason) {
+	public PersonaDeactivateEvent(Persona persona, Reason reason) {
 		super(persona);
 		this.reason = reason;
 	}
@@ -22,6 +22,9 @@ public class PersonaActivateEvent extends PersonaEvent{
 	}
 
 	@Override public HandlerList getHandlers() { return handlers ; }
+
+	public enum Reason {LOGOUT, SWITCH, REMOVE}
 	
-	public static enum Reason { LOGIN, SWITCH }
 }
+
+

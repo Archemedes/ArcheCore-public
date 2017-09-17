@@ -1,7 +1,7 @@
 package net.lordofthecraft.arche.listener;
 
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.event.PersonaSwitchEvent;
+import net.lordofthecraft.arche.event.persona.PersonaSwitchEvent;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;

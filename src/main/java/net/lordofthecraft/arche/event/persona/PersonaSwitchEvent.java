@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche.event;
+package net.lordofthecraft.arche.event.persona;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;

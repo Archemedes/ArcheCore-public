@@ -10,8 +10,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
-import net.lordofthecraft.arche.event.PersonaActivateEvent;
-import net.lordofthecraft.arche.event.PersonaDeactivateEvent;
+import net.lordofthecraft.arche.event.persona.PersonaActivateEvent;
+import net.lordofthecraft.arche.event.persona.PersonaDeactivateEvent;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;

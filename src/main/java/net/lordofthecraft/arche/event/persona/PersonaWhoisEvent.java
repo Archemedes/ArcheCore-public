@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche.event;
+package net.lordofthecraft.arche.event.persona;
 
 import java.util.List;
 
