@@ -1,22 +1,27 @@
 package net.lordofthecraft.arche.persona;
 
-import com.google.common.collect.Maps;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheTimer;
-import net.lordofthecraft.arche.attributes.*;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.attribute.ArcheAttributeInsertTask;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
+import com.google.common.collect.Maps;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheTimer;
+import net.lordofthecraft.arche.attributes.ArcheAttribute;
+import net.lordofthecraft.arche.attributes.ArcheAttributeInstance;
+import net.lordofthecraft.arche.attributes.AttributeRegistry;
+import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
+import net.lordofthecraft.arche.attributes.VanillaAttribute;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.tasks.attribute.ArcheAttributeInsertTask;
 
 /**
  * Just fucking end me - Sporadic 2k17
@@ -60,11 +65,8 @@ public class PersonaAttributes {
     }
     
     public void addModifier(Attribute a, AttributeModifier m) {
-        Optional<VanillaAttribute> att = AttributeRegistry.getInstance().getVanillaAttribute(a);
-        if (!att.isPresent()) {
-            return;
-        }
-        addModifier(att.get(), m);
+        VanillaAttribute att = AttributeRegistry.getInstance().getVanillaAttribute(a);
+        addModifier(att, m);
     }
     
     public void addModifier(ArcheAttribute a, AttributeModifier m) {
@@ -125,11 +127,8 @@ public class PersonaAttributes {
     }
     
     public void removeModifier(Attribute a, AttributeModifier m) {
-        Optional<VanillaAttribute> att = AttributeRegistry.getInstance().getVanillaAttribute(a);
-        if (!att.isPresent()) {
-            return;
-        }
-        removeModifier(att.get(), m);
+        VanillaAttribute att = AttributeRegistry.getInstance().getVanillaAttribute(a);
+        removeModifier(att, m);
     }
     
     public void removeModifier(ArcheAttribute a, AttributeModifier m) {

@@ -1,10 +1,10 @@
 package net.lordofthecraft.arche.attributes;
 
-import com.google.common.collect.Sets;
+import java.util.Set;
+
 import org.bukkit.attribute.Attribute;
 
-import java.util.Optional;
-import java.util.Set;
+import com.google.common.collect.Sets;
 
 public class AttributeRegistry {
 
@@ -39,15 +39,15 @@ public class AttributeRegistry {
         registeredAttributes.add(attr);
     }
 
-    public Optional<VanillaAttribute> getVanillaAttribute(Attribute attribute) {
+    public VanillaAttribute getVanillaAttribute(Attribute attribute) {
         return registeredAttributes.stream()
                 .filter(a -> a.getName().equalsIgnoreCase(attribute.toString()) && a instanceof VanillaAttribute)
                 .map(m -> (VanillaAttribute) m)
-                .findFirst();
+                .findFirst().get();
     }
 
-    public Optional<ArcheAttribute> getAttribute(String name) {
-        return registeredAttributes.stream().filter(a -> a.getName().equals(name)).findFirst();
+    public ArcheAttribute getAttribute(String name) {
+        return registeredAttributes.stream().filter(a -> a.getName().equals(name)).findFirst().get();
     }
 
 }

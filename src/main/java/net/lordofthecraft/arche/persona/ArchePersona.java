@@ -289,33 +289,30 @@ public final class ArchePersona implements Persona, InventoryHolder {
             ResultSet rs = statement.executeQuery();
             AttributeRegistry reg = AttributeRegistry.getInstance();
             while (rs.next()) {
-                Optional<ArcheAttribute> oattr = reg.getAttribute(rs.getString("attribute_type"));
-                if (oattr.isPresent()) {
-                    ArcheAttribute att = oattr.get();
-                    String type = rs.getString("decaytype");
-                    String sop = rs.getString("operation");
-                    AttributeModifier.Operation op = null;
-                    ExtendedAttributeModifier.Decay decaytype = null;
-                    for (ExtendedAttributeModifier.Decay at : ExtendedAttributeModifier.Decay.values()) {
-                        if (at.name().equalsIgnoreCase(type)) {
-                            decaytype = at;
-                            break;
-                        }
-                    }
-                    for (AttributeModifier.Operation fop : AttributeModifier.Operation.values()) {
-                        if (fop.name().equalsIgnoreCase(sop)) {
-                            op = fop;
-                            break;
-                        }
-                    }
-                    if (decaytype != null && op != null) {
-                        UUID id = UUID.fromString(rs.getString("mod_uuid"));
-                        String name = rs.getString("name");
-                        double amount = rs.getDouble("mod_value");
-                        long ticks = rs.getLong("decayticks");
-                        boolean lostondeath = rs.getBoolean("lostondeath");
-                        attributes.addModifierFromSQL(att, new ExtendedAttributeModifier(id, name, amount, op, this, att, decaytype, ticks, lostondeath));
-                    }
+                ArcheAttribute att = reg.getAttribute(rs.getString("attribute_type"));
+                String type = rs.getString("decaytype");
+                String sop = rs.getString("operation");
+                AttributeModifier.Operation op = null;
+                ExtendedAttributeModifier.Decay decaytype = null;
+                for (ExtendedAttributeModifier.Decay at : ExtendedAttributeModifier.Decay.values()) {
+                	if (at.name().equalsIgnoreCase(type)) {
+                		decaytype = at;
+                		break;
+                	}
+                }
+                for (AttributeModifier.Operation fop : AttributeModifier.Operation.values()) {
+                	if (fop.name().equalsIgnoreCase(sop)) {
+                		op = fop;
+                		break;
+                	}
+                }
+                if (decaytype != null && op != null) {
+                	UUID id = UUID.fromString(rs.getString("mod_uuid"));
+                	String name = rs.getString("name");
+                	double amount = rs.getDouble("mod_value");
+                	long ticks = rs.getLong("decayticks");
+                	boolean lostondeath = rs.getBoolean("lostondeath");
+                	attributes.addModifierFromSQL(att, new ExtendedAttributeModifier(id, name, amount, op, this, att, decaytype, ticks, lostondeath));
                 }
             }
             rs.close();
