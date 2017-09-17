@@ -27,9 +27,6 @@ public class ArmorListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onClick(PlayerInteractEvent e) {
-		System.out.println(e.getItem());
-		System.out.println(e.isBlockInHand());
-		System.out.println(e.getAction());
 		
 		if(( e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) 
 				&& !e.isBlockInHand() && e.getItem() != null) {
