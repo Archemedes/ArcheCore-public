@@ -25,7 +25,7 @@ import net.lordofthecraft.arche.util.InventoryUtil.MovedItem;
 public class ArmorListener implements Listener {
 
 	
-	@EventHandler(priority = EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.HIGH)
 	public void onClick(PlayerInteractEvent e) {
 		
 		if(( e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) 
@@ -43,7 +43,7 @@ public class ArmorListener implements Listener {
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.HIGH)
 	public void onInventoryClick(InventoryClickEvent e){		
 		if(e.getInventory().getType() == InventoryType.CRAFTING) { //Can only equip while in the player inv screen
 			switch(e.getAction()) {
@@ -82,7 +82,7 @@ public class ArmorListener implements Listener {
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.HIGH)
 	public void onDrag(InventoryDragEvent e) {
 		if(e.getInventory().getType() == InventoryType.CRAFTING) {
 			List<MovedItem> moved = InventoryUtil.getResultOfEvent(e);
