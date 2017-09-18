@@ -3,7 +3,6 @@ package net.lordofthecraft.arche.save.tasks;
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
-import net.lordofthecraft.arche.SQL.WhySQLHandler;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -37,9 +36,7 @@ public abstract class StatementTask extends ArcheTask {
 			
 			setValues();
 			stat.execute();
-            if (handle instanceof WhySQLHandler) {
-                conn.close();
-            }
+            conn.close();
         }catch(SQLException e){e.printStackTrace();}
         if (timer != null) {
             timer.stopTiming("StatementTask " + simpleName() + " " + r);

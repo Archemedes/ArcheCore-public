@@ -17,7 +17,6 @@ interface StatementsList {
 public /*abstract*/ class SQLite implements Closeable {
 
     protected Logger logger;
-    protected Connection connection;
     //protected DBList driver;
     protected String prefix;
     // protected String dbprefix;
@@ -52,18 +51,18 @@ public /*abstract*/ class SQLite implements Closeable {
     public boolean open() //Overridden
     {
         if (initialize()) {
-            try {
-                SQLiteDataSource ds = new SQLiteDataSource();
-                ds.setUrl("jdbc:sqlite:" + this.getFile().getAbsolutePath());
-                this.ds = ds;
-                this.connection = ds.getConnection();
-                //this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.getFile().getAbsolutePath());
+            SQLiteDataSource ds = new SQLiteDataSource();
+            ds.setUrl("jdbc:sqlite:" + this.getFile().getAbsolutePath());
+            this.ds = ds;
+            //this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.getFile().getAbsolutePath());
 
-                return true;
+            return true;
+            /*try {
+
             } catch (SQLException e) {
                 this.printError("Could not establish an SQLite connection, SQLException: " + e.getMessage());
                 return false;
-            }
+            }*/
         } else {
             return false;
         }
@@ -71,7 +70,8 @@ public /*abstract*/ class SQLite implements Closeable {
 
     @Override
     public final void close() {
-        if (connection != null) {
+        //Honestly... not sure... how to close the DS.
+        /*if (connection != null) {
             try {
                 connection.close();
             } catch (SQLException e) {
@@ -79,31 +79,11 @@ public /*abstract*/ class SQLite implements Closeable {
             }
         } else {
             this.printError("Could not close connection, it is null.");
-        }
+        }*/
     }
 
-    public final Connection getConnection() {
-        return this.connection;
-    }
-
-    public final boolean isOpen() {
-        if (connection != null)
-            try {
-                if (connection.isValid(1))
-                    return true;
-            } catch (SQLException ignored) {
-            }
-        return false;
-    }
-
-    public final boolean isOpen(int seconds) {
-        if (connection != null)
-            try {
-                if (connection.isValid(seconds))
-                    return true;
-            } catch (SQLException ignored) {
-            }
-        return false;
+    public final Connection getConnection() throws SQLException {
+        return ds.getConnection();
     }
 
     protected void printError(String error) {

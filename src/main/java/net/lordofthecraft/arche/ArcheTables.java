@@ -2,7 +2,6 @@ package net.lordofthecraft.arche;
 
 import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.WhySQLHandler;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -76,12 +75,7 @@ public final class ArcheTables {
             conn.commit();
             ArcheCore.getPlugin().getLogger().info("We've finished with committing all tables now.");
             statement.close();
-            if (sqlHandler instanceof WhySQLHandler) {
-                conn.setAutoCommit(true);
-                conn.close();
-            } else {
-                conn.setAutoCommit(true);
-            }
+            conn.close();
             if (timer != null) {
                 timer.stopTiming("Database Creation");
             }

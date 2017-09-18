@@ -2,7 +2,6 @@ package net.lordofthecraft.arche.save.tasks.persona;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
-import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
@@ -83,9 +82,7 @@ public class UpdateTask extends ArcheTask {
             stat.setInt(2, persona.getPersonaId());
             stat.executeUpdate();
             stat.close();
-            if (handle instanceof WhySQLHandler) {
-                c.close();
-            }
+            c.close();
 
         }catch(SQLException e){e.printStackTrace();}
 	}

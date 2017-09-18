@@ -317,9 +317,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
             }
             rs.close();
             statement.close();
-            if (!ArcheCore.usingSQLite()) {
-                conn.close();
-            }
+            conn.close();
         } catch (SQLException e) {
             ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Warning! We failed to load attributes for the persona of " + player + "! [" + persona_id + "]", e);
         }
@@ -366,9 +364,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			}
 			rs.close();
 			stat.close();
-            if (!ArcheCore.usingSQLite()) {
-                conn.close();
-            }
+            conn.close();
         } catch (SQLException e) {
 			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "An error occurred while loading " + player + "'s persona magics!!!", e);
 		}

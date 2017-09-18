@@ -228,6 +228,11 @@ public class ArcheSQLiteHandler extends SQLHandler {
 
 	@Override
 	public Connection getConnection() {
-		return sqlite.getConnection();
-	}
+        try {
+            return sqlite.getConnection();
+        } catch (SQLException e) {
+            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Failed to create a Connection object inside of SQLiteHandler!: ", e);
+            return null;
+        }
+    }
 }

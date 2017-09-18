@@ -2,7 +2,6 @@ package net.lordofthecraft.arche.magic;
 
 import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.interfaces.Creature;
 import net.lordofthecraft.arche.interfaces.Magic;
 import net.lordofthecraft.arche.interfaces.MagicType;
@@ -179,9 +178,7 @@ public class Archenomicon {
             creaturecreators.close();
             creatureabilities.close();
 
-            if (handler instanceof WhySQLHandler) {
-                conn.close();
-            }
+            conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }

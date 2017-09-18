@@ -3,7 +3,6 @@ package net.lordofthecraft.arche.save;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePreparedStatementRow;
@@ -172,7 +171,7 @@ public class Consumer extends TimerTask implements IConsumer {
                 if (state != null) {
                     state.close();
                 }
-                if (conn != null && handler instanceof WhySQLHandler) {
+                if (conn != null) {
                     conn.close();
                 }
             } catch (SQLException e) {

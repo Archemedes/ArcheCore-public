@@ -292,9 +292,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
                 }
             }
             res.getStatement().close();
-            if (sqlHandler instanceof WhySQLHandler) {
-                res.getStatement().getConnection().close();
-            }
+            res.getStatement().getConnection().close();
         }catch(SQLException e){e.printStackTrace();}
 
 
