@@ -14,9 +14,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import net.lordofthecraft.arche.attributes.AttributeItem.Slot;
 import net.lordofthecraft.arche.event.util.ArmorEquipEvent;
 import net.lordofthecraft.arche.event.util.ArmorUnequipEvent;
 import net.lordofthecraft.arche.util.InventoryUtil;
@@ -31,7 +31,7 @@ public class ArmorListener implements Listener {
 		if(( e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) 
 				&& !e.isBlockInHand() && e.getItem() != null) {
 			ItemStack item = e.getItem();
-			Slot armorSlot = isArmor(item.getType());
+			EquipmentSlot armorSlot = isArmor(item.getType());
 			if(armorSlot != null) {
 				ArmorEquipEvent aee = new ArmorEquipEvent(e.getPlayer(), item, armorSlot);
 				Bukkit.getPluginManager().callEvent(aee);
@@ -58,7 +58,7 @@ public class ArmorListener implements Listener {
 						int raw = m.getFinalSlot();
 						int init = m.getInitialSlot();
 						if(raw >= 5 && raw <= 8) {
-							Slot slot = asSlot(raw);
+							EquipmentSlot slot = asSlot(raw);
 							ArmorEquipEvent aee = new ArmorEquipEvent((Player) e.getWhoClicked(), m.getItem(), slot);
 							Bukkit.getPluginManager().callEvent(aee);
 							if(aee.isCancelled()) {
@@ -67,7 +67,7 @@ public class ArmorListener implements Listener {
 							
 							return; //Can't ever have more than 1 armor equipped per event
 						} else if(init >= 5 && init <= 8) {
-							Slot slot = asSlot(init);
+							EquipmentSlot slot = asSlot(init);
 							ArmorUnequipEvent aue = new ArmorUnequipEvent((Player) e.getWhoClicked(), m.getItem(), slot);
 							Bukkit.getPluginManager().callEvent(aue);
 							if(aue.isCancelled()) {
@@ -89,7 +89,7 @@ public class ArmorListener implements Listener {
 			for(MovedItem m : moved) {
 				int raw = m.getFinalSlot();
 				if(raw >= 5 && raw <= 8) {
-					Slot slot = asSlot(raw);
+					EquipmentSlot slot = asSlot(raw);
 					ArmorEquipEvent aee = new ArmorEquipEvent((Player) e.getWhoClicked(), m.getItem(), slot);
 					Bukkit.getPluginManager().callEvent(aee);
 					if(aee.isCancelled()) {
@@ -103,27 +103,27 @@ public class ArmorListener implements Listener {
 	}
 	
 	
-	private Slot asSlot(int raw) {
+	private EquipmentSlot asSlot(int raw) {
 		switch(raw) {
-		case 5: return Slot.HEAD;
-		case 6: return Slot.CHEST;
-		case 7: return Slot.LEGS;
-		case 8: return Slot.FEET;
+		case 5: return EquipmentSlot.HEAD;
+		case 6: return EquipmentSlot.CHEST;
+		case 7: return EquipmentSlot.LEGS;
+		case 8: return EquipmentSlot.FEET;
 		default: throw new NullPointerException("Wrong slot you shouldn't be seeing this");
 		}
 	}
 	
-	private Slot isArmor(Material m){
+	private EquipmentSlot isArmor(Material m){
 		switch(m){
 		case LEATHER_HELMET: case CHAINMAIL_HELMET: case IRON_HELMET: case GOLD_HELMET: case DIAMOND_HELMET:
-			return Slot.HEAD;
+			return EquipmentSlot.HEAD;
 		case LEATHER_CHESTPLATE: case CHAINMAIL_CHESTPLATE: case IRON_CHESTPLATE:
 		case GOLD_CHESTPLATE: case DIAMOND_CHESTPLATE: case ELYTRA:
-			return Slot.CHEST;
+			return EquipmentSlot.CHEST;
 		case LEATHER_LEGGINGS: case CHAINMAIL_LEGGINGS: case IRON_LEGGINGS: case GOLD_LEGGINGS: case DIAMOND_LEGGINGS:
-			return Slot.LEGS;
+			return EquipmentSlot.LEGS;
 		case LEATHER_BOOTS: case CHAINMAIL_BOOTS: case IRON_BOOTS: case GOLD_BOOTS: case DIAMOND_BOOTS:
-			return Slot.FEET;
+			return EquipmentSlot.FEET;
 		default: return null;
 		}
 	}

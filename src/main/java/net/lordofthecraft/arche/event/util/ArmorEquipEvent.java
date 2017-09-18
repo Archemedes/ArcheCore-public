@@ -2,14 +2,13 @@ package net.lordofthecraft.arche.event.util;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-
-import net.lordofthecraft.arche.attributes.AttributeItem.Slot;
 
 public class ArmorEquipEvent extends ArmorEvent {
 	private static final HandlerList handlers = new HandlerList();
 
-	public ArmorEquipEvent(Player who, ItemStack armor, Slot slot) {
+	public ArmorEquipEvent(Player who, ItemStack armor, EquipmentSlot slot) {
 		super(who, armor, slot);
 	}
 

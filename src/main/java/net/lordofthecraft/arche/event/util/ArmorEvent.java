@@ -4,21 +4,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-
-import net.lordofthecraft.arche.attributes.AttributeItem.Slot;
 
 public abstract class ArmorEvent extends PlayerEvent implements Cancellable{
 	private ItemStack armor;
-	private final Slot slot; 
+	private final EquipmentSlot slot; 
 	
-	ArmorEvent(Player who, ItemStack armor, Slot slot) {
+	ArmorEvent(Player who, ItemStack armor, EquipmentSlot slot) {
 		super(who);
 		this.armor = armor;
 		this.slot = slot;
 	}
 	
-	public Slot getSlot() {
+	public EquipmentSlot getSlot() {
 		return slot;
 	}
 	
