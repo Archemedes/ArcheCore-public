@@ -155,4 +155,15 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 		}
 	}
 
+    @Override
+    public String toString() {
+        return "ExtendedAttributeModifier{" +
+                "lostOnDeath=" + lostOnDeath +
+                ", save=" + save +
+                ", decay=" + decay +
+                ", task=" + task +
+                ", ticksRemaining=" + ticksRemaining +
+                ", superModifier=" + super.toString() +
+                '}';
+    }
 }

@@ -25,7 +25,8 @@ public class CreatureUpdateRow implements ArcheMergeableRow {
 
     @Override
     public boolean isUnique() {
-        return false;
+        //TODO make merged row
+        return true;
     }
 
     @Override
@@ -63,20 +64,19 @@ public class CreatureUpdateRow implements ArcheMergeableRow {
             statement.executeUpdate();
             statement.close();
         } else {
-            PreparedStatement statement = connection.prepareStatement("UPDATE magic_creatures SET ?=? WHERE id_key=?");
-            statement.setString(1, field.field);
+            PreparedStatement statement = connection.prepareStatement("UPDATE magic_creatures SET " + field.field + "=? WHERE id_key=?");
             if (ArcheCore.getPlugin().isUsingSQLite()) {
                 switch (field) {
                     case NAME:
                     case DESCRIPTION:
                     case ABILITY:
                     case CREATOR:
-                        statement.setString(2, (String) data);
+                        statement.setString(1, (String) data);
                 }
             } else {
-                statement.setObject(2, data, field.type);
+                statement.setObject(1, data, field.type);
             }
-            statement.setString(3, creature.getId());
+            statement.setString(2, creature.getId());
             statement.executeUpdate();
             statement.close();
         }

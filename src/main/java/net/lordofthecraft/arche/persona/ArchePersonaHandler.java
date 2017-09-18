@@ -24,7 +24,6 @@ import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -43,7 +42,6 @@ public class ArchePersonaHandler implements PersonaHandler {
     //private SaveHandler buffer = SaveHandler.getInstance();
     private Connection personaConnection = null;
 	private boolean displayName = false;
-	private PreparedStatement selectStatement = null;
 	private Map<Race, Location> racespawns = Maps.newHashMap();
 
 	private boolean preloading = false;
@@ -276,6 +274,10 @@ public class ArchePersonaHandler implements PersonaHandler {
 				k -> new ArchePersona[ArcheCore.getControls().personaSlots()]
 		);
 
+        if (ArcheCore.getPlugin().debugMode()) {
+            ArcheCore.getPlugin().getLogger().info("Persona is being created with the RP name of " + persona.getName());
+        }
+
         if (prs[persona.getSlot()] != null) {
             PersonaRemoveEvent event2 = new PersonaRemoveEvent(prs[persona.getSlot()], true);
             Bukkit.getPluginManager().callEvent(event2);
@@ -304,14 +306,12 @@ public class ArchePersonaHandler implements PersonaHandler {
 		for(PotionEffect ps : p.getActivePotionEffects())
 			p.removePotionEffect(ps.getType());
 
-        Block b = p.getLocation().getBlock();
+        //For their starter items, provided by Admissions.
+        persona.inv = new PersonaInventory(p.getInventory().getContents(), p.getEnderChest().getContents());
         //buffer.put(new PersonaInsertTask(persona.getPersonaId(), p.getUniqueId(), persona.getSlot(), persona.getGender(), persona.getRace(), persona.getName(), persona.getCreationTime(), b.getX(), b.getY(), b.getZ(), b.getWorld().getUID()));
         consumer.queueRow(new PersonaInsertRow(persona));
 
         persona.saveMinecraftSpecifics(p);
-
-		//ArcheTask task = new InsertTask(uuid, id, name, race, gender,creationTime);
-		//buffer.put(task);
 
 		RaceBonusHandler.apply(p, persona.getRace());
 		persona.updateDisplayName(p);
@@ -517,10 +517,13 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		boolean hasCurrent = false;
 		ResultSet res = null;
-		try {
-			if (selectStatement == null)
-                selectStatement = personaConnection.prepareStatement(personaSelect);
-            selectStatement.clearParameters();
+        Connection connection = null;
+        PreparedStatement selectStatement = null;
+        try {
+            /*if (selectStatement == null)
+                selectStatement = .prepareStatement(personaSelect);*/
+            connection = ArcheCore.getSQLControls().getConnection();
+            selectStatement = connection.prepareStatement(personaSelect);
 			selectStatement.setString(1, p.getUniqueId().toString());
 			res = selectStatement.executeQuery();
 
@@ -562,8 +565,22 @@ public class ArchePersonaHandler implements PersonaHandler {
 			if(res != null){
 				try {res.close();} catch (SQLException e) {e.printStackTrace();}
 			}
+            if (selectStatement != null) {
+                try {
+                    selectStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
 
-			//See about having no Personas, no current Personas, etc
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            //See about having no Personas, no current Personas, etc
 			ensureValidPersonaRecord(p, prs, hasCurrent);
 
 			//Crucial that this part happens for obvious reasons.
@@ -693,13 +710,13 @@ public class ArchePersonaHandler implements PersonaHandler {
 		SQLHandler handler = ArcheCore.getPlugin().getSQLHandler();
 		long time = System.currentTimeMillis();
 		preloading = true;
-		try{
-			if (selectStatement == null)
-                selectStatement = personaConnection.prepareStatement(personaSelect);
-
-
-			ResultSet res = personaConnection.createStatement().executeQuery("SELECT player,preload_force FROM players");
-			while(res.next()){
+        Connection connection = null;
+        PreparedStatement selectStatement = null;
+        try{
+            connection = ArcheCore.getSQLControls().getConnection();
+            selectStatement = connection.prepareStatement(personaSelect);
+            ResultSet res = connection.createStatement().executeQuery("SELECT player,preload_force FROM players");
+            while(res.next()){
 				UUID uuid = UUID.fromString(res.getString("player"));
 				OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
 
@@ -715,12 +732,12 @@ public class ArchePersonaHandler implements PersonaHandler {
 					prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
 					personas.put(uuid, prs);
 				}
-				selectStatement.clearParameters();
 				selectStatement.setString(1, p.getUniqueId().toString());
 				ArchePersona persona = buildPersona(selectStatement.executeQuery(), p);
                 prs[persona.getSlot()] = persona;
             }
-		}catch(SQLException e){e.printStackTrace();}
+            res.close();
+        }catch(SQLException e){e.printStackTrace();}
 		finally{
 			for(ArchePersona[] prs : getPersonas()){
 				boolean current = false;
@@ -747,7 +764,22 @@ public class ArchePersonaHandler implements PersonaHandler {
 					}
 				}
 			}
-			/*
+            if (selectStatement != null) {
+                try {
+                    selectStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            /*
 			 * TODO
 			 * Move this out of initPreload, or if presonas aren't preloaded it will throw NPE since racespawns will be null.
 			 * - Kowaman

@@ -1,7 +1,6 @@
 package net.lordofthecraft.arche.save;
 
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
@@ -29,13 +28,16 @@ public class Consumer extends TimerTask implements IConsumer {
     private final int timePerRun;
     private final int forceToProcess;
     private final int warningSize;
+    private final boolean debugConsumer;
 
-    public Consumer(SQLHandler handler, ArcheCore pl, int timePerRun, int forceToProcess, int warningSize) {
+
+    public Consumer(SQLHandler handler, ArcheCore pl, int timePerRun, int forceToProcess, int warningSize, boolean debugConsumer) {
         this.handler = handler;
         this.pl = pl;
         this.timePerRun = timePerRun;
         this.forceToProcess = forceToProcess;
         this.warningSize = warningSize;
+        this.debugConsumer = debugConsumer;
     }
 
     @Override
@@ -52,15 +54,21 @@ public class Consumer extends TimerTask implements IConsumer {
 
     @Override
     public synchronized void run() {
-        pl.getLogger().info("[ArcheCore Consumer] Beginning save process...");
-        if (!lock.tryLock()) {
-            if (pl.debugMode())
-                pl.getLogger().warning("[ArcheCore Consumer] The consumer is still locked and we attempted to run, we are not running.");
+        if (debugConsumer) {
+            pl.getLogger().info("[ArcheCore Consumer] Beginning save process...");
+        }
+        if (queue.isEmpty()) {
+            if (debugConsumer) pl.getLogger().info("[ArcheCore Consumer] The consumer has no queue, not running.");
             return;
         }
-        if (!queue.isEmpty()) {
-            if (pl.debugMode()) pl.getLogger().info("[ArcheCore Consumer] The consumer has no queue, not running.");
+        if (!lock.tryLock()) {
+            if (debugConsumer)
+                pl.getLogger().info("[ArcheCore Consumer] The consumer is still locked and we attempted to run, we are not running.");
             return;
+        } else {
+            if (debugConsumer) {
+                pl.getLogger().info("[ArcheCore Consumer] We have locked the consumer and are beginning now.");
+            }
         }
         final int startSize = queue.size();
         final Connection conn = handler.getConnection();
@@ -85,7 +93,7 @@ public class Consumer extends TimerTask implements IConsumer {
                     continue;
                 }
                 long taskstart = System.currentTimeMillis();
-                if (pl.debugMode()) {
+                if (debugConsumer) {
                     pl.getLogger().info("[ArcheCore Consumer] Beginning process for " + row.toString());
                 }
                 if (row instanceof ArchePreparedStatementRow) {
@@ -133,13 +141,8 @@ public class Consumer extends TimerTask implements IConsumer {
                         //I hate you.
                         pl.getLogger().severe("[ArcheCore Consumer] So we have an acid-dunk worthy individual who closed the connection we gave them in their ArcheRow, despite specific documentation telling them not to. Offender: " + apsr.getClass().getSimpleName());
 
-                        if (handler instanceof ArcheSQLiteHandler) {
-                            pl.getLogger().warning("[ArcheCore Consumer] Mother of god you closed the only connection this thing has because we're in SQLite... I'm going to try to save the connection (the data has been BRUTALLY MURDERED) but you should consider never having kids for the sake of natural selection");
-                            //TODO retard-proof
-                        } else {
-                            pl.getLogger().warning("[ArcheCore Consumer] So we're going to terminate this consumer run. This data is visiting ol' yeller but cant really do anything about it");
-                            pl.getLogger().info("[ArcheCore Consumer] (Whoever did this needs to go find a bridge)");
-                        }
+                        pl.getLogger().warning("[ArcheCore Consumer] So we're going to terminate this consumer run. This data is visiting ol' yeller but cant really do anything about it");
+                        pl.getLogger().info("[ArcheCore Consumer] (Whoever did this needs to go find a bridge)");
                         break;
                     } else if (conn.isReadOnly()) {
                         pl.getLogger().severe("[ArcheCore Consumer] So some not max level retard but definitely over 9000 level retard set the connection to read only, either maliciously or as a meme. Either way, rapid termination of life should occur. Offender: " + apsr.getClass().getSimpleName());
@@ -158,7 +161,7 @@ public class Consumer extends TimerTask implements IConsumer {
                         }
                     }
                 }
-                if (pl.debugMode()) {
+                if (debugConsumer) {
                     pl.getLogger().info("[ArcheCore Consumer] Process took " + (System.currentTimeMillis() - taskstart) + "ms for " + row.toString());
                 }
                 count++;
@@ -181,10 +184,12 @@ public class Consumer extends TimerTask implements IConsumer {
 
             long time = System.currentTimeMillis() - starttime;
             pl.getLogger().info("[ArcheCore Consumer] Finished saving in " + time + "ms.");
-            if (pl.debugMode()) {
+            if (debugConsumer && count > 0) {
                 float perRowTime = count / time;
                 pl.getLogger().log(Level.INFO, "[ArcheCore Consumer] Total rows processed: " + count + ". Row/time: " + String.format("%.4f", perRowTime));
                 pl.getLogger().log(Level.INFO, "[ArcheCore Consumer] We started with a queue size of " + startSize + " which is now " + queue.size());
+            } else if (count == 0 && debugConsumer) {
+                pl.getLogger().info("[ArcheCore Consumer] Ran with 0 tasks.");
             }
         }
 

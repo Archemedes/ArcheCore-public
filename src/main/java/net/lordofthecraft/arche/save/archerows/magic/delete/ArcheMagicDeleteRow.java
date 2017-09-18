@@ -53,4 +53,11 @@ public class ArcheMagicDeleteRow implements ArcheMergeableRow {
                 "DELETE FROM magics WHERE id_key='" + magic.getName() + "';"
         };
     }
+
+    @Override
+    public String toString() {
+        return "ArcheMagicDeleteRow{" +
+                "magic=" + magic +
+                '}';
+    }
 }

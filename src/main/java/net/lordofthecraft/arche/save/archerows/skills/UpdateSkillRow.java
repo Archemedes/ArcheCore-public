@@ -6,6 +6,7 @@ import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.SkillAttachment;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.util.SQLUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,7 +34,7 @@ public class UpdateSkillRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public boolean canMerge(ArcheMergeableRow row) {
-        return !row.isUnique() && row instanceof UpdateSkillRow;
+        return !row.isUnique() && (row instanceof UpdateSkillRow && ((UpdateSkillRow) row).field == field);
     }
 
     @Override
@@ -41,7 +42,7 @@ public class UpdateSkillRow implements ArcheMergeableRow, ArchePersonaRow {
         if (second.isUnique()) {
             throw new IllegalArgumentException("Cannot merge unique rows");
         }
-        return null;
+        return new MultiUpdateSkillRow(this, (UpdateSkillRow) second);
     }
 
     @Override
@@ -56,25 +57,25 @@ public class UpdateSkillRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public void executeStatements() throws SQLException {
-        PreparedStatement statement = connection.prepareStatement("UPDATE persona_skills SET ?=? WHERE persona_id_fk=? AND skill_id_fk=?");
-        statement.setString(1, field.field);
+        PreparedStatement statement = connection.prepareStatement("UPDATE persona_skills SET " + field.field + "=? WHERE persona_id_fk=? AND skill_id_fk=?");
+
         if (ArcheCore.getPlugin().isUsingSQLite()) {
             switch (field) {
                 case XP:
-                    statement.setDouble(2, (double) data);
+                    statement.setDouble(1, (double) data);
                 case VISIBLE:
-                    statement.setBoolean(2, (boolean) data);
+                    statement.setBoolean(1, (boolean) data);
             }
         } else {
-            statement.setObject(2, data, field.type);
+            statement.setObject(1, data, field.type);
         }
-        statement.setInt(3, persona.getPersonaId());
-        statement.setString(4, skill.getName());
+        statement.setInt(2, persona.getPersonaId());
+        statement.setString(3, skill.getName());
         statement.executeUpdate();
     }
 
     @Override
     public String[] getInserts() {
-        return new String[0];
+        return new String[]{"UPDATE persona_skills SET " + field.field + "=" + (data instanceof String ? "'" + SQLUtil.mysqlTextEscape((String) data) + '\'' : data) + " WHERE persona_id_fk=" + persona.getPersonaId() + " AND skill_id_fk='" + SQLUtil.mysqlTextEscape(skill.getName()) + "';"};
     }
 }

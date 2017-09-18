@@ -3,6 +3,7 @@ package net.lordofthecraft.arche.save.archerows.persona.update;
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.PersonaTable;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
@@ -19,11 +20,11 @@ public class MultiPersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow
 
     final List<PersonaUpdateRow> updateRows = Lists.newArrayList();
     final List<Persona> personas = Lists.newArrayList();
-    final PersonaTable updateTable;
+    final PersonaField field;
     Connection connection;
 
     public MultiPersonaUpdateRow(PersonaUpdateRow row1, PersonaUpdateRow row2) {
-        updateTable = row1.updatefield.table;
+        field = row1.updatefield;
         updateRows.add(row1);
         updateRows.add(row2);
         personas.addAll(Lists.newArrayList(row1.getPersonas()));
@@ -39,7 +40,7 @@ public class MultiPersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow
     @Override
     public boolean canMerge(ArcheMergeableRow row) {
         return !row.isUnique() && (row instanceof PersonaUpdateRow
-                && ((PersonaUpdateRow) row).updatefield.table == updateTable);
+                && ((PersonaUpdateRow) row).updatefield == field);
     }
 
     @Override
@@ -57,10 +58,9 @@ public class MultiPersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow
     public void executeStatements() throws SQLException {
         PreparedStatement statement = null;
         try {
-            statement = connection.prepareStatement("UPDATE " + updateTable.getTable() + " SET ?=? WHERE persona_id" + (updateTable == PersonaTable.MASTER ? "=?" : "_fk=?"));
+            statement = connection.prepareStatement("UPDATE " + field.table.getTable() + " SET " + field.field() + "=? WHERE persona_id" + (field.table == PersonaTable.MASTER ? "=?" : "_fk=?"));
             for (PersonaUpdateRow row : updateRows) {
                 if (!row.toupdate.isDeleted()) {
-                    statement.setString(1, row.updatefield.field());
                     if (ArcheCore.usingSQLite()) {
                         switch (row.updatefield) {
                             case PREFIX:
@@ -105,9 +105,9 @@ public class MultiPersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow
                                 break;
                         }
                     } else {
-                        statement.setObject(2, row.data, row.updatefield.type);
+                        statement.setObject(1, row.data, row.updatefield.type);
                     }
-                    statement.setInt(3, row.toupdate.getPersonaId());
+                    statement.setInt(2, row.toupdate.getPersonaId());
                     statement.addBatch();
                 }
             }

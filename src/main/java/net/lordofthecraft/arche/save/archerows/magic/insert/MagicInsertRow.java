@@ -30,7 +30,8 @@ public class MagicInsertRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public boolean isUnique() {
-        return false;
+        //TODO make merged row
+        return true;
     }
 
     @Override

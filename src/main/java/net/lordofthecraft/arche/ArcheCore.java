@@ -94,6 +94,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private int consumerRunDelay;
     private boolean consumerShouldUseBukkitScheduler;
     private int consumerWarningSize;
+    private boolean debugConsumer;
 
     //private Thread saverThread = null;
 
@@ -243,20 +244,21 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
         saveHandler = SaveHandler.getInstance();
         //This will import data that might have failed to save before ArcheCore was last disabled.
-        getServer().getScheduler().runTaskAsynchronously(this, new DumpedDBReader(this));
-        archeConsumer = new Consumer(sqlHandler, this, consumerRun, consumerForceProcessMin, consumerWarningSize);
+        //MUST complete before we progress so it's done on the main thread, if a persona creation or deletion is in here that is VITAL that it is performed before we load anything.
+        getServer().getScheduler().runTask(this, new DumpedDBReader(this));
+        archeConsumer = new Consumer(sqlHandler, this, consumerRun, consumerForceProcessMin, consumerWarningSize, debugConsumer);
         if (consumerShouldUseBukkitScheduler) {
             if (Bukkit.getScheduler().runTaskTimerAsynchronously(this, archeConsumer, consumerRunDelay < 20 ? 20 : consumerRunDelay, consumerRunDelay).getTaskId() > 0) {
                 getLogger().info("[ArcheCore Consumer] Started using Bukkit Scheduler with a delay of " + consumerRunDelay + " ticks");
             } else {
                 getLogger().warning("[ArcheCore Consumer] Failed to use the Bukkit Scheduler as specified, task did not register. Using timer now.");
                 archeTimer = new Timer();
-                //archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
+                archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
                 getLogger().info("[ArcheCore Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
             }
         } else {
             archeTimer = new Timer();
-            //archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
+            archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
             getLogger().info("[ArcheCore Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
         }
         ArcheTables.setUpSQLTables(sqlHandler);
@@ -374,6 +376,16 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         consumerRunDelay = config.getInt("consumer.run.delay");
         consumerShouldUseBukkitScheduler = config.getBoolean("consumer.use.bukkit.scheduler");
         consumerWarningSize = config.getInt("consumer.queue.warning.size");
+        debugConsumer = config.getBoolean("consumer.debug");
+
+        if (debugMode) {
+            getLogger().info("[ArcheCore Consumer] Started with the following config options: " +
+                    "runTime: " + consumerRun + ", " +
+                    "forceProcessMin: " + consumerForceProcessMin + ", " +
+                    "runDelay: " + consumerRun + ", " +
+                    "useBukkitScheduler?: " + consumerShouldUseBukkitScheduler + ", " +
+                    "warningSize: " + consumerWarningSize);
+        }
 
         if(teleportNewbies){
             World w = Bukkit.getWorld(config.getString("preferred.spawn.world"));

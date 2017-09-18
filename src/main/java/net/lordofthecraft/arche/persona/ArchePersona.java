@@ -581,7 +581,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 				p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 			}
 		}
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.RACE_REAL, race, false));
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.RACE_REAL, race.name(), false));
         consumer.queueRow(new PersonaUpdateRow(this, PersonaField.RACE, "", false));
         //buffer.put(new UpdateTask(this, PersonaField.RACE_REAL, race));
         //buffer.put(new UpdateTask(this, PersonaField.RACE, ""));
@@ -830,16 +830,21 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		else return location.toLocation();
 	}
 
-	@Override
-	public int hashCode(){
+	/*@Override
+    public int hashCode(){
 		if(hash == 0)
             hash = (5 * this.player.hashCode()) + getSlot();
 
 		return hash;
-	}
+	}*/
 
-	@Override
-	public boolean equals(Object object){
+    @Override
+    public int hashCode() {
+        return com.google.common.base.Objects.hashCode(persona_id);
+    }
+
+    @Override
+    public boolean equals(Object object){
 		if(object == null) return false;
 		if(!(object instanceof ArchePersona)) return false;
 		ArchePersona p = (ArchePersona) object;

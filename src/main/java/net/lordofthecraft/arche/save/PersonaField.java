@@ -30,7 +30,7 @@ public enum PersonaField {
     INV("inv", PersonaTable.VITALS, JDBCType.VARCHAR),
     ENDERINV("ender_inv", PersonaTable.VITALS, JDBCType.VARCHAR),
     HEALTH("health", PersonaTable.VITALS, JDBCType.DOUBLE),
-    FOOD("food", PersonaTable.VITALS, JDBCType.INTEGER),
+    FOOD("hunger", PersonaTable.VITALS, JDBCType.INTEGER),
     SATURATION("saturation", PersonaTable.VITALS, JDBCType.FLOAT),
     POTIONS("potions", PersonaTable.VITALS, JDBCType.VARCHAR);
 

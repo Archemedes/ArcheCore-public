@@ -54,7 +54,6 @@ public class PersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
     @Override
     public void executeStatements() throws SQLException {
         PreparedStatement statement = updatefield.getStatement(conn);
-        statement.setString(1, updatefield.field());
         if (ArcheCore.usingSQLite()) {
             switch (updatefield) {
                 case PREFIX:
@@ -99,9 +98,9 @@ public class PersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
                     break;
             }
         } else {
-            statement.setObject(2, data, updatefield.type);
+            statement.setObject(1, data, updatefield.type);
         }
-        statement.setInt(3, toupdate.getPersonaId());
+        statement.setInt(2, toupdate.getPersonaId());
         statement.executeUpdate();
         statement.close();
     }

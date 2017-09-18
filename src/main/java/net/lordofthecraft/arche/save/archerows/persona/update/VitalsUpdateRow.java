@@ -72,8 +72,8 @@ public class VitalsUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
         statement.setDouble(5, health);
         statement.setFloat(6, saturation);
         statement.setInt(7, hunger);
-        statement.setString(8, inv.getInvAsString());
-        statement.setString(9, inv.getEnderInvAsString());
+        statement.setString(8, inv == null ? null : inv.getInvAsString());
+        statement.setString(9, inv == null ? null : inv.getEnderInvAsString());
         statement.setString(10, potions);
         statement.setInt(11, persona.getPersonaId());
         statement.executeUpdate();

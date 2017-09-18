@@ -4,6 +4,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.SQLUtil;
 
 import java.sql.Connection;
@@ -37,7 +38,10 @@ public class SkillRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public ArcheMergeableRow merge(ArcheMergeableRow second) {
-        return null;
+        if (second.isUnique()) {
+            throw new IllegalArgumentException("Cannot merge unique rows");
+        }
+        return new MultiSkillRow(this, (SkillRow) second);
     }
 
     @Override
@@ -64,5 +68,15 @@ public class SkillRow implements ArcheMergeableRow, ArchePersonaRow {
     @Override
     public Persona[] getPersonas() {
         return new Persona[]{persona};
+    }
+
+    @Override
+    public String toString() {
+        return "SkillRow{" +
+                "persona=" + MessageUtil.identifyPersona(persona) +
+                ", skill=" + skill.getName() +
+                ", xp=" + xp +
+                ", visible=" + visible +
+                '}';
     }
 }

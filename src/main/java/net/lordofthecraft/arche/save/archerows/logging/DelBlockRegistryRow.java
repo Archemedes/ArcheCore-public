@@ -57,4 +57,11 @@ public class DelBlockRegistryRow implements ArcheMergeableRow {
                 "DELETE FROM blockregistry WHERE world='" + SQLUtil.mysqlTextEscape(wb.getWorld()) + "' AND x=" + wb.getX() + " AND y=" + wb.getY() + " AND z=" + wb.getZ() + ";"
         };
     }
+
+    @Override
+    public String toString() {
+        return "DelBlockRegistryRow{" +
+                "wb=" + wb +
+                '}';
+    }
 }

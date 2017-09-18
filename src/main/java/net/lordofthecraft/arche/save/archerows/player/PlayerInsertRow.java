@@ -33,4 +33,12 @@ public class PlayerInsertRow implements ArchePreparedStatementRow {
     public String[] getInserts() {
         return new String[]{"INSERT " + (ArcheCore.getPlugin().isUsingSQLite() ? "OR IGNORE " : "IGNORE ") + " INTO players(player) VALUES ('" + player.getUniqueId().toString() + "');"};
     }
+
+    @Override
+    public String toString() {
+        return "PlayerInsertRow{" +
+                "player=" + player.getUniqueId() +
+                ", playerName='" + player.getName() + '\'' +
+                '}';
+    }
 }

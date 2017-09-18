@@ -141,6 +141,10 @@ consumer.use.bukkit.scheduler: true
 #The warning size of the queue, when it reaches this threshhold it will warn about overload.
 consumer.queue.warning.size: 1000
 
+#Enable the Consumer debug mode which will forward a large amount of info related to tasks into Console.
+#enable.debug.mode will enable some basic messages however on the Consumer.
+consumer.debug: false
+
 #Checking this to true will force ArcheCore to use MySQL for it's SQLHandler, making all saving mechanisms save into
 #a MySQL database. If false ArcheCore will use a SQLite instance
 enable.mysql: false

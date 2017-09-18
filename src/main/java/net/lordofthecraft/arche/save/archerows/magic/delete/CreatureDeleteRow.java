@@ -50,4 +50,11 @@ public class CreatureDeleteRow implements ArcheMergeableRow {
                 "DELETE FROM magic_creatures WHERE id_key='" + creature.getId() + "';"
         };
     }
+
+    @Override
+    public String toString() {
+        return "CreatureDeleteRow{" +
+                "creature=" + creature +
+                '}';
+    }
 }

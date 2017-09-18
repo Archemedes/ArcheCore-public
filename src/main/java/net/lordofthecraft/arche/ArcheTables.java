@@ -391,7 +391,7 @@ public final class ArcheTables {
     protected static void createLoggingTables(Statement statement, String end, boolean sqlite) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS persona_log (" +
                 "persona_id INT UNSIGNED," +
-                "removed_date TIMESTAMP " + (sqlite ? "DEFAULT DATE('now')," : "DEFAULT NOW(),") +
+                "removed_date TIMESTAMP," +
                 "player_fk CHAR(36) NOT NULL," +
                 "slot INT UNSIGNED NOT NULL," +
                 "race VARCHAR(255) NOT NULL," +

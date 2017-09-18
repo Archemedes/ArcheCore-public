@@ -100,4 +100,14 @@ public class MultiEconomyLogRow implements ArcheMergeableRow, ArchePersonaRow {
         }
         return (String[]) s.toArray();
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(getClass().getSimpleName() + "[");
+        for (ArcheRow row : rows) {
+            builder.append(" ").append(row.toString()).append(" ");
+        }
+        builder.append("]");
+        return builder.toString();
+    }
 }

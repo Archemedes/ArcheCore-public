@@ -5,6 +5,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.util.MessageUtil;
 
 import java.sql.*;
 
@@ -25,7 +26,8 @@ public class MagicUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public boolean isUnique() {
-        return false;
+        //TODO make merged row
+        return true;
     }
 
     @Override
@@ -80,5 +82,15 @@ public class MagicUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
         return new String[]{
                 "UPDATE persona_magic SET " + field.field + "=" + (field.type == JDBCType.VARCHAR ? "'" + toSet + "'" : toSet) + " WHERE persona_id_fk=" + persona.getPersonaId() + " AND magic_fk='" + magic_name + "';"
         };
+    }
+
+    @Override
+    public String toString() {
+        return "MagicUpdateRow{" +
+                "persona=" + MessageUtil.identifyPersona(persona) +
+                ", magic_name='" + magic_name + '\'' +
+                ", field=" + field +
+                ", toSet=" + toSet +
+                '}';
     }
 }

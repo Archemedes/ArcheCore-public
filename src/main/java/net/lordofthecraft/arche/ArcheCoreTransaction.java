@@ -19,4 +19,10 @@ public class ArcheCoreTransaction implements Transaction {
 		return ArcheCore.getPlugin().getName();
 	}
 
+    @Override
+    public String toString() {
+        return "ArcheCoreTransaction{" +
+                "cause='" + cause + '\'' +
+                '}';
+    }
 }

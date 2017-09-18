@@ -21,7 +21,8 @@ public class CreatureInsertRow implements ArcheMergeableRow {
 
     @Override
     public boolean isUnique() {
-        return false;
+        //TODO make merged row
+        return true;
     }
 
     @Override

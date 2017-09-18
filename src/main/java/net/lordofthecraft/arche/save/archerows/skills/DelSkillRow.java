@@ -4,6 +4,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.util.MessageUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,7 +36,7 @@ public class DelSkillRow implements ArcheMergeableRow, ArchePersonaRow {
         if (second.isUnique()) {
             throw new IllegalArgumentException("Cannot merge unique rows");
         }
-        return null;
+        return new MultiDelSkillRow(this, (DelSkillRow) second);
     }
 
     @Override
@@ -58,5 +59,13 @@ public class DelSkillRow implements ArcheMergeableRow, ArchePersonaRow {
     @Override
     public String[] getInserts() {
         return new String[]{"DELETE FROM persona_skills WHERE persona_id_fk=" + persona.getPersonaId() + " AND skill_id_fk='" + skill.getName() + "';"};
+    }
+
+    @Override
+    public String toString() {
+        return "DelSkillRow{" +
+                "persona=" + MessageUtil.identifyPersona(persona) +
+                ", skill=" + skill.getName() +
+                '}';
     }
 }

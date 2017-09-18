@@ -29,7 +29,7 @@ public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersona
     @Override
     public void executeStatements() throws SQLException {
         PreparedStatement stat = connection.prepareStatement("INSERT INTO persona(persona_id,player_fk,slot,race,name,gender,skin) " +
-                "VALUES (LAST_INSERT_ID(?),?,?,?,?,?,'NULL')");
+                "VALUES (?,?,?,?,?,?,'NULL')");
 
         stat.setInt(1, persona.getPersonaId());
         stat.setString(2, persona.getPlayerUUID().toString());
@@ -74,7 +74,7 @@ public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersona
         Block b = persona.getPlayer().getLocation().getBlock();
         return new String[]{
                 "INSERT INTO persona(persona_id,player_fk,slot,race,name,gender,skin) " +
-                        "VALUES (LAST_INSERT_ID(" + persona.getPersonaId() + "),'"
+                        "VALUES (" + persona.getPersonaId() + ",'"
                         + persona.getPlayerUUID().toString()
                         + "'," + persona.getSlot()
                         + ",'" + persona.getRace().name()

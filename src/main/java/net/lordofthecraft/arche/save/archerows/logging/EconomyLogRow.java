@@ -5,6 +5,7 @@ import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.persona.ArcheEconomy;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.util.MessageUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -85,5 +86,17 @@ public class EconomyLogRow implements ArcheMergeableRow, ArchePersonaRow {
                         + "'" + transaction.getCause() + "'" +
                         "," + before + "," + after + ");"
         };
+    }
+
+    @Override
+    public String toString() {
+        return "EconomyLogRow{" +
+                "persona=" + MessageUtil.identifyPersona(persona) +
+                ", transaction=" + transaction +
+                ", type=" + type.name() +
+                ", before=" + before +
+                ", after=" + after +
+                ", amount=" + amount +
+                '}';
     }
 }

@@ -5,6 +5,7 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.save.archerows.ArcheRow;
 import net.lordofthecraft.arche.save.tasks.persona.UpdateVitalsTask;
 
 import java.sql.Connection;
@@ -106,7 +107,7 @@ public class MultiVitalsUpdateRow implements ArcheMergeableRow, ArchePersonaRow 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(getClass().getSimpleName() + "[");
-        for (VitalsUpdateRow row : rows) {
+        for (ArcheRow row : rows) {
             builder.append(" ").append(row.toString()).append(" ");
         }
         builder.append("]");

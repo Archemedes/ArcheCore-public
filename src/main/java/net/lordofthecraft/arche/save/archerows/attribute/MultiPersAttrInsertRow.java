@@ -5,6 +5,7 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.save.archerows.ArcheRow;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -100,5 +101,15 @@ public class MultiPersAttrInsertRow implements ArcheMergeableRow, ArchePersonaRo
             s.addAll(Arrays.asList(row.getInserts()));
         }
         return (String[]) s.toArray();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(getClass().getSimpleName() + "[");
+        for (ArcheRow row : rows) {
+            builder.append(" ").append(row.toString()).append(" ");
+        }
+        builder.append("]");
+        return builder.toString();
     }
 }

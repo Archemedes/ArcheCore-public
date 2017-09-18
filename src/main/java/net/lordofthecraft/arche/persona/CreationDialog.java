@@ -1,31 +1,7 @@
 package net.lordofthecraft.arche.persona;
 
-import java.lang.reflect.Field;
-import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Objects;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.conversations.BooleanPrompt;
-import org.bukkit.conversations.Conversation;
-import org.bukkit.conversations.ConversationContext;
-import org.bukkit.conversations.ConversationFactory;
-import org.bukkit.conversations.ConversationPrefix;
-import org.bukkit.conversations.FixedSetPrompt;
-import org.bukkit.conversations.MessagePrompt;
-import org.bukkit.conversations.Prompt;
-import org.bukkit.conversations.ValidatingPrompt;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheCoreTransaction;
 import net.lordofthecraft.arche.enums.Race;
@@ -33,11 +9,21 @@ import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
 import net.lordofthecraft.arche.util.MessageUtil;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.conversations.*;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+import java.lang.reflect.Field;
+import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Objects;
 
 public class CreationDialog {
 
@@ -255,12 +241,11 @@ public class CreationDialog {
         @Override
         protected boolean isInputValid(ConversationContext context, String input) {
             Player p = (Player) context.getForWhom();
-            
+
             if (input.startsWith("/")) return false;
             String lower = input.toLowerCase();
-            if (lower.contains("help") || lower.contains("hello") || lower.contains("why") || lower.contains("?")) return false;
+            return !lower.contains("help") && !lower.contains("hello") && !lower.contains("why") && !lower.contains("?") && (p.hasPermission("archecore.longname") || input.length() <= 32);
 
-            return p.hasPermission("archecore.longname") || input.length() <= 32;
         }
 
         @Override
@@ -280,10 +265,10 @@ public class CreationDialog {
 		@Override
         public String getPromptText(ConversationContext context) {
             Player p = (Player) context.getForWhom();
-            BaseComponent mains = new TextComponent("You have entered " +
+            BaseComponent mains = new TextComponent(ChatColor.YELLOW + "You have entered " +
                     ChatColor.GREEN + name + ChatColor.YELLOW + " as your character name. Is this correct?\n");
             mains.addExtra(MessageUtil.CommandButton("Yes", "Yes", "Click to select!"));
-            mains.addExtra("  ");
+            mains.addExtra(" ");
             mains.addExtra(MessageUtil.CommandButton("No", "No", "Click to select!"));
             p.spigot().sendMessage(mains);
             return DIVIDER;
@@ -541,12 +526,11 @@ public class CreationDialog {
 
             //ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS) {
             ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, gender, new Timestamp(creationTimeMS));
+            persona.setPlayerName(p.getName());
             if (!ArchePersonaHandler.getInstance().registerPersona(p, persona)) {
                 context.getForWhom().sendRawMessage(ChatColor.RED + "We apologize, something went wrong while creating your persona. Please try again and if the problem persists please make a thread on our Forums under Support");
-                ArcheCore.getPlugin().getLogger().severe("We failed to create a persona for " + p.getName() + "! It was Null, error is nondescript!");
+                ArcheCore.getPlugin().getLogger().severe("We failed to create a persona for " + p.getName() + "!");
                 return Prompt.END_OF_CONVERSATION;
-            } else {
-                persona.setPlayerName(p.getName());
             }
             p.sendMessage(ChatColor.GOLD + "" + ChatColor.UNDERLINE + "Created your new Persona: " + ChatColor.GREEN + name + ChatColor.GOLD + "!");
 

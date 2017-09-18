@@ -55,4 +55,12 @@ public class ArcheAttribute {
 	public void calibrate(Player p, double value) {
 		
 	}
+
+    @Override
+    public String toString() {
+        return "ArcheAttribute{" +
+                "name='" + name + '\'' +
+                ", defaultValue=" + defaultValue +
+                '}';
+    }
 }

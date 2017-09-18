@@ -4,6 +4,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.util.MessageUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -62,5 +63,13 @@ public class MagicDeleteRow implements ArcheMergeableRow, ArchePersonaRow {
         return new String[]{
                 "DELETE FROM persona_magic WHERE persona_id_fk=" + persona.getPersonaId() + " AND magic_fk='" + magic.getName() + "';"
         };
+    }
+
+    @Override
+    public String toString() {
+        return "MagicDeleteRow{" +
+                "persona=" + MessageUtil.identifyPersona(persona) +
+                ", magic=" + magic +
+                '}';
     }
 }

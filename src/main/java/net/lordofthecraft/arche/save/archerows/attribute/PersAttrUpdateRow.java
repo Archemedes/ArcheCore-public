@@ -5,6 +5,7 @@ import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.SQLUtil;
 
 import java.sql.Connection;
@@ -75,5 +76,14 @@ public class PersAttrUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
                         " AND moduuid='" + mod.getUniqueId().toString() + "'" +
                         " AND attribute_type='" + SQLUtil.mysqlTextEscape(attribute.getName()) + "';"
         };
+    }
+
+    @Override
+    public String toString() {
+        return "PersAttrUpdateRow{" +
+                "mod=" + mod +
+                ", persona=" + MessageUtil.identifyPersona(persona) +
+                ", attribute=" + attribute +
+                '}';
     }
 }

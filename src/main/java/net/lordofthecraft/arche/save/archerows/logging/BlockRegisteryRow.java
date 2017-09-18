@@ -82,4 +82,12 @@ public class BlockRegisteryRow implements ArcheMergeableRow {
                 "INSERT " + (ArcheCore.getPlugin().isUsingSQLite() ? "OR IGNORE " : "IGNORE ") + "INTO blockregistry(world,x,y,z) VALUES ('" + block.getWorld() + "'," + block.getX() + "," + block.getY() + "," + block.getZ() + ");"
         };
     }
+
+    @Override
+    public String toString() {
+        return "BlockRegisteryRow{" +
+                "block=" + block +
+                ", data='" + data + '\'' +
+                '}';
+    }
 }
