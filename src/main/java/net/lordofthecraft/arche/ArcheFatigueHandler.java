@@ -78,10 +78,11 @@ public class ArcheFatigueHandler implements FatigueHandler {
 	@Override
 	public void showFatigueBar(Player p, Persona pers) {
 		if(fatigueDecreaseHours == 0) return;
-
+		double max = getMaxFatigue(pers);
         float factor = 1.0f - ((float) (pers.getFatigue() / getMaxFatigue(pers)));
+        
         p.setExp(factor);
-		p.setLevel((int)factor*100); 
+		p.setLevel((int) (max - pers.getFatigue())); 
 	}
 
 	@Override

@@ -12,22 +12,19 @@ public class AttributeRegistry {
     public static final ArcheAttribute FATIGUE_GAIN = new ArcheAttribute("Fatigue Gained", 1);
     public static final ArcheAttribute EXHAUSTION = new ArcheAttribute("Exhaustion", 0);
 
-    static {
-        getInstance().register(MAX_FATIGUE);
-        getInstance().register(FATIGUE_GAIN);
-        getInstance().register(EXHAUSTION);
-        for (Attribute a : Attribute.values()) {
-            getInstance().register(new VanillaAttribute(a.toString(), 0.0, a));
-        }
-    }
-
-    private static AttributeRegistry ourInstance = new AttributeRegistry();
+    private static AttributeRegistry INSTANCE = new AttributeRegistry();
 
     public static AttributeRegistry getInstance() {
-        return ourInstance;
+        return INSTANCE;
     }
 
     private AttributeRegistry() {
+        register(MAX_FATIGUE);
+        register(FATIGUE_GAIN);
+        register(EXHAUSTION);
+        for (Attribute a : Attribute.values()) {
+            register(new VanillaAttribute(a.toString(), 0.0, a));
+        }
     }
 
     public Set<ArcheAttribute> registeredAttributes = Sets.newConcurrentHashSet();

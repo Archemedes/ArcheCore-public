@@ -113,7 +113,7 @@ public class ArchePersonaHandler implements PersonaHandler {
     public Optional<ArchePersona> getPersonaById(int persona_id) {
         return personas.values().stream()
                 .flatMap(Arrays::stream)
-                .filter(p -> p.getPersonaId() == persona_id)
+                .filter(p -> p != null && p.getPersonaId() == persona_id)
                 .findFirst();
     }
 

@@ -97,26 +97,22 @@ public class ArcheAttributeInstance implements AttributeInstance {
 	public double getValue() {
 		//Minecraft-like computation of base with all attributes
 		double result = baseValue;
-		
 		//Three phases, one for each operation.
 		for(AttributeModifier m : mods.values()) {
 			if(m.getOperation() == Operation.ADD_NUMBER)
-				baseValue += m.getAmount();
+				result += m.getAmount();
 		}
-		
 		double multiplier = 1.0;
 		for(AttributeModifier m : mods.values()) {
 			if(m.getOperation() == Operation.ADD_SCALAR)
 				multiplier += m.getAmount();
 		}
 		
-		baseValue *= multiplier;
-		
+		result *= multiplier;
 		for(AttributeModifier m : mods.values()) {
 			if(m.getOperation() == Operation.MULTIPLY_SCALAR_1)
-				baseValue *= (1.0 + m.getAmount());
+				result *= (1.0 + m.getAmount());
 		}
-		
 		return result;
 	}
 

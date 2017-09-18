@@ -830,21 +830,14 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		else return location.toLocation();
 	}
 
-	/*@Override
-    public int hashCode(){
-		if(hash == 0)
-            hash = (5 * this.player.hashCode()) + getSlot();
-
-		return hash;
-	}*/
 
     @Override
     public int hashCode() {
         return com.google.common.base.Objects.hashCode(persona_id);
     }
 
-    @Override
-    public boolean equals(Object object){
+	@Override
+	public boolean equals(Object object){
 		if(object == null) return false;
 		if(!(object instanceof ArchePersona)) return false;
 		ArchePersona p = (ArchePersona) object;

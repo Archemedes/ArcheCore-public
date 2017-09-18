@@ -25,7 +25,6 @@ public class ArcheAttribute {
 	
 	public void tryApply(ArcheAttributeInstance instance) {
 		if(this.getClass() == ArcheAttribute.class) return; //200-IQ optimization it's OK to be impressed
-		
 		Persona p = instance.getPersona().getPersona();
 		if(p != null && p.isCurrent()) {
 			Player player = p.getPlayer();
