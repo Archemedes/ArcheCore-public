@@ -20,8 +20,6 @@ import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.attributes.VanillaAttribute;
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.attribute.ArcheAttributeInsertTask;
 
 /**
  * Just fucking end me - Sporadic 2k17
@@ -92,9 +90,7 @@ public class PersonaAttributes {
     	
     	inst.addModifier(m);
 		a.tryApply(inst);
-        if (m instanceof ExtendedAttributeModifier) {
-            SaveHandler.getInstance().put(new ArcheAttributeInsertTask((ExtendedAttributeModifier) m, persona, a));
-        }
+
         //SaveHandler.getInstance().put(new ArcheAttributeInsertTask(m));
         if(timer != null) timer.stopTiming(timerWhy);
     }

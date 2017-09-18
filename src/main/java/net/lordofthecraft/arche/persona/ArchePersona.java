@@ -836,10 +836,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	@Override
 	public int hashCode(){
-		if(hash == 0)
-            hash = (5 * this.player.hashCode()) + getSlot();
-
-		return hash;
+		return this.persona_id;
 	}
 
 	@Override
