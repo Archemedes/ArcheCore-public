@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -137,7 +138,7 @@ public class AttributeItem {
 	 * @return The ItemStack with the modifier applied 
 	 */
 
-	public static ItemStack addModifier(Attribute att, AttributeModifier m, Slot slot, ItemStack is){
+	public static ItemStack addModifier(Attribute att, AttributeModifier m, EquipmentSlot slot, ItemStack is){
 		try{
 
 			Object compound = compoundConstructor.newInstance();
@@ -154,7 +155,7 @@ public class AttributeItem {
 			setDouble.invoke(compound, "Amount", m.getAmount());
 			setInt.invoke(compound, "Operation", m.getOperation().ordinal()); //unsafe but probably works
 			if (slot != null) {
-				setString.invoke(compound, "Slot", slot.getField());
+				setString.invoke(compound, "Slot", getInternalName(slot));
 			}
 
 			//Find the correct place in the NBT Item Hierarchy to put the data
@@ -282,25 +283,17 @@ public class AttributeItem {
 		f.setAccessible(false);
 	}
 	
-	public enum Slot {
-	    MAINHAND("mainhand"),
-	    OFFHAND("offhand"),
-	    FEET("feet"),
-	    LEGS("legs"),
-	    CHEST("chest"),
-	    HEAD("head");
-
-	    final String field;
-	    
-	    Slot(String field) {this.field = field;}
-
-	    public String getField() {
-	        return field;
-	    }
-
-	    @Override
-	    public String toString() {
-	        return field;
-	    }
+	public static String getInternalName(EquipmentSlot slot) {
+		switch(slot) {
+		case CHEST: return "chest";
+		case FEET: return "feet";
+		case HAND: return "mainhand";
+		case HEAD: return "head";
+		case LEGS: return "legs";
+		case OFF_HAND: return "offhand";
+		default:
+			throw new UnsupportedOperationException();
+		
+		}
 	}
 }
