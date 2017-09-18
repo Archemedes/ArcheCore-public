@@ -58,7 +58,7 @@ public class DumpedDBReader implements Runnable {
             } catch (Exception ex) {
                 ac.getLogger().log(Level.WARNING, "Error while importing the dumped data! This isn't good but the rows should still be in file form.", ex);
             } finally {
-                if (connection != null && !ac.isUsingSQLite()) {
+                if (connection != null) {
                     try {
                         connection.close();
                     } catch (SQLException ex) {
