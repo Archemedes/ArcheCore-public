@@ -1,27 +1,20 @@
 package net.lordofthecraft.arche.persona;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.google.common.collect.Maps;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheTimer;
+import net.lordofthecraft.arche.attributes.*;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.save.archerows.attribute.PersAttrInsertRow;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 
-import com.google.common.collect.Maps;
-
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheTimer;
-import net.lordofthecraft.arche.attributes.ArcheAttribute;
-import net.lordofthecraft.arche.attributes.ArcheAttributeInstance;
-import net.lordofthecraft.arche.attributes.AttributeRegistry;
-import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
-import net.lordofthecraft.arche.attributes.VanillaAttribute;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.attribute.ArcheAttributeInsertTask;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Just fucking end me - Sporadic 2k17
@@ -93,7 +86,8 @@ public class PersonaAttributes {
     	inst.addModifier(m);
 		a.tryApply(inst);
         if (m instanceof ExtendedAttributeModifier) {
-            SaveHandler.getInstance().put(new ArcheAttributeInsertTask((ExtendedAttributeModifier) m, persona, a));
+            //SaveHandler.getInstance().put(new ArcheAttributeInsertTask((ExtendedAttributeModifier) m, persona, a));
+            ArcheCore.getConsumerControls().queueRow(new PersAttrInsertRow((ExtendedAttributeModifier) m, persona, a));
         }
         //SaveHandler.getInstance().put(new ArcheAttributeInsertTask(m));
         if(timer != null) timer.stopTiming(timerWhy);

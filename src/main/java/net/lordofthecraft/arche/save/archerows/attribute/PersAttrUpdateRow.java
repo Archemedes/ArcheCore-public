@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.save.archerows.attribute;
 
+import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
@@ -13,10 +14,14 @@ import java.sql.SQLException;
 public class PersAttrUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
     final ExtendedAttributeModifier mod;
+    final Persona persona;
+    final ArcheAttribute attribute;
     private Connection connection;
 
-    public PersAttrUpdateRow(ExtendedAttributeModifier mod) {
+    public PersAttrUpdateRow(ExtendedAttributeModifier mod, Persona persona, ArcheAttribute attribute) {
         this.mod = mod;
+        this.persona = persona;
+        this.attribute = attribute;
     }
 
     @Override
@@ -48,16 +53,16 @@ public class PersAttrUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
         statement.setString(1, mod.getDecayStrategy().name());
         statement.setLong(2, mod.getTicksRemaining());
         statement.setBoolean(3, mod.isLostOnDeath());
-        statement.setInt(4, mod.getPersonaId());
+        statement.setInt(4, persona.getPersonaId());
         statement.setString(5, mod.getUniqueId().toString());
-        statement.setString(6, mod.getAttribute().getName());
+        statement.setString(6, attribute.getName());
         statement.executeUpdate();
         statement.close();
     }
 
     @Override
     public Persona[] getPersonas() {
-        return new Persona[]{mod.getPersona()};
+        return new Persona[]{persona};
     }
 
     @Override
@@ -66,9 +71,9 @@ public class PersAttrUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
                 "UPDATE persona_attributes SET decaytype='" + mod.getDecayStrategy().name() + "'" +
                         " AND decaytime=" + mod.getTicksRemaining() + "" +
                         " AND lostondeath=" + mod.isLostOnDeath() + "" +
-                        " WHERE persona_id_fk=" + mod.getPersonaId() + "" +
+                        " WHERE persona_id_fk=" + persona.getPersonaId() + "" +
                         " AND moduuid='" + mod.getUniqueId().toString() + "'" +
-                        " AND attribute_type='" + SQLUtil.mysqlTextEscape(mod.getAttribute().getName()) + "';"
+                        " AND attribute_type='" + SQLUtil.mysqlTextEscape(attribute.getName()) + "';"
         };
     }
 }

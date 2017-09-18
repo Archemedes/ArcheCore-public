@@ -2,9 +2,8 @@ package net.lordofthecraft.arche.attributes;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.attribute.ArcheAttributeRemoveTask;
-import net.lordofthecraft.arche.save.tasks.attribute.ArcheAttributeUpdateTask;
+import net.lordofthecraft.arche.save.archerows.attribute.PersAttrRemoveRow;
+import net.lordofthecraft.arche.save.archerows.attribute.PersAttrUpdateRow;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -115,7 +114,7 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 	
 	private void trySave(Persona ps, ArcheAttribute aa) {
 		if(save) {
-            SaveHandler.getInstance().put(new ArcheAttributeUpdateTask(this, ps, aa));
+            ArcheCore.getConsumerControls().queueRow(new PersAttrUpdateRow(this, ps, aa));
         }
 	}
 	
@@ -124,7 +123,8 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 		if(task != null) task.cancel();
         if (save) {
             save = true;
-            SaveHandler.getInstance().put(new ArcheAttributeRemoveTask(this, ps, aa));
+            //SaveHandler.getInstance().put(new ArcheAttributeRemoveTask(this, ps, aa));
+            ArcheCore.getConsumerControls().queueRow(new PersAttrRemoveRow(this, aa, ps));
         }
     }
 	

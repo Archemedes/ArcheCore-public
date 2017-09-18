@@ -1,12 +1,13 @@
 package net.lordofthecraft.arche.persona;
 
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Economy;
+import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.logging.InsertEconomyLogTask;
-import net.lordofthecraft.arche.save.tasks.persona.UpdateTask;
+import net.lordofthecraft.arche.save.archerows.logging.EconomyLogRow;
+import net.lordofthecraft.arche.save.archerows.persona.update.PersonaUpdateRow;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class ArcheEconomy implements Economy {
@@ -20,7 +21,8 @@ public class ArcheEconomy implements Economy {
 	private final double lostOnDeath;
 	private final double beginnerAmount;
 	private final boolean proximity;
-    private SaveHandler buffer = SaveHandler.getInstance();
+    //private SaveHandler buffer = SaveHandler.getInstance();
+    private IConsumer consumer = ArcheCore.getConsumerControls();
 
     public ArcheEconomy(FileConfiguration config){
 		singular = config.getString("currency.name.singular");
@@ -49,24 +51,24 @@ public class ArcheEconomy implements Economy {
     public void setPersona(Persona p, double amount, Transaction transaction) {
         double before = getBalance(p);
         ((ArchePersona) p).money = amount;
-        buffer.put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
-        buffer.put(new InsertEconomyLogTask(p.getSlot(), transaction, TransactionType.SET, amount, before, getBalance(p)));
+        consumer.queueRow(new PersonaUpdateRow(p, PersonaField.MONEY, ((ArchePersona) p).money, false));
+        consumer.queueRow(new EconomyLogRow(p, transaction, TransactionType.SET, amount, before, getBalance(p)));
     }
 
     @Override
     public void depositPersona(Persona p, double amount, Transaction transaction) {
         double before = getBalance(p);
         ((ArchePersona) p).money += amount;
-        buffer.put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
-        buffer.put(new InsertEconomyLogTask(p.getSlot(), transaction, TransactionType.DEPOSIT, amount, before, getBalance(p)));
+        consumer.queueRow(new PersonaUpdateRow(p, PersonaField.MONEY, ((ArchePersona) p).money, false));
+        consumer.queueRow(new EconomyLogRow(p, transaction, TransactionType.DEPOSIT, amount, before, getBalance(p)));
     }
 
     @Override
     public void withdrawPersona(Persona p, double amount, Transaction transaction) {
         double before = getBalance(p);
         ((ArchePersona) p).money -= amount;
-        buffer.put(new UpdateTask(p, PersonaField.MONEY, ((ArchePersona) p).money));
-        buffer.put(new InsertEconomyLogTask(p.getSlot(), transaction, TransactionType.WITHDRAW, amount, before, getBalance(p)));
+        consumer.queueRow(new PersonaUpdateRow(p, PersonaField.MONEY, ((ArchePersona) p).money, false));
+        consumer.queueRow(new EconomyLogRow(p, transaction, TransactionType.WITHDRAW, amount, before, getBalance(p)));
     }
 
     @Override

@@ -60,8 +60,8 @@ public class MultiPersAttrInsertRow implements ArcheMergeableRow, ArchePersonaRo
                     "VALUES (?,?,?,?,?,?,?,?,?,?)");
             for (PersAttrInsertRow row : rows) {
                 statement.setString(1, row.mod.getUniqueId().toString());
-                statement.setInt(2, row.mod.getPersonaId());
-                statement.setString(3, row.mod.getAttribute().getName());
+                statement.setInt(2, row.persona.getPersonaId());
+                statement.setString(3, row.attribute.getName());
                 statement.setString(4, row.mod.getName());
                 statement.setDouble(5, row.mod.getAmount());
                 statement.setString(6, row.mod.getOperation().name());

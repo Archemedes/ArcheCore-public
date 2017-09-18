@@ -1,13 +1,5 @@
 package net.lordofthecraft.arche.listener;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.event.persona.PersonaActivateEvent;
@@ -15,8 +7,14 @@ import net.lordofthecraft.arche.event.persona.PersonaDeactivateEvent;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.general.PlayerRegisterTask;
+import net.lordofthecraft.arche.save.archerows.player.PlayerInsertRow;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerJoinListener implements Listener {
 	private final ArchePersonaHandler handler;
@@ -42,8 +40,9 @@ public class PlayerJoinListener implements Listener {
 			Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
 			ps.attributes().handleLogin();
 		}else {
-			SaveHandler.getInstance().put(new PlayerRegisterTask(p.getUniqueId()));
-		}
+            //SaveHandler.getInstance().put(new PlayerRegisterTask(p.getUniqueId()));
+            ArcheCore.getConsumerControls().queueRow(new PlayerInsertRow(p));
+        }
 		
 		if(timer != null) timer.stopTiming("login");
 		if(ArcheCore.getPlugin().debugMode()) ArcheCore.getPlugin().getLogger().info("{Login} Currently have " + handler.getPersonas().size() + " persona files for " + Bukkit.getOnlinePlayers().size() + " players." );

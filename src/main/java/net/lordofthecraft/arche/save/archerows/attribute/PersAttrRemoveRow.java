@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.save.archerows.attribute;
 
+import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
@@ -13,10 +14,14 @@ import java.sql.SQLException;
 public class PersAttrRemoveRow implements ArcheMergeableRow, ArchePersonaRow {
 
     final ExtendedAttributeModifier mod;
+    final ArcheAttribute attribute;
+    final Persona persona;
     private Connection connection;
 
-    public PersAttrRemoveRow(ExtendedAttributeModifier mod) {
+    public PersAttrRemoveRow(ExtendedAttributeModifier mod, ArcheAttribute attribute, Persona persona) {
         this.mod = mod;
+        this.attribute = attribute;
+        this.persona = persona;
     }
 
     @Override
@@ -46,21 +51,21 @@ public class PersAttrRemoveRow implements ArcheMergeableRow, ArchePersonaRow {
     public void executeStatements() throws SQLException {
         PreparedStatement statement = connection.prepareStatement("DELETE FROM persona_attributes WHERE moduuid=? AND persona_id_fk=? AND attribute_type=?");
         statement.setString(1, mod.getUniqueId().toString());
-        statement.setInt(2, mod.getPersonaId());
-        statement.setString(3, mod.getAttribute().getName());
+        statement.setInt(2, persona.getPersonaId());
+        statement.setString(3, attribute.getName());
         statement.executeUpdate();
         statement.close();
     }
 
     @Override
     public Persona[] getPersonas() {
-        return new Persona[]{mod.getPersona()};
+        return new Persona[]{persona};
     }
 
     @Override
     public String[] getInserts() {
         return new String[]{
-                "DELETE FROM persona_attributes WHERE moduuid='" + mod.getUniqueId().toString() + "' AND persona_id_fk=" + mod.getPersonaId() + " AND attribute_type='" + SQLUtil.mysqlTextEscape(mod.getAttribute().getName()) + "';"
+                "DELETE FROM persona_attributes WHERE moduuid='" + mod.getUniqueId().toString() + "' AND persona_id_fk=" + persona.getPersonaId() + " AND attribute_type='" + SQLUtil.mysqlTextEscape(attribute.getName()) + "';"
         };
     }
 }

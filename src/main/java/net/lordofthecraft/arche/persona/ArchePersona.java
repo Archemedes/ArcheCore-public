@@ -359,7 +359,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
                     Integer teacher = rs.getInt("teacher");
                     boolean visible = rs.getBoolean("visible");
                     data = new MagicData(armagic.get(), tier, visible, teacher != null && teacher > 0, (teacher), learned.toInstant().toEpochMilli(), last_advanced.toInstant().toEpochMilli());
-                    magics.addMagicAttachment(new MagicAttachment(armagic.get(), persona_id, data));
+                    magics.addMagicAttachment(new MagicAttachment(armagic.get(), this, data));
                 }
 			}
 			rs.close();
@@ -399,7 +399,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
         }
         MagicData data = new MagicData(m, tier, visible, teacher != null, (teacher == null ? null : teacher.getPersonaId()), System.currentTimeMillis(), System.currentTimeMillis());
         consumer.queueRow(new MagicInsertRow(this, (ArcheMagic) m, tier, (teacher == null ? null : teacher.getPersonaId()), visible));
-        return Optional.of(new MagicAttachment(m, persona_id, data));
+        return Optional.of(new MagicAttachment(m, this, data));
     }
 
 	@Override

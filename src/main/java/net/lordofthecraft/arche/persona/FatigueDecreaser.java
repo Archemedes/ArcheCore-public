@@ -1,11 +1,11 @@
 package net.lordofthecraft.arche.persona;
 
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheFatigueHandler;
 import net.lordofthecraft.arche.interfaces.FatigueHandler;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.persona.FatigueReduceTask;
+import net.lordofthecraft.arche.save.archerows.persona.update.FatigueReduceRow;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class FatigueDecreaser extends BukkitRunnable {
@@ -25,7 +25,8 @@ public class FatigueDecreaser extends BukkitRunnable {
         //TODO fix
         double toDecrease = 100 / (fatigueRestoreHours * 3);
 
-        SaveHandler.getInstance().put(new FatigueReduceTask());
+        //SaveHandler.getInstance().put(new FatigueReduceTask());
+        ArcheCore.getConsumerControls().queueRow(new FatigueReduceRow());
 
         for(Persona[] prs: handler.getPersonas()) {
 			for(Persona pr : prs) {

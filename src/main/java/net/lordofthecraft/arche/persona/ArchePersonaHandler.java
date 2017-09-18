@@ -7,18 +7,12 @@ import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.event.*;
-import net.lordofthecraft.arche.event.persona.PersonaActivateEvent;
-import net.lordofthecraft.arche.event.persona.PersonaDeactivateEvent;
-import net.lordofthecraft.arche.event.persona.PersonaRemoveEvent;
-import net.lordofthecraft.arche.event.persona.PersonaSwitchEvent;
-import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent;
+import net.lordofthecraft.arche.event.persona.*;
 import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent.Query;
 import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.archerows.persona.insert.PersonaInsertRow;
-import net.lordofthecraft.arche.save.tasks.skills.SkillDeleteTask;
+import net.lordofthecraft.arche.save.archerows.skills.DelSkillRow;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.ArcheSkin;
@@ -46,8 +40,8 @@ public class ArchePersonaHandler implements PersonaHandler {
     private final Map<UUID, ArchePersona[]> personas = new HashMap<>(Bukkit.getServer().getMaxPlayers());
 	//private final ArchePersonaExtender extender = new ArchePersonaExtender();
     private final IConsumer consumer = ArcheCore.getControls().getConsumer();
-    private SaveHandler buffer = SaveHandler.getInstance();
-	private Connection personaConnection = null;
+    //private SaveHandler buffer = SaveHandler.getInstance();
+    private Connection personaConnection = null;
 	private boolean displayName = false;
 	private PreparedStatement selectStatement = null;
 	private Map<Race, Location> racespawns = Maps.newHashMap();
@@ -801,10 +795,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	void deleteSkills(ArchePersona p){
-		for(String sname : ArcheSkillFactory.getSkills().keySet()){
-            //TODO fix
-            buffer.put(new SkillDeleteTask(sname, p.getPersonaId()));
-		}
+        for (Skill sname : ArcheSkillFactory.getSkills().values()) {
+            consumer.queueRow(new DelSkillRow(p, sname));
+        }
 	}
 
 	public void removeMagic(Magic magic) {

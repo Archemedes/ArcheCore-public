@@ -10,8 +10,7 @@ import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.persona.UpdateTask;
+import net.lordofthecraft.arche.save.archerows.persona.update.PersonaUpdateRow;
 import net.lordofthecraft.arche.util.CommandUtil;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -337,7 +336,8 @@ public class CommandPersona implements CommandExecutor {
                         pers.setName(name);
                         sender.sendMessage(ChatColor.AQUA + "Persona name was set to: " + ChatColor.RESET + name);
                         if (sender == pers.getPlayer()) {
-                            SaveHandler.getInstance().put(new UpdateTask(pers, PersonaField.STAT_RENAMED, new Timestamp(System.currentTimeMillis())));
+                            //SaveHandler.getInstance().put(new UpdateTask(pers, PersonaField.STAT_RENAMED, new Timestamp(System.currentTimeMillis())));
+                            ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(pers, PersonaField.STAT_RENAMED, new Timestamp(System.currentTimeMillis()), false));
                         } //Player renamed by his own accord
                         //SaveHandler.getInstance().put(new PersonaRenameTask(pers));
                     } else {

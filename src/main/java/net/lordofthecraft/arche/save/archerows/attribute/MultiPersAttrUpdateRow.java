@@ -60,9 +60,9 @@ public class MultiPersAttrUpdateRow implements ArcheMergeableRow, ArchePersonaRo
                 statement.setString(1, row.mod.getDecayStrategy().name());
                 statement.setLong(2, row.mod.getTicksRemaining());
                 statement.setBoolean(3, row.mod.isLostOnDeath());
-                statement.setInt(4, row.mod.getPersonaId());
+                statement.setInt(4, row.persona.getPersonaId());
                 statement.setString(5, row.mod.getUniqueId().toString());
-                statement.setString(6, row.mod.getAttribute().getName());
+                statement.setString(6, row.attribute.getName());
                 statement.addBatch();
             }
             statement.executeBatch();

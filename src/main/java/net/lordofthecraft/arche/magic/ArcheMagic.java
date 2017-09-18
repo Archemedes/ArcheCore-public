@@ -7,10 +7,9 @@ import net.lordofthecraft.arche.interfaces.MagicType;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.MagicAttachment;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.magic.ArcheMagicDeleteTask;
-import net.lordofthecraft.arche.save.tasks.magic.ArcheMagicInsertTask;
-import net.lordofthecraft.arche.save.tasks.magic.ArcheMagicUpdateTask;
+import net.lordofthecraft.arche.save.archerows.magic.delete.ArcheMagicDeleteRow;
+import net.lordofthecraft.arche.save.archerows.magic.insert.ArcheMagicInsertRow;
+import net.lordofthecraft.arche.save.archerows.magic.update.ArcheMagicUpdateRow;
 import org.bukkit.entity.Player;
 
 import java.sql.JDBCType;
@@ -83,7 +82,8 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         }
         ArcheMagic m = new ArcheMagic(name, maxTier, selfTeachable);
         ArcheCore.getMagicControls().registerMagic(m);
-        SaveHandler.getInstance().put(new ArcheMagicInsertTask(m));
+        //SaveHandler.getInstance().put(new ArcheMagicInsertTask(m));
+        ArcheCore.getConsumerControls().queueRow(new ArcheMagicInsertRow(m));
         return m;
     }
 
@@ -248,12 +248,14 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     }
 
     protected void performSQLUpdate(Field f, Object data) {
-        SaveHandler.getInstance().put(new ArcheMagicUpdateTask(this, f, data));
+        //SaveHandler.getInstance().put(new ArcheMagicUpdateTask(this, f, data));
+        ArcheCore.getConsumerControls().queueRow(new ArcheMagicUpdateRow(this, f, data));
     }
 
     public void remove() {
         ArcheCore.getMagicControls().removeMagic(this);
-        SaveHandler.getInstance().put(new ArcheMagicDeleteTask(name));
+        //SaveHandler.getInstance().put(new ArcheMagicDeleteTask(name));
+        ArcheCore.getConsumerControls().queueRow(new ArcheMagicDeleteRow(this));
     }
 
 }

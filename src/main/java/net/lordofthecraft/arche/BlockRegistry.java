@@ -3,9 +3,8 @@ package net.lordofthecraft.arche;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.interfaces.IConsumer;
-import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.archerows.logging.BlockRegisteryRow;
-import net.lordofthecraft.arche.save.tasks.logging.BlockRegistryDeleteTask;
+import net.lordofthecraft.arche.save.archerows.logging.DelBlockRegistryRow;
 import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -19,7 +18,7 @@ public class BlockRegistry {
 	final Set<WeakBlock> playerPlaced = Sets.newHashSetWithExpectedSize(3000);
 	private final Set<Material> watching = EnumSet.noneOf(Material.class);
     final Map<WeakBlock, String> data = Maps.newConcurrentMap();
-    private final SaveHandler buffer = SaveHandler.getInstance();
+    //private final SaveHandler buffer = SaveHandler.getInstance();
     private final IConsumer consumer = ArcheCore.getControls().getConsumer();
 
     BlockRegistry() {
@@ -74,7 +73,8 @@ public class BlockRegistry {
 	public boolean removeBlock(Block b){
 		WeakBlock wb = new WeakBlock(b);
 		boolean res = playerPlaced.remove(wb);
-        buffer.put(new BlockRegistryDeleteTask(wb));
+        //buffer.put(new BlockRegistryDeleteTask(wb));
+        consumer.queueRow(new DelBlockRegistryRow(wb));
         if (data.containsKey(wb)) {
             data.remove(wb);
         }

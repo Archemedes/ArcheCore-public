@@ -1,12 +1,11 @@
 package net.lordofthecraft.arche.persona;
 
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.ArcheTask;
-import net.lordofthecraft.arche.save.tasks.skills.SkillDeleteTask;
-import net.lordofthecraft.arche.save.tasks.skills.SkillUpdateTask;
+import net.lordofthecraft.arche.save.archerows.skills.DelSkillRow;
+import net.lordofthecraft.arche.save.archerows.skills.UpdateSkillRow;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.SkillData;
 import org.bukkit.entity.Player;
@@ -35,11 +34,12 @@ public class SkillAttachment {
 	}
 
 	private static final double DEFAULT_XP = 0.0;
-	
-	private static final SaveHandler buffer = SaveHandler.getInstance();
-	final ArcheSkill skill;
+
+    //private static final SaveHandler buffer = SaveHandler.getInstance();
+    private static final IConsumer consumer = ArcheCore.getConsumerControls();
+    final ArcheSkill skill;
 	private final PersonaSkills handle;
-    private final int persona_id;
+    private final Persona persona;
     private final String uuid;
 	private final int id;
 	private FutureTask<SkillData> call;
@@ -67,8 +67,8 @@ public class SkillAttachment {
 		this.skill = (ArcheSkill) skill;
 		this.uuid = persona.getPlayerUUID().toString();
         this.id = persona.getSlot();
-        this.persona_id = persona.getPersonaId();
-	}
+        this.persona = persona;
+    }
 	
 	
 	public void initialize(){
@@ -161,13 +161,15 @@ public class SkillAttachment {
 		if(error) return;
 		
 		if(inPersonaSkills && hasDefaultValues()) {
-			buffer.put(new SkillDeleteTask(skill.getName(), persona_id));
-			handle.removeSkillAttachment(this);
+            //buffer.put(new SkillDeleteTask(skill.getName(), persona_id));
+            consumer.queueRow(new DelSkillRow(persona, skill));
+            handle.removeSkillAttachment(this);
 			inPersonaSkills = false;
 		} else {
-			ArcheTask task = new SkillUpdateTask(persona_id, skill.getName(), f, getValueForField(f));
-			buffer.put(task);
-			if(!inPersonaSkills) { //Start tracking this skill in PersonaSkills
+            //ArcheTask task = new SkillUpdateTask(persona_id, skill.getName(), f, getValueForField(f));
+            //buffer.put(task);
+            consumer.queueRow(new UpdateSkillRow(persona, skill, f, getValueForField(f)));
+            if(!inPersonaSkills) { //Start tracking this skill in PersonaSkills
 				handle.addSkillAttachment(this);
 				inPersonaSkills = true;
 			}

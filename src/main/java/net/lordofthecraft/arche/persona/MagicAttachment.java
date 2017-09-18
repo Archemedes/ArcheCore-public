@@ -1,10 +1,11 @@
 package net.lordofthecraft.arche.persona;
 
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.Magic;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.magic.MagicData;
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.magic.MagicUpdateTask;
+import net.lordofthecraft.arche.save.archerows.magic.update.MagicUpdateRow;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -53,9 +54,10 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         }
     }
 
-    private static final SaveHandler buffer = SaveHandler.getInstance();
+    //private static final SaveHandler buffer = SaveHandler.getInstance();
+    private static final IConsumer consumer = ArcheCore.getConsumerControls();
     private final Magic magic;
-    private final int persona_id;
+    private final Persona persona;
     //private FutureTask<MagicData> call;
     private int tier;
     private AtomicBoolean visible;
@@ -65,9 +67,9 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     private long lastAdvanced;
 
 
-    public MagicAttachment(Magic magic, int persona_id, MagicData data) {
+    public MagicAttachment(Magic magic, Persona persona, MagicData data) {
         this.magic = magic;
-        this.persona_id = persona_id;
+        this.persona = persona;
         tier = data.tier;
         visible = new AtomicBoolean(data.visible);
         taught = new AtomicBoolean(data.taught);
@@ -116,7 +118,11 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     }
 
     public int getPersonaId() {
-        return persona_id;
+        return persona.getPersonaId();
+    }
+
+    public Persona getPersona() {
+        return persona;
     }
 
     public int getTier() {
@@ -151,6 +157,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     }
 
     protected void performSQLUpdate(Field field, Object data) {
-        buffer.put(new MagicUpdateTask(persona_id, magic.getName(), field, data));
+        //buffer.put(new MagicUpdateTask(persona_id, magic.getName(), field, data));
+        consumer.queueRow(new MagicUpdateRow(persona, magic.getName(), field, data));
     }
 }

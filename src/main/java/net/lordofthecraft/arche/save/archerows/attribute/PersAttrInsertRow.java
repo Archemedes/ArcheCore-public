@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche.save.archerows.attribute;
 
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
@@ -15,10 +16,14 @@ import java.sql.Timestamp;
 public class PersAttrInsertRow implements ArcheMergeableRow, ArchePersonaRow {
 
     final ExtendedAttributeModifier mod;
+    final Persona persona;
+    final ArcheAttribute attribute;
     private Connection connection;
 
-    public PersAttrInsertRow(ExtendedAttributeModifier modifier) {
-        this.mod = modifier;
+    public PersAttrInsertRow(ExtendedAttributeModifier mod, Persona persona, ArcheAttribute attribute) {
+        this.mod = mod;
+        this.persona = persona;
+        this.attribute = attribute;
     }
 
     @Override
@@ -49,8 +54,8 @@ public class PersAttrInsertRow implements ArcheMergeableRow, ArchePersonaRow {
         PreparedStatement statement = connection.prepareStatement("INSERT " + (!ArcheCore.getPlugin().isUsingSQLite() ? "IGNORE " : "OR IGNORE ") + " INTO persona_attributes(mod_uuid,persona_id_fk,attribute_type,mod_name,mod_value,operation,created,decayticks,decaytype,lostondeath) " +
                 "VALUES (?,?,?,?,?,?,?,?,?,?)");
         statement.setString(1, mod.getUniqueId().toString());
-        statement.setInt(2, mod.getPersonaId());
-        statement.setString(3, mod.getAttribute().getName());
+        statement.setInt(2, persona.getPersonaId());
+        statement.setString(3, attribute.getName());
         statement.setString(4, mod.getName());
         statement.setDouble(5, mod.getAmount());
         statement.setString(6, mod.getOperation().name());
@@ -64,7 +69,7 @@ public class PersAttrInsertRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public Persona[] getPersonas() {
-        return new Persona[]{mod.getPersona()};
+        return new Persona[]{persona};
     }
 
     @Override
@@ -72,8 +77,8 @@ public class PersAttrInsertRow implements ArcheMergeableRow, ArchePersonaRow {
         return new String[]{
                 "INSERT " + (!ArcheCore.getPlugin().isUsingSQLite() ? "IGNORE " : "OR IGNORE ") + " INTO persona_attributes(mod_uuid,persona_id_fk,attribute_type,mod_name,mod_value,operation,created,decayticks,decaytype,lostondeath) " +
                         "VALUES ('" + mod.getUniqueId().toString()
-                        + "'," + mod.getPersonaId()
-                        + ",'" + SQLUtil.mysqlTextEscape(mod.getAttribute().getName())
+                        + "'," + persona.getPersonaId()
+                        + ",'" + SQLUtil.mysqlTextEscape(attribute.getName())
                         + "','" + SQLUtil.mysqlTextEscape(mod.getName())
                         + "'," + mod.getAmount()
                         + ",'" + mod.getOperation().name()

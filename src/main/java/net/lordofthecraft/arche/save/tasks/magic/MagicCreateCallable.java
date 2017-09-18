@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.save.tasks.magic;
 
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
+import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.persona.MagicAttachment;
@@ -16,7 +17,7 @@ import java.util.concurrent.Callable;
  */
 public class MagicCreateCallable implements Callable<MagicAttachment> {
 
-    private final int persona_id;
+    private final Persona persona;
     private final ArcheMagic magic;
     private final int tier;
     private final Integer teacher;
@@ -24,8 +25,8 @@ public class MagicCreateCallable implements Callable<MagicAttachment> {
     private final SQLHandler handler;
     private MagicAttachment result = null;
 
-    public MagicCreateCallable(int persona_id, ArcheMagic magic, int tier, Integer teacher, boolean visible, SQLHandler handler) {
-        this.persona_id = persona_id;
+    public MagicCreateCallable(Persona persona, ArcheMagic magic, int tier, Integer teacher, boolean visible, SQLHandler handler) {
+        this.persona = persona;
         this.magic = magic;
         this.tier = tier;
         this.teacher = teacher;
@@ -33,8 +34,8 @@ public class MagicCreateCallable implements Callable<MagicAttachment> {
         this.handler = handler;
     }
 
-    public MagicCreateCallable(int persona_id, ArcheMagic magic, int tier, Integer teacher, boolean visible, SQLHandler handler, MagicAttachment result) {
-        this.persona_id = persona_id;
+    public MagicCreateCallable(Persona persona, ArcheMagic magic, int tier, Integer teacher, boolean visible, SQLHandler handler, MagicAttachment result) {
+        this.persona = persona;
         this.magic = magic;
         this.tier = tier;
         this.teacher = teacher;
@@ -68,14 +69,14 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         String sql = "INSERT INTO persona_magic(magic_fk,persona_id_fk,tier,teacher,visible) VALUES (?,?,?,?,?);";
         PreparedStatement stat = handler.getConnection().prepareStatement(sql);
         stat.setString(1, magic.getName());
-        stat.setInt(2, persona_id);
+        stat.setInt(2, persona.getPersonaId());
         stat.setInt(3, tier);
         stat.setString(4, (teacher == null ? null : teacher.toString()));
         stat.setBoolean(5, visible);
         stat.executeUpdate();
         //public MagicData(ArcheMagic magic, int id, int tier, boolean visible, boolean taught, UUID teacher, long learned, long lastAdvanced) {
         MagicData data = new MagicData(magic, tier, visible, teacher != null, teacher, System.currentTimeMillis(), System.currentTimeMillis());
-        result = new MagicAttachment(magic, persona_id, data);
+        result = new MagicAttachment(magic, persona, data);
         stat.close();
         if (handler instanceof WhySQLHandler) {
             stat.getConnection().close();
