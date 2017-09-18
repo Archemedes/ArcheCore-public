@@ -836,9 +836,9 @@ public final class ArchePersona implements Persona, InventoryHolder {
         return com.google.common.base.Objects.hashCode(persona_id);
     }
 
-	@Override
-	public boolean equals(Object object){
-		if(object == null) return false;
+    @Override
+    public boolean equals(Object object) {
+        if(object == null) return false;
 		if(!(object instanceof ArchePersona)) return false;
 		ArchePersona p = (ArchePersona) object;
 		return this.persona_id == p.persona_id;
