@@ -1,25 +1,31 @@
 package net.lordofthecraft.arche.save.tasks.attribute;
 
-import net.lordofthecraft.arche.SQL.WhySQLHandler;
-import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
-import net.lordofthecraft.arche.save.tasks.StatementTask;
-
 import java.sql.SQLException;
 import java.sql.Timestamp;
+
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
+import net.lordofthecraft.arche.attributes.ArcheAttribute;
+import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.save.tasks.StatementTask;
 
 public class ArcheAttributeInsertTask extends StatementTask {
 
     private final ExtendedAttributeModifier mod;
-
-    public ArcheAttributeInsertTask(ExtendedAttributeModifier mod) {
+    private final int personaId;
+    private final ArcheAttribute aa;
+    
+    public ArcheAttributeInsertTask(ExtendedAttributeModifier mod, Persona p, ArcheAttribute aa) {
         this.mod = mod;
+        this.personaId = p.getPersonaId();
+        this.aa = aa;
     }
 
     @Override
     protected void setValues() throws SQLException {
         stat.setString(1, mod.getUniqueId().toString());
-        stat.setInt(2, mod.getPersonaId());
-        stat.setString(3, mod.getAttribute().getName());
+        stat.setInt(2, personaId);
+        stat.setString(3, aa.getName());
         stat.setString(4, mod.getName());
         stat.setDouble(5, mod.getAmount());
         stat.setString(6, mod.getOperation().name());

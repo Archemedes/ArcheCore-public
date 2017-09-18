@@ -22,40 +22,20 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 	private Decay decay = Decay.NEVER;
 	private AttributeModifierRemover task = null;
 	private long ticksRemaining = -1;
-    private final ArcheAttribute attribute;
-    private final Persona persona;
 
-    public ExtendedAttributeModifier(AttributeModifier other, Persona owner, ArcheAttribute attribute) {
+    public ExtendedAttributeModifier(AttributeModifier other) {
         super(other.getUniqueId(), other.getName(), other.getAmount(), other.getOperation());
-        this.attribute = attribute;
-        this.persona = owner;
     }
 
-    public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, Persona owner, ArcheAttribute attribute) {
+    public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation) {
         super(uuid, name, amount, operation);
-        this.attribute = attribute;
-        this.persona = owner;
     }
 
-    public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, Persona owner, ArcheAttribute attribute, Decay decay, long ticksRemaining, boolean lostOnDeath) {
+    public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, Decay decay, long ticksRemaining, boolean lostOnDeath) {
         super(uuid, name, amount, operation);
-        this.attribute = attribute;
-        this.persona = owner;
         this.decay = decay;
         this.ticksRemaining = ticksRemaining;
         this.lostOnDeath = lostOnDeath;
-    }
-
-    public ArcheAttribute getAttribute() {
-        return attribute;
-    }
-
-    public int getPersonaId() {
-        return persona.getPersonaId();
-    }
-
-    public Persona getPersona() {
-        return persona;
     }
 
     public boolean isLostOnDeath() {
@@ -82,7 +62,7 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 		this.decay = decay;
 		this.ticksRemaining = ticksFromNow;
 		setupTask(a, ps);
-        trySave();
+        trySave(ps, a);
     }
 	
 	public void stopDecay() {
@@ -109,15 +89,15 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 		//It is thus handled as if it were a Minecraft vitals component
 		//Note however that ACTUAL vanilla attmods are not made persistent in AC
 		if(!ps.isCurrent()) {
-			trySave();
+			trySave(ps, a);
 		}
 	}
 	
-	public void handleLogoff() {
+	public void handleLogoff(Persona ps, ArcheAttribute a) {
 		if(decay == Decay.ACTIVE && task != null) {
 			interruptTask();
 		}
-		trySave();
+		trySave(ps, a);
 	}
 	
 	private void interruptTask() {
@@ -133,17 +113,18 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 		this.save = save;
 	}
 	
-	private void trySave() {
+	private void trySave(Persona ps, ArcheAttribute aa) {
 		if(save) {
-            SaveHandler.getInstance().put(new ArcheAttributeUpdateTask(this));
+            SaveHandler.getInstance().put(new ArcheAttributeUpdateTask(this, ps, aa));
         }
 	}
 	
-	public void remove() {
+	
+	public void remove(Persona ps, ArcheAttribute aa) {
 		if(task != null) task.cancel();
         if (save) {
             save = true;
-            SaveHandler.getInstance().put(new ArcheAttributeRemoveTask(this));
+            SaveHandler.getInstance().put(new ArcheAttributeRemoveTask(this, ps, aa));
         }
     }
 	

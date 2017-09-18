@@ -312,7 +312,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
                 	double amount = rs.getDouble("mod_value");
                 	long ticks = rs.getLong("decayticks");
                 	boolean lostondeath = rs.getBoolean("lostondeath");
-                	attributes.addModifierFromSQL(att, new ExtendedAttributeModifier(id, name, amount, op, this, att, decaytype, ticks, lostondeath));
+                	attributes.addModifierFromSQL(att, new ExtendedAttributeModifier(id, name, amount, op, decaytype, ticks, lostondeath));
                 }
             }
             rs.close();

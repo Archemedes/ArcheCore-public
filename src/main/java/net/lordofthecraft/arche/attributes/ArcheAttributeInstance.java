@@ -75,7 +75,7 @@ public class ArcheAttributeInstance implements AttributeInstance {
 		} else {
 			
 			ExtendedAttributeModifier mm = modifier instanceof ExtendedAttributeModifier?
-                    (ExtendedAttributeModifier) modifier : new ExtendedAttributeModifier(modifier, persona.getPersona(), parent);
+                    (ExtendedAttributeModifier) modifier : new ExtendedAttributeModifier(modifier);
             mods.put(uuid, mm);
 			return !exists;
 		}
@@ -86,7 +86,7 @@ public class ArcheAttributeInstance implements AttributeInstance {
 	public void removeModifier(AttributeModifier modifier) {
         Preconditions.checkArgument(modifier != null, "modifier");
         ExtendedAttributeModifier remove = mods.remove(modifier.getUniqueId());
-        remove.remove();
+        remove.remove(persona.getPersona(), parent);
 	}
 	
 	public boolean hasModifier(AttributeModifier modifier) {

@@ -93,7 +93,7 @@ public class PersonaAttributes {
     	inst.addModifier(m);
 		a.tryApply(inst);
         if (m instanceof ExtendedAttributeModifier) {
-            SaveHandler.getInstance().put(new ArcheAttributeInsertTask((ExtendedAttributeModifier) m));
+            SaveHandler.getInstance().put(new ArcheAttributeInsertTask((ExtendedAttributeModifier) m, persona, a));
         }
         //SaveHandler.getInstance().put(new ArcheAttributeInsertTask(m));
         if(timer != null) timer.stopTiming(timerWhy);
@@ -185,7 +185,7 @@ public class PersonaAttributes {
 			
 			aai.getModifiers().stream()
 			.map(ExtendedAttributeModifier.class::cast)
-			.forEach(m -> {if(logoff) m.handleLogoff(); else m.handleSwitch(aa, persona);} );
+			.forEach(m -> {if(logoff) m.handleLogoff(persona, aa); else m.handleSwitch(aa, persona);} );
 			
 			if(aa instanceof VanillaAttribute) {
 				if(logoff || !persona.isCurrent()) deactivateVanilla((VanillaAttribute) aa);

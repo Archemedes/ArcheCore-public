@@ -1,6 +1,8 @@
 package net.lordofthecraft.arche.save.tasks.attribute;
 
+import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
+import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.tasks.StatementTask;
 
 import java.sql.SQLException;
@@ -8,9 +10,13 @@ import java.sql.SQLException;
 public class ArcheAttributeUpdateTask extends StatementTask {
 
     private final ExtendedAttributeModifier mod;
-
-    public ArcheAttributeUpdateTask(ExtendedAttributeModifier mod) {
+    private final int personaId;
+    private final ArcheAttribute aa;
+    
+    public ArcheAttributeUpdateTask(ExtendedAttributeModifier mod, Persona p, ArcheAttribute aa) {
         this.mod = mod;
+        this.personaId = p.getPersonaId();
+        this.aa = aa;
     }
 
     @Override
@@ -18,9 +24,9 @@ public class ArcheAttributeUpdateTask extends StatementTask {
         stat.setString(1, mod.getDecayStrategy().name());
         stat.setLong(2, mod.getTicksRemaining());
         stat.setBoolean(3, mod.isLostOnDeath());
-        stat.setInt(4, mod.getPersonaId());
+        stat.setInt(4, personaId);
         stat.setString(5, mod.getUniqueId().toString());
-        stat.setString(6, mod.getAttribute().getName());
+        stat.setString(6, aa.getName());
     }
 
     @Override
