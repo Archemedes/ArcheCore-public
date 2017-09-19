@@ -61,7 +61,7 @@ public interface IArcheCore {
 	SQLHandler getSQLHandler();
 
     /**
-     * The ArcheCore consumer is the SQL processor which safely and efficiently saves SQL data for Personas.
+     * The Consumer is the SQL processor which safely and efficiently saves SQL data for Personas.
      *
      * @return The Consumer object
      */

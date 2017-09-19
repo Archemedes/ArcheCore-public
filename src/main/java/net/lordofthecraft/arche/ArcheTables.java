@@ -2,6 +2,7 @@ package net.lordofthecraft.arche;
 
 import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,7 +15,7 @@ public final class ArcheTables {
         //Do nothing
     }
 
-    public static void setUpSQLTables(SQLHandler sqlHandler) {
+    public static boolean setUpSQLTables(SQLHandler sqlHandler) {
         try {
             ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
             if (timer != null) {
@@ -66,12 +67,20 @@ public final class ArcheTables {
             createPersonaSpawnsTable(statement, end);
             ArcheCore.getPlugin().getLogger().info("Done with persona spawns! Creating block registry...");
             createBlockRegistryTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with block registry! Creating logging tables...");
-            createLoggingTables(statement, end, (sqlHandler instanceof ArcheSQLiteHandler));
-            ArcheCore.getPlugin().getLogger().info("Done with logging tables! Creating delete procedure...");
-            //createDeleteProcedure(statement);
+
+            if (sqlHandler instanceof WhySQLHandler) {
+                //So as it turns out SQLite doesn't support stored procedures. This sucks, but in order to make sure that we're
+                //not overburdening the consumer with massive logging statement after statement we're going to ONLY log
+                //If we're using MySQL. Sorry SQLite fangays.
+
+                //If it's SQLite check net.lordofthecraft.arche.save.archerows.persona.delete.PersonaDeleteRow for how it's handled.
+                ArcheCore.getPlugin().getLogger().info("Done with block registry! Creating logging tables...");
+                createLoggingTables(statement, end, false);
+                ArcheCore.getPlugin().getLogger().info("Done with logging tables! Creating delete procedure...");
+                createDeleteProcedure(statement);
+            }
             createEconomyLogging(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with delete procedure! All done!");
+            ArcheCore.getPlugin().getLogger().info("Done with economy log! All done!");
             conn.commit();
             ArcheCore.getPlugin().getLogger().info("We've finished with committing all tables now.");
             statement.close();
@@ -82,9 +91,10 @@ public final class ArcheTables {
         } catch (Exception e) {
             ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to create Archecore.db! Stopping!", e);
             //Bukkit.getPluginManager().disablePlugin(ArcheCore.getPlugin());
+            return false;
         }
-
-	}
+        return true;
+    }
 
     protected static void createPlayerTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS players (" +
@@ -230,7 +240,7 @@ public final class ArcheTables {
     protected static void createPersonaVitalsTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS persona_vitals (" +
                 "persona_id_fk INT UNSIGNED," +
-                "world VARCHAR(255) NOT NULL," +
+                "world CHAR(36) DEFAULT 'gofuckyourselfgofuckyourselfgofuckyo'," +
                 "x INT NOT NULL," +
                 "y INT NOT NULL," +
                 "z INT NOT NULL," +

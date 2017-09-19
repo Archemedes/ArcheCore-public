@@ -29,7 +29,7 @@ public class Consumer extends TimerTask implements IConsumer {
     private final int forceToProcess;
     private final int warningSize;
     private final boolean debugConsumer;
-
+    private boolean bypassForce = false;
 
     public Consumer(SQLHandler handler, ArcheCore pl, int timePerRun, int forceToProcess, int warningSize, boolean debugConsumer) {
         this.handler = handler;
@@ -38,6 +38,10 @@ public class Consumer extends TimerTask implements IConsumer {
         this.forceToProcess = forceToProcess;
         this.warningSize = warningSize;
         this.debugConsumer = debugConsumer;
+    }
+
+    public void bypassForce() {
+        bypassForce = true;
     }
 
     @Override
@@ -55,46 +59,45 @@ public class Consumer extends TimerTask implements IConsumer {
     @Override
     public synchronized void run() {
         if (debugConsumer) {
-            pl.getLogger().info("[ArcheCore Consumer] Beginning save process...");
+            pl.getLogger().info("[Consumer] Beginning save process...");
         }
         if (queue.isEmpty()) {
-            if (debugConsumer) pl.getLogger().info("[ArcheCore Consumer] The consumer has no queue, not running.");
+            if (debugConsumer) pl.getLogger().info("[Consumer] The consumer has no queue, not running.");
             return;
         }
         if (!lock.tryLock()) {
             if (debugConsumer)
-                pl.getLogger().info("[ArcheCore Consumer] The consumer is still locked and we attempted to run, we are not running.");
+                pl.getLogger().info("[Consumer] The consumer is still locked and we attempted to run, we are not running.");
             return;
         } else {
             if (debugConsumer) {
-                pl.getLogger().info("[ArcheCore Consumer] We have locked the consumer and are beginning now.");
+                pl.getLogger().info("[Consumer] We have locked the consumer and are beginning now.");
             }
         }
-        final int startSize = queue.size();
         final Connection conn = handler.getConnection();
         Statement state = null;
         final long starttime = System.currentTimeMillis();
         if (queue.size() >= warningSize) {
-            pl.getLogger().warning("[ArcheCore Consumer] Warning! The Consumer Queue is overloaded! The size of the queue is " + queue.size() + " which is " + (queue.size() - warningSize) + " over our set threshold! We're still running, but this should be looked into!");
+            pl.getLogger().warning("[Consumer] Warning! The Consumer Queue is overloaded! The size of the queue is " + queue.size() + " which is " + (queue.size() - warningSize) + " over our set threshold of " + warningSize + "! We're still running, but this should be looked into!");
         }
         int count = 0;
         try {
             if (conn == null) {
-                pl.getLogger().severe("[ArcheCore Consumer] ArcheCore Consumer failed to start, we could not Connect to the Database.");
+                pl.getLogger().severe("[Consumer] Consumer failed to start, we could not Connect to the Database.");
                 return;
             }
             conn.setAutoCommit(false);
             state = conn.createStatement();
 
             process:
-            while (!queue.isEmpty() && (System.currentTimeMillis() - starttime < timePerRun || count < forceToProcess)) {
+            while (!queue.isEmpty() && (System.currentTimeMillis() - starttime < timePerRun || (count < forceToProcess && !bypassForce))) {
                 ArcheRow row = queue.poll();
                 if (row == null) {
                     continue;
                 }
                 long taskstart = System.currentTimeMillis();
                 if (debugConsumer) {
-                    pl.getLogger().info("[ArcheCore Consumer] Beginning process for " + row.toString());
+                    pl.getLogger().info("[Consumer] Beginning process for " + row.toString());
                 }
                 if (row instanceof ArchePreparedStatementRow) {
                     ArchePreparedStatementRow apsr = (ArchePreparedStatementRow) row;
@@ -129,7 +132,7 @@ public class Consumer extends TimerTask implements IConsumer {
                     try {
                         apsr.executeStatements();
                     } catch (final SQLException ex) {
-                        pl.getLogger().log(Level.SEVERE, "[ArcheCore Consumer] SQL Exception in Consumer: ", ex);
+                        pl.getLogger().log(Level.SEVERE, "[Consumer] SQL Exception in Consumer: ", ex);
                         break;
                     }
                     //If you are reading through this code to see how this works
@@ -139,16 +142,16 @@ public class Consumer extends TimerTask implements IConsumer {
                     //Thanks.
                     if (conn.isClosed()) {
                         //I hate you.
-                        pl.getLogger().severe("[ArcheCore Consumer] So we have an acid-dunk worthy individual who closed the connection we gave them in their ArcheRow, despite specific documentation telling them not to. Offender: " + apsr.getClass().getSimpleName());
+                        pl.getLogger().severe("[Consumer] So we have an acid-dunk worthy individual who closed the connection we gave them in their ArcheRow, despite specific documentation telling them not to. Offender: " + apsr.getClass().getSimpleName());
 
-                        pl.getLogger().warning("[ArcheCore Consumer] So we're going to terminate this consumer run. This data is visiting ol' yeller but cant really do anything about it");
-                        pl.getLogger().info("[ArcheCore Consumer] (Whoever did this needs to go find a bridge)");
+                        pl.getLogger().warning("[Consumer] So we're going to terminate this consumer run. This data is visiting ol' yeller but cant really do anything about it");
+                        pl.getLogger().info("[Consumer] (Whoever did this needs to go find a bridge)");
                         break;
                     } else if (conn.isReadOnly()) {
-                        pl.getLogger().severe("[ArcheCore Consumer] So some not max level retard but definitely over 9000 level retard set the connection to read only, either maliciously or as a meme. Either way, rapid termination of life should occur. Offender: " + apsr.getClass().getSimpleName());
+                        pl.getLogger().severe("[Consumer] So some not max level retard but definitely over 9000 level retard set the connection to read only, either maliciously or as a meme. Either way, rapid termination of life should occur. Offender: " + apsr.getClass().getSimpleName());
                         conn.setReadOnly(false);
                     } else if (conn.getAutoCommit()) {
-                        pl.getLogger().severe("[ArcheCore Consumer] This might be a genuine mistake but probably not, some idiot set the connection for Consumer to auto commit which will nuke performance into kingdom come. We're fixing this but the idiotic code is here: " + apsr.getClass().getSimpleName());
+                        pl.getLogger().severe("[Consumer] This might be a genuine mistake but probably not, some idiot set the connection for Consumer to auto commit which will nuke performance into kingdom come. We're fixing this but the idiotic code is here: " + apsr.getClass().getSimpleName());
                         conn.setAutoCommit(false);
                     }
                 } else {
@@ -156,19 +159,19 @@ public class Consumer extends TimerTask implements IConsumer {
                         try {
                             state.execute(toinsert);
                         } catch (final SQLException ex) {
-                            pl.getLogger().log(Level.SEVERE, "[ArcheCore Consumer] SQL exception on " + toinsert + ": ", ex);
+                            pl.getLogger().log(Level.SEVERE, "[Consumer] SQL exception on " + toinsert + ": ", ex);
                             break process;
                         }
                     }
                 }
                 if (debugConsumer) {
-                    pl.getLogger().info("[ArcheCore Consumer] Process took " + (System.currentTimeMillis() - taskstart) + "ms for " + row.toString());
+                    pl.getLogger().info("[Consumer] Process took " + (System.currentTimeMillis() - taskstart) + "ms for " + row.toString());
                 }
                 count++;
             }
             conn.commit();
         } catch (final SQLException ex) {
-            pl.getLogger().log(Level.SEVERE, "[ArcheCore Consumer] We failed to complete Consumer SQL Processes.", ex);
+            pl.getLogger().log(Level.SEVERE, "[Consumer] We failed to complete Consumer SQL Processes.", ex);
         } finally {
             try {
                 if (state != null) {
@@ -178,18 +181,18 @@ public class Consumer extends TimerTask implements IConsumer {
                     conn.close();
                 }
             } catch (SQLException e) {
-                pl.getLogger().log(Level.SEVERE, "[ArcheCore Consumer] Failed to finish our Consumer out, either statement or connection failed to close.", e);
+                pl.getLogger().log(Level.SEVERE, "[Consumer] Failed to finish our Consumer out, either statement or connection failed to close.", e);
             }
             lock.unlock();
 
             long time = System.currentTimeMillis() - starttime;
-            pl.getLogger().info("[ArcheCore Consumer] Finished saving in " + time + "ms.");
+            pl.getLogger().info("[Consumer] Finished saving in " + time + "ms.");
             if (debugConsumer && count > 0) {
                 float perRowTime = count / time;
-                pl.getLogger().log(Level.INFO, "[ArcheCore Consumer] Total rows processed: " + count + ". Row/time: " + String.format("%.4f", perRowTime));
-                pl.getLogger().log(Level.INFO, "[ArcheCore Consumer] We started with a queue size of " + startSize + " which is now " + queue.size());
-            } else if (count == 0 && debugConsumer) {
-                pl.getLogger().info("[ArcheCore Consumer] Ran with 0 tasks.");
+                pl.getLogger().log(Level.INFO, "[Consumer] Total rows processed: " + count + ". Row/time: " + String.format("%.4f", perRowTime));
+                pl.getLogger().log(Level.INFO, "[Consumer] There are " + queue.size() + " rows left in queue");
+            } else if (count == 0) {
+                pl.getLogger().warning("[Consumer] Ran with 0 tasks, this shouldn't happen?");
             }
         }
 

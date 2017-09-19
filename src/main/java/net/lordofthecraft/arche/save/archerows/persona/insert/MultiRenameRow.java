@@ -61,7 +61,7 @@ public class MultiRenameRow implements ArcheMergeableRow, ArchePersonaRow {
             statement.executeBatch();
         } catch (SQLException ex) {
             if (statement != null) {
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] Problematic MultiRenameRow statement: " + statement.toString());
+                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[Consumer] Problematic MultiRenameRow statement: " + statement.toString());
             }
             throw ex;
         } finally {
@@ -70,7 +70,7 @@ public class MultiRenameRow implements ArcheMergeableRow, ArchePersonaRow {
                     statement.close();
                 }
             } catch (SQLException ex) {
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] We failed to close the statement in MultiRenameRow!", ex);
+                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[Consumer] We failed to close the statement in MultiRenameRow!", ex);
             }
         }
     }

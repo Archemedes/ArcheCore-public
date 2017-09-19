@@ -31,16 +31,14 @@ import org.bukkit.potion.PotionEffect;
 import javax.annotation.Nonnull;
 import java.sql.*;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ArchePersonaHandler implements PersonaHandler {
 	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
     private static int max_persona_id = 0;
     private final Map<UUID, ArchePersona[]> personas = new HashMap<>(Bukkit.getServer().getMaxPlayers());
-	//private final ArchePersonaExtender extender = new ArchePersonaExtender();
     private final IConsumer consumer = ArcheCore.getControls().getConsumer();
-    //private SaveHandler buffer = SaveHandler.getInstance();
-    private Connection personaConnection = null;
 	private boolean displayName = false;
 	private Map<Race, Location> racespawns = Maps.newHashMap();
 
@@ -54,20 +52,21 @@ public class ArchePersonaHandler implements PersonaHandler {
 		return instance;
 	}
 
-	public void setPersonaConnection(Connection connection) {
-		if (personaConnection == null) {
-			personaConnection = connection;
-		}
-        String sql = "SELECT LAST_INSERT_ID() FROM persona;";
+    public synchronized void updatePersonaID() {
+        Connection connection = ArcheCore.getSQLControls().getConnection();
         try {
-            ResultSet rs = personaConnection.createStatement().executeQuery(sql);
+            PreparedStatement statement = connection.prepareStatement("SELECT " + (ArcheCore.getPlugin().isUsingSQLite() ? "LAST_INSERT_ROWID()" : "LAST_INSERT_ID()") + " FROM persona");
+            ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 max_persona_id = rs.getInt(1);
+            } else {
+                ArcheCore.getPlugin().getLogger().warning("We could not retrieve the LAST_INSERT_ID for persona, either there are no personas or there is an error. We'll be starting at 0. This will throw errors if there are actually personas in the Database.");
             }
             rs.close();
-            rs.getStatement().close();
+            statement.close();
+            connection.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to set up our persona ID!!! We can't create personas!", e);
         }
     }
 
@@ -306,10 +305,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		for(PotionEffect ps : p.getActivePotionEffects())
 			p.removePotionEffect(ps.getType());
 
-        //For their starter items, provided by Admissions.
-        persona.inv = new PersonaInventory(p.getInventory().getContents(), p.getEnderChest().getContents());
         //buffer.put(new PersonaInsertTask(persona.getPersonaId(), p.getUniqueId(), persona.getSlot(), persona.getGender(), persona.getRace(), persona.getName(), persona.getCreationTime(), b.getX(), b.getY(), b.getZ(), b.getWorld().getUID()));
-        consumer.queueRow(new PersonaInsertRow(persona));
+        consumer.queueRow(new PersonaInsertRow(persona, p.getLocation().getBlock()));
 
         persona.saveMinecraftSpecifics(p);
 

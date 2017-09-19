@@ -15,10 +15,12 @@ import java.sql.Timestamp;
 public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersonaRow {
 
     private final Persona persona;
+    private final Block b;
     private Connection connection = null;
 
-    public PersonaInsertRow(Persona persona) {
+    public PersonaInsertRow(Persona persona, Block b) {
         this.persona = persona;
+        this.b = b;
     }
 
     @Override
@@ -42,12 +44,11 @@ public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersona
 
         stat = connection.prepareStatement("INSERT INTO persona_vitals(persona_id_fk,world,x,y,z,inv,ender_inv) VALUES (?,?,?,?,?,?,?)");
         stat.setInt(1, persona.getPersonaId());
-        Block b = persona.getPlayer().getLocation().getBlock();
         stat.setString(2, b.getWorld().getUID().toString());
         stat.setInt(3, b.getX());
         stat.setInt(4, b.getY());
         stat.setInt(5, b.getZ());
-        stat.setString(6, null);
+        stat.setString(6, persona.getPInv() == null ? null : persona.getPInv().getInvAsString());
         stat.setString(7, null);
         stat.executeUpdate();
         stat.close();

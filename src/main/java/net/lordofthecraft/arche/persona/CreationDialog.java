@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.conversations.*;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -67,8 +68,8 @@ public class CreationDialog {
         data.put("slot", 0);
         data.put("first", new Object());
 
-  		 p.sendTitle(ChatColor.BOLD + "" + ChatColor.GOLD + "Welcome", 
-				 ChatColor.YELLOW + "Type your Persona's name to continue",
+        p.sendTitle(ChatColor.BOLD + "" + ChatColor.GOLD + "Welcome",
+                ChatColor.YELLOW + "Type your Persona's name to continue",
 				 20, 60*20, 20);
 
         factory.withFirstPrompt(new WelcomePrompt())
@@ -134,7 +135,7 @@ public class CreationDialog {
 
         int permakillDays = ArcheCore.getControls().getNewPersonaPermakillDelay();
         if(permakillDays <= 0) return true;
-        
+
         long permakillMs = permakillDays * 24 * 3600 * 1000;
         final long goodTimeSinceCreation = pers.getCreationTime().getTime() + permakillMs;
         if ((goodTimeSinceCreation < System.currentTimeMillis())) {
@@ -253,9 +254,9 @@ public class CreationDialog {
            return new ConfirmNamePrompt(input);
         }
     }
-    
+
     private class ConfirmNamePrompt extends BooleanPrompt {
-    	
+
     	private String name;
 
         public ConfirmNamePrompt(String input) {
@@ -266,7 +267,8 @@ public class CreationDialog {
         public String getPromptText(ConversationContext context) {
             Player p = (Player) context.getForWhom();
             BaseComponent mains = new TextComponent(ChatColor.YELLOW + "You have entered " +
-                    ChatColor.GREEN + name + ChatColor.YELLOW + " as your character name. Is this correct?\n");
+                    ChatColor.GREEN + name + ChatColor.YELLOW + " as your character name. Is this " +
+                    ChatColor.YELLOW + "correct?\n");
             mains.addExtra(MessageUtil.CommandButton("Yes", "Yes", "Click to select!"));
             mains.addExtra(" ");
             mains.addExtra(MessageUtil.CommandButton("No", "No", "Click to select!"));
@@ -295,7 +297,7 @@ public class CreationDialog {
         @Override
         public String getPromptText(ConversationContext context) {
             Player p = (Player) context.getForWhom();
-            
+
             p.spigot().sendMessage(new ComponentBuilder("Please type the desired Gender of your Persona.")
             		.color(MessageUtil.convertColor(ChatColor.YELLOW))
             		.create()
@@ -320,7 +322,7 @@ public class CreationDialog {
 
 
     }
-    
+
     private class PickRacePrompt extends ValidatingPrompt {
 
         @Override
@@ -401,8 +403,8 @@ public class CreationDialog {
             Race selected = findRace(string);
             BaseComponent subraces = new TextComponent("Sub Race Options: ");
             subraces.setColor(MessageUtil.convertColor(ChatColor.YELLOW));
-            
-        	subraces.addExtra(MessageUtil.CommandButton(selected.getName(), selected.getName(), "Click to select this Race"));
+
+            subraces.addExtra(MessageUtil.CommandButton(selected.getName(), selected.getName(), "Click to select this Race"));
 
             for (Race race : Race.values()){
                 if (Objects.equals(race.getParentRace(), selected.getName())
@@ -463,7 +465,7 @@ public class CreationDialog {
             BaseComponent m = new TextComponent("Available Races: ");
             m.setColor(MessageUtil.convertColor(ChatColor.YELLOW));
             Player p = (Player) context.getForWhom();
-            
+
             for(Race race : Race.values()){
                 if(p.hasPermission("archecore.race." + race.toString().toLowerCase())){
                 	m.addExtra(MessageUtil.CommandButton(race.getName(), race.getName(), "Click to select this Race"));
@@ -504,7 +506,7 @@ public class CreationDialog {
             return null;
         }
     }
-    
+
     private class PersonaConfirmPrompt extends MessagePrompt{
 
         @Override
@@ -522,10 +524,17 @@ public class CreationDialog {
             String gender = (String) context.getSessionData("gender");
             Race race = (Race) context.getSessionData("race");
             long creationTimeMS = System.currentTimeMillis();
-            //Block b = p.getLocation().getBlock();
+            ItemStack[] invBefore = p.getInventory().getContents();
 
+            if (ArcheCore.getPlugin().debugMode()) {
+                ArcheCore.getPlugin().getLogger().info("New persona created in the world " + p.getWorld().getName() + " with the uuid of " + p.getWorld().getUID());
+            }
             //ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS) {
             ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, gender, new Timestamp(creationTimeMS));
+            if (context.getSessionData("first") != null) {
+                //Essentially, they keep items they start with :)
+                persona.inv = new PersonaInventory(invBefore, null);
+            }
             persona.setPlayerName(p.getName());
             if (!ArchePersonaHandler.getInstance().registerPersona(p, persona)) {
                 context.getForWhom().sendRawMessage(ChatColor.RED + "We apologize, something went wrong while creating your persona. Please try again and if the problem persists please make a thread on our Forums under Support");
@@ -539,7 +548,7 @@ public class CreationDialog {
                     30, 120, 30);
 
             if (context.getSessionData("first") != null) {
-                Economy econ = ArcheCore.getControls().getEconomy();
+                Economy econ = ArcheCore.getEconomyControls();
                 if (econ != null)
                     econ.setPersona(persona, econ.getBeginnerAllowance(),
                     		new ArcheCoreTransaction(MessageUtil.identifyPersona(persona) + " received beginner allowance"));

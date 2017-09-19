@@ -150,8 +150,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	public void setPlayerName(String name) {
-		this.name = name;
-	}
+        this.player = name;
+    }
 
 	@Override
 	public boolean hasTagKey(String s) {
@@ -650,6 +650,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
         inv = PersonaInventory.store(p);
 		location = new WeakBlock(p.getLocation());
         String pots = savePotionEffects(p);
+        ArcheCore.getPlugin().getLogger().info("Player world is " + p.getWorld().getName() + " which has a UID of " + p.getWorld().getUID().toString());
         consumer.queueRow(new VitalsUpdateRow(this, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv, pots));
         //buffer.put(new UpdateVitalsTask(persona_id, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv, pots));
         attributes.handleSwitch(false);
@@ -789,8 +790,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 			p.sendMessage(ChatColor.DARK_PURPLE + "Your persona was removed: " + ChatColor.GRAY + this.getName());
 		}
-
-		return true;
+        deleted = true;
+        return true;
 	}
 
 	@Override

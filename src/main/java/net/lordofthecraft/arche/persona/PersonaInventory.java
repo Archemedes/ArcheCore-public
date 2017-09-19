@@ -50,7 +50,7 @@ public class PersonaInventory {
 
     public static PersonaInventory store(Player p) {
     	PlayerInventory pinv = p.getInventory();
-    	return InventoryUtil.isEmpty(pinv)?
+        return InventoryUtil.isEmpty(pinv) && InventoryUtil.isEmpty(p.getEnderChest()) ?
                 null : new PersonaInventory(pinv.getContents(), p.getEnderChest().getContents());
     }
 

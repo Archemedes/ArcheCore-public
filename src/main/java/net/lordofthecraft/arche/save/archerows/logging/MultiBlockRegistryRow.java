@@ -64,7 +64,7 @@ public class MultiBlockRegistryRow implements ArcheMergeableRow {
             statement.executeBatch();
         } catch (SQLException ex) {
             if (statement != null) {
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] Problematic statement: " + statement.toString());
+                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[Consumer] Problematic statement: " + statement.toString());
             }
             throw ex;
         } finally {
@@ -73,7 +73,7 @@ public class MultiBlockRegistryRow implements ArcheMergeableRow {
                     statement.close();
                 }
             } catch (SQLException ex) {
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] Failed to close statement for " + getClass().getSimpleName(), ex);
+                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[Consumer] Failed to close statement for " + getClass().getSimpleName(), ex);
             }
         }
     }

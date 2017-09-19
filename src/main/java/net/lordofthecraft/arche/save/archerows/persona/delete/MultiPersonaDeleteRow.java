@@ -67,7 +67,7 @@ public class MultiPersonaDeleteRow implements ArcheMergeableRow, ArchePersonaRow
             statement.executeBatch();
         } catch (SQLException ex) {
             if (statement != null) {
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] Problematic statement: " + statement);
+                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[Consumer] Problematic statement: " + statement);
             }
             throw ex;
         } finally {
@@ -76,7 +76,7 @@ public class MultiPersonaDeleteRow implements ArcheMergeableRow, ArchePersonaRow
                     statement.close();
                 }
             } catch (SQLException ex) {
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] We failed to close a CallableStatement in MultiPersonaDeleteRow!", ex);
+                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[Consumer] We failed to close a CallableStatement in MultiPersonaDeleteRow!", ex);
             }
         }
     }

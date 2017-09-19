@@ -96,6 +96,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private int consumerWarningSize;
     private boolean debugConsumer;
 
+    private int blockregistryPurgeDelay;
+    private boolean blockregistryKillCustom;
+
     //private Thread saverThread = null;
 
     private boolean shouldClone = false;
@@ -159,45 +162,47 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     }
 
     public void onDisable() {
-        sqlHandler.close();
 
-        Bukkit.getOnlinePlayers().forEach(p -> {
-            //This part must be done for safety reasons.
-            //Disables are messy, and in the brief period of Bukkit downtime
-            //Players may shift inventories around and dupe items they shouldn't dupe
-            p.closeInventory();
+        if (personaHandler != null) {
+            Bukkit.getOnlinePlayers().forEach(p -> {
+                //This part must be done for safety reasons.
+                //Disables are messy, and in the brief period of Bukkit downtime
+                //Players may shift inventories around and dupe items they shouldn't dupe
+                p.closeInventory();
 
-            //Attribute Bonuses stick around forever. To prevent lingering ones, just in
-            //case the plugin is to be removed, we perform this method.
-            RaceBonusHandler.reset(p);
-            
-            //Attribute bonuses form the Persona Handler, similarly, linger around
-            //We want these cleanly removed from Players on shutdown
-            //As a side-effect, this is also a good time to save them for current Personas
-            ArchePersona persona = personaHandler.getPersona(p);
-            persona.attributes().handleSwitch(true);
-        });
+                //Attribute Bonuses stick around forever. To prevent lingering ones, just in
+                //case the plugin is to be removed, we perform this method.
+                RaceBonusHandler.reset(p);
+
+                //Attribute bonuses form the Persona Handler, similarly, linger around
+                //We want these cleanly removed from Players on shutdown
+                //As a side-effect, this is also a good time to save them for current Personas
+                ArchePersona persona = personaHandler.getPersona(p);
+                persona.attributes().handleSwitch(true);
+            });
+        }
 
         if (archeTimer != null) {
             archeTimer.cancel();
         }
         getServer().getScheduler().cancelTasks(this);
         if (archeConsumer != null) {
-            getLogger().info("[ArcheCore Consumer] Proceeding to shutdown SQL Consumer...");
+            getLogger().info("[Consumer] Proceeding to shutdown SQL Consumer...");
+            archeConsumer.bypassForce();
             archeConsumer.run();
             if (archeConsumer.getQueueSize() > 0) {
                 int tries = 9;
                 while (archeConsumer.getQueueSize() > 0) {
-                    getLogger().info("[ArcheCore Consumer] Remaining queue size: " + archeConsumer.getQueueSize());
+                    getLogger().info("[Consumer] Remaining queue size: " + archeConsumer.getQueueSize());
                     if (tries > 0) {
-                        getLogger().info("[ArcheCore Consumer] Remaining Tries: " + tries);
+                        getLogger().info("[Consumer] Remaining Tries: " + tries);
                     } else {
-                        getLogger().warning("[ArcheCore Consumer] We failed to save the ArcheCore Database!!! This is REALLY BAD!!! We're going to try to write all pending changes to a file!");
+                        getLogger().warning("[Consumer] We failed to save the ArcheCore Database!!! This is potentially REALLY BAD!!! We're going to try to write all pending changes to a file!");
                         try {
                             archeConsumer.writeToFile();
-                            getLogger().info("[ArcheCore Consumer] We've successfully dumped all pending DB changes into files, we will attempt to parse them on next start up.");
+                            getLogger().info("[Consumer] We've successfully dumped all pending DB changes into files, we will attempt to parse them on next start up.");
                         } catch (final FileNotFoundException ex) {
-                            getLogger().severe("[ArcheCore Consumer] Well, this is bad. We've failed to save the Database and failed to write to the database changes to a file. All pending changes have been lost irrevocably. Consider manual refunds.");
+                            getLogger().severe("[Consumer] Well, this is ACTUALLY bad. We've failed to save the Database and failed to write to the database changes to a file. All pending changes have been lost irrevocably. Consider manual refunds, suicide, or both. FeelsAmazingMan :gun:");
                             break;
                         }
                     }
@@ -207,9 +212,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             }
 
         }
-        sqlHandler.close();
-        if (shouldClone && sqlHandler instanceof ArcheSQLiteHandler) {
-            ((ArcheSQLiteHandler) sqlHandler).cloneDB();
+        if (sqlHandler != null) {
+            sqlHandler.close();
+            if (shouldClone && sqlHandler instanceof ArcheSQLiteHandler) {
+                ((ArcheSQLiteHandler) sqlHandler).cloneDB();
+            }
         }
     }
 
@@ -249,19 +256,26 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         archeConsumer = new Consumer(sqlHandler, this, consumerRun, consumerForceProcessMin, consumerWarningSize, debugConsumer);
         if (consumerShouldUseBukkitScheduler) {
             if (Bukkit.getScheduler().runTaskTimerAsynchronously(this, archeConsumer, consumerRunDelay < 20 ? 20 : consumerRunDelay, consumerRunDelay).getTaskId() > 0) {
-                getLogger().info("[ArcheCore Consumer] Started using Bukkit Scheduler with a delay of " + consumerRunDelay + " ticks");
+                getLogger().info("[Consumer] Started using Bukkit Scheduler with a delay of " + consumerRunDelay + " ticks");
             } else {
-                getLogger().warning("[ArcheCore Consumer] Failed to use the Bukkit Scheduler as specified, task did not register. Using timer now.");
+                getLogger().warning("[Consumer] Failed to use the Bukkit Scheduler as specified, task did not register. Using timer now.");
                 archeTimer = new Timer();
                 archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
-                getLogger().info("[ArcheCore Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
+                getLogger().info("[Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
             }
         } else {
             archeTimer = new Timer();
             archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
-            getLogger().info("[ArcheCore Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
+            getLogger().info("[Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
         }
-        ArcheTables.setUpSQLTables(sqlHandler);
+        if (!ArcheTables.setUpSQLTables(sqlHandler)) {
+            return;
+        }
+        if (sqlHandler instanceof WhySQLHandler) {
+            sqlHandler.execute("DELETE FROM blockregistry WHERE date>DATE_ADD(NOW(), INTERVAL " + blockregistryPurgeDelay + " DAY')" + (blockregistryKillCustom ? " WHERE data IS NULL;" : ";"));
+        } else {
+            sqlHandler.execute("DELETE FROM blockregistry WHERE date>DateTime('Now', 'LocalTime', '+" + blockregistryPurgeDelay + " Day')" + (blockregistryKillCustom ? " WHERE data IS NULL;" : ";"));
+        }
         //saveHandler.put(new CreateDatabaseTask());
         blockRegistry = new BlockRegistry();
         archenomicon = Archenomicon.getInstance();
@@ -269,6 +283,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         fatigueHandler = ArcheFatigueHandler.getInstance();
         helpdesk = HelpDesk.getInstance();
         skinCache = SkinCache.getInstance();
+
+        personaHandler.updatePersonaID();
 
         fatigueHandler.fatigueDecreaseHours = this.fullFatigueRestore;
         timer = debugMode? new ArcheTimer(this) : null;
@@ -379,7 +395,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         debugConsumer = config.getBoolean("consumer.debug");
 
         if (debugMode) {
-            getLogger().info("[ArcheCore Consumer] Started with the following config options: " +
+            getLogger().info("[Consumer] Started with the following config options: " +
                     "runTime: " + consumerRun + ", " +
                     "forceProcessMin: " + consumerForceProcessMin + ", " +
                     "runDelay: " + consumerRun + ", " +

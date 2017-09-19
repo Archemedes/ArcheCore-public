@@ -71,7 +71,7 @@ public class MultiMagicDeleteRow implements ArcheMergeableRow, ArchePersonaRow {
             statement.executeBatch();
         } catch (SQLException ex) {
             if (statement != null) {
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] Problematic Statement: " + statement.toString());
+                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[Consumer] Problematic Statement: " + statement.toString());
             }
             throw ex;
         } finally {
@@ -80,7 +80,7 @@ public class MultiMagicDeleteRow implements ArcheMergeableRow, ArchePersonaRow {
                     statement.close();
                 }
             } catch (SQLException ex) {
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] Failed to close out PreparedStatement in " + getClass().getSimpleName() + "!", ex);
+                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[Consumer] Failed to close out PreparedStatement in " + getClass().getSimpleName() + "!", ex);
             }
         }
     }

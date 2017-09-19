@@ -114,7 +114,7 @@ public class MultiPersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow
             statement.executeBatch();
         } catch (SQLException ex) {
             if (statement != null) {
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] Problematic Persona Update: " + statement.toString());
+                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[Consumer] Problematic Persona Update: " + statement.toString());
             }
             throw ex;
         } finally {
@@ -123,7 +123,7 @@ public class MultiPersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow
                     statement.close();
                 }
             } catch (SQLException e) {
-                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[ArcheCore Consumer] Failed to close update statement in MultiPersonaUpdateRow", e);
+                ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "[Consumer] Failed to close update statement in MultiPersonaUpdateRow", e);
             }
         }
     }
