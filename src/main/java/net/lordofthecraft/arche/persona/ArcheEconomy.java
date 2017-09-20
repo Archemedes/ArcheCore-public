@@ -22,7 +22,7 @@ public class ArcheEconomy implements Economy {
 	private final double beginnerAmount;
 	private final boolean proximity;
     //private SaveHandler buffer = SaveHandler.getInstance();
-    private IConsumer consumer = ArcheCore.getConsumerControls();
+    private IConsumer consumer;
 
     public ArcheEconomy(FileConfiguration config){
 		singular = config.getString("currency.name.singular");
@@ -34,8 +34,8 @@ public class ArcheEconomy implements Economy {
 	}
 	
 	public void init(){
-		
-	}
+        consumer = ArcheCore.getConsumerControls();
+    }
 	
 	@Override
 	public boolean has(Persona p, double amount){

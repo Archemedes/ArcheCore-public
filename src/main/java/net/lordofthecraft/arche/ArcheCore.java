@@ -55,7 +55,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private HelpDesk helpdesk;
     private SkinCache skinCache;
     private ArcheTimer timer;
-    private Economy economy;
+    private ArcheEconomy economy;
     private Consumer archeConsumer;
     private Timer archeTimer = null;
 
@@ -254,6 +254,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         //MUST complete before we progress so it's done on the main thread, if a persona creation or deletion is in here that is VITAL that it is performed before we load anything.
         getServer().getScheduler().runTask(this, new DumpedDBReader(this));
         archeConsumer = new Consumer(sqlHandler, this, consumerRun, consumerForceProcessMin, consumerWarningSize, debugConsumer);
+        economy.init();
         if (consumerShouldUseBukkitScheduler) {
             if (Bukkit.getScheduler().runTaskTimerAsynchronously(this, archeConsumer, consumerRunDelay < 20 ? 20 : consumerRunDelay, consumerRunDelay).getTaskId() > 0) {
                 getLogger().info("[Consumer] Started using Bukkit Scheduler with a delay of " + consumerRunDelay + " ticks");
@@ -272,7 +273,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             return;
         }
         if (sqlHandler instanceof WhySQLHandler) {
-            sqlHandler.execute("DELETE FROM blockregistry WHERE date>DATE_ADD(NOW(), INTERVAL " + blockregistryPurgeDelay + " DAY')" + (blockregistryKillCustom ? " WHERE data IS NULL;" : ";"));
+            sqlHandler.execute("DELETE FROM blockregistry WHERE date>DATE_ADD(NOW(), INTERVAL " + blockregistryPurgeDelay + " DAY)" + (blockregistryKillCustom ? " WHERE data IS NULL;" : ";"));
         } else {
             sqlHandler.execute("DELETE FROM blockregistry WHERE date>DateTime('Now', 'LocalTime', '+" + blockregistryPurgeDelay + " Day')" + (blockregistryKillCustom ? " WHERE data IS NULL;" : ";"));
         }
