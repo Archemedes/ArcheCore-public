@@ -36,6 +36,7 @@ public final class ArcheTables {
             ArcheCore.getPlugin().getLogger().info("Done with skills! Creating persona...");
             createPersonaTable(statement, end);
             ArcheCore.getPlugin().getLogger().info("Done with persona! Creating persona stats...");
+            createPerPersonaSkinTable(statement, end);
             createPersonaStatsTable(statement, end);
             ArcheCore.getPlugin().getLogger().info("Done with persona stats! Creating persona tags...");
             createPersonaTagsTable(statement, end);
@@ -77,7 +78,11 @@ public final class ArcheTables {
                 ArcheCore.getPlugin().getLogger().info("Done with block registry! Creating logging tables...");
                 createLoggingTables(statement, end, false);
                 ArcheCore.getPlugin().getLogger().info("Done with logging tables! Creating delete procedure...");
-                createDeleteProcedure(statement);
+                try {
+                    createDeleteProcedure(statement);
+                } catch (Exception e) {
+                    ArcheCore.getPlugin().getLogger().warning("Failed to instantiate the delete procedure");
+                }
             }
             createEconomyLogging(statement, end);
             ArcheCore.getPlugin().getLogger().info("Done with economy log! All done!");
@@ -152,14 +157,23 @@ public final class ArcheTables {
                 "prefix TEXT DEFAULT NULL," +
                 "curr BOOLEAN DEFAULT FALSE," +
                 "money DOUBLE DEFAULT 0.0," +
-                "skin INT NULL," +
                 "profession VARCHAR(255) DEFAULT NULL," +
                 "fatigue DOUBLE DEFAULT 0.0," +
                 "max_fatigue DOUBLE DEFAULT 100.00," +
                 "PRIMARY KEY (persona_id)," +
                 "FOREIGN KEY (player_fk) REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT," +
-                "FOREIGN KEY (profession) REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE SET NULL," +
-                "FOREIGN KEY (skin) REFERENCES persona_skins (skin_id) ON UPDATE CASCADE ON DELETE SET NULL" +
+                "FOREIGN KEY (profession) REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE SET NULL" +
+                ")" +
+                end);
+    }
+
+    protected static void createPerPersonaSkinTable(Statement statement, String end) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS per_persona_skins (" +
+                "persona_id_fk INT UNSIGNED," +
+                "skin_id_fk INT," +
+                "PRIMARY KEY (persona_id_fk)," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE," +
+                "FOREIGN KEY (skin_id_fk) REFERENCES persona_skins (skin_id) ON UPDATE CASCADE ON DELETE SET NULL" +
                 ")" +
                 end);
     }
@@ -320,7 +334,7 @@ public final class ArcheTables {
                 "persona_id_fk INT UNSIGNED," +
                 "tier INT DEFAULT 0," +
                 "last_advanced TIMESTAMP," +
-                "teacher CHAR(36)," +
+                "teacher INT UNSIGNED," +
                 "learned TIMESTAMP," +
                 "visible BOOLEAN DEFAULT TRUE," +
                 "PRIMARY KEY (magic_fk,persona_id_fk)," +
@@ -386,7 +400,7 @@ public final class ArcheTables {
     protected static void createEconomyLogging(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS econ_log(" +
                 "date TIMESTAMP," +
-                "persona_id_fk INT UNSIGNED" +
+                "persona_id_fk INT UNSIGNED," +
                 "type VARCHAR(255)," +
                 "amount DOUBLE," +
                 "plugin TEXT," +
@@ -472,7 +486,7 @@ public final class ArcheTables {
 
         statement.execute("CREATE TABLE IF NOT EXISTS persona_attributes_log (" +
                 "mod_uuid CHAR(36)," +
-                "persona_id_fk CHAR(36)," +
+                "persona_id_fk INT UNSIGNED," +
                 "attribute_type VARCHAR(255)," +
                 "mod_name TEXT NOT NULL," +
                 "mod_value DOUBLE DEFAULT 0.0," +

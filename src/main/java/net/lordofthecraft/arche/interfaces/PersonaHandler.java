@@ -13,7 +13,7 @@ import java.util.*;
 public interface PersonaHandler {
     String personaSelect = "SELECT " +
             "persona_id,slot,race,gender" +
-            ",name,curr,race_header,descr,p_type,prefix,money,skin,profession,fatigue,max_fatigue" +
+            ",name,curr,race_header,descr,p_type,prefix,money,profession,fatigue,max_fatigue" +
             ",world,x,y,z,inv,ender_inv,potions,health,hunger,saturation,creature" +
             ",played,chars,renamed,playtime_past,date_created,last_played " +
             "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
