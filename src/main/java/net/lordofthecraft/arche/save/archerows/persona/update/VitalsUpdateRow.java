@@ -64,7 +64,7 @@ public class VitalsUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public void executeStatements() throws SQLException {
-        PreparedStatement statement = connection.prepareStatement("UPDATE persona_vitals SET persona_vitals.world=?, x=?, y=?, z=?, health=?, saturation=?, hunger=?, persona_vitals.inv=?, persona_vitals.ender_inv=?, persona_vitals.potions=? WHERE persona_id_fk=?");
+        PreparedStatement statement = connection.prepareStatement("UPDATE persona_vitals SET world=?, x=?, y=?, z=?, health=?, saturation=?, hunger=?, inv=?, ender_inv=?, potions=? WHERE persona_id_fk=?");
         statement.setString(1, world.toString());
         statement.setInt(2, x);
         statement.setInt(3, y);
