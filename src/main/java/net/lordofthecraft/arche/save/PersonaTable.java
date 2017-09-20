@@ -11,7 +11,8 @@ public enum PersonaTable {
     STATS("persona_stats"),
     VITALS("persona_vitals"),
     TAGS("persona_tags"),
-    SKILLS("persona_skills");
+    SKILLS("persona_skills"),
+    SKINS("per_persona_skins");
 
     private final String table;
 
