@@ -177,8 +177,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
                 //Attribute bonuses form the Persona Handler, similarly, linger around
                 //We want these cleanly removed from Players on shutdown
                 //As a side-effect, this is also a good time to save them for current Personas
-                ArchePersona persona = personaHandler.getPersona(p);
-                persona.attributes().handleSwitch(true);
+                if (hasPersona(p)) {
+                    ArchePersona persona = personaHandler.getPersona(p);
+                    persona.attributes().handleSwitch(true);
+                }
             });
         }
 
