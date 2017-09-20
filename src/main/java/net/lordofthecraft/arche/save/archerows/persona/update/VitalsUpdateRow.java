@@ -8,8 +8,8 @@ import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.SQLUtil;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.UUID;
 
 public class VitalsUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
@@ -64,9 +64,8 @@ public class VitalsUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public void executeStatements() throws SQLException {
-        /*PreparedStatement statement = connection.prepareStatement("UPDATE persona_vitals SET persona_vitals.world=? AND x=? AND y=? AND z=? AND health=? AND saturation=? AND hunger=? AND persona_vitals.inv=? AND persona_vitals.ender_inv=? AND persona_vitals.potions=? WHERE persona_id_fk=?");
-        ArcheCore.getPlugin().getLogger().info("World is "+world.toString()+"... is this correct? Here is the concat: "+world);
-        statement.setString(1, String.valueOf(world));
+        PreparedStatement statement = connection.prepareStatement("UPDATE persona_vitals SET persona_vitals.world=?, x=?, y=?, z=?, health=?, saturation=?, hunger=?, persona_vitals.inv=?, persona_vitals.ender_inv=?, persona_vitals.potions=? WHERE persona_id_fk=?");
+        statement.setString(1, world.toString());
         statement.setInt(2, x);
         statement.setInt(3, y);
         statement.setInt(4, z);
@@ -77,15 +76,7 @@ public class VitalsUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
         statement.setString(9, inv == null ? null : inv.getEnderInvAsString());
         statement.setString(10, potions);
         statement.setInt(11, persona.getPersonaId());
-        ArcheCore.getPlugin().getLogger().info("Executing the following statement: "+statement.toString());
-        for (String s : getInserts()) {
-            ArcheCore.getPlugin().getLogger().info(s);
-        }
-        statement.executeUpdate();*/
-        Statement statement = connection.createStatement();
-        for (String insert : getInserts()) {
-            statement.executeUpdate(insert);
-        }
+        statement.executeUpdate();
         statement.close();
     }
 
@@ -97,7 +88,7 @@ public class VitalsUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
     @Override
     public String[] getInserts() {
         return new String[]{
-                "UPDATE persona_vitals SET world='" + world + "' AND x=" + x + " AND y=" + y + " AND z=" + z + " AND health=" + health + " AND saturation=" + saturation + " AND hunger=" + hunger + " AND inv='" + SQLUtil.mysqlTextEscape(inv.getInvAsString()) + "' AND ender_inv='" + SQLUtil.mysqlTextEscape(inv.getEnderInvAsString()) + "' AND potions='" + SQLUtil.mysqlTextEscape(potions) + "' WHERE persona_id_fk=" + persona.getPersonaId() + ";"
+                "UPDATE persona_vitals SET world='" + world + "', x=" + x + ", y=" + y + ", z=" + z + ", health=" + health + ", saturation=" + saturation + ", hunger=" + hunger + ", inv='" + (inv != null ? SQLUtil.mysqlTextEscape(inv.getInvAsString()) : "NULL") + "', ender_inv='" + (inv != null ? SQLUtil.mysqlTextEscape(inv.getEnderInvAsString()) : "NULL") + "', potions='" + SQLUtil.mysqlTextEscape(potions) + "' WHERE persona_id_fk=" + persona.getPersonaId() + ";"
         };
     }
 
