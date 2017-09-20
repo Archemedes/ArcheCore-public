@@ -25,10 +25,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class CommandPersona implements CommandExecutor {
@@ -66,7 +63,10 @@ public class CommandPersona implements CommandExecutor {
         ASCENDED("archecore.command.persona.ascended", true, "aengulbound", "setaengulbound"),
         ASSIGNRACE("archecore.admin.command.persona.assignrace", false, "assignrace", "setunderlyingrace", "setunder"),
         ASSIGNGENDER("archecore.admin.command.persona.assigngender", false, "assigngender", "setgender"),
-        SETTYPE("archecore.admin.command.persona.settype", false, "settype", "type", "assigntype");
+        SETTYPE("archecore.admin.command.persona.settype", false, "settype", "type", "assigntype"),
+        READTAG("archecore.admin.command.persona.tag", true, "readtag", "viewtags", "readtags", "tagread", "tags", "tagview"),
+        SETTAG("archecore.admin.command.persona.tag.set", false, "settag", "settagvalue", "tagset"),
+        DELTAG("archecore.admin.command.persona.tag.remove", false, "deltag", "tagdel");
 
         public final String permission;
         private final String[] aliases;
@@ -188,11 +188,6 @@ public class CommandPersona implements CommandExecutor {
                 ((Player) sender).spigot().sendMessage(base);
             }
 
-			/*if (sender.hasPermission("archecore.admin")) {
-                sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Force a permakill with 'permakill [persona]'. Default on your current Persona");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Reassign the underlying race with 'assignrace'");
-				sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.DARK_RED + "" + ChatColor.BOLD + "A" + ChatColor.DARK_AQUA + "] Perform gender reassignment surgery with 'assigngender'.");
-			}*/
 			return true;
 		} else {
             PersonaCommand cmd = PersonaCommand.getCommand(args[0]);
@@ -216,26 +211,6 @@ public class CommandPersona implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Error: You do not have permission to do this.");
                 return true;
             }
-
-            /*(args[0].equalsIgnoreCase("permakill")
-                    || args[0].equalsIgnoreCase("time")
-					|| args[0].equalsIgnoreCase("construct")
-					|| args[0].equalsIgnoreCase("spectre")
-					|| args[0].equalsIgnoreCase("necrolyte")
-					|| args[0].equalsIgnoreCase("golem")
-					|| args[0].equalsIgnoreCase("spectral")
-					|| args[0].equalsIgnoreCase("specter")
-					|| args[0].equalsIgnoreCase("necro")
-					|| args[0].equalsIgnoreCase("ascended")
-					|| args[0].equalsIgnoreCase("aengulbound")
-					|| args[0].equalsIgnoreCase("keeper")
-					|| args[0].equalsIgnoreCase("realrace")
-					|| args[0].equalsIgnoreCase("wiperace")
-					|| args[0].equalsIgnoreCase("openinv")
-                    || args[0].equalsIgnoreCase("openender")
-                    || args[0].equalsIgnoreCase("head")
-					|| args[0].equalsIgnoreCase("icon")
-					|| args[0].equalsIgnoreCase("created")*/
 
 			//Go through process to find the Persona we want
 			Persona pers = null;
@@ -468,6 +443,37 @@ public class CommandPersona implements CommandExecutor {
 
                     } else {
                         sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
+                    }
+                    return true;
+                } else if (cmd == PersonaCommand.READTAG) {
+                    sender.sendMessage("");
+                    sender.sendMessage(ChatColor.GOLD + pers.getName() + "" + ChatColor.DARK_AQUA + "'s tags.");
+                    if (pers.getTags().size() == 0) {
+                        sender.sendMessage(ChatColor.RED + "None!");
+                    } else {
+                        for (Map.Entry<String, String> ent : pers.getTags().entrySet()) {
+                            sender.sendMessage(ChatColor.BLUE + ent.getKey() + ": " + ChatColor.GRAY + (ent.getValue().isEmpty() ? "Empty" : ent.getValue()));
+                        }
+                    }
+                    return true;
+                } else if (cmd == PersonaCommand.SETTAG) {
+                    if (args.length >= 3 && !args[1].equalsIgnoreCase("-p") && !args[2].equalsIgnoreCase("-p")) {
+                        String key = args[1];
+                        String value = args[2];
+                        pers.setTag(key, value);
+                        sender.sendMessage(ChatColor.AQUA + key + " has been set to " + value + " for " + MessageUtil.identifyPersona(pers));
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "Use /help Persona Command to see the syntax for this.");
+                    }
+                    return true;
+                } else if (cmd == PersonaCommand.DELTAG) {
+                    if (!args[1].equalsIgnoreCase("-p")) {
+                        if (!pers.hasTagKey(args[1])) {
+                            sender.sendMessage(ChatColor.RED + "Error: " + MessageUtil.identifyPersona(pers) + " doesn't have a tag with the value of " + args[1]);
+                        } else {
+                            pers.removeTag(args[1]);
+                            sender.sendMessage(ChatColor.GREEN + "Success! Removed the tag " + args[1] + " from " + MessageUtil.identifyPersona(pers));
+                        }
                     }
                     return true;
                 } else if (cmd == PersonaCommand.CONSTRUCT) {

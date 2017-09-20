@@ -17,18 +17,17 @@ import net.lordofthecraft.arche.listener.NewbieProtectListener;
 import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.save.archerows.magic.insert.MagicInsertRow;
 import net.lordofthecraft.arche.save.archerows.persona.delete.PersonaDeleteRow;
 import net.lordofthecraft.arche.save.archerows.persona.update.PersonaUpdateRow;
 import net.lordofthecraft.arche.save.archerows.persona.update.VitalsUpdateRow;
-import net.lordofthecraft.arche.save.tasks.persona.TagAttachmentCallable;
 import net.lordofthecraft.arche.save.tasks.skills.SelectSkillTask;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.SkillData;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
+import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
@@ -50,7 +49,7 @@ import org.bukkit.potion.PotionEffect;
 import java.lang.ref.WeakReference;
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -97,7 +96,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private WeakReference<Player> playerObject;
 	private int hash = 0;
 	private TagAttachment attachment;
-	private Map<String, String> tags;
 	private PersonaType type;
     private ArcheSkin skin;
     private ArrayList<PotionEffect> effects = Lists.newArrayList();
@@ -120,8 +118,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		charactersSpoken = new AtomicInteger();
 		lastRenamed = new Timestamp(0);
 		pastPlayTime = 0;
-
-		tags = Maps.newConcurrentMap();
 
 		sqlCriteria = Maps.newConcurrentMap();
 		sqlCriteria.put("persona_id", persona_id);
@@ -155,8 +151,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	@Override
 	public boolean hasTagKey(String s) {
-		return tags.containsKey(s);
-	}
+        return attachment.hasKey(s);
+    }
 
 	@Override
 	public Optional<String> getTagValue(String tag) {
@@ -324,19 +320,25 @@ public final class ArchePersona implements Persona, InventoryHolder {
     }
 
 	void loadTags() {
-        Callable<TagAttachment> attachmentCallable = new TagAttachmentCallable(persona_id, ArcheCore.getSQLControls());
-        Future<TagAttachment> ft = SaveHandler.getInstance().prepareCallable(attachmentCallable);
+        String sql = "SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=?";
         try {
-            attachment = ft.get(100, TimeUnit.MILLISECONDS);
-
-		} catch (TimeoutException e) {
-			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We timed out while trying to fetch the persona " + persona_id + "'s tags!", e);
-			attachment = new TagAttachment(Maps.newConcurrentMap(), persona_id, false);
-		} catch (Exception e) {
-			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We threw an exception while trying to fetch the persona " + persona_id + "'s tags!", e);
-			attachment = new TagAttachment(Maps.newConcurrentMap(), persona_id, false);
-		}
-	}
+            Connection conn = ArcheCore.getSQLControls().getConnection();
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setInt(1, persona_id);
+            ResultSet rs = stat.executeQuery();
+            Map<String, String> tags = Maps.newHashMap();
+            while (rs.next()) {
+                tags.putIfAbsent(rs.getString("tag_key"), rs.getString("tag_value"));
+            }
+            attachment = new TagAttachment(tags, this, true);
+            rs.close();
+            stat.close();
+            conn.close();
+        } catch (SQLException e) {
+            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Failed to retrieve tags for the persona " + MessageUtil.identifyPersona(this), e);
+            attachment = new TagAttachment(Maps.newHashMap(), this, false);
+        }
+    }
 
 	void loadMagics() {
         String sql = "SELECT magic_fk,tier,last_advanced,teacher,learned,visible FROM persona_magics WHERE persona_id_fk=?";
@@ -371,8 +373,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
 	void createEmptyTags() {
-		attachment = new TagAttachment(Maps.newConcurrentMap(), persona_id, true);
-	}
+        attachment = new TagAttachment(Maps.newConcurrentMap(), this, true);
+    }
 
 	void removeMagicAttachment(Magic magic) {
         magics.removeMagicAttachment(magic);
@@ -672,15 +674,19 @@ public final class ArchePersona implements Persona, InventoryHolder {
     }
 
     void loadPotionsFromString(String contents) {
+        if (contents == null || contents.isEmpty()) {
+            effects = Lists.newArrayList();
+            return;
+        }
         YamlConfiguration potionconfig = new YamlConfiguration();
 
         try {
             potionconfig.loadFromString(contents);
             if (potionconfig.getKeys(false).contains("potions")) {
                 @SuppressWarnings("unchecked")
-                List<PotionEffect> result = potionconfig.getList("contents").stream()
+                List<PotionEffect> result = potionconfig.getList("potions").stream()
                         .map(ent -> (Map<String, Object>) ent)
-                        .map(PotionEffect::new)
+                        .map(ent -> ent == null ? null : new PotionEffect(ent))
                         .collect(Collectors.toList());
                 effects = Lists.newArrayList(result);
             }

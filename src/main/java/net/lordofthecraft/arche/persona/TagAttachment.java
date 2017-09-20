@@ -1,7 +1,11 @@
 package net.lordofthecraft.arche.persona;
 
-import net.lordofthecraft.arche.save.SaveHandler;
-import net.lordofthecraft.arche.save.tasks.persona.PersonaTagTask;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.IConsumer;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.save.archerows.persona.delete.DelPersTagRow;
+import net.lordofthecraft.arche.save.archerows.persona.insert.PersTagRow;
+import net.lordofthecraft.arche.save.archerows.persona.update.UpdatePersTagRow;
 
 import java.util.Collections;
 import java.util.Map;
@@ -12,14 +16,15 @@ import java.util.Map;
  * @author 501warhead
  */
 public class TagAttachment {
-    private static final SaveHandler buffer = SaveHandler.getInstance();
+    //private static final SaveHandler buffer = SaveHandler.getInstance();
+    private static final IConsumer consumer = ArcheCore.getConsumerControls();
     private final Map<String, String> tags;
-    private final int persona_id;
+    private final Persona persona;
     private final boolean save;
 
-    public TagAttachment(Map<String, String> tags, int persona_id, boolean save) {
+    public TagAttachment(Map<String, String> tags, Persona persona, boolean save) {
         this.tags = tags;
-        this.persona_id = persona_id;
+        this.persona = persona;
         this.save = save;
     }
 
@@ -30,18 +35,22 @@ public class TagAttachment {
     public void setValue(String name, String value) {
         if (tags.containsKey(name)) {
             tags.replace(name, value);
-            if (save) buffer.put(new PersonaTagTask(false, persona_id, name, value));
+            if (save) consumer.queueRow(new UpdatePersTagRow(persona, name, value));
         } else {
             tags.put(name, value);
-            if (save) buffer.put(new PersonaTagTask(true, persona_id, name, value));
+            if (save) consumer.queueRow(new PersTagRow(persona, name, value));
         }
     }
 
     public void delValue(String name) {
         if (tags.containsKey(name)) {
             tags.remove(name);
-            if (save) buffer.put(new PersonaTagTask(false, persona_id, name, null));
+            if (save) consumer.queueRow(new DelPersTagRow(persona, name));
         }
+    }
+
+    public boolean hasKey(String name) {
+        return tags.containsKey(name);
     }
 
     public Map<String, String> getTags() {
@@ -49,6 +58,10 @@ public class TagAttachment {
     }
 
     public int getPersonaid() {
-        return persona_id;
+        return persona.getPersonaId();
+    }
+
+    public Persona getPersona() {
+        return persona;
     }
 }
