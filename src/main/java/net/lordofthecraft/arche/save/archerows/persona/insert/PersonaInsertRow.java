@@ -74,14 +74,14 @@ public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersona
         }
         Block b = persona.getPlayer().getLocation().getBlock();
         return new String[]{
-                "INSERT INTO persona(persona_id,player_fk,slot,race,name,gender,skin) " +
+                "INSERT INTO persona(persona_id,player_fk,slot,race,name,gender) " +
                         "VALUES (" + persona.getPersonaId() + ",'"
                         + persona.getPlayerUUID().toString()
                         + "'," + persona.getSlot()
                         + ",'" + persona.getRace().name()
                         + "','" + SQLUtil.mysqlTextEscape(persona.getName())
                         + "','" + SQLUtil.mysqlTextEscape(persona.getGender())
-                        + ",'NULL');",
+                        + ");",
                 "INSERT INTO persona_vitals(persona_id_fk,world,x,y,z,inv,ender_inv) " +
                         "VALUES (" + persona.getPersonaId()
                         + ",'" + b.getWorld().getUID().toString()
@@ -90,7 +90,7 @@ public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersona
                         + "," + b.getZ()
                         + ",'NULL','NULL');",
                 "INSERT INTO persona_stats(persona_id_fk,renamed,date_created,last_played) VALUES (" + persona.getPersonaId()
-                        + "," + new Timestamp(0).toString()
+                        + "," + new Timestamp(System.currentTimeMillis()).toString()
                         + "," + new Timestamp(System.currentTimeMillis()).toString()
                         + "," + new Timestamp(System.currentTimeMillis()).toString()
                         + ");"
