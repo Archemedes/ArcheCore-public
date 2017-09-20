@@ -1,12 +1,11 @@
 package net.lordofthecraft.arche.util;
 
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 public class CommandUtil {
 
@@ -28,8 +27,9 @@ public class CommandUtil {
 		
 		Player p = Bukkit.getPlayer(player);
 		if(p == null) return getPreloadedPersonaFromName(player);
-		else return id < 0 || id > 3? hand.getPersona(p) : hand.getAllPersonas(p)[id];
-	}
+        else
+            return id < 0 || id > ArcheCore.getControls().personaSlots() ? hand.getPersona(p) : hand.getAllPersonas(p)[id];
+    }
 	
 	public static Persona currentPersonaFromArg(String a){
 		Player p = Bukkit.getPlayer(a);
