@@ -59,10 +59,10 @@ public class PlayerJoinListener implements Listener {
 		if(ps != null) Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(ps, PersonaDeactivateEvent.Reason.LOGOUT));
 
 		RaceBonusHandler.reset(p);
-		ps.attributes().handleSwitch(true); 
-		
-		//Stop dupe?
-		p.saveData();
+        if (ps != null) ps.attributes().handleSwitch(true);
+
+        //Stop dupe?
+        p.saveData();
 		
 		if(timer != null){
 			timer.stopTiming("logout");
