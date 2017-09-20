@@ -22,6 +22,7 @@ public class SQLUtil {
     }
 
     public static String mysqlTextEscape(String untrusted) {
+        if (untrusted == null) return null;
         return untrusted.replace("\\", "\\\\").replace("'", "\\'");
     }
 }
