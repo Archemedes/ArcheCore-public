@@ -676,15 +676,25 @@ public class ArchePersonaHandler implements PersonaHandler {
 		}
 
 		String invString = res.getString(PersonaField.INV.field());
-        String enderinvString = res.getString(PersonaField.ENDERINV.field());
-        if(!res.wasNull()){
-			try {
-                persona.inv = PersonaInventory.restore(invString, enderinvString);
-            } catch (InvalidConfigurationException e) {
-				ArcheCore.getPlugin().getLogger().severe("Unable to restore Persona Inventory from database: (" + p.getName() + ";" + name + ")");
-				e.printStackTrace();
-			}
-		}
+        if (!res.wasNull()) {
+            String enderinvString = res.getString(PersonaField.ENDERINV.field());
+            if (!res.wasNull()) {
+                try {
+                    persona.inv = PersonaInventory.restore(invString, null);
+                } catch (InvalidConfigurationException e) {
+                    ArcheCore.getPlugin().getLogger().severe("Unable to restore Persona Inventory from database: (" + p.getName() + ";" + name + ")");
+                    e.printStackTrace();
+                }
+            } else {
+                try {
+                    persona.inv = PersonaInventory.restore(invString, enderinvString);
+                } catch (InvalidConfigurationException e) {
+                    ArcheCore.getPlugin().getLogger().severe("Unable to restore Persona Inventory from database: (" + p.getName() + ";" + name + ")");
+                    e.printStackTrace();
+                }
+            }
+
+        }
 
         persona.loadPotionsFromString(res.getString(PersonaField.POTIONS.field()));
 
