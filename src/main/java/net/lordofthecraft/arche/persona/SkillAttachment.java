@@ -35,7 +35,7 @@ public class SkillAttachment {
 
 	private static final double DEFAULT_XP = 0.0;
 
-    //private static final SaveHandler buffer = SaveHandler.getInstance();
+    //private static final ArcheExecutor buffer = ArcheExecutor.getInstance();
     private static final IConsumer consumer = ArcheCore.getConsumerControls();
     final ArcheSkill skill;
 	private final PersonaSkills handle;

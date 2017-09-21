@@ -46,4 +46,6 @@ public interface ArcheMergeableRow extends ArchePreparedStatementRow {
      * @return The combined rows
      */
     ArcheMergeableRow merge(ArcheMergeableRow second);
+
+
 }

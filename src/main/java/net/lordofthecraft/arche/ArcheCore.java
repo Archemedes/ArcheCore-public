@@ -13,9 +13,9 @@ import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.listener.*;
 import net.lordofthecraft.arche.magic.Archenomicon;
 import net.lordofthecraft.arche.persona.*;
+import net.lordofthecraft.arche.save.ArcheExecutor;
 import net.lordofthecraft.arche.save.Consumer;
 import net.lordofthecraft.arche.save.DumpedDBReader;
-import net.lordofthecraft.arche.save.SaveHandler;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
 import net.lordofthecraft.arche.skin.SkinCache;
@@ -47,7 +47,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private static ArcheCore instance;
 
     private SQLHandler sqlHandler;
-    private SaveHandler saveHandler;
+    private ArcheExecutor archeExecutor;
     private BlockRegistry blockRegistry;
     private ArchePersonaHandler personaHandler;
     private ArcheFatigueHandler fatigueHandler;
@@ -251,7 +251,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
         }
 
-        saveHandler = SaveHandler.getInstance();
+        archeExecutor = ArcheExecutor.getInstance();
         //This will import data that might have failed to save before ArcheCore was last disabled.
         //MUST complete before we progress so it's done on the main thread, if a persona creation or deletion is in here that is VITAL that it is performed before we load anything.
         getServer().getScheduler().runTask(this, new DumpedDBReader(this));
@@ -279,7 +279,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         } else {
             sqlHandler.execute("DELETE FROM blockregistry WHERE date>DateTime('Now', 'LocalTime', '+" + blockregistryPurgeDelay + " Day')" + (blockregistryKillCustom ? " WHERE data IS NULL;" : ";"));
         }
-        //saveHandler.put(new CreateDatabaseTask());
+        //archeExecutor.put(new CreateDatabaseTask());
         blockRegistry = new BlockRegistry();
         archenomicon = Archenomicon.getInstance();
         personaHandler = ArchePersonaHandler.getInstance();
@@ -332,7 +332,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             }
 
             //Start saving our data
-            //saverThread = new Thread(new DataSaveRunnable(saveHandler, timer, sqlHandler), "ArcheCore SQL Consumer");
+            //saverThread = new Thread(new DataSaveRunnable(archeExecutor, timer, sqlHandler), "ArcheCore SQL Consumer");
             //saverThread.start();
         });
 

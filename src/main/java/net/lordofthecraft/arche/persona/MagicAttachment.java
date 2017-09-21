@@ -54,7 +54,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         }
     }
 
-    //private static final SaveHandler buffer = SaveHandler.getInstance();
+    //private static final ArcheExecutor buffer = ArcheExecutor.getInstance();
     private static final IConsumer consumer = ArcheCore.getConsumerControls();
     private final Magic magic;
     private final Persona persona;

@@ -6,7 +6,6 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
 import net.lordofthecraft.arche.save.archerows.ArcheRow;
-import net.lordofthecraft.arche.save.tasks.persona.UpdateVitalsTask;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,7 +34,7 @@ public class MultiVitalsUpdateRow implements ArcheMergeableRow, ArchePersonaRow 
 
     @Override
     public boolean canMerge(ArcheMergeableRow row) {
-        return !row.isUnique() && row instanceof UpdateVitalsTask;
+        return !row.isUnique() && row instanceof VitalsUpdateRow;
     }
 
     @Override

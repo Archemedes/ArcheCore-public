@@ -42,7 +42,7 @@ public class PlayerJoinListener implements Listener {
 			ps.attributes().handleLogin();
             ArcheCore.getConsumerControls().queueRow(new UpdatePlayerRow(p));
         }else {
-            //SaveHandler.getInstance().put(new PlayerRegisterTask(p.getUniqueId()));
+            //ArcheExecutor.getInstance().put(new PlayerRegisterTask(p.getUniqueId()));
             ArcheCore.getConsumerControls().queueRow(new PlayerInsertRow(p));
         }
 		

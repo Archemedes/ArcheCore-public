@@ -123,7 +123,7 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 		if(task != null) task.cancel();
         if (save) {
             save = true;
-            //SaveHandler.getInstance().put(new ArcheAttributeRemoveTask(this, ps, aa));
+            //ArcheExecutor.getInstance().put(new ArcheAttributeRemoveTask(this, ps, aa));
             ArcheCore.getConsumerControls().queueRow(new PersAttrRemoveRow(this, aa, ps));
         }
     }

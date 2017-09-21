@@ -7,13 +7,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
 
-public class SaveHandler {
+public class ArcheExecutor {
 
 	//private BlockingDeque<ArcheTask> saveQueue = new LinkedBlockingDeque<>();
 	private ExecutorService service = Executors.newSingleThreadExecutor(new ArcheThreadFactory());
 
-	public static SaveHandler getInstance() {
-		return SingletonHolder.INSTANCE;
+    public static ArcheExecutor getInstance() {
+        return SingletonHolder.INSTANCE;
 	}
 
 	public Future<?> put(ArcheTask s) {
@@ -53,6 +53,6 @@ public class SaveHandler {
     }
 	
 	private static class SingletonHolder {
-		private static final SaveHandler INSTANCE = new SaveHandler();
-	}
+        private static final ArcheExecutor INSTANCE = new ArcheExecutor();
+    }
 }

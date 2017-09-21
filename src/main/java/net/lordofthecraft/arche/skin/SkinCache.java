@@ -18,7 +18,7 @@ import com.mojang.authlib.exceptions.AuthenticationException;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaSkinListener;
-import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.ArcheExecutor;
 import net.lordofthecraft.arche.skin.MojangCommunicator.AuthenthicationData;
 import net.lordofthecraft.arche.skin.MojangCommunicator.MinecraftAccount;
 import net.lordofthecraft.arche.util.ProtocolUtil;
@@ -82,7 +82,7 @@ public class SkinCache {
 		String skinUrl = skinJson.get("url").toString();
 
         ArcheSkinCallable call = new ArcheSkinCallable(index, p.getUniqueId(), null, skinUrl, slim, ((GameProfile) profile.getHandle()).getProperties().get("textures").iterator().next(), new Timestamp(0));
-        Future<ArcheSkin> futskin = SaveHandler.getInstance().prepareCallable(call);
+        Future<ArcheSkin> futskin = ArcheExecutor.getInstance().prepareCallable(call);
         try {
             ArcheSkin skin = futskin.get(150, TimeUnit.MILLISECONDS);
             skin.timeLastRefreshed = new Timestamp(0);
@@ -143,8 +143,12 @@ public class SkinCache {
 		.filter(s -> s.getIndex() == index)
 		.findAny().orElse(null);
 	}
-	
-	private void init() {
+
+    public ArcheSkin getSkinByID(int i) {
+        return skinCache.values().stream().filter(s -> s.getSkinId() == i).findAny().orElse(null);
+    }
+
+    private void init() {
 		try {
             Connection conn = ArcheCore.getSQLControls().getConnection();
             if (!ArcheCore.usingSQLite()) {

@@ -25,7 +25,7 @@ public class FatigueDecreaser extends BukkitRunnable {
         //TODO fix
         double toDecrease = 100 / (fatigueRestoreHours * 3);
 
-        //SaveHandler.getInstance().put(new FatigueReduceTask());
+        //ArcheExecutor.getInstance().put(new FatigueReduceTask());
         ArcheCore.getConsumerControls().queueRow(new FatigueReduceRow());
 
         for(Persona[] prs: handler.getPersonas()) {
