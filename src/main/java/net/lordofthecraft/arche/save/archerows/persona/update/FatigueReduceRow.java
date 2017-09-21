@@ -9,7 +9,7 @@ public class FatigueReduceRow implements ArcheRow {
 
     @Override
     public String[] getInserts() {
-        return new String[]{"UPDATE persona SET fatigue=fatigue-1 WHERE fatigue>0;"};
+        return new String[]{"UPDATE persona SET fatigue=fatigue-1 WHERE fatigue>0;", "UPDATE persona SET fatigue=0 WHERE fatigue<0;"};
     }
 
 

@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.save.archerows.player;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.save.archerows.ArchePreparedStatementRow;
+import net.lordofthecraft.arche.util.SQLUtil;
 import org.bukkit.entity.Player;
 
 import java.sql.Connection;
@@ -24,14 +25,15 @@ public class PlayerInsertRow implements ArchePreparedStatementRow {
 
     @Override
     public void executeStatements() throws SQLException {
-        PreparedStatement statement = connection.prepareStatement("INSERT " + (ArcheCore.getPlugin().isUsingSQLite() ? "OR IGNORE " : "IGNORE ") + " INTO players(player) VALUES (?)");
+        PreparedStatement statement = connection.prepareStatement("INSERT " + (ArcheCore.getPlugin().isUsingSQLite() ? "OR IGNORE " : "IGNORE ") + " INTO players(player,player_name) VALUES (?,?)");
         statement.setString(1, player.getUniqueId().toString());
+        statement.setString(2, player.getName());
         statement.executeUpdate();
     }
 
     @Override
     public String[] getInserts() {
-        return new String[]{"INSERT " + (ArcheCore.getPlugin().isUsingSQLite() ? "OR IGNORE " : "IGNORE ") + " INTO players(player) VALUES ('" + player.getUniqueId().toString() + "');"};
+        return new String[]{"INSERT " + (ArcheCore.getPlugin().isUsingSQLite() ? "OR IGNORE " : "IGNORE ") + " INTO players(player) VALUES ('" + player.getUniqueId().toString() + "', '" + SQLUtil.mysqlTextEscape(player.getName()) + "');"};
     }
 
     @Override

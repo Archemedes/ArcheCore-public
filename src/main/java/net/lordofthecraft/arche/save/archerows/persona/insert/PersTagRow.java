@@ -4,6 +4,7 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.SQLUtil;
 
 import java.sql.Connection;
@@ -61,5 +62,14 @@ public class PersTagRow implements ArcheMergeableRow, ArchePersonaRow {
     public String[] getInserts() {
         return new String[]{"INSERT " + (ArcheCore.usingSQLite() ? "OR IGNORE" : "IGNORE") + " INTO persona_tags(persona_id_fk,tag_key,tag_value)" +
                 " VALUES (" + persona.getPersonaId() + ",'" + SQLUtil.mysqlTextEscape(key) + "','" + SQLUtil.mysqlTextEscape(value) + "');"};
+    }
+
+    @Override
+    public String toString() {
+        return "PersTagRow{" +
+                "persona=" + MessageUtil.identifyPersona(persona) +
+                ", key='" + key + '\'' +
+                ", value='" + value + '\'' +
+                '}';
     }
 }

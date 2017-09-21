@@ -3,6 +3,7 @@ package net.lordofthecraft.arche.save.archerows.persona.update;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.SQLUtil;
 
 import java.sql.Connection;
@@ -59,5 +60,14 @@ public class UpdatePersTagRow implements ArcheMergeableRow, ArchePersonaRow {
     @Override
     public String[] getInserts() {
         return new String[]{"UPDATE persona_tags SET tag_value='" + SQLUtil.mysqlTextEscape(value) + "' WHERE persona_id_fk=" + persona.getPersonaId() + " AND tag_key='" + SQLUtil.mysqlTextEscape(key) + "';"};
+    }
+
+    @Override
+    public String toString() {
+        return "UpdatePersTagRow{" +
+                "persona=" + MessageUtil.identifyPersona(persona) +
+                ", key='" + key + '\'' +
+                ", value='" + value + '\'' +
+                '}';
     }
 }

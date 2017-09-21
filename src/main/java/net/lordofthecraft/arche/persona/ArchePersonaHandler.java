@@ -630,7 +630,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.player = p.getName();
 		//prs[id] = persona;
 
-		if(rheader != null && !rheader.equals("null") && !rheader.isEmpty()){
+
+        if(rheader != null && !rheader.equals("null") && !rheader.isEmpty()){
 			persona.raceHeader = rheader;
 		}
 

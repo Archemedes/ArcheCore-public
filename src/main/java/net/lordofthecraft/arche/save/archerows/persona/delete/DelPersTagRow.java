@@ -3,6 +3,7 @@ package net.lordofthecraft.arche.save.archerows.persona.delete;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.SQLUtil;
 
 import java.sql.Connection;
@@ -57,5 +58,13 @@ public class DelPersTagRow implements ArcheMergeableRow, ArchePersonaRow {
     @Override
     public String[] getInserts() {
         return new String[]{"DELETE FROM persona_tags WHERE persona_id_fk=" + persona.getPersonaId() + " AND tag_key='" + SQLUtil.mysqlTextEscape(key) + "';"};
+    }
+
+    @Override
+    public String toString() {
+        return "DelPersTagRow{" +
+                "persona=" + MessageUtil.identifyPersona(persona) +
+                ", key='" + key + '\'' +
+                '}';
     }
 }

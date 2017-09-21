@@ -16,6 +16,7 @@ import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -66,7 +67,9 @@ public class CommandPersona implements CommandExecutor {
         SETTYPE("archecore.admin.command.persona.settype", false, "settype", "type", "assigntype"),
         READTAG("archecore.admin.command.persona.tag", true, "readtag", "viewtags", "readtags", "tagread", "tags", "tagview"),
         SETTAG("archecore.admin.command.persona.tag.set", false, "settag", "settagvalue", "tagset"),
-        DELTAG("archecore.admin.command.persona.tag.remove", false, "deltag", "tagdel");
+        DELTAG("archecore.admin.command.persona.tag.remove", false, "deltag", "tagdel"),
+        FATIGUEVIEW("archecore.admin.command.persona.fatigue", true, "fatigue", "fatigueview"),
+        FATIGUESET("archecore.admin.command.persona.fatigue.set", false, "fatigueset", "setfatigue");
 
         public final String permission;
         private final String[] aliases;
@@ -447,7 +450,7 @@ public class CommandPersona implements CommandExecutor {
                     return true;
                 } else if (cmd == PersonaCommand.READTAG) {
                     sender.sendMessage("");
-                    sender.sendMessage(ChatColor.GOLD + pers.getName() + "" + ChatColor.DARK_AQUA + "'s tags.");
+                    sender.sendMessage("~~~~ " + ChatColor.GOLD + pers.getName() + "" + ChatColor.RESET + "'s tags. ~~~~");
                     if (pers.getTags().size() == 0) {
                         sender.sendMessage(ChatColor.RED + "None!");
                     } else {
@@ -476,6 +479,16 @@ public class CommandPersona implements CommandExecutor {
                         }
                     }
                     return true;
+                } else if (cmd == PersonaCommand.FATIGUEVIEW) {
+                    sender.sendMessage(ChatColor.AQUA + "The persona " + pers.getName() + ChatColor.GRAY + " (" + pers.getPlayerName() + ")" + ChatColor.AQUA + " has " + ChatColor.GOLD + pers.getFatigue() + ChatColor.AQUA + "/100 fatigue");
+                    return true;
+                } else if (cmd == PersonaCommand.FATIGUESET) {
+                    if (NumberUtils.isNumber(args[1])) {
+                        pers.setFatigue(Double.valueOf(args[1]));
+                        sender.sendMessage(ChatColor.GREEN + "Success!" + ChatColor.BLUE + " The persona " + MessageUtil.identifyPersona(pers) + " has had their fatigue set to " + ChatColor.GOLD + pers.getFatigue());
+                        return true;
+                    }
+                    return false;
                 } else if (cmd == PersonaCommand.CONSTRUCT) {
                     return doRaceChange(sender, pers, Race.CONSTRUCT);
                 } else if (cmd == PersonaCommand.SPECTRE) {

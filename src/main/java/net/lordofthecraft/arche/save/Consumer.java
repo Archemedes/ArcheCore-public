@@ -128,12 +128,16 @@ public class Consumer extends TimerTask implements IConsumer {
                             }
                         }
                     }
-                    apsr.setConnection(conn);
-                    try {
-                        apsr.executeStatements();
-                    } catch (final SQLException ex) {
-                        pl.getLogger().log(Level.SEVERE, "[Consumer] SQL Exception in Consumer: ", ex);
-                        break;
+                    if (apsr != null) {
+                        apsr.setConnection(conn);
+                        try {
+                            apsr.executeStatements();
+                        } catch (final SQLException ex) {
+                            pl.getLogger().log(Level.SEVERE, "[Consumer] SQL Exception in Consumer: ", ex);
+                            break;
+                        }
+                    } else {
+                        pl.getLogger().warning("Error! Looks like some rows failed to merge, our row was null! This usually happens if ArcheMergeableRow#merge returns a null!");
                     }
                     //If you are reading through this code to see how this works
                     //Understand that if you close or edit a connection in your row it will explode everything violently.

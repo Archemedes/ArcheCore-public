@@ -8,6 +8,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import net.lordofthecraft.arche.save.archerows.player.PlayerInsertRow;
+import net.lordofthecraft.arche.save.archerows.player.UpdatePlayerRow;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -39,7 +40,8 @@ public class PlayerJoinListener implements Listener {
 		if(ps != null) {
 			Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
 			ps.attributes().handleLogin();
-		}else {
+            ArcheCore.getConsumerControls().queueRow(new UpdatePlayerRow(p));
+        }else {
             //SaveHandler.getInstance().put(new PlayerRegisterTask(p.getUniqueId()));
             ArcheCore.getConsumerControls().queueRow(new PlayerInsertRow(p));
         }

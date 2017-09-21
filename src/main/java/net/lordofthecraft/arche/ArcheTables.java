@@ -105,6 +105,7 @@ public final class ArcheTables {
         statement.execute("CREATE TABLE IF NOT EXISTS players (" +
                 "player CHAR(36)," +
                 "force_preload BOOLEAN DEFAULT FALSE," +
+                "player_name TEXT DEFAULT NULL," +
                 "PRIMARY KEY (player)" +
                 ")" +
                 end);
