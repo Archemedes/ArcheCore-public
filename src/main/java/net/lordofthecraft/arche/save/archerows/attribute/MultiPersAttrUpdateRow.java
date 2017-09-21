@@ -56,7 +56,7 @@ public class MultiPersAttrUpdateRow implements ArcheMergeableRow, ArchePersonaRo
     public void executeStatements() throws SQLException {
         PreparedStatement statement = null;
         try {
-            statement = connection.prepareStatement("UPDATE persona_attributes SET decaytype=? AND decaytime=? AND lostondeath=? WHERE persona_id_fk=? AND moduuid=? AND attribute_type=?");
+            statement = connection.prepareStatement("UPDATE persona_attributes SET decaytype=? AND decaytime=? AND lostondeath=? WHERE persona_id_fk=? AND mod_uuid=? AND attribute_type=?");
             for (PersAttrUpdateRow row : rows) {
                 statement.setString(1, row.mod.getDecayStrategy().name());
                 statement.setLong(2, row.mod.getTicksRemaining());

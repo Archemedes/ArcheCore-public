@@ -28,6 +28,6 @@ public class ArcheAttributeRemoveTask extends StatementTask {
 
     @Override
     protected String getQuery() {
-        return "DELETE FROM persona_attributes WHERE moduuid=? AND persona_id_fk=? AND attribute_type=?";
+        return "DELETE FROM persona_attributes WHERE mod_uuid=? AND persona_id_fk=? AND attribute_type=?";
     }
 }

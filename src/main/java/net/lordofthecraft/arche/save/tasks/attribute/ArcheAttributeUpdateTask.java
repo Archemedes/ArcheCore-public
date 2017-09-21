@@ -31,6 +31,6 @@ public class ArcheAttributeUpdateTask extends StatementTask {
 
     @Override
     protected String getQuery() {
-        return "UPDATE persona_attributes SET decaytype=? AND decaytime=? AND lostondeath=? WHERE persona_id_fk=? AND moduuid=? AND attribute_type=?";
+        return "UPDATE persona_attributes SET decaytype=? AND decaytime=? AND lostondeath=? WHERE persona_id_fk=? AND mod_uuid=? AND attribute_type=?";
     }
 }

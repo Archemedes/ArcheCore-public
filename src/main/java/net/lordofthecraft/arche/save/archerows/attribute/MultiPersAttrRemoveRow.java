@@ -56,7 +56,7 @@ public class MultiPersAttrRemoveRow implements ArcheMergeableRow, ArchePersonaRo
     public void executeStatements() throws SQLException {
         PreparedStatement statement = null;
         try {
-            statement = connection.prepareStatement("DELETE FROM persona_attributes WHERE moduuid=? AND persona_id_fk=? AND attribute_type=?");
+            statement = connection.prepareStatement("DELETE FROM persona_attributes WHERE mod_uuid=? AND persona_id_fk=? AND attribute_type=?");
             for (PersAttrRemoveRow row : rows) {
                 statement.setString(1, row.mod.getUniqueId().toString());
                 statement.setInt(2, row.persona.getPersonaId());

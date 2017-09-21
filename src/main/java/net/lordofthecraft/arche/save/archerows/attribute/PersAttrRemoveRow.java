@@ -50,7 +50,7 @@ public class PersAttrRemoveRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public void executeStatements() throws SQLException {
-        PreparedStatement statement = connection.prepareStatement("DELETE FROM persona_attributes WHERE moduuid=? AND persona_id_fk=? AND attribute_type=?");
+        PreparedStatement statement = connection.prepareStatement("DELETE FROM persona_attributes WHERE mod_uuid=? AND persona_id_fk=? AND attribute_type=?");
         statement.setString(1, mod.getUniqueId().toString());
         statement.setInt(2, persona.getPersonaId());
         statement.setString(3, attribute.getName());
@@ -66,7 +66,7 @@ public class PersAttrRemoveRow implements ArcheMergeableRow, ArchePersonaRow {
     @Override
     public String[] getInserts() {
         return new String[]{
-                "DELETE FROM persona_attributes WHERE moduuid='" + mod.getUniqueId().toString() + "' AND persona_id_fk=" + persona.getPersonaId() + " AND attribute_type='" + SQLUtil.mysqlTextEscape(attribute.getName()) + "';"
+                "DELETE FROM persona_attributes WHERE mod_uuid='" + mod.getUniqueId().toString() + "' AND persona_id_fk=" + persona.getPersonaId() + " AND attribute_type='" + SQLUtil.mysqlTextEscape(attribute.getName()) + "';"
         };
     }
 
