@@ -21,7 +21,7 @@ public class ArcheEconomy implements Economy {
 	private final double lostOnDeath;
 	private final double beginnerAmount;
 	private final boolean proximity;
-    //private SaveHandler buffer = SaveHandler.getInstance();
+    //private ArcheExecutor buffer = ArcheExecutor.getInstance();
     private IConsumer consumer;
 
     public ArcheEconomy(FileConfiguration config){

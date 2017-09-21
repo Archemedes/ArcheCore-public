@@ -18,7 +18,9 @@ import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.archerows.magic.insert.MagicInsertRow;
+import net.lordofthecraft.arche.save.archerows.persona.delete.DeletePersonaSkinRow;
 import net.lordofthecraft.arche.save.archerows.persona.delete.PersonaDeleteRow;
+import net.lordofthecraft.arche.save.archerows.persona.insert.SkinRow;
 import net.lordofthecraft.arche.save.archerows.persona.update.PersonaUpdateRow;
 import net.lordofthecraft.arche.save.archerows.persona.update.VitalsUpdateRow;
 import net.lordofthecraft.arche.save.tasks.skills.SelectSkillTask;
@@ -57,7 +59,7 @@ import java.util.stream.Collectors;
 public final class ArchePersona implements Persona, InventoryHolder {
 
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
-    //private static final SaveHandler buffer = SaveHandler.getInstance();
+    //private static final ArcheExecutor buffer = ArcheExecutor.getInstance();
     private static final IConsumer consumer = ArcheCore.getControls().getConsumer();
 
 	//The immutable auto-increment ID of this persona.
@@ -189,19 +191,16 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		this.type = type;
 
         consumer.queueRow(new PersonaUpdateRow(this, PersonaField.TYPE, type, false));
-        //buffer.put(new UpdateTask(this, PersonaField.TYPE, type));
     }
 
 	@Override
 	public double withdraw(double amount, Transaction cause) {
-        //buffer.put(new InsertEconomyLogTask(persona_id, cause, amount));
         ArcheCore.getControls().getEconomy().withdrawPersona(this, amount, cause);
         return money;
 	}
 
 	@Override
 	public double deposit(double amount, Transaction cause){
-        //buffer.put(new InsertEconomyLogTask(persona_id, cause, amount));
         ArcheCore.getControls().getEconomy().depositPersona(this, amount, cause);
         return money;
 	}
@@ -259,6 +258,26 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		}
 	}
 
+    void loadSkin(Connection connection) {
+        String sql = "SELECT skin_id_fk FROM per_persona_skin WHERE persona_id_fk=?";
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                ArcheSkin skin = SkinCache.getInstance().getSkinByID(rs.getInt("skin_id_fk"));
+                if (skin != null) {
+                    this.skin = skin;
+                } else {
+                    consumer.queueRow(new DeletePersonaSkinRow(this));
+                }
+            }
+            rs.close();
+            statement.close();
+        } catch (SQLException ex) {
+            ArcheCore.getPlugin().getLogger().log(Level.WARNING, "Failed to create skin for persona " + MessageUtil.identifyPersona(this), ex);
+        }
+    }
+
 	void loadSkills(){
         //TODO no lazy loading.
         for(ArcheSkill s : ArcheSkillFactory.getSkills().values()){
@@ -273,9 +292,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		}
 	}
 
-    void loadAttributes() {
-        Connection conn = null;
-        conn = ArcheCore.getSQLControls().getConnection();
+    void loadAttributes(Connection conn) {
         try {
             if (!ArcheCore.usingSQLite()) {
                 conn.setReadOnly(true);
@@ -313,16 +330,14 @@ public final class ArchePersona implements Persona, InventoryHolder {
             }
             rs.close();
             statement.close();
-            conn.close();
         } catch (SQLException e) {
             ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Warning! We failed to load attributes for the persona of " + player + "! [" + persona_id + "]", e);
         }
     }
 
-	void loadTags() {
+    void loadTags(Connection conn) {
         String sql = "SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=?";
         try {
-            Connection conn = ArcheCore.getSQLControls().getConnection();
             PreparedStatement stat = conn.prepareStatement(sql);
             stat.setInt(1, persona_id);
             ResultSet rs = stat.executeQuery();
@@ -333,17 +348,15 @@ public final class ArchePersona implements Persona, InventoryHolder {
             attachment = new TagAttachment(tags, this, true);
             rs.close();
             stat.close();
-            conn.close();
         } catch (SQLException e) {
             ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Failed to retrieve tags for the persona " + MessageUtil.identifyPersona(this), e);
             attachment = new TagAttachment(Maps.newHashMap(), this, false);
         }
     }
 
-	void loadMagics() {
+    void loadMagics(Connection conn) {
         String sql = "SELECT magic_fk,tier,last_advanced,teacher,learned,visible FROM persona_magics WHERE persona_id_fk=?";
         try {
-            Connection conn = ArcheCore.getSQLControls().getConnection();
             if (!ArcheCore.usingSQLite()) {
                 conn.setReadOnly(true);
             }
@@ -366,7 +379,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 			}
 			rs.close();
 			stat.close();
-            conn.close();
         } catch (SQLException e) {
 			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "An error occurred while loading " + player + "'s persona magics!!!", e);
 		}
@@ -520,7 +532,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
                 sb.append(end);
             }
         } else if (raceHeader != null && !raceHeader.isEmpty()) {
-            sb.append(raceHeader).append(" ");
             if (mod) {
                 sb.append(ChatColor.GRAY).append("(").append(race.getName()).append(") ");
             }
@@ -559,8 +570,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
         consumer.queueRow(new PersonaUpdateRow(this, PersonaField.NAME, name, false));
         consumer.queueRow(new PersonaUpdateRow(this, PersonaField.STAT_RENAMED, lastRenamed, false));
-        //buffer.put(new UpdateTask(this, PersonaField.NAME, name));
-        //buffer.put(new UpdateTask(this, PersonaField.STAT_RENAMED, lastRenamed));
 
 		if (current) {
 			Player p = Bukkit.getPlayer(getPlayerUUID());
@@ -585,8 +594,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 		}
         consumer.queueRow(new PersonaUpdateRow(this, PersonaField.RACE_REAL, race.name(), false));
         consumer.queueRow(new PersonaUpdateRow(this, PersonaField.RACE, "", false));
-        //buffer.put(new UpdateTask(this, PersonaField.RACE_REAL, race));
-        //buffer.put(new UpdateTask(this, PersonaField.RACE, ""));
         this.raceHeader = null;
 	}
 
@@ -840,7 +847,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
     @Override
     public int hashCode() {
-        return com.google.common.base.Objects.hashCode(persona_id);
+        return persona_id;
     }
 
     @Override
@@ -884,10 +891,15 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
     @Override
     public void setSkin(ArcheSkin skin) {
+        boolean update = this.skin != null;
         this.skin = skin;
         skin.addPersona(this);
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.ICON, skin.getSkinId(), false));
+        if (update) {
+            consumer.queueRow(new PersonaUpdateRow(this, PersonaField.ICON, skin.getSkinId(), false));
+        } else {
+            consumer.queueRow(new SkinRow(this));
+        }
         //buffer.put(new UpdateTask(this, PersonaField.ICON, skin.getSkinId()));
     }
 
@@ -896,7 +908,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
         skin.removePersona(this);
         this.skin = null;
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.ICON, -1, false));
+        consumer.queueRow(new DeletePersonaSkinRow(this));
         //buffer.put(new UpdateTask(this, PersonaField.ICON, -1));
     }
 

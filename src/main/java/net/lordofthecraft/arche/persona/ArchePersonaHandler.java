@@ -643,18 +643,6 @@ public class ArchePersonaHandler implements PersonaHandler {
         persona.food = res.getInt(PersonaField.FOOD.field());
         persona.saturation = res.getFloat(PersonaField.SATURATION.field());
 
-        /*
-            String personaSelect = "SELECT " +
-            "persona_id,slot,race,gender" +
-            ",name,curr,race_header,descr,p_type,prefix,money,skin,profession,fatigue,max_fatigue" +
-            ",world,x,y,z,inv,ender_inv,health,hunger,saturation,creature" +
-            ",played,chars,renamed,playtime_past,date_created,last_played " +
-            "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
-            "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
-            "WHERE player_fk=?";
-
-         */
-
 		persona.timePlayed.set(res.getInt(PersonaField.STAT_PLAYED.field()));
 		persona.charactersSpoken.set(res.getInt(PersonaField.STAT_CHARS.field()));
 		persona.lastRenamed = res.getTimestamp(PersonaField.STAT_RENAMED.field());
@@ -705,11 +693,17 @@ public class ArchePersonaHandler implements PersonaHandler {
 		//We now let all Personas load their skills (albeit lazily). Let's do this now
 		persona.loadSkills();
 
-		persona.loadMagics();
+        Connection connection = ArcheCore.getSQLControls().getConnection();
 
-		persona.loadTags();
+        persona.loadMagics(connection);
 
-        persona.loadAttributes();
+        persona.loadTags(connection);
+
+        persona.loadAttributes(connection);
+
+        persona.loadSkin(connection);
+
+        connection.close();
 
 		return persona;
 	}

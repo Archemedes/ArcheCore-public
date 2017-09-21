@@ -82,7 +82,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
         }
         ArcheMagic m = new ArcheMagic(name, maxTier, selfTeachable);
         ArcheCore.getMagicControls().registerMagic(m);
-        //SaveHandler.getInstance().put(new ArcheMagicInsertTask(m));
+        //ArcheExecutor.getInstance().put(new ArcheMagicInsertTask(m));
         ArcheCore.getConsumerControls().queueRow(new ArcheMagicInsertRow(m));
         return m;
     }
@@ -248,13 +248,13 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
     }
 
     protected void performSQLUpdate(Field f, Object data) {
-        //SaveHandler.getInstance().put(new ArcheMagicUpdateTask(this, f, data));
+        //ArcheExecutor.getInstance().put(new ArcheMagicUpdateTask(this, f, data));
         ArcheCore.getConsumerControls().queueRow(new ArcheMagicUpdateRow(this, f, data));
     }
 
     public void remove() {
         ArcheCore.getMagicControls().removeMagic(this);
-        //SaveHandler.getInstance().put(new ArcheMagicDeleteTask(name));
+        //ArcheExecutor.getInstance().put(new ArcheMagicDeleteTask(name));
         ArcheCore.getConsumerControls().queueRow(new ArcheMagicDeleteRow(this));
     }
 

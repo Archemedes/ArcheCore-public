@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.commands;
 
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.help.HelpDesk;
@@ -314,10 +315,10 @@ public class CommandPersona implements CommandExecutor {
                         pers.setName(name);
                         sender.sendMessage(ChatColor.AQUA + "Persona name was set to: " + ChatColor.RESET + name);
                         if (sender == pers.getPlayer()) {
-                            //SaveHandler.getInstance().put(new UpdateTask(pers, PersonaField.STAT_RENAMED, new Timestamp(System.currentTimeMillis())));
+                            //ArcheExecutor.getInstance().put(new UpdateTask(pers, PersonaField.STAT_RENAMED, new Timestamp(System.currentTimeMillis())));
                             ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(pers, PersonaField.STAT_RENAMED, new Timestamp(System.currentTimeMillis()), false));
                         } //Player renamed by his own accord
-                        //SaveHandler.getInstance().put(new PersonaRenameTask(pers));
+                        //ArcheExecutor.getInstance().put(new PersonaRenameTask(pers));
                     } else {
                         sender.sendMessage(ChatColor.RED + "Error: Name too long. Max length 32 characters");
                     }
@@ -480,7 +481,7 @@ public class CommandPersona implements CommandExecutor {
                     }
                     return true;
                 } else if (cmd == PersonaCommand.FATIGUEVIEW) {
-                    sender.sendMessage(ChatColor.AQUA + "The persona " + pers.getName() + ChatColor.GRAY + " (" + pers.getPlayerName() + ")" + ChatColor.AQUA + " has " + ChatColor.GOLD + pers.getFatigue() + ChatColor.AQUA + "/100 fatigue");
+                    sender.sendMessage(ChatColor.AQUA + "The persona " + pers.getName() + ChatColor.GRAY + " (" + pers.getPlayerName() + ")" + ChatColor.AQUA + " has " + ChatColor.GOLD + pers.getFatigue() + ChatColor.AQUA + "/" + pers.attributes().getAttributeValue(AttributeRegistry.MAX_FATIGUE) + " fatigue");
                     return true;
                 } else if (cmd == PersonaCommand.FATIGUESET) {
                     if (NumberUtils.isNumber(args[1])) {

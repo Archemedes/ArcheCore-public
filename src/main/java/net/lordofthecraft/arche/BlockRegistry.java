@@ -18,7 +18,7 @@ public class BlockRegistry {
 	final Set<WeakBlock> playerPlaced = Sets.newHashSetWithExpectedSize(3000);
 	private final Set<Material> watching = EnumSet.noneOf(Material.class);
     final Map<WeakBlock, String> data = Maps.newConcurrentMap();
-    //private final SaveHandler buffer = SaveHandler.getInstance();
+    //private final ArcheExecutor buffer = ArcheExecutor.getInstance();
     private final IConsumer consumer = ArcheCore.getControls().getConsumer();
 
     BlockRegistry() {

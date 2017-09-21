@@ -16,7 +16,7 @@ import java.util.Map;
  * @author 501warhead
  */
 public class TagAttachment {
-    //private static final SaveHandler buffer = SaveHandler.getInstance();
+    //private static final ArcheExecutor buffer = ArcheExecutor.getInstance();
     private static final IConsumer consumer = ArcheCore.getConsumerControls();
     private final Map<String, String> tags;
     private final Persona persona;
