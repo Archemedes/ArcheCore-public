@@ -259,7 +259,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
     void loadSkin(Connection connection) {
-        String sql = "SELECT skin_id_fk FROM per_persona_skin WHERE persona_id_fk=?";
+        String sql = "SELECT skin_id_fk FROM per_persona_skins WHERE persona_id_fk=?";
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet rs = statement.executeQuery();
