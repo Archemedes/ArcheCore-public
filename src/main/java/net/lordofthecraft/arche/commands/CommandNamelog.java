@@ -1,7 +1,7 @@
 package net.lordofthecraft.arche.commands;
 
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
-import net.lordofthecraft.arche.save.SaveHandler;
+import net.lordofthecraft.arche.save.ArcheExecutor;
 import net.lordofthecraft.arche.save.tasks.ArcheTask;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -30,7 +30,7 @@ public class CommandNamelog implements CommandExecutor {
 			} else {
 				final UUID uuid = play.getUniqueId();
 				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Retrieving a Persona name history for " + ChatColor.WHITE + play.getName());
-                SaveHandler.getInstance().put(new ArcheTask() {
+                ArcheExecutor.getInstance().put(new ArcheTask() {
                     @Override
                     public void run(){
 						try{
