@@ -1,19 +1,26 @@
 package net.lordofthecraft.arche.persona;
 
-import com.google.common.collect.Maps;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheTimer;
-import net.lordofthecraft.arche.attributes.*;
-import net.lordofthecraft.arche.interfaces.Persona;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Logger;
+
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
+import com.google.common.collect.Maps;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheTimer;
+import net.lordofthecraft.arche.attributes.ArcheAttribute;
+import net.lordofthecraft.arche.attributes.ArcheAttributeInstance;
+import net.lordofthecraft.arche.attributes.AttributeRegistry;
+import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
+import net.lordofthecraft.arche.attributes.VanillaAttribute;
+import net.lordofthecraft.arche.interfaces.Persona;
 
 /**
  * Just fucking end me - Sporadic 2k17
@@ -65,6 +72,16 @@ public class PersonaAttributes {
     	ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
     	String timerWhy = null;
     	if(timer != null) {
+    		Logger logger = ArcheCore.getPlugin().getLogger();
+    		logger.info("[Debug] Adding attribute: " + toString(m));
+    		logger.info("[Debug] Current attributes for " + a.getName() + ":");
+    		if(customAttributes.containsKey(a)) {
+    			customAttributes.get(a).getModifiers()
+    			.forEach(x-> logger.info("[Debug] " + toString(x)));
+    		} else {
+    			logger.info("[Debug] NONE!");
+    		}
+    		
     		timerWhy = String.format("adding attribute to %s (%d)", persona.getName(), persona.getPersonaId());
     		timer.startTiming(timerWhy);
     	}
@@ -93,7 +110,17 @@ public class PersonaAttributes {
         ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
         String timerWhy = null;
         if (timer != null) {
-            timerWhy = String.format("adding attribute to %s (%d)", persona.getName(), persona.getPersonaId());
+    		Logger logger = ArcheCore.getPlugin().getLogger();
+    		logger.info("[Debug] SQL-adding attribute: " + toString(m));
+    		logger.info("[Debug] Current attributes for " + a.getName() + ":");
+    		if(customAttributes.containsKey(a)) {
+    			customAttributes.get(a).getModifiers()
+    			.forEach(x-> logger.info("[Debug] " + toString(x)));
+    		} else {
+    			logger.info("[Debug] NONE!");
+    		}
+        	
+            timerWhy = String.format("sql-adding attribute to %s (%d)", persona.getName(), persona.getPersonaId());
             timer.startTiming(timerWhy);
         }
 
@@ -125,6 +152,16 @@ public class PersonaAttributes {
     	ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
     	String timerWhy = null;
     	if(timer != null) {
+    		Logger logger = ArcheCore.getPlugin().getLogger();
+    		logger.info("[Debug] Removing attribute: " + toString(m));
+    		logger.info("[Debug] Current attributes for " + a.getName() + ":");
+    		if(customAttributes.containsKey(a)) {
+    			customAttributes.get(a).getModifiers()
+    			.forEach(x-> logger.info("[Debug] " + toString(x)));
+    		} else {
+    			logger.info("[Debug] NONE!");
+    		}
+    		
     		timerWhy = String.format("removing attribute from %s (%d)", persona.getName(), persona.getPersonaId());
     		timer.startTiming(timerWhy);
     	}
@@ -191,6 +228,16 @@ public class PersonaAttributes {
     		AttributeInstance ai = p.getAttribute(va.getHandle());
             aai.getModifiers().forEach(ai::removeModifier);
         }
+    }
+    
+    private String toString(AttributeModifier m) {
+    	String base = "ATTMOD uuid:" + m.getUniqueId().toString().substring(0, 8) + " o:" + m.getOperation().ordinal() + ". a:" + m.getAmount() + " n:\"" + m.getName()  + "\"";
+    	if(m instanceof ExtendedAttributeModifier) {
+    		ExtendedAttributeModifier eam = (ExtendedAttributeModifier) m;
+    		base += " save:" + (eam.save? 'y' : 'n');
+    	}
+    	
+    	return base;
     }
     
 }
