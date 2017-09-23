@@ -22,10 +22,13 @@ public class ExhaustionListener implements Listener {
 		Player p = (Player) e.getEntity();
 		Persona ps = ArcheCore.getPersonaControls().getPersona(p);
 		
+		
 		if(ps != null) {
 			int change = e.getFoodLevel() - p.getFoodLevel();
 			if(change > 0) {
-				double exhaustion = Math.min(100, ps.attributes().getAttributeValue(AttributeRegistry.EXHAUSTION)) / 100.0;
+				double exhaustion = Math.max(0, 
+						Math.min(100, ps.attributes().getAttributeValue(AttributeRegistry.EXHAUSTION)) / 100.0);
+				
 				float saturation = p.getSaturation();
 				Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), 
 						()-> {
@@ -36,9 +39,16 @@ public class ExhaustionListener implements Listener {
 						});
 			} else if(p.isSprinting()) {
 				double exhaustion = ps.attributes().getAttributeValue(AttributeRegistry.EXHAUSTION);
+				if(exhaustion < 0) exhaustion = 0;
 				int foodLevel = e.getFoodLevel();
-				foodLevel = Math.max(0, foodLevel - ((int) (exhaustion / 10.0)));
+				
+				int divider = 15;
+				int extraFood = (int) (exhaustion / divider);
+				double remainder = (exhaustion % divider) / divider * 4.0;
+				
+				foodLevel = Math.max(0, foodLevel - extraFood);
 				e.setFoodLevel(foodLevel);
+				p.setExhaustion((float) remainder);
 			}
 		}
 	}
