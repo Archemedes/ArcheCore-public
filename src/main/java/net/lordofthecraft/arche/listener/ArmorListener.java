@@ -3,7 +3,6 @@ package net.lordofthecraft.arche.listener;
 import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -21,6 +20,7 @@ import net.lordofthecraft.arche.event.util.ArmorEquipEvent;
 import net.lordofthecraft.arche.event.util.ArmorUnequipEvent;
 import net.lordofthecraft.arche.util.InventoryUtil;
 import net.lordofthecraft.arche.util.InventoryUtil.MovedItem;
+import net.lordofthecraft.arche.util.MaterialUtil;
 
 public class ArmorListener implements Listener {
 
@@ -31,7 +31,7 @@ public class ArmorListener implements Listener {
 		if(( e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) 
 				&& !e.isBlockInHand() && e.getItem() != null) {
 			ItemStack item = e.getItem();
-			EquipmentSlot armorSlot = isArmor(item.getType());
+			EquipmentSlot armorSlot = MaterialUtil.isArmor(item.getType());
 			if(armorSlot != null) {
 				ArmorEquipEvent aee = new ArmorEquipEvent(e.getPlayer(), item, armorSlot);
 				Bukkit.getPluginManager().callEvent(aee);
@@ -102,7 +102,6 @@ public class ArmorListener implements Listener {
 		}
 	}
 	
-	
 	private EquipmentSlot asSlot(int raw) {
 		switch(raw) {
 		case 5: return EquipmentSlot.HEAD;
@@ -110,21 +109,6 @@ public class ArmorListener implements Listener {
 		case 7: return EquipmentSlot.LEGS;
 		case 8: return EquipmentSlot.FEET;
 		default: throw new NullPointerException("Wrong slot you shouldn't be seeing this");
-		}
-	}
-	
-	private EquipmentSlot isArmor(Material m){
-		switch(m){
-		case LEATHER_HELMET: case CHAINMAIL_HELMET: case IRON_HELMET: case GOLD_HELMET: case DIAMOND_HELMET:
-			return EquipmentSlot.HEAD;
-		case LEATHER_CHESTPLATE: case CHAINMAIL_CHESTPLATE: case IRON_CHESTPLATE:
-		case GOLD_CHESTPLATE: case DIAMOND_CHESTPLATE: case ELYTRA:
-			return EquipmentSlot.CHEST;
-		case LEATHER_LEGGINGS: case CHAINMAIL_LEGGINGS: case IRON_LEGGINGS: case GOLD_LEGGINGS: case DIAMOND_LEGGINGS:
-			return EquipmentSlot.LEGS;
-		case LEATHER_BOOTS: case CHAINMAIL_BOOTS: case IRON_BOOTS: case GOLD_BOOTS: case DIAMOND_BOOTS:
-			return EquipmentSlot.FEET;
-		default: return null;
 		}
 	}
 
