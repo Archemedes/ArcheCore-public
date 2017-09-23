@@ -103,6 +103,24 @@ public class MaterialUtil { //Why do I do this to myself
 	
 	//////////////////////////// End of Material equipment groupings ////////////////////////
 	
+	public static EquipmentSlot getLikelySlot(Material m){
+		switch(m){
+		case LEATHER_HELMET: case CHAINMAIL_HELMET: case IRON_HELMET: case GOLD_HELMET: case DIAMOND_HELMET:
+		case SKULL_ITEM: case PUMPKIN:
+			return EquipmentSlot.HEAD;
+		case LEATHER_CHESTPLATE: case CHAINMAIL_CHESTPLATE: case IRON_CHESTPLATE:
+		case GOLD_CHESTPLATE: case DIAMOND_CHESTPLATE: case ELYTRA:
+			return EquipmentSlot.CHEST;
+		case LEATHER_LEGGINGS: case CHAINMAIL_LEGGINGS: case IRON_LEGGINGS: case GOLD_LEGGINGS: case DIAMOND_LEGGINGS:
+			return EquipmentSlot.LEGS;
+		case LEATHER_BOOTS: case CHAINMAIL_BOOTS: case IRON_BOOTS: case GOLD_BOOTS: case DIAMOND_BOOTS:
+			return EquipmentSlot.FEET;
+		case SHIELD: case TOTEM:
+			return EquipmentSlot.OFF_HAND;
+		default: return EquipmentSlot.HAND;
+		}
+	}
+	
 	public static EquipmentSlot isArmor(Material m){
 		switch(m){
 		case LEATHER_HELMET: case CHAINMAIL_HELMET: case IRON_HELMET: case GOLD_HELMET: case DIAMOND_HELMET:
