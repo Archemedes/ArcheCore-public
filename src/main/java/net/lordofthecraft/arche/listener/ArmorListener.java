@@ -17,7 +17,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import co.lotc.nativ.items.MaterialUtil;
 import net.lordofthecraft.arche.event.util.ArmorEquipEvent;
 import net.lordofthecraft.arche.event.util.ArmorUnequipEvent;
 import net.lordofthecraft.arche.util.InventoryUtil;
