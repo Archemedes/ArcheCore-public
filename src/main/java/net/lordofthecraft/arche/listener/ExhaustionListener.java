@@ -16,12 +16,10 @@ import net.lordofthecraft.arche.interfaces.Persona;
 
 public class ExhaustionListener implements Listener {
 	
-
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void food(FoodLevelChangeEvent e){
 		Player p = (Player) e.getEntity();
 		Persona ps = ArcheCore.getPersonaControls().getPersona(p);
-		
 		
 		if(ps != null) {
 			int change = e.getFoodLevel() - p.getFoodLevel();
@@ -45,7 +43,7 @@ public class ExhaustionListener implements Listener {
 				int divider = 15;
 				int extraFood = (int) (exhaustion / divider);
 				double remainder = (exhaustion % divider) / divider * 4.0;
-				
+				System.out.println("Exhaustion: " + exhaustion + " "  + extraFood + " " + remainder);
 				foodLevel = Math.max(0, foodLevel - extraFood);
 				e.setFoodLevel(foodLevel);
 				p.setExhaustion((float) remainder);
