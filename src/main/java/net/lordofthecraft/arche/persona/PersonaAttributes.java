@@ -21,6 +21,7 @@ import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.attributes.VanillaAttribute;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.util.MessageUtil;
 
 /**
  * Just fucking end me - Sporadic 2k17
@@ -82,7 +83,7 @@ public class PersonaAttributes {
     			logger.info("[Debug] NONE!");
     		}
     		
-    		timerWhy = String.format("adding attribute to %s (%d)", persona.getName(), persona.getPersonaId());
+    		timerWhy = "adding attribute to " + MessageUtil.identifyPersona(persona);
     		timer.startTiming(timerWhy);
     	}
     	
@@ -120,7 +121,7 @@ public class PersonaAttributes {
     			logger.info("[Debug] NONE!");
     		}
         	
-            timerWhy = String.format("sql-adding attribute to %s (%d)", persona.getName(), persona.getPersonaId());
+            timerWhy = String.format("sql-adding attribute to "+ MessageUtil.identifyPersona(persona));
             timer.startTiming(timerWhy);
         }
 
@@ -162,7 +163,7 @@ public class PersonaAttributes {
     			logger.info("[Debug] NONE!");
     		}
     		
-    		timerWhy = String.format("removing attribute from %s (%d)", persona.getName(), persona.getPersonaId());
+    		timerWhy = String.format("removing attribute from " + MessageUtil.identifyPersona(persona));
     		timer.startTiming(timerWhy);
     	}
     	
