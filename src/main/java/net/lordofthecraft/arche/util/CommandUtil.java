@@ -1,15 +1,29 @@
 package net.lordofthecraft.arche.util;
 
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 
-public class CommandUtil {
-
+public class CommandUtil {	
+	public static Player getPlayerOrMessage(CommandSender sender) {
+		return getPlayerOrMessage(sender, ChatColor.DARK_RED + "ERROR: " + ChatColor.RED + " This command must be run by a player");
+	}
 	
+	public static Player getPlayerOrMessage(CommandSender sender, String message) {
+		if(sender instanceof Player) {
+			return (Player) sender;
+		} else {
+			sender.sendMessage(message);
+			return null;
+		}
+	}
+
 	public static Persona personaFromArg(String a){
 		int c = StringUtils.countMatches(a, "@");
 		String player;
