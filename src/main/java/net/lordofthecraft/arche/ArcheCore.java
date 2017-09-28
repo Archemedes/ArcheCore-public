@@ -525,7 +525,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         String persHelp = ChatColor.YELLOW + "Your " + ChatColor.ITALIC + "Persona" + ChatColor.YELLOW + " is an uncouth sailor, fair Elven maiden or parent-slaying Orc. " +
                 "in Lord of the Craft, you speak and act as your current Persona, and know only what they know." +
                 div + ChatColor.GREEN + "Once accepted, creating your Persona is the first step of your adventure."
-                + " You can later remove or create new Personas by using the $/bme$ " + ChatColor.GREEN + " command.";
+                + " You can later remove or create new Personas by using the $/me$ " + ChatColor.GREEN + " command.";
 
         String commandHelp = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Your essential commands are as follows: "
                 + div + ChatColor.GRAY + "" + ChatColor.ITALIC +  (helpOverriden? "$/help$":"$/archehelp$") + ChatColor.GRAY + ": Provides a useful database of help topics.\n"
@@ -538,16 +538,22 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
                 + ChatColor.BLUE  + "Depending on your Persona's race, some professions may come easier to you than others.\n"
                 + ChatColor.GRAY  + "You receive special perks for your chosen profession, but beware, as these perks cause @Fatigue@.";
 
+        String attributes = ChatColor.GRAY + "Attributes are the various base stats of your Persona. These stats can be anything from how fast your Persona runs to how much fatigue they accumulate. \n"
+        		+ ChatColor.GREEN + "Various modifiers on items, spells and foodstuffs can affect these attributes for better or worse.\n"
+                + ChatColor.LIGHT_PURPLE  + "Current persona modifiers are shown on an icon in the $/me$ " + ChatColor.LIGHT_PURPLE + " menu.";
+
+        
         String fatigue = ChatColor.GRAY + "Fatigue accumulates when practicing your chosen @@<Professions>profession@@.\n"
                 + ChatColor.GREEN + "You can still do everything while fatigued, but will not have access to your profession-related perks.\n"
                 + ChatColor.LIGHT_PURPLE  + "your fatigue will reset over time, so it's best to simply take a break and wait it out. "
                 + "If you are inpatient, having a drink at a tavern will also reduce a Persona's fatigue.\n";
-
+        
         addHelp("Persona", persHelp, Material.REDSTONE_COMPARATOR, "archecore.mayuse");
         addHelp("Commands", commandHelp, Material.COMMAND);
         addHelp("Professions", profession, Material.BEDROCK);
-        addHelp("Fatigue", fatigue, Material.BED);
-
+        addHelp("Attributes", attributes, Material.GOLDEN_APPLE);   
+        addHelp("Fatigue", fatigue, Material.BED);        
+        
         //Create config-set Help Files
         if(!(new File(getDataFolder(), "helpfiles.yml").exists()))
             saveResource("helpfiles.yml", false);
