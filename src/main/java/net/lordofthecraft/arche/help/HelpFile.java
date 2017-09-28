@@ -35,7 +35,7 @@ public abstract class HelpFile {
     }
 
     public boolean canView(CommandSender sender) {
-        return sender.hasPermission(perm);
+        return perm == null || sender.hasPermission(perm);
     }
 
     public void setPerm(String perm) {
