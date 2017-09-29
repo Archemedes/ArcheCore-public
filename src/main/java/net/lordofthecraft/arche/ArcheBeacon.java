@@ -183,9 +183,12 @@ public class ArcheBeacon {
             //populate the top row using the FUNCTIONS array
             if(current >= 0) {
             	for(int i = 0; i < FUNCTIONS.length; i++) {
-            		if(FUNCTIONS[i] != null) {
+            		if(FUNCTIONS[i] != null) try {
             			is = FUNCTIONS[i].apply(null, prs[current]);
             			if(InventoryUtil.exists(is)) inv.setItem(i+1, is);
+            		} catch(Throwable t) {
+            			t.printStackTrace();
+            			continue;
             		}
             	}
             }

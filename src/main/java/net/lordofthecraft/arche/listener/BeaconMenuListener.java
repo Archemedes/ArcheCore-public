@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -71,8 +72,17 @@ public class BeaconMenuListener implements Listener {
 						ct == ClickType.RIGHT || ct == ClickType.SHIFT_RIGHT) {
 					Persona ps = handler.getPersona(p);
 					Validate.notNull(ps);
-					ItemStack apply = ArcheBeacon.getFunction(s).apply(ct, ps);
-					if(apply != null) inv.setItem(s, apply);
+					try{ 
+						ItemStack apply = ArcheBeacon.getFunction(s).apply(ct, ps);
+						if(apply != null) inv.setItem(s, apply);
+					} catch(Throwable t) {
+						t.printStackTrace();
+						p.sendMessage(ChatColor.RED + "There's an error with this button! Please report this occurence.");
+						Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->{
+							p.closeInventory();
+						});
+						return;
+					}
 				}
 				break;
 			case 9:
