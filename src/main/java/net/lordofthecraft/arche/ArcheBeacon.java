@@ -1,25 +1,125 @@
 package net.lordofthecraft.arche;
 
-import com.google.common.collect.Lists;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.CreationDialog;
-import net.lordofthecraft.arche.skin.ArcheSkin;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.logging.Logger;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.List;
-import java.util.logging.Logger;
+import com.google.common.collect.Lists;
+
+import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
+import net.lordofthecraft.arche.executables.OpenEnderRunnable;
+import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.CreationDialog;
+import net.lordofthecraft.arche.skin.ArcheSkin;
+import net.lordofthecraft.arche.util.InventoryUtil;
 
 public class ArcheBeacon {
 	public static final String BEACON_HEADER = ChatColor.AQUA + "" + ChatColor.BOLD + "Your settings:";
+	
+	@SuppressWarnings("unchecked")
+	private static final BiFunction<ClickType, Persona, ItemStack>[] FUNCTIONS = new BiFunction[8];
+	
+	
+	private ArcheBeacon() {}
+	
+	static {
+		FUNCTIONS[0] = (click,pers) -> { //Ender chest button
+			if(ArcheCore.getControls().showEnderchestInMenu()) {
+				if(click != null) { //open ender chest
+					Player p = pers.getPlayer();
+					closeAnd(p, () -> {
+                        if (p.hasPermission("archecore.enderchest") && pers.getTimePlayed() >= 200)
+                            OpenEnderRunnable.begin(pers);
+						else 
+							p.sendMessage(ChatColor.RED + "You do not have access to your Ender Chest.");
+					});
+				}
+				ItemStack is = new ItemStack(Material.ENDER_CHEST);
+				return buildItem(is, ChatColor.RESET + "Ender Chest", ChatColor.GRAY + "Open your Ender Chest");
+			} else {
+				return new ItemStack(Material.AIR); //Do not draw an item now
+			}
+		};
+		
+		FUNCTIONS[1] = (click,pers) -> { //List of persona att mods
+			if(click == null) { //Make the icon
+				ItemStack icon = new ItemStack(Material.GOLDEN_APPLE);
+				ItemMeta m = icon.getItemMeta();
+				m.setDisplayName(ChatColor.AQUA + "Persona Modifiers:");
+				
+				List<String> lore = new ArrayList<>();
+				pers.attributes().getExistingInstances().forEach(aa->
+					pers.attributes().getInstance(aa).getModifiers().stream()
+					.map(ExtendedAttributeModifier.class::cast)
+					.forEach(mod-> lore.add(
+							mod.asReadablePercentage() + ' ' + aa.getName() + ' '
+							+ ChatColor.GRAY + "" + ChatColor.ITALIC + '('
+							+ mod.getName() + ')')) 
+				);
+				lore.add(ChatColor.GRAY + "Click to learn about attributes");
+				m.setLore(lore);
+				icon.setItemMeta(m);
+				return icon;
+			} else { //Close inv and give help on attributes
+				Player p = pers.getPlayer();
+				closeAnd(p, ()->HelpDesk.getInstance().outputHelp("Attributes", p));
+				return null; //
+			}
+		};
+		
+		
+	}
 
-	private ArcheBeacon() {
+	
+	/**
+	 * By default, claiming a slot overrides any icon originally there. If you want to avoid this, call this function first
+	 * Slot 1 and 2 are used by ArcheCore by default
+	 * @param index slot on the menu to check, between 1 and 8
+	 * @return whether or not an icon is already in the asked for slot
+	 */
+	public static boolean isSlotTaken(int index) {
+		if(index == 0 || index > 8) return true; //Help slot and persona slots
+		return FUNCTIONS[index-1] != null;
+	}
+	
+	/**
+	 * @param index slot on the menu to check, between 1 and 8
+	 * @return The BiFunction coupled to this slot, else null
+	 */
+	public static BiFunction<ClickType, Persona, ItemStack> getFunction(int index){
+		return FUNCTIONS[index-1];
+	}
+	
+	/**
+	 * Claim a slot in the ArcheCore "beacon menu". The top row of slots (apart from slot 0, which is reserved for help)
+	 * can be used by your plugin if you wish for some super-critical "main menu" actions to be performed by players
+	 * Note that the provided function must return the Icon the menu will draw. It will provide the ClickType 'null' when the menu is first created
+	 * @param index The slot in which to place your executable icon.
+	 * @param bif Function to execute when menu is created or slot is clicked.
+	 */
+	public static void claimSlot(int index, BiFunction<ClickType, Persona, ItemStack> bif) {
+		FUNCTIONS[index-1] = bif;
+	}
+	
+	
+	private static void closeAnd(Player p, Runnable actionToTake) {
+		Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()-> {
+			p.closeInventory();
+			actionToTake.run();
+		});
 	}
 	
 	public static void openBeacon(Player p){
@@ -55,7 +155,7 @@ public class ArcheBeacon {
 			int max = handler.getAllowedPersonas(p);
 			int absmax = ArcheCore.getControls().personaSlots();
 			int requiredSize = requiredSize(highestUsed, max, absmax, firstFree);
-			Inventory inv = Bukkit.createInventory(p, 9*(1 + (requiredSize + 2)/9 ), BEACON_HEADER);
+			Inventory inv = Bukkit.createInventory(p, 9*(2 + requiredSize/9 ), BEACON_HEADER);
 
 			ItemStack is;
 			final String r = ChatColor.RESET.toString();
@@ -68,7 +168,7 @@ public class ArcheBeacon {
 				is = new ItemStack(Material.ENDER_CHEST);
 				buildItem(is, r + "Ender Chest", g + "Open your Ender Chest");
 				inv.setItem(1, is);
-			}
+			}	
 
 
             //Everybody gets these buttons
@@ -78,8 +178,18 @@ public class ArcheBeacon {
 
 			is = new ItemStack(Material.REDSTONE_COMPARATOR);
             buildItem(is, r + "Your Personas to the right", ChatColor.GRAY + "Max Personas: " + ChatColor.LIGHT_PURPLE + max, g + "Left Click to select", (ArcheCore.getControls().canCreatePersonas() ? g + "SHIFT + Left Click: Create new" : ChatColor.RED + "Creating new personas is disabled on this server"), g + "SHIFT + Right Click: Permakill Persona", ChatColor.GRAY + "Click me for more info.");
-            inv.setItem(2, is);
+            inv.setItem(9, is); //First item on second row
 
+            //populate the top row using the FUNCTIONS array
+            if(current >= 0) {
+            	for(int i = 0; i < FUNCTIONS.length; i++) {
+            		if(FUNCTIONS[i] != null) {
+            			is = FUNCTIONS[i].apply(null, prs[current]);
+            			if(InventoryUtil.exists(is)) inv.setItem(i+1, is);
+            		}
+            	}
+            }
+            
 			//Buttons for switching Personas
             boolean mayMakeMore = (count < max && ArcheCore.getControls().canCreatePersonas());
 
@@ -109,7 +219,7 @@ public class ArcheBeacon {
 				}
 
 				//Always do this
-				inv.setItem(3+i, is);
+				inv.setItem(10+i, is);
 			}
 
 
@@ -125,15 +235,15 @@ public class ArcheBeacon {
 		//Need an extra slot for a white skull (= open slot)
 		if(firstFree > highestUsed && firstFree < allowedPersonas) {
 			result++;
-		} else if(firstFree > highestUsed && maxPersonas > result && result > 6) {
+		} else if(firstFree > highestUsed && maxPersonas > result && result > 8) {
 			result++;
 		}
 		//Need an extra slot to tell people they can buy MORE
 
-        return result < 6? 6 : result;
+        return result < 8? 8 : result;
 	}
 
-    private static ItemStack buildItem(ItemStack is, String title, String... lore){
+    public static ItemStack buildItem(ItemStack is, String title, String... lore){
 		ItemMeta meta = is.getItemMeta();
 		meta.setDisplayName(title);
 		List<String> loreList = Lists.newLinkedList();

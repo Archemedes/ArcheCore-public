@@ -4,6 +4,8 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.archerows.attribute.PersAttrRemoveRow;
 import net.lordofthecraft.arche.save.archerows.attribute.PersAttrUpdateRow;
+import net.md_5.bungee.api.ChatColor;
+
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -153,6 +155,19 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 		public void run() {
 			ps.attributes().removeModifier(attribute, modifier);
 		}
+	}
+	
+	public String asReadablePercentage() {
+		
+		boolean negative = getAmount() < 0;
+		ChatColor cc = negative? ChatColor.RED : ChatColor.BLUE;
+		char plusle = negative? Character.MIN_VALUE : '+';
+				
+		boolean addNumber = getOperation() == Operation.ADD_NUMBER;
+		String value = addNumber? Double.toString(getAmount()) : 
+			Integer.toString( (int) (getAmount() * 100 ));
+		char percent = addNumber? Character.MIN_VALUE : '%';
+		return cc.toString() + plusle + value + percent;
 	}
 
     @Override
