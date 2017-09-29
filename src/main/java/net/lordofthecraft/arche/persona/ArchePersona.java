@@ -96,7 +96,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	private Creature creature;
 	private volatile String name;
 	private WeakReference<Player> playerObject;
-	private int hash = 0;
 	private TagAttachment attachment;
 	private PersonaType type;
     private ArcheSkin skin;
