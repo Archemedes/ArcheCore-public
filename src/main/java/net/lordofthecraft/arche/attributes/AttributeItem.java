@@ -90,6 +90,21 @@ public class AttributeItem {
 		comp.setTranslate(getItemLocaleName(is));
 		return comp.toPlainText();
 	}
+	
+	/**
+	 * Returns best-fitting name of ItemStack.
+	 * Either the display name from Item Meta, or else the en_US english name of the item
+	 * @param is ItemStack to check
+	 * @return the display name
+	 */
+	public static String getDisplayName(ItemStack is){
+		if(is.hasItemMeta()) {
+			ItemMeta m = is.getItemMeta();
+			if(m.hasDisplayName()) return m.getDisplayName();
+		}
+		
+		return getItemEnglishName(is);
+	}
 
 	/**
 	 * Retrieve item name recognized by MCs Locale translations
@@ -137,7 +152,6 @@ public class AttributeItem {
 	 * @param is The base ItemStack to apply a modifier to
 	 * @return The ItemStack with the modifier applied 
 	 */
-
 	public static ItemStack addModifier(Attribute att, AttributeModifier m, EquipmentSlot slot, ItemStack is){
 		try{
 
@@ -283,7 +297,7 @@ public class AttributeItem {
 		f.setAccessible(false);
 	}
 	
-	public static String getInternalName(EquipmentSlot slot) {
+	private static String getInternalName(EquipmentSlot slot) {
 		switch(slot) {
 		case CHEST: return "chest";
 		case FEET: return "feet";
