@@ -23,18 +23,11 @@ public class ArcheFatigueHandler implements FatigueHandler {
 	private ArcheFatigueHandler() {}
 	public static ArcheFatigueHandler getInstance() { return INSTANCE; }
 	
-	@Override
-	public void addFatigue(Persona pers, double add) {
-		addFatigue(pers, add, null);
-	}
 	
 	@Override
-	public void addFatigue(Persona pers, double add, Skill skill) {
+	public void addFatigue(Persona pers, double add) {
 		if(fatigueDecreaseHours == 0) return;
 		double fat = pers.getFatigue();
-		
-		if(skill != null && skill.getRaceMods().containsKey(pers.getRace())) 
-			add /= skill.getRaceMods().get(pers.getRace());
 
         fat = Math.min(pers.attributes().getAttributeValue(AttributeRegistry.MAX_FATIGUE), fat + add);
         pers.setFatigue(fat);
@@ -105,8 +98,7 @@ public class ArcheFatigueHandler implements FatigueHandler {
 		ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
 		if(timer != null) timer.startTiming("fatigue_" + pers.getName());
 		
-		if(skill != null && skill.getRaceMods().containsKey(pers.getRace())) 
-			add /= skill.getRaceMods().get(pers.getRace());
+		add = modifyNetFatigue(pers, add, skill);
 		
 		Player p = pers.getPlayer();
 		boolean able = hasEnoughEnergy(pers, add);
@@ -125,12 +117,17 @@ public class ArcheFatigueHandler implements FatigueHandler {
 	}
 	
 	@Override
-	public double modifySkillFatigue(Persona mlk, double value, Skill racist) {
+	public double modifyNetFatigue(Persona mlk, double value, Skill racist) {
 		if(value <= 0 ) return value;
-		Race poc = mlk.getRace();
-		Map<Race, Double> affirmitiveAction = racist.getRaceMods();
-		if(affirmitiveAction.containsKey(poc))
-			value /= affirmitiveAction.get(poc);
+		
+		if(racist != null) {
+			Race poc = mlk.getRace();
+			Map<Race, Double> affirmitiveAction = racist.getRaceMods();
+			if(affirmitiveAction.containsKey(poc))
+				value /= affirmitiveAction.get(poc);
+		}
+		
+		value *= mlk.attributes().getAttributeValue(AttributeRegistry.FATIGUE_GAIN);
 		
 		return value;
 	}

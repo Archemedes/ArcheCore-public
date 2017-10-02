@@ -65,7 +65,7 @@ public class ArcheBeacon {
 					pers.attributes().getInstance(aa).getModifiers().stream()
 					.map(ExtendedAttributeModifier.class::cast)
 					.forEach(mod-> lore.add(
-							mod.asReadablePercentage() + ' ' + aa.getName() + ' '
+							mod.asReadablePercentage(aa) + ' ' + aa.getName() + ' '
 							+ ChatColor.GRAY + "" + ChatColor.ITALIC + '('
 							+ mod.getName() + ')')) 
 				);

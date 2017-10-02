@@ -9,8 +9,8 @@ import com.google.common.collect.Sets;
 public class AttributeRegistry {
 
     public static final ArcheAttribute MAX_FATIGUE = new AttributeMaxFatigue("Maximum Fatigue", 100.0);
-    public static final ArcheAttribute FATIGUE_GAIN = new ArcheAttribute("Fatigue Gained", 1);
-    public static final ArcheAttribute EXHAUSTION = new ArcheAttribute("Exhaustion", 0);
+    public static final ArcheAttribute FATIGUE_GAIN = new ArcheAttribute("Fatigue Gained", 1, false);
+    public static final ArcheAttribute EXHAUSTION = new ArcheAttribute("Exhaustion", 0, false);
     public static final ArcheAttribute ARROW_DAMAGE = new ArcheAttribute("Archery Damage", 1.0);
     public static final ArcheAttribute ARROW_VELOCITY = new ArcheAttribute("Arrow Velocity", 1.0);
 

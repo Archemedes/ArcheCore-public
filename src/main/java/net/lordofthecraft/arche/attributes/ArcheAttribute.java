@@ -1,23 +1,35 @@
 package net.lordofthecraft.arche.attributes;
 
-import com.google.common.base.Objects;
-import net.lordofthecraft.arche.interfaces.Persona;
 import org.bukkit.entity.Player;
+
+import com.google.common.base.Objects;
+
+import net.lordofthecraft.arche.interfaces.Persona;
 
 public class ArcheAttribute {
 	
 	private final String name;
 	private final double defaultValue;
+	private final boolean higherIsBetter;
 
 	public ArcheAttribute(String name, double defaultValue) {
+		this(name, defaultValue, true);
+	}
+
+	
+	public ArcheAttribute(String name, double defaultValue, boolean higherIsBetter) {
 		this.name = name;
 		this.defaultValue = defaultValue;
+		this.higherIsBetter = higherIsBetter;
 	}
 
 	public String getName() {
 		return name;
 	}
 	
+	public boolean isHigherBetter() {
+		return higherIsBetter;
+	}
 	
 	public double getDefaultValue() {
 		return defaultValue;
