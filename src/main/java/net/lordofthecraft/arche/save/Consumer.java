@@ -3,9 +3,9 @@ package net.lordofthecraft.arche.save;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.interfaces.IConsumer;
-import net.lordofthecraft.arche.save.archerows.ArcheMergeableRow;
-import net.lordofthecraft.arche.save.archerows.ArchePreparedStatementRow;
-import net.lordofthecraft.arche.save.archerows.ArcheRow;
+import net.lordofthecraft.arche.save.rows.ArcheMergeableRow;
+import net.lordofthecraft.arche.save.rows.ArchePreparedStatementRow;
+import net.lordofthecraft.arche.save.rows.ArcheRow;
 
 import java.io.File;
 import java.io.FileNotFoundException;

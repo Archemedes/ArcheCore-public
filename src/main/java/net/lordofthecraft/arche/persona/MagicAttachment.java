@@ -5,7 +5,7 @@ import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.Magic;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.magic.MagicData;
-import net.lordofthecraft.arche.save.archerows.magic.update.MagicUpdateRow;
+import net.lordofthecraft.arche.save.rows.magic.update.MagicUpdateRow;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;

@@ -2,10 +2,9 @@ package net.lordofthecraft.arche.attributes;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.save.archerows.attribute.PersAttrRemoveRow;
-import net.lordofthecraft.arche.save.archerows.attribute.PersAttrUpdateRow;
+import net.lordofthecraft.arche.save.rows.attribute.PersAttrRemoveRow;
+import net.lordofthecraft.arche.save.rows.attribute.PersAttrUpdateRow;
 import net.md_5.bungee.api.ChatColor;
-
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.scheduler.BukkitRunnable;
 

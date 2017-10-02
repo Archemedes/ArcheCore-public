@@ -1,6 +1,6 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.save.archerows.ArcheRow;
+import net.lordofthecraft.arche.save.rows.ArcheRow;
 
 public interface IConsumer {
 

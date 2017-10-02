@@ -14,7 +14,7 @@ public class ArcheExecutor {
 
     public static ArcheExecutor getInstance() {
         return SingletonHolder.INSTANCE;
-	}
+    }
 
 	public Future<?> put(ArcheTask s) {
 		if (s instanceof EndOfStreamTask) {

@@ -2,18 +2,19 @@ package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.persona.*;
-import net.lordofthecraft.arche.save.archerows.ArchePersonaRow;
+import net.lordofthecraft.arche.persona.MagicAttachment;
+import net.lordofthecraft.arche.persona.PersonaAttributes;
+import net.lordofthecraft.arche.persona.PersonaMagics;
+import net.lordofthecraft.arche.persona.PersonaSkills;
+import net.lordofthecraft.arche.save.rows.ArchePersonaRow;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
-public interface Persona {
+public interface Persona extends OfflinePersona {
 
 	/**
 	 * Take money from a Persona. Negative amounts possible, but consider using {@link #deposit(double, Transaction)} instead.
@@ -31,12 +32,6 @@ public interface Persona {
 	 * @return Amount of minas persona possess after the transaction
 	 */
 	double deposit(double amount, Transaction cause);
-
-	/**
-     * Retrieve the persona-specific integer that uniquely defines this persona.
-     * @return The immutable int persona id
-     */
-    int getPersonaId();
 
     /**
      * The PersonaSkills objects hold the fields and methods related to a particular persona's skills
@@ -68,19 +63,6 @@ public interface Persona {
 	 * @param profession The skill to be set as main.
 	 */
 	void setMainSkill(Skill profession);
-
-	/**
-     * Returns the session-invariant ID of the Persona. Ids are between 0 and 15.
-     * IDs are only unique for the same player
-     * @return the immutable slot of the persona
-     */
-    int getSlot();
-
-	/**
-	 * See if the Persona is a Player's current Persona
-	 * @return Whether or not the Persona is current
-	 */
-	boolean isCurrent();
 
     /**
      * See if this persona has a specific magic
@@ -140,7 +122,7 @@ public interface Persona {
     double getFatigue();
 
     /**
-     * Sets the current level of Fatigue for this persona and performs a quick {@link net.lordofthecraft.arche.save.tasks.persona.UpdateFatigueTask}
+     * Sets the current level of Fatigue for this persona and performs a quick {@link net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow}
      *
      * @param fatigue The new level of fatigue
      */
@@ -163,27 +145,6 @@ public interface Persona {
 	 * @return Amount of characters spoken.
 	 */
 	int getCharactersSpoken();
-
-	/**
-	 * Retrive the name of the Player that this Persona belongs to.
-	 * @return the name of the owning player.
-	 */
-	String getPlayerName();
-
-	/**
-	 * Each Persona is uniquely identified with a composite key that consists of
-	 * the Mojang Player UUID and a integer that refers to the Persona of the player.
-	 * The PersonaKey pairs these two objects, and can be used to compare Personas and as keys in HashMaps.
-	 * @return The Persona Key for this persona
-	 */
-	PersonaKey getPersonaKey();
-
-	/**
-	 * Retrieve the Mojang-issued UUID coupled to this Persona's player
-	 * @return the Player's unique id.
-	 */
-	UUID getPlayerUUID();
-
 
 	/**
 	 * Retrieve the Player to which this Persona belongs. The Persona object does not hold any references (not even weak ones)
@@ -334,26 +295,6 @@ public interface Persona {
 	 * @return if the player is below the new persona timer
      */
     boolean isNewbie();
-
-    /**
-     * @return The EnderChest inventory for this persona
-     */
-    Inventory getEnderChest();
-
-    /**
-     * @return The PersonaInventory for this persona
-	 */
-	PersonaInventory getPInv();
-
-	/**
-	 * @return the inventory of this persona as an Inventory object
-	 */
-	Inventory getInventory();
-
-	/**
-	 * @return the creation time of this persona in milliseconds
-	 */
-    Timestamp getCreationTime();
 
 	/**
 	 * @return the total playtime of this persona(all maps added)

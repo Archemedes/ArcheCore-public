@@ -149,7 +149,7 @@ public class SkinCache {
     }
 
     private void init() {
-		try {
+        try {
             Connection conn = ArcheCore.getSQLControls().getConnection();
             if (!ArcheCore.usingSQLite()) {
                 conn.setReadOnly(true);

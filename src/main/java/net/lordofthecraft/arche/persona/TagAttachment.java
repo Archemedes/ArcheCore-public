@@ -3,9 +3,9 @@ package net.lordofthecraft.arche.persona;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.save.archerows.persona.delete.DelPersTagRow;
-import net.lordofthecraft.arche.save.archerows.persona.insert.PersTagRow;
-import net.lordofthecraft.arche.save.archerows.persona.update.UpdatePersTagRow;
+import net.lordofthecraft.arche.save.rows.persona.delete.DelPersTagRow;
+import net.lordofthecraft.arche.save.rows.persona.insert.PersTagRow;
+import net.lordofthecraft.arche.save.rows.persona.update.UpdatePersTagRow;
 
 import java.util.Collections;
 import java.util.Map;

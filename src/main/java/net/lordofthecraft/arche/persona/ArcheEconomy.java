@@ -6,8 +6,8 @@ import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.archerows.logging.EconomyLogRow;
-import net.lordofthecraft.arche.save.archerows.persona.update.PersonaUpdateRow;
+import net.lordofthecraft.arche.save.rows.logging.EconomyLogRow;
+import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class ArcheEconomy implements Economy {

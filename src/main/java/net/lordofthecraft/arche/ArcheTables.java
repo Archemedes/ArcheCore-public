@@ -74,7 +74,7 @@ public final class ArcheTables {
                 //not overburdening the consumer with massive logging statement after statement we're going to ONLY log
                 //If we're using MySQL. Sorry SQLite fangays.
 
-                //If it's SQLite check net.lordofthecraft.arche.save.archerows.persona.delete.PersonaDeleteRow for how it's handled.
+                //If it's SQLite check net.lordofthecraft.arche.save.rows.persona.delete.PersonaDeleteRow for how it's handled.
                 ArcheCore.getPlugin().getLogger().info("Done with block registry! Creating logging tables...");
                 createLoggingTables(statement, end, false);
                 ArcheCore.getPlugin().getLogger().info("Done with logging tables! Creating delete procedure...");

@@ -7,9 +7,9 @@ import net.lordofthecraft.arche.interfaces.MagicType;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.MagicAttachment;
-import net.lordofthecraft.arche.save.archerows.magic.delete.ArcheMagicDeleteRow;
-import net.lordofthecraft.arche.save.archerows.magic.insert.ArcheMagicInsertRow;
-import net.lordofthecraft.arche.save.archerows.magic.update.ArcheMagicUpdateRow;
+import net.lordofthecraft.arche.save.rows.magic.delete.ArcheMagicDeleteRow;
+import net.lordofthecraft.arche.save.rows.magic.insert.ArcheMagicInsertRow;
+import net.lordofthecraft.arche.save.rows.magic.update.ArcheMagicUpdateRow;
 import org.bukkit.entity.Player;
 
 import java.sql.JDBCType;
