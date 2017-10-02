@@ -157,10 +157,12 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 		}
 	}
 	
-	public String asReadablePercentage() {
+	public String asReadablePercentage(ArcheAttribute aa) {
 		
 		boolean negative = getAmount() < 0;
-		ChatColor cc = negative? ChatColor.RED : ChatColor.BLUE;
+		ChatColor cc = negative? (aa.isHigherBetter()? ChatColor.RED : ChatColor.BLUE) :
+						(aa.isHigherBetter()? ChatColor.BLUE : ChatColor.RED);
+							
 		char plusle = negative? Character.MIN_VALUE : '+';
 				
 		boolean addNumber = getOperation() == Operation.ADD_NUMBER;
