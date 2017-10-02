@@ -15,14 +15,6 @@ public interface FatigueHandler {
     void addFatigue(Persona pers, double add);
 
     /**
-	 * Add a certain amount of fatigue, respecting the upper limit
-	 * @param pers Persona to handle
-	 * @param skill The skill Persona performed (may receive racial fatigue decrease)
-	 * @param add Amount to add
-	 */
-    void addFatigue(Persona pers, double add, Skill skill);
-
-    /**
 	 * Remove a certain amount of fatigue, respecting the lower limit
 	 * @param pers Persona to handle
      * @param remove Amount to reduce
@@ -74,14 +66,14 @@ public interface FatigueHandler {
     boolean hasEnoughEnergy(Persona pers, double needed);
 
     /**
-	 * Racial bonuses of a skill may modify fatigue gain. This method will recalculate
-	 * based on the applicable racial bonuses for this persona and skill
+	 * Racial bonuses of a skill or the Fatigue gain attribute may modify fatigue gain. 
+	 * This method will recalculate based on the applicable modifiers for this persona.
 	 * @param pers Persona to check the race of
 	 * @param value initial fatigue value to add (negative values return unmodified)
 	 * @param skill the skill to check the racial bonuses of
 	 * @return the modified fatigue value
 	 */
-    double modifySkillFatigue(Persona pers, double value, Skill skill);
+    double modifyNetFatigue(Persona pers, double value, Skill skill);
 
     /**
 	 * Method that condenses the most likely workflow for fatigue management while practicing a profession
