@@ -157,19 +157,22 @@ public class ExtendedAttributeModifier extends AttributeModifier {
 		}
 	}
 	
-	public String asReadablePercentage(ArcheAttribute aa) {
-		
-		boolean negative = getAmount() < 0;
+	public static String readablePercentage(AttributeModifier mod, ArcheAttribute aa) {
+		boolean negative = mod.getAmount() < 0;
 		ChatColor cc = negative? (aa.isHigherBetter()? ChatColor.RED : ChatColor.BLUE) :
 						(aa.isHigherBetter()? ChatColor.BLUE : ChatColor.RED);
 							
 		char plusle = negative? Character.MIN_VALUE : '+';
 				
-		boolean addNumber = getOperation() == Operation.ADD_NUMBER;
-		String value = addNumber? Double.toString(getAmount()) : 
-			Integer.toString( (int) (getAmount() * 100 ));
+		boolean addNumber = mod.getOperation() == Operation.ADD_NUMBER;
+		String value = addNumber? Double.toString(mod.getAmount()) : 
+			Integer.toString( (int) (mod.getAmount() * 100 ));
 		char percent = addNumber? Character.MIN_VALUE : '%';
 		return cc.toString() + plusle + value + percent;
+	}
+	
+	public String asReadablePercentage(ArcheAttribute aa) {
+		return readablePercentage(this, aa);
 	}
 
     @Override
