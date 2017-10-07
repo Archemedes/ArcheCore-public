@@ -151,10 +151,8 @@ public class SkinCache {
     private void init() {
         try {
             Connection conn = ArcheCore.getSQLControls().getConnection();
-            if (!ArcheCore.usingSQLite()) {
-                conn.setReadOnly(true);
-            }
-            PreparedStatement selectStatement = conn.prepareStatement("SELECT player,slot,name,skinUrl,slim,skinValue,skinSignature,refresh FROM persona_skins");
+            conn.setReadOnly(true);
+            PreparedStatement selectStatement = conn.prepareStatement("SELECT skin_id,player,slot,name,skinUrl,slim,skinValue,skinSignature,refresh FROM persona_skins");
             ResultSet res = selectStatement.executeQuery();
 			while(res.next()) {
 				ArcheSkin skin = ArcheSkin.fromSQL(res);
@@ -162,9 +160,7 @@ public class SkinCache {
 			}
             res.close();
             selectStatement.close();
-            if (!ArcheCore.usingSQLite()) {
-                conn.close();
-            }
+            conn.close();
         }catch(SQLException e) {e.printStackTrace();}
 	}
 	

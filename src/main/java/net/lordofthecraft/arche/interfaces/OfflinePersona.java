@@ -73,7 +73,31 @@ public interface OfflinePersona {
      */
     Timestamp getCreationTime();
 
+    /**
+     * Check if this persona is "loaded"
+     *
+     * @return Whether or not this is a loaded persona
+     */
     boolean isLoaded();
 
+    /**
+     * Get the loaded persona object, if applicable.
+     * @see #isLoaded()
+     * @return The loaded persona.
+     */
     Persona getPersona();
+
+    /**
+     * Delete the Persona from the Plugin records.
+     *
+     * @return whether or not the removal was successful.
+     */
+    boolean remove();
+
+    /**
+     * Load persona from SQL.
+     *
+     * @return The loaded persona
+     */
+    Persona loadPersona();
 }

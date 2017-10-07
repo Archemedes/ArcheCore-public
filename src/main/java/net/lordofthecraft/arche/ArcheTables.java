@@ -161,6 +161,7 @@ public final class ArcheTables {
                 "profession VARCHAR(255) DEFAULT NULL," +
                 "fatigue DOUBLE DEFAULT 0.0," +
                 "max_fatigue DOUBLE DEFAULT 100.00," +
+                "last_played TIMESTAMP," +
                 "PRIMARY KEY (persona_id)," +
                 "FOREIGN KEY (player_fk) REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT," +
                 "FOREIGN KEY (profession) REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE SET NULL" +
@@ -310,7 +311,6 @@ public final class ArcheTables {
                 "renamed TIMESTAMP," +
                 "playtime_past INT UNSIGNED DEFAULT 0," +
                 "date_created TIMESTAMP," +
-                "last_played TIMESTAMP," +
                 "PRIMARY KEY (persona_id_fk)," +
                 "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT" +
                 ")" +

@@ -37,7 +37,9 @@ import java.util.logging.Logger;
 public class ArchePersonaHandler implements PersonaHandler {
 	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
     private static int max_persona_id = 0;
-    private final Map<UUID, ArchePersona[]> personas = new HashMap<>(Bukkit.getServer().getMaxPlayers());
+    //private final Map<UUID, ArchePersona[]> personas = new HashMap<>(Bukkit.getServer().getMaxPlayers());
+    private final Map<Integer, ArcheOfflinePersona> personas = Maps.newConcurrentMap();
+    private final Map<UUID, ArchePersona[]> loadedPersonas = new HashMap<>(Bukkit.getServer().getMaxPlayers());
     private final IConsumer consumer = ArcheCore.getControls().getConsumer();
 	private boolean displayName = false;
 	private Map<Race, Location> racespawns = Maps.newHashMap();
@@ -104,22 +106,26 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	@Override
-	public Collection<ArchePersona[]> getPersonas(){
-		return Collections.unmodifiableCollection(personas.values());
+    public Collection<ArcheOfflinePersona> getPersonas() {
+        return Collections.unmodifiableCollection(personas.values());
 	}
 
     @Override
-    public Optional<ArchePersona> getPersonaById(int persona_id) {
-        return personas.values().stream()
+    public Optional<ArcheOfflinePersona> getPersonaById(int persona_id) {
+        if (personas.containsKey(persona_id)) {
+            return Optional.of(personas.get(persona_id));
+        }
+        return Optional.empty();
+        /*return personas.values().stream()
                 .flatMap(Arrays::stream)
                 .filter(p -> p != null && p.getPersonaId() == persona_id)
-                .findFirst();
+                .findFirst();*/
     }
 
 	@Override
 	public ArchePersona getPersona(Player p){
 		if(p == null) return null;
-		ArchePersona[] prs = personas.get(p.getUniqueId());
+        ArchePersona[] prs = loadedPersonas.get(p.getUniqueId());
 
 		if(prs == null) return null;
 
@@ -135,19 +141,19 @@ public class ArchePersonaHandler implements PersonaHandler {
 	@Override
 	public ArchePersona getPersona(PersonaKey key){
 		if(key == null) return null;
-        Optional<ArchePersona> oper = getPersonaById(key.getPersonaID());
-        return oper.orElse(null);
+        Optional<ArcheOfflinePersona> oper = getPersonaById(key.getPersonaID());
+        return oper.filter(ArcheOfflinePersona::isLoaded).map(ArchePersona.class::cast).orElse(null);
     }
 
 	@Override
 	public ArchePersona getPersona(UUID uuid, int id){
-		ArchePersona[] prs = personas.get(uuid);
-		if(prs != null) return prs[id];
+        ArchePersona[] prs = loadedPersonas.get(uuid);
+        if(prs != null) return prs[id];
 		else return null;
 	} 
 
 	public ArchePersona getPersona(UUID uuid){
-		ArchePersona[] prs = personas.get(uuid);
+        ArchePersona[] prs = loadedPersonas.get(uuid);
 
 		if(prs == null) return null;
 
@@ -177,8 +183,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	@Override
 	public ArchePersona[] getAllPersonas(UUID uuid){
-		ArchePersona[] prs = this.personas.get(uuid);
-		if (prs == null) return new ArchePersona[ArcheCore.getControls().personaSlots()];
+        ArchePersona[] prs = this.loadedPersonas.get(uuid);
+        if (prs == null) return new ArchePersona[ArcheCore.getControls().personaSlots()];
 		else return prs;
 	}
 
@@ -195,8 +201,11 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public void unload(UUID uuid){
 		Player p = Bukkit.getPlayer(uuid);
 		if(p == null){
-			personas.remove(uuid);
-		}
+            loadedPersonas.remove(uuid);
+
+        }
+
+        //TODO Properly unload personas to OfflinePersonas
 
 		if(ArcheCore.getPlugin().debugMode())
 			ArcheCore.getPlugin().getLogger().info("[Debug] Unloaded player '" + uuid + "' who was null: " + (p == null) + ". Loaded players now " + personas.size());
@@ -217,8 +226,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		if(id < 0 || id > slots) throw new IllegalArgumentException("Only Persona IDs higher than 0 and at most "+slots+" are allowed.");
 
 		ArchePersona before=null;
-		ArchePersona[] prs = personas.get(p.getUniqueId());
-		ArchePersona after = prs[id];
+        ArchePersona[] prs = loadedPersonas.get(p.getUniqueId());
+        ArchePersona after = prs[id];
 
 		PersonaSwitchEvent event = new PersonaSwitchEvent(prs[id]);
 		Bukkit.getPluginManager().callEvent(event);
@@ -268,8 +277,8 @@ public class ArchePersonaHandler implements PersonaHandler {
     }
 
 	public boolean registerPersona(Player p, ArchePersona persona) {
-		ArchePersona[] prs = personas.computeIfAbsent(
-				p.getUniqueId(),
+        ArchePersona[] prs = loadedPersonas.computeIfAbsent(
+                p.getUniqueId(),
 				k -> new ArchePersona[ArcheCore.getControls().personaSlots()]
 		);
 
@@ -294,6 +303,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         }
 		//Add this Persona into its slot
         prs[persona.getSlot()] = persona;
+        personas.putIfAbsent(persona.getPersonaId(), persona);
 
 		//Load skills for the Persona
 		for(ArcheSkill s : ArcheSkillFactory.getSkills().values()){
@@ -482,8 +492,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	public void initPlayer(Player p){
 
-		if(personas.containsKey(p.getUniqueId())){//Already present in Persona list (quick relog?)
-			ArcheCore plug = ArcheCore.getPlugin();
+        if (loadedPersonas.containsKey(p.getUniqueId())) {//Already present in Persona list (quick relog?)
+            ArcheCore plug = ArcheCore.getPlugin();
 
 			if(!plug.willCachePersonas()){
 				plug.getLogger().warning("Player " + p.getName() + " logged in while already being registered. Quick relog?");
@@ -491,8 +501,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 			}
 
 			//Maybe player has changed their name with Mojang? Update to be sure
-			ArchePersona[] perses = personas.get(p.getUniqueId());
-			for(ArchePersona pers : perses){
+            ArchePersona[] perses = loadedPersonas.get(p.getUniqueId());
+            for(ArchePersona pers : perses){
 				if(pers != null) pers.player = p.getName();
 			}
 
@@ -581,8 +591,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 			ensureValidPersonaRecord(p, prs, hasCurrent);
 
 			//Crucial that this part happens for obvious reasons.
-			personas.put(p.getUniqueId(), prs);
-		}	
+            loadedPersonas.put(p.getUniqueId(), prs);
+        }
 	}
 
 	private void ensureValidPersonaRecord(final Player p, ArchePersona[] prs, boolean hasCurrent){
@@ -711,20 +721,33 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public void initPreload(int range){
 		SQLHandler handler = ArcheCore.getPlugin().getSQLHandler();
 		long time = System.currentTimeMillis();
-		preloading = true;
+        Timestamp threshhold = new Timestamp(time - (range * 24 * 60 * 60 * 1000));
+        preloading = true;
         Connection connection = null;
         PreparedStatement selectStatement = null;
+        Statement statement = null;
+
         try{
             connection = ArcheCore.getSQLControls().getConnection();
             selectStatement = connection.prepareStatement(personaSelect);
-            ResultSet res = connection.createStatement().executeQuery("SELECT player,preload_force FROM players");
+            statement = connection.createStatement();
+            ResultSet res = statement.executeQuery(playerSelect);
+
+            //TODO Load ALL THE PERSONAS :moon2R:
             while(res.next()){
 				UUID uuid = UUID.fromString(res.getString("player"));
-				OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
+                Timestamp timestamp = res.getTimestamp("last_played");
+                OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
 
 				//Have we loaded a Persona for this player already?
 				//If so we apparently should preload for this player
-				ArchePersona prs[] = personas.get(uuid);
+                ArchePersona prs[] = loadedPersonas.get(uuid);
+
+                if (timestamp.after(threshhold)) {
+
+                } else {
+
+                }
 
 				if(prs == null){ //Apparently not, see if we should based on player login time
 					long days = (time - p.getLastPlayed()) / (1000L * 3600L * 24L);
@@ -732,8 +755,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 					//Preload, generate a Persona file
 					prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
-					personas.put(uuid, prs);
-				}
+                    loadedPersonas.put(uuid, prs);
+                }
 				selectStatement.setString(1, p.getUniqueId().toString());
 				ArchePersona persona = buildPersona(selectStatement.executeQuery(), p);
                 prs[persona.getSlot()] = persona;
@@ -741,8 +764,8 @@ public class ArchePersonaHandler implements PersonaHandler {
             res.close();
         }catch(SQLException e){e.printStackTrace();}
 		finally{
-			for(ArchePersona[] prs : getPersonas()){
-				boolean current = false;
+            for (ArchePersona[] prs : loadedPersonas.values()) {
+                boolean current = false;
 				for(ArchePersona p : prs){
 					if(p == null) continue;
 
@@ -835,8 +858,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	public void removeMagic(Magic magic) {
-		getPersonas().forEach(pers -> {
-			for (Persona p : pers) {
+        loadedPersonas.values().forEach(pers -> {
+            for (Persona p : pers) {
 				((ArchePersona) p).removeMagicAttachment(magic);
 			}
 		});

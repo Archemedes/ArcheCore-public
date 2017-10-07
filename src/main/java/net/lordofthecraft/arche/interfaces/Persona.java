@@ -286,12 +286,6 @@ public interface Persona extends OfflinePersona {
 	void setPersonaType(PersonaType type);
 
 	/**
-	 * Delete the Persona from the Plugin records.
-	 * @return whether or not the removal was successful.
-	 */
-	boolean remove();
-
-	/**
 	 * @return if the player is below the new persona timer
      */
     boolean isNewbie();

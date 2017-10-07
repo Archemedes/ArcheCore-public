@@ -56,14 +56,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-public final class ArchePersona implements Persona, InventoryHolder {
+public final class ArchePersona extends ArcheOfflinePersona implements Persona, InventoryHolder {
 
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
     //private static final ArcheExecutor buffer = ArcheExecutor.getInstance();
     private static final IConsumer consumer = ArcheCore.getControls().getConsumer();
-
-	//The immutable auto-increment ID of this persona.
-    private final int persona_id;
 
     private boolean deleted = false;
 
@@ -74,7 +71,6 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger timePlayed;
 	final AtomicInteger charactersSpoken;
-	private final ArchePersonaKey key;
     private String gender;
     String description = null;
 	volatile String prefix = null;
@@ -106,14 +102,16 @@ public final class ArchePersona implements Persona, InventoryHolder {
 	}
 
     ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS, PersonaType type) {
-        this.key = new ArchePersonaKey(persona_id, player, slot);
+        //public ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, boolean isCurrent, PersonaInventory inventory) {
+        super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, false, new PersonaInventory(null, null));
+        //this.key = new ArchePersonaKey(persona_id, player, slot);
 
-		this.persona_id = persona_id;
-		this.race = race;
+        //this.persona_id = persona_id;
+        this.race = race;
 		this.name = name;
 		this.gender = gender;
-		this.creationTimeMS = creationTimeMS;
-		this.type = type;
+        //this.creationTimeMS = creationTimeMS;
+        this.type = type;
 
 		timePlayed = new AtomicInteger();
 		charactersSpoken = new AtomicInteger();
@@ -126,8 +124,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	@Override
     public int getPersonaId() {
-        return persona_id;
-	}
+        return super.getPersonaId();
+    }
 
 	public void addSkill(ArcheSkill skill, FutureTask<SkillData> future){
 		SkillAttachment attach = new SkillAttachment(skill, this, future);
@@ -220,7 +218,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	@Override
     public int getSlot() {
-        return key.getPersonaSlot();
+        return super.getPersonaKey().getPersonaSlot();
     }
 
 	@Override
@@ -297,7 +295,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
                 conn.setReadOnly(true);
             }
             PreparedStatement statement = conn.prepareStatement("SELECT mod_uuid,attribute_type,mod_name,mod_value,operation,decayticks,decaytype,lostondeath FROM persona_attributes WHERE persona_id_fk=?");
-            statement.setInt(1, persona_id);
+            statement.setInt(1, super.getPersonaId());
             ResultSet rs = statement.executeQuery();
             AttributeRegistry reg = AttributeRegistry.getInstance();
             while (rs.next()) {
@@ -330,7 +328,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
             rs.close();
             statement.close();
         } catch (SQLException e) {
-            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Warning! We failed to load attributes for the persona of " + player + "! [" + persona_id + "]", e);
+            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Warning! We failed to load attributes for the persona of " + player + "! [" + getPersonaId() + "]", e);
         }
     }
 
@@ -338,7 +336,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
         String sql = "SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=?";
         try {
             PreparedStatement stat = conn.prepareStatement(sql);
-            stat.setInt(1, persona_id);
+            stat.setInt(1, getPersonaId());
             ResultSet rs = stat.executeQuery();
             Map<String, String> tags = Maps.newHashMap();
             while (rs.next()) {
@@ -360,7 +358,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
                 conn.setReadOnly(true);
             }
             PreparedStatement stat = conn.prepareStatement(sql);
-            stat.setInt(1, persona_id);
+            stat.setInt(1, getPersonaId());
             ResultSet rs = stat.executeQuery();
 			while (rs.next()) {
 				MagicData data = null;
@@ -489,8 +487,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	@Override
 	public PersonaKey getPersonaKey(){
-		return key;
-	}
+        return super.getPersonaKey();
+    }
 
 	@Override
 	public Player getPlayer(){
@@ -512,8 +510,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
 	@Override
 	public UUID getPlayerUUID(){
-		return key.getPlayerUUID();
-	}
+        return super.getPersonaKey().getPlayerUUID();
+    }
 
     @Override
     public String getRaceString(boolean mod) {
@@ -846,7 +844,7 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
     @Override
     public int hashCode() {
-        return persona_id;
+        return super.getPersonaId();
     }
 
     @Override
@@ -854,8 +852,8 @@ public final class ArchePersona implements Persona, InventoryHolder {
         if(object == null) return false;
 		if(!(object instanceof ArchePersona)) return false;
 		ArchePersona p = (ArchePersona) object;
-		return this.persona_id == p.persona_id;
-	}
+        return this.getPersonaId() == p.getPersonaId();
+    }
 	
 	@Override
 	public boolean isNewbie() {
@@ -928,5 +926,20 @@ public final class ArchePersona implements Persona, InventoryHolder {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return true;
+    }
+
+    @Override
+    public Persona getPersona() {
+        return this;
+    }
+
+    @Override
+    public Persona loadPersona() {
+        return this;
     }
 }

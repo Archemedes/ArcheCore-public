@@ -1,7 +1,7 @@
 package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.persona.ArcheOfflinePersona;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -11,6 +11,10 @@ import javax.annotation.Nonnull;
 import java.util.*;
 
 public interface PersonaHandler {
+
+    String playerSelect = "SELECT pers1.player_fk,pers1.last_played " +
+            "FROM persona AS pers1 LEFT OUTER JOIN persona AS pers2 ON (pers1.persona_id=pers2.persona_id AND pers1.last_played < pers2.last_played) " +
+            "WHERE pers.last_played IS NULL";
     String personaSelect = "SELECT " +
             "persona_id,slot,race,gender" +
             ",name,curr,race_header,descr,p_type,prefix,money,profession,fatigue,max_fatigue" +
@@ -57,7 +61,7 @@ public interface PersonaHandler {
      *
      * @return A <b>unmodifiable</b> collection of personas which are loaded.
      */
-    Collection<ArchePersona[]> getPersonas();
+    Collection<ArcheOfflinePersona> getPersonas();
 
 	/**
 	 * Attempts to find a Persona uniquely corresponding to a Persona Key. Persona may not exist or may not be loaded
@@ -87,7 +91,7 @@ public interface PersonaHandler {
      * @param persona_id The int id of this persona
      * @return The Persona which is wrapped in an Optional
      */
-    Optional<ArchePersona> getPersonaById(int persona_id);
+    Optional<ArcheOfflinePersona> getPersonaById(int persona_id);
 
     /**
      * Fetch a Player's current Persona

@@ -83,10 +83,22 @@ public class ArcheOfflinePersona implements OfflinePersona {
         return this instanceof Persona;
     }
 
+    @Override
+    public Persona loadPersona() {
+        //TODO Load.
+        return null;
+    }
+
+    @Override
     public Persona getPersona() {
         if (!isLoaded()) {
             return null;
         }
         return (Persona) this;
+    }
+
+    @Override
+    public boolean remove() {
+        return false;
     }
 }
