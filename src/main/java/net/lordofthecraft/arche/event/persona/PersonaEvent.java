@@ -23,6 +23,4 @@ public abstract class PersonaEvent extends PlayerEvent{
         return persona;
 	}
 
-    public abstract boolean isLoadedEvent();
-
 }
