@@ -3,8 +3,10 @@ package net.lordofthecraft.arche.util;
 import static org.bukkit.event.inventory.InventoryAction.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventoryView;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
@@ -56,13 +58,67 @@ public class InventoryUtil {
 	}
 	
 	/**
-	 * Convenience method for checking if an ItemStack is non-null and non-AIR
-	 * @param is ItemStack to check
-	 * @return is != null && is.getType() != Material.AIR;
+	 * Like the Bukkit method, but respects max ItemStack size
+	 * See also: {@link org.bukkit.inventory.Inventory#addItem(ItemStack...)}
+	 * @param inv Inventory to add to
+	 * @param items Items to add
+	 * @return What couldn't be added
 	 */
-	public static boolean exists(ItemStack is) {
-		return is != null && is.getType() != Material.AIR;
-	}
+    public static HashMap<Integer, ItemStack> addItem(final Inventory inv, final ItemStack... items) {
+        Validate.noNullElements(items, "Item cannot be null");
+        final HashMap<Integer, ItemStack> leftover = new HashMap<>();
+        for (int i = 0; i < items.length; ++i) {
+            final ItemStack item = items[i];
+            while (true) {
+                final int firstPartial = firstPartial(item, inv);
+                if (firstPartial == -1) {
+                    final int firstFree = inv.firstEmpty();
+                    if (firstFree == -1) {
+                        leftover.put(i, item);
+                        break;
+                    }
+                    final int max = Math.min(item.getMaxStackSize(), inv.getMaxStackSize());
+                    if (item.getAmount() <= max) {
+                        inv.setItem(firstFree, item);
+                        break;
+                    }
+                    final ItemStack stack = item.clone();
+                    stack.setAmount(max);
+                    inv.setItem(firstFree, stack);
+                    item.setAmount(item.getAmount() - max);
+                }
+                else {
+                    final ItemStack partialItem = inv.getItem(firstPartial);
+                    final int amount = item.getAmount();
+                    final int partialAmount = partialItem.getAmount();
+                    final int maxAmount = partialItem.getMaxStackSize();
+                    if (amount + partialAmount <= maxAmount) {
+                        partialItem.setAmount(amount + partialAmount);
+                        break;
+                    }
+                    partialItem.setAmount(maxAmount);
+                    item.setAmount(amount + partialAmount - maxAmount);
+                }
+            }
+        }
+        return leftover;
+    }
+    
+    private static int firstPartial(final ItemStack item, final Inventory inv) {
+        final ItemStack[] inventory = inv.getContents();
+        if (item == null) {
+            return -1;
+        }
+        final ItemStack filteredItem = item.clone();
+        for (int i = 0; i < inventory.length; ++i) {
+            final ItemStack cItem = inventory[i];
+            if (cItem != null && cItem.getAmount() < cItem.getMaxStackSize() && cItem.isSimilar(filteredItem)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+	
 	
 	/**
 	 * Represents an item that was moved during a certain InventoryInteractEvent

@@ -24,7 +24,7 @@ import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.CreationDialog;
 import net.lordofthecraft.arche.skin.ArcheSkin;
-import net.lordofthecraft.arche.util.InventoryUtil;
+import net.lordofthecraft.arche.util.ItemUtil;
 
 public class ArcheBeacon {
 	public static final String BEACON_HEADER = ChatColor.AQUA + "" + ChatColor.BOLD + "Your settings:";
@@ -185,7 +185,7 @@ public class ArcheBeacon {
             	for(int i = 0; i < FUNCTIONS.length; i++) {
             		if(FUNCTIONS[i] != null) try {
             			is = FUNCTIONS[i].apply(null, prs[current]);
-            			if(InventoryUtil.exists(is)) inv.setItem(i+1, is);
+            			if(ItemUtil.exists(is)) inv.setItem(i+1, is);
             		} catch(Throwable t) {
             			t.printStackTrace();
             			continue;
