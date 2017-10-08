@@ -540,7 +540,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
         String attributes = ChatColor.GRAY + "Attributes are the various base stats of your Persona. These stats can be anything from how fast your Persona runs to how much fatigue they accumulate. \n"
         		+ ChatColor.GREEN + "Various modifiers on items, spells and foodstuffs can affect these attributes for better or worse.\n"
-                + ChatColor.LIGHT_PURPLE  + "Current persona modifiers are shown on an icon in the $/me$ " + ChatColor.LIGHT_PURPLE + " menu.";
+                + ChatColor.LIGHT_PURPLE  + "Current persona modifiers are shown on an icon in the $/me$ " + ChatColor.LIGHT_PURPLE + "menu.";
 
         
         String fatigue = ChatColor.GRAY + "Fatigue accumulates when practicing your chosen @@<Professions>profession@@.\n"
