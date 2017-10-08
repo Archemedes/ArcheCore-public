@@ -405,7 +405,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         FileConfiguration config = getConfig(); // Get the config file either out of our .jar our datafolder
         saveDefaultConfig(); //Save the config file to disk if it doesn't exist yet.
 
-        maxPersonaSlots = Math.min(15, config.getInt("persona.slots.maximum"));
+        maxPersonaSlots = Math.max(8, Math.min(17, config.getInt("persona.slots.maximum")));
         helpOverriden = config.getBoolean("override.help.command");
         legacyCommands = config.getBoolean("enable.legacy.commands");
         nameChangeDelay = config.getInt("name.change.delay");
