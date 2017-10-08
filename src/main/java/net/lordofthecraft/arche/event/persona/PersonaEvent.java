@@ -14,9 +14,9 @@ public abstract class PersonaEvent extends PlayerEvent{
 		super(persona.getPlayer());
 		this.persona = persona;
 	}
-	
-	/**
-	 * The Persona object relevant to this event.
+
+    /**
+     * The Persona object relevant to this event.
 	 * @return The Persona object
 	 */
     public OfflinePersona getPersona() {

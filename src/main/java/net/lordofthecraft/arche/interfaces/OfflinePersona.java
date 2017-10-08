@@ -1,5 +1,7 @@
 package net.lordofthecraft.arche.interfaces;
 
+import net.lordofthecraft.arche.enums.PersonaType;
+import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.PersonaInventory;
 import org.bukkit.inventory.Inventory;
 
@@ -45,6 +47,55 @@ public interface OfflinePersona {
      * @return The Persona Key for this persona
      */
     PersonaKey getPersonaKey();
+
+    /**
+     * Retrieves the Type of this persona.
+     *
+     * @return The type of persona this is
+     */
+    PersonaType getPersonaType();
+
+    /**
+     * Set the underlying type of this persona
+     *
+     * @param type The type of persona it should be.
+     */
+    void setPersonaType(PersonaType type);
+
+    /**
+     * Get the human-readable Gender of this Persona
+     *
+     * @return The Persona's gender
+     */
+    String getGender();
+
+    /**
+     * Assign a persona's gender to the specified gender.
+     *
+     * @param gender The persona's new gender.
+     */
+    void setGender(String gender);
+
+    /**
+     * Retrieve the Roleplay name of this Persona
+     *
+     * @return The Persona's RP name.
+     */
+    String getName();
+
+    /**
+     * Set the new RP name of this Persona. This also updates the time at which this Persona was last renamed
+     *
+     * @param name The new RP name.
+     */
+    void setName(String name);
+
+    /**
+     * Retrieve the immutable Race of this Persona.
+     *
+     * @return Race of the Persona.
+     */
+    Race getRace();
 
     /**
      * Retrieve the Mojang-issued UUID coupled to this Persona's player

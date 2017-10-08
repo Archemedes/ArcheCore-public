@@ -1,7 +1,5 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.enums.PersonaType;
-import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.persona.PersonaAttributes;
 import net.lordofthecraft.arche.persona.PersonaMagics;
@@ -114,7 +112,7 @@ public interface Persona extends OfflinePersona {
 	boolean hasPrefix();
 
     /**
-     * Gets the current level of Fatigue this persona has, between 0 and {@link #getMaximumFatigue()}
+     * Gets the current level of Fatigue this persona has, between 0 and 100ish
      *
      * @return The current level of fatigue
      * @see net.lordofthecraft.arche.ArcheFatigueHandler
@@ -168,24 +166,6 @@ public interface Persona extends OfflinePersona {
 	String getChatName();
 
 	/**
-	 * Retrieve the Roleplay name of this Persona 
-	 * @return The Persona's RP name.
-	 */
-	String getName();
-
-	/**
-	 * Set the new RP name of this Persona. This also updates the time at which this Persona was last renamed
-	 * @param name The new RP name.
-	 */
-	void setName(String name);
-
-	/**
-	 * Retrieve the immutable Race of this Persona.
-	 * @return Race of the Persona.
-	 */
-	Race getRace();
-
-	/**
 	 * Override the Persona's visible Race with a Custom String. This does not remove
 	 * the actual race of the Persona, but displays only the newly set 'apparent' race.
 	 * @param race The string to be displayed as Race.
@@ -220,18 +200,6 @@ public interface Persona extends OfflinePersona {
 	 * @param description The new biography of the Persona.
 	 */
 	void setDescription(String description);
-
-	/**
-	 * Get the human-readable Gender of this Persona
-	 * @return The Persona's gender
-	 */
-	String getGender();
-
-	/**
-	 * Assign a persona's gender to the specified gender.
-	 * @param gender The persona's new gender.
-	 */
-	void setGender(String gender);
 
 	/**
 	 * See if a persona has a tag for the specific key
@@ -271,19 +239,6 @@ public interface Persona extends OfflinePersona {
 	 * @param key The key to remove
 	 */
 	void removeTag(String key);
-
-	/**
-	 * Retrieves the Type of this persona.
-	 *
-	 * @return The type of persona this is
-	 */
-	PersonaType getPersonaType();
-
-	/**
-	 * Set the underlying type of this persona
-	 * @param type The type of persona it should be.
-	 */
-	void setPersonaType(PersonaType type);
 
 	/**
 	 * @return if the player is below the new persona timer

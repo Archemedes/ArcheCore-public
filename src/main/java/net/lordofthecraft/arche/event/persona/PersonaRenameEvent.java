@@ -1,17 +1,17 @@
 package net.lordofthecraft.arche.event.persona;
 
-import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
-public class PersonaRenameEvent extends PersonaEvent implements Cancellable {
-	private static final HandlerList handlers = new HandlerList();
+public class PersonaRenameEvent extends OfflinePersonaEvent implements Cancellable {
+    private static final HandlerList handlers = new HandlerList();
 	private String newName;
 	//Generic Cancellable implementation
 	private boolean cancelled = false;
-	
-	public PersonaRenameEvent(Persona persona, String newName) {
-		super(persona);
+
+    public PersonaRenameEvent(OfflinePersona persona, String newName) {
+        super(persona);
 		this.newName = newName;
 	}
 

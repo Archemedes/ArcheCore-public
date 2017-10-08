@@ -1,7 +1,7 @@
 package net.lordofthecraft.arche.save.rows.persona.update;
 
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.PersonaTable;
 import net.lordofthecraft.arche.save.rows.ArcheMergeableRow;
@@ -12,14 +12,14 @@ import java.sql.*;
 
 public class PersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
-    final Persona toupdate;
+    final OfflinePersona toupdate;
     final PersonaField updatefield;
     final Object data;
     final boolean solorun;
     Connection conn = null;
 
 
-    public PersonaUpdateRow(Persona toupdate, PersonaField updatefield, Object data, boolean solorun) {
+    public PersonaUpdateRow(OfflinePersona toupdate, PersonaField updatefield, Object data, boolean solorun) {
         this.toupdate = toupdate;
         this.updatefield = updatefield;
         this.data = data;
@@ -106,8 +106,8 @@ public class PersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
     }
 
     @Override
-    public Persona[] getPersonas() {
-        return new Persona[]{toupdate};
+    public OfflinePersona[] getPersonas() {
+        return new OfflinePersona[]{toupdate};
     }
 
     @Override

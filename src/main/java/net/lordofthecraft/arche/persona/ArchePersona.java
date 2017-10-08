@@ -60,7 +60,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
     //private static final ArcheExecutor buffer = ArcheExecutor.getInstance();
-    private static final IConsumer consumer = ArcheCore.getControls().getConsumer();
+
 
     private boolean deleted = false;
 
@@ -71,29 +71,22 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger timePlayed;
 	final AtomicInteger charactersSpoken;
-    private String gender;
     String description = null;
 	volatile String prefix = null;
 	boolean current = true;
 	String raceHeader = null;
 	Timestamp lastRenamed;
-    private Timestamp creationTimeMS;
     int pastPlayTime; //stat_playtime_past
 	String player; //Last known minecraft name of the owning player
 	WeakBlock location = null;
-	PersonaInventory inv = null;
 	double money = 0;
 	double fatigue = 0;
 	int food = 0;
     float saturation = 0;
     double health = 0;
-	Timestamp lastPlayed;
-	private Race race;
 	private Creature creature;
-	private volatile String name;
 	private WeakReference<Player> playerObject;
 	private TagAttachment attachment;
-	private PersonaType type;
     private ArcheSkin skin;
     private ArrayList<PotionEffect> effects = Lists.newArrayList();
 
@@ -124,7 +117,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 	@Override
     public int getPersonaId() {
-        return super.getPersonaId();
+        return personaKey.getPersonaID();
     }
 
 	public void addSkill(ArcheSkill skill, FutureTask<SkillData> future){
@@ -179,18 +172,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	}
 
 	@Override
-	public PersonaType getPersonaType() {
-		return type;
-	}
-
-	@Override
-	public void setPersonaType(PersonaType type) {
-		this.type = type;
-
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.TYPE, type, false));
-    }
-
-	@Override
 	public double withdraw(double amount, Transaction cause) {
         ArcheCore.getControls().getEconomy().withdrawPersona(this, amount, cause);
         return money;
@@ -218,7 +199,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 	@Override
     public int getSlot() {
-        return super.getPersonaKey().getPersonaSlot();
+        return personaKey.getPersonaSlot();
     }
 
 	@Override
@@ -295,7 +276,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
                 conn.setReadOnly(true);
             }
             PreparedStatement statement = conn.prepareStatement("SELECT mod_uuid,attribute_type,mod_name,mod_value,operation,decayticks,decaytype,lostondeath FROM persona_attributes WHERE persona_id_fk=?");
-            statement.setInt(1, super.getPersonaId());
+            statement.setInt(1, personaKey.getPersonaID());
             ResultSet rs = statement.executeQuery();
             AttributeRegistry reg = AttributeRegistry.getInstance();
             while (rs.next()) {
@@ -486,11 +467,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	}
 
 	@Override
-	public PersonaKey getPersonaKey(){
-        return super.getPersonaKey();
-    }
-
-	@Override
 	public Player getPlayer(){
 		Player play;
 		if(playerObject == null || (play = playerObject.get()) == null || play.isDead()){
@@ -510,7 +486,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 	@Override
 	public UUID getPlayerUUID(){
-        return super.getPersonaKey().getPlayerUUID();
+        return personaKey.getPlayerUUID();
     }
 
     @Override
@@ -551,28 +527,23 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		}
 	}
 
-	@Override
-	public String getName(){
-		return name;
-	}
+    @Override
+    public void setName(String name) {
+        PersonaRenameEvent event = new PersonaRenameEvent(this, name);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return;
 
-	@Override
-	public void setName(String name) {
-		PersonaRenameEvent event = new PersonaRenameEvent(this, name);
-		Bukkit.getPluginManager().callEvent(event);
-		if (event.isCancelled()) return;
-
-		this.name = name;
-		lastRenamed = new Timestamp(System.currentTimeMillis());
+        this.name = name;
+        lastRenamed = new Timestamp(System.currentTimeMillis());
 
         consumer.queueRow(new PersonaUpdateRow(this, PersonaField.NAME, name, false));
         consumer.queueRow(new PersonaUpdateRow(this, PersonaField.STAT_RENAMED, lastRenamed, false));
 
-		if (current) {
-			Player p = Bukkit.getPlayer(getPlayerUUID());
-			updateDisplayName(p);
-		}
-	}
+        if (current) {
+            Player p = Bukkit.getPlayer(getPlayerUUID());
+            updateDisplayName(p);
+        }
+    }
 
 	@Override
 	public Race getRace(){
@@ -634,18 +605,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
         consumer.queueRow(new PersonaUpdateRow(this, PersonaField.DESCRIPTION, description, false));
         //buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
-    }
-
-	@Override
-	public String getGender(){
-        return gender;
-    }
-
-	@Override
-	 public void setGender(String gender) {
-        this.gender = gender;
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.GENDER, gender, false));
-        //buffer.put(new UpdateTask(this, PersonaField.GENDER, gender));
     }
 
 	void saveMinecraftSpecifics(final Player p){
@@ -844,7 +803,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
     @Override
     public int hashCode() {
-        return super.getPersonaId();
+        return personaKey.getPersonaID();
     }
 
     @Override
@@ -862,8 +821,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 	@Override
 	public Timestamp getCreationTime() {
-		return this.creationTimeMS;
-	}
+        return creation;
+    }
 
 	@Override
 	public int getTotalPlaytime(){

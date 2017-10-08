@@ -1,6 +1,6 @@
 package net.lordofthecraft.arche.util;
 
-import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.md_5.bungee.api.chat.*;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -165,7 +165,7 @@ public class MessageUtil {
 		else sender.sendMessage(m.toPlainText());
 	}
 
-    public static String identifyPersona(Persona p) {
+    public static String identifyPersona(OfflinePersona p) {
         return p.getPersonaId() + ":" + p.getName() + " (" + p.getPlayerName() + ")";
     }
 
