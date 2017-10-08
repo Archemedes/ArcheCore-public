@@ -48,7 +48,7 @@ public class ItemUtil {
 	 * @param profile The profile to get a skin from
 	 * @return a textured Minecraft SKULL_ITEM 
 	 */
-	public static ItemStack getSkullFromTexture(GameProfile profile) {
+	public static ItemStack getSkullFromProfile(GameProfile profile) {
 		String value = profile.getProperties().get("textures").iterator().next().getValue();
 		System.out.println("value");
 		return getSkullFromTexture(value);
