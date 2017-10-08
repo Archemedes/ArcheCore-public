@@ -58,15 +58,6 @@ public class InventoryUtil {
 	}
 	
 	/**
-	 * Convenience method for checking if an ItemStack is non-null and non-AIR
-	 * @param is ItemStack to check
-	 * @return is != null && is.getType() != Material.AIR;
-	 */
-	public static boolean exists(ItemStack is) {
-		return is != null && is.getType() != Material.AIR;
-	}
-	
-	/**
 	 * Like the Bukkit method, but respects max ItemStack size
 	 * See also: {@link org.bukkit.inventory.Inventory#addItem(ItemStack...)}
 	 * @param inv Inventory to add to
