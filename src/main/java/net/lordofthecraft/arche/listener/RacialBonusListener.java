@@ -123,7 +123,9 @@ public class RacialBonusListener implements Listener {
 		Persona ps = handler.getPersona(p);
 		if(ps != null){
 			if(ps.getRace() == Race.CONSTRUCT && p.getGameMode() != GameMode.CREATIVE){
-				if(p.getWorld().getFullTime() % 20 == 0) p.sendMessage(ChatColor.RED + "You are moving too fast!");
+				
+				//Yes I really do give this little fucks
+				p.sendMessage(ChatColor.RED + "You are moving too fast!");
 				ArcheProtocolUtil.fakeRespawn(p, p.getWorld().getEnvironment());
 			}
 		}
