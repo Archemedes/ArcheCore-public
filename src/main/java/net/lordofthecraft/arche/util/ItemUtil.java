@@ -127,6 +127,17 @@ public class ItemUtil {
 	 */
 	public static ItemStack make(Material mat, String displayName, String... lore) {
 		ItemStack is = new ItemStack(mat);
+		return decorate(is, displayName, lore);
+	}
+	
+	/**
+	 * Decorate an item with displayName and Lore
+	 * @param is Item
+	 * @param displayName Name (not italicized by default)
+	 * @param lore Lore lines
+	 * @return the Item, now decorated
+	 */
+	public static ItemStack decorate(ItemStack is, String displayName, String... lore) {
 		ItemMeta m = is.getItemMeta();
 		if(displayName.charAt(0) != ChatColor.COLOR_CHAR) displayName = ChatColor.WHITE + displayName;
 		m.setLore(Arrays.asList(lore));
