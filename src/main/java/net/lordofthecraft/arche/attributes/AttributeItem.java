@@ -24,7 +24,7 @@ import net.md_5.bungee.api.chat.TranslatableComponent;
  * Static class containing the methods for applying an AttributeModifier to an item.
  */
 public class AttributeItem {
-	final private static String PATH = "net.minecraft.server." + Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3] + "."; 
+	final private static String PATH = "net.minecraft.server." + Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3] + "."; 
 
 	//NBT Base class
 	private static Class<?> NBTBase;
