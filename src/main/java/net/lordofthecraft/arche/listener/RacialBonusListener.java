@@ -47,6 +47,7 @@ import org.spigotmc.event.entity.EntityMountEvent;
 import com.google.common.collect.Lists;
 
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheProtocolUtil;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
@@ -122,11 +123,8 @@ public class RacialBonusListener implements Listener {
 		Persona ps = handler.getPersona(p);
 		if(ps != null){
 			if(ps.getRace() == Race.CONSTRUCT && p.getGameMode() != GameMode.CREATIVE){
-				//p.sendMessage(ChatColor.RED + "You are moving too fast!");
-				//p.damage(4);
-				p.setFoodLevel(6); //Ghetto but works.
-				p.setSprinting(false);
-				e.setCancelled(true);
+				if(p.getWorld().getFullTime() % 20 == 0) p.sendMessage(ChatColor.RED + "You are moving too fast!");
+				ArcheProtocolUtil.fakeRespawn(p, p.getWorld().getEnvironment());
 			}
 		}
 	}
