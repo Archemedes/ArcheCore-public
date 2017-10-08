@@ -7,6 +7,8 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.util.ItemUtil;
+
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -103,25 +105,11 @@ public class ArcheSkin {
         inUse.remove(persona);
     }
 
-    public ItemStack getHeadItem() { //Kowaman
-        ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-		//return skull;
-		ItemMeta skullMeta = skull.getItemMeta();
-		
+    public ItemStack getHeadItem() {
 		GameProfile profile = new GameProfile(UUID.randomUUID(), null);		
 		profile.getProperties().putAll("textures", mojangSkinData.get("textures"));
 		
-		Field profileField = null;
-		
-		try {
-			profileField = skullMeta.getClass().getDeclaredField("profile");
-			profileField.setAccessible(true);
-			profileField.set(skullMeta, profile);
-		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException e) {
-			e.printStackTrace();
-		}
-		skull.setItemMeta(skullMeta);
-		return skull;
+		return ItemUtil.getSkullFromTexture(mojangSkinData.get("textures").iterator().next().getValue());
 	}
 	
 	
