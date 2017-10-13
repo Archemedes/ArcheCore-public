@@ -484,7 +484,7 @@ public class CommandPersona implements CommandExecutor {
 					}
 					return true;
 				} else if (args[0].equalsIgnoreCase("assignrace")) {
-					if (!sender.hasPermission("archecore.admin") && !sender.hasPermission("archecore.mod.persona.assignrace")) {
+					if (!sender.hasPermission("archecore.admin") && !sender.hasPermission("archecore.persona.assignrace")) {
 						sender.sendMessage(ChatColor.RED + "Error: Permission denied.");
 					} else {
 						int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
