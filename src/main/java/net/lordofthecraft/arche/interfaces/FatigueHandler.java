@@ -73,7 +73,7 @@ public interface FatigueHandler {
 	 * @param skill the skill to check the racial bonuses of
 	 * @return the modified fatigue value
 	 */
-    double modifyNetFatigue(Persona pers, double value, Skill skill);
+    double modifyNetFatigue(Persona pers, double value, Skill... skill);
 
     /**
 	 * Method that condenses the most likely workflow for fatigue management while practicing a profession

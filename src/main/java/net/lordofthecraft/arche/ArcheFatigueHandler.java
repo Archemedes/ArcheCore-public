@@ -117,14 +117,21 @@ public class ArcheFatigueHandler implements FatigueHandler {
 	}
 	
 	@Override
-	public double modifyNetFatigue(Persona mlk, double value, Skill racist) {
+	public double modifyNetFatigue(Persona mlk, double value, Skill... racist) {
 		if(value <= 0 ) return value;
 		
-		if(racist != null) {
+		if(racist.length > 0) {
 			Race poc = mlk.getRace();
-			Map<Race, Double> affirmitiveAction = racist.getRaceMods();
-			if(affirmitiveAction.containsKey(poc))
-				value /= affirmitiveAction.get(poc);
+			double bestMod = -1;
+			for(Skill skill : racist) {
+				Map<Race, Double> affirmitiveAction = skill.getRaceMods();
+				if(affirmitiveAction.containsKey(poc))
+					bestMod = Math.max(affirmitiveAction.get(poc), bestMod);
+			}
+			
+			if(bestMod > 0) {
+				value /= bestMod;
+			}
 		}
 		
 		value *= mlk.attributes().getAttributeValue(AttributeRegistry.FATIGUE_GAIN);
