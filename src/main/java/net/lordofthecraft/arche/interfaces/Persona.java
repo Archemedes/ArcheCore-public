@@ -1,9 +1,6 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.persona.MagicAttachment;
-import net.lordofthecraft.arche.persona.PersonaAttributes;
-import net.lordofthecraft.arche.persona.PersonaMagics;
-import net.lordofthecraft.arche.persona.PersonaSkills;
+import net.lordofthecraft.arche.persona.*;
 import net.lordofthecraft.arche.save.rows.ArchePersonaRow;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import org.bukkit.entity.Player;
@@ -61,6 +58,8 @@ public interface Persona extends OfflinePersona {
 	 * @param profession The skill to be set as main.
 	 */
 	void setMainSkill(Skill profession);
+
+    PersonaAbilityScores scores();
 
     /**
      * See if this persona has a specific magic

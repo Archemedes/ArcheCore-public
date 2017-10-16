@@ -629,11 +629,15 @@ public class ArchePersonaHandler implements PersonaHandler {
         int persona_id = res.getInt(PersonaField.PERSONA_ID.field());
         int slot = res.getInt(PersonaField.SLOT.field());
         String name = res.getString(PersonaField.NAME.field());
+        boolean current = res.getBoolean(PersonaField.CURRENT.field());
         Race race = Race.valueOf(res.getString(PersonaField.RACE_REAL.field()));
         String gender = res.getString(PersonaField.GENDER.field());
         Timestamp creationTimeMS = res.getTimestamp(PersonaField.STAT_CREATION.field());
+        Timestamp lastPlayed = res.getTimestamp(PersonaField.STAT_LAST_PLAYED.field());
         String type = res.getString(PersonaField.TYPE.field());
         PersonaType ptype = PersonaType.valueOf(type);
+        //ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, boolean current, Race race, String gender, PersonaType type, String name) {
+        ArcheOfflinePersona persona = new ArcheOfflinePersona(new ArchePersonaKey(persona_id, pl.getUniqueId(), slot), creationTimeMS, lastPlayed, current, race, gender, ptype, name);
         String invString = res.getString(PersonaField.INV.field());
         if (!res.wasNull()) {
             String enderinvString = res.getString(PersonaField.ENDERINV.field());
@@ -641,19 +645,21 @@ public class ArchePersonaHandler implements PersonaHandler {
                 try {
                     persona.inv = PersonaInventory.restore(invString, null);
                 } catch (InvalidConfigurationException e) {
-                    ArcheCore.getPlugin().getLogger().severe("Unable to restore Persona Inventory from database: (" + p.getName() + ";" + name + ")");
+                    ArcheCore.getPlugin().getLogger().severe("Unable to restore Persona Inventory from database: (" + pl.getName() + ";" + name + ")");
                     e.printStackTrace();
                 }
             } else {
                 try {
                     persona.inv = PersonaInventory.restore(invString, enderinvString);
                 } catch (InvalidConfigurationException e) {
-                    ArcheCore.getPlugin().getLogger().severe("Unable to restore Persona Inventory from database: (" + p.getName() + ";" + name + ")");
+                    ArcheCore.getPlugin().getLogger().severe("Unable to restore Persona Inventory from database: (" + pl.getName() + ";" + name + ")");
                     e.printStackTrace();
                 }
             }
 
         }
+
+        return persona;
     }
 
 	private ArchePersona buildPersona(ResultSet res, OfflinePlayer p) throws SQLException{
@@ -776,16 +782,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 				//If so we apparently should preload for this player
                 ArchePersona prs[] = loadedPersonas.get(uuid);
 
-                if (timestamp.after(threshhold)) {
-                    selectStatement.setString(1, p.getUniqueId().toString());
-                    ArchePersona persona = buildPersona(selectStatement.executeQuery(), p);
-                    prs[persona.getSlot()] = persona;
-                    personas.putIfAbsent(persona.getPersonaId(), persona);
-                } else {
-                    lightSelect.setString(1, p.getUniqueId().toString());
-
-                }
-
 				if(prs == null){ //Apparently not, see if we should based on player login time
 					long days = (time - p.getLastPlayed()) / (1000L * 3600L * 24L);
 					if (days > range && !res.getBoolean("preload_force")) continue; //Player file too old, don't preload
@@ -794,9 +790,19 @@ public class ArchePersonaHandler implements PersonaHandler {
 					prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
                     loadedPersonas.put(uuid, prs);
                 }
-				selectStatement.setString(1, p.getUniqueId().toString());
+                if (timestamp.after(threshhold)) {
+                    selectStatement.setString(1, p.getUniqueId().toString());
+                    ArchePersona persona = buildPersona(selectStatement.executeQuery(), p);
+                    prs[persona.getSlot()] = persona;
+                    personas.putIfAbsent(persona.getPersonaId(), persona);
+                } else {
+                    lightSelect.setString(1, p.getUniqueId().toString());
+                    ArcheOfflinePersona persona = buildOfflinePersona(lightSelect.executeQuery(), p);
+                    personas.putIfAbsent(persona.getPersonaId(), persona);
+                }
+				/*selectStatement.setString(1, p.getUniqueId().toString());
 				ArchePersona persona = buildPersona(selectStatement.executeQuery(), p);
-                prs[persona.getSlot()] = persona;
+                prs[persona.getSlot()] = persona;*/
             }
             res.close();
         }catch(SQLException e){e.printStackTrace();}

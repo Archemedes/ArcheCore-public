@@ -17,6 +17,7 @@ public enum PersonaField {
     STAT_RENAMED("renamed", PersonaTable.STATS, JDBCType.TIMESTAMP),
     STAT_CREATION("date_created", PersonaTable.STATS, JDBCType.TIMESTAMP),
     STAT_PLAYTIME_PAST("playtime_past", PersonaTable.STATS, JDBCType.INTEGER),
+    STAT_LAST_PLAYED("last_played", PersonaTable.STATS, JDBCType.TIMESTAMP),
     MONEY("money", PersonaTable.MASTER, JDBCType.DOUBLE),
     ICON("skin_id_fk", PersonaTable.SKINS, JDBCType.INTEGER),
     TYPE("p_type", PersonaTable.MASTER, JDBCType.VARCHAR),

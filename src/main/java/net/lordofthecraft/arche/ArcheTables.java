@@ -36,6 +36,7 @@ public final class ArcheTables {
             ArcheCore.getPlugin().getLogger().info("Done with skills! Creating persona...");
             createPersonaTable(statement, end);
             ArcheCore.getPlugin().getLogger().info("Done with persona! Creating persona stats...");
+            createPersonaAbilityScoreTable(statement, end);
             createPerPersonaSkinTable(statement, end);
             createPersonaStatsTable(statement, end);
             ArcheCore.getPlugin().getLogger().info("Done with persona stats! Creating persona tags...");
@@ -165,6 +166,21 @@ public final class ArcheTables {
                 "PRIMARY KEY (persona_id)," +
                 "FOREIGN KEY (player_fk) REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT," +
                 "FOREIGN KEY (profession) REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE SET NULL" +
+                ")" +
+                end);
+    }
+
+    protected static void createPersonaAbilityScoreTable(Statement statement, String end) throws SQLException {
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_ability_scores (" +
+                "persona_id_fk INT UNSIGNED," +
+                "points INT UNSIGNED," +
+                "constitution INT DEFAULT 2," +
+                "strength INT DEFAULT 2," +
+                "dexterity INT DEFAULT 2," +
+                "intellect INT DEFAULT 2," +
+                "luck INT DEFAULT 2," +
+                "PRIMARY KEY (persona_id_fk)," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE " +
                 ")" +
                 end);
     }

@@ -66,6 +66,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 	final PersonaSkills skills = new PersonaSkills(this);
     final PersonaMagics magics = new PersonaMagics(this);
+    final PersonaAbilityScores scores = new PersonaAbilityScores(this);
     final PersonaAttributes attributes = new PersonaAttributes(this);
 
 	final Map<String,Object> sqlCriteria;
@@ -211,6 +212,9 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     public PersonaMagics magics() {
         return magics;
     }
+
+    @Override
+    public PersonaAbilityScores scores() { return scores; }
 
     void setCurrent(boolean current) {
         if (this.current != current) {

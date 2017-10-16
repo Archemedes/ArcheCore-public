@@ -30,13 +30,28 @@ public class ArcheOfflinePersona implements OfflinePersona {
     volatile String name;
     Timestamp lastRenamed;
 
-    public ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, boolean current, Race race, String name, PersonaType type) {
+    ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, boolean current, Race race, String gender, PersonaType type, String name) {
         this.personaKey = personaKey;
         this.creation = creation;
         this.current = current;
+        this.race = race;
+        this.gender = gender;
+        this.type = type;
+        this.name = name;
     }
 
-    public ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation) {
+    ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, boolean current, Race race, String gender, PersonaType type, String name) {
+        this.personaKey = personaKey;
+        this.creation = creation;
+        this.lastPlayed = lastPlayed;
+        this.current = current;
+        this.race = race;
+        this.gender = gender;
+        this.type = type;
+        this.name = name;
+    }
+
+    ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation) {
         this.personaKey = personaKey;
         this.creation = creation;
     }
