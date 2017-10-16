@@ -1,12 +1,17 @@
 package net.lordofthecraft.arche.util;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.comphenix.protocol.utility.MinecraftReflection;
+import com.comphenix.protocol.wrappers.nbt.NbtCompound;
+import com.comphenix.protocol.wrappers.nbt.NbtFactory;
+import com.comphenix.protocol.wrappers.nbt.NbtList;
+import com.mojang.authlib.GameProfile;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TranslatableComponent;
@@ -14,6 +19,40 @@ import net.md_5.bungee.api.chat.TranslatableComponent;
 import static net.lordofthecraft.arche.util.ReflectionUtil.*;
 
 public class ItemUtil {
+	
+	/**
+	 * Method to easily make Minecraft skulls from arbitrary skin files
+	 * @param theTexture A base-64 encoded nbt compound containing skin info
+	 * @return a textured Minecraft SKULL_ITEM
+	 */
+	public static ItemStack getSkullFromTexture(String theTexture) {
+		NbtCompound tag = NbtFactory.ofCompound("tag");
+		NbtCompound skullOwner = NbtFactory.ofCompound("SkullOwner");
+		NbtCompound properties = NbtFactory.ofCompound("Properties");
+		NbtCompound property = NbtFactory.ofCompound("");
+		
+		property.put("Value", theTexture);
+		skullOwner.put("Id", UUID.randomUUID().toString());
+		NbtList<NbtCompound> list = NbtFactory.ofList("textures", property);
+		properties.put(list);
+		skullOwner.put(properties);
+		tag.put(skullOwner);
+		
+		ItemStack is = MinecraftReflection.getBukkitItemStack(new ItemStack(Material.SKULL_ITEM, 1, (short) 3));
+		NbtFactory.setItemTag(is, tag);
+		return is;
+	}
+	
+	/**
+	 * Method to easily make Minecraft skulls from arbitrary skin files
+	 * @param profile The profile to get a skin from
+	 * @return a textured Minecraft SKULL_ITEM 
+	 */
+	public static ItemStack getSkullFromProfile(GameProfile profile) {
+		String value = profile.getProperties().get("textures").iterator().next().getValue();
+		System.out.println("value");
+		return getSkullFromTexture(value);
+	}
 	
 	/**
 	 * Transforms an itemstack into its JSON equivalent. Useful for HoverEvent SHOW_ITEM or uncommon serialization needs
@@ -88,6 +127,17 @@ public class ItemUtil {
 	 */
 	public static ItemStack make(Material mat, String displayName, String... lore) {
 		ItemStack is = new ItemStack(mat);
+		return decorate(is, displayName, lore);
+	}
+	
+	/**
+	 * Decorate an item with displayName and Lore
+	 * @param is Item
+	 * @param displayName Name (not italicized by default)
+	 * @param lore Lore lines
+	 * @return the Item, now decorated
+	 */
+	public static ItemStack decorate(ItemStack is, String displayName, String... lore) {
 		ItemMeta m = is.getItemMeta();
 		if(displayName.charAt(0) != ChatColor.COLOR_CHAR) displayName = ChatColor.WHITE + displayName;
 		m.setLore(Arrays.asList(lore));
