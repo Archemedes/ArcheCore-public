@@ -1,5 +1,15 @@
 package net.lordofthecraft.arche.util;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
@@ -149,10 +159,15 @@ public class ItemUtil {
 	 * @return the Item, now decorated
 	 */
 	public static ItemStack decorate(ItemStack is, String displayName, String... lore) {
+		Predicate<String> colored = s->s.indexOf(ChatColor.COLOR_CHAR) >= 0;
+		if(!colored.test(displayName)) displayName = ChatColor.WHITE + displayName;
+		List<String> listLore = Arrays.stream(lore)
+				.map(s -> colored.test(s)? s:ChatColor.GRAY+s)
+				.collect(Collectors.toList());
+
 		ItemMeta m = is.getItemMeta();
-		if(displayName.charAt(0) != ChatColor.COLOR_CHAR) displayName = ChatColor.WHITE + displayName;
-        m.setDisplayName(displayName);
-        m.setLore(Arrays.asList(lore));
+		m.setDisplayName(displayName);
+		m.setLore(listLore);
 		is.setItemMeta(m);
 		return is;
 	}
