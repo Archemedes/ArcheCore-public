@@ -80,6 +80,7 @@ public final class ArcheTables {
                 ArcheCore.getPlugin().getLogger().info("Done with logging tables! Creating delete procedure...");
                 try {
                     createDeleteProcedure(statement);
+                    ArcheCore.getPlugin().setUseDeleteProcedure(true);
                 } catch (Exception e) {
                     ArcheCore.getPlugin().getLogger().warning("Failed to instantiate the delete procedure");
                 }

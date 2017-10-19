@@ -44,9 +44,11 @@ public interface IArcheCore {
 	 * @return A Persona Key constructed on the criteria
 	 */
 	PersonaKey composePersonaKey(UUID uuid, int pid);
-	
-	/**
-	 * ArcheCore maintains a temporary non-persistent registry of all player-placed blocks.
+
+    boolean logsPersonaDeletions();
+
+    /**
+     * ArcheCore maintains a temporary non-persistent registry of all player-placed blocks.
 	 * Use it to keep track of which blocks have been placed by players and should not provide Skill Xp for this reason.
 	 * @return The active Block Registry
 	 */

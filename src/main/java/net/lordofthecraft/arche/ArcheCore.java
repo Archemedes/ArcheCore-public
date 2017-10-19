@@ -96,6 +96,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private int consumerWarningSize;
     private boolean debugConsumer;
 
+    private boolean useDeleteProcedure = false;
+
     private int blockregistryPurgeDelay;
     private boolean blockregistryKillCustom;
 
@@ -578,6 +580,15 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     public ArcheTimer getMethodTimer(){
         return timer;
+    }
+
+    void setUseDeleteProcedure(boolean toset) {
+        this.useDeleteProcedure = toset;
+    }
+
+    @Override
+    public boolean logsPersonaDeletions() {
+        return useDeleteProcedure;
     }
 
     @Override
