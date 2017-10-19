@@ -62,6 +62,7 @@ public class MultiPersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow
             statement = connection.prepareStatement("UPDATE " + field.table.getTable() + " SET " + field.field() + "=? WHERE persona_id" + (field.table == PersonaTable.MASTER ? "=?" : "_fk=?"));
             for (PersonaUpdateRow row : updateRows) {
                 if (!row.toupdate.isDeleted()) {
+
                     if (ArcheCore.usingSQLite()) {
                         switch (row.updatefield) {
                             case PREFIX:

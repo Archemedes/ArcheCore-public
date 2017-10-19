@@ -319,12 +319,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
 
-            if(willCachePersonas()){
-                long time = System.currentTimeMillis();
-                getLogger().info("Preloading Personas as far back as " + cachePersonas + " days");
-                personaHandler.initPreload(cachePersonas);
-                getLogger().info("Personas were loaded in " + (System.currentTimeMillis() - time) + "ms.");
-            }
+            long time = System.currentTimeMillis();
+            getLogger().info("Preloading Personas as far back as " + cachePersonas + " days");
+            personaHandler.initPreload(cachePersonas);
+            getLogger().info("Personas were loaded in " + (System.currentTimeMillis() - time) + "ms.");
 
             //Incase of a reload, load all Personas for currently logged in players
             for(Player p : Bukkit.getOnlinePlayers()){

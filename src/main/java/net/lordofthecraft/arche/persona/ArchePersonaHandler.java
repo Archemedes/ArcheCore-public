@@ -61,10 +61,11 @@ public class ArchePersonaHandler implements PersonaHandler {
     public synchronized void updatePersonaID() {
         Connection connection = ArcheCore.getSQLControls().getConnection();
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT " + (ArcheCore.getPlugin().isUsingSQLite() ? "LAST_INSERT_ROWID()" : "LAST_INSERT_ID()") + " FROM persona");
+            PreparedStatement statement = connection.prepareStatement("SELECT MAX(persona_id) AS 'max_persona_id' FROM persona");
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 max_persona_id = rs.getInt(1);
+                max_persona_id++;
             } else {
                 ArcheCore.getPlugin().getLogger().warning("We could not retrieve the LAST_INSERT_ID for persona, either there are no personas or there is an error. We'll be starting at 0. This will throw errors if there are actually personas in the Database.");
             }
@@ -74,6 +75,8 @@ public class ArchePersonaHandler implements PersonaHandler {
         } catch (SQLException e) {
             ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to set up our persona ID!!! We can't create personas!", e);
         }
+
+        ArcheCore.getPlugin().getLogger().info("[ArchePersonaHandler] Persona ID is now set at " + max_persona_id);
     }
 
 	public boolean isPreloading() {
@@ -283,8 +286,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
     int getNextPersonaId() {
-        ++max_persona_id;
-        return max_persona_id;
+        return max_persona_id++;
     }
 
 	public boolean registerPersona(Player p, ArchePersona persona) {
@@ -518,10 +520,10 @@ public class ArchePersonaHandler implements PersonaHandler {
         if (loadedPersonas.containsKey(p.getUniqueId())) {//Already present in Persona list (quick relog?)
             ArcheCore plug = ArcheCore.getPlugin();
 
-			if(!plug.willCachePersonas()){
-				plug.getLogger().warning("Player " + p.getName() + " logged in while already being registered. Quick relog?");
-				plug.getLogger().warning("Currently have " + personas.size() + " persona files for " + Bukkit.getOnlinePlayers().size() + " players." );
-			}
+			/*if(!plug.willCachePersonas()){
+                plug.getLogger().warning("Player " + p.getName() + " logged in while already being registered. Quick relog?");
+				plug.getLogger().warning("Currently have " + loadedPersonas.size() + " persona files for " + Bukkit.getOnlinePlayers().size() + " players." );
+			}*/
 
 			//Maybe player has changed their name with Mojang? Update to be sure
             ArchePersona[] perses = loadedPersonas.get(p.getUniqueId());
@@ -549,34 +551,60 @@ public class ArchePersonaHandler implements PersonaHandler {
 		ResultSet res = null;
         Connection connection = null;
         PreparedStatement selectStatement = null;
+        if (ArcheCore.isDebugging()) {
+            ArcheCore.getPlugin().getLogger().info("Starting the loading of personas for " + p.getName());
+        }
         try {
             connection = ArcheCore.getSQLControls().getConnection();
             selectStatement = connection.prepareStatement(personaLoadSelect);
             List<OfflinePersona> pers = personas.values().stream().filter(ps -> ps.personaKey.getPlayerUUID().equals(p.getUniqueId())).collect(Collectors.toList());
+            if (ArcheCore.isDebugging()) {
+                ArcheCore.getPlugin().getLogger().info("Now loading " + pers.size() + " personas.");
+            }
             for (OfflinePersona ps : pers) {
-                selectStatement.setString(1, p.getUniqueId().toString());
+                if (ArcheCore.isDebugging()) {
+                    ArcheCore.getPlugin().getLogger().info("Loading the persona " + MessageUtil.identifyPersona(ps));
+                }
+                selectStatement.setInt(1, ps.getPersonaId());
                 res = selectStatement.executeQuery();
-                personas.remove(ps.getPersonaId());
-                ArchePersona persona = (ArchePersona) ps.loadPersona(res);
-                personas.put(persona.getPersonaId(), persona);
-                prs[persona.getSlot()] = persona;
-                if (persona.current) {
-                    if (!hasCurrent) {
-                        hasCurrent = true;
-
-                        //Update the display name, if enabled
-                        persona.updateDisplayName(p);
-
-                        //CURRENT persona gets racial bonuses applied
-                        if (ArcheCore.getPlugin().areRacialBonusesEnabled())
-                            RaceBonusHandler.apply(persona, persona.getRace());
-                        else
-                            RaceBonusHandler.reset(p);
-
-                    } else {
-                        ArcheCore.getPlugin().getLogger().warning("Player " + p.getName() + " has simultaneous current Personas. Fixing now...");
-                        persona.setCurrent(false);
+                if (ArcheCore.isDebugging()) {
+                    ArcheCore.getPlugin().getLogger().info("We've fetched rows for the persona " + ps.getPersonaId() + ", now populating.");
+                }
+                if (res.next()) {
+                    if (ArcheCore.isDebugging()) {
+                        ArcheCore.getPlugin().getLogger().info("There is a row for the persona " + ps.getPersonaId() + ", populating now.");
                     }
+                    ArchePersona persona = (ArchePersona) ps.loadPersona(res);
+                    if (ArcheCore.isDebugging()) {
+                        ArcheCore.getPlugin().getLogger().info("We've now loaded " + MessageUtil.identifyPersona(persona));
+                    }
+                    //personas.remove(ps.getPersonaId());
+                    personas.put(persona.getPersonaId(), persona);
+                    prs[persona.getSlot()] = persona;
+                    if (persona.current) {
+                        if (!hasCurrent) {
+                            hasCurrent = true;
+
+                            //Update the display name, if enabled
+                            persona.updateDisplayName(p);
+
+                            //CURRENT persona gets racial bonuses applied
+                            if (ArcheCore.getPlugin().areRacialBonusesEnabled())
+                                RaceBonusHandler.apply(persona, persona.getRace());
+                            else
+                                RaceBonusHandler.reset(p);
+
+                        } else {
+                            ArcheCore.getPlugin().getLogger().warning("Player " + p.getName() + " has simultaneous current Personas. Fixing now...");
+                            persona.setCurrent(false);
+                        }
+                    }
+                    if (ArcheCore.isDebugging()) {
+                        ArcheCore.getPlugin().getLogger().info("We've finished the method for loading the persona " + MessageUtil.identifyPersona(persona));
+                    }
+                }
+                if (ArcheCore.isDebugging()) {
+                    ArcheCore.getPlugin().getLogger().info("The persona array size for " + p.getName() + " is now " + prs.length);
                 }
             }
 
@@ -602,6 +630,10 @@ public class ArchePersonaHandler implements PersonaHandler {
             }
             //See about having no Personas, no current Personas, etc
 			ensureValidPersonaRecord(p, prs, hasCurrent);
+
+            if (ArcheCore.isDebugging()) {
+                ArcheCore.getPlugin().getLogger().info("Now adding " + prs.length + " personas for the player " + p.getName());
+            }
 
 			//Crucial that this part happens for obvious reasons.
             loadedPersonas.put(p.getUniqueId(), prs);
@@ -785,7 +817,7 @@ public class ArchePersonaHandler implements PersonaHandler {
             ResultSet res = statement.executeQuery(playerSelect);
 
             while(res.next()){
-				UUID uuid = UUID.fromString(res.getString("player"));
+                UUID uuid = UUID.fromString(res.getString("player_fk"));
                 Timestamp timestamp = res.getTimestamp("last_played");
                 OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
 
@@ -793,25 +825,38 @@ public class ArchePersonaHandler implements PersonaHandler {
 				//If so we apparently should preload for this player
                 ArchePersona prs[] = loadedPersonas.get(uuid);
 
-				if(prs == null){ //Apparently not, see if we should based on player login time
-					long days = (time - p.getLastPlayed()) / (1000L * 3600L * 24L);
-					if (days > range && !res.getBoolean("preload_force")) continue; //Player file too old, don't preload
+				/*if(prs == null){ //Apparently not, see if we should based on player login time
+                    long days = (time - p.getLastPlayed()) / (1000L * 3600L * 24L);
+					TODO preload force
+					if (days > range  ) continue; //Player file too old, don't preload
 
 					//Preload, generate a Persona file
 					prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
                     loadedPersonas.put(uuid, prs);
-                }
+                }*/
+                ResultSet rs;
                 if (timestamp.after(threshhold)) {
+                    if (prs == null) {
+                        prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
+                        loadedPersonas.put(uuid, prs);
+                    }
                     selectStatement.setString(1, p.getUniqueId().toString());
-                    ArchePersona persona = buildPersona(selectStatement.executeQuery(), p);
-                    prs[persona.getSlot()] = persona;
-                    personas.putIfAbsent(persona.getPersonaId(), persona);
+                    rs = selectStatement.executeQuery();
+                    while (rs.next()) {
+                        ArchePersona persona = buildPersona(rs, p);
+                        prs[persona.getSlot()] = persona;
+                        personas.putIfAbsent(persona.getPersonaId(), persona);
+                    }
                 } else {
                     lightSelect.setString(1, p.getUniqueId().toString());
-                    ArcheOfflinePersona persona = buildOfflinePersona(lightSelect.executeQuery(), p);
-                    personas.putIfAbsent(persona.getPersonaId(), persona);
+                    rs = lightSelect.executeQuery();
+                    while (rs.next()) {
+                        ArcheOfflinePersona persona = buildOfflinePersona(rs, p);
+                        personas.putIfAbsent(persona.getPersonaId(), persona);
+                    }
                 }
-				/*selectStatement.setString(1, p.getUniqueId().toString());
+                rs.close();
+                /*selectStatement.setString(1, p.getUniqueId().toString());
 				ArchePersona persona = buildPersona(selectStatement.executeQuery(), p);
                 prs[persona.getSlot()] = persona;*/
             }

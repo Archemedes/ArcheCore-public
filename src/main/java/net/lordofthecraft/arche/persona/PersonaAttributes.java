@@ -101,7 +101,7 @@ public class PersonaAttributes {
             inst.removeModifier(m);
         }
 
-        inst.addModifier(m, force, save);
+        inst.addModifier(m, force, save, true);
         a.tryApply(inst);
 
         //ArcheExecutor.getInstance().put(new ArcheAttributeInsertTask(m));

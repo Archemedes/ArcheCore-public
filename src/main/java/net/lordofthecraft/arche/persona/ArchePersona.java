@@ -225,7 +225,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         if (this.current != current) {
 
 			this.current = current;
-            consumer.queueRow(new PersonaUpdateRow(this, PersonaField.CURRENT, current, false));
+            consumer.queueRow(new PersonaUpdateRow(this, PersonaField.CURRENT, this.current, false));
             //buffer.put(new UpdateTask(this, PersonaField.CURRENT, current));
 
 			if (current) { // Persona becoming Player's current Persona.
@@ -249,6 +249,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         String sql = "SELECT skin_id_fk FROM per_persona_skins WHERE persona_id_fk=?";
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, personaKey.getPersonaID());
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 ArcheSkin skin = SkinCache.getInstance().getSkinByID(rs.getInt("skin_id_fk"));
@@ -308,8 +309,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
                 }
                 if (decaytype != null && op != null) {
                 	UUID id = UUID.fromString(rs.getString("mod_uuid"));
-                	String name = rs.getString("name");
-                	double amount = rs.getDouble("mod_value");
+                    String name = rs.getString("mod_name");
+                    double amount = rs.getDouble("mod_value");
                 	long ticks = rs.getLong("decayticks");
                 	boolean lostondeath = rs.getBoolean("lostondeath");
                 	attributes.addModifierFromSQL(att, new ExtendedAttributeModifier(id, name, amount, op, decaytype, ticks, lostondeath));

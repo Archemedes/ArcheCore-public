@@ -69,26 +69,29 @@ public class ArcheAttributeInstance implements AttributeInstance {
     }
 
     public boolean addModifier(AttributeModifier modifier, boolean force, boolean save) {
+        return addModifier(modifier, force, save, false);
+    }
+
+    public boolean addModifier(AttributeModifier modifier, boolean force, boolean save, boolean insert) {
         Preconditions.checkArgument(modifier != null, "modifier");
-		UUID uuid = modifier.getUniqueId();
-		boolean exists = mods.containsKey(uuid);
-		if(exists && !force) {
-			throw new IllegalArgumentException("Modifier is already applied on this CUSTOM(ARCHE) attribute!");
-		} else {
-			
-			ExtendedAttributeModifier mm = modifier instanceof ExtendedAttributeModifier?
+        UUID uuid = modifier.getUniqueId();
+        boolean exists = mods.containsKey(uuid);
+        if (exists && !force) {
+            throw new IllegalArgumentException("Modifier is already applied on this CUSTOM(ARCHE) attribute!");
+        } else {
+
+            ExtendedAttributeModifier mm = modifier instanceof ExtendedAttributeModifier ?
                     (ExtendedAttributeModifier) modifier : new ExtendedAttributeModifier(modifier);
             if (!(modifier instanceof ExtendedAttributeModifier)) {
                 mm.setShouldSave(save);
             }
             mods.put(uuid, mm);
-            if (mm.save) {
+            if (mm.save && insert) {
                 ArcheCore.getConsumerControls().queueRow(new PersAttrInsertRow(mm, persona.getPersona(), parent));
             }
             return !exists;
-		}
-	}
-
+        }
+    }
 
 	@Override
 	public void removeModifier(AttributeModifier modifier) {

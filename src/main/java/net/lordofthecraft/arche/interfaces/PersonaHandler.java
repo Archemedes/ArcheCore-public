@@ -14,13 +14,18 @@ public interface PersonaHandler {
 
     String playerSelect = "SELECT pers1.player_fk,pers1.last_played " +
             "FROM persona AS pers1 LEFT OUTER JOIN persona AS pers2 ON (pers1.persona_id=pers2.persona_id AND pers1.last_played < pers2.last_played) " +
-            "WHERE pers.last_played IS NULL " +
+            "WHERE pers2.last_played IS NULL " +
             "ORDER BY pers1.last_played";
     String personaSelect = "SELECT " +
             "persona_id,slot,race,gender" +
             ",name,curr,race_header,descr,p_type,prefix,money,profession,fatigue,max_fatigue" +
             ",world,x,y,z,inv,ender_inv,potions,health,hunger,saturation,creature" +
             ",played,chars,renamed,playtime_past,date_created,last_played " +
+            "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
+            "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
+            "WHERE player_fk=?";
+    String lightPersonaSelect = "SELECT " +
+            "persona_id,slot,name,curr,inv,ender_inv,date_created,race,gender,last_played,p_type " +
             "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
             "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
             "WHERE player_fk=?";
@@ -33,11 +38,7 @@ public interface PersonaHandler {
             "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
             "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
             "WHERE persona_id=?";
-    String lightPersonaSelect = "SELECT " +
-            "persona_id,slot,name,curr,inv,ender_inv,date_created " +
-            "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
-            "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
-            "WHERE player_fk=?";
+
 
     UUID SCORE_ID = UUID.fromString("6898332e-abce-4da9-a284-9b34c4df751a");
 
