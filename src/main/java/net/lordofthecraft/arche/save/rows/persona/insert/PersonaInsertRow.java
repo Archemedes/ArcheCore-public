@@ -30,8 +30,8 @@ public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersona
 
     @Override
     public void executeStatements() throws SQLException {
-        PreparedStatement stat = connection.prepareStatement("INSERT INTO persona(persona_id,player_fk,slot,race,name,gender) " +
-                "VALUES (?,?,?,?,?,?)");
+        PreparedStatement stat = connection.prepareStatement("INSERT INTO persona(persona_id,player_fk,slot,race,name,gender,last_played) " +
+                "VALUES (?,?,?,?,?,?,?)");
 
         stat.setInt(1, persona.getPersonaId());
         stat.setString(2, persona.getPlayerUUID().toString());
@@ -39,6 +39,7 @@ public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersona
         stat.setString(4, persona.getRace().name());
         stat.setString(5, persona.getName());
         stat.setString(6, persona.getGender());
+        stat.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
         stat.executeUpdate();
         stat.close();
 
@@ -53,11 +54,10 @@ public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersona
         stat.executeUpdate();
         stat.close();
 
-        stat = connection.prepareStatement("INSERT INTO persona_stats(persona_id_fk,renamed,date_created,last_played) VALUES (?,?,?,?)");
+        stat = connection.prepareStatement("INSERT INTO persona_stats(persona_id_fk,renamed,date_created) VALUES (?,?,?)");
         stat.setInt(1, persona.getPersonaId());
         stat.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
         stat.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-        stat.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
         stat.executeUpdate();
         stat.close();
     }

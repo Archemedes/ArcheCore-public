@@ -1,11 +1,15 @@
 package net.lordofthecraft.arche.listener;
 
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.persona.AttributeSelectMenu;
+import net.lordofthecraft.arche.util.InventoryUtil;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
 
 public class PersonaInventoryListener implements Listener {
 
@@ -35,9 +39,13 @@ public class PersonaInventoryListener implements Listener {
             } else {
                 e.setCancelled(true);
             }
-        }
-        if(e.getInventory().getTitle().contains("Casket Table(Pg.")){
+        } else if (e.getInventory().getTitle().contains("Casket Table(Pg.")) {
             e.setCancelled(true);
+        } else if (e.getInventory().getHolder() instanceof AttributeSelectMenu) {
+            AttributeSelectMenu holder = (AttributeSelectMenu) e.getInventory().getHolder();
+            List<InventoryUtil.MovedItem> moved = InventoryUtil.getResultOfEvent(e);
+            e.setCancelled(true);
+            moved.stream().map(InventoryUtil.MovedItem::getInitialSlot).forEach(holder::click);
         }
     }
 }

@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.save.rows.persona.delete;
 
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.save.rows.ArcheMergeableRow;
@@ -17,7 +18,7 @@ import java.util.logging.Level;
 public class MultiPersonaDeleteRow implements ArcheMergeableRow, ArchePersonaRow {
 
     final List<PersonaDeleteRow> rows = Lists.newArrayList();
-    final List<Persona> personas = Lists.newArrayList();
+    final List<OfflinePersona> personas = Lists.newArrayList();
     private Connection conn = null;
 
     public MultiPersonaDeleteRow(PersonaDeleteRow row1, PersonaDeleteRow row2) {

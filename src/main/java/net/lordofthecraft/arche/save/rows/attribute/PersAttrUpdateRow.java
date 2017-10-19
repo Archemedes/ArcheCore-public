@@ -50,7 +50,7 @@ public class PersAttrUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public void executeStatements() throws SQLException {
-        PreparedStatement statement = connection.prepareStatement("UPDATE persona_attributes SET decaytype=? AND decaytime=? AND lostondeath=? WHERE persona_id_fk=? AND mod_uuid=? AND attribute_type=?");
+        PreparedStatement statement = connection.prepareStatement("UPDATE persona_attributes SET decaytype=?, decayticks=?, lostondeath=? WHERE persona_id_fk=? AND mod_uuid=? AND attribute_type=?");
         statement.setString(1, mod.getDecayStrategy().name());
         statement.setLong(2, mod.getTicksRemaining());
         statement.setBoolean(3, mod.isLostOnDeath());
@@ -70,8 +70,8 @@ public class PersAttrUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
     public String[] getInserts() {
         return new String[]{
                 "UPDATE persona_attributes SET decaytype='" + mod.getDecayStrategy().name() + "'" +
-                        " AND decaytime=" + mod.getTicksRemaining() + "" +
-                        " AND lostondeath=" + mod.isLostOnDeath() + "" +
+                        ", decaytime=" + mod.getTicksRemaining() + "" +
+                        ", lostondeath=" + mod.isLostOnDeath() + "" +
                         " WHERE persona_id_fk=" + persona.getPersonaId() + "" +
                         " AND mod_uuid='" + mod.getUniqueId().toString() + "'" +
                         " AND attribute_type='" + SQLUtil.mysqlTextEscape(attribute.getName()) + "';"

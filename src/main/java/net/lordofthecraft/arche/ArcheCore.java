@@ -1,13 +1,25 @@
 package net.lordofthecraft.arche;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Timer;
-import java.util.UUID;
-import java.util.logging.Level;
-
+import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
+import net.lordofthecraft.arche.commands.*;
+import net.lordofthecraft.arche.commands.tab.CommandAttributeTabCompleter;
+import net.lordofthecraft.arche.commands.tab.CommandHelpTabCompleter;
+import net.lordofthecraft.arche.commands.tab.CommandPersonaTabCompleter;
+import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.help.HelpFile;
+import net.lordofthecraft.arche.interfaces.*;
+import net.lordofthecraft.arche.listener.*;
+import net.lordofthecraft.arche.magic.Archenomicon;
+import net.lordofthecraft.arche.persona.*;
+import net.lordofthecraft.arche.save.ArcheExecutor;
+import net.lordofthecraft.arche.save.Consumer;
+import net.lordofthecraft.arche.save.DumpedDBReader;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
+import net.lordofthecraft.arche.skin.SkinCache;
+import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -22,66 +34,13 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
-import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.WhySQLHandler;
-import net.lordofthecraft.arche.commands.CommandArchehelp;
-import net.lordofthecraft.arche.commands.CommandAttribute;
-import net.lordofthecraft.arche.commands.CommandBeaconme;
-import net.lordofthecraft.arche.commands.CommandHelpMenu;
-import net.lordofthecraft.arche.commands.CommandMoney;
-import net.lordofthecraft.arche.commands.CommandNamelog;
-import net.lordofthecraft.arche.commands.CommandNewbies;
-import net.lordofthecraft.arche.commands.CommandPersona;
-import net.lordofthecraft.arche.commands.CommandRaceSpawn;
-import net.lordofthecraft.arche.commands.CommandRealname;
-import net.lordofthecraft.arche.commands.CommandSkin;
-import net.lordofthecraft.arche.commands.CommandSql;
-import net.lordofthecraft.arche.commands.CommandSqlClone;
-import net.lordofthecraft.arche.commands.CommandTreasurechest;
-import net.lordofthecraft.arche.commands.tab.CommandAttributeTabCompleter;
-import net.lordofthecraft.arche.commands.tab.CommandHelpTabCompleter;
-import net.lordofthecraft.arche.commands.tab.CommandPersonaTabCompleter;
-import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.help.HelpFile;
-import net.lordofthecraft.arche.interfaces.Economy;
-import net.lordofthecraft.arche.interfaces.IArcheCore;
-import net.lordofthecraft.arche.interfaces.IConsumer;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.PersonaHandler;
-import net.lordofthecraft.arche.interfaces.PersonaKey;
-import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.interfaces.SkillFactory;
-import net.lordofthecraft.arche.listener.ArmorListener;
-import net.lordofthecraft.arche.listener.ArmorPreventionListener;
-import net.lordofthecraft.arche.listener.BeaconMenuListener;
-import net.lordofthecraft.arche.listener.BlockRegistryListener;
-import net.lordofthecraft.arche.listener.EconomyListener;
-import net.lordofthecraft.arche.listener.ExhaustionListener;
-import net.lordofthecraft.arche.listener.ExperienceOrbListener;
-import net.lordofthecraft.arche.listener.HelpMenuListener;
-import net.lordofthecraft.arche.listener.HelpOverrideListener;
-import net.lordofthecraft.arche.listener.LegacyCommandsListener;
-import net.lordofthecraft.arche.listener.NewbieProtectListener;
-import net.lordofthecraft.arche.listener.PersonaInventoryListener;
-import net.lordofthecraft.arche.listener.PlayerChatListener;
-import net.lordofthecraft.arche.listener.PlayerInteractListener;
-import net.lordofthecraft.arche.listener.PlayerJoinListener;
-import net.lordofthecraft.arche.listener.RacialBonusListener;
-import net.lordofthecraft.arche.listener.TreasureChestListener;
-import net.lordofthecraft.arche.magic.Archenomicon;
-import net.lordofthecraft.arche.persona.ArcheEconomy;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.FatigueDecreaser;
-import net.lordofthecraft.arche.persona.RaceBonusHandler;
-import net.lordofthecraft.arche.save.ArcheExecutor;
-import net.lordofthecraft.arche.save.Consumer;
-import net.lordofthecraft.arche.save.DumpedDBReader;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
-import net.lordofthecraft.arche.skin.SkinCache;
-import net.lordofthecraft.arche.util.WeakBlock;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Timer;
+import java.util.UUID;
+import java.util.logging.Level;
 
 //TODO BungeeCord implementation
 public class ArcheCore extends JavaPlugin implements IArcheCore {
@@ -377,6 +336,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             //saverThread.start();
         });
 
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new PersonaPointNagRunnable(personaHandler), 173, 20 * 30 * 20);
+
         //Start tracking Personas and their playtime.
         new TimeTrackerRunnable(personaHandler).runTaskTimerAsynchronously(this, 2203, 1200);
 
@@ -536,7 +497,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         String profession = ChatColor.GRAY + "/persona profession [skill]: " + ChatColor.GOLD + "Select a profession.\n"
                 + ChatColor.GREEN + "You can select only a single profession and only ONCE, so choose very carefully.\n"
                 + ChatColor.BLUE  + "Depending on your Persona's race, some professions may come easier to you than others.\n"
-                + ChatColor.GRAY  + "You receive special perks for your chosen profession, but beware, as these perks cause @Fatigue@.";
+                + ChatColor.GRAY + "You receive special perks for your chosen profession, but beware, as these perks cause @@Fatigue@@.";
 
         String attributes = ChatColor.GRAY + "Attributes are the various base stats of your Persona. These stats can be anything from how fast your Persona runs to how much fatigue they accumulate. \n"
         		+ ChatColor.GREEN + "Various modifiers on items, spells and foodstuffs can affect these attributes for better or worse.\n"
@@ -611,6 +572,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     public boolean debugMode(){
         return debugMode;
+    }
+
+    public static boolean isDebugging() {
+        return instance.debugMode;
     }
 
     public ArcheTimer getMethodTimer(){

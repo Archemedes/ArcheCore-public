@@ -53,7 +53,9 @@ public class PersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
     @Override
     public void executeStatements() throws SQLException {
-        PreparedStatement statement = conn.prepareStatement("UPDATE " + updatefield.table.getTable() + " SET " + updatefield.field() + "=? WHERE persona_id" + (updatefield.table == PersonaTable.MASTER ? "=" : "_fk=") + "?");/*updatefield.getStatement(conn);*/
+        String sql = "UPDATE " + updatefield.table.getTable() + " SET " + updatefield.field() + "=? WHERE persona_id" + (updatefield.table == PersonaTable.MASTER ? "=" : "_fk=") + "?";
+        ArcheCore.getPlugin().getLogger().info("[SQL] Statement is: " + sql);
+        PreparedStatement statement = conn.prepareStatement(sql);
         if (ArcheCore.usingSQLite()) {
             switch (updatefield) {
                 case PREFIX:

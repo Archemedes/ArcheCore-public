@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.save.rows.persona.update;
 
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.PersonaTable;
@@ -19,7 +20,7 @@ import java.util.logging.Level;
 public class MultiPersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
     final List<PersonaUpdateRow> updateRows = Lists.newArrayList();
-    final List<Persona> personas = Lists.newArrayList();
+    final List<OfflinePersona> personas = Lists.newArrayList();
     final PersonaField field;
     Connection connection;
 

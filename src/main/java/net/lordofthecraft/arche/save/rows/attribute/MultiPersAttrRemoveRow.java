@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.save.rows.attribute;
 
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.rows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.rows.ArchePersonaRow;
@@ -17,7 +18,7 @@ import java.util.logging.Level;
 public class MultiPersAttrRemoveRow implements ArcheMergeableRow, ArchePersonaRow {
 
     private final List<PersAttrRemoveRow> rows = Lists.newArrayList();
-    private final List<Persona> personas = Lists.newArrayList();
+    private final List<OfflinePersona> personas = Lists.newArrayList();
     private Connection connection = null;
 
     public MultiPersAttrRemoveRow(PersAttrRemoveRow row1, PersAttrRemoveRow row2) {

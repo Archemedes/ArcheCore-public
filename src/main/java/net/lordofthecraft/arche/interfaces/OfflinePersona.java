@@ -3,8 +3,12 @@ package net.lordofthecraft.arche.interfaces;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.PersonaInventory;
+import net.lordofthecraft.arche.save.rows.ArchePersonaRow;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.Inventory;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.UUID;
 
@@ -150,5 +154,32 @@ public interface OfflinePersona {
      *
      * @return The loaded persona
      */
-    Persona loadPersona();
+    Persona loadPersona(ResultSet rs) throws SQLException;
+
+    /**
+     * Check whether or not this Persona has had it's SQL removed.
+     * <p>
+     * <b>Why?</b> When performing tasks such as {@link ArchePersonaRow} there is the chance that
+     * a persona might already be removed. In the efforts to ensure that we are not unneedingly running tasks on personas which have no longer exist
+     * this variable is set.
+     * <p>
+     * P.S. Don't set this value manually. Thanks.
+     *
+     * @return If this persona was successfully deleted
+     */
+    boolean isDeleted();
+
+    /**
+     * @return the total playtime of this persona(all maps added)
+     */
+    int getTotalPlaytime();
+
+    /**
+     * Retrieve the total Playtime this Persona has seen since its creation.
+     *
+     * @return Playtime in minutes
+     */
+    int getTimePlayed();
+
+    OfflinePlayer getPlayer();
 }

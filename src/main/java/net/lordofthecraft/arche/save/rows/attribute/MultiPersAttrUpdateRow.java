@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.save.rows.attribute;
 
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.rows.ArcheMergeableRow;
 import net.lordofthecraft.arche.save.rows.ArchePersonaRow;
@@ -17,7 +18,7 @@ import java.util.logging.Level;
 public class MultiPersAttrUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
 
     private final List<PersAttrUpdateRow> rows = Lists.newArrayList();
-    private final List<Persona> personas = Lists.newArrayList();
+    private final List<OfflinePersona> personas = Lists.newArrayList();
     private Connection connection = null;
 
     public MultiPersAttrUpdateRow(PersAttrUpdateRow row1, PersAttrUpdateRow row2) {
@@ -56,7 +57,7 @@ public class MultiPersAttrUpdateRow implements ArcheMergeableRow, ArchePersonaRo
     public void executeStatements() throws SQLException {
         PreparedStatement statement = null;
         try {
-            statement = connection.prepareStatement("UPDATE persona_attributes SET decaytype=? AND decaytime=? AND lostondeath=? WHERE persona_id_fk=? AND mod_uuid=? AND attribute_type=?");
+            statement = connection.prepareStatement("UPDATE persona_attributes SET decaytype=?, decayticks=?, lostondeath=? WHERE persona_id_fk=? AND mod_uuid=? AND attribute_type=?");
             for (PersAttrUpdateRow row : rows) {
                 statement.setString(1, row.mod.getDecayStrategy().name());
                 statement.setLong(2, row.mod.getTicksRemaining());

@@ -1,7 +1,9 @@
 package net.lordofthecraft.arche.attributes;
 
 import com.google.common.base.Preconditions;
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
+import net.lordofthecraft.arche.save.rows.attribute.PersAttrInsertRow;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -63,10 +65,10 @@ public class ArcheAttributeInstance implements AttributeInstance {
 	public void addModifier(AttributeModifier modifier) {
 		//I would prefer if the existing modifier would be replaced by the new modifier
 		//But this is how this function behaves in vanilla in case of conflict
-		addModifier(modifier, false);
-	}
-	
-	public boolean addModifier(AttributeModifier modifier, boolean force) {
+        addModifier(modifier, false, false);
+    }
+
+    public boolean addModifier(AttributeModifier modifier, boolean force, boolean save) {
         Preconditions.checkArgument(modifier != null, "modifier");
 		UUID uuid = modifier.getUniqueId();
 		boolean exists = mods.containsKey(uuid);
@@ -76,8 +78,14 @@ public class ArcheAttributeInstance implements AttributeInstance {
 			
 			ExtendedAttributeModifier mm = modifier instanceof ExtendedAttributeModifier?
                     (ExtendedAttributeModifier) modifier : new ExtendedAttributeModifier(modifier);
+            if (!(modifier instanceof ExtendedAttributeModifier)) {
+                mm.setShouldSave(save);
+            }
             mods.put(uuid, mm);
-			return !exists;
+            if (mm.save) {
+                ArcheCore.getConsumerControls().queueRow(new PersAttrInsertRow(mm, persona.getPersona(), parent));
+            }
+            return !exists;
 		}
 	}
 

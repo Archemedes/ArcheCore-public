@@ -1,7 +1,10 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.persona.*;
-import net.lordofthecraft.arche.save.rows.ArchePersonaRow;
+import net.lordofthecraft.arche.enums.AbilityScore;
+import net.lordofthecraft.arche.persona.MagicAttachment;
+import net.lordofthecraft.arche.persona.PersonaAttributes;
+import net.lordofthecraft.arche.persona.PersonaMagics;
+import net.lordofthecraft.arche.persona.PersonaSkills;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import org.bukkit.entity.Player;
 
@@ -58,8 +61,6 @@ public interface Persona extends OfflinePersona {
 	 * @param profession The skill to be set as main.
 	 */
 	void setMainSkill(Skill profession);
-
-    PersonaAbilityScores scores();
 
     /**
      * See if this persona has a specific magic
@@ -130,12 +131,6 @@ public interface Persona extends OfflinePersona {
 	 * the prefix, but not display it anywhere in the current session.
 	 */
 	void clearPrefix();
-
-	/**
-	 * Retrieve the total Playtime this Persona has seen since its creation.
-	 * @return Playtime in minutes
-	 */
-	int getTimePlayed();
 
 	/**
 	 * Get the amount of characters this player has entered into chat, while playing this Persona, since creation
@@ -244,11 +239,6 @@ public interface Persona extends OfflinePersona {
      */
     boolean isNewbie();
 
-	/**
-	 * @return the total playtime of this persona(all maps added)
-	 */
-	int getTotalPlaytime();
-
     /**
      * Sets the skin of this persona to use
      *
@@ -276,15 +266,16 @@ public interface Persona extends OfflinePersona {
     boolean hasSkin();
 
     /**
-     * Check whether or not this Persona has had it's SQL removed.
-     * <p>
-     * <b>Why?</b> When performing tasks such as {@link ArchePersonaRow} there is the chance that
-     * a persona might already be removed. In the efforts to ensure that we are not unneedingly running tasks on personas which have no longer exist
-     * this variable is set.
-     * <p>
-     * P.S. Don't set this value manually. Thanks.
-     *
-     * @return If this persona was successfully deleted
+     * Gets the respective score of this persona - <b>only</b> gets racial bonus + assigned points
+     * @param score The score to check
+     * @return The integer which is the level of this score
      */
-    boolean isDeleted();
+    int getScore(AbilityScore score);
+
+    /**
+     * Returns a barebones {@link OfflinePersona} which is an unloaded version of this persona
+     *
+     * @return Unloaded Persona
+     */
+    OfflinePersona unloadPersona();
 }

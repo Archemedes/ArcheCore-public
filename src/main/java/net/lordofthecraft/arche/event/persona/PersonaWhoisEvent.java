@@ -1,24 +1,23 @@
 package net.lordofthecraft.arche.event.persona;
 
-import java.util.List;
-
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.md_5.bungee.api.chat.BaseComponent;
+import java.util.List;
 
 /**
  * Event that is sent when a whois call is being made on a Persona
  * @author Sporadic
  */
-public class PersonaWhoisEvent extends PersonaEvent implements Cancellable {
-	final private List<BaseComponent> whatIsSend;
+public class PersonaWhoisEvent extends OfflinePersonaEvent implements Cancellable {
+    final private List<BaseComponent> whatIsSend;
 	final private Query query;
 	final private boolean mod;
-	
-	public PersonaWhoisEvent(Persona p, List<BaseComponent> sent, Query query, boolean mod) {
-		super(p);
+
+    public PersonaWhoisEvent(OfflinePersona p, List<BaseComponent> sent, Query query, boolean mod) {
+        super(p);
 		this.query = query;
 		this.whatIsSend = sent;
 		this.mod = mod;
@@ -49,12 +48,12 @@ public class PersonaWhoisEvent extends PersonaEvent implements Cancellable {
 	public Query getQuery() {
 		return query;
 	}
-	
-	public static enum Query{
-		BASIC, EXTENDED_PROBE, EXTENDED;
-	}
-	
-	//Double boilerplate implementation
+
+    public enum Query {
+        BASIC, EXTENDED_PROBE, EXTENDED
+    }
+
+    //Double boilerplate implementation
 	private static final HandlerList handlers = new HandlerList();
 	private boolean cancelled = false;
 	

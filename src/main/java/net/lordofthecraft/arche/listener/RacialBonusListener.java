@@ -20,7 +20,10 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -88,8 +91,8 @@ public class RacialBonusListener implements Listener {
 
 		Persona ps = handler.getPersona(p);
 		if (ps != null) {
-			RaceBonusHandler.apply(p, ps.getRace());
-			if (handler.getRacespawns().containsKey(ps.getRace())) {
+            RaceBonusHandler.apply(ps, ps.getRace());
+            if (handler.getRacespawns().containsKey(ps.getRace())) {
 				e.setRespawnLocation(handler.getRacespawns().get(ps.getRace()));
 			}
 		}

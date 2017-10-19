@@ -1,32 +1,25 @@
 package net.lordofthecraft.arche.util;
 
-import static org.bukkit.event.inventory.InventoryAction.*;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
+import com.google.common.collect.Lists;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheTimer;
+import net.minecraft.server.v1_12_R1.Container;
+import net.minecraft.server.v1_12_R1.Slot;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventoryView;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Animals;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryInteractEvent;
-import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheTimer;
-import net.minecraft.server.v1_12_R1.Container;
-import net.minecraft.server.v1_12_R1.Slot;
+import static org.bukkit.event.inventory.InventoryAction.*;
 
 public class InventoryUtil {
 
@@ -265,9 +258,9 @@ public class InventoryUtil {
 					is = ev.getCursor();
 					//Full stack can't collect other items
 					if(is.getAmount() >= is.getMaxStackSize()) return result;
-					
-					//Doing the double click over an occuplied slot doesn't cause a collect
-					if(ev.getCurrentItem().getType() != Material.AIR) return result;
+
+                    //Doing the double click over an occupied slot doesn't cause a collect
+                    if(ev.getCurrentItem().getType() != Material.AIR) return result;
 					
 					InventoryView v = ev.getView();
 					InventoryType type = v.getType();

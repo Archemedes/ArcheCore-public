@@ -7,6 +7,8 @@ import net.lordofthecraft.arche.event.persona.PersonaDeactivateEvent;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
+import net.lordofthecraft.arche.save.PersonaField;
+import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
 import net.lordofthecraft.arche.save.rows.player.PlayerInsertRow;
 import net.lordofthecraft.arche.save.rows.player.UpdatePlayerRow;
 import org.bukkit.Bukkit;
@@ -16,6 +18,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.sql.Timestamp;
 
 public class PlayerJoinListener implements Listener {
 	private final ArchePersonaHandler handler;
@@ -41,6 +45,7 @@ public class PlayerJoinListener implements Listener {
 			Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
 			ps.attributes().handleLogin();
             ArcheCore.getConsumerControls().queueRow(new UpdatePlayerRow(p));
+            ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));
         }else {
             //ArcheExecutor.getInstance().put(new PlayerRegisterTask(p.getUniqueId()));
             ArcheCore.getConsumerControls().queueRow(new PlayerInsertRow(p));
@@ -65,8 +70,10 @@ public class PlayerJoinListener implements Listener {
 
         //Stop dupe?
         p.saveData();
-		
-		if(timer != null){
+
+        ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));
+
+        if(timer != null){
 			timer.stopTiming("logout");
 			int size = plug.getPersonaHandler().getPersonas().size();
 			plug.getLogger().info("[Debug] Seen Personas of " + size + " players at logout of "  + e.getPlayer().getName());

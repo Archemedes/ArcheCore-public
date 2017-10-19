@@ -1,27 +1,21 @@
 package net.lordofthecraft.arche.persona;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.logging.Logger;
-
+import com.google.common.collect.Maps;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheTimer;
+import net.lordofthecraft.arche.attributes.*;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.util.MessageUtil;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 
-import com.google.common.collect.Maps;
-
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheTimer;
-import net.lordofthecraft.arche.attributes.ArcheAttribute;
-import net.lordofthecraft.arche.attributes.ArcheAttributeInstance;
-import net.lordofthecraft.arche.attributes.AttributeRegistry;
-import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
-import net.lordofthecraft.arche.attributes.VanillaAttribute;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.util.MessageUtil;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 /**
  * Just fucking end me - Sporadic 2k17
@@ -45,7 +39,10 @@ public class PersonaAttributes {
     
     
     public ArcheAttributeInstance getInstance(ArcheAttribute a) {
-    	return customAttributes.get(a);
+        if (!customAttributes.containsKey(a)) {
+            customAttributes.put(a, new ArcheAttributeInstance(a, persona.getPersonaKey()));
+        }
+        return customAttributes.get(a);
     }
     
     public Collection<ArcheAttribute> getExistingInstances(){
@@ -68,40 +65,44 @@ public class PersonaAttributes {
         VanillaAttribute att = AttributeRegistry.getInstance().getVanillaAttribute(a);
         addModifier(att, m);
     }
-    
+
     public void addModifier(ArcheAttribute a, AttributeModifier m) {
-    	ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
-    	String timerWhy = null;
-    	if(timer != null) {
-    		Logger logger = ArcheCore.getPlugin().getLogger();
-    		logger.info("[Debug] Adding attribute: " + toString(m));
-    		logger.info("[Debug] Current attributes for " + a.getName() + ":");
-    		if(customAttributes.containsKey(a)) {
-    			customAttributes.get(a).getModifiers()
-    			.forEach(x-> logger.info("[Debug] " + toString(x)));
-    		} else {
-    			logger.info("[Debug] NONE!");
-    		}
-    		
-    		timerWhy = "adding attribute to " + MessageUtil.identifyPersona(persona);
-    		timer.startTiming(timerWhy);
-    	}
-    	
-    	ArcheAttributeInstance inst = null;
-    	if(!customAttributes.containsKey(a)) {
-    		inst = new ArcheAttributeInstance(a, persona.getPersonaKey());
-    		customAttributes.put(a, inst);
-    	} else {
-    		inst = customAttributes.get(a);
-    	}
-    	
-    	if(inst.hasModifier(m)) {
-    		//We remove it because the values for this modifier may have changed
-    		inst.removeModifier(m);
-    	}	
-    	
-    	inst.addModifier(m);
-		a.tryApply(inst);
+        addModifier(a, m, false, false);
+    }
+
+    public void addModifier(ArcheAttribute a, AttributeModifier m, boolean force, boolean save) {
+        ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
+        String timerWhy = null;
+        if(timer != null) {
+            Logger logger = ArcheCore.getPlugin().getLogger();
+            logger.info("[Debug] Adding attribute: " + toString(m));
+            logger.info("[Debug] Current attributes for " + a.getName() + ":");
+            if(customAttributes.containsKey(a)) {
+                customAttributes.get(a).getModifiers()
+                        .forEach(x-> logger.info("[Debug] " + toString(x)));
+            } else {
+                logger.info("[Debug] NONE!");
+            }
+
+            timerWhy = "adding attribute to " + MessageUtil.identifyPersona(persona);
+            timer.startTiming(timerWhy);
+        }
+
+        ArcheAttributeInstance inst = null;
+        if(!customAttributes.containsKey(a)) {
+            inst = new ArcheAttributeInstance(a, persona.getPersonaKey());
+            customAttributes.put(a, inst);
+        } else {
+            inst = customAttributes.get(a);
+        }
+
+        if(inst.hasModifier(m)) {
+            //We remove it because the values for this modifier may have changed
+            inst.removeModifier(m);
+        }
+
+        inst.addModifier(m, force, save);
+        a.tryApply(inst);
 
         //ArcheExecutor.getInstance().put(new ArcheAttributeInsertTask(m));
         if(timer != null) timer.stopTiming(timerWhy);
@@ -120,8 +121,8 @@ public class PersonaAttributes {
     		} else {
     			logger.info("[Debug] NONE!");
     		}
-        	
-            timerWhy = String.format("sql-adding attribute to "+ MessageUtil.identifyPersona(persona));
+
+            timerWhy = "sql-adding attribute to " + MessageUtil.identifyPersona(persona);
             timer.startTiming(timerWhy);
         }
 

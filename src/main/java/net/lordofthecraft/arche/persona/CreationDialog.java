@@ -28,7 +28,7 @@ import java.util.Objects;
 
 public class CreationDialog {
 
-    private static final String DIVIDER = ChatColor.LIGHT_PURPLE +
+    public static final String DIVIDER = ChatColor.LIGHT_PURPLE +
             "\n--------------------------------------------------\n" + ChatColor.YELLOW;
     private static final String NOTE = ChatColor.DARK_RED + "" + ChatColor.BOLD +
             "NB:" + ChatColor.YELLOW;
@@ -530,7 +530,7 @@ public class CreationDialog {
                 ArcheCore.getPlugin().getLogger().info("New persona created in the world " + p.getWorld().getName() + " with the uuid of " + p.getWorld().getUID());
             }
             //ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS) {
-            ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, gender, new Timestamp(creationTimeMS));
+            ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, gender, new Timestamp(creationTimeMS), new Timestamp(System.currentTimeMillis()));
             if (context.getSessionData("first") != null) {
                 //Essentially, they keep items they start with :)
                 persona.inv = new PersonaInventory(invBefore, null);
@@ -562,11 +562,12 @@ public class CreationDialog {
                 }
 
             }
+            PersonaPointNagRunnable.nag(persona);
             return Prompt.END_OF_CONVERSATION;
         }
     }
 
-    private class Prefix implements ConversationPrefix{
+    public static class Prefix implements ConversationPrefix {
 
         @Override
         public String getPrefix(ConversationContext context) {

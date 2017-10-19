@@ -1,20 +1,18 @@
 package net.lordofthecraft.arche.util;
 
-import java.util.Arrays;
-import java.util.UUID;
-
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import com.comphenix.protocol.wrappers.nbt.NbtList;
 import com.mojang.authlib.GameProfile;
-
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TranslatableComponent;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.Arrays;
+import java.util.UUID;
 
 import static net.lordofthecraft.arche.util.ReflectionUtil.*;
 
@@ -117,7 +115,20 @@ public class ItemUtil {
 	public static boolean exists(ItemStack is) {
 		return is != null && is.getType() != Material.AIR;
 	}
-	
+
+    public static ItemStack make(Material mat, short durability, String displayName, String... lore) {
+        ItemStack is = new ItemStack(mat);
+        is.setDurability(durability);
+        return decorate(is, displayName, lore);
+    }
+
+    public static ItemStack make(Material mat, short durability, int amount, String displayName, String... lore) {
+        ItemStack is = new ItemStack(mat);
+        is.setDurability(durability);
+        is.setAmount(amount);
+        return decorate(is, displayName, lore);
+    }
+
 	/**
 	 * Conveniently make a new item.
 	 * @param mat Material of button
@@ -140,7 +151,8 @@ public class ItemUtil {
 	public static ItemStack decorate(ItemStack is, String displayName, String... lore) {
 		ItemMeta m = is.getItemMeta();
 		if(displayName.charAt(0) != ChatColor.COLOR_CHAR) displayName = ChatColor.WHITE + displayName;
-		m.setLore(Arrays.asList(lore));
+        m.setDisplayName(displayName);
+        m.setLore(Arrays.asList(lore));
 		is.setItemMeta(m);
 		return is;
 	}
