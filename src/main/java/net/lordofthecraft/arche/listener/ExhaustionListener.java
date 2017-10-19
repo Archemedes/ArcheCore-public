@@ -1,5 +1,8 @@
 package net.lordofthecraft.arche.listener;
 
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.attributes.AttributeRegistry;
+import net.lordofthecraft.arche.interfaces.Persona;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -9,10 +12,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.attributes.AttributeRegistry;
-import net.lordofthecraft.arche.interfaces.Persona;
 
 public class ExhaustionListener implements Listener {
 	
@@ -41,11 +40,11 @@ public class ExhaustionListener implements Listener {
 				int foodLevel = e.getFoodLevel();
 				
 				int divider = 15;
-				double totalExtraFood = exhaustion / divider;
-				int extraFood = (int) (exhaustion / divider);
-				double remainder = (totalExtraFood - extraFood) / totalExtraFood * 4.0;
-				System.out.println("Exhaustion: " + exhaustion + " "  + extraFood + " " + remainder);
-				foodLevel = Math.max(0, foodLevel - extraFood);
+                double totalExtraFood = exhaustion / divider;
+                int extraFood = (int) (exhaustion / divider);
+                double remainder = (totalExtraFood - extraFood) / totalExtraFood * 4.0;
+                System.out.println("Exhaustion: " + exhaustion + " " + extraFood + " " + remainder);
+                foodLevel = Math.max(0, foodLevel - extraFood);
 				e.setFoodLevel(foodLevel);
 				p.setExhaustion((float) remainder);
 			}
