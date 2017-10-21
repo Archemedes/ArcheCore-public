@@ -976,16 +976,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	@Override
-	public double getLuck(@Nonnull Player p) {
-		AttributeInstance instance = p.getAttribute(Attribute.GENERIC_LUCK);
-		if (instance != null) {
-			return instance.getValue();
-		} else {
-			return 0.0d;
-		}
-	}
-
-	@Override
 	public Map<Race, Location> getRacespawns() {
 		return Collections.unmodifiableMap(racespawns);
 	}

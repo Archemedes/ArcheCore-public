@@ -9,7 +9,6 @@ import net.lordofthecraft.arche.skin.SkinCache;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import java.util.UUID;
@@ -165,14 +164,6 @@ public interface IArcheCore {
      * @return If ArcheCore has a DB clone scheduled
      */
 	boolean isCloning();
-
-	/**
-	 * Convenience method to Create a Treasure Chest which draws from a predefined Loot
-	 * Table in the ArcheCore plugin. Treasure Chests can be opened by all players to
-	 * retrieve an item reward (1-2 items)
-	 * @return The Treasure Chest item
-	 */
-	ItemStack giveTreasureChest();
 
 	/** 
 	 * If enabled, ArcheCore gives each of the races defined in its Method some 

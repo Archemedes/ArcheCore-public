@@ -29,7 +29,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -227,8 +226,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     @Override
     public void onLoad(){
         instance = this;
-
-        TreasureChest.init(this);
     }
 
     @Override
@@ -356,9 +353,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
         //Start all our Event listeners
         initListeners();
-
-        //Init treasurechest logging
-        TreasureChest.initSQL();
     }
 
     private void initConfig(){
@@ -425,7 +419,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         getCommand("persona").setExecutor(new CommandPersona(helpdesk, personaHandler, nameChangeDelay, enablePrefixes));
         getCommand("persona").setTabCompleter(new CommandPersonaTabCompleter());
         getCommand("beaconme").setExecutor(new CommandBeaconme());
-        getCommand("treasurechest").setExecutor(new CommandTreasurechest());
         getCommand("realname").setExecutor(new CommandRealname(this));
         getCommand("money").setExecutor(new CommandMoney(helpdesk, economy));
         getCommand("namelog").setExecutor(new CommandNamelog());
@@ -448,7 +441,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         pm.registerEvents(new BeaconMenuListener(this, personaChangeDelay), this);
         pm.registerEvents(new HelpMenuListener(this, helpdesk), this);
         pm.registerEvents(new PlayerChatListener(), this);
-        pm.registerEvents(new TreasureChestListener(), this);
         pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
         pm.registerEvents(new PersonaInventoryListener(), this);
         pm.registerEvents(new ArmorListener(), this);
@@ -684,11 +676,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     @Override
     public boolean isCloning() { return shouldClone; }
-
-    @Override
-    public ItemStack giveTreasureChest(){
-        return TreasureChest.giveChest();
-    }
 
     @Override
     public boolean areRacialBonusesEnabled(){
