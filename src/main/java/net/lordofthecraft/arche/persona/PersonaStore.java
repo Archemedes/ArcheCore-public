@@ -6,15 +6,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -48,6 +51,7 @@ public class PersonaStore {
             "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
             "WHERE player_fk=?";
 	
+    private int max_persona_id = 0;
     
 	private final Map<Integer, ArcheOfflinePersona> allPersonas = new ConcurrentHashMap<>();
 	private final Map<UUID, ArchePersona[]> pendingBlobs = new ConcurrentHashMap<>();
@@ -72,6 +76,12 @@ public class PersonaStore {
     public Collection<ArcheOfflinePersona> getPersonas() {
     	waitUntilPreload();
         return Collections.unmodifiableCollection(allPersonas.values());
+	}
+    
+    public Collection<ArchePersona> getLoadedPersonas() {
+    	Collection<ArchePersona> result = new ArrayList<>();
+    	onlinePersonas.values().stream().forEach( ps-> Arrays.stream(ps).filter(Objects::nonNull).forEach(result::add));
+        return result;
 	}
 
     public ArcheOfflinePersona getPersonaById(int persona_id) {
@@ -180,8 +190,41 @@ public class PersonaStore {
         
         if (timer != null) timer.stopTiming("Loading Personas of " + playerName);
 	}
+	
+	public int getNextPersonaId() {
+		return max_persona_id++;
+	}
 
-	public void preload() { //Run this async
+    public void initMaxPersonaId() {
+        Connection connection = ArcheCore.getSQLControls().getConnection();
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            statement = connection.prepareStatement("SELECT MAX(persona_id) AS 'max_persona_id' FROM persona");
+            rs = statement.executeQuery();
+            if (rs.next()) {
+                max_persona_id = rs.getInt(1);
+                max_persona_id++;
+            } else {
+                ArcheCore.getPlugin().getLogger().warning("We could not retrieve the LAST_INSERT_ID for persona,"
+                		+ " either there are no personas or there is an error."
+                		+ " We'll be starting at 0. This will throw errors if there are actually personas in the Database.");
+            }
+            rs.close();
+            statement.close();
+            connection.close();
+        } catch (SQLException e) {
+            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to set up our persona ID!!! We can't create personas!", e);
+        } finally {
+        	SQLUtils.close(rs);
+        	SQLUtils.close(statement);
+        	SQLUtils.close(connection);
+        }
+
+        ArcheCore.getPlugin().getLogger().info("[ArchePersonaHandler] Persona ID is now set at " + max_persona_id);
+    }
+	
+	public void preload() {
 		ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
 		if (timer != null) timer.startTiming("Preloading personas");
 		

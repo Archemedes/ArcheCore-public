@@ -725,7 +725,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 		PersonaRemoveEvent event = new PersonaRemoveEvent(this, false);
 		Bukkit.getPluginManager().callEvent(event);
-		if(event.isCancelled()) return false;
 
         consumer.queueRow(new PersonaDeleteRow(this));
         //buffer.put(new PersonaDeleteTask(this));

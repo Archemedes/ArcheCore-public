@@ -1,7 +1,30 @@
 package net.lordofthecraft.arche.persona;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.apache.commons.lang.time.DateUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.SQLUtils;
@@ -10,35 +33,37 @@ import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.enums.AbilityScore;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.event.persona.*;
+import net.lordofthecraft.arche.event.persona.PersonaActivateEvent;
+import net.lordofthecraft.arche.event.persona.PersonaDeactivateEvent;
+import net.lordofthecraft.arche.event.persona.PersonaRemoveEvent;
+import net.lordofthecraft.arche.event.persona.PersonaSwitchEvent;
+import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent;
 import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent.Query;
-import net.lordofthecraft.arche.interfaces.*;
+import net.lordofthecraft.arche.interfaces.IConsumer;
+import net.lordofthecraft.arche.interfaces.Magic;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.PersonaHandler;
+import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.persona.insert.PersonaInsertRow;
 import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
+import net.lordofthecraft.arche.save.rows.player.PlayerInsertRow;
+import net.lordofthecraft.arche.save.rows.player.UpdatePlayerRow;
 import net.lordofthecraft.arche.save.rows.skills.DelSkillRow;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.MessageUtil;
-import net.lordofthecraft.arche.util.WeakBlock;
-import net.md_5.bungee.api.chat.*;
-import org.apache.commons.lang.time.DateUtils;
-import org.bukkit.*;
-import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-
-import java.sql.*;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class ArchePersonaHandler implements PersonaHandler {
 	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
-    private static int max_persona_id = 0;
     
     private final PersonaStore store = new PersonaStore();
     private final IConsumer consumer = ArcheCore.getControls().getConsumer();
@@ -52,29 +77,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public static ArchePersonaHandler getInstance(){
 		return instance;
 	}
-
-    public synchronized void updatePersonaID() {
-        Connection connection = ArcheCore.getSQLControls().getConnection();
-        try {
-            PreparedStatement statement = connection.prepareStatement("SELECT MAX(persona_id) AS 'max_persona_id' FROM persona");
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                max_persona_id = rs.getInt(1);
-                max_persona_id++;
-            } else {
-                ArcheCore.getPlugin().getLogger().warning("We could not retrieve the LAST_INSERT_ID for persona,"
-                		+ " either there are no personas or there is an error."
-                		+ " We'll be starting at 0. This will throw errors if there are actually personas in the Database.");
-            }
-            rs.close();
-            statement.close();
-            connection.close();
-        } catch (SQLException e) {
-            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to set up our persona ID!!! We can't create personas!", e);
-        }
-
-        ArcheCore.getPlugin().getLogger().info("[ArchePersonaHandler] Persona ID is now set at " + max_persona_id);
-    }
 
 	@Override
 	public void setModifyDisplayNames(boolean will){
@@ -222,10 +224,10 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		return true;
 	}
-
-    int getNextPersonaId() {
-        return max_persona_id++;
-    }
+	
+	public int getNextPersonaId() {
+		return store.getNextPersonaId();
+	}
 
 	public boolean registerPersona(ArchePersona persona) {
 		if (ArcheCore.getPlugin().debugMode()) {
@@ -440,12 +442,16 @@ public class ArchePersonaHandler implements PersonaHandler {
         return components;
     }
 
+    public void loadPlayer(UUID uuid, String playerName) {
+    	store.loadPersonas(playerName, uuid);
+    }
+    
 	public void joinPlayer(Player p){
 		ArchePersona[] prs = store.implementPersonas(p);
-		
+		RaceBonusHandler.reset(p);
+
 		if(countPersonas(prs) == 0){
-			//Clear Racial Bonuses, if any...
-			RaceBonusHandler.reset(p);
+            ArcheCore.getConsumerControls().queueRow(new PlayerInsertRow(p));
 			if(p.hasPermission("archecore.mayuse")){
 				if(p.hasPermission("archecore.exempt")){
 					if(p.hasPermission("archecore.command.beaconme")) p.sendMessage(ChatColor.LIGHT_PURPLE + "No Personas found. Maybe use " + ChatColor.ITALIC + "/beaconme");
@@ -459,9 +465,18 @@ public class ArchePersonaHandler implements PersonaHandler {
 				}
 			}
 		} else {
-			//TODO
+			ArchePersona ps = getPersona(p);
+			if(ps == null) { //has no current Persona, but does have SOME personas. Rectify.
+				ps = Arrays.stream(prs).filter(Objects::nonNull).findFirst().get();
+				ps.setCurrent(true);
+			} 
+			
+			Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
+			ps.attributes().handleLogin();
+			ps.restoreMinecraftSpecifics(p);
+            ArcheCore.getConsumerControls().queueRow(new UpdatePlayerRow(p));
+            ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));
 		}
-
 	}
 
 	public void initRacespawns(){
@@ -514,11 +529,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	public void removeMagic(Magic magic) {
-        loadedPersonas.values().forEach(pers -> {
-            for (Persona p : pers) {
-				((ArchePersona) p).removeMagicAttachment(magic);
-			}
-		});
+        store.getLoadedPersonas().forEach(pers -> pers.removeMagicAttachment(magic));
 	}
 
 	@Override
@@ -574,5 +585,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		map.put("race", r.name());
 		ArcheCore.getControls().getSQLHandler().remove("persona_race_spawns", map);
 	}
+
+
 
 }

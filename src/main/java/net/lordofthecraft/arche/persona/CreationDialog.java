@@ -536,7 +536,7 @@ public class CreationDialog {
                 persona.inv = new PersonaInventory(invBefore, null);
             }
             persona.setPlayerName(p.getName());
-            if (!ArchePersonaHandler.getInstance().registerPersona(p, persona)) {
+            if (!ArchePersonaHandler.getInstance().registerPersona(persona)) {
                 context.getForWhom().sendRawMessage(ChatColor.RED + "We apologize, something went wrong while creating your persona. Please try again and if the problem persists please make a thread on our Forums under Support");
                 ArcheCore.getPlugin().getLogger().severe("We failed to create a persona for " + p.getName() + "!");
                 return Prompt.END_OF_CONVERSATION;
