@@ -78,6 +78,10 @@ public class ArchePersonaHandler implements PersonaHandler {
 		return instance;
 	}
 	
+	public PersonaStore getPersonaStore() {
+		return store;
+	}
+	
 	public void onEnable() {
 		store.initMaxPersonaId();
 		store.preload();
