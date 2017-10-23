@@ -77,6 +77,12 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public static ArchePersonaHandler getInstance(){
 		return instance;
 	}
+	
+	public void onEnable() {
+		store.initMaxPersonaId();
+		store.preload();
+		this.initRacespawns();
+	}
 
 	@Override
 	public void setModifyDisplayNames(boolean will){

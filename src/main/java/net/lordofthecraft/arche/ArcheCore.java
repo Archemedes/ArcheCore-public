@@ -71,7 +71,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private boolean enablePrefixes;
     private boolean modifyDisplayNames;
     private boolean debugMode;
-    private int cachePersonas;
     private int newbieDelay;
     private int newbieProtectDelay;
     private boolean protectiveTeleport;
@@ -286,7 +285,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         helpdesk = HelpDesk.getInstance();
         skinCache = SkinCache.getInstance();
 
-        personaHandler.updatePersonaID();
+        personaHandler.onEnable();
 
         fatigueHandler.fatigueDecreaseHours = this.fullFatigueRestore;
         timer = debugMode? new ArcheTimer(this) : null;
@@ -315,23 +314,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             res.getStatement().getConnection().close();
         }catch(SQLException e){e.printStackTrace();}
 
-
-        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
-
-            long time = System.currentTimeMillis();
-            getLogger().info("Preloading Personas as far back as " + cachePersonas + " days");
-            personaHandler.initPreload(cachePersonas);
-            getLogger().info("Personas were loaded in " + (System.currentTimeMillis() - time) + "ms.");
-
-            //Incase of a reload, load all Personas for currently logged in players
-            for(Player p : Bukkit.getOnlinePlayers()){
-                personaHandler.initPlayer(p);
-            }
-
-            //Start saving our data
-            //saverThread = new Thread(new DataSaveRunnable(archeExecutor, timer, sqlHandler), "ArcheCore SQL Consumer");
-            //saverThread.start();
-        });
+        //Incase of a reload, load all Personas for currently logged in players
+        for(Player p : Bukkit.getOnlinePlayers()){
+            personaHandler.joinPlayer(p);
+        }
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new PersonaPointNagRunnable(personaHandler), 173, 20 * 30 * 20);
 
@@ -375,7 +361,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         debugMode = config.getBoolean("enable.debug.mode");
         newbieDelay = config.getInt("newbie.notification");
         useWiki = config.getBoolean("enable.wiki.lookup");
-        cachePersonas = config.getInt("persona.cache.time");
         protectiveTeleport = config.getBoolean("teleport.to.rescue");
         teleportNewbies = config.getBoolean("new.persona.to.spawn");
         worldName = config.getString("server.world.name");
@@ -445,7 +430,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         pm.registerEvents(new PersonaInventoryListener(), this);
         pm.registerEvents(new ArmorListener(), this);
         pm.registerEvents(new ExhaustionListener(), this);
-        //if (permissions) pm.registerEvents(new PersonaPermissionListener(personaHandler.getPermHandler()), this);
 
         if (showXpToPlayers) {
             pm.registerEvents(new ExperienceOrbListener(), this);
@@ -703,10 +687,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     public boolean getWikiUsage(){
         return useWiki;
-    }
-
-    public boolean willCachePersonas(){
-        return cachePersonas > 0;
     }
 
     @Override

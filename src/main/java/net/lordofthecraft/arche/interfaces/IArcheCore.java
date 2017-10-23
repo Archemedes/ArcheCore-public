@@ -199,12 +199,6 @@ public interface IArcheCore {
 	boolean isBlockPlayerPlaced(Block b);
 	
 	/**
-	 * Checks if ArcheCore is instructed to preload Personas of players that logged in within a certain time.
-	 * @return If ArcheCore is instructed to preload Personas
-	 */
-	boolean willCachePersonas();
-	
-	/**
 	 * ArcheCore optionally has functionality for money tied to specific Personas. This boolean tells you if it is used 
 	 * @return Whether Economy is enabled
 	 */

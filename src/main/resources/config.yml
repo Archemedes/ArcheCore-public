@@ -44,9 +44,6 @@ show.exp.values: false
 #Whether or not to use the packaged Racial Bonuses in this plugin
 enable.racial.bonuses: true
 
-#Provide a time, in days, within which Persona files will be preloaded (Personas will not be unloaded if >0)
-persona.cache.time: 0
-
 #The current roleplay name of the world we are in
 server.world.name: world
 

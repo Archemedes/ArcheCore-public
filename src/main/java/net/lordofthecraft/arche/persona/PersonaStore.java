@@ -16,7 +16,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
@@ -53,28 +52,13 @@ public class PersonaStore {
 	
     private int max_persona_id = 0;
     
-	private final Map<Integer, ArcheOfflinePersona> allPersonas = new ConcurrentHashMap<>();
+    private final Map<Integer, ArcheOfflinePersona> allPersonas = new HashMap<>();
+	private final Map<UUID, ArchePersona[]> onlinePersonas = new HashMap<>();
+	
 	private final Map<UUID, ArchePersona[]> pendingBlobs = new ConcurrentHashMap<>();
 	private final Map<UUID, Integer> pendingTasks = new ConcurrentHashMap<>();
 	
-	private final Map<UUID, ArchePersona[]> onlinePersonas = new HashMap<>();
-	
-	private boolean needlessOptimization = false;
-	private AtomicBoolean hasPreloaded = new AtomicBoolean(false);
-	
-	private void waitUntilPreload() {
-		if(!needlessOptimization) {
-			synchronized(hasPreloaded) {
-				while(!hasPreloaded.get()) {
-					try {hasPreloaded.wait(); }catch(InterruptedException e) { }
-				}	
-			}
-			needlessOptimization = true;
-		}
-	}
-	
     public Collection<ArcheOfflinePersona> getPersonas() {
-    	waitUntilPreload();
         return Collections.unmodifiableCollection(allPersonas.values());
 	}
     
@@ -85,13 +69,7 @@ public class PersonaStore {
 	}
 
     public ArcheOfflinePersona getPersonaById(int persona_id) {
-    	ArcheOfflinePersona p = allPersonas.get(persona_id);
-        if(!needlessOptimization && p == null) {
-        	waitUntilPreload();
-        	p = allPersonas.get(persona_id);
-        }
-        
-        return p;
+    	return allPersonas.get(persona_id);       
     }
 
 	public ArchePersona getPersona(Player p){
@@ -264,11 +242,6 @@ public class PersonaStore {
             SQLUtils.close(offlineSelectStat);
             SQLUtils.close(playerSelectStat);
             SQLUtils.close(connection);
-            synchronized(hasPreloaded) {
-            	hasPreloaded.set(true);
-            	hasPreloaded.notify();
-            }
-            if(Bukkit.isPrimaryThread()) needlessOptimization = true;
 		}
         
         if (timer != null) timer.stopTiming("Preloading personas");
