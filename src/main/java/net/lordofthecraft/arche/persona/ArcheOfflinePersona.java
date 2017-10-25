@@ -221,9 +221,6 @@ public class ArcheOfflinePersona implements OfflinePersona, InventoryHolder {
         if (ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble(PersonaField.MONEY.field());
         persona.pastPlayTime = res.getInt(PersonaField.STAT_PLAYTIME_PAST.field());
 
-        //We now let all Personas load their skills (albeit lazily). Let's do this now
-        persona.loadSkills();
-
         Connection connection = ArcheCore.getSQLControls().getConnection();
 
         persona.loadMagics(connection);
@@ -232,6 +229,8 @@ public class ArcheOfflinePersona implements OfflinePersona, InventoryHolder {
 
         persona.loadAttributes(connection);
 
+        persona.loadSkills(connection);
+        
         persona.loadSkin(connection);
 
         connection.close();

@@ -51,7 +51,6 @@ import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
 import net.lordofthecraft.arche.save.rows.player.PlayerInsertRow;
 import net.lordofthecraft.arche.save.rows.player.UpdatePlayerRow;
 import net.lordofthecraft.arche.save.rows.skills.DelSkillRow;
-import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
@@ -254,10 +253,10 @@ public class ArchePersonaHandler implements PersonaHandler {
             SkinCache.getInstance().clearSkin(oldPersona);
         }
 
-		//Load skills for the Persona
+/*		//Load skills for the Persona
 		for(ArcheSkill s : ArcheSkillFactory.getSkills().values()){
 			persona.addSkill(s, null);
-		}
+		}*/
 
 		persona.createEmptyTags();
 
