@@ -33,7 +33,8 @@ public enum PersonaField {
     HEALTH("health", PersonaTable.VITALS, JDBCType.DOUBLE),
     FOOD("hunger", PersonaTable.VITALS, JDBCType.INTEGER),
     SATURATION("saturation", PersonaTable.VITALS, JDBCType.FLOAT),
-    POTIONS("potions", PersonaTable.VITALS, JDBCType.VARCHAR);
+    POTIONS("potions", PersonaTable.VITALS, JDBCType.VARCHAR),
+    POINTS("unspent_points", PersonaTable.VITALS, JDBCType.INTEGER);
 
     private static final String STATEMENT_SUFFIX = " = ? WHERE persona_id";
 

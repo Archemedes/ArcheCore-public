@@ -12,15 +12,15 @@ import java.util.*;
 
 public interface PersonaHandler {
 
-    String playerSelect = "SELECT pers1.player_fk,pers1.last_played " +
-            "FROM persona AS pers1 LEFT OUTER JOIN persona AS pers2 ON (pers1.persona_id=pers2.persona_id AND pers1.last_played < pers2.last_played) " +
+    String playerSelect = "SELECT player1.player,player1.player_name,player1.force_preload,pers1.last_played " +
+            "FROM players AS player1 JOIN persona AS pers1 ON player=pers1.player_fk LEFT OUTER JOIN persona AS pers2 ON (pers1.persona_id=pers2.persona_id AND pers1.last_played < pers2.last_played) " +
             "WHERE pers2.last_played IS NULL " +
             "ORDER BY pers1.last_played";
     String personaSelect = "SELECT " +
             "persona_id,slot,race,gender" +
             ",name,curr,race_header,descr,p_type,prefix,money,profession,fatigue,max_fatigue" +
             ",world,x,y,z,inv,ender_inv,potions,health,hunger,saturation,creature" +
-            ",played,chars,renamed,playtime_past,date_created,last_played " +
+            ",played,chars,renamed,playtime_past,date_created,last_played,unspent_points " +
             "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
             "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
             "WHERE player_fk=?";
@@ -34,7 +34,7 @@ public interface PersonaHandler {
             "persona_id,slot,race,gender" +
             ",name,curr,race_header,descr,p_type,prefix,money,profession,fatigue,max_fatigue" +
             ",world,x,y,z,inv,ender_inv,potions,health,hunger,saturation,creature" +
-            ",played,chars,renamed,playtime_past,date_created,last_played " +
+            ",played,chars,renamed,playtime_past,date_created,last_played,unspent_points " +
             "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
             "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
             "WHERE persona_id=?";

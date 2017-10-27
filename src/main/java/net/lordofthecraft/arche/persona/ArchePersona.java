@@ -80,7 +80,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	int food = 0;
     float saturation = 0;
     double health = 0;
-	private Creature creature;
+    int unspent_points = 0;
+    private Creature creature;
 	private WeakReference<Player> playerObject;
 	private TagAttachment attachment;
     private ArcheSkin skin;
@@ -104,6 +105,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
     ArchePersona(ArcheOfflinePersona persona) {
         super(persona.personaKey, persona.creation, persona.lastPlayed, persona.current, persona.race, persona.gender, persona.type, persona.name);
+        player = persona.getPlayerName();
         charactersSpoken = new AtomicInteger();
         lastRenamed = new Timestamp(0);
         pastPlayTime = 0;
@@ -134,9 +136,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		return skills.getSkill(skill);
 	}
 
-	public void setPlayerName(String name) {
-        this.player = name;
-    }
+
 
 	@Override
 	public boolean hasTagKey(String s) {
@@ -465,11 +465,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         consumer.queueRow(new PersonaUpdateRow(this, PersonaField.STAT_CHARS, val, false));
         //buffer.put(new UpdateTask(this, PersonaField.STAT_CHARS, val));
     }
-
-	//@Override
-	public String getPlayerName(){
-		return player;
-	}
 
 	@Override
 	public Player getPlayer(){
@@ -872,6 +867,18 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     public OfflinePersona unloadPersona() {
         //super(persona.personaKey, persona.creation, persona.lastPlayed, persona.current, persona.race, persona.gender, persona.type, persona.name);
         return new ArcheOfflinePersona(personaKey, creation, lastPlayed, current, race, gender, type, name);
+    }
+
+    @Override
+    public void setUnspentPoints(int points) {
+        if (points < 0) points = 0;
+        this.unspent_points = points;
+        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.POINTS, unspent_points, false));
+    }
+
+    @Override
+    public int getUnspentPoints() {
+        return unspent_points;
     }
 
     @Override

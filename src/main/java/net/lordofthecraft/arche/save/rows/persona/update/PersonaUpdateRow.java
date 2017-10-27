@@ -82,10 +82,12 @@ public class PersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow {
                 case Y:
                 case Z:
                 case FOOD:
+                case POINTS:
                     statement.setInt(1, (int) data);
                     break;
                 case STAT_RENAMED:
                 case STAT_CREATION:
+                case STAT_LAST_PLAYED:
                     statement.setTimestamp(1, (Timestamp) data);
                     break;
                 case MONEY:

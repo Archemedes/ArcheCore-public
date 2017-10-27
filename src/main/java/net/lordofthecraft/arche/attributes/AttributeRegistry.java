@@ -19,7 +19,6 @@ public class AttributeRegistry {
     public static final ArcheAttribute SCORE_INTELLECT = new AttributeAbilityScore(AbilityScore.INTELLECT, 0.0);
     public static final ArcheAttribute SCORE_WISDOM = new AttributeAbilityScore(AbilityScore.WISDOM, 0.0);
     public static final ArcheAttribute SCORE_LUCK = new AttributeAbilityScore(AbilityScore.LUCK, 0.0);
-    public static final ArcheAttribute SCORE_UNSPENT = new AttributeAbilityScore(AbilityScore.UNSPENT, 0.0);
 
     public static final ArcheAttribute SCORE_CAP_CONSTITUTION = new AttributeAbilityScoreCap(AbilityScore.CONSTITUTION, 10.0);
     public static final ArcheAttribute SCORE_CAP_STRENGTH = new AttributeAbilityScoreCap(AbilityScore.STRENGTH, 10.0);
@@ -48,7 +47,6 @@ public class AttributeRegistry {
         register(SCORE_INTELLECT);
         register(SCORE_WISDOM);
         register(SCORE_LUCK);
-        register(SCORE_UNSPENT);
 
         register(SCORE_CAP_CONSTITUTION);
         register(SCORE_CAP_STRENGTH);

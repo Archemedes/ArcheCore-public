@@ -55,7 +55,7 @@ public class AttributeSelectMenu implements InventoryHolder {
 
     public AttributeSelectMenu(Persona forWhom) {
         this.persona = forWhom;
-        this.unspentPoints = (int) persona.attributes().getAttributeValue(AttributeRegistry.SCORE_UNSPENT);
+        this.unspentPoints = persona.getUnspentPoints();
         canModify = unspentPoints > 0;
         this.inv = Bukkit.createInventory(this, (canModify ? 9 * 3 : 9), TITLE);
 
@@ -65,7 +65,7 @@ public class AttributeSelectMenu implements InventoryHolder {
                 .withModality(true);
         for (AbilityScore score : AbilityScore.values()) {
             if (score.isChangeable()) {
-                scores.put(score, getScore(score, PersonaHandler.SCORE_ID) + getScore(score, RaceBonusHandler.UUID_RACIAL_SCORE));
+                scores.put(score, getScore(score, PersonaHandler.SCORE_ID));
             }
         }
         buildInventory();
@@ -115,6 +115,8 @@ public class AttributeSelectMenu implements InventoryHolder {
 
     public void updateScoreSlot(AbilityScore score) {
         int currentScore = scores.get(score);
+        int noRacialScore = getScore(score, PersonaHandler.SCORE_ID);
+        int racialScore = getScore(score, RaceBonusHandler.UUID_RACIAL_SCORE);
         int capScore = (int) persona.attributes().getAttributeValue(AttributeRegistry.getInstance().getAttribute("cap_" + score.getName())) + getScore(score, RaceBonusHandler.UUID_RACIAL_SCORE);
         Integer[] slots = abilityButtons.get(score);
         if (currentScore < capScore && unspentPoints > 0 && canModify) {
@@ -137,15 +139,20 @@ public class AttributeSelectMenu implements InventoryHolder {
         }
         inv.setItem((canModify ? slots[1] : slots[1] - 9), ItemUtil.make(score.getItemIcon(),
                 (short) 0,
-                currentScore,
-                score.getStringID() + ": " + ChatColor.RESET + currentScore,
+                currentScore + racialScore,
+                score.getStringID() + ": " + ChatColor.RESET + (currentScore + racialScore),
                 ChatColor.GRAY + score.getDesc()));
-        if (currentScore > 1 && canModify) {
+        if (currentScore > 1 && currentScore > noRacialScore && canModify) {
             inv.setItem(slots[2], ItemUtil.make(Material.CONCRETE,
                     (short) 14,
                     ChatColor.RED + "Subtract point",
                     ChatColor.GRAY + "Remove 1 point from " + score.getName(),
                     ChatColor.GRAY + "which will be added back to the pool"));
+        } else if (canModify && currentScore <= noRacialScore) {
+            inv.setItem(slots[2], ItemUtil.make(Material.BARRIER,
+                    ChatColor.DARK_RED + "Cannot Subtract",
+                    ChatColor.GRAY + "You cannot go",
+                    ChatColor.GRAY + "below " + noRacialScore + " point" + (noRacialScore == 1 ? "" : "s") + " in " + score.getName()));
         } else if (canModify) {
             inv.setItem(slots[2], ItemUtil.make(Material.BARRIER,
                     ChatColor.DARK_RED + "Cannot Subtract",
@@ -227,8 +234,12 @@ public class AttributeSelectMenu implements InventoryHolder {
         @Override
         protected Prompt acceptValidatedInput(ConversationContext conversationContext, boolean b) {
             if (b) {
-                menu.scores.forEach((score, i) -> menu.persona.attributes().addModifier(AttributeRegistry.getSAttribute(score.getName()), new AttributeModifier(PersonaHandler.SCORE_ID, score.getName(), i, AttributeModifier.Operation.ADD_NUMBER), true, true));
-                menu.persona.attributes().addModifier(AttributeRegistry.SCORE_UNSPENT, new AttributeModifier(PersonaHandler.SCORE_ID, "Unspent Points", menu.unspentPoints, AttributeModifier.Operation.ADD_NUMBER), true, true);
+                menu.scores.forEach((score, i) -> {
+                    if (menu.getScore(score, PersonaHandler.SCORE_ID) != i) {
+                        menu.persona.attributes().addModifier(AttributeRegistry.getSAttribute(score.getName()), new AttributeModifier(PersonaHandler.SCORE_ID, score.getName(), i, AttributeModifier.Operation.ADD_NUMBER), true, true);
+                    }
+                });
+                menu.persona.setUnspentPoints(menu.unspentPoints);
                 conversationContext.getForWhom().sendRawMessage(ChatColor.GREEN + "Success! Your points have been successfully spent.");
             } else {
                 menu.show();
@@ -243,7 +254,8 @@ public class AttributeSelectMenu implements InventoryHolder {
             menu.scores.entrySet().parallelStream()
                     .sorted(Comparator.comparingInt(o -> o.getKey().ordinal()))
                     .forEach((score) -> context.getForWhom().sendRawMessage(score.getKey().getStringID() + ": " + ChatColor.RESET + score.getValue()));
-            context.getForWhom().sendRawMessage(ChatColor.YELLOW + "Is this correct? Yes/No");
+            context.getForWhom().sendRawMessage(ChatColor.YELLOW + "Is this correct? Yes/No\n" + ChatColor.RED.toString() + ChatColor.BOLD + "Warning! You cannot change once set!");
+
             return CreationDialog.DIVIDER;
         }
     }

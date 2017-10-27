@@ -90,10 +90,12 @@ public class MultiPersonaUpdateRow implements ArcheMergeableRow, ArchePersonaRow
                             case Y:
                             case Z:
                             case FOOD:
+                            case POINTS:
                                 statement.setInt(1, (int) row.data);
                                 break;
                             case STAT_RENAMED:
                             case STAT_CREATION:
+                            case STAT_LAST_PLAYED:
                                 statement.setTimestamp(1, (Timestamp) row.data);
                                 break;
                             case MONEY:

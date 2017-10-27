@@ -251,6 +251,10 @@ public interface Persona extends OfflinePersona {
      */
     void removeSkin();
 
+    void setUnspentPoints(int points);
+
+    int getUnspentPoints();
+
     /**
      * Get the current skin on this persona
      *

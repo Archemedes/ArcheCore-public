@@ -257,7 +257,7 @@ public final class ArcheTables {
     protected static void createPersonaVitalsTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS persona_vitals (" +
                 "persona_id_fk INT UNSIGNED," +
-                "world CHAR(36) DEFAULT 'gofuckyourselfgofuckyourselfgofuckyo'," +
+                "world CHAR(36)," +
                 "x INT NOT NULL," +
                 "y INT NOT NULL," +
                 "z INT NOT NULL," +
@@ -268,6 +268,7 @@ public final class ArcheTables {
                 "hunger INT DEFAULT 20," +
                 "saturation FLOAT DEFAULT 0.0," +
                 "creature VARCHAR(255) DEFAULT NULL," +
+                "unspent_points INT UNSIGNED DEFAULT 0," +
                 "PRIMARY KEY (persona_id_fk)," +
                 "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT," +
                 "FOREIGN KEY (creature) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE RESTRICT" +
@@ -382,6 +383,22 @@ public final class ArcheTables {
                 ")" +
                 end);
     }
+
+    protected static void createBlockTable(Statement statement, String end) throws SQLException {
+        statement.executeUpdate("CREATE TABLE IF NOT EXISTS blocks (" +
+                "date TIMESTAMP," +
+                "world CHAR(36) NOT NULL," +
+                "x INT," +
+                "y INT," +
+                "z INT," +
+                "drop BOOLEAN DEFAULT TRUE," +
+                "decay BOOLEAN DEFAULT FALSE," +
+                "" +
+                ")" +
+                end);
+    }
+
+
 
     protected static void createBlockRegistryTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS blockregistry (" +

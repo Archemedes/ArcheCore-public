@@ -333,7 +333,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
         persona.saveMinecraftSpecifics(p);
 
-        persona.attributes.addModifier(AttributeRegistry.SCORE_UNSPENT, new AttributeModifier(PersonaHandler.SCORE_ID, "unspent_points", 22, AttributeModifier.Operation.ADD_NUMBER), true, true);
+        persona.setUnspentPoints(22);
+        //persona.attributes.addModifier(AttributeRegistry.SCORE_UNSPENT, new AttributeModifier(PersonaHandler.SCORE_ID, "unspent_points", 22, AttributeModifier.Operation.ADD_NUMBER), true, true);
         Arrays.asList(AbilityScore.values()).parallelStream().filter(AbilityScore::isChangeable).forEach(a -> persona.attributes.addModifier(AttributeRegistry.getSAttribute(a.getName()), new AttributeModifier(SCORE_ID, a.getName(), 1, AttributeModifier.Operation.ADD_NUMBER), true, true));
 
         RaceBonusHandler.apply(persona, persona.getRace());
@@ -579,6 +580,7 @@ public class ArchePersonaHandler implements PersonaHandler {
                         ArcheCore.getPlugin().getLogger().info("We've now loaded " + MessageUtil.identifyPersona(persona));
                     }
                     //personas.remove(ps.getPersonaId());
+                    persona.setPlayerName(p.getName());
                     personas.put(persona.getPersonaId(), persona);
                     prs[persona.getSlot()] = persona;
                     if (persona.current) {
@@ -738,7 +740,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		persona.timePlayed.set(res.getInt(PersonaField.STAT_PLAYED.field()));
 		persona.charactersSpoken.set(res.getInt(PersonaField.STAT_CHARS.field()));
 		persona.lastRenamed = res.getTimestamp(PersonaField.STAT_RENAMED.field());
-		//persona.gainsXP = res.getBoolean(15);
+        persona.unspent_points = res.getInt(PersonaField.POINTS.field());
+        //persona.gainsXP = res.getBoolean(15);
 		persona.skills.setMainProfession(ArcheSkillFactory.getSkill(res.getString(PersonaField.SKILL_SELECTED.field())));
         Optional<Creature> creature = ArcheCore.getMagicControls().getCreatureById(res.getString("creature"));
         creature.ifPresent(persona.magics::setCreature);
@@ -817,7 +820,8 @@ public class ArchePersonaHandler implements PersonaHandler {
             ResultSet res = statement.executeQuery(playerSelect);
 
             while(res.next()){
-                UUID uuid = UUID.fromString(res.getString("player_fk"));
+                UUID uuid = UUID.fromString(res.getString("player"));
+                String player_name = res.getString("player_name");
                 Timestamp timestamp = res.getTimestamp("last_played");
                 OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
 
@@ -827,7 +831,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 				/*if(prs == null){ //Apparently not, see if we should based on player login time
                     long days = (time - p.getLastPlayed()) / (1000L * 3600L * 24L);
-					TODO preload force
 					if (days > range  ) continue; //Player file too old, don't preload
 
 					//Preload, generate a Persona file
@@ -835,7 +838,7 @@ public class ArchePersonaHandler implements PersonaHandler {
                     loadedPersonas.put(uuid, prs);
                 }*/
                 ResultSet rs;
-                if (timestamp.after(threshhold)) {
+                if (timestamp.after(threshhold) || res.getBoolean("force_preload")) {
                     if (prs == null) {
                         prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
                         loadedPersonas.put(uuid, prs);
@@ -844,6 +847,7 @@ public class ArchePersonaHandler implements PersonaHandler {
                     rs = selectStatement.executeQuery();
                     while (rs.next()) {
                         ArchePersona persona = buildPersona(rs, p);
+                        persona.setPlayerName(player_name);
                         prs[persona.getSlot()] = persona;
                         personas.putIfAbsent(persona.getPersonaId(), persona);
                     }
@@ -852,6 +856,7 @@ public class ArchePersonaHandler implements PersonaHandler {
                     rs = lightSelect.executeQuery();
                     while (rs.next()) {
                         ArcheOfflinePersona persona = buildOfflinePersona(rs, p);
+                        persona.setPlayerName(player_name);
                         personas.putIfAbsent(persona.getPersonaId(), persona);
                     }
                 }

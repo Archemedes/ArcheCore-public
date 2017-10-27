@@ -41,7 +41,7 @@ public class ArcheOfflinePersona implements OfflinePersona, InventoryHolder {
     volatile String name;
     Timestamp lastRenamed;
     int pastPlayTime; //stat_playtime_past
-
+    String player;
 
     ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, boolean current, Race race, String gender, PersonaType type, String name) {
         this.personaKey = personaKey;
@@ -89,8 +89,7 @@ public class ArcheOfflinePersona implements OfflinePersona, InventoryHolder {
 
     @Override
     public String getPlayerName() {
-        //TODO return player name
-        return null;
+        return player;
     }
 
     @Override
@@ -273,5 +272,9 @@ public class ArcheOfflinePersona implements OfflinePersona, InventoryHolder {
     @Override
     public int getTimePlayed() {
         return timePlayed.get();
+    }
+
+    public void setPlayerName(String name) {
+        this.player = name;
     }
 }

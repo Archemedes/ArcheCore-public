@@ -276,11 +276,7 @@ public class CommandPersona implements CommandExecutor {
                 }
                 Persona pers = (Persona) opers;
                 if (cmd == PersonaCommand.POINTS) {
-                    if (args.length > 1 && args[1].equalsIgnoreCase("spend")) {
-                        AttributeSelectMenu.open(pers);
-                        return true;
-                    }
-                    //TODO print points
+                    AttributeSelectMenu.open(pers);
                     return true;
                 } else if (cmd == PersonaCommand.CREATED) {
                     String time = millsToDaysHours(System.currentTimeMillis() - pers.getCreationTime().getTime());
@@ -297,7 +293,7 @@ public class CommandPersona implements CommandExecutor {
                 } else if (cmd == PersonaCommand.LIST) {
                     ArchePersona[] personas = handler.getAllPersonas(pers.getPlayerUUID());
                     sender.sendMessage(ChatColor.AQUA + ArcheCore.getPlugin().getServer().getOfflinePlayer(pers.getPlayerUUID()).getName() + "'s personas:");
-                    for (int i = 0; i <= 3; i++) {
+                    for (int i = 0; i <= ArcheCore.getPlugin().personaSlots(); i++) {
                         Persona persona = personas[i];
                         if (persona != null) {
                             sender.sendMessage(ChatColor.GRAY + "[" + i + "] " + ChatColor.AQUA + persona.getName());
