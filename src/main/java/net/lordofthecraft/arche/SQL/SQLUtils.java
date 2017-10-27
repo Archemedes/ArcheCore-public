@@ -1,7 +1,9 @@
 package net.lordofthecraft.arche.SQL;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 
 /**
@@ -66,4 +68,36 @@ public class SQLUtils {
             }
         }
     }
+    
+    public static void close(ResultSet closable) {
+    	if(closable != null){
+    		try {
+    			closable.close();
+    		} catch(SQLException e) {
+    			e.printStackTrace();
+    		}
+    	}
+    }
+    
+    public static void close(Statement closable) {
+    	if(closable != null){
+    		try {
+    			closable.close();
+    		} catch(SQLException e) {
+    			e.printStackTrace();
+    		}
+    	}
+    }
+    
+    public static void close(Connection closable) {
+    	if(closable != null){
+    		try {
+    			closable.close();
+    		} catch(SQLException e) {
+    			e.printStackTrace();
+    		}
+    	}
+    }
+    
+    
 }

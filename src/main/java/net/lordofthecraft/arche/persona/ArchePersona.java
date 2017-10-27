@@ -24,10 +24,7 @@ import net.lordofthecraft.arche.save.rows.persona.delete.PersonaDeleteRow;
 import net.lordofthecraft.arche.save.rows.persona.insert.SkinRow;
 import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
 import net.lordofthecraft.arche.save.rows.persona.update.VitalsUpdateRow;
-import net.lordofthecraft.arche.save.tasks.skills.SelectSkillTask;
-import net.lordofthecraft.arche.skill.ArcheSkill;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-import net.lordofthecraft.arche.skill.SkillData;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.MessageUtil;
@@ -52,7 +49,6 @@ import org.bukkit.potion.PotionEffect;
 import java.lang.ref.WeakReference;
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -119,10 +115,10 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         return personaKey.getPersonaID();
     }
 
-	public void addSkill(ArcheSkill skill, FutureTask<SkillData> future){
+/*	public void addSkill(ArcheSkill skill, FutureTask<SkillData> future){
 		SkillAttachment attach = new SkillAttachment(skill, this, future);
 		skills.addSkillAttachment(attach);
-	}
+	}*/
 
 	public PersonaSkills skills() {
 		return skills;
@@ -266,18 +262,27 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         }
     }
 
-	void loadSkills(){
-        //TODO no lazy loading.
-        for(ArcheSkill s : ArcheSkillFactory.getSkills().values()){
-
-			//Start loading this Persona's Skill data for this one particular skill
-			SelectSkillTask task = new SelectSkillTask(this, s);
-			FutureTask<SkillData> fut = task.getFuture();
-
-            //buffer.put(task);
-
-			addSkill(s, fut);
-		}
+	void loadSkills(Connection connection){
+        String sql = "SELECT skill_id,xp,visible FROM persona_skills WHERE persona_id_fk=?";
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, personaKey.getPersonaID());
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+            	String skill_id = rs.getString(1);
+            	double xp = rs.getDouble(2);
+            	boolean visible = rs.getBoolean(3);
+            	Skill skill = ArcheSkillFactory.getSkill(skill_id);
+            	
+        		SkillAttachment attach = new SkillAttachment(skill, this, xp, visible);
+        		skills.addSkillAttachment(attach);
+            }
+            
+            rs.close();
+            statement.close();
+        } catch (SQLException ex) {
+            ArcheCore.getPlugin().getLogger().log(Level.WARNING, "Failed to create skills for persona " + MessageUtil.identifyPersona(this), ex);
+        }
 	}
 
     void loadAttributes(Connection conn) {
@@ -720,7 +725,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 		PersonaRemoveEvent event = new PersonaRemoveEvent(this, false);
 		Bukkit.getPluginManager().callEvent(event);
-		if(event.isCancelled()) return false;
 
         consumer.queueRow(new PersonaDeleteRow(this));
         //buffer.put(new PersonaDeleteTask(this));

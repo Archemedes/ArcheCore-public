@@ -9,7 +9,6 @@ import net.lordofthecraft.arche.skin.SkinCache;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import java.util.UUID;
@@ -166,14 +165,6 @@ public interface IArcheCore {
      */
 	boolean isCloning();
 
-	/**
-	 * Convenience method to Create a Treasure Chest which draws from a predefined Loot
-	 * Table in the ArcheCore plugin. Treasure Chests can be opened by all players to
-	 * retrieve an item reward (1-2 items)
-	 * @return The Treasure Chest item
-	 */
-	ItemStack giveTreasureChest();
-
 	/** 
 	 * If enabled, ArcheCore gives each of the races defined in its Method some 
 	 * unique stat bonuses to make each race unique.
@@ -206,12 +197,6 @@ public interface IArcheCore {
 	 * @return If the called block was placed by a player this session.
 	 */
 	boolean isBlockPlayerPlaced(Block b);
-	
-	/**
-	 * Checks if ArcheCore is instructed to preload Personas of players that logged in within a certain time.
-	 * @return If ArcheCore is instructed to preload Personas
-	 */
-	boolean willCachePersonas();
 	
 	/**
 	 * ArcheCore optionally has functionality for money tied to specific Personas. This boolean tells you if it is used 

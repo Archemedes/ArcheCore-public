@@ -248,12 +248,7 @@ public class ArcheSkill implements Skill {
 	}
 	
 	private SkillAttachment getAttachment(Persona pers){
-		SkillAttachment attach = ((ArchePersona) pers).getSkill(this);
-		
-		if(!attach.isInitialized())
-			attach.initialize();
-		
-		return attach;
+		return ((ArchePersona) pers).getSkill(this);
 	}
 
 	@Override

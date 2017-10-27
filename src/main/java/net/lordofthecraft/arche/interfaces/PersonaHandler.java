@@ -7,46 +7,10 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 
 public interface PersonaHandler {
-
-    String playerSelect = "SELECT player1.player,player1.player_name,player1.force_preload,pers1.last_played " +
-            "FROM players AS player1 JOIN persona AS pers1 ON player=pers1.player_fk LEFT OUTER JOIN persona AS pers2 ON (pers1.persona_id=pers2.persona_id AND pers1.last_played < pers2.last_played) " +
-            "WHERE pers2.last_played IS NULL " +
-            "ORDER BY pers1.last_played";
-    String personaSelect = "SELECT " +
-            "persona_id,slot,race,gender" +
-            ",name,curr,race_header,descr,p_type,prefix,money,profession,fatigue,max_fatigue" +
-            ",world,x,y,z,inv,ender_inv,potions,health,hunger,saturation,creature" +
-            ",played,chars,renamed,playtime_past,date_created,last_played,unspent_points " +
-            "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
-            "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
-            "WHERE player_fk=?";
-    String lightPersonaSelect = "SELECT " +
-            "persona_id,slot,name,curr,inv,ender_inv,date_created,race,gender,last_played,p_type " +
-            "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
-            "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
-            "WHERE player_fk=?";
-
-    String personaLoadSelect = "SELECT " +
-            "persona_id,slot,race,gender" +
-            ",name,curr,race_header,descr,p_type,prefix,money,profession,fatigue,max_fatigue" +
-            ",world,x,y,z,inv,ender_inv,potions,health,hunger,saturation,creature" +
-            ",played,chars,renamed,playtime_past,date_created,last_played,unspent_points " +
-            "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
-            "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
-            "WHERE persona_id=?";
-
-
     UUID SCORE_ID = UUID.fromString("6898332e-abce-4da9-a284-9b34c4df751a");
-
-	/**
-	 * @return If archecore is currently preloading personas
-	 */
-
-	boolean isPreloading();
 
 	/**
 	 * Set whether or not ArcheCore should continue to modify Bukkit Display Names to reflect Persona names
@@ -82,13 +46,6 @@ public interface PersonaHandler {
     Collection<ArcheOfflinePersona> getPersonas();
 
 	/**
-	 * Attempts to find a Persona uniquely corresponding to a Persona Key. Persona may not exist or may not be loaded
-	 * @param key The PersonaKey to look with
-	 * @return the Persona (null if not found)
-	 */
-	Persona getPersona(PersonaKey key);
-
-	/**
 	 * Attempts to find a Persona corresponding to a Player UUID and id. Persona may not exist or may not be loaded
 	 * @param uuid The Player UUID to look for
 	 * @param id The internal persona id 0-3
@@ -109,7 +66,7 @@ public interface PersonaHandler {
      * @param persona_id The int id of this persona
      * @return The Persona which is wrapped in an Optional
      */
-    Optional<ArcheOfflinePersona> getPersonaById(int persona_id);
+    ArcheOfflinePersona getPersonaById(int persona_id);
 
     /**
      * Fetch a Player's current Persona
@@ -200,15 +157,6 @@ public interface PersonaHandler {
 	 */
 
     List<BaseComponent> whoisMore(OfflinePersona p, boolean mod, boolean self);
-
-	/**
-	 * Gets the value of the luck attribute for a player
-	 *
-	 * @param p The player to check
-	 * @return The double value of the attribute, 0.0 if none found or none assigned
-	 */
-
-	double getLuck(@Nonnull Player p);
 
 	/**
 	 * Gets the races which have unique spawns assigned to them

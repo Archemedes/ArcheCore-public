@@ -22,33 +22,42 @@ public class PersonaInventory {
         this.enderContents = enderContents;
     }
 
-    public static PersonaInventory restore(String inv, String enderinv) throws InvalidConfigurationException {
-        YamlConfiguration config = new YamlConfiguration();
+    @SuppressWarnings("unchecked")
+	public static PersonaInventory restore(String inv, String enderinv) {
+    	YamlConfiguration config = new YamlConfiguration();
+    	ItemStack[] contents, enderContents;
+    	try {
+    		if(inv != null) {
+    			config.loadFromString(inv);
+    			List<ItemStack> result = config.getList("contents").stream()
+    					.map(ent -> (Map<String, Object>) ent)
+    					.map(ent -> ent == null ? null : ItemStack.deserialize(ent))
+    					.collect(Collectors.toList());
+    			contents = result.toArray(new ItemStack[result.size()]);
 
-        config.loadFromString(inv);
-        if(config.getKeys(false).contains("contents")) {
-            @SuppressWarnings("unchecked")
-			List<ItemStack> result = config.getList("contents").stream()
-                    .map(ent -> (Map<String, Object>) ent)
-                    .map(ent -> ent == null ? null : ItemStack.deserialize(ent))
-                    .collect(Collectors.toList());
-        	ItemStack[] contents = result.toArray(new ItemStack[result.size()]);
-            if (enderinv != null) {
-                YamlConfiguration enderconfig = new YamlConfiguration();
-                enderconfig.loadFromString(enderinv);
-                if (enderconfig.getKeys(false).contains("contents")) {
-                    List<ItemStack> enderresult = config.getList("contents").stream()
-                            .map(ent -> (Map<String, Object>) ent)
-                            .map(ent -> ent == null ? null : ItemStack.deserialize(ent))
-                            .collect(Collectors.toList());
-                    ItemStack[] endercontents = enderresult.toArray(new ItemStack[enderresult.size()]);
-                    return new PersonaInventory(contents, endercontents);
-                }
-            }
+    		} else {
+    			contents = new ItemStack[InventoryType.PLAYER.getDefaultSize()];
+    		}
 
-            return new PersonaInventory(contents, new ItemStack[InventoryType.ENDER_CHEST.getDefaultSize()]);
-        } else throw new InvalidConfigurationException("Config node 'contents' not found! Should always be there and should always be the only tag!");
+    		if (enderinv != null) {
+    			config = new YamlConfiguration();
+    			config.loadFromString(enderinv);
+    			List<ItemStack> enderresult = config.getList("contents").stream()
+    					.map(ent -> (Map<String, Object>) ent)
+    					.map(ent -> ent == null ? null : ItemStack.deserialize(ent))
+    					.collect(Collectors.toList());
+    			enderContents = enderresult.toArray(new ItemStack[enderresult.size()]);
+    		} else {
+    			enderContents = new ItemStack[InventoryType.ENDER_CHEST.getDefaultSize()];
+    		}
 
+    	} catch(InvalidConfigurationException e) {
+    		contents = new ItemStack[InventoryType.PLAYER.getDefaultSize()];
+    		enderContents = new ItemStack[InventoryType.ENDER_CHEST.getDefaultSize()];
+    		e.printStackTrace();
+    	}
+    	
+        return new PersonaInventory(contents, enderContents);
     }
 
     public static PersonaInventory store(Player p) {

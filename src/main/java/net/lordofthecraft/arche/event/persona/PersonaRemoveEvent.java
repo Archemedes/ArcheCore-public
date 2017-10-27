@@ -1,14 +1,14 @@
 package net.lordofthecraft.arche.event.persona;
 
-import net.lordofthecraft.arche.interfaces.Persona;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
+
+import net.lordofthecraft.arche.interfaces.Persona;
 
 /**
  * Called when a Persona is removed, even if to make room for a new Persona that is being created.
  * Cancelling this event will also cancel Persona creation if two Personas compete for the same id.
  */
-public class PersonaRemoveEvent extends PersonaDeactivateEvent implements Cancellable {
+public class PersonaRemoveEvent extends PersonaDeactivateEvent {
 	private static final HandlerList handlers = new HandlerList();
 	private final boolean makeRoom;
 	//Generic Cancellable implementation
@@ -35,8 +35,5 @@ public class PersonaRemoveEvent extends PersonaDeactivateEvent implements Cancel
 	public boolean isToMakeRoom(){
 		return makeRoom;
 	}
-
-	@Override public boolean isCancelled() { return cancelled ; }
-	@Override public void setCancelled(boolean cancelled) { this.cancelled = cancelled ; }
 
 }

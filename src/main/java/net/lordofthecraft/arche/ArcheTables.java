@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class ArcheTables {
 
@@ -18,7 +19,8 @@ public final class ArcheTables {
     public static boolean setUpSQLTables(SQLHandler sqlHandler) {
         try {
             ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
-            if (timer != null) {
+            boolean debug = timer != null;
+            if (debug) {
                 timer.startTiming("Database Creation");
             }
             Connection conn = sqlHandler.getConnection();
@@ -27,46 +29,47 @@ public final class ArcheTables {
 
             String end = getEndingString(sqlHandler);
 
-            ArcheCore.getPlugin().getLogger().info("Creating player table...");
+            Logger l = ArcheCore.getPlugin().getLogger();            
+            if(debug) l.info("[Debug] Creating player table...");
             createPlayerTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with Player! Creating skins table...");
+            if(debug) l.info("[Debug] Done with Player! Creating skins table...");
             createPersonaSkinsTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with Skins! Creating skills table...");
+            if(debug) l.info("[Debug] Done with Skins! Creating skills table...");
             createSkillsTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with skills! Creating persona...");
+            if(debug) l.info("[Debug] Done with skills! Creating persona...");
             createPersonaTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with persona! Creating persona stats...");
+            if(debug) l.info("[Debug] Done with persona! Creating persona stats...");
             createPerPersonaSkinTable(statement, end);
             createPersonaStatsTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with persona stats! Creating persona tags...");
+            if(debug) l.info("[Debug] Done with persona stats! Creating persona tags...");
             createPersonaTagsTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with persona tags! Creating archetypes...");
+            if(debug) l.info("[Debug] Done with persona tags! Creating archetypes...");
             createArchetypeTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with archetypes! Creating magics...");
+            if(debug) l.info("[Debug] Done with archetypes! Creating magics...");
             createMagicTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with magics! Creating weaknesses....");
+            if(debug) l.info("[Debug] Done with magics! Creating weaknesses....");
             createMagicWeaknesses(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with weaknesses! Creating creatures...");
+            if(debug) l.info("[Debug] Done with weaknesses! Creating creatures...");
             createCreaturesTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with creatures! Creating creature creators...");
+            if(debug) l.info("[Debug] Done with creatures! Creating creature creators...");
             createCreatureCreators(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with creature creators! Creating creature abilities...");
+            if(debug) l.info("[Debug] Done with creature creators! Creating creature abilities...");
             createCreatureAbilities(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with creature abilities! Creating persona vitals...");
+            if(debug) l.info("[Debug] Done with creature abilities! Creating persona vitals...");
             createPersonaVitalsTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with persona vitals! Creating persona attributes...");
+            if(debug) l.info("[Debug] Done with persona vitals! Creating persona attributes...");
             createPersonaAttributes(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with persona attributes! Creating racial skills...");
+            if(debug) l.info("[Debug] Done with persona attributes! Creating racial skills...");
             createRacialSkillsTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with racial skills! Creating persona skills...");
+            if(debug) l.info("[Debug] Done with racial skills! Creating persona skills...");
             createPersonaSkillsTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with persona skills! Creating persona magics...");
+            if(debug) l.info("[Debug] Done with persona skills! Creating persona magics...");
             createPersonaMagicsTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with persona magics! Creating persona names...");
+            if(debug) l.info("[Debug] Done with persona magics! Creating persona names...");
             createPersonaNamesTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with persona names! Creating persona spawns...");
+            if(debug) l.info("[Debug] Done with persona names! Creating persona spawns...");
             createPersonaSpawnsTable(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with persona spawns! Creating block registry...");
+            if(debug) l.info("[Debug] Done with persona spawns! Creating block registry...");
             createBlockRegistryTable(statement, end);
 
             if (sqlHandler instanceof WhySQLHandler) {
@@ -75,20 +78,20 @@ public final class ArcheTables {
                 //If we're using MySQL. Sorry SQLite fangays.
 
                 //If it's SQLite check net.lordofthecraft.arche.save.rows.persona.delete.PersonaDeleteRow for how it's handled.
-                ArcheCore.getPlugin().getLogger().info("Done with block registry! Creating logging tables...");
+                if(debug) l.info("[Debug] Done with block registry! Creating logging tables...");
                 createLoggingTables(statement, end, false);
-                ArcheCore.getPlugin().getLogger().info("Done with logging tables! Creating delete procedure...");
+                if(debug) l.info("[Debug] Done with logging tables! Creating delete procedure...");
                 try {
                     createDeleteProcedure(statement);
                     ArcheCore.getPlugin().setUseDeleteProcedure(true);
                 } catch (Exception e) {
-                    ArcheCore.getPlugin().getLogger().warning("Failed to instantiate the delete procedure");
+                    l.warning("Failed to instantiate the delete procedure");
                 }
             }
             createEconomyLogging(statement, end);
-            ArcheCore.getPlugin().getLogger().info("Done with economy log! All done!");
+            if(debug) l.info("[Debug] Done with economy log! All done!");
             conn.commit();
-            ArcheCore.getPlugin().getLogger().info("We've finished with committing all tables now.");
+            l.info("We've finished with committing all tables now.");
             statement.close();
             conn.close();
             if (timer != null) {
@@ -96,7 +99,6 @@ public final class ArcheTables {
             }
         } catch (Exception e) {
             ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to create Archecore.db! Stopping!", e);
-            //Bukkit.getPluginManager().disablePlugin(ArcheCore.getPlugin());
             return false;
         }
         return true;

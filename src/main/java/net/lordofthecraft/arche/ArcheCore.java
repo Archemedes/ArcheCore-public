@@ -29,7 +29,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -72,7 +71,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private boolean enablePrefixes;
     private boolean modifyDisplayNames;
     private boolean debugMode;
-    private int cachePersonas;
     private int newbieDelay;
     private int newbieProtectDelay;
     private boolean protectiveTeleport;
@@ -227,8 +225,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     @Override
     public void onLoad(){
         instance = this;
-
-        TreasureChest.init(this);
     }
 
     @Override
@@ -289,7 +285,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         helpdesk = HelpDesk.getInstance();
         skinCache = SkinCache.getInstance();
 
-        personaHandler.updatePersonaID();
+        personaHandler.onEnable();
 
         fatigueHandler.fatigueDecreaseHours = this.fullFatigueRestore;
         timer = debugMode? new ArcheTimer(this) : null;
@@ -318,23 +314,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             res.getStatement().getConnection().close();
         }catch(SQLException e){e.printStackTrace();}
 
-
-        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
-
-            long time = System.currentTimeMillis();
-            getLogger().info("Preloading Personas as far back as " + cachePersonas + " days");
-            personaHandler.initPreload(cachePersonas);
-            getLogger().info("Personas were loaded in " + (System.currentTimeMillis() - time) + "ms.");
-
-            //Incase of a reload, load all Personas for currently logged in players
-            for(Player p : Bukkit.getOnlinePlayers()){
-                personaHandler.initPlayer(p);
-            }
-
-            //Start saving our data
-            //saverThread = new Thread(new DataSaveRunnable(archeExecutor, timer, sqlHandler), "ArcheCore SQL Consumer");
-            //saverThread.start();
-        });
+        //Incase of a reload, load all Personas for currently logged in players
+        for(Player p : Bukkit.getOnlinePlayers()){
+        	personaHandler.getPersonaStore().loadPersonas(p.getName(), p.getUniqueId());
+            personaHandler.joinPlayer(p);
+        }
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new PersonaPointNagRunnable(personaHandler), 173, 20 * 30 * 20);
 
@@ -356,9 +340,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
         //Start all our Event listeners
         initListeners();
-
-        //Init treasurechest logging
-        TreasureChest.initSQL();
     }
 
     private void initConfig(){
@@ -381,7 +362,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         debugMode = config.getBoolean("enable.debug.mode");
         newbieDelay = config.getInt("newbie.notification");
         useWiki = config.getBoolean("enable.wiki.lookup");
-        cachePersonas = config.getInt("persona.cache.time");
         protectiveTeleport = config.getBoolean("teleport.to.rescue");
         teleportNewbies = config.getBoolean("new.persona.to.spawn");
         worldName = config.getString("server.world.name");
@@ -425,7 +405,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         getCommand("persona").setExecutor(new CommandPersona(helpdesk, personaHandler, nameChangeDelay, enablePrefixes));
         getCommand("persona").setTabCompleter(new CommandPersonaTabCompleter());
         getCommand("beaconme").setExecutor(new CommandBeaconme());
-        getCommand("treasurechest").setExecutor(new CommandTreasurechest());
         getCommand("realname").setExecutor(new CommandRealname(this));
         getCommand("money").setExecutor(new CommandMoney(helpdesk, economy));
         getCommand("namelog").setExecutor(new CommandNamelog());
@@ -448,12 +427,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         pm.registerEvents(new BeaconMenuListener(this, personaChangeDelay), this);
         pm.registerEvents(new HelpMenuListener(this, helpdesk), this);
         pm.registerEvents(new PlayerChatListener(), this);
-        pm.registerEvents(new TreasureChestListener(), this);
         pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
         pm.registerEvents(new PersonaInventoryListener(), this);
         pm.registerEvents(new ArmorListener(), this);
         pm.registerEvents(new ExhaustionListener(), this);
-        //if (permissions) pm.registerEvents(new PersonaPermissionListener(personaHandler.getPermHandler()), this);
 
         if (showXpToPlayers) {
             pm.registerEvents(new ExperienceOrbListener(), this);
@@ -686,11 +663,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     public boolean isCloning() { return shouldClone; }
 
     @Override
-    public ItemStack giveTreasureChest(){
-        return TreasureChest.giveChest();
-    }
-
-    @Override
     public boolean areRacialBonusesEnabled(){
         return racialBonuses;
     }
@@ -716,10 +688,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     public boolean getWikiUsage(){
         return useWiki;
-    }
-
-    public boolean willCachePersonas(){
-        return cachePersonas > 0;
     }
 
     @Override
