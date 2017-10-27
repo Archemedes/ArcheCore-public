@@ -1,8 +1,5 @@
 package net.lordofthecraft.arche.persona;
 
-import java.sql.JDBCType;
-import java.sql.SQLType;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -10,6 +7,9 @@ import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.rows.skills.DelSkillRow;
 import net.lordofthecraft.arche.save.rows.skills.UpdateSkillRow;
 import net.lordofthecraft.arche.skill.ArcheSkill;
+
+import java.sql.JDBCType;
+import java.sql.SQLType;
 
 public class SkillAttachment {
 
@@ -41,19 +41,19 @@ public class SkillAttachment {
 	//NB: This constructor is ONLY called from PersonaSkills when it is NEWLY INITIALIZED
 	//it is NOT called when loaded from SQL. If called, the PersonaSkills will NOT hold a reference to this attachment
 	//We set inPersonaSkills to false in this constructor. We only add it if there is a need to.
-	//That is, if the persona's xp/visibility values are non-default and we need to keep track of it
-	SkillAttachment(Skill skill, Persona persona){
-		this(skill, persona, DEFAULT_XP, skill.getVisibility() == Skill.VISIBILITY_VISIBLE);
-		inPersonaSkills = false;
-	}
-	
-	SkillAttachment(Skill skill, Persona persona, double xp, boolean visible){
-		this.handle = persona.skills();
-		
-		this.xp = xp;
-		this.canSee = visible;
-		
-		this.skill = (ArcheSkill) skill;
+    //That is, if the persona's xp/visibility values are non-default and we need to keep track of it
+    SkillAttachment(Skill skill, Persona persona) {
+        this(skill, persona, DEFAULT_XP, skill.getVisibility() == Skill.VISIBILITY_VISIBLE);
+        inPersonaSkills = false;
+    }
+
+    SkillAttachment(Skill skill, Persona persona, double xp, boolean visible) {
+        this.handle = persona.skills();
+
+        this.xp = xp;
+        this.canSee = visible;
+
+        this.skill = (ArcheSkill) skill;
         this.persona = persona;
     }
 	

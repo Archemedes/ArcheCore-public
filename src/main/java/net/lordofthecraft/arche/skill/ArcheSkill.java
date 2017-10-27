@@ -248,8 +248,8 @@ public class ArcheSkill implements Skill {
 	}
 	
 	private SkillAttachment getAttachment(Persona pers){
-		return ((ArchePersona) pers).getSkill(this);
-	}
+        return ((ArchePersona) pers).getSkill(this);
+    }
 
 	@Override
 	public String getProfessionalName() {

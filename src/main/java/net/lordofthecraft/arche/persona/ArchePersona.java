@@ -116,7 +116,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     }
 
 /*	public void addSkill(ArcheSkill skill, FutureTask<SkillData> future){
-		SkillAttachment attach = new SkillAttachment(skill, this, future);
+        SkillAttachment attach = new SkillAttachment(skill, this, future);
 		skills.addSkillAttachment(attach);
 	}*/
 
@@ -262,28 +262,28 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         }
     }
 
-	void loadSkills(Connection connection){
+    void loadSkills(Connection connection) {
         String sql = "SELECT skill_id,xp,visible FROM persona_skills WHERE persona_id_fk=?";
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setInt(1, personaKey.getPersonaID());
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-            	String skill_id = rs.getString(1);
-            	double xp = rs.getDouble(2);
-            	boolean visible = rs.getBoolean(3);
-            	Skill skill = ArcheSkillFactory.getSkill(skill_id);
-            	
-        		SkillAttachment attach = new SkillAttachment(skill, this, xp, visible);
-        		skills.addSkillAttachment(attach);
+                String skill_id = rs.getString(1);
+                double xp = rs.getDouble(2);
+                boolean visible = rs.getBoolean(3);
+                Skill skill = ArcheSkillFactory.getSkill(skill_id);
+
+                SkillAttachment attach = new SkillAttachment(skill, this, xp, visible);
+                skills.addSkillAttachment(attach);
             }
-            
+
             rs.close();
             statement.close();
         } catch (SQLException ex) {
             ArcheCore.getPlugin().getLogger().log(Level.WARNING, "Failed to create skills for persona " + MessageUtil.identifyPersona(this), ex);
         }
-	}
+    }
 
     void loadAttributes(Connection conn) {
         try {

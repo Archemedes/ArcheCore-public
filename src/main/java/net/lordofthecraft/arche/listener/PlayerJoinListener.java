@@ -1,7 +1,13 @@
 package net.lordofthecraft.arche.listener;
 
-import java.sql.Timestamp;
-
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheTimer;
+import net.lordofthecraft.arche.event.persona.PersonaDeactivateEvent;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.RaceBonusHandler;
+import net.lordofthecraft.arche.save.PersonaField;
+import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,14 +17,7 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheTimer;
-import net.lordofthecraft.arche.event.persona.PersonaDeactivateEvent;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.RaceBonusHandler;
-import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
+import java.sql.Timestamp;
 
 public class PlayerJoinListener implements Listener {
 	private final ArchePersonaHandler handler;
@@ -28,20 +27,21 @@ public class PlayerJoinListener implements Listener {
 		this.handler = handler;
         timer = ArcheCore.getPlugin().getMethodTimer();
     }
-	
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void onJoin(AsyncPlayerPreLoginEvent e) {
-		handler.loadPlayer(e.getUniqueId(), e.getName());
-	}
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onJoin(AsyncPlayerPreLoginEvent e) {
+        handler.loadPlayer(e.getUniqueId(), e.getName());
+    }
     
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onJoin(PlayerJoinEvent e){
 		Player p = e.getPlayer();
-		if(timer != null) timer.startTiming("login " + p.getName());
-		handler.joinPlayer(p);		
-		if(timer != null) timer.stopTiming("login" + p.getName());
-		if(ArcheCore.getPlugin().debugMode()) ArcheCore.getPlugin().getLogger().info("{Login} Currently have " + handler.getPersonas().size() + " persona files for " + Bukkit.getOnlinePlayers().size() + " players." );
-	}
+        if (timer != null) timer.startTiming("login " + p.getName());
+        handler.joinPlayer(p);
+        if (timer != null) timer.stopTiming("login" + p.getName());
+        if (ArcheCore.getPlugin().debugMode())
+            ArcheCore.getPlugin().getLogger().info("{Login} Currently have " + handler.getPersonas().size() + " persona files for " + Bukkit.getOnlinePlayers().size() + " players.");
+    }
 	
 	@EventHandler (priority = EventPriority.LOW)
 	public void onLeave(PlayerQuitEvent e){
