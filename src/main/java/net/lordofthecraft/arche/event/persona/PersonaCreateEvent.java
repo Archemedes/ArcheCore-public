@@ -10,8 +10,6 @@ import net.lordofthecraft.arche.interfaces.Persona;
 public class PersonaCreateEvent extends PersonaEvent{
 	private static final HandlerList handlers = new HandlerList();
 	private final Persona replaces;
-	//Generic Cancellable implementation
-	private boolean cancelled = false;
 
 	public PersonaCreateEvent(Persona persona, Persona replaces) {
 		super(persona);

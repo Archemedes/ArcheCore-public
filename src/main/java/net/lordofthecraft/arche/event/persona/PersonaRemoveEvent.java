@@ -11,8 +11,6 @@ import net.lordofthecraft.arche.interfaces.Persona;
 public class PersonaRemoveEvent extends PersonaDeactivateEvent {
 	private static final HandlerList handlers = new HandlerList();
 	private final boolean makeRoom;
-	//Generic Cancellable implementation
-	private boolean cancelled = false;
 	
 	public PersonaRemoveEvent(Persona persona, boolean makeRoom) {
 		super(persona, Reason.REMOVE);
