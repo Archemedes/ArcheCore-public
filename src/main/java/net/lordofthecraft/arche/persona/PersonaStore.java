@@ -9,15 +9,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
-
+	
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -31,25 +34,20 @@ import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Creature;
 import net.lordofthecraft.arche.save.PersonaField;
+import net.lordofthecraft.arche.save.PersonaTable;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.util.WeakBlock;
 
 public class PersonaStore {
-    private final String playerSelect = "SELECT DISTINCT player_fk FROM persona";
-    private final String personaSelect = "SELECT " +
-            "persona_id,player_fk,slot,race,gender" +
-            ",name,curr,race_header,descr,p_type,prefix,money,profession,fatigue,max_fatigue" +
-            ",world,x,y,z,inv,ender_inv,potions,health,hunger,saturation,creature" +
-            ",played,chars,renamed,playtime_past,date_created,last_played " +
-            "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
-            "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
-            "WHERE player_fk=?";
-    private final String offlinePersonaSelect = "SELECT " +
-            "persona_id,slot,name,curr,inv,ender_inv,date_created,race,gender,last_played,p_type " +
-            "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
-            "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
-            "WHERE player_fk=?";
+    private final String personaSelect;
+    private final String offlinePersonaSelect;
 	
+    
+    public PersonaStore() {
+    	personaSelect = personaSelectStatement(false);
+    	offlinePersonaSelect = personaSelectStatement(true);
+    }
+    
     private int max_persona_id = 0;
     
     private final Map<Integer, ArcheOfflinePersona> allPersonas = new HashMap<>();
@@ -207,40 +205,26 @@ public class PersonaStore {
 		if (timer != null) timer.startTiming("Preloading personas");
 		
         Connection connection = null;
-        PreparedStatement playerSelectStat = null;
         PreparedStatement offlineSelectStat = null;
         
-        ResultSet rs1=null,rs2=null;
+        ResultSet res = null;
         try{
             connection = ArcheCore.getSQLControls().getConnection();
-            playerSelectStat = connection.prepareStatement(playerSelect);
             offlineSelectStat = connection.prepareStatement(offlinePersonaSelect);
-            rs1 = playerSelectStat.executeQuery();
+            res = offlineSelectStat.executeQuery();
 
-            while(rs1.next()){ //Looping for every player we know to have personas
-                UUID uuid = UUID.fromString(rs1.getString("player_fk"));
+            while(res.next()){ //Looping for every player we know to have personas
+                UUID uuid = UUID.fromString(res.getString("player_fk"));
 
                 OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-                offlineSelectStat.setString(1, uuid.toString());
-                rs2 = offlineSelectStat.executeQuery();
-                List<ArcheOfflinePersona> offlines = new ArrayList<>();
-                
-                while(rs2.next()) { //Looping for the personas of our player
-                    int persona_id = rs2.getInt(PersonaField.PERSONA_ID.field());
-                    if(allPersonas.containsKey(persona_id)) continue;
-                	ArcheOfflinePersona offline = buildOfflinePersona(rs2, player);
-                	offlines.add(offline);
-                }
-                
-                SQLUtils.closeStatement(rs2);
-                offlines.forEach(o -> allPersonas.putIfAbsent(o.getPersonaId(), o));
+            	ArcheOfflinePersona offline = buildOfflinePersona(res, player);
+            	allPersonas.put(offline.getPersonaId(), offline);
             }
+            
         }catch(SQLException e){e.printStackTrace();}
 		finally{
-            SQLUtils.close(rs1);
-            SQLUtils.close(rs2);
+            SQLUtils.close(res);
             SQLUtils.close(offlineSelectStat);
-            SQLUtils.close(playerSelectStat);
             SQLUtils.close(connection);
 		}
         
@@ -344,8 +328,31 @@ public class PersonaStore {
 			Integer taskId = pendingTasks.get(uuid);
 			Bukkit.getScheduler().cancelTask(taskId);
 		}
-		
-		
 		return prs;
+	}
+	
+	private String personaSelectStatement(boolean forOffline) {
+		List<String> fields = new ArrayList<>();
+		if(forOffline) fields.add("player_fk");
+		
+		Set<PersonaTable> tables = EnumSet.noneOf(PersonaTable.class);
+		for(PersonaField field : PersonaField.values()) {
+			if(field.isForOfflinePersona() == forOffline) {
+				fields.add(field.field());
+				if(field.table != PersonaTable.MASTER) tables.add(field.table);
+			}
+		}
+		StringBuilder result = new StringBuilder();
+		result.append("SELECT ")
+			.append(StringUtils.join(fields, ','))
+			.append(" FROM PERSONA ");
+		
+		tables.stream().map(PersonaTable::getTable)
+		.forEach(tab -> result.append(" JOIN ").append(tab)
+				.append(" ON persona.persona_id=")
+				.append(tab).append(".persona_id_fk")
+				);
+		if(!forOffline) result.append(" WHERE player_fk=?");
+		return result.toString();
 	}
 }
