@@ -114,11 +114,6 @@ public interface OfflinePersona {
     Inventory getEnderChest();
 
     /**
-     * @return The PersonaInventory for this persona
-     */
-    PersonaInventory getPInv();
-
-    /**
      * @return the inventory of this persona as an Inventory object
      */
     Inventory getInventory();

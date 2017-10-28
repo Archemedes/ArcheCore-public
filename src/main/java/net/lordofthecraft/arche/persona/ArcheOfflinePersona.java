@@ -8,12 +8,10 @@ import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
@@ -105,27 +103,12 @@ public class ArcheOfflinePersona implements OfflinePersona, InventoryHolder {
 
     @Override
     public Inventory getInventory() {
-        if (inv == null || inv.getContents() == null) {
-            return null;
-        }
-        Inventory binv = Bukkit.createInventory(this, InventoryType.PLAYER.getDefaultSize(), "Persona Inventory: " + MessageUtil.identifyPersona(this));
-        binv.setContents(inv.getContents());
-        return binv;
+        return inv.getInventory();
     }
 
     @Override
     public Inventory getEnderChest() {
-        if (inv == null || inv.getEnderContents() == null) {
-            return null;
-        }
-        Inventory einv = Bukkit.createInventory(this, InventoryType.ENDER_CHEST.getDefaultSize(), "Persona Enderchest: " + MessageUtil.identifyPersona(this));
-        einv.setContents(inv.getEnderContents());
-        return einv;
-    }
-
-    @Override
-    public PersonaInventory getPInv() {
-        return inv;
+        return inv.getEnderInventory();
     }
 
     @Override

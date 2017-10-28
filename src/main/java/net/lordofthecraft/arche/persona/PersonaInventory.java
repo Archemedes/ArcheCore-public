@@ -1,25 +1,30 @@
 package net.lordofthecraft.arche.persona;
 
 import com.google.common.collect.Lists;
-import net.lordofthecraft.arche.util.InventoryUtil;
+
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PersonaInventory {
-    private ItemStack[] contents;
-    private ItemStack[] enderContents;
+	private Inventory inv;
+	private Inventory enderInv;
 
     public PersonaInventory(ItemStack[] contents, ItemStack[] enderContents) {
-        this.contents = contents;
-        this.enderContents = enderContents;
+    	inv = PersonaInventoryHolder.get(InventoryType.PLAYER);
+    	inv.setContents(contents);
+    	
+    	enderInv = PersonaInventoryHolder.get(InventoryType.ENDER_CHEST);
+    	enderInv.setContents(enderContents);
     }
 
     @SuppressWarnings("unchecked")
@@ -29,7 +34,7 @@ public class PersonaInventory {
     	try {
     		if(inv != null) {
     			config.loadFromString(inv);
-    			List<ItemStack> result = config.getList("contents").stream()
+    			List<ItemStack> result = config.getList("c").stream()
     					.map(ent -> (Map<String, Object>) ent)
     					.map(ent -> ent == null ? null : ItemStack.deserialize(ent))
     					.collect(Collectors.toList());
@@ -42,7 +47,7 @@ public class PersonaInventory {
     		if (enderinv != null) {
     			config = new YamlConfiguration();
     			config.loadFromString(enderinv);
-    			List<ItemStack> enderresult = config.getList("contents").stream()
+    			List<ItemStack> enderresult = config.getList("c").stream()
     					.map(ent -> (Map<String, Object>) ent)
     					.map(ent -> ent == null ? null : ItemStack.deserialize(ent))
     					.collect(Collectors.toList());
@@ -61,46 +66,42 @@ public class PersonaInventory {
     }
 
     public static PersonaInventory store(Player p) {
-    	PlayerInventory pinv = p.getInventory();
-        return InventoryUtil.isEmpty(pinv) && InventoryUtil.isEmpty(p.getEnderChest()) ?
-                null : new PersonaInventory(pinv.getContents(), p.getEnderChest().getContents());
+    	return new PersonaInventory(p.getInventory().getContents(), p.getEnderChest().getContents());
     }
 
     public ItemStack[] getContents() {
-        return contents;
+    	return inv.getContents();
     }
-
+    
     public ItemStack[] getEnderContents() {
-        return enderContents;
+    	return enderInv.getContents();
     }
-
-    public void setContents(ItemStack[] contents) {
-        this.contents = contents;
+    
+    public Inventory getInventory() {
+    	return inv;
     }
-
-    public void setEnderContents(ItemStack[] contents) {
-        this.enderContents = contents;
+    
+    public Inventory getEnderInventory() {
+    	return enderInv;
     }
-
+    
     public String getInvAsString() {
+    	return getInvAsString(inv);
+    }
+    
+    public String getEnderInvAsString() {
+    	return getInvAsString(enderInv);
+    }
+    
+    private String getInvAsString(Inventory someInv) {
         YamlConfiguration config = new YamlConfiguration();
+        ItemStack[] contents = someInv.getContents();
         List<Map<String, Object>> contentslist = Lists.newArrayList();
         for (ItemStack i : contents) {
         	if(i == null) contentslist.add(null);
         	else contentslist.add(i.serialize());
         }
-        config.set("contents", contentslist);
-        return config.saveToString();
-    }
-
-    public String getEnderInvAsString() {
-        YamlConfiguration config = new YamlConfiguration();
-        List<Map<String, Object>> contentslist = Lists.newArrayList();
-        for (ItemStack i : enderContents) {
-            if (i == null) contentslist.add(null);
-            else contentslist.add(i.serialize());
-        }
-        config.set("contents", contentslist);
+        config.set("c", contentslist);
         return config.saveToString();
     }
 
@@ -110,5 +111,18 @@ public class PersonaInventory {
                 "contents=" + getInvAsString() +
                 ", enderContents=" + getEnderInvAsString() +
                 '}';
+    }
+    
+    public static class PersonaInventoryHolder implements InventoryHolder {
+    	public static Inventory get(InventoryType type) {
+    		return new PersonaInventoryHolder(type).getInventory();
+    	}
+    	
+    	private PersonaInventoryHolder(InventoryType t) {
+    		inv = Bukkit.createInventory(this, t);
+    	}
+    	
+    	private final Inventory inv;
+    	public Inventory getInventory() {return inv;}
     }
 }
