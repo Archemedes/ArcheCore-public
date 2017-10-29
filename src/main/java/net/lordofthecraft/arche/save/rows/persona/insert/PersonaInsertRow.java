@@ -5,7 +5,6 @@ import net.lordofthecraft.arche.save.rows.ArchePersonaRow;
 import net.lordofthecraft.arche.save.rows.ArchePreparedStatementRow;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.SQLUtil;
-import org.bukkit.block.Block;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,12 +14,10 @@ import java.sql.Timestamp;
 public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersonaRow {
 
     private final Persona persona;
-    private final Block b;
     private Connection connection = null;
 
-    public PersonaInsertRow(Persona persona, Block b) {
+    public PersonaInsertRow(Persona persona) {
         this.persona = persona;
-        this.b = b;
     }
 
     @Override
@@ -42,18 +39,7 @@ public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersona
         stat.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
         stat.executeUpdate();
         stat.close();
-
-        stat = connection.prepareStatement("INSERT INTO persona_vitals(persona_id_fk,world,x,y,z,inv,ender_inv) VALUES (?,?,?,?,?,?,?)");
-        stat.setInt(1, persona.getPersonaId());
-        stat.setString(2, b.getWorld().getUID().toString());
-        stat.setInt(3, b.getX());
-        stat.setInt(4, b.getY());
-        stat.setInt(5, b.getZ());
-        stat.setString(6, persona.getPInv() == null ? null : persona.getPInv().getInvAsString());
-        stat.setString(7, null);
-        stat.executeUpdate();
-        stat.close();
-
+        
         stat = connection.prepareStatement("INSERT INTO persona_stats(persona_id_fk,renamed,date_created) VALUES (?,?,?)");
         stat.setInt(1, persona.getPersonaId());
         stat.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
@@ -72,7 +58,6 @@ public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersona
         if (persona.getPlayer() == null) {
             return new String[0];
         }
-        Block b = persona.getPlayer().getLocation().getBlock();
         return new String[]{
                 "INSERT INTO persona(persona_id,player_fk,slot,race,name,gender) " +
                         "VALUES (" + persona.getPersonaId() + ",'"
@@ -81,14 +66,7 @@ public class PersonaInsertRow implements ArchePreparedStatementRow, ArchePersona
                         + ",'" + persona.getRace().name()
                         + "','" + SQLUtil.mysqlTextEscape(persona.getName())
                         + "','" + SQLUtil.mysqlTextEscape(persona.getGender())
-                        + ");",
-                "INSERT INTO persona_vitals(persona_id_fk,world,x,y,z,inv,ender_inv) " +
-                        "VALUES (" + persona.getPersonaId()
-                        + ",'" + b.getWorld().getUID().toString()
-                        + "'," + b.getX()
-                        + "," + b.getY()
-                        + "," + b.getZ()
-                        + ",'NULL','NULL');",
+                        + "');",
                 "INSERT INTO persona_stats(persona_id_fk,renamed,date_created,last_played) VALUES (" + persona.getPersonaId()
                         + "," + new Timestamp(System.currentTimeMillis()).toString()
                         + "," + new Timestamp(System.currentTimeMillis()).toString()

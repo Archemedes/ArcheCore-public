@@ -3,9 +3,7 @@ package net.lordofthecraft.arche.persona;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheCoreTransaction;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
 import net.lordofthecraft.arche.util.MessageUtil;
@@ -543,8 +541,6 @@ public class CreationDialog {
                     30, 120, 30);
 
             if (context.getSessionData("first") != null) {
-                if (ArcheCore.getControls().getPersonaHandler().willModifyDisplayNames()) p.setDisplayName(name);
-
                 long treshold = System.currentTimeMillis() - (1000 * 90);
                 if (lastAnnounce < treshold) {
                     lastAnnounce = System.currentTimeMillis();

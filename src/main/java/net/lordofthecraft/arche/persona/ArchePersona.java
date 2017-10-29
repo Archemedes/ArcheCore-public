@@ -222,22 +222,12 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 			this.current = current;
             consumer.queueRow(new PersonaUpdateRow(this, PersonaField.CURRENT, this.current, false));
-            //buffer.put(new UpdateTask(this, PersonaField.CURRENT, current));
 
-			if (current) { // Persona becoming Player's current Persona.
-				Player p = Bukkit.getPlayer(getPlayerUUID());
-				if (p != null) {
-					updateDisplayName(p);
-
-					//Apply Racial bonuses
-					if (ArcheCore.getControls().areRacialBonusesEnabled())
-                        RaceBonusHandler.apply(this, race);
-
-
-				} else {
-					ArcheCore.getPlugin().getLogger().info("Player " + player + " was not found (null) as her Persona was switched.");
-				}
-			}
+            if(current) {
+            	Validate.notNull(getPlayer(), "Persona can't be switched while Player offline");
+            	updateDisplayName();
+            	RaceBonusHandler.apply(this, race);
+            }
 		}
 	}
 
@@ -417,7 +407,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	@Override
 	public void setPrefix(String prefix){
 		this.prefix = prefix;
-		updateDisplayName(Bukkit.getPlayer(this.getPlayerUUID()));
+		updateDisplayName();
         consumer.queueRow(new PersonaUpdateRow(this, PersonaField.PREFIX, prefix, false));
         //buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
     }
@@ -430,12 +420,12 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	@Override
 	public void clearPrefix(){
 		prefix = null;
-		updateDisplayName(Bukkit.getPlayer(this.getPlayerUUID()));
-        //buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
+		updateDisplayName();
         consumer.queueRow(new PersonaUpdateRow(this, PersonaField.PREFIX, prefix, false));
     }
 
-	void updateDisplayName(Player p){
+	void updateDisplayName(){
+		Player p = getPlayer();
 		if(handler.willModifyDisplayNames() && p != null){
 			if(hasPrefix() && ArcheCore.getPlugin().arePrefixesEnabled())
 				p.setDisplayName("[" + getPrefix() + "] " + name);
@@ -549,10 +539,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         consumer.queueRow(new PersonaUpdateRow(this, PersonaField.NAME, name, false));
         consumer.queueRow(new PersonaUpdateRow(this, PersonaField.STAT_RENAMED, lastRenamed, false));
 
-        if (current) {
-            Player p = Bukkit.getPlayer(getPlayerUUID());
-            updateDisplayName(p);
-        }
+        if (current) updateDisplayName();
     }
 
 	@Override
@@ -627,7 +614,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         String pots = savePotionEffects(p);
         ArcheCore.getPlugin().getLogger().info("Player world is " + p.getWorld().getName() + " which has a UID of " + p.getWorld().getUID().toString());
         consumer.queueRow(new VitalsUpdateRow(this, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv, pots));
-        //buffer.put(new UpdateVitalsTask(persona_id, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv, pots));
         attributes.handleSwitch(false);
     }
 
@@ -700,7 +686,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		} else { //Clears the inv
 			pinv.clear();
             einv.clear();
-            pinv.setArmorContents(new ItemStack[4]);
 		}
         attributes.handleSwitch(false);
 

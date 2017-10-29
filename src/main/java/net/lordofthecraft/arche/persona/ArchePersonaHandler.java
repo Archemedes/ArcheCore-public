@@ -20,7 +20,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
+import org.jsoup.helper.Validate;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -183,9 +183,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 	@Override
 	public boolean switchPersona(final Player p, int id){
 		int slots = ArcheCore.getControls().personaSlots();
-		if(id < 0 || id > slots) throw new IllegalArgumentException("Only Persona IDs higher than 0 and at most "+slots+" are allowed.");
+		Validate.isTrue(id >= 0 && id < slots, "Only Persona IDs higher than 0 and at most "+slots+" are allowed.");
 
-		ArchePersona before=null;
         ArchePersona[] prs = getAllPersonas(p.getUniqueId());
         ArchePersona after = prs[id];
 
@@ -194,21 +193,17 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		if(event.isCancelled()) return false;
 
-		for (ArchePersona pr : prs) {
-			if (pr != null) {
-                boolean setAs = pr.getSlot() == id;
-                if (before == null && pr.current && !setAs) before = pr;
-				pr.setCurrent(setAs);
-			}
-		}
-
+		after.setCurrent(true);
 		Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(after, PersonaActivateEvent.Reason.SWITCH));
-		if(before != null) Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(before, PersonaDeactivateEvent.Reason.SWITCH));
-
-        ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(after, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));
-        if (before != null)
-            ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(before, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));
-        if(before != null && before != after){
+        ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(after, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));		
+		
+        ArchePersona before = (ArchePersona) event.getOriginPersona();
+		if(before != null) {
+			Validate.isTrue(before != after,"Player tried to switch to same persona!");
+			before.setCurrent(false);
+			Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(before, PersonaDeactivateEvent.Reason.SWITCH));
+			ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(before, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));
+			
 			//Store and switch Persona-related specifics: Location and Inventory.
 			before.saveMinecraftSpecifics(p);
 
@@ -220,7 +215,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 				after.setFatigue(before.getFatigue());
 			}
 		}
-
+		
 		after.restoreMinecraftSpecifics(p);
 		
 		//Check if switched-to Persona will require a different skin from storage
@@ -238,7 +233,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		return store.getNextPersonaId();
 	}
 
-	public boolean registerPersona(ArchePersona persona) {
+	public void registerPersona(ArchePersona persona) {
 		if (ArcheCore.getPlugin().debugMode()) {
             ArcheCore.getPlugin().getLogger().info("[Debug] Persona is being created with the RP name of " + persona.getName());
         }
@@ -253,46 +248,28 @@ public class ArchePersonaHandler implements PersonaHandler {
             SkinCache.getInstance().clearSkin(oldPersona);
         }
 
-/*		//Load skills for the Persona
-		for(ArcheSkill s : ArcheSkillFactory.getSkills().values()){
-			persona.addSkill(s, null);
-		}*/
-
 		persona.createEmptyTags();
-
-		Player p = persona.getPlayer();
-		
-		for(PotionEffect ps : p.getActivePotionEffects())
-			p.removePotionEffect(ps.getType());
-
-        consumer.queueRow(new PersonaInsertRow(persona, p.getLocation().getBlock()));
-
-        persona.saveMinecraftSpecifics(p);
+        consumer.queueRow(new PersonaInsertRow(persona));
 
         persona.attributes.addModifier(AttributeRegistry.SCORE_UNSPENT, new AttributeModifier(PersonaHandler.SCORE_ID, "unspent_points", 22, AttributeModifier.Operation.ADD_NUMBER), true, true);
         Arrays.asList(AbilityScore.values()).parallelStream().filter(AbilityScore::isChangeable).forEach(a -> persona.attributes.addModifier(AttributeRegistry.getSAttribute(a.getName()), new AttributeModifier(SCORE_ID, a.getName(), 1, AttributeModifier.Operation.ADD_NUMBER), true, true));
 
         RaceBonusHandler.apply(persona, persona.getRace());
-        persona.updateDisplayName(p);
-
+        persona.updateDisplayName();
+        
+        Player p = persona.getPlayer();
         switchPersona(p, persona.getSlot()); //This teleport will fail due to the Location being null still
 
 		if (ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
 			Location to;
-			try {
-				if (!racespawns.containsKey(persona.getRace())) {
-					World w = ArcheCore.getControls().getNewPersonaWorld();
-					to = w == null ? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
-				} else {
-					to = racespawns.get(persona.getRace());
-				}
-				p.teleport(to);
-			}catch (Exception e){
-				Bukkit.getLogger().info("Could not tp player to race spawn!");
+			if (!racespawns.containsKey(persona.getRace())) {
+				World w = ArcheCore.getControls().getNewPersonaWorld();
+				to = w == null ? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
+			} else {
+				to = racespawns.get(persona.getRace());
 			}
+			p.teleport(to);
 		}
-
-		return true;
 	}
 
 	@Override
