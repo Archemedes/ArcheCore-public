@@ -160,7 +160,7 @@ public final class ArcheTables {
                 "descr TEXT DEFAULT NULL," +
                 "prefix TEXT DEFAULT NULL," +
                 "curr BOOLEAN DEFAULT FALSE," +
-                "money DOUBLE DEFAULT 0.0," +
+                "money DOUBLE DEFAULT "+ArcheCore.getEconomyControls().getBeginnerAllowance()+"," +
                 "profession VARCHAR(255) DEFAULT NULL," +
                 "fatigue DOUBLE DEFAULT 0.0," +
                 "max_fatigue DOUBLE DEFAULT 100.00," +

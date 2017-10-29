@@ -71,11 +71,11 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	Timestamp lastRenamed;
 	String player; //Last known minecraft name of the owning player
 	WeakBlock location = null;
-	double money = 0;
+	double money = ArcheCore.getEconomyControls().getBeginnerAllowance();
 	double fatigue = 0;
-	int food = 0;
+	int food = 20;
     float saturation = 0;
-    double health = 0;
+    double health = 20;
 	private Creature creature;
 	private WeakReference<Player> playerObject;
 	private TagAttachment attachment;
@@ -706,12 +706,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 		//Heal them so their Persona is fresh
 		double maxHp = p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
-		if (health == 0) {
-			health = maxHp;
-		}
-		if (food == 0) {
-			food = 20;
-		}
+
 		if (maxHp < health) p.setHealth(maxHp);
 		else p.setHealth(health);
 		p.setFoodLevel(food);
