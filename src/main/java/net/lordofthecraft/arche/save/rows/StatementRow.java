@@ -8,16 +8,9 @@ import java.sql.Timestamp;
 import org.apache.commons.lang.StringUtils;
 
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.util.SQLUtil;
 
 public abstract class StatementRow implements ArcheRow {
-	private final boolean usingSqlite;
-	
-	
-	public StatementRow(){
-		usingSqlite = ArcheCore.getSQLControls() instanceof ArcheSQLiteHandler;
-	}
 	
 	@Override
 	public String[] getInserts() { //Works in most cases else override
@@ -96,7 +89,17 @@ public abstract class StatementRow implements ArcheRow {
 		}
 	}
 	
-	public final boolean isUsingSqlite() { return usingSqlite; }
+	public boolean usingSQLite() {
+		return ArcheCore.getControls().isUsingSQLite();
+	}
+	
+	public String orIgnore() {
+		return usingSQLite()? "IGNORE" : "OR IGNORE"; 
+	}
+	
+	public Timestamp now() {
+		return new Timestamp(System.currentTimeMillis());
+	}
 	
 	protected abstract String[] getStatements();
 	
