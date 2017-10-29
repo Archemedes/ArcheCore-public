@@ -83,11 +83,13 @@ public abstract class StatementRow implements ArcheRow {
 					} else if (o instanceof Byte) {
 						statement.setByte(i, (Byte) o);
 					} else {
-						throw new IllegalArgumentException("Custom Number implementation!");
+						throw new IllegalArgumentException("Unhandled Number implementation: " + o.getClass().getSimpleName());
 					}
 				} else if(o instanceof Timestamp) {
 					statement.setTimestamp(i, (Timestamp) o);
-				} else { //String, enum, etc
+				} else if(o instanceof Boolean) {
+					statement.setBoolean(i, (Boolean) o);
+				} else { //String, enums, etc
 					statement.setString(i, o.toString());
 				}
 			}
