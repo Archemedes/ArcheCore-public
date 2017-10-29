@@ -44,6 +44,10 @@ public abstract class StatementRow implements ArcheRow {
 		return finalResult;
 	}
 	
+	public boolean isUnique() {
+		return false;
+	}
+	
 	public final PreparedStatement[] prepare(Connection connection) throws SQLException {
 		String[] sql = getStatements();
 		PreparedStatement[] result = new PreparedStatement[sql.length];
