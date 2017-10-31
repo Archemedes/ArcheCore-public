@@ -13,7 +13,7 @@ import java.util.UUID;
 
 //Slightly more data for temp atts, which is not serialized through the bukkit method
 //Note that by default this is a permanent attribute
-public class ExtendedAttributeModifier extends AttributeModifier {
+public class ExtendedAttributeModifier extends AttributeModifier implements Cloneable {
 
 	public boolean lostOnDeath = false;
 	public boolean save = true; 
@@ -36,6 +36,10 @@ public class ExtendedAttributeModifier extends AttributeModifier {
         this.decay = decay;
         this.ticksRemaining = ticksRemaining;
         this.lostOnDeath = lostOnDeath;
+    }
+    
+    public ExtendedAttributeModifier clone() {
+    	return new ExtendedAttributeModifier(this.getUniqueId(), this.getName(), this.getAmount(), this.getOperation(), this.decay, this.ticksRemaining, this.lostOnDeath);
     }
 
     public boolean isLostOnDeath() {

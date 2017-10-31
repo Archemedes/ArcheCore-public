@@ -24,10 +24,10 @@ public abstract class StatementRow implements ArcheRow {
 				result.append(bits[i-1]);
 
 				Object o = getValueFor(h,i);
-				if(o instanceof String) {
-					result.append('\'').append(SQLUtil.mysqlTextEscape((String) o)).append('\'');
-				} else {
+				if(o instanceof Number || o instanceof Boolean || o instanceof Timestamp) {
 					result.append(o.toString());
+				} else { //String, UUID, enum
+					result.append('\'').append(SQLUtil.mysqlTextEscape(o.toString())).append('\'');
 				}
 			}
 			
@@ -76,24 +76,25 @@ public abstract class StatementRow implements ArcheRow {
 					} else if (o instanceof Byte) {
 						statement.setByte(i, (Byte) o);
 					} else {
-						throw new IllegalArgumentException("Unhandled Number implementation: " + o.getClass().getSimpleName());
+						statement.setInt(i, ((Number) o).intValue());
+						ArcheCore.getPlugin().getLogger().warning("unhandled Number implementation being used: " + o.getClass().getName() + ". Int assumed");
 					}
 				} else if(o instanceof Timestamp) {
 					statement.setTimestamp(i, (Timestamp) o);
 				} else if(o instanceof Boolean) {
 					statement.setBoolean(i, (Boolean) o);
-				} else { //String, enums, etc
+				} else { //String, enums, uuid
 					statement.setString(i, o.toString());
 				}
 			}
 		}
 	}
 	
-	public boolean usingSQLite() {
+	public static boolean usingSQLite() {
 		return ArcheCore.getControls().isUsingSQLite();
 	}
 	
-	public String orIgnore() {
+	public static String orIgnore() {
 		return usingSQLite()? "IGNORE" : "OR IGNORE"; 
 	}
 	
