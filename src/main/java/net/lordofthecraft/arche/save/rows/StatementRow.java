@@ -98,7 +98,7 @@ public abstract class StatementRow implements ArcheRow {
 		return usingSQLite()? "IGNORE" : "OR IGNORE"; 
 	}
 	
-	public Timestamp now() {
+	public static Timestamp now() {
 		return new Timestamp(System.currentTimeMillis());
 	}
 	
