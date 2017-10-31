@@ -107,7 +107,8 @@ public class Consumer extends TimerTask implements IConsumer {
                 		sRow.setValues(pending);
 
                 		ArcheRow other;
-                		if(!sRow.isUnique() && (other = queue.peek()) != null && other.getClass() == sRow.getClass()) { 
+                		if(!sRow.isUnique() && (other = queue.peek()) != null && other.getClass() == sRow.getClass() 
+                				&& !((StatementRow) other).isUnique()) { 
                 			//At least one more of this Row type is behind in queue
                 			for(PreparedStatement s : pending) s.addBatch();
                 		} else { //None of this Row behind in queue
