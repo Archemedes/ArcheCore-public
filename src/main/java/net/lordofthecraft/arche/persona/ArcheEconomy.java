@@ -1,14 +1,15 @@
 package net.lordofthecraft.arche.persona;
 
+import org.bukkit.configuration.file.FileConfiguration;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.rows.logging.EconomyLogRow;
+import net.lordofthecraft.arche.save.rows.logging.TransactionRow;
 import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
-import org.bukkit.configuration.file.FileConfiguration;
 
 public class ArcheEconomy implements Economy {
     public enum TransactionType {
@@ -52,7 +53,7 @@ public class ArcheEconomy implements Economy {
         double before = getBalance(p);
         ((ArchePersona) p).money = amount;
         consumer.queueRow(new PersonaUpdateRow(p, PersonaField.MONEY, ((ArchePersona) p).money, false));
-        consumer.queueRow(new EconomyLogRow(p, transaction, TransactionType.SET, amount, before, getBalance(p)));
+        consumer.queueRow(new TransactionRow(p, transaction, TransactionType.SET, amount, before, getBalance(p)));
     }
 
     @Override
@@ -60,7 +61,7 @@ public class ArcheEconomy implements Economy {
         double before = getBalance(p);
         ((ArchePersona) p).money += amount;
         consumer.queueRow(new PersonaUpdateRow(p, PersonaField.MONEY, ((ArchePersona) p).money, false));
-        consumer.queueRow(new EconomyLogRow(p, transaction, TransactionType.DEPOSIT, amount, before, getBalance(p)));
+        consumer.queueRow(new TransactionRow(p, transaction, TransactionType.DEPOSIT, amount, before, getBalance(p)));
     }
 
     @Override
@@ -68,7 +69,7 @@ public class ArcheEconomy implements Economy {
         double before = getBalance(p);
         ((ArchePersona) p).money -= amount;
         consumer.queueRow(new PersonaUpdateRow(p, PersonaField.MONEY, ((ArchePersona) p).money, false));
-        consumer.queueRow(new EconomyLogRow(p, transaction, TransactionType.WITHDRAW, amount, before, getBalance(p)));
+        consumer.queueRow(new TransactionRow(p, transaction, TransactionType.WITHDRAW, amount, before, getBalance(p)));
     }
 
     @Override

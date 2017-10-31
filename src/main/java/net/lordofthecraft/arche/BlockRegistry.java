@@ -1,18 +1,20 @@
 package net.lordofthecraft.arche;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import net.lordofthecraft.arche.interfaces.IConsumer;
-import net.lordofthecraft.arche.save.rows.logging.BlockRegisteryRow;
-import net.lordofthecraft.arche.save.rows.logging.DelBlockRegistryRow;
-import net.lordofthecraft.arche.util.WeakBlock;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
+import net.lordofthecraft.arche.interfaces.IConsumer;
+import net.lordofthecraft.arche.save.rows.logging.BlockRegistryRow;
+import net.lordofthecraft.arche.save.rows.logging.DeleteBlockRegistryRow;
+import net.lordofthecraft.arche.util.WeakBlock;
 
 public class BlockRegistry {
 	final Set<WeakBlock> playerPlaced = Sets.newHashSetWithExpectedSize(3000);
@@ -48,7 +50,7 @@ public class BlockRegistry {
 	public void monitorBlock(Block b){
 		WeakBlock wb = new WeakBlock(b);
 		playerPlaced.add(wb);
-        consumer.queueRow(new BlockRegisteryRow(wb));
+        consumer.queueRow(new BlockRegistryRow(wb));
         //buffer.put(new BlockRegistryInsertTask(wb));
     }
 
@@ -62,7 +64,7 @@ public class BlockRegistry {
         WeakBlock wb = new WeakBlock(b);
         playerPlaced.add(wb);
         this.data.putIfAbsent(wb, data);
-        consumer.queueRow(new BlockRegisteryRow(wb, data));
+        consumer.queueRow(new BlockRegistryRow(wb, data));
     }
 
     /**
@@ -74,7 +76,7 @@ public class BlockRegistry {
 		WeakBlock wb = new WeakBlock(b);
 		boolean res = playerPlaced.remove(wb);
         //buffer.put(new BlockRegistryDeleteTask(wb));
-        consumer.queueRow(new DelBlockRegistryRow(wb));
+        consumer.queueRow(new DeleteBlockRegistryRow(wb));
         if (data.containsKey(wb)) {
             data.remove(wb);
         }
