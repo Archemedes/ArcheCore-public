@@ -1,15 +1,21 @@
 package net.lordofthecraft.arche.attributes;
 
-import com.google.common.base.Preconditions;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.interfaces.PersonaKey;
-import net.lordofthecraft.arche.save.rows.attribute.PersAttrInsertRow;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
 
-import java.util.*;
+import com.google.common.base.Preconditions;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.PersonaKey;
+import net.lordofthecraft.arche.save.rows.attribute.AttributeInsertRow;
 
 public class ArcheAttributeInstance implements AttributeInstance {
 	private final ArcheAttribute parent;
@@ -87,7 +93,7 @@ public class ArcheAttributeInstance implements AttributeInstance {
             }
             mods.put(uuid, mm);
             if (mm.save && insert) {
-                ArcheCore.getConsumerControls().queueRow(new PersAttrInsertRow(mm, persona.getPersona(), parent));
+                ArcheCore.getConsumerControls().queueRow(new AttributeInsertRow(mm, persona.getPersona(), parent));
             }
             return !exists;
         }

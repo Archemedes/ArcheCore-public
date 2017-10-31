@@ -1,15 +1,16 @@
 package net.lordofthecraft.arche.attributes;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.save.rows.attribute.PersAttrRemoveRow;
-import net.lordofthecraft.arche.save.rows.attribute.PersAttrUpdateRow;
-import net.md_5.bungee.api.ChatColor;
+import java.sql.Timestamp;
+import java.util.UUID;
+
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.sql.Timestamp;
-import java.util.UUID;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.save.rows.attribute.AttributeRemoveRow;
+import net.lordofthecraft.arche.save.rows.attribute.AttributeUpdateRow;
+import net.md_5.bungee.api.ChatColor;
 
 //Slightly more data for temp atts, which is not serialized through the bukkit method
 //Note that by default this is a permanent attribute
@@ -119,7 +120,7 @@ public class ExtendedAttributeModifier extends AttributeModifier implements Clon
 	
 	private void trySave(Persona ps, ArcheAttribute aa) {
 		if(save) {
-            ArcheCore.getConsumerControls().queueRow(new PersAttrUpdateRow(this, ps, aa));
+            ArcheCore.getConsumerControls().queueRow(new AttributeUpdateRow(this, ps, aa));
         }
 	}
 	
@@ -129,7 +130,7 @@ public class ExtendedAttributeModifier extends AttributeModifier implements Clon
         if (save) {
             save = true;
             //ArcheExecutor.getInstance().put(new ArcheAttributeRemoveTask(this, ps, aa));
-            ArcheCore.getConsumerControls().queueRow(new PersAttrRemoveRow(this, aa, ps));
+            ArcheCore.getConsumerControls().queueRow(new AttributeRemoveRow(this, aa, ps));
         }
     }
 	
