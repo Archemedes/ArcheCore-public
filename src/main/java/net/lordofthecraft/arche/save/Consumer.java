@@ -115,8 +115,6 @@ public class Consumer extends TimerTask implements IConsumer {
                 			for(PreparedStatement s : pending) {
                 				if(inBatch) {s.addBatch(); s.executeBatch();} 
                 				else {s.execute();}
-
-                				s.close();
                 			}
                 			pending = null;
                 		}
@@ -151,8 +149,10 @@ public class Consumer extends TimerTask implements IConsumer {
         } catch (final SQLException ex) {
             pl.getLogger().log(Level.SEVERE, "[Consumer] We failed to complete Consumer SQL Processes.", ex);
         } finally {
+        	StatementRow.close();
         	SQLUtils.close(state);
         	SQLUtils.close(conn);
+        	
             lock.unlock();
 
             long time = System.currentTimeMillis() - starttime;

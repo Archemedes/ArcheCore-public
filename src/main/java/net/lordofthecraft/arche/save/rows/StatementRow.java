@@ -4,13 +4,27 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.util.SQLUtil;
 
 public abstract class StatementRow implements ArcheRow {
+	private static List<PreparedStatement> statPool = new LinkedList<>();
+	private PreparedStatement[] statements;
+	
+	public static void close() { //Called by consumer
+		statPool.forEach(t -> {
+			try {t.close();} 
+			catch (SQLException e) {e.printStackTrace();}
+		});
+		
+		statPool = new LinkedList<>();
+	}
 	
 	@Override
 	public String[] getInserts() { //Works in most cases else override
@@ -42,14 +56,19 @@ public abstract class StatementRow implements ArcheRow {
 	}
 	
 	public final PreparedStatement[] prepare(Connection connection) throws SQLException {
-		String[] sql = getStatements();
-		PreparedStatement[] result = new PreparedStatement[sql.length];
-		
-		for(int h = 0; h<sql.length;h++) {
-			result[h] = connection.prepareStatement(sql[h]);
+		if(statements == null || statements[0].isClosed()) {
+			String[] sql = getStatements();
+			Validate.isTrue(sql.length > 0);
+			PreparedStatement[] result = new PreparedStatement[sql.length];
+			
+			for(int h = 0; h<sql.length;h++) {
+				PreparedStatement s = connection.prepareStatement(sql[h]);
+				statPool.add(s);
+				result[h] = s;
+			}
 		}
 		
-		return result;
+		return statements;
 	}
 	
 	public final void setValues(PreparedStatement[] statements) throws SQLException {
