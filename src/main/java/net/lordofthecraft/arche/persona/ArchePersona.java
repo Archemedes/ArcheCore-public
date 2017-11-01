@@ -57,10 +57,10 @@ import net.lordofthecraft.arche.magic.ArcheMagic;
 import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.magic.insert.MagicInsertRow;
+import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
+import net.lordofthecraft.arche.save.rows.persona.DeletePersonaSkinRow;
+import net.lordofthecraft.arche.save.rows.persona.PersonaSkinRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdateVitalsRow;
-import net.lordofthecraft.arche.save.rows.persona.delete.DeletePersonaSkinRow;
-import net.lordofthecraft.arche.save.rows.persona.delete.PersonaDeleteRow;
-import net.lordofthecraft.arche.save.rows.persona.insert.SkinRow;
 import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.ArcheSkin;
@@ -726,7 +726,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		PersonaRemoveEvent event = new PersonaRemoveEvent(this, false);
 		Bukkit.getPluginManager().callEvent(event);
 
-        consumer.queueRow(new PersonaDeleteRow(this));
+        consumer.queueRow(new DeletePersonaRow(this));
         //buffer.put(new PersonaDeleteTask(this));
         handler.deleteSkills(this);
 
@@ -853,7 +853,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         if (update) {
             consumer.queueRow(new PersonaUpdateRow(this, PersonaField.ICON, skin.getSkinId(), false));
         } else {
-            consumer.queueRow(new SkinRow(this));
+            consumer.queueRow(new PersonaSkinRow(this));
         }
         //buffer.put(new UpdateTask(this, PersonaField.ICON, skin.getSkinId()));
     }
