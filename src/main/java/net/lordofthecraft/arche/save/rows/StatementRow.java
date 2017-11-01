@@ -4,8 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -14,7 +15,7 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.util.SQLUtil;
 
 public abstract class StatementRow implements ArcheRow {
-	private static List<PreparedStatement> statPool = new LinkedList<>();
+	private static Set<PreparedStatement> statPool = identityHashSet();
 	private PreparedStatement[] statements;
 	
 	public static void close() { //Called by consumer
@@ -23,7 +24,7 @@ public abstract class StatementRow implements ArcheRow {
 			catch (SQLException e) {e.printStackTrace();}
 		});
 		
-		statPool = new LinkedList<>();
+		statPool = identityHashSet();
 	}
 	
 	@Override
@@ -56,19 +57,25 @@ public abstract class StatementRow implements ArcheRow {
 	}
 	
 	public final PreparedStatement[] prepare(Connection connection) throws SQLException {
-		if(statements == null || statements[0].isClosed()) {
-			String[] sql = getStatements();
-			Validate.isTrue(sql.length > 0);
-			PreparedStatement[] result = new PreparedStatement[sql.length];
-			
-			for(int h = 0; h<sql.length;h++) {
-				PreparedStatement s = connection.prepareStatement(sql[h]);
-				statPool.add(s);
-				result[h] = s;
-			}
+		PreparedStatement[] result = (isUnique() || statements == null || statements[0].isClosed())?
+				prepareInternal(connection) : statements;
+		
+		if(!isUnique()) statements = result;
+		return result;
+	}
+	
+	private PreparedStatement[] prepareInternal(Connection connection) throws SQLException{
+		String[] sql = getStatements();
+		Validate.isTrue(sql.length > 0);
+		PreparedStatement[] result = new PreparedStatement[sql.length];
+		
+		for(int h = 0; h<sql.length;h++) {
+			PreparedStatement s = connection.prepareStatement(sql[h]);
+			statPool.add(s);
+			result[h] = s;
 		}
 		
-		return statements;
+		return result;
 	}
 	
 	public final void setValues(PreparedStatement[] statements) throws SQLException {
@@ -103,10 +110,14 @@ public abstract class StatementRow implements ArcheRow {
 				} else if(o instanceof Boolean) {
 					statement.setBoolean(i, (Boolean) o);
 				} else { //String, enums, uuid
-					statement.setString(i, o.toString());
+					statement.setString(i, o==null? null : o.toString());
 				}
 			}
 		}
+	}
+	
+	private static Set<PreparedStatement> identityHashSet(){
+		return Collections.newSetFromMap(new IdentityHashMap<>());
 	}
 	
 	public static boolean usingSQLite() {

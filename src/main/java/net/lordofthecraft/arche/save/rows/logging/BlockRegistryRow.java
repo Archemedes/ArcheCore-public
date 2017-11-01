@@ -8,26 +8,20 @@ import net.lordofthecraft.arche.util.WeakBlock;
 public class BlockRegistryRow extends SingleStatementRow {
 	private final Timestamp now = now();
     private final WeakBlock block;
-    String data = null;
+    private final String data;
 
     public BlockRegistryRow(WeakBlock block) {
-        this.block = block;
+        this(block, null);
     }
 
     public BlockRegistryRow(WeakBlock block, String data) {
         this.block = block;
         this.data = data;
     }
-
-    @Override
-    public boolean isUnique() {
-        return data != null;
-    }
     
 	@Override
 	protected String getStatement() {
-		return "INSERT " + orIgnore() + " INTO blockregistry" + 
-				(isUnique()? "(date,world,x,y,z,data) VALUES (?,?,?,?,?,?)" : "(date,world,x,y,z) VALUES (?,?,?,?,?)");
+		return "INSERT " + orIgnore() + " INTO blockregistry (date,world,x,y,z,data) VALUES (?,?,?,?,?,?)";
 	}
 
 	@Override
