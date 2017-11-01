@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche.save.rows.persona.update;
+package net.lordofthecraft.arche.save.rows.persona;
 
 import net.lordofthecraft.arche.save.rows.ArcheRow;
 

@@ -1,14 +1,13 @@
 package net.lordofthecraft.arche.persona;
 
+import java.util.Collections;
+import java.util.Map;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.save.rows.persona.delete.DelPersTagRow;
-import net.lordofthecraft.arche.save.rows.persona.insert.PersTagRow;
-import net.lordofthecraft.arche.save.rows.persona.update.UpdatePersTagRow;
-
-import java.util.Collections;
-import java.util.Map;
+import net.lordofthecraft.arche.save.rows.persona.DeletePersonaTagRow;
+import net.lordofthecraft.arche.save.rows.persona.PersonaTagRow;
 
 /**
  * Created on 6/16/2017
@@ -33,19 +32,14 @@ public class TagAttachment {
     }
 
     public void setValue(String name, String value) {
-        if (tags.containsKey(name)) {
-            tags.replace(name, value);
-            if (save) consumer.queueRow(new UpdatePersTagRow(persona, name, value));
-        } else {
-            tags.put(name, value);
-            if (save) consumer.queueRow(new PersTagRow(persona, name, value));
-        }
+    	tags.put(name, value);
+    	if (save) consumer.queueRow(new PersonaTagRow(persona, name, value));
     }
 
     public void delValue(String name) {
         if (tags.containsKey(name)) {
             tags.remove(name);
-            if (save) consumer.queueRow(new DelPersTagRow(persona, name));
+            if (save) consumer.queueRow(new DeletePersonaTagRow(persona, name));
         }
     }
 
