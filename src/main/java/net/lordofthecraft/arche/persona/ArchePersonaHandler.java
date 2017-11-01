@@ -46,7 +46,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.rows.persona.insert.PersonaInsertRow;
+import net.lordofthecraft.arche.save.rows.persona.InsertPersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
 import net.lordofthecraft.arche.save.rows.player.ReplacePlayerRow;
 import net.lordofthecraft.arche.save.rows.skills.DeleteSkillRow;
@@ -248,7 +248,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         }
 
 		persona.createEmptyTags();
-        consumer.queueRow(new PersonaInsertRow(persona));
+        consumer.queueRow(new InsertPersonaRow(persona));
 
         persona.attributes.addModifier(AttributeRegistry.SCORE_UNSPENT, new AttributeModifier(PersonaHandler.SCORE_ID, "unspent_points", 22, AttributeModifier.Operation.ADD_NUMBER), true, true);
         Arrays.asList(AbilityScore.values()).parallelStream().filter(AbilityScore::isChangeable).forEach(a -> persona.attributes.addModifier(AttributeRegistry.getSAttribute(a.getName()), new AttributeModifier(SCORE_ID, a.getName(), 1, AttributeModifier.Operation.ADD_NUMBER), true, true));
