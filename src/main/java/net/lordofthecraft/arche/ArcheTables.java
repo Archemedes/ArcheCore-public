@@ -107,7 +107,6 @@ public final class ArcheTables {
     protected static void createPlayerTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS players (" +
                 "player CHAR(36)," +
-                "force_preload BOOLEAN DEFAULT FALSE," +
                 "player_name TEXT DEFAULT NULL," +
                 "PRIMARY KEY (player)" +
                 ")" +

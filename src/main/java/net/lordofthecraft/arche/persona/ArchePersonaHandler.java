@@ -48,8 +48,7 @@ import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.persona.insert.PersonaInsertRow;
 import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
-import net.lordofthecraft.arche.save.rows.player.PlayerInsertRow;
-import net.lordofthecraft.arche.save.rows.player.UpdatePlayerRow;
+import net.lordofthecraft.arche.save.rows.player.ReplacePlayerRow;
 import net.lordofthecraft.arche.save.rows.skills.DeleteSkillRow;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.ArcheSkin;
@@ -435,9 +434,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public void joinPlayer(Player p){
 		ArchePersona[] prs = store.implementPersonas(p);
 		RaceBonusHandler.reset(p);
-
+		ArcheCore.getConsumerControls().queueRow(new ReplacePlayerRow(p));
+		
 		if(countPersonas(prs) == 0){
-            ArcheCore.getConsumerControls().queueRow(new PlayerInsertRow(p));
 			if(p.hasPermission("archecore.mayuse")){
 				if(p.hasPermission("archecore.exempt")){
 					if(p.hasPermission("archecore.command.beaconme")) p.sendMessage(ChatColor.LIGHT_PURPLE + "No Personas found. Maybe use " + ChatColor.ITALIC + "/beaconme");
@@ -460,9 +459,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 			Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
 			ps.attributes().handleLogin();
 			ps.restoreMinecraftSpecifics(p);
-            ArcheCore.getConsumerControls().queueRow(new UpdatePlayerRow(p));
             ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));
 		}
+		
 	}
 
 	public void initRacespawns(){
