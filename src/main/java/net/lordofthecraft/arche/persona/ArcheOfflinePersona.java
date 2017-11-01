@@ -8,6 +8,7 @@ import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -255,5 +256,26 @@ public class ArcheOfflinePersona implements OfflinePersona, InventoryHolder {
     @Override
     public int getTimePlayed() {
         return timePlayed.get();
+    }
+    
+    @Override
+    public int hashCode() {
+        return personaKey.getPersonaID();
+    }
+    
+    @Override
+    public boolean equals(Object object) {
+        if(object == null) return false;
+        //Note that due to demanding exact class equality (comrade)
+        //this equals also works for ArchePersona equals ArchePersona
+        //but not equal for ArchePersona and ArcheOfflinePersona 
+		if(object.getClass() != this.getClass()) return false;
+		ArcheOfflinePersona p = (ArcheOfflinePersona) object;
+        return this.getPersonaId() == p.getPersonaId();
+    }
+    
+    @Override
+    public String toString() { //Also works for ArchePersona
+    	return this.getClass().getSimpleName() + ": " + MessageUtil.identifyPersona(this);
     }
 }

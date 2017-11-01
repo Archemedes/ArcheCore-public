@@ -803,20 +803,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		if(location == null) return null;
 		else return location.toLocation();
 	}
-
-
-    @Override
-    public int hashCode() {
-        return personaKey.getPersonaID();
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if(object == null) return false;
-		if(!(object instanceof ArchePersona)) return false;
-		ArchePersona p = (ArchePersona) object;
-        return this.getPersonaId() == p.getPersonaId();
-    }
 	
 	@Override
 	public boolean isNewbie() {
