@@ -50,7 +50,7 @@ import net.lordofthecraft.arche.save.rows.persona.insert.PersonaInsertRow;
 import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
 import net.lordofthecraft.arche.save.rows.player.PlayerInsertRow;
 import net.lordofthecraft.arche.save.rows.player.UpdatePlayerRow;
-import net.lordofthecraft.arche.save.rows.skills.DelSkillRow;
+import net.lordofthecraft.arche.save.rows.skills.DeleteSkillRow;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
@@ -510,7 +510,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	void deleteSkills(ArchePersona p){
         for (Skill sname : ArcheSkillFactory.getSkills().values()) {
-            consumer.queueRow(new DelSkillRow(p, sname));
+            consumer.queueRow(new DeleteSkillRow(p, sname));
         }
 	}
 
