@@ -150,7 +150,7 @@ public class Consumer extends TimerTask implements IConsumer {
         } catch (final SQLException ex) {
             pl.getLogger().log(Level.SEVERE, "[Consumer] We failed to complete Consumer SQL Processes.", ex);
         } finally {
-        	MultiStatementRow.close();
+        	StatementRow.close();
         	SQLUtils.close(state);
         	SQLUtils.close(conn);
         	

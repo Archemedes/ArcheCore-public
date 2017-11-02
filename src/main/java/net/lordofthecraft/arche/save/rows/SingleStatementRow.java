@@ -31,7 +31,7 @@ public abstract class SingleStatementRow extends MultiStatementRow {
 	
 	@Override
 	public final Object getValueFor(int stat, int index) {
-		Validate.isTrue(stat == 0);
+		Validate.isTrue(stat == 1);
 		return getValueFor(index);
 	}
 	
