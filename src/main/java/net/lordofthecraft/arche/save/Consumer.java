@@ -1,12 +1,5 @@
 package net.lordofthecraft.arche.save;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.SQLUtils;
-import net.lordofthecraft.arche.interfaces.IConsumer;
-import net.lordofthecraft.arche.save.rows.ArcheRow;
-import net.lordofthecraft.arche.save.rows.StatementRow;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -21,6 +14,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.SQLUtils;
+import net.lordofthecraft.arche.interfaces.IConsumer;
+import net.lordofthecraft.arche.save.rows.ArcheRow;
+import net.lordofthecraft.arche.save.rows.MultiStatementRow;
+import net.lordofthecraft.arche.save.rows.StatementRow;
 
 public class Consumer extends TimerTask implements IConsumer {
     private final Queue<ArcheRow> queue = new LinkedBlockingQueue<>();
@@ -108,7 +109,7 @@ public class Consumer extends TimerTask implements IConsumer {
 
                 		ArcheRow other;
                 		if(!sRow.isUnique() && (other = queue.peek()) != null && other.getClass() == sRow.getClass() 
-                				&& !((StatementRow) other).isUnique()) { 
+                				&& !((MultiStatementRow) other).isUnique()) { 
                 			//At least one more of this Row type is behind in queue
                 			for(PreparedStatement s : pending) s.addBatch();
                 		} else { //None of this Row behind in queue
@@ -149,7 +150,7 @@ public class Consumer extends TimerTask implements IConsumer {
         } catch (final SQLException ex) {
             pl.getLogger().log(Level.SEVERE, "[Consumer] We failed to complete Consumer SQL Processes.", ex);
         } finally {
-        	StatementRow.close();
+        	MultiStatementRow.close();
         	SQLUtils.close(state);
         	SQLUtils.close(conn);
         	

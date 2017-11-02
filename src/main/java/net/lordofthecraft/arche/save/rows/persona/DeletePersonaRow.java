@@ -1,9 +1,9 @@
 package net.lordofthecraft.arche.save.rows.persona;
 
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.save.rows.StatementRow;
+import net.lordofthecraft.arche.save.rows.MultiStatementRow;
 
-public class DeletePersonaRow extends StatementRow {
+public class DeletePersonaRow extends MultiStatementRow {
 	private final Persona persona;
 	
 	public DeletePersonaRow(Persona persona) {

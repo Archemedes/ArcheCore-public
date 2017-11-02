@@ -3,9 +3,9 @@ package net.lordofthecraft.arche.save.rows.persona;
 import java.sql.Timestamp;
 
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.save.rows.StatementRow;
+import net.lordofthecraft.arche.save.rows.MultiStatementRow;
 
-public class InsertPersonaRow extends StatementRow {
+public class InsertPersonaRow extends MultiStatementRow {
     private final Persona persona;
     private final Timestamp now;
 

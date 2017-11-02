@@ -3,7 +3,7 @@ package net.lordofthecraft.arche.save.rows;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
-public abstract class SingleStatementRow extends StatementRow {
+public abstract class SingleStatementRow extends MultiStatementRow {
 		
 	@Override
 	public String toString() { //Works in most cases else override
