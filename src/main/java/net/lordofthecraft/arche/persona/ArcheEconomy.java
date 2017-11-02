@@ -9,7 +9,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.logging.TransactionRow;
-import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
+import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 
 public class ArcheEconomy implements Economy {
     public enum TransactionType {
@@ -52,7 +52,7 @@ public class ArcheEconomy implements Economy {
     public void setPersona(Persona p, double amount, Transaction transaction) {
         double before = getBalance(p);
         ((ArchePersona) p).money = amount;
-        consumer.queueRow(new PersonaUpdateRow(p, PersonaField.MONEY, ((ArchePersona) p).money, false));
+        consumer.queueRow(new UpdatePersonaRow(p, PersonaField.MONEY, ((ArchePersona) p).money));
         consumer.queueRow(new TransactionRow(p, transaction, TransactionType.SET, amount, before, getBalance(p)));
     }
 
@@ -60,7 +60,7 @@ public class ArcheEconomy implements Economy {
     public void depositPersona(Persona p, double amount, Transaction transaction) {
         double before = getBalance(p);
         ((ArchePersona) p).money += amount;
-        consumer.queueRow(new PersonaUpdateRow(p, PersonaField.MONEY, ((ArchePersona) p).money, false));
+        consumer.queueRow(new UpdatePersonaRow(p, PersonaField.MONEY, ((ArchePersona) p).money));
         consumer.queueRow(new TransactionRow(p, transaction, TransactionType.DEPOSIT, amount, before, getBalance(p)));
     }
 
@@ -68,7 +68,7 @@ public class ArcheEconomy implements Economy {
     public void withdrawPersona(Persona p, double amount, Transaction transaction) {
         double before = getBalance(p);
         ((ArchePersona) p).money -= amount;
-        consumer.queueRow(new PersonaUpdateRow(p, PersonaField.MONEY, ((ArchePersona) p).money, false));
+        consumer.queueRow(new UpdatePersonaRow(p, PersonaField.MONEY, ((ArchePersona) p).money));
         consumer.queueRow(new TransactionRow(p, transaction, TransactionType.WITHDRAW, amount, before, getBalance(p)));
     }
 

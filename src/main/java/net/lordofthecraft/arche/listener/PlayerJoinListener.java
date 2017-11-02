@@ -18,7 +18,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
+import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 
 public class PlayerJoinListener implements Listener {
 	private final ArchePersonaHandler handler;
@@ -58,7 +58,7 @@ public class PlayerJoinListener implements Listener {
         //Stop dupe?
         p.saveData();
 
-        ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));
+        ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
 
         if(timer != null){
 			timer.stopTiming("logout");

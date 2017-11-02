@@ -1,21 +1,5 @@
 package net.lordofthecraft.arche.persona;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.enums.PersonaType;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.event.persona.PersonaRenameEvent;
-import net.lordofthecraft.arche.interfaces.*;
-import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-import net.lordofthecraft.arche.util.MessageUtil;
-import net.lordofthecraft.arche.util.WeakBlock;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,6 +7,27 @@ import java.sql.Timestamp;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.enums.PersonaType;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.event.persona.PersonaRenameEvent;
+import net.lordofthecraft.arche.interfaces.Creature;
+import net.lordofthecraft.arche.interfaces.IConsumer;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.PersonaKey;
+import net.lordofthecraft.arche.save.PersonaField;
+import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.util.MessageUtil;
+import net.lordofthecraft.arche.util.WeakBlock;
 
 public class ArcheOfflinePersona implements OfflinePersona, InventoryHolder {
 
@@ -125,7 +130,7 @@ public class ArcheOfflinePersona implements OfflinePersona, InventoryHolder {
     @Override
     public void setGender(String gender) {
         this.gender = gender;
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.GENDER, gender, false));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.GENDER, gender));
         //buffer.put(new UpdateTask(this, PersonaField.GENDER, gender));
     }
 
@@ -138,7 +143,7 @@ public class ArcheOfflinePersona implements OfflinePersona, InventoryHolder {
     public void setPersonaType(PersonaType type) {
         this.type = type;
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.TYPE, type, false));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.TYPE, type));
     }
 
     @Override
@@ -160,8 +165,8 @@ public class ArcheOfflinePersona implements OfflinePersona, InventoryHolder {
         this.name = name;
         lastRenamed = new Timestamp(System.currentTimeMillis());
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.NAME, name, false));
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.STAT_RENAMED, lastRenamed, false));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.NAME, name));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.STAT_RENAMED, lastRenamed));
     }
 
 

@@ -47,7 +47,7 @@ import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.persona.InsertPersonaRow;
-import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
+import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.save.rows.player.ReplacePlayerRow;
 import net.lordofthecraft.arche.save.rows.skills.DeleteSkillRow;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
@@ -194,14 +194,14 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		after.setCurrent(true);
 		Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(after, PersonaActivateEvent.Reason.SWITCH));
-        ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(after, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));		
+        ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(after, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));		
 		
         ArchePersona before = (ArchePersona) event.getOriginPersona();
 		if(before != null) {
 			Validate.isTrue(before != after,"Player tried to switch to same persona!");
 			before.setCurrent(false);
 			Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(before, PersonaDeactivateEvent.Reason.SWITCH));
-			ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(before, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));
+			ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(before, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
 			
 			//Store and switch Persona-related specifics: Location and Inventory.
 			before.saveMinecraftSpecifics(p);
@@ -459,7 +459,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
 			ps.attributes().handleLogin();
 			ps.restoreMinecraftSpecifics(p);
-            ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));
+            ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
 		}
 		
 	}

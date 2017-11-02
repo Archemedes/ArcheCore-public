@@ -38,16 +38,11 @@ public enum PersonaField {
     SATURATION("saturation", VITALS, FLOAT),
     POTIONS("potions", VITALS, VARCHAR);
 
-    private static final String STATEMENT_SUFFIX = " = ? WHERE persona_id";
-
     private final String field;
     public final PersonaTable table;
     public final SQLType type;
     private final boolean offline;
     
-    private PreparedStatement stat = null;
-    
-
     PersonaField(String field, PersonaTable table, SQLType type) {
     	this(field, table, type, false);
     }
@@ -64,10 +59,4 @@ public enum PersonaField {
     }
     
     public String field() { return this.field; }
-
-    public PreparedStatement getStatement(Connection c) throws SQLException {
-        if (stat == null)
-            stat = c.prepareStatement("UPDATE " + table.getTable() + " SET " + field + STATEMENT_SUFFIX + (table == MASTER ? "=?" : "_fk=?"));
-        return stat;
-	}
 }

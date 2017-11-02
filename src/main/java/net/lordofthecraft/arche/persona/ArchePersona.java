@@ -60,8 +60,8 @@ import net.lordofthecraft.arche.save.rows.magic.insert.MagicInsertRow;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaSkinRow;
 import net.lordofthecraft.arche.save.rows.persona.PersonaSkinRow;
+import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdateVitalsRow;
-import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
@@ -200,8 +200,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public void setMainSkill(Skill profession){
 		skills.setMainProfession(profession);
 		String name = profession == null? null : profession.getName();
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.SKILL_SELECTED, name, false));
-        //buffer.put(new UpdateTask(this,PersonaField.SKILL_SELECTED, name));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.SKILL_SELECTED, name));
     }
 
 
@@ -236,7 +235,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         if (this.current != current) {
 
 			this.current = current;
-            consumer.queueRow(new PersonaUpdateRow(this, PersonaField.CURRENT, this.current, false));
+            consumer.queueRow(new UpdatePersonaRow(this, PersonaField.CURRENT, this.current));
 
             if(current) {
             	Validate.notNull(getPlayer(), "Persona can't be switched while Player offline");
@@ -423,8 +422,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public void setPrefix(String prefix){
 		this.prefix = prefix;
 		updateDisplayName();
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.PREFIX, prefix, false));
-        //buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.PREFIX, prefix));
     }
 
 	@Override
@@ -436,7 +434,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public void clearPrefix(){
 		prefix = null;
 		updateDisplayName();
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.PREFIX, prefix, false));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.PREFIX, prefix));
     }
 
 	void updateDisplayName(){
@@ -456,8 +454,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public void addTimePlayed(int timePlayed){
 		int val = this.timePlayed.addAndGet(timePlayed);
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.STAT_PLAYED, val, false));
-        //buffer.put(new UpdateTask(this, PersonaField.STAT_PLAYED, val));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.STAT_PLAYED, val));
     }
 
 	@Override
@@ -472,8 +469,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public void addCharactersSpoken(int charsSpoken){
 		int val = charactersSpoken.addAndGet(charsSpoken);
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.STAT_CHARS, val, false));
-        //buffer.put(new UpdateTask(this, PersonaField.STAT_CHARS, val));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.STAT_CHARS, val));
     }
 
 	//@Override
@@ -551,8 +547,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         this.name = name;
         lastRenamed = new Timestamp(System.currentTimeMillis());
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.NAME, name, false));
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.STAT_RENAMED, lastRenamed, false));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.NAME, name));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.STAT_RENAMED, lastRenamed));
 
         if (current) updateDisplayName();
     }
@@ -572,8 +568,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
                 p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 			}
 		}
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.RACE_REAL, race.name(), false));
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.RACE, "", false));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE_REAL, race.name()));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE, ""));
         this.raceHeader = null;
 	}
 
@@ -581,8 +577,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public void setApparentRace(String race){
 		raceHeader = race;
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.RACE, race, false));
-        //buffer.put(new UpdateTask(this, PersonaField.RACE, race));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE, race));
     }
 
 	@Override
@@ -593,8 +588,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	@Override
 	public void clearDescription(){
 		description = null;
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.DESCRIPTION, null, false));
-        //buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, null));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.DESCRIPTION, null));
     }
 
 	@Override
@@ -602,8 +596,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		if(description == null) description = addendum;
 		else description = description + " " + addendum;
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.DESCRIPTION, description, false));
-        //buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.DESCRIPTION, description));
     }
 
 	@Override
@@ -615,7 +608,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public void setDescription(String description) {
 		this.description = description;
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.DESCRIPTION, description, false));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.DESCRIPTION, description));
         //buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
     }
 
@@ -825,8 +818,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		Bukkit.getPluginManager().callEvent(event);
 		if(!event.isCancelled()) {
 			this.fatigue = event.getNewFatigue();
-            consumer.queueRow(new PersonaUpdateRow(this, PersonaField.FATIGUE, fatigue, false));
-            //buffer.put(new UpdateFatigueTask(fatigue, persona_id, player));
+            consumer.queueRow(new UpdatePersonaRow(this, PersonaField.FATIGUE, fatigue));
         }
 	}
 
@@ -837,11 +829,10 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         skin.addPersona(this);
 
         if (update) {
-            consumer.queueRow(new PersonaUpdateRow(this, PersonaField.ICON, skin.getSkinId(), false));
+            consumer.queueRow(new UpdatePersonaRow(this, PersonaField.ICON, skin.getSkinId()));
         } else {
             consumer.queueRow(new PersonaSkinRow(this));
         }
-        //buffer.put(new UpdateTask(this, PersonaField.ICON, skin.getSkinId()));
     }
 
     @Override
