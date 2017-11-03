@@ -20,7 +20,6 @@ import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.SQLUtils;
 import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.save.rows.ArcheRow;
-import net.lordofthecraft.arche.save.rows.MultiStatementRow;
 import net.lordofthecraft.arche.save.rows.StatementRow;
 
 public class Consumer extends TimerTask implements IConsumer {
@@ -109,7 +108,7 @@ public class Consumer extends TimerTask implements IConsumer {
 
                 		ArcheRow other;
                 		if(!sRow.isUnique() && (other = queue.peek()) != null && other.getClass() == sRow.getClass() 
-                				&& !((MultiStatementRow) other).isUnique()) { 
+                				&& !((StatementRow) other).isUnique()) { 
                 			//At least one more of this Row type is behind in queue
                 			for(PreparedStatement s : pending) s.addBatch();
                 		} else { //None of this Row behind in queue
