@@ -246,7 +246,7 @@ public class PersonaStore {
 
         String invString = res.getString(PersonaField.INV.field());
         String enderinvString = res.getString(PersonaField.ENDERINV.field());
-        persona.inv = PersonaInventory.restore(invString, enderinvString);
+        persona.inv = PersonaInventory.restore(persona, invString, enderinvString);
 
         return persona;
     }
@@ -300,7 +300,7 @@ public class PersonaStore {
 
 		String invString = res.getString(PersonaField.INV.field());
         String enderinvString = res.getString(PersonaField.ENDERINV.field());
-        persona.inv = PersonaInventory.restore(invString, enderinvString);
+        persona.inv = PersonaInventory.restore(persona, invString, enderinvString);
         
         persona.loadPotionsFromString(res.getString(PersonaField.POTIONS.field()));
 		if (ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble(PersonaField.MONEY.field());

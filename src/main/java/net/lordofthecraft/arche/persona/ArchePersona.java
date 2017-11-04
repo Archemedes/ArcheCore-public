@@ -609,7 +609,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		this.description = description;
 
         consumer.queueRow(new UpdatePersonaRow(this, PersonaField.DESCRIPTION, description));
-        //buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
     }
 
 	void saveMinecraftSpecifics(final Player p){
@@ -617,7 +616,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		food = p.getFoodLevel();
 		health = p.getHealth();
         saturation = p.getSaturation();
-        inv = PersonaInventory.store(p);
+        inv = PersonaInventory.store(this);
 		location = new WeakBlock(p.getLocation());
         String pots = savePotionEffects(p);
         ArcheCore.getPlugin().getLogger().info("Player world is " + p.getWorld().getName() + " which has a UID of " + p.getWorld().getUID().toString());
