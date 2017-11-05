@@ -162,7 +162,6 @@ public final class ArcheTables {
                 "money DOUBLE DEFAULT "+ArcheCore.getEconomyControls().getBeginnerAllowance()+"," +
                 "profession VARCHAR(255) DEFAULT NULL," +
                 "fatigue DOUBLE DEFAULT 0.0," +
-                "max_fatigue DOUBLE DEFAULT 100.00," +
                 "last_played TIMESTAMP," +
                 "PRIMARY KEY (persona_id)," +
                 "FOREIGN KEY (player_fk) REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT," +

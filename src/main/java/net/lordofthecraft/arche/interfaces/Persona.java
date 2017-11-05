@@ -1,12 +1,14 @@
 package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.enums.AbilityScore;
+import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.persona.PersonaAttributes;
 import net.lordofthecraft.arche.persona.PersonaMagics;
 import net.lordofthecraft.arche.persona.PersonaSkills;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
 import java.sql.Timestamp;
 import java.util.Map;
@@ -91,6 +93,27 @@ public interface Persona extends OfflinePersona {
 	 * @see java.util.concurrent.Future View this to see more information on Futures and how they work
 	 */
     Optional<MagicAttachment> createAttachment(Magic magic, int tier, Persona teacher, boolean visible);
+
+    /**
+     * Assign a persona's gender to the specified gender.
+     *
+     * @param gender The persona's new gender.
+     */
+    void setGender(String gender);
+    
+    /**
+     * Set the new RP name of this Persona. This also updates the time at which this Persona was last renamed
+     *
+     * @param name The new RP name.
+     */
+    void setName(String name);
+    
+    /**
+     * Set the underlying type of this persona
+     *
+     * @param type The type of persona it should be.
+     */
+    void setPersonaType(PersonaType type);
 
 	/**
 	 * Gets a Personas prefix.
@@ -233,6 +256,16 @@ public interface Persona extends OfflinePersona {
 	 * @param key The key to remove
 	 */
 	void removeTag(String key);
+	
+    /**
+     * @return The EnderChest inventory for this persona
+     */
+    Inventory getEnderChest();
+
+    /**
+     * @return the inventory of this persona as an Inventory object
+     */
+    Inventory getInventory();
 
 	/**
 	 * @return if the player is below the new persona timer
@@ -272,6 +305,11 @@ public interface Persona extends OfflinePersona {
      */
     int getScore(AbilityScore score);
 
+    /**
+     * @return the total playtime of this persona(all maps added)
+     */
+    int getTotalPlaytime();
+    
     /**
      * Returns a barebones {@link OfflinePersona} which is an unloaded version of this persona
      *

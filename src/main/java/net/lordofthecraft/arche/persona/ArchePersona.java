@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -71,7 +70,6 @@ import net.lordofthecraft.arche.util.WeakBlock;
 public final class ArchePersona extends ArcheOfflinePersona implements Persona, InventoryHolder {
 
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
-    //private static final ArcheExecutor buffer = ArcheExecutor.getInstance();
 
 	final PersonaSkills skills = new PersonaSkills(this);
     final PersonaMagics magics = new PersonaMagics(this);
@@ -84,13 +82,14 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	boolean current = true;
 	String raceHeader = null;
 	Timestamp lastRenamed;
+    int pastPlayTime; //stat_playtime_past
 	String player; //Last known minecraft name of the owning player
-	WeakBlock location = null;
 	double money = ArcheCore.getEconomyControls().getBeginnerAllowance();
 	double fatigue = 0;
 	int food = 20;
     float saturation = 0;
     double health = 20;
+    PersonaInventory inv;
 	private Creature creature;
 	private WeakReference<Player> playerObject;
 	private TagAttachment attachment;
@@ -102,9 +101,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     }
 
     ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS, Timestamp lastPlayed, PersonaType type) {
-        //ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, boolean current, Race race, String gender, PersonaType type, String name) {
         super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, lastPlayed, false, race, gender, type, name);
-        //this.key = new ArchePersonaKey(persona_id, player, slot);
 		charactersSpoken = new AtomicInteger();
 		lastRenamed = new Timestamp(0);
 		pastPlayTime = 0;
@@ -113,25 +110,15 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		sqlCriteria.put("persona_id", persona_id);
 	}
 
-    ArchePersona(ArcheOfflinePersona persona) {
-        super(persona.personaKey, persona.creation, persona.lastPlayed, persona.current, persona.race, persona.gender, persona.type, persona.name);
-        charactersSpoken = new AtomicInteger();
-        lastRenamed = new Timestamp(0);
-        pastPlayTime = 0;
-
-        sqlCriteria = Maps.newConcurrentMap();
-        sqlCriteria.put("persona_id", persona.getPersonaId());
-    }
-
 	@Override
     public int getPersonaId() {
         return personaKey.getPersonaID();
     }
-
-/*	public void addSkill(ArcheSkill skill, FutureTask<SkillData> future){
-		SkillAttachment attach = new SkillAttachment(skill, this, future);
-		skills.addSkillAttachment(attach);
-	}*/
+	
+    @Override
+    public int getTotalPlaytime() {
+        return pastPlayTime + getTimePlayed();
+    }
 
 	public PersonaSkills skills() {
 		return skills;
@@ -144,6 +131,16 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public SkillAttachment getSkill(Skill skill){
 		return skills.getSkill(skill);
 	}
+	
+    @Override
+    public void setGender(String gender) {
+        this.gender = gender;
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.GENDER, gender));
+    }
+    
+    
+    
+    
 
 	public void setPlayerName(String name) {
         this.player = name;
@@ -552,6 +549,13 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
         if (current) updateDisplayName();
     }
+    
+    @Override
+    public void setPersonaType(PersonaType type) {
+        this.type = type;
+
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.TYPE, type));
+    }
 
 	@Override
 	public Race getRace(){
@@ -791,10 +795,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		return inv;
 	}
 
-	public Location getLocation(){
-		if(location == null) return null;
-		else return location.toLocation();
-	}
+
 	
 	@Override
 	public boolean isNewbie() {
@@ -840,12 +841,10 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         this.skin = null;
 
         consumer.queueRow(new DeletePersonaSkinRow(this));
-        //buffer.put(new UpdateTask(this, PersonaField.ICON, -1));
     }
 
     @Override
     public OfflinePersona unloadPersona() {
-        //super(persona.personaKey, persona.creation, persona.lastPlayed, persona.current, persona.race, persona.gender, persona.type, persona.name);
         return new ArcheOfflinePersona(personaKey, creation, lastPlayed, current, race, gender, type, name);
     }
 
@@ -870,7 +869,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     }
 
     @Override
-    public Persona loadPersona(ResultSet rs) {
+    public Persona loadPersona() {
         return this;
     }
 }

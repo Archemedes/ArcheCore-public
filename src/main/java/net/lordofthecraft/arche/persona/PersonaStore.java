@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
-	
+
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -39,9 +39,8 @@ import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.util.WeakBlock;
 
 public class PersonaStore {
-    private final String personaSelect;
+    final String personaSelect;
     private final String offlinePersonaSelect;
-	
     
     public PersonaStore() {
     	personaSelect = personaSelectStatement(false);
@@ -137,7 +136,7 @@ public class PersonaStore {
 
             while(res.next()) {
             	any = true;
-            	ArchePersona blob = buildPersona(res, uuid, playerName);
+            	ArchePersona blob = buildPersona(res, Bukkit.getOfflinePlayer(uuid));
             	prs[blob.getSlot()] = blob;
             	
             	if(blob.current) {
@@ -237,54 +236,13 @@ public class PersonaStore {
         String name = res.getString(PersonaField.NAME.field());
         boolean current = res.getBoolean(PersonaField.CURRENT.field());
         Race race = Race.valueOf(res.getString(PersonaField.RACE_REAL.field()));
+        String type = res.getString(PersonaField.TYPE.field());
         String gender = res.getString(PersonaField.GENDER.field());
         Timestamp creationTimeMS = res.getTimestamp(PersonaField.STAT_CREATION.field());
         Timestamp lastPlayed = res.getTimestamp(PersonaField.STAT_LAST_PLAYED.field());
-        String type = res.getString(PersonaField.TYPE.field());
+        
         PersonaType ptype = PersonaType.valueOf(type);
         ArcheOfflinePersona persona = new ArcheOfflinePersona(new ArchePersonaKey(persona_id, pl.getUniqueId(), slot), creationTimeMS, lastPlayed, current, race, gender, ptype, name);
-
-        String invString = res.getString(PersonaField.INV.field());
-        String enderinvString = res.getString(PersonaField.ENDERINV.field());
-        persona.inv = PersonaInventory.restore(persona, invString, enderinvString);
-
-        return persona;
-    }
-	
-	private ArchePersona buildPersona(ResultSet res, UUID uuid, String playerName) throws SQLException{
-        int persona_id = res.getInt(PersonaField.PERSONA_ID.field());
-        int slot = res.getInt(PersonaField.SLOT.field());
-		String name = res.getString(PersonaField.NAME.field());
-		Race race = Race.valueOf(res.getString(PersonaField.RACE_REAL.field()));
-		String rheader = res.getString(PersonaField.RACE.field());
-        String gender = res.getString(PersonaField.GENDER.field());
-        Timestamp creationTimeMS = res.getTimestamp(PersonaField.STAT_CREATION.field());
-		String type = res.getString(PersonaField.TYPE.field());
-		PersonaType ptype = PersonaType.valueOf(type);
-        Timestamp lastPlayed = res.getTimestamp(PersonaField.STAT_LAST_PLAYED.field());
-
-        ArchePersona persona = new ArchePersona(persona_id, uuid, slot, name, race, gender, creationTimeMS, lastPlayed, ptype);
-        persona.player = playerName;
-
-        if(rheader != null && !rheader.equals("null") && !rheader.isEmpty()){
-			persona.raceHeader = rheader;
-		}
-
-		persona.description = res.getString(PersonaField.DESCRIPTION.field());
-		persona.prefix = res.getString(PersonaField.PREFIX.field());
-		persona.current = res.getBoolean(PersonaField.CURRENT.field());
-		persona.fatigue = res.getInt(PersonaField.FATIGUE.field());
-		persona.health = res.getDouble(PersonaField.HEALTH.field());
-        persona.food = res.getInt(PersonaField.FOOD.field());
-        persona.saturation = res.getFloat(PersonaField.SATURATION.field());
-
-		persona.timePlayed.set(res.getInt(PersonaField.STAT_PLAYED.field()));
-		persona.charactersSpoken.set(res.getInt(PersonaField.STAT_CHARS.field()));
-		persona.lastRenamed = res.getTimestamp(PersonaField.STAT_RENAMED.field());
-
-		persona.skills.setMainProfession(ArcheSkillFactory.getSkill(res.getString(PersonaField.SKILL_SELECTED.field())));
-        Optional<Creature> creature = ArcheCore.getMagicControls().getCreatureById(res.getString("creature"));
-        creature.ifPresent(persona.magics::setCreature);
 
 		String wstr = res.getString(PersonaField.WORLD.field());
 		if(!res.wasNull()){
@@ -297,7 +255,49 @@ public class PersonaStore {
 				persona.location = new WeakBlock(w, x, y, z);
 			}
 		}
+		
+        return persona;
+    }
+	
+	ArchePersona buildPersona(ResultSet res, OfflinePlayer pl) throws SQLException{
+		ArcheOfflinePersona op = buildOfflinePersona(res, pl);
+		
+		ArchePersona persona = new ArchePersona(
+					op.getPersonaId(),
+					op.getPlayerUUID(),
+					op.getSlot(),
+					op.getName(),
+					op.getRace(),
+					op.getGender(),
+					op.getCreationTime(),
+					op.lastPlayed,
+					op.getPersonaType()
+				);
+		
+		persona.location = op.location;
+		persona.current = op.current;
+		persona.player = pl.getName();
+		
+		String rheader = res.getString(PersonaField.RACE.field());
+        if(rheader != null && !rheader.equals("null") && !rheader.isEmpty()){
+			persona.raceHeader = rheader;
+		}
 
+		persona.description = res.getString(PersonaField.DESCRIPTION.field());
+		persona.prefix = res.getString(PersonaField.PREFIX.field());
+		persona.fatigue = res.getInt(PersonaField.FATIGUE.field());
+		persona.health = res.getDouble(PersonaField.HEALTH.field());
+        persona.food = res.getInt(PersonaField.FOOD.field());
+        persona.saturation = res.getFloat(PersonaField.SATURATION.field());
+
+		persona.timePlayed.set(res.getInt(PersonaField.STAT_PLAYED.field()));
+		persona.charactersSpoken.set(res.getInt(PersonaField.STAT_CHARS.field()));
+		persona.lastRenamed = res.getTimestamp(PersonaField.STAT_RENAMED.field());
+
+		persona.skills.setMainProfession(ArcheSkillFactory.getSkill(res.getString(PersonaField.SKILL_SELECTED.field())));
+        Optional<Creature> creature = ArcheCore.getMagicControls().getCreatureById(res.getString("creature"));
+        creature.ifPresent(persona.magics::setCreature);
+        
 		String invString = res.getString(PersonaField.INV.field());
         String enderinvString = res.getString(PersonaField.ENDERINV.field());
         persona.inv = PersonaInventory.restore(persona, invString, enderinvString);
@@ -337,7 +337,7 @@ public class PersonaStore {
 		
 		Set<PersonaTable> tables = EnumSet.noneOf(PersonaTable.class);
 		for(PersonaField field : PersonaField.values()) {
-			if(field.isForOfflinePersona() == forOffline) {
+			if(!forOffline || field.isForOfflinePersona()) {
 				fields.add(field.field());
 				if(field.table != PersonaTable.MASTER) tables.add(field.table);
 			}

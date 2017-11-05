@@ -281,29 +281,12 @@ public class ArchePersonaHandler implements PersonaHandler {
         String c = ChatColor.BLUE + "";
         String l = ChatColor.GRAY + "";
 
-        boolean masked = !op.isLoaded() && ((ArchePersona) op).hasTagKey("masked");
+        Persona p = op.getPersona();
+        boolean masked = op.isLoaded() && p.hasTagKey("masked");
 
         result.add(new TextComponent(l + "~~~~ " + r + ((masked) ? op.getName() : op.getPlayerName()) + ((mod && masked) ? l + "(" + op.getPlayerName() + ")" + r : "") + "'s Roleplay Persona" + l + " ~~~~"));
+        result.add(getPersonaHeader(op));
 
-        if (op.getPersonaType() != PersonaType.NORMAL) {
-            result.add(new TextComponent(op.getPersonaType().personaViewLine));
-        } else if (op.getTotalPlaytime() < ArcheCore.getPlugin().getNewbieProtectDelay()) {
-            Player player = ArcheCore.getPlayer(op.getPlayerUUID());
-            if (player != null && !player.hasPermission("archecore.persona.nonewbie"))
-                result.add(new TextComponent(ChatColor.LIGHT_PURPLE + "((Persona was recently made and can't engage in PvP))"));
-            else
-                result.add(new TextComponent(op.getPersonaType().personaViewLine));
-        } else if (ArcheCore.getPlugin().getNewbieNotificationDelay() > 0 && op.getTotalPlaytime() < 600) {
-            OfflinePlayer player = ArcheCore.getPlayer(op.getPlayerUUID());
-            long age = player == null ? Integer.MAX_VALUE : System.currentTimeMillis() - player.getFirstPlayed();
-            int mins = (int) (age / DateUtils.MILLIS_PER_MINUTE);
-            if (ArcheCore.getPlugin().getNewbieNotificationDelay() > mins && !(player != null && player.isOnline() && ((Player) player).hasPermission("archecore.persona.nonewbie")))
-                result.add(new TextComponent(ChatColor.AQUA + "((This player is new to the server))"));
-            else
-                result.add(new TextComponent(op.getPersonaType().personaViewLine));
-        } else result.add(new TextComponent(op.getPersonaType().personaViewLine));
-
-        //----End of header----
         //Now we add all the actual relevant Persona tags in a list called subresult.
         List<BaseComponent> subresult = Lists.newArrayList();
 
@@ -313,9 +296,6 @@ public class ArchePersonaHandler implements PersonaHandler {
         if (gender != null) subresult.add(new TextComponent(c + "Gender: " + r + op.getGender()));
 
         if (op.isLoaded()) {
-            Persona p = (Persona) op;
-
-
             String race = p.getRaceString(mod);
             if (race != null && !race.isEmpty()) {
                 subresult.add(new TextComponent(c + "Race: " + r + race));
@@ -328,8 +308,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 
             if (desc != null)
                 subresult.add(new TextComponent(c + "Description: " + r + desc));
-        } else {
-
         }
 
         //Having added EVERYTHING relevant into subresult, we call the event around
@@ -359,12 +337,32 @@ public class ArchePersonaHandler implements PersonaHandler {
         }
 
 		return result;
-
 	}
 
 	@Override
 	public List<BaseComponent> whois(Player p, boolean mod) {
 		return whois(getPersona(p), mod);
+	}
+	
+	private BaseComponent getPersonaHeader(OfflinePersona op) {
+		Persona p = op.getPersona();
+        if (op.getPersonaType() != PersonaType.NORMAL) {
+            return new TextComponent(op.getPersonaType().personaViewLine);
+        } else if (op.isLoaded() && p.getTotalPlaytime() < ArcheCore.getPlugin().getNewbieProtectDelay()) {
+            Player player = ArcheCore.getPlayer(op.getPlayerUUID());
+            if (player != null && !player.hasPermission("archecore.persona.nonewbie"))
+                return new TextComponent(ChatColor.LIGHT_PURPLE + "((Persona was recently made and can't engage in PvP))");
+            else
+                return new TextComponent(op.getPersonaType().personaViewLine);
+        } else if (op.isLoaded() && ArcheCore.getPlugin().getNewbieNotificationDelay() > 0 && p.getTotalPlaytime() < 600) {
+            OfflinePlayer player = ArcheCore.getPlayer(op.getPlayerUUID());
+            long age = player == null ? Integer.MAX_VALUE : System.currentTimeMillis() - player.getFirstPlayed();
+            int mins = (int) (age / DateUtils.MILLIS_PER_MINUTE);
+            if (ArcheCore.getPlugin().getNewbieNotificationDelay() > mins && !(player != null && player.isOnline() && player.getPlayer().hasPermission("archecore.persona.nonewbie")))
+                return new TextComponent(ChatColor.AQUA + "((This player is new to the server))");
+            else
+                return new TextComponent(op.getPersonaType().personaViewLine);
+        } else return new TextComponent(op.getPersonaType().personaViewLine);
 	}
 
 	private BaseComponent getProfessionWhois(Persona p) {

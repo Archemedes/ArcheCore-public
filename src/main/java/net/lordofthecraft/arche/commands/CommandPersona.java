@@ -272,7 +272,7 @@ public class CommandPersona implements CommandExecutor {
                     return true;
                 } else if (cmd == PersonaCommand.TIME) {
                     sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(opers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + opers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
-                    sender.sendMessage(ChatColor.AQUA + "You have a total of " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(opers.getTotalPlaytime() / 60) + ChatColor.AQUA + " hours on " + opers.getName() + "!");
+                  //sender.sendMessage(ChatColor.AQUA + "You have a total of " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(opers.getTotalPlaytime() / 60) + ChatColor.AQUA + " hours on " + opers.getName() + "!");
                     return true;
                 }
             } else {
