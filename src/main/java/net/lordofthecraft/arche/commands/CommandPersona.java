@@ -17,6 +17,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.google.common.collect.Lists;
 
@@ -237,6 +238,7 @@ public class CommandPersona implements CommandExecutor {
 
 			//Go through process to find the Persona we want
             OfflinePersona opers = null;
+            boolean willTryToLoad = false;
             if ((cmd == PersonaCommand.VIEW || cmd == PersonaCommand.MORE || cmd == PersonaCommand.LIST)
                     && args.length > 1) {
                 opers = CommandUtil.personaFromArg(args[1]);
@@ -244,14 +246,18 @@ public class CommandPersona implements CommandExecutor {
                     && args.length > 1
                     && sender.hasPermission("archecore.mod.other")) {
                 opers = CommandUtil.personaFromArg(args[1]);
+                if(opers == null && sender instanceof Player) willTryToLoad = loadAndReexecute(args[1], (Player) sender, command, args);
             } else if (args.length > 2 && args[args.length - 2].equalsIgnoreCase("-p") && (sender.hasPermission("archecore.mod.other"))) {
                 opers = CommandUtil.personaFromArg(args[args.length - 1]);
+                
+                if(opers == null && sender instanceof Player) willTryToLoad = loadAndReexecute(args[args.length - 1], (Player) sender, command, args);
             } else if (sender instanceof Player) {
                 opers = handler.getPersona((Player) sender);
             }
 
             if (opers == null) {
-                sender.sendMessage(ChatColor.RED + "Error: No persona found to modify");
+                if(willTryToLoad) sender.sendMessage(ChatColor.LIGHT_PURPLE + "Error: Persona not loaded. Will try to load it now. Please wait...");
+                else sender.sendMessage(ChatColor.RED + "Error: No persona found to modify");
 				return true;
 			}
 
@@ -272,7 +278,6 @@ public class CommandPersona implements CommandExecutor {
                     return true;
                 } else if (cmd == PersonaCommand.TIME) {
                     sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(opers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + opers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
-                  //sender.sendMessage(ChatColor.AQUA + "You have a total of " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(opers.getTotalPlaytime() / 60) + ChatColor.AQUA + " hours on " + opers.getName() + "!");
                     return true;
                 }
             } else {
@@ -349,10 +354,8 @@ public class CommandPersona implements CommandExecutor {
                             pers.setName(name);
                             sender.sendMessage(ChatColor.AQUA + "Persona name was set to: " + ChatColor.RESET + name);
                             if (sender == pers.getPlayer()) {
-                                //ArcheExecutor.getInstance().put(new UpdateTask(pers, PersonaField.STAT_RENAMED, new Timestamp(System.currentTimeMillis())));
                                 ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(pers, PersonaField.STAT_RENAMED, new Timestamp(System.currentTimeMillis())));
                             } //Player renamed by his own accord
-                            //ArcheExecutor.getInstance().put(new PersonaRenameTask(pers));
                         } else {
                             sender.sendMessage(ChatColor.RED + "Error: Name too long. Max length 32 characters");
                         }
@@ -582,6 +585,26 @@ public class CommandPersona implements CommandExecutor {
 				" hours";
 
 		return(sb);
+	}
+	
+	private boolean loadAndReexecute(String personaToLoad, Player caller, Command command, String[] args) {
+		final OfflinePersona offlinePersona = CommandUtil.offlinePersonaFromArg(personaToLoad);
+		if(offlinePersona == null) return false; //Nothing we can do at this point
+		if(offlinePersona.isLoaded()) throw new IllegalStateException("Persona is already loaded!");
+		
+		//Run async to load then use
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				ArchePersona persona = (ArchePersona) offlinePersona.loadPersona();
+				Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->{
+							ArchePersonaHandler.getInstance().getPersonaStore().addOnlinePersona(persona);
+							caller.performCommand(command.getName() + ' ' + StringUtils.join(args, ' '));
+						});
+			}
+		}.runTaskAsynchronously(ArcheCore.getPlugin());
+		
+		return true;
 	}
 
 }

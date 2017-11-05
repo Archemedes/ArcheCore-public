@@ -33,6 +33,7 @@ import net.lordofthecraft.arche.SQL.SQLUtils;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Creature;
+import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.PersonaTable;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
@@ -100,6 +101,13 @@ public class PersonaStore {
         ArchePersona[] prs = this.onlinePersonas.get(uuid);
         if (prs == null) return new ArchePersona[ArcheCore.getControls().personaSlots()];
 		else return prs;
+	}
+	
+	public void addOnlinePersona(ArchePersona persona) {
+		ArcheOfflinePersona old = allPersonas.get(persona.getPersonaId());
+		if(old.isLoaded()) return;
+		
+		allPersonas.put(persona.getPersonaId(), persona);
 	}
 	
 	public ArchePersona registerPersona(ArchePersona persona) {
@@ -325,6 +333,13 @@ public class PersonaStore {
 			if(prs == null) prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
 		} else {
 			onlinePersonas.put(uuid, prs);
+			for(int i = 0; i < prs.length; i++) {
+				ArchePersona p = prs[i];
+				if(p == null) continue;
+				ArcheOfflinePersona aop = allPersonas.get(p.getPersonaId());
+				if(aop.isLoaded()) prs[i] = aop.getPersona();
+				else allPersonas.put(p.getPersonaId(), p);
+			}
 			Integer taskId = pendingTasks.get(uuid);
 			Bukkit.getScheduler().cancelTask(taskId);
 		}

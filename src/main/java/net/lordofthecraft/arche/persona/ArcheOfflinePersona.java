@@ -120,7 +120,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 
     @Override
     public boolean isLoaded() {
-        return this instanceof Persona;
+        return this instanceof ArchePersona;
     }
 
     @Override
@@ -138,11 +138,11 @@ public class ArcheOfflinePersona implements OfflinePersona {
     }
 
     @Override
-    public Persona getPersona() {
+    public ArchePersona getPersona() {
         if (!isLoaded()) {
             return null;
         }
-        return (Persona) this;
+        return (ArchePersona) this;
     }
 
     @Override
