@@ -864,7 +864,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     }
 
     @Override
-    public Persona getPersona() {
+    public ArchePersona getPersona() {
         return this;
     }
 
