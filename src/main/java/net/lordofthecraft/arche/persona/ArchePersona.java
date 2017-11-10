@@ -63,7 +63,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	private final PersonaSkills skills = new PersonaSkills(this);
     private final PersonaMagics magics = new PersonaMagics(this);
     private final PersonaAttributes attributes = new PersonaAttributes(this);
-    private final TagAttachment tags = new TagAttachment(this);
+    private final PersonaTags tags = new PersonaTags(this);
     
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger charactersSpoken;
@@ -136,7 +136,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         this.player = name;
     }
 
-	public TagAttachment tags() {
+	public PersonaTags tags() {
 		return tags;
 	}
 	

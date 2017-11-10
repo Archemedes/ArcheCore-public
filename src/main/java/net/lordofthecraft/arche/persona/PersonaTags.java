@@ -17,13 +17,13 @@ import net.lordofthecraft.arche.save.rows.persona.PersonaTagRow;
  *
  * @author 501warhead
  */
-public class TagAttachment {
+public class PersonaTags {
     private static final IConsumer consumer = ArcheCore.getConsumerControls();
     private final Map<String, String> tags = new HashMap<>();
     private final Persona persona;
     private boolean save = false;
 
-    public TagAttachment(Persona persona) {
+    public PersonaTags(Persona persona) {
         this.persona = persona;
     }
     
