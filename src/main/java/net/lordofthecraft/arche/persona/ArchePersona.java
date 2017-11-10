@@ -60,10 +60,10 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
 
-	final PersonaSkills skills = new PersonaSkills(this);
-    final PersonaMagics magics = new PersonaMagics(this);
-    final PersonaAttributes attributes = new PersonaAttributes(this);
-    final TagAttachment tags = new TagAttachment(this);
+	private final PersonaSkills skills = new PersonaSkills(this);
+    private final PersonaMagics magics = new PersonaMagics(this);
+    private final PersonaAttributes attributes = new PersonaAttributes(this);
+    private final TagAttachment tags = new TagAttachment(this);
     
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger charactersSpoken;
@@ -136,6 +136,10 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         this.player = name;
     }
 
+	public TagAttachment tags() {
+		return tags;
+	}
+	
 	@Override
 	public boolean hasTagKey(String s) {
         return tags.hasKey(s);

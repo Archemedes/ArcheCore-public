@@ -312,9 +312,9 @@ public class PersonaStore {
 		persona.charactersSpoken.set(res.getInt(PersonaField.STAT_CHARS.field()));
 		persona.lastRenamed = res.getTimestamp(PersonaField.STAT_RENAMED.field());
 
-		persona.skills.setMainProfession(ArcheSkillFactory.getSkill(res.getString(PersonaField.SKILL_SELECTED.field())));
+		persona.skills().setMainProfession(ArcheSkillFactory.getSkill(res.getString(PersonaField.SKILL_SELECTED.field())));
         Optional<Creature> creature = ArcheCore.getMagicControls().getCreatureById(res.getString("creature"));
-        creature.ifPresent(persona.magics::setCreature);
+        creature.ifPresent(persona.magics()::setCreature);
         
 		String invString = res.getString(PersonaField.INV.field());
         String enderinvString = res.getString(PersonaField.ENDERINV.field());
@@ -356,7 +356,7 @@ public class PersonaStore {
                     Integer teacher = rs.getInt("teacher");
                     boolean visible = rs.getBoolean("visible");
                     data = new MagicData(armagic.get(), tier, visible, teacher != null && teacher > 0, (teacher), learned.toInstant().toEpochMilli(), last_advanced.toInstant().toEpochMilli());
-                    persona.magics.addMagicAttachment(new MagicAttachment(armagic.get(), persona, data));
+                    persona.magics().addMagicAttachment(new MagicAttachment(armagic.get(), persona, data));
                 }
 			}
 		} catch (SQLException e) { e.printStackTrace(); }
@@ -365,7 +365,7 @@ public class PersonaStore {
 	private void loadTags(ArchePersona persona, Connection c) {
 		String sql = "SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=" + persona.getPersonaId();
 		try(Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)){
-			persona.tags.init(rs);
+			persona.tags().init(rs);
 		} catch (SQLException e) { e.printStackTrace(); }
 	}
 	
