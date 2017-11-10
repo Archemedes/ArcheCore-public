@@ -1,6 +1,9 @@
 package net.lordofthecraft.arche.persona;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import net.lordofthecraft.arche.ArcheCore;
@@ -15,16 +18,19 @@ import net.lordofthecraft.arche.save.rows.persona.PersonaTagRow;
  * @author 501warhead
  */
 public class TagAttachment {
-    //private static final ArcheExecutor buffer = ArcheExecutor.getInstance();
     private static final IConsumer consumer = ArcheCore.getConsumerControls();
-    private final Map<String, String> tags;
+    private final Map<String, String> tags = new HashMap<>();
     private final Persona persona;
-    private final boolean save;
+    private boolean save = false;
 
-    public TagAttachment(Map<String, String> tags, Persona persona, boolean save) {
-        this.tags = tags;
+    public TagAttachment(Persona persona) {
         this.persona = persona;
-        this.save = save;
+    }
+    
+    void init(ResultSet rs) throws SQLException {
+    	while(rs.next()) {
+    		tags.put(rs.getString("tag_key"), rs.getString("tag_value"));
+    	}
     }
 
     public String getValue(String name) {

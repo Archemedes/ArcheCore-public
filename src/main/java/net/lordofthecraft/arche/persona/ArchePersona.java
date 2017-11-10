@@ -1,10 +1,6 @@
 package net.lordofthecraft.arche.persona;
 
 import java.lang.ref.WeakReference;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.Validate;
@@ -34,9 +29,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
-import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.enums.AbilityScore;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
@@ -57,14 +50,10 @@ import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.magic.insert.MagicInsertRow;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
-import net.lordofthecraft.arche.save.rows.persona.DeletePersonaSkinRow;
-import net.lordofthecraft.arche.save.rows.persona.PersonaSkinRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdateVitalsRow;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
-import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
 
 public final class ArchePersona extends ArcheOfflinePersona implements Persona, InventoryHolder {
@@ -74,7 +63,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	final PersonaSkills skills = new PersonaSkills(this);
     final PersonaMagics magics = new PersonaMagics(this);
     final PersonaAttributes attributes = new PersonaAttributes(this);
-
+    final TagAttachment tags = new TagAttachment(this);
+    
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger charactersSpoken;
     String description = null;
@@ -92,8 +82,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     PersonaInventory inv;
 	private Creature creature;
 	private WeakReference<Player> playerObject;
-	private TagAttachment attachment;
-    private ArcheSkin skin;
+	
+    ArcheSkin skin;
     private ArrayList<PotionEffect> effects = Lists.newArrayList();
 
     ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS, Timestamp lastPlayed) {
@@ -148,12 +138,12 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 	@Override
 	public boolean hasTagKey(String s) {
-        return attachment.hasKey(s);
+        return tags.hasKey(s);
     }
 
 	@Override
 	public Optional<String> getTagValue(String tag) {
-		String s = attachment.getValue(tag);
+		String s = tags.getValue(tag);
 		if (s == null) {
 			return Optional.empty();
 		} else {
@@ -163,17 +153,17 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 	@Override
 	public Map<String, String> getTags() {
-		return attachment.getTags();
+		return tags.getTags();
 	}
 
 	@Override
 	public void setTag(String name, String value) {
-		attachment.setValue(name, value);
+		tags.setValue(name, value);
 	}
 
 	@Override
 	public void removeTag(String name) {
-		attachment.delValue(name);
+		tags.delValue(name);
 	}
 
 	@Override
@@ -241,146 +231,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
             }
 		}
 	}
-
-    void loadSkin(Connection connection) {
-        String sql = "SELECT skin_id_fk FROM per_persona_skins WHERE persona_id_fk=?";
-        try {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, personaKey.getPersonaID());
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                ArcheSkin skin = SkinCache.getInstance().getSkinByID(rs.getInt("skin_id_fk"));
-                if (skin != null) {
-                    this.skin = skin;
-                } else {
-                    consumer.queueRow(new DeletePersonaSkinRow(this));
-                }
-            }
-            rs.close();
-            statement.close();
-        } catch (SQLException ex) {
-            ArcheCore.getPlugin().getLogger().log(Level.WARNING, "Failed to create skin for persona " + MessageUtil.identifyPersona(this), ex);
-        }
-    }
-
-	void loadSkills(Connection connection){
-        String sql = "SELECT skill_id,xp,visible FROM persona_skills WHERE persona_id_fk=?";
-        try {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, personaKey.getPersonaID());
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-            	String skill_id = rs.getString(1);
-            	double xp = rs.getDouble(2);
-            	boolean visible = rs.getBoolean(3);
-            	Skill skill = ArcheSkillFactory.getSkill(skill_id);
-            	
-        		SkillAttachment attach = new SkillAttachment(skill, this, xp, visible);
-        		skills.addSkillAttachment(attach);
-            }
-            
-            rs.close();
-            statement.close();
-        } catch (SQLException ex) {
-            ArcheCore.getPlugin().getLogger().log(Level.WARNING, "Failed to create skills for persona " + MessageUtil.identifyPersona(this), ex);
-        }
-	}
-
-    void loadAttributes(Connection conn) {
-        try {
-            if (!ArcheCore.usingSQLite()) {
-                conn.setReadOnly(true);
-            }
-            PreparedStatement statement = conn.prepareStatement("SELECT mod_uuid,attribute_type,mod_name,mod_value,operation,decayticks,decaytype,lostondeath FROM persona_attributes WHERE persona_id_fk=?");
-            statement.setInt(1, personaKey.getPersonaID());
-            ResultSet rs = statement.executeQuery();
-            AttributeRegistry reg = AttributeRegistry.getInstance();
-            while (rs.next()) {
-                ArcheAttribute att = reg.getAttribute(rs.getString("attribute_type"));
-                String type = rs.getString("decaytype");
-                String sop = rs.getString("operation");
-                AttributeModifier.Operation op = null;
-                ExtendedAttributeModifier.Decay decaytype = null;
-                for (ExtendedAttributeModifier.Decay at : ExtendedAttributeModifier.Decay.values()) {
-                	if (at.name().equalsIgnoreCase(type)) {
-                		decaytype = at;
-                		break;
-                	}
-                }
-                for (AttributeModifier.Operation fop : AttributeModifier.Operation.values()) {
-                	if (fop.name().equalsIgnoreCase(sop)) {
-                		op = fop;
-                		break;
-                	}
-                }
-                if (decaytype != null && op != null) {
-                	UUID id = UUID.fromString(rs.getString("mod_uuid"));
-                    String name = rs.getString("mod_name");
-                    double amount = rs.getDouble("mod_value");
-                	long ticks = rs.getLong("decayticks");
-                	boolean lostondeath = rs.getBoolean("lostondeath");
-                	attributes.addModifierFromSQL(att, new ExtendedAttributeModifier(id, name, amount, op, decaytype, ticks, lostondeath));
-                }
-            }
-            rs.close();
-            statement.close();
-        } catch (SQLException e) {
-            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Warning! We failed to load attributes for the persona of " + player + "! [" + getPersonaId() + "]", e);
-        }
-    }
-
-    void loadTags(Connection conn) {
-        String sql = "SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=?";
-        try {
-            PreparedStatement stat = conn.prepareStatement(sql);
-            stat.setInt(1, getPersonaId());
-            ResultSet rs = stat.executeQuery();
-            Map<String, String> tags = Maps.newHashMap();
-            while (rs.next()) {
-                tags.putIfAbsent(rs.getString("tag_key"), rs.getString("tag_value"));
-            }
-            attachment = new TagAttachment(tags, this, true);
-            rs.close();
-            stat.close();
-        } catch (SQLException e) {
-            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Failed to retrieve tags for the persona " + MessageUtil.identifyPersona(this), e);
-            attachment = new TagAttachment(Maps.newHashMap(), this, false);
-        }
-    }
-
-    void loadMagics(Connection conn) {
-        String sql = "SELECT magic_fk,tier,last_advanced,teacher,learned,visible FROM persona_magics WHERE persona_id_fk=?";
-        try {
-            if (!ArcheCore.usingSQLite()) {
-                conn.setReadOnly(true);
-            }
-            PreparedStatement stat = conn.prepareStatement(sql);
-            stat.setInt(1, getPersonaId());
-            ResultSet rs = stat.executeQuery();
-			while (rs.next()) {
-				MagicData data = null;
-				String magic = rs.getString("magic_fk");
-                Optional<Magic> armagic = ArcheCore.getMagicControls().getMagic(magic);
-                if (armagic.isPresent()) {
-					int tier = rs.getInt("tier");
-					Timestamp last_advanced = rs.getTimestamp("last_advanced");
-					Timestamp learned = rs.getTimestamp("learned");
-                    Integer teacher = rs.getInt("teacher");
-                    boolean visible = rs.getBoolean("visible");
-                    data = new MagicData(armagic.get(), tier, visible, teacher != null && teacher > 0, (teacher), learned.toInstant().toEpochMilli(), last_advanced.toInstant().toEpochMilli());
-                    magics.addMagicAttachment(new MagicAttachment(armagic.get(), this, data));
-                }
-			}
-			rs.close();
-			stat.close();
-        } catch (SQLException e) {
-			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "An error occurred while loading " + player + "'s persona magics!!!", e);
-		}
-	}
-
-	void createEmptyTags() {
-        attachment = new TagAttachment(Maps.newConcurrentMap(), this, true);
-    }
 
 	void removeMagicAttachment(Magic magic) {
         magics.removeMagicAttachment(magic);
@@ -824,15 +674,10 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
     @Override
     public void setSkin(ArcheSkin skin) {
-        boolean update = this.skin != null;
         this.skin = skin;
         skin.addPersona(this);
 
-        if (update) {
-            consumer.queueRow(new UpdatePersonaRow(this, PersonaField.ICON, skin.getSkinId()));
-        } else {
-            consumer.queueRow(new PersonaSkinRow(this));
-        }
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.SKIN, skin.getSkinId()));
     }
 
     @Override
@@ -840,7 +685,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         skin.removePersona(this);
         this.skin = null;
 
-        consumer.queueRow(new DeletePersonaSkinRow(this));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.SKIN, -1));
     }
 
     @Override

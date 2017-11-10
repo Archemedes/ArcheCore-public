@@ -39,7 +39,6 @@ public final class ArcheTables {
             if(debug) l.info("[Debug] Done with skills! Creating persona...");
             createPersonaTable(statement, end);
             if(debug) l.info("[Debug] Done with persona! Creating persona stats...");
-            createPerPersonaSkinTable(statement, end);
             createPersonaStatsTable(statement, end);
             if(debug) l.info("[Debug] Done with persona stats! Creating persona tags...");
             createPersonaTagsTable(statement, end);
@@ -163,20 +162,10 @@ public final class ArcheTables {
                 "profession VARCHAR(255) DEFAULT NULL," +
                 "fatigue DOUBLE DEFAULT 0.0," +
                 "last_played TIMESTAMP," +
+                "skin_id_fk INT DEFAULT -1," +
                 "PRIMARY KEY (persona_id)," +
                 "FOREIGN KEY (player_fk) REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT," +
                 "FOREIGN KEY (profession) REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE SET NULL" +
-                ")" +
-                end);
-    }
-
-    protected static void createPerPersonaSkinTable(Statement statement, String end) throws SQLException {
-        statement.execute("CREATE TABLE IF NOT EXISTS per_persona_skins (" +
-                "persona_id_fk INT UNSIGNED," +
-                "skin_id_fk INT," +
-                "PRIMARY KEY (persona_id_fk)," +
-                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE," +
-                "FOREIGN KEY (skin_id_fk) REFERENCES persona_skins (skin_id) ON UPDATE CASCADE ON DELETE SET NULL" +
                 ")" +
                 end);
     }

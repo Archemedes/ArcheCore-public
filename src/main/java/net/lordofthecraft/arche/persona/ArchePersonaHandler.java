@@ -247,7 +247,6 @@ public class ArchePersonaHandler implements PersonaHandler {
             SkinCache.getInstance().clearSkin(oldPersona);
         }
 
-		persona.createEmptyTags();
         consumer.queueRow(new InsertPersonaRow(persona));
 
         persona.attributes.addModifier(AttributeRegistry.SCORE_UNSPENT, new AttributeModifier(PersonaHandler.SCORE_ID, "unspent_points", 22, AttributeModifier.Operation.ADD_NUMBER), true, true);

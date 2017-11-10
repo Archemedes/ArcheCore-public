@@ -15,17 +15,19 @@ public enum PersonaField {
     DESCRIPTION("descr", MASTER, VARCHAR),
     SKILL_SELECTED("profession", MASTER, VARCHAR),
     CURRENT("curr", MASTER, BOOLEAN,true),
+    MONEY("money", MASTER, DOUBLE),
+    TYPE("p_type", MASTER, VARCHAR, true),
+    GENDER("gender", MASTER, INTEGER, true),
+    FATIGUE("fatigue", MASTER, DOUBLE),
+    STAT_LAST_PLAYED("last_played", MASTER, TIMESTAMP, true),
+	SKIN("skin_id_fk", MASTER, INTEGER),
+	
     STAT_PLAYED("played", STATS, INTEGER),
     STAT_CHARS("chars", STATS, INTEGER),
     STAT_RENAMED("renamed", STATS, TIMESTAMP),
     STAT_CREATION("date_created", STATS, TIMESTAMP, true),
     STAT_PLAYTIME_PAST("playtime_past", STATS, INTEGER),
-    STAT_LAST_PLAYED("last_played", MASTER, TIMESTAMP, true),
-    MONEY("money", MASTER, DOUBLE),
-    ICON("skin_id_fk", SKINS, INTEGER),
-    TYPE("p_type", MASTER, VARCHAR, true),
-    GENDER("gender", MASTER, INTEGER, true),
-    FATIGUE("fatigue", MASTER, DOUBLE),
+
     WORLD("world", VITALS, VARCHAR, true),
     X("x", VITALS, INTEGER, true),
     Y("y", VITALS, INTEGER, true),
@@ -36,6 +38,8 @@ public enum PersonaField {
     FOOD("hunger", VITALS, INTEGER),
     SATURATION("saturation", VITALS, FLOAT),
     POTIONS("potions", VITALS, VARCHAR);
+	
+
 
     private final String field;
     public final PersonaTable table;

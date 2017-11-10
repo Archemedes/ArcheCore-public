@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,19 +25,28 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.SQL.SQLUtils;
+import net.lordofthecraft.arche.attributes.ArcheAttribute;
+import net.lordofthecraft.arche.attributes.AttributeRegistry;
+import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Creature;
-import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Magic;
+import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.PersonaTable;
+import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.skin.ArcheSkin;
+import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.WeakBlock;
 
 public class PersonaStore {
@@ -314,16 +324,101 @@ public class PersonaStore {
 		if (ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble(PersonaField.MONEY.field());
 		persona.pastPlayTime = res.getInt(PersonaField.STAT_PLAYTIME_PAST.field());
 
+		int skinId = res.getInt(PersonaField.SKIN.field());
+		if(skinId >=0 ) {
+			ArcheSkin skin = SkinCache.getInstance().getSkinByID(skinId);
+			if (skin != null) persona.skin = skin;
+            else ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(persona, PersonaField.SKIN, -1)); 
+		}
+		
         Connection connection = ArcheCore.getSQLControls().getConnection();
-        persona.loadMagics(connection);
-        persona.loadTags(connection);
-        persona.loadAttributes(connection);
-        persona.loadSkills(connection);
-        persona.loadSkin(connection);
+        loadMagics(persona, connection);
+        loadTags(persona, connection);
+        loadAttributes(persona, connection);
+        loadSkills(persona, connection);
         connection.close();
         
 		return persona;
 	}
+	
+	private void loadMagics(ArchePersona persona, Connection c) {
+		String sql = "SELECT magic_fk,tier,last_advanced,teacher,learned,visible FROM persona_magics WHERE persona_id_fk=" + persona.getPersonaId();
+		
+		try(Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)){
+			while (rs.next()) {
+				MagicData data = null;
+				String magic = rs.getString("magic_fk");
+                Optional<Magic> armagic = ArcheCore.getMagicControls().getMagic(magic);
+                if (armagic.isPresent()) {
+					int tier = rs.getInt("tier");
+					Timestamp last_advanced = rs.getTimestamp("last_advanced");
+					Timestamp learned = rs.getTimestamp("learned");
+                    Integer teacher = rs.getInt("teacher");
+                    boolean visible = rs.getBoolean("visible");
+                    data = new MagicData(armagic.get(), tier, visible, teacher != null && teacher > 0, (teacher), learned.toInstant().toEpochMilli(), last_advanced.toInstant().toEpochMilli());
+                    persona.magics.addMagicAttachment(new MagicAttachment(armagic.get(), persona, data));
+                }
+			}
+		} catch (SQLException e) { e.printStackTrace(); }
+	}
+	
+	private void loadTags(ArchePersona persona, Connection c) {
+		String sql = "SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=" + persona.getPersonaId();
+		try(Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)){
+			persona.tags.init(rs);
+		} catch (SQLException e) { e.printStackTrace(); }
+	}
+	
+	private void loadAttributes(ArchePersona persona, Connection c) {
+		String sql = "SELECT mod_uuid,attribute_type,mod_name,mod_value,operation,decayticks,decaytype,lostondeath FROM persona_attributes WHERE persona_id_fk=" + persona.getPersonaId();
+		
+		try(Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)){
+            AttributeRegistry reg = AttributeRegistry.getInstance();
+			while (rs.next()) {
+                ArcheAttribute att = reg.getAttribute(rs.getString("attribute_type"));
+                String type = rs.getString("decaytype");
+                String sop = rs.getString("operation");
+                AttributeModifier.Operation op = null;
+                ExtendedAttributeModifier.Decay decaytype = null;
+                for (ExtendedAttributeModifier.Decay at : ExtendedAttributeModifier.Decay.values()) {
+                	if (at.name().equalsIgnoreCase(type)) {
+                		decaytype = at;
+                		break;
+                	}
+                }
+                for (AttributeModifier.Operation fop : AttributeModifier.Operation.values()) {
+                	if (fop.name().equalsIgnoreCase(sop)) {
+                		op = fop;
+                		break;
+                	}
+                }
+                if (decaytype != null && op != null) {
+                	UUID id = UUID.fromString(rs.getString("mod_uuid"));
+                    String name = rs.getString("mod_name");
+                    double amount = rs.getDouble("mod_value");
+                	long ticks = rs.getLong("decayticks");
+                	boolean lostondeath = rs.getBoolean("lostondeath");
+                	persona.attributes().addModifierFromSQL(att, new ExtendedAttributeModifier(id, name, amount, op, decaytype, ticks, lostondeath));
+                }
+            }
+		} catch (SQLException e) { e.printStackTrace(); }
+	}
+	
+	private void loadSkills(ArchePersona persona, Connection c) {
+		String sql = "SELECT skill_id,xp,visible FROM persona_skills WHERE persona_id_fk="+persona.getPersonaId();			
+		try(Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)){
+            while (rs.next()) {
+            	String skill_id = rs.getString(1);
+            	double xp = rs.getDouble(2);
+            	boolean visible = rs.getBoolean(3);
+            	Skill skill = ArcheSkillFactory.getSkill(skill_id);
+            	
+        		SkillAttachment attach = new SkillAttachment(skill, persona, xp, visible);
+        		persona.skills().addSkillAttachment(attach);
+            }
+		} catch (SQLException e) { e.printStackTrace(); }
+	}
+	
 	
 	public ArchePersona[] implementPersonas(Player player) {
 		UUID uuid = player.getUniqueId();
@@ -360,10 +455,10 @@ public class PersonaStore {
 		StringBuilder result = new StringBuilder();
 		result.append("SELECT ")
 			.append(StringUtils.join(fields, ','))
-			.append(" FROM PERSONA ");
+			.append(" FROM persona ");
 		
 		tables.stream().map(PersonaTable::getTable)
-		.forEach(tab -> result.append(" JOIN ").append(tab)
+		.forEach(tab -> result.append(" LEFT JOIN ").append(tab)
 				.append(" ON persona.persona_id=")
 				.append(tab).append(".persona_id_fk")
 				);
