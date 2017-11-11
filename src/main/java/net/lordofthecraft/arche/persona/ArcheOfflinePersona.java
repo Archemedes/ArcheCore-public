@@ -15,16 +15,16 @@ import org.bukkit.OfflinePlayer;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
+import net.lordofthecraft.arche.interfaces.PersonaTags;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
 
 public class ArcheOfflinePersona implements OfflinePersona {
-
-    static final IConsumer consumer = ArcheCore.getControls().getConsumer();
+	final ArchePersonaTags tags = new ArchePersonaTags(this);
+	
     boolean deleted = false;
     final AtomicInteger timePlayed;
     final PersonaKey personaKey;
@@ -153,6 +153,11 @@ public class ArcheOfflinePersona implements OfflinePersona {
     @Override
     public boolean isDeleted() {
         return deleted;
+    }
+    
+    @Override
+    public PersonaTags tags() {
+    	return tags;
     }
 
     public void setDeleted(boolean deleted) {

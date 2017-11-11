@@ -287,6 +287,7 @@ public final class ArcheTables {
                 "persona_id_fk INT UNSIGNED," +
                 "tag_key VARCHAR(255) NOT NULL," +
                 "tag_value TEXT," +
+                "offline BOOLEAN DEFAULT FALSE," +
                 "PRIMARY KEY (persona_id_fk,tag_key)," +
                 "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id)" +
                 ")" +

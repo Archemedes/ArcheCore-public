@@ -274,6 +274,8 @@ public class PersonaStore {
 			}
 		}
 		
+		Connection connection = ArcheCore.getSQLControls().getConnection();
+        loadTags(persona, connection, true);
         return persona;
     }
 	
@@ -333,7 +335,7 @@ public class PersonaStore {
 		
         Connection connection = ArcheCore.getSQLControls().getConnection();
         loadMagics(persona, connection);
-        loadTags(persona, connection);
+        loadTags(persona, connection, false);
         loadAttributes(persona, connection);
         loadSkills(persona, connection);
         connection.close();
@@ -362,10 +364,11 @@ public class PersonaStore {
 		} catch (SQLException e) { e.printStackTrace(); }
 	}
 	
-	private void loadTags(ArchePersona persona, Connection c) {
-		String sql = "SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=" + persona.getPersonaId();
+	private void loadTags(ArcheOfflinePersona persona, Connection c, boolean offline) {
+		String sql = "SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=" + persona.getPersonaId()
+			+ (offline? " AND offline" : "");
 		try(Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)){
-			persona.tags().init(rs);
+			persona.tags.init(rs, offline);
 		} catch (SQLException e) { e.printStackTrace(); }
 	}
 	

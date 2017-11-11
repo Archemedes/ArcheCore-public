@@ -1,13 +1,13 @@
 package net.lordofthecraft.arche.save.rows.persona;
 
-import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.save.rows.SingleStatementRow;
 
 public class DeletePersonaTagRow extends SingleStatementRow {
-    private final Persona persona;
+    private final OfflinePersona persona;
     private final String key;
 
-    public DeletePersonaTagRow(Persona persona, String key) {
+    public DeletePersonaTagRow(OfflinePersona persona, String key) {
         this.persona = persona;
         this.key = key;
     }

@@ -38,6 +38,7 @@ import net.lordofthecraft.arche.event.persona.PersonaRemoveEvent;
 import net.lordofthecraft.arche.event.persona.PersonaRenameEvent;
 import net.lordofthecraft.arche.event.persona.PersonaSwitchEvent;
 import net.lordofthecraft.arche.interfaces.Creature;
+import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.Magic;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -57,13 +58,12 @@ import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.WeakBlock;
 
 public final class ArchePersona extends ArcheOfflinePersona implements Persona, InventoryHolder {
-
+	private static final IConsumer consumer = ArcheCore.getConsumerControls();
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
 
 	private final PersonaSkills skills = new PersonaSkills(this);
     private final PersonaMagics magics = new PersonaMagics(this);
     private final PersonaAttributes attributes = new PersonaAttributes(this);
-    private final PersonaTags tags = new PersonaTags(this);
     
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger charactersSpoken;
@@ -127,48 +127,10 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         this.gender = gender;
         consumer.queueRow(new UpdatePersonaRow(this, PersonaField.GENDER, gender));
     }
-    
-    
-    
-    
 
 	public void setPlayerName(String name) {
         this.player = name;
     }
-
-	public PersonaTags tags() {
-		return tags;
-	}
-	
-	@Override
-	public boolean hasTagKey(String s) {
-        return tags.hasKey(s);
-    }
-
-	@Override
-	public Optional<String> getTagValue(String tag) {
-		String s = tags.getValue(tag);
-		if (s == null) {
-			return Optional.empty();
-		} else {
-			return Optional.of(s);
-		}
-	}
-
-	@Override
-	public Map<String, String> getTags() {
-		return tags.getTags();
-	}
-
-	@Override
-	public void setTag(String name, String value) {
-		tags.setValue(name, value);
-	}
-
-	@Override
-	public void removeTag(String name) {
-		tags.delValue(name);
-	}
 
 	@Override
 	public double withdraw(double amount, Transaction cause) {

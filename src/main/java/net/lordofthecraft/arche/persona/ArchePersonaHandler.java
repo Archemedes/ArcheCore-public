@@ -281,7 +281,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         String l = ChatColor.GRAY + "";
 
         Persona p = op.getPersona();
-        boolean masked = op.isLoaded() && p.hasTagKey("masked");
+        boolean masked = op.isLoaded() && p.tags().hasTag("masked");
 
         result.add(new TextComponent(l + "~~~~ " + r + ((masked) ? op.getName() : op.getPlayerName()) + ((mod && masked) ? l + "(" + op.getPlayerName() + ")" + r : "") + "'s Roleplay Persona" + l + " ~~~~"));
         result.add(getPersonaHeader(op));

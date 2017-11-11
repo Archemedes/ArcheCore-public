@@ -1,5 +1,11 @@
 package net.lordofthecraft.arche.interfaces;
 
+import java.sql.Timestamp;
+import java.util.Optional;
+
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+
 import net.lordofthecraft.arche.enums.AbilityScore;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.persona.MagicAttachment;
@@ -7,12 +13,6 @@ import net.lordofthecraft.arche.persona.PersonaAttributes;
 import net.lordofthecraft.arche.persona.PersonaMagics;
 import net.lordofthecraft.arche.persona.PersonaSkills;
 import net.lordofthecraft.arche.skin.ArcheSkin;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-
-import java.sql.Timestamp;
-import java.util.Map;
-import java.util.Optional;
 
 public interface Persona extends OfflinePersona {
 
@@ -217,45 +217,6 @@ public interface Persona extends OfflinePersona {
 	 * @param description The new biography of the Persona.
 	 */
 	void setDescription(String description);
-
-	/**
-	 * See if a persona has a tag for the specific key
-	 *
-	 * @param key The key to check for
-	 * @return Whether or not it has an entry for the key
-	 */
-	boolean hasTagKey(String key);
-
-	/**
-	 * Get the value of a tag by it's key.
-	 *
-	 * @param key The key to fetch a value for
-	 * @return The value of the Key wrapped in an Optional
-	 * @see java.util.Optional
-	 */
-	Optional<String> getTagValue(String key);
-
-	/**
-	 * Get the list of tags for this persona
-	 *
-	 * @return A map of tags, Key mapped to value.
-	 */
-	Map<String, String> getTags();
-
-	/**
-	 * Set the value of a tag,
-	 *
-	 * @param key   The key to set, will overwrite existing keys.
-	 * @param value The value of the key to set
-	 */
-	void setTag(String key, String value);
-
-	/**
-	 * Removes a tag from a Persona
-	 *
-	 * @param key The key to remove
-	 */
-	void removeTag(String key);
 	
     /**
      * @return The EnderChest inventory for this persona
@@ -271,7 +232,7 @@ public interface Persona extends OfflinePersona {
 	 * @return if the player is below the new persona timer
      */
     boolean isNewbie();
-
+    
     /**
      * Sets the skin of this persona to use
      *
