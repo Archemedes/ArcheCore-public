@@ -1,10 +1,7 @@
 package net.lordofthecraft.arche;
 
 import com.google.common.collect.Lists;
-import net.lordofthecraft.arche.attributes.AttributeAbilityScore;
-import net.lordofthecraft.arche.attributes.AttributeAbilityScoreCap;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
-import net.lordofthecraft.arche.enums.AbilityScore;
 import net.lordofthecraft.arche.executables.OpenEnderRunnable;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -62,8 +59,8 @@ public class ArcheBeacon {
 				m.setDisplayName(ChatColor.AQUA + "Persona Modifiers:");
 				
 				List<String> lore = new ArrayList<>();
-                pers.attributes().getExistingInstances().parallelStream().filter(i -> !(i instanceof AttributeAbilityScore) && !(i instanceof AttributeAbilityScoreCap)).forEach(aa ->
-                        pers.attributes().getInstance(aa).getModifiers().stream()
+                pers.attributes().getExistingInstances().parallelStream().forEach(aa ->
+                    pers.attributes().getInstance(aa).getModifiers().stream()
 					.map(ExtendedAttributeModifier.class::cast)
 					.forEach(mod-> lore.add(
 							mod.asReadablePercentage(aa) + ' ' + aa.getName() + ' '
@@ -214,20 +211,11 @@ public class ArcheBeacon {
                 } else {
                     ArcheSkin sk = a.getSkin();
                     is = (sk != null ? sk.getHeadItem() : new ItemStack(Material.SKULL_ITEM, 1, (short) 3));
-                    StringBuilder points = new StringBuilder("");
-                    String k = "";
-                    for (AbilityScore score : AbilityScore.values()) {
-                        if (score.isChangeable()) {
-                            points.append(k);
-                            points.append(score.getIcon()).append(ChatColor.RESET).append(" ").append(a.getScore(score));
-                            k = ", ";
-                        }
-                    }
                     String name = ChatColor.YELLOW + "" + ChatColor.ITALIC + a.getName();
 					String gender = a.getGender() == null? "" : a.getGender();
                     String desc = ChatColor.GRAY + a.getRaceString(false) + " " + gender;
                     String d2 = (i == current? ChatColor.DARK_GREEN + "Selected!": ChatColor.GREEN + "Click to select");
-                    buildItem(is, name, points.toString(), desc, d2);
+                    buildItem(is, name, desc, d2);
                 }
 
 				//Always do this

@@ -18,7 +18,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.jsoup.helper.Validate;
 
@@ -29,8 +28,6 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.SQLUtils;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
-import net.lordofthecraft.arche.attributes.AttributeRegistry;
-import net.lordofthecraft.arche.enums.AbilityScore;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.persona.PersonaActivateEvent;
@@ -248,9 +245,6 @@ public class ArchePersonaHandler implements PersonaHandler {
         }
 
         consumer.queueRow(new InsertPersonaRow(persona));
-
-        persona.attributes().addModifier(AttributeRegistry.SCORE_UNSPENT, new AttributeModifier(PersonaHandler.SCORE_ID, "unspent_points", 22, AttributeModifier.Operation.ADD_NUMBER), true, true);
-        Arrays.asList(AbilityScore.values()).parallelStream().filter(AbilityScore::isChangeable).forEach(a -> persona.attributes().addModifier(AttributeRegistry.getSAttribute(a.getName()), new AttributeModifier(SCORE_ID, a.getName(), 1, AttributeModifier.Operation.ADD_NUMBER), true, true));
 
         RaceBonusHandler.apply(persona, persona.getRace());
         persona.updateDisplayName();

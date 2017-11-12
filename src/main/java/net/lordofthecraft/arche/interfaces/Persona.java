@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
-import net.lordofthecraft.arche.enums.AbilityScore;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.persona.PersonaAttributes;
@@ -258,13 +257,6 @@ public interface Persona extends OfflinePersona {
      * @return Returns whether or not this persona has an {@link net.lordofthecraft.arche.skin.ArcheSkin}
      */
     boolean hasSkin();
-
-    /**
-     * Gets the respective score of this persona - <b>only</b> gets racial bonus + assigned points
-     * @param score The score to check
-     * @return The integer which is the level of this score
-     */
-    int getScore(AbilityScore score);
 
     /**
      * @return the total playtime of this persona(all maps added)

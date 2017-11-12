@@ -30,7 +30,6 @@ import com.google.common.collect.Maps;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
-import net.lordofthecraft.arche.enums.AbilityScore;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.persona.PersonaFatigueEvent;
@@ -170,18 +169,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     @Override
     public PersonaMagics magics() {
         return magics;
-    }
-
-    @Override
-    public int getScore(AbilityScore score) {
-        return attributes.getInstance(AttributeRegistry.getSAttribute(score.getName()))
-                .getModifiers()
-                .stream()
-                .filter(m -> m.getUniqueId().equals(PersonaHandler.SCORE_ID) || m.getUniqueId().equals(RaceBonusHandler.UUID_RACIAL_SCORE))
-                .map(AttributeModifier::getAmount)
-                .map(Double::new)
-                .mapToInt(Double::intValue)
-                .sum();
     }
 
     void setCurrent(boolean current) {

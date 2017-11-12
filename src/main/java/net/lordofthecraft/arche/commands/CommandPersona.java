@@ -31,7 +31,6 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.AttributeSelectMenu;
 import net.lordofthecraft.arche.persona.TagAttachment;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
@@ -80,8 +79,7 @@ public class CommandPersona implements CommandExecutor {
         SETTAG("archecore.admin.command.persona.tag.set", false, "settag", "settagvalue", "tagset"),
         DELTAG("archecore.admin.command.persona.tag.remove", false, "deltag", "tagdel"),
         FATIGUEVIEW("archecore.admin.command.persona.fatigue", true, "fatigue", "fatigueview"),
-        FATIGUESET("archecore.admin.command.persona.fatigue.set", false, "fatigueset", "setfatigue"),
-        POINTS("archecore.command.persona.points", false, "points", "score");
+        FATIGUESET("archecore.admin.command.persona.fatigue.set", false, "fatigueset", "setfatigue");
 
         public final String permission;
         private final String[] aliases;
@@ -287,14 +285,7 @@ public class CommandPersona implements CommandExecutor {
                     return true;
                 }
                 Persona pers = (Persona) opers;
-                if (cmd == PersonaCommand.POINTS) {
-                    if (args.length > 1 && args[1].equalsIgnoreCase("spend")) {
-                        AttributeSelectMenu.open(pers);
-                        return true;
-                    }
-                    //TODO print points
-                    return true;
-                } else if (cmd == PersonaCommand.CREATED) {
+                if (cmd == PersonaCommand.CREATED) {
                     String time = millsToDaysHours(System.currentTimeMillis() - pers.getCreationTime().getTime());
                     sender.sendMessage(ChatColor.AQUA + "You created " + pers.getName() + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
                     return true;
