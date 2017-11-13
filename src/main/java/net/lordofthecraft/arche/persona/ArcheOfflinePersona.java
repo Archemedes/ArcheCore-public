@@ -101,6 +101,16 @@ public class ArcheOfflinePersona implements OfflinePersona {
     public String getGender() {
         return gender;
     }
+    
+    @Override
+    public boolean isMale() {
+    	return "Male".equals(gender);
+    }
+    
+    @Override
+    public boolean isFemale() {
+    	return "Female".equals(gender);
+    }
 
     @Override
     public PersonaType getPersonaType() {
