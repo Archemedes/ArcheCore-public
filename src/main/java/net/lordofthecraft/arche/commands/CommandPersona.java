@@ -34,9 +34,11 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.TagAttachment;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.util.CommandUtil;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 
 public class CommandPersona implements CommandExecutor {
@@ -333,6 +335,21 @@ public class CommandPersona implements CommandExecutor {
                     return true;
                 } else if (cmd == PersonaCommand.PROFESSION && args.length == 1 && sender instanceof Player) {
                     sender.sendMessage(ChatColor.BLUE + "Available Professions: " + ChatColor.DARK_GRAY + "[Click for Info]");
+                    final BaseComponent m = new TextComponent();
+                    ArcheSkillFactory.getSkills().values().stream().forEach(s->{
+                    	m.addExtra(MessageUtil.CommandButton(s.getName(), "/archehelp " + s.getName()));
+                    	m.addExtra("  ");
+                    });
+                    MessageUtil.addNewlines(m);
+                    MessageUtil.send(m, sender);
+                    
+                    BaseComponent m2 = new TextComponent("Select a profession by using ");
+                    m2.setColor(MessageUtil.convertColor(ChatColor.BLUE));
+                    BaseComponent extra = new TextComponent("/persona skill [skillname]");
+                    extra.setColor(MessageUtil.convertColor(ChatColor.GOLD));
+                    extra.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/persona skill "));
+                    m2.addExtra(extra);
+                    MessageUtil.send(m2, sender);
                     return true;
                 } else if (args.length > 1) {
                     if (cmd == PersonaCommand.NAME) {
@@ -383,9 +400,13 @@ public class CommandPersona implements CommandExecutor {
                             Skill skill = ArcheCore.getControls().getSkill(args[1]);
                             if (skill == null) {
                                 sender.sendMessage(ChatColor.RED + "Error: This profession could not be found!");
-                            } else {
+                            } else if (args.length == 3 && "confirm".equals(args[2])){
                                 pers.setMainSkill(skill);
                                 sender.sendMessage(ChatColor.GOLD + "You have dedicated yourself to " + ChatColor.RESET + skill.getName());
+                            } else { //ARE YOU SURE~?!
+                            	sender.sendMessage(ChatColor.GRAY + "You are wishing to become a " + ChatColor.GOLD + skill.getProfessionalName(pers.isFemale()));
+                            	sender.sendMessage(ChatColor.GRAY + "Selecting a profession will take dedication, and you cannot change your mind afterwards. If you are absolutely sure about your selection, please confirm below.");
+                            	MessageUtil.CommandButton("Yes, I will be a " + skill.getProfessionalName(pers.isFemale()), "/persona skill " + skill.getName() + " confirm");
                             }
                         } else {
                             sender.sendMessage(ChatColor.RED + "You have already selected a profession!");
