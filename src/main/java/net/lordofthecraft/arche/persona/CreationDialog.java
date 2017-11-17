@@ -545,7 +545,6 @@ public class CreationDialog {
                 }
 
             }
-            PersonaPointNagRunnable.nag(persona);
             return Prompt.END_OF_CONVERSATION;
         }
     }

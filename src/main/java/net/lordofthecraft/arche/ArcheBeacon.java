@@ -1,10 +1,7 @@
 package net.lordofthecraft.arche;
 
 import com.google.common.collect.Lists;
-import net.lordofthecraft.arche.attributes.AttributeAbilityScore;
-import net.lordofthecraft.arche.attributes.AttributeAbilityScoreCap;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
-import net.lordofthecraft.arche.enums.AbilityScore;
 import net.lordofthecraft.arche.executables.OpenEnderRunnable;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -62,8 +59,8 @@ public class ArcheBeacon {
 				m.setDisplayName(ChatColor.AQUA + "Persona Modifiers:");
 				
 				List<String> lore = new ArrayList<>();
-                pers.attributes().getExistingInstances().parallelStream().filter(i -> !(i instanceof AttributeAbilityScore) && !(i instanceof AttributeAbilityScoreCap)).forEach(aa ->
-                        pers.attributes().getInstance(aa).getModifiers().stream()
+                pers.attributes().getExistingInstances().parallelStream().forEach(aa ->
+                    pers.attributes().getInstance(aa).getModifiers().stream()
 					.map(ExtendedAttributeModifier.class::cast)
 					.forEach(mod-> lore.add(
 							mod.asReadablePercentage(aa) + ' ' + aa.getName() + ' '
@@ -178,7 +175,10 @@ public class ArcheBeacon {
 			inv.setItem(0, is);
 
 			is = new ItemStack(Material.REDSTONE_COMPARATOR);
-            buildItem(is, r + "Your Personas to the right", ChatColor.GRAY + "Max Personas: " + ChatColor.LIGHT_PURPLE + max, g + "Left Click to select", (ArcheCore.getControls().canCreatePersonas() ? g + "SHIFT + Left Click: Create new" : ChatColor.RED + "Creating new personas is disabled on this server"), g + "SHIFT + Right Click: Permakill Persona", ChatColor.GRAY + "Click me for more info.");
+            buildItem(is, r + "Your Personas to the right", ChatColor.GRAY + "Max Personas: " + ChatColor.LIGHT_PURPLE + max, 
+            		g + "Left Click to select", (ArcheCore.getControls().canCreatePersonas() ? g + "SHIFT + Left Click: Create new" : ChatColor.RED + "Creating new personas is disabled on this server"),
+            		g + "SHIFT + Right Click: Permakill Persona", 
+            		ChatColor.GRAY + "Click me for more info.");
             inv.setItem(9, is); //First item on second row
 
             //populate the top row using the FUNCTIONS array
@@ -203,31 +203,22 @@ public class ArcheBeacon {
 					if(mayMakeMore) {
 						is = new ItemStack(Material.SKULL_ITEM, 1, (short) 0);
 						buildItem(is, "Empty Persona", ChatColor.GREEN+""+ChatColor.ITALIC + "Click here", g + "To create a new Persona");
+						mayMakeMore = false;
 					}else if(i < max) {
 						is = new ItemStack(Material.SKULL_ITEM, 1, (short) 2);
 						buildItem(is, "Empty Persona", ChatColor.GREEN+""+ChatColor.ITALIC + "Slot is available", g + "");
 					}else {
 						is = new ItemStack(Material.SKULL_ITEM, 1, (short) 1);
-						if(i > 5) mayMakeMore = false;
 						buildItem(is, "Locked Slot", g + "Please " + ChatColor.GREEN+""+ChatColor.ITALIC + "Purchase", g + "You may purchase more personas in the store");
                     }
                 } else {
                     ArcheSkin sk = a.getSkin();
                     is = (sk != null ? sk.getHeadItem() : new ItemStack(Material.SKULL_ITEM, 1, (short) 3));
-                    StringBuilder points = new StringBuilder("");
-                    String k = "";
-                    for (AbilityScore score : AbilityScore.values()) {
-                        if (score.isChangeable()) {
-                            points.append(k);
-                            points.append(score.getIcon()).append(ChatColor.RESET).append(" ").append(a.getScore(score));
-                            k = ", ";
-                        }
-                    }
                     String name = ChatColor.YELLOW + "" + ChatColor.ITALIC + a.getName();
 					String gender = a.getGender() == null? "" : a.getGender();
                     String desc = ChatColor.GRAY + a.getRaceString(false) + " " + gender;
                     String d2 = (i == current? ChatColor.DARK_GREEN + "Selected!": ChatColor.GREEN + "Click to select");
-                    buildItem(is, name, points.toString(), desc, d2);
+                    buildItem(is, name, desc, d2);
                 }
 
 				//Always do this
@@ -244,15 +235,16 @@ public class ArcheBeacon {
 	
 	private static int requiredSize(int highestUsed, int allowedPersonas, int maxPersonas, int firstFree) {
 		int result = highestUsed+1;
-		//Need an extra slot for a white skull (= open slot)
+		
 		if(firstFree > highestUsed && firstFree < allowedPersonas) {
+			//Need an extra slot for a white skull (= open slot)
 			result++;
-		} else if(firstFree > highestUsed && maxPersonas > result && result > 8) {
+		} else if(firstFree > highestUsed && maxPersonas > result && result != 8) {
+			//Need an extra slot to tell people they can buy MORE
 			result++;
 		}
-		//Need an extra slot to tell people they can buy MORE
-
-        return result < 8? 8 : result;
+		
+        return result;
 	}
 
     public static ItemStack buildItem(ItemStack is, String title, String... lore){

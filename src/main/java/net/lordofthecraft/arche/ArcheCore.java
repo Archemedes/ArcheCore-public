@@ -320,8 +320,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             personaHandler.joinPlayer(p);
         }
 
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new PersonaPointNagRunnable(personaHandler), 173, 20 * 30 * 20);
-
         //Start tracking Personas and their playtime.
         new TimeTrackerRunnable(personaHandler).runTaskTimerAsynchronously(this, 2203, 1200);
 

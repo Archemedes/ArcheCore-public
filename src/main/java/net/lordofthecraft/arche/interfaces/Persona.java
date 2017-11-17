@@ -1,17 +1,17 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.enums.AbilityScore;
+import java.sql.Timestamp;
+import java.util.Optional;
+
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.persona.PersonaAttributes;
 import net.lordofthecraft.arche.persona.PersonaMagics;
 import net.lordofthecraft.arche.persona.PersonaSkills;
 import net.lordofthecraft.arche.skin.ArcheSkin;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-
-import java.sql.Timestamp;
-import java.util.Optional;
 
 public interface Persona extends OfflinePersona {
 
@@ -99,14 +99,14 @@ public interface Persona extends OfflinePersona {
      * @param gender The persona's new gender.
      */
     void setGender(String gender);
-
+    
     /**
      * Set the new RP name of this Persona. This also updates the time at which this Persona was last renamed
      *
      * @param name The new RP name.
      */
     void setName(String name);
-
+    
     /**
      * Set the underlying type of this persona
      *
@@ -216,7 +216,7 @@ public interface Persona extends OfflinePersona {
 	 * @param description The new biography of the Persona.
 	 */
 	void setDescription(String description);
-
+	
     /**
      * @return The EnderChest inventory for this persona
      */
@@ -231,7 +231,7 @@ public interface Persona extends OfflinePersona {
 	 * @return if the player is below the new persona timer
      */
     boolean isNewbie();
-
+    
     /**
      * Sets the skin of this persona to use
      *
@@ -243,10 +243,6 @@ public interface Persona extends OfflinePersona {
      * Removes the current {@link net.lordofthecraft.arche.skin.ArcheSkin} from the persona, regardless of if one is present or not. Extra dead.
      */
     void removeSkin();
-
-    void setUnspentPoints(int points);
-
-    int getUnspentPoints();
 
     /**
      * Get the current skin on this persona
@@ -261,13 +257,6 @@ public interface Persona extends OfflinePersona {
      * @return Returns whether or not this persona has an {@link net.lordofthecraft.arche.skin.ArcheSkin}
      */
     boolean hasSkin();
-
-    /**
-     * Gets the respective score of this persona - <b>only</b> gets racial bonus + assigned points
-     * @param score The score to check
-     * @return The integer which is the level of this score
-     */
-    int getScore(AbilityScore score);
 
     /**
      * @return the total playtime of this persona(all maps added)

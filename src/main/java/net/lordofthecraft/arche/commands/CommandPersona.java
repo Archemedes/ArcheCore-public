@@ -1,24 +1,13 @@
 package net.lordofthecraft.arche.commands;
 
-import com.google.common.collect.Lists;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.attributes.AttributeRegistry;
-import net.lordofthecraft.arche.enums.PersonaType;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.interfaces.OfflinePersona;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.AttributeSelectMenu;
-import net.lordofthecraft.arche.persona.TagAttachment;
-import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
-import net.lordofthecraft.arche.util.CommandUtil;
-import net.lordofthecraft.arche.util.MessageUtil;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
@@ -30,9 +19,27 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import com.google.common.collect.Lists;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.attributes.AttributeRegistry;
+import net.lordofthecraft.arche.enums.PersonaType;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.TagAttachment;
+import net.lordofthecraft.arche.save.PersonaField;
+import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.util.CommandUtil;
+import net.lordofthecraft.arche.util.MessageUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class CommandPersona implements CommandExecutor {
 	private final HelpDesk helpdesk;
@@ -74,8 +81,7 @@ public class CommandPersona implements CommandExecutor {
         SETTAG("archecore.admin.command.persona.tag.set", false, "settag", "settagvalue", "tagset"),
         DELTAG("archecore.admin.command.persona.tag.remove", false, "deltag", "tagdel"),
         FATIGUEVIEW("archecore.admin.command.persona.fatigue", true, "fatigue", "fatigueview"),
-        FATIGUESET("archecore.admin.command.persona.fatigue.set", false, "fatigueset", "setfatigue"),
-        POINTS("archecore.command.persona.points", false, "points", "score");
+        FATIGUESET("archecore.admin.command.persona.fatigue.set", false, "fatigueset", "setfatigue");
 
         public final String permission;
         private final String[] aliases;
@@ -241,23 +247,20 @@ public class CommandPersona implements CommandExecutor {
                     && args.length > 1
                     && sender.hasPermission("archecore.mod.other")) {
                 opers = CommandUtil.personaFromArg(args[1]);
-                if (opers == null && sender instanceof Player)
-                    willTryToLoad = loadAndReexecute(args[1], (Player) sender, command, args);
+                if(opers == null && sender instanceof Player) willTryToLoad = loadAndReexecute(args[1], (Player) sender, command, args);
             } else if (args.length > 2 && args[args.length - 2].equalsIgnoreCase("-p") && (sender.hasPermission("archecore.mod.other"))) {
                 opers = CommandUtil.personaFromArg(args[args.length - 1]);
-
-                if (opers == null && sender instanceof Player)
-                    willTryToLoad = loadAndReexecute(args[args.length - 1], (Player) sender, command, args);
+                
+                if(opers == null && sender instanceof Player) willTryToLoad = loadAndReexecute(args[args.length - 1], (Player) sender, command, args);
             } else if (sender instanceof Player) {
                 opers = handler.getPersona((Player) sender);
             }
 
             if (opers == null) {
-                if (willTryToLoad)
-                    sender.sendMessage(ChatColor.LIGHT_PURPLE + "Error: Persona not loaded. Will try to load it now. Please wait...");
+                if(willTryToLoad) sender.sendMessage(ChatColor.LIGHT_PURPLE + "Error: Persona not loaded. Will try to load it now. Please wait...");
                 else sender.sendMessage(ChatColor.RED + "Error: No persona found to modify");
-                return true;
-            }
+				return true;
+			}
 
             if (cmd.acceptsOffline) {
                 if (cmd == PersonaCommand.VIEW || cmd == PersonaCommand.MORE) {
@@ -284,10 +287,7 @@ public class CommandPersona implements CommandExecutor {
                     return true;
                 }
                 Persona pers = (Persona) opers;
-                if (cmd == PersonaCommand.POINTS) {
-                    AttributeSelectMenu.open(pers);
-                    return true;
-                } else if (cmd == PersonaCommand.CREATED) {
+                if (cmd == PersonaCommand.CREATED) {
                     String time = millsToDaysHours(System.currentTimeMillis() - pers.getCreationTime().getTime());
                     sender.sendMessage(ChatColor.AQUA + "You created " + pers.getName() + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
                     return true;
@@ -302,7 +302,7 @@ public class CommandPersona implements CommandExecutor {
                 } else if (cmd == PersonaCommand.LIST) {
                     ArchePersona[] personas = handler.getAllPersonas(pers.getPlayerUUID());
                     sender.sendMessage(ChatColor.AQUA + ArcheCore.getPlugin().getServer().getOfflinePlayer(pers.getPlayerUUID()).getName() + "'s personas:");
-                    for (int i = 0; i <= ArcheCore.getPlugin().personaSlots(); i++) {
+                    for (int i = 0; i <= 3; i++) {
                         Persona persona = personas[i];
                         if (persona != null) {
                             sender.sendMessage(ChatColor.GRAY + "[" + i + "] " + ChatColor.AQUA + persona.getName());
@@ -335,6 +335,21 @@ public class CommandPersona implements CommandExecutor {
                     return true;
                 } else if (cmd == PersonaCommand.PROFESSION && args.length == 1 && sender instanceof Player) {
                     sender.sendMessage(ChatColor.BLUE + "Available Professions: " + ChatColor.DARK_GRAY + "[Click for Info]");
+                    final BaseComponent m = new TextComponent();
+                    ArcheSkillFactory.getSkills().values().stream().forEach(s->{
+                    	m.addExtra(MessageUtil.CommandButton(s.getName(), "/archehelp " + s.getName()));
+                    	m.addExtra("  ");
+                    });
+                    MessageUtil.addNewlines(m);
+                    MessageUtil.send(m, sender);
+                    
+                    BaseComponent m2 = new TextComponent("Select a profession by using ");
+                    m2.setColor(MessageUtil.convertColor(ChatColor.BLUE));
+                    BaseComponent extra = new TextComponent("/persona skill [skillname]");
+                    extra.setColor(MessageUtil.convertColor(ChatColor.GOLD));
+                    extra.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/persona skill "));
+                    m2.addExtra(extra);
+                    MessageUtil.send(m2, sender);
                     return true;
                 } else if (args.length > 1) {
                     if (cmd == PersonaCommand.NAME) {
@@ -385,9 +400,13 @@ public class CommandPersona implements CommandExecutor {
                             Skill skill = ArcheCore.getControls().getSkill(args[1]);
                             if (skill == null) {
                                 sender.sendMessage(ChatColor.RED + "Error: This profession could not be found!");
-                            } else {
+                            } else if (args.length == 3 && "confirm".equals(args[2])){
                                 pers.setMainSkill(skill);
                                 sender.sendMessage(ChatColor.GOLD + "You have dedicated yourself to " + ChatColor.RESET + skill.getName());
+                            } else { //ARE YOU SURE~?!
+                            	sender.sendMessage(ChatColor.GRAY + "You are wishing to become a " + ChatColor.GOLD + skill.getProfessionalName(pers.isFemale()));
+                            	sender.sendMessage(ChatColor.GRAY + "Selecting a profession will take dedication, and you cannot change your mind afterwards. If you are absolutely sure about your selection, please confirm below.");
+                            	MessageUtil.CommandButton("Yes, I will be a " + skill.getProfessionalName(pers.isFemale()), "/persona skill " + skill.getName() + " confirm");
                             }
                         } else {
                             sender.sendMessage(ChatColor.RED + "You have already selected a profession!");
@@ -580,25 +599,25 @@ public class CommandPersona implements CommandExecutor {
 
 		return(sb);
 	}
-
-    private boolean loadAndReexecute(String personaToLoad, Player caller, Command command, String[] args) {
-        final OfflinePersona offlinePersona = CommandUtil.offlinePersonaFromArg(personaToLoad);
-        if (offlinePersona == null) return false; //Nothing we can do at this point
-        if (offlinePersona.isLoaded()) throw new IllegalStateException("Persona is already loaded!");
-
-        //Run async to load then use
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                ArchePersona persona = (ArchePersona) offlinePersona.loadPersona();
-                Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> {
-                    ArchePersonaHandler.getInstance().getPersonaStore().addOnlinePersona(persona);
-                    caller.performCommand(command.getName() + ' ' + StringUtils.join(args, ' '));
-                });
-            }
-        }.runTaskAsynchronously(ArcheCore.getPlugin());
-
-        return true;
-    }
+	
+	private boolean loadAndReexecute(String personaToLoad, Player caller, Command command, String[] args) {
+		final OfflinePersona offlinePersona = CommandUtil.offlinePersonaFromArg(personaToLoad);
+		if(offlinePersona == null) return false; //Nothing we can do at this point
+		if(offlinePersona.isLoaded()) throw new IllegalStateException("Persona is already loaded!");
+		
+		//Run async to load then use
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				ArchePersona persona = (ArchePersona) offlinePersona.loadPersona();
+				Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->{
+							ArchePersonaHandler.getInstance().getPersonaStore().addOnlinePersona(persona);
+							caller.performCommand(command.getName() + ' ' + StringUtils.join(args, ' '));
+						});
+			}
+		}.runTaskAsynchronously(ArcheCore.getPlugin());
+		
+		return true;
+	}
 
 }

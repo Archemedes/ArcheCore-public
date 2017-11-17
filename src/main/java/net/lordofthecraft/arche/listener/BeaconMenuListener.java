@@ -49,7 +49,7 @@ public class BeaconMenuListener implements Listener {
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
 	public void onClick(InventoryClickEvent e){
 		Inventory inv = e.getInventory();
-		if (ArcheBeacon.BEACON_HEADER.equals(inv.getTitle())) {
+		if (ArcheBeacon.BEACON_HEADER == inv.getTitle()) {
 			e.setCancelled(true);
 			final Player p = (Player) e.getWhoClicked();
 			final int s = e.getRawSlot();
@@ -77,7 +77,7 @@ public class BeaconMenuListener implements Listener {
 						if(apply != null) inv.setItem(s, apply);
 					} catch(Throwable t) {
 						t.printStackTrace();
-						p.sendMessage(ChatColor.RED + "There's an error with this button! Please report this occurence.");
+						p.sendMessage(ChatColor.RED + "There's an error with this button! Please report this occurrence.");
 						Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->{
 							p.closeInventory();
 						});
@@ -98,12 +98,15 @@ public class BeaconMenuListener implements Listener {
 
 				int count = 0;
 				int current = -1;
+				int firstFree = -1;
 				for(int i = 0; i < prs.length; i++){
 					if(prs[i] != null){
 						count++;
 						if(prs[i].isCurrent())
 							current = i;
-					} 
+					} else if(firstFree < 0) {
+						firstFree = i;
+					}
 				}
 
 				int t = s - 10;
@@ -112,15 +115,16 @@ public class BeaconMenuListener implements Listener {
 				CreationDialog dialog = new CreationDialog();
 
 				if(prs[t] == null){ //Clicked Persona does NOT exist
-					if(count < handler.getAllowedPersonas(p)){
+					if(count < handler.getAllowedPersonas(p) && t == firstFree){
 						if (!ArcheCore.getControls().canCreatePersonas()) {
 							p.sendMessage(ChatColor.RED + "Persona creation is disabled for this server, please go to the main server to create your persona.");
-							return;
+						} else {
+							//Player may make new persona here, let's do so now.
+							dialog.addPersona(p, t, true);
+							new BukkitRunnable(){@Override public void run(){ p.closeInventory();}}.runTask(plugin);
 						}
-						//Player may make new persona here, let's do so now.
-						dialog.addPersona(p, t, true);
-						new BukkitRunnable(){@Override public void run(){ p.closeInventory();}}.runTask(plugin);
 					}
+					return;
 				} else { //Clicked Persona does exist
 					if(e.isShiftClick()){ // Tried to modify persona somehow
 						if(e.isLeftClick()){ //Create new
