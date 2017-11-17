@@ -61,12 +61,12 @@ public interface OfflinePersona {
      * @return The Persona's gender
      */
     String getGender();
-    
+
     /**
-     * @return getGender().equals("Male") 
+     * @return getGender().equals("Male")
      */
     boolean isMale();
-    
+
     /**
      * @return getGender().equals("Female")
      */

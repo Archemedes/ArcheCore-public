@@ -60,9 +60,9 @@ public class ArcheBeacon {
 				
 				List<String> lore = new ArrayList<>();
                 pers.attributes().getExistingInstances().parallelStream().forEach(aa ->
-                    pers.attributes().getInstance(aa).getModifiers().stream()
-					.map(ExtendedAttributeModifier.class::cast)
-					.forEach(mod-> lore.add(
+                        pers.attributes().getInstance(aa).getModifiers().stream()
+                                .map(ExtendedAttributeModifier.class::cast)
+                                .forEach(mod-> lore.add(
 							mod.asReadablePercentage(aa) + ' ' + aa.getName() + ' '
 							+ ChatColor.GRAY + "" + ChatColor.ITALIC + '('
 							+ mod.getName() + ')')) 
@@ -175,10 +175,10 @@ public class ArcheBeacon {
 			inv.setItem(0, is);
 
 			is = new ItemStack(Material.REDSTONE_COMPARATOR);
-            buildItem(is, r + "Your Personas to the right", ChatColor.GRAY + "Max Personas: " + ChatColor.LIGHT_PURPLE + max, 
-            		g + "Left Click to select", (ArcheCore.getControls().canCreatePersonas() ? g + "SHIFT + Left Click: Create new" : ChatColor.RED + "Creating new personas is disabled on this server"),
-            		g + "SHIFT + Right Click: Permakill Persona", 
-            		ChatColor.GRAY + "Click me for more info.");
+            buildItem(is, r + "Your Personas to the right", ChatColor.GRAY + "Max Personas: " + ChatColor.LIGHT_PURPLE + max,
+                    g + "Left Click to select", (ArcheCore.getControls().canCreatePersonas() ? g + "SHIFT + Left Click: Create new" : ChatColor.RED + "Creating new personas is disabled on this server"),
+                    g + "SHIFT + Right Click: Permakill Persona",
+                    ChatColor.GRAY + "Click me for more info.");
             inv.setItem(9, is); //First item on second row
 
             //populate the top row using the FUNCTIONS array
@@ -203,9 +203,9 @@ public class ArcheBeacon {
 					if(mayMakeMore) {
 						is = new ItemStack(Material.SKULL_ITEM, 1, (short) 0);
 						buildItem(is, "Empty Persona", ChatColor.GREEN+""+ChatColor.ITALIC + "Click here", g + "To create a new Persona");
-						mayMakeMore = false;
-					}else if(i < max) {
-						is = new ItemStack(Material.SKULL_ITEM, 1, (short) 2);
+                        mayMakeMore = false;
+                    } else if (i < max) {
+                        is = new ItemStack(Material.SKULL_ITEM, 1, (short) 2);
 						buildItem(is, "Empty Persona", ChatColor.GREEN+""+ChatColor.ITALIC + "Slot is available", g + "");
 					}else {
 						is = new ItemStack(Material.SKULL_ITEM, 1, (short) 1);
@@ -235,17 +235,17 @@ public class ArcheBeacon {
 	
 	private static int requiredSize(int highestUsed, int allowedPersonas, int maxPersonas, int firstFree) {
 		int result = highestUsed+1;
-		
-		if(firstFree > highestUsed && firstFree < allowedPersonas) {
-			//Need an extra slot for a white skull (= open slot)
-			result++;
-		} else if(firstFree > highestUsed && maxPersonas > result && result != 8) {
-			//Need an extra slot to tell people they can buy MORE
-			result++;
-		}
-		
+
+        if (firstFree > highestUsed && firstFree < allowedPersonas) {
+            //Need an extra slot for a white skull (= open slot)
+            result++;
+        } else if (firstFree > highestUsed && maxPersonas > result && result != 8) {
+            //Need an extra slot to tell people they can buy MORE
+            result++;
+        }
+
         return result;
-	}
+    }
 
     public static ItemStack buildItem(ItemStack is, String title, String... lore){
 		ItemMeta meta = is.getItemMeta();
