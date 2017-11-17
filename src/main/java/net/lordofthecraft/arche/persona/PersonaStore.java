@@ -1,168 +1,192 @@
 package net.lordofthecraft.arche.persona;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheTimer;
-import net.lordofthecraft.arche.SQL.SQLUtils;
-import net.lordofthecraft.arche.enums.PersonaType;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.interfaces.Creature;
-import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-import net.lordofthecraft.arche.util.WeakBlock;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheTimer;
+import net.lordofthecraft.arche.SQL.SQLUtils;
+import net.lordofthecraft.arche.attributes.ArcheAttribute;
+import net.lordofthecraft.arche.attributes.AttributeRegistry;
+import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
+import net.lordofthecraft.arche.enums.PersonaType;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.interfaces.Creature;
+import net.lordofthecraft.arche.interfaces.Magic;
+import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.magic.MagicData;
+import net.lordofthecraft.arche.save.PersonaField;
+import net.lordofthecraft.arche.save.PersonaTable;
+import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.skin.ArcheSkin;
+import net.lordofthecraft.arche.skin.SkinCache;
+import net.lordofthecraft.arche.util.WeakBlock;
+
 public class PersonaStore {
-    private final String playerSelect = "SELECT DISTINCT player_fk FROM persona";
-    private final String personaSelect = "SELECT " +
-            "persona_id,player_fk,slot,race,gender" +
-            ",name,curr,race_header,descr,p_type,prefix,money,profession,fatigue,max_fatigue" +
-            ",world,x,y,z,inv,ender_inv,potions,health,hunger,saturation,creature" +
-            ",played,chars,renamed,playtime_past,date_created,last_played " +
-            "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
-            "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
-            "WHERE player_fk=?";
-    private final String offlinePersonaSelect = "SELECT " +
-            "persona_id,slot,name,curr,inv,ender_inv,date_created,race,gender,last_played,p_type " +
-            "FROM persona JOIN persona_vitals ON persona.persona_id=persona_vitals.persona_id_fk " +
-            "JOIN persona_stats ON persona.persona_id=persona_stats.persona_id_fk " +
-            "WHERE player_fk=?";
-
+    final String personaSelect;
+    private final String offlinePersonaSelect;
+    
+    public PersonaStore() {
+    	personaSelect = personaSelectStatement(false);
+    	offlinePersonaSelect = personaSelectStatement(true);
+    }
+    
     private int max_persona_id = 0;
-
+    
     private final Map<Integer, ArcheOfflinePersona> allPersonas = new HashMap<>();
-    private final Map<UUID, ArchePersona[]> onlinePersonas = new HashMap<>();
-
-    private final Map<UUID, ArchePersona[]> pendingBlobs = new ConcurrentHashMap<>();
-    private final Map<UUID, Integer> pendingTasks = new ConcurrentHashMap<>();
-
+	private final Map<UUID, ArchePersona[]> onlinePersonas = new HashMap<>();
+	
+	private final Map<UUID, ArchePersona[]> pendingBlobs = new ConcurrentHashMap<>();
+	private final Map<UUID, Integer> pendingTasks = new ConcurrentHashMap<>();
+	
     public Collection<ArcheOfflinePersona> getPersonas() {
         return Collections.unmodifiableCollection(allPersonas.values());
-    }
-
+	}
+    
     public Collection<ArchePersona> getLoadedPersonas() {
-        Collection<ArchePersona> result = new ArrayList<>();
-        onlinePersonas.values().stream().forEach(ps -> Arrays.stream(ps).filter(Objects::nonNull).forEach(result::add));
+    	Collection<ArchePersona> result = new ArrayList<>();
+    	onlinePersonas.values().stream().forEach( ps-> Arrays.stream(ps).filter(Objects::nonNull).forEach(result::add));
         return result;
-    }
+	}
 
     public ArcheOfflinePersona getPersonaById(int persona_id) {
-        return allPersonas.get(persona_id);
+    	return allPersonas.get(persona_id);       
     }
 
-    public ArchePersona getPersona(Player p) {
-        if (p == null) return null;
+	public ArchePersona getPersona(Player p){
+		if(p == null) return null;
         ArchePersona[] prs = onlinePersonas.get(p.getUniqueId());
 
-        if (prs == null) return null;
-        for (ArchePersona pr : prs) {
-            if (pr != null && pr.isCurrent()) return pr;
-        }
+		if(prs == null) return null;
+		for (ArchePersona pr : prs) {
+			if (pr != null && pr.isCurrent()) return pr;
+		}
 
-        return null;
-    }
-
-    public ArchePersona getPersona(UUID uuid, int id) {
+		return null;
+	}
+	
+	public ArchePersona getPersona(UUID uuid, int id){
         ArchePersona[] prs = onlinePersonas.get(uuid);
-        if (prs != null) return prs[id];
-        else return null;
-    }
-
-    public ArchePersona getPersona(UUID uuid) {
+        if(prs != null) return prs[id];
+		else return null;
+	} 
+	
+	public ArchePersona getPersona(UUID uuid){
         ArchePersona[] prs = onlinePersonas.get(uuid);
-        if (prs == null) return null;
-        for (ArchePersona pr : prs) {
-            if (pr != null && pr.isCurrent()) return pr;
-        }
-        return null;
-    }
-
-    public ArchePersona[] getAllPersonas(UUID uuid) {
+		if(prs == null) return null;
+		for (ArchePersona pr : prs) {
+			if (pr != null && pr.isCurrent()) return pr;
+		}
+		return null;
+	}
+	
+	public ArchePersona[] getAllPersonas(UUID uuid){
         ArchePersona[] prs = this.onlinePersonas.get(uuid);
         if (prs == null) return new ArchePersona[ArcheCore.getControls().personaSlots()];
-        else return prs;
-    }
+		else return prs;
+	}
+	
+	public void addOnlinePersona(ArchePersona persona) {
+		ArcheOfflinePersona old = allPersonas.get(persona.getPersonaId());
+		if(old.isLoaded()) return;
+		
+		allPersonas.put(persona.getPersonaId(), persona);
+	}
+	
+	public ArchePersona registerPersona(ArchePersona persona) {
+		Player player = persona.getPlayer();
+		ArchePersona[] prs = onlinePersonas.get(player.getUniqueId());
+		ArchePersona old;
+		if(prs == null) {
+			prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
+			onlinePersonas.put(player.getUniqueId(), prs);
+			old = null;
+		} else {
+			old = prs[persona.getSlot()];
+		}
+		
+		prs[persona.getSlot()] = persona;
+		return old;
+	}
 
-    public ArchePersona registerPersona(ArchePersona persona) {
-        Player player = persona.getPlayer();
-        ArchePersona[] prs = onlinePersonas.get(player.getUniqueId());
-        ArchePersona old;
-        if (prs == null) {
-            prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
-            onlinePersonas.put(player.getUniqueId(), prs);
-            old = null;
-        } else {
-            old = prs[persona.getSlot()];
-        }
+	public void loadPersonas(String playerName, UUID uuid) { //Run this async	
+		ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
+		if (timer != null) timer.startTiming("Loading Personas of " + playerName);
+		
+		ArchePersona[] prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
+		boolean hasCurrent = false, any = false;
 
-        prs[persona.getSlot()] = persona;
-        return old;
-    }
-
-    public void loadPersonas(String playerName, UUID uuid) { //Run this async
-        ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
-        if (timer != null) timer.startTiming("Loading Personas of " + playerName);
-
-        ArchePersona[] prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
-        boolean hasCurrent = false, any = false;
-
-        ResultSet res = null;
+		ResultSet res = null;
         Connection connection = null;
         PreparedStatement statement = null;
-
+        
         try {
             connection = ArcheCore.getSQLControls().getConnection();
             statement = connection.prepareStatement(personaSelect);
             res = statement.executeQuery();
 
-            while (res.next()) {
-                any = true;
-                ArchePersona blob = buildPersona(res, uuid, playerName);
-                prs[blob.getSlot()] = blob;
-
-                if (blob.current) {
-                    if (!hasCurrent) {
-                        hasCurrent = true;
-                    } else {
-                        ArcheCore.getPlugin().getLogger().warning("Multiple Current Personas for " + playerName);
-                        blob.current = false;
-                    }
-                }
+            while(res.next()) {
+            	any = true;
+            	ArchePersona blob = buildPersona(res, Bukkit.getOfflinePlayer(uuid));
+            	prs[blob.getSlot()] = blob;
+            	
+            	if(blob.current) {
+            		if(!hasCurrent) {
+            			hasCurrent = true;
+            		}else {
+            			ArcheCore.getPlugin().getLogger().warning("Multiple Current Personas for " + playerName);
+            			blob.current = false;
+            		}
+            	}
             }
-        } catch (SQLException e1) {
-            e1.printStackTrace();
-        } finally {
-            SQLUtils.close(res);
-            SQLUtils.close(statement);
-            SQLUtils.close(connection);
-
-            if (any) {
-                pendingBlobs.put(uuid, prs);
-                int taskId = new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        pendingBlobs.remove(uuid);
-                        pendingTasks.remove(uuid);
-                    }
-                }.runTaskLaterAsynchronously(ArcheCore.getPlugin(), 20 * 90).getTaskId();
-                pendingTasks.put(uuid, taskId);
-            }
+		} catch (SQLException e1) {e1.printStackTrace();}
+		finally{
+			SQLUtils.close(res);
+			SQLUtils.close(statement);
+			SQLUtils.close(connection);
+			
+			if(any) {
+				pendingBlobs.put(uuid, prs);
+				int taskId = new BukkitRunnable(){
+					@Override public void run() { pendingBlobs.remove(uuid); pendingTasks.remove(uuid); }
+				}.runTaskLaterAsynchronously(ArcheCore.getPlugin(), 20*90).getTaskId();
+				pendingTasks.put(uuid, taskId);
+			}
         }
-
+        
         if (timer != null) timer.stopTiming("Loading Personas of " + playerName);
-    }
-
-    public int getNextPersonaId() {
-        return max_persona_id++;
-    }
+	}
+	
+	public int getNextPersonaId() {
+		return max_persona_id++;
+	}
 
     public void initMaxPersonaId() {
         Connection connection = ArcheCore.getSQLControls().getConnection();
@@ -176,8 +200,8 @@ public class PersonaStore {
                 max_persona_id++;
             } else {
                 ArcheCore.getPlugin().getLogger().warning("We could not retrieve the LAST_INSERT_ID for persona,"
-                        + " either there are no personas or there is an error."
-                        + " We'll be starting at 0. This will throw errors if there are actually personas in the Database.");
+                		+ " either there are no personas or there is an error."
+                		+ " We'll be starting at 0. This will throw errors if there are actually personas in the Database.");
             }
             rs.close();
             statement.close();
@@ -185,159 +209,263 @@ public class PersonaStore {
         } catch (SQLException e) {
             ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to set up our persona ID!!! We can't create personas!", e);
         } finally {
-            SQLUtils.close(rs);
-            SQLUtils.close(statement);
-            SQLUtils.close(connection);
+        	SQLUtils.close(rs);
+        	SQLUtils.close(statement);
+        	SQLUtils.close(connection);
         }
 
         ArcheCore.getPlugin().getLogger().info("[ArchePersonaHandler] Persona ID is now set at " + max_persona_id);
     }
-
-    public void preload() {
-        ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
-        if (timer != null) timer.startTiming("Preloading personas");
-
+	
+	public void preload() {
+		ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
+		if (timer != null) timer.startTiming("Preloading personas");
+		
         Connection connection = null;
-        PreparedStatement playerSelectStat = null;
         PreparedStatement offlineSelectStat = null;
-
-        ResultSet rs1 = null, rs2 = null;
-        try {
+        
+        ResultSet res = null;
+        try{
             connection = ArcheCore.getSQLControls().getConnection();
-            playerSelectStat = connection.prepareStatement(playerSelect);
             offlineSelectStat = connection.prepareStatement(offlinePersonaSelect);
-            rs1 = playerSelectStat.executeQuery();
+            res = offlineSelectStat.executeQuery();
 
-            while (rs1.next()) { //Looping for every player we know to have personas
-                UUID uuid = UUID.fromString(rs1.getString("player_fk"));
+            while(res.next()){ //Looping for every player we know to have personas
+                UUID uuid = UUID.fromString(res.getString("player_fk"));
 
                 OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-                offlineSelectStat.setString(1, uuid.toString());
-                rs2 = offlineSelectStat.executeQuery();
-                List<ArcheOfflinePersona> offlines = new ArrayList<>();
-
-                while (rs2.next()) { //Looping for the personas of our player
-                    int persona_id = rs2.getInt(PersonaField.PERSONA_ID.field());
-                    if (allPersonas.containsKey(persona_id)) continue;
-                    ArcheOfflinePersona offline = buildOfflinePersona(rs2, player);
-                    offlines.add(offline);
-                }
-
-                SQLUtils.closeStatement(rs2);
-                offlines.forEach(o -> allPersonas.putIfAbsent(o.getPersonaId(), o));
+            	ArcheOfflinePersona offline = buildOfflinePersona(res, player);
+            	allPersonas.put(offline.getPersonaId(), offline);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            SQLUtils.close(rs1);
-            SQLUtils.close(rs2);
+            
+        }catch(SQLException e){e.printStackTrace();}
+		finally{
+            SQLUtils.close(res);
             SQLUtils.close(offlineSelectStat);
-            SQLUtils.close(playerSelectStat);
             SQLUtils.close(connection);
-        }
-
+		}
+        
         if (timer != null) timer.stopTiming("Preloading personas");
-    }
-
+	}
+	
     private ArcheOfflinePersona buildOfflinePersona(ResultSet res, OfflinePlayer pl) throws SQLException {
         int persona_id = res.getInt(PersonaField.PERSONA_ID.field());
         int slot = res.getInt(PersonaField.SLOT.field());
         String name = res.getString(PersonaField.NAME.field());
         boolean current = res.getBoolean(PersonaField.CURRENT.field());
         Race race = Race.valueOf(res.getString(PersonaField.RACE_REAL.field()));
+        String type = res.getString(PersonaField.TYPE.field());
         String gender = res.getString(PersonaField.GENDER.field());
         Timestamp creationTimeMS = res.getTimestamp(PersonaField.STAT_CREATION.field());
         Timestamp lastPlayed = res.getTimestamp(PersonaField.STAT_LAST_PLAYED.field());
-        String type = res.getString(PersonaField.TYPE.field());
+        
         PersonaType ptype = PersonaType.valueOf(type);
         ArcheOfflinePersona persona = new ArcheOfflinePersona(new ArchePersonaKey(persona_id, pl.getUniqueId(), slot), creationTimeMS, lastPlayed, current, race, gender, ptype, name);
 
-        String invString = res.getString(PersonaField.INV.field());
-        String enderinvString = res.getString(PersonaField.ENDERINV.field());
-        persona.inv = PersonaInventory.restore(invString, enderinvString);
-
+		String wstr = res.getString(PersonaField.WORLD.field());
+		if(!res.wasNull()){
+			UUID wuuid = UUID.fromString(wstr);
+			World w = Bukkit.getWorld(wuuid); //Yes this is thread-safe
+			if(w != null){
+				int x = res.getInt(PersonaField.X.field());
+				int y = res.getInt(PersonaField.Y.field());
+				int z = res.getInt(PersonaField.Z.field());
+				persona.location = new WeakBlock(w, x, y, z);
+			}
+		}
+		
+		Connection connection = ArcheCore.getSQLControls().getConnection();
+        loadTags(persona, connection, true);
         return persona;
     }
+	
+	ArchePersona buildPersona(ResultSet res, OfflinePlayer pl) throws SQLException{
+		ArcheOfflinePersona op = buildOfflinePersona(res, pl);
+		
+		ArchePersona persona = new ArchePersona(
+					op.getPersonaId(),
+					op.getPlayerUUID(),
+					op.getSlot(),
+					op.getName(),
+					op.getRace(),
+					op.getGender(),
+					op.getCreationTime(),
+					op.lastPlayed,
+					op.getPersonaType()
+				);
+		
+		persona.location = op.location;
+		persona.current = op.current;
+		persona.player = pl.getName();
+		
+		String rheader = res.getString(PersonaField.RACE.field());
+        if(rheader != null && !rheader.equals("null") && !rheader.isEmpty()){
+			persona.raceHeader = rheader;
+		}
 
-    private ArchePersona buildPersona(ResultSet res, UUID uuid, String playerName) throws SQLException {
-        int persona_id = res.getInt(PersonaField.PERSONA_ID.field());
-        int slot = res.getInt(PersonaField.SLOT.field());
-        String name = res.getString(PersonaField.NAME.field());
-        Race race = Race.valueOf(res.getString(PersonaField.RACE_REAL.field()));
-        String rheader = res.getString(PersonaField.RACE.field());
-        String gender = res.getString(PersonaField.GENDER.field());
-        Timestamp creationTimeMS = res.getTimestamp(PersonaField.STAT_CREATION.field());
-        String type = res.getString(PersonaField.TYPE.field());
-        PersonaType ptype = PersonaType.valueOf(type);
-        Timestamp lastPlayed = res.getTimestamp(PersonaField.STAT_LAST_PLAYED.field());
-
-        ArchePersona persona = new ArchePersona(persona_id, uuid, slot, name, race, gender, creationTimeMS, lastPlayed, ptype);
-        persona.player = playerName;
-
-        if (rheader != null && !rheader.equals("null") && !rheader.isEmpty()) {
-            persona.raceHeader = rheader;
-        }
-
-        persona.description = res.getString(PersonaField.DESCRIPTION.field());
-        persona.prefix = res.getString(PersonaField.PREFIX.field());
-        persona.current = res.getBoolean(PersonaField.CURRENT.field());
-        persona.fatigue = res.getInt(PersonaField.FATIGUE.field());
-        persona.health = res.getDouble(PersonaField.HEALTH.field());
+		persona.description = res.getString(PersonaField.DESCRIPTION.field());
+		persona.prefix = res.getString(PersonaField.PREFIX.field());
+		persona.fatigue = res.getInt(PersonaField.FATIGUE.field());
+		persona.health = res.getDouble(PersonaField.HEALTH.field());
         persona.food = res.getInt(PersonaField.FOOD.field());
         persona.saturation = res.getFloat(PersonaField.SATURATION.field());
 
-        persona.timePlayed.set(res.getInt(PersonaField.STAT_PLAYED.field()));
-        persona.charactersSpoken.set(res.getInt(PersonaField.STAT_CHARS.field()));
-        persona.lastRenamed = res.getTimestamp(PersonaField.STAT_RENAMED.field());
+		persona.timePlayed.set(res.getInt(PersonaField.STAT_PLAYED.field()));
+		persona.charactersSpoken.set(res.getInt(PersonaField.STAT_CHARS.field()));
+		persona.lastRenamed = res.getTimestamp(PersonaField.STAT_RENAMED.field());
 
-        persona.skills.setMainProfession(ArcheSkillFactory.getSkill(res.getString(PersonaField.SKILL_SELECTED.field())));
+		persona.skills().setMainProfession(ArcheSkillFactory.getSkill(res.getString(PersonaField.SKILL_SELECTED.field())));
         Optional<Creature> creature = ArcheCore.getMagicControls().getCreatureById(res.getString("creature"));
-        creature.ifPresent(persona.magics::setCreature);
-
-        String wstr = res.getString(PersonaField.WORLD.field());
-        if (!res.wasNull()) {
-            UUID wuuid = UUID.fromString(wstr);
-            World w = Bukkit.getWorld(wuuid); //Yes this is thread-safe
-            if (w != null) {
-                int x = res.getInt(PersonaField.X.field());
-                int y = res.getInt(PersonaField.Y.field());
-                int z = res.getInt(PersonaField.Z.field());
-                persona.location = new WeakBlock(w, x, y, z);
-            }
-        }
-
-        String invString = res.getString(PersonaField.INV.field());
+        creature.ifPresent(persona.magics()::setCreature);
+        
+		String invString = res.getString(PersonaField.INV.field());
         String enderinvString = res.getString(PersonaField.ENDERINV.field());
-        persona.inv = PersonaInventory.restore(invString, enderinvString);
-
+        persona.inv = PersonaInventory.restore(persona, invString, enderinvString);
+        
         persona.loadPotionsFromString(res.getString(PersonaField.POTIONS.field()));
-        if (ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble(PersonaField.MONEY.field());
-        persona.pastPlayTime = res.getInt(PersonaField.STAT_PLAYTIME_PAST.field());
+		if (ArcheCore.getControls().usesEconomy()) persona.money = res.getDouble(PersonaField.MONEY.field());
+		persona.pastPlayTime = res.getInt(PersonaField.STAT_PLAYTIME_PAST.field());
 
+		int skinId = res.getInt(PersonaField.SKIN.field());
+		if(skinId >=0 ) {
+			ArcheSkin skin = SkinCache.getInstance().getSkinByID(skinId);
+			if (skin != null) persona.skin = skin;
+            else ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(persona, PersonaField.SKIN, -1)); 
+		}
+		
         Connection connection = ArcheCore.getSQLControls().getConnection();
-        persona.loadMagics(connection);
-        persona.loadTags(connection);
-        persona.loadAttributes(connection);
-        persona.loadSkills(connection);
-        persona.loadSkin(connection);
+        loadMagics(persona, connection);
+        loadTags(persona, connection, false);
+        loadAttributes(persona, connection);
+        loadSkills(persona, connection);
         connection.close();
-
-        return persona;
-    }
-
-    public ArchePersona[] implementPersonas(Player player) {
-        UUID uuid = player.getUniqueId();
-        ArchePersona[] prs = pendingBlobs.remove(uuid);
-        if (prs == null) {
-            prs = onlinePersonas.get(uuid);
-            if (prs == null) prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
-        } else {
-            onlinePersonas.put(uuid, prs);
-            Integer taskId = pendingTasks.get(uuid);
-            Bukkit.getScheduler().cancelTask(taskId);
-        }
-
-
-        return prs;
-    }
+        
+		return persona;
+	}
+	
+	private void loadMagics(ArchePersona persona, Connection c) {
+		String sql = "SELECT magic_fk,tier,last_advanced,teacher,learned,visible FROM persona_magics WHERE persona_id_fk=" + persona.getPersonaId();
+		
+		try(Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)){
+			while (rs.next()) {
+				MagicData data = null;
+				String magic = rs.getString("magic_fk");
+                Optional<Magic> armagic = ArcheCore.getMagicControls().getMagic(magic);
+                if (armagic.isPresent()) {
+					int tier = rs.getInt("tier");
+					Timestamp last_advanced = rs.getTimestamp("last_advanced");
+					Timestamp learned = rs.getTimestamp("learned");
+                    Integer teacher = rs.getInt("teacher");
+                    boolean visible = rs.getBoolean("visible");
+                    data = new MagicData(armagic.get(), tier, visible, teacher != null && teacher > 0, (teacher), learned.toInstant().toEpochMilli(), last_advanced.toInstant().toEpochMilli());
+                    persona.magics().addMagicAttachment(new MagicAttachment(armagic.get(), persona, data));
+                }
+			}
+		} catch (SQLException e) { e.printStackTrace(); }
+	}
+	
+	private void loadTags(ArcheOfflinePersona persona, Connection c, boolean offline) {
+		String sql = "SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=" + persona.getPersonaId()
+			+ (offline? " AND offline" : "");
+		try(Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)){
+			persona.tags.init(rs, offline);
+		} catch (SQLException e) { e.printStackTrace(); }
+	}
+	
+	private void loadAttributes(ArchePersona persona, Connection c) {
+		String sql = "SELECT mod_uuid,attribute_type,mod_name,mod_value,operation,decayticks,decaytype,lostondeath FROM persona_attributes WHERE persona_id_fk=" + persona.getPersonaId();
+		
+		try(Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)){
+            AttributeRegistry reg = AttributeRegistry.getInstance();
+			while (rs.next()) {
+                ArcheAttribute att = reg.getAttribute(rs.getString("attribute_type"));
+                String type = rs.getString("decaytype");
+                String sop = rs.getString("operation");
+                AttributeModifier.Operation op = null;
+                ExtendedAttributeModifier.Decay decaytype = null;
+                for (ExtendedAttributeModifier.Decay at : ExtendedAttributeModifier.Decay.values()) {
+                	if (at.name().equalsIgnoreCase(type)) {
+                		decaytype = at;
+                		break;
+                	}
+                }
+                for (AttributeModifier.Operation fop : AttributeModifier.Operation.values()) {
+                	if (fop.name().equalsIgnoreCase(sop)) {
+                		op = fop;
+                		break;
+                	}
+                }
+                if (decaytype != null && op != null) {
+                	UUID id = UUID.fromString(rs.getString("mod_uuid"));
+                    String name = rs.getString("mod_name");
+                    double amount = rs.getDouble("mod_value");
+                	long ticks = rs.getLong("decayticks");
+                	boolean lostondeath = rs.getBoolean("lostondeath");
+                	persona.attributes().addModifierFromSQL(att, new ExtendedAttributeModifier(id, name, amount, op, decaytype, ticks, lostondeath));
+                }
+            }
+		} catch (SQLException e) { e.printStackTrace(); }
+	}
+	
+	private void loadSkills(ArchePersona persona, Connection c) {
+		String sql = "SELECT skill_id,xp,visible FROM persona_skills WHERE persona_id_fk="+persona.getPersonaId();			
+		try(Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)){
+            while (rs.next()) {
+            	String skill_id = rs.getString(1);
+            	double xp = rs.getDouble(2);
+            	boolean visible = rs.getBoolean(3);
+            	Skill skill = ArcheSkillFactory.getSkill(skill_id);
+            	
+        		SkillAttachment attach = new SkillAttachment(skill, persona, xp, visible);
+        		persona.skills().addSkillAttachment(attach);
+            }
+		} catch (SQLException e) { e.printStackTrace(); }
+	}
+	
+	
+	public ArchePersona[] implementPersonas(Player player) {
+		UUID uuid = player.getUniqueId();
+		ArchePersona[] prs = pendingBlobs.remove(uuid);
+		if(prs == null) {
+			prs = onlinePersonas.get(uuid);
+			if(prs == null) prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
+		} else {
+			onlinePersonas.put(uuid, prs);
+			for(int i = 0; i < prs.length; i++) {
+				ArchePersona p = prs[i];
+				if(p == null) continue;
+				ArcheOfflinePersona aop = allPersonas.get(p.getPersonaId());
+				if(aop.isLoaded()) prs[i] = aop.getPersona();
+				else allPersonas.put(p.getPersonaId(), p);
+			}
+			Integer taskId = pendingTasks.get(uuid);
+			Bukkit.getScheduler().cancelTask(taskId);
+		}
+		return prs;
+	}
+	
+	private String personaSelectStatement(boolean forOffline) {
+		List<String> fields = new ArrayList<>();
+		if(forOffline) fields.add("player_fk");
+		
+		Set<PersonaTable> tables = EnumSet.noneOf(PersonaTable.class);
+		for(PersonaField field : PersonaField.values()) {
+			if(!forOffline || field.isForOfflinePersona()) {
+				fields.add(field.field());
+				if(field.table != PersonaTable.MASTER) tables.add(field.table);
+			}
+		}
+		StringBuilder result = new StringBuilder();
+		result.append("SELECT ")
+			.append(StringUtils.join(fields, ','))
+			.append(" FROM persona ");
+		
+		tables.stream().map(PersonaTable::getTable)
+		.forEach(tab -> result.append(" LEFT JOIN ").append(tab)
+				.append(" ON persona.persona_id=")
+				.append(tab).append(".persona_id_fk")
+				);
+		if(!forOffline) result.append(" WHERE player_fk=?");
+		return result.toString();
+	}
 }

@@ -3,9 +3,7 @@ package net.lordofthecraft.arche.persona;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheCoreTransaction;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
 import net.lordofthecraft.arche.util.MessageUtil;
@@ -14,7 +12,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.conversations.*;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -524,23 +521,15 @@ public class CreationDialog {
             String gender = (String) context.getSessionData("gender");
             Race race = (Race) context.getSessionData("race");
             long creationTimeMS = System.currentTimeMillis();
-            ItemStack[] invBefore = p.getInventory().getContents();
 
             if (ArcheCore.getPlugin().debugMode()) {
                 ArcheCore.getPlugin().getLogger().info("New persona created in the world " + p.getWorld().getName() + " with the uuid of " + p.getWorld().getUID());
             }
-            //ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS) {
+            
             ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, gender, new Timestamp(creationTimeMS), new Timestamp(System.currentTimeMillis()));
-            if (context.getSessionData("first") != null) {
-                //Essentially, they keep items they start with :)
-                persona.inv = new PersonaInventory(invBefore, null);
-            }
+            
             persona.setPlayerName(p.getName());
-            if (!ArchePersonaHandler.getInstance().registerPersona(persona)) {
-                context.getForWhom().sendRawMessage(ChatColor.RED + "We apologize, something went wrong while creating your persona. Please try again and if the problem persists please make a thread on our Forums under Support");
-                ArcheCore.getPlugin().getLogger().severe("We failed to create a persona for " + p.getName() + "!");
-                return Prompt.END_OF_CONVERSATION;
-            }
+            ArchePersonaHandler.getInstance().registerPersona(persona);
             p.sendMessage(ChatColor.GOLD + "" + ChatColor.UNDERLINE + "Created your new Persona: " + ChatColor.GREEN + name + ChatColor.GOLD + "!");
 
             p.sendTitle(ChatColor.GOLD + "" + ChatColor.ITALIC + name,
@@ -548,12 +537,6 @@ public class CreationDialog {
                     30, 120, 30);
 
             if (context.getSessionData("first") != null) {
-                Economy econ = ArcheCore.getEconomyControls();
-                if (econ != null)
-                    econ.setPersona(persona, econ.getBeginnerAllowance(),
-                    		new ArcheCoreTransaction(MessageUtil.identifyPersona(persona) + " received beginner allowance"));
-                if (ArcheCore.getControls().getPersonaHandler().willModifyDisplayNames()) p.setDisplayName(name);
-
                 long treshold = System.currentTimeMillis() - (1000 * 90);
                 if (lastAnnounce < treshold) {
                     lastAnnounce = System.currentTimeMillis();

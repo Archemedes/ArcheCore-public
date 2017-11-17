@@ -1,7 +1,30 @@
 package net.lordofthecraft.arche.persona;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.apache.commons.lang.time.DateUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.Player;
+import org.jsoup.helper.Validate;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.SQLUtils;
@@ -10,35 +33,36 @@ import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.enums.AbilityScore;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.event.persona.*;
+import net.lordofthecraft.arche.event.persona.PersonaActivateEvent;
+import net.lordofthecraft.arche.event.persona.PersonaDeactivateEvent;
+import net.lordofthecraft.arche.event.persona.PersonaRemoveEvent;
+import net.lordofthecraft.arche.event.persona.PersonaSwitchEvent;
+import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent;
 import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent.Query;
-import net.lordofthecraft.arche.interfaces.*;
+import net.lordofthecraft.arche.interfaces.IConsumer;
+import net.lordofthecraft.arche.interfaces.Magic;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.PersonaHandler;
+import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.rows.persona.insert.PersonaInsertRow;
-import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
-import net.lordofthecraft.arche.save.rows.player.PlayerInsertRow;
-import net.lordofthecraft.arche.save.rows.player.UpdatePlayerRow;
-import net.lordofthecraft.arche.save.rows.skills.DelSkillRow;
+import net.lordofthecraft.arche.save.rows.persona.InsertPersonaRow;
+import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
+import net.lordofthecraft.arche.save.rows.player.ReplacePlayerRow;
+import net.lordofthecraft.arche.save.rows.skills.DeleteSkillRow;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.MessageUtil;
-import net.md_5.bungee.api.chat.*;
-import org.apache.commons.lang.time.DateUtils;
-import org.bukkit.*;
-import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.*;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class ArchePersonaHandler implements PersonaHandler {
 	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
-
+    
     private final PersonaStore store = new PersonaStore();
     private final IConsumer consumer = ArcheCore.getControls().getConsumer();
 	private boolean displayName = false;
@@ -51,16 +75,16 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public static ArchePersonaHandler getInstance(){
 		return instance;
 	}
-
-    public PersonaStore getPersonaStore() {
-        return store;
-    }
-
-    public void onEnable() {
-        store.initMaxPersonaId();
-        store.preload();
-        this.initRacespawns();
-    }
+	
+	public PersonaStore getPersonaStore() {
+		return store;
+	}
+	
+	public void onEnable() {
+		store.initMaxPersonaId();
+		store.preload();
+		this.initRacespawns();
+	}
 
 	@Override
 	public void setModifyDisplayNames(boolean will){
@@ -90,11 +114,11 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		return 1;
 	}
-
+	
 	@Override
     public Collection<ArcheOfflinePersona> getPersonas() {
-        return store.getPersonas();
-    }
+       return store.getPersonas();
+	}
 
     @Override
     public ArcheOfflinePersona getPersonaById(int persona_id) {
@@ -103,17 +127,17 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	@Override
 	public ArchePersona getPersona(Player p){
-        return store.getPersona(p);
-    }
+		return store.getPersona(p);
+	}
 
 	@Override
 	public ArchePersona getPersona(UUID uuid, int id){
         return store.getPersona(uuid, id);
-    }
+	} 
 
 	public ArchePersona getPersona(UUID uuid){
-        return store.getPersona(uuid);
-    }
+       return store.getPersona(uuid);
+	}
 
 	@Override
 	public ArchePersona getPersona(OfflinePlayer p){
@@ -134,7 +158,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	@Override
 	public ArchePersona[] getAllPersonas(UUID uuid){
         return store.getAllPersonas(uuid);
-    }
+	}
 
 	@Override
 	public int countPersonas(UUID uuid) {
@@ -158,9 +182,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 	@Override
 	public boolean switchPersona(final Player p, int id){
 		int slots = ArcheCore.getControls().personaSlots();
-		if(id < 0 || id > slots) throw new IllegalArgumentException("Only Persona IDs higher than 0 and at most "+slots+" are allowed.");
+		Validate.isTrue(id >= 0 && id < slots, "Only Persona IDs higher than 0 and at most "+slots+" are allowed.");
 
-		ArchePersona before=null;
         ArchePersona[] prs = getAllPersonas(p.getUniqueId());
         ArchePersona after = prs[id];
 
@@ -169,21 +192,17 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		if(event.isCancelled()) return false;
 
-		for (ArchePersona pr : prs) {
-			if (pr != null) {
-                boolean setAs = pr.getSlot() == id;
-                if (before == null && pr.current && !setAs) before = pr;
-				pr.setCurrent(setAs);
-			}
-		}
-
+		after.setCurrent(true);
 		Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(after, PersonaActivateEvent.Reason.SWITCH));
-		if(before != null) Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(before, PersonaDeactivateEvent.Reason.SWITCH));
-
-        ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(after, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));
-        if (before != null)
-            ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(before, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));
-        if(before != null && before != after){
+        ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(after, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));		
+		
+        ArchePersona before = (ArchePersona) event.getOriginPersona();
+		if(before != null) {
+			Validate.isTrue(before != after,"Player tried to switch to same persona!");
+			before.setCurrent(false);
+			Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(before, PersonaDeactivateEvent.Reason.SWITCH));
+			ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(before, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
+			
 			//Store and switch Persona-related specifics: Location and Inventory.
 			before.saveMinecraftSpecifics(p);
 
@@ -195,7 +214,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 				after.setFatigue(before.getFatigue());
 			}
 		}
-
+		
 		after.restoreMinecraftSpecifics(p);
 		
 		//Check if switched-to Persona will require a different skin from storage
@@ -208,17 +227,17 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		return true;
 	}
+	
+	public int getNextPersonaId() {
+		return store.getNextPersonaId();
+	}
 
-    public int getNextPersonaId() {
-        return store.getNextPersonaId();
-    }
-
-    public boolean registerPersona(ArchePersona persona) {
-        if (ArcheCore.getPlugin().debugMode()) {
+	public void registerPersona(ArchePersona persona) {
+		if (ArcheCore.getPlugin().debugMode()) {
             ArcheCore.getPlugin().getLogger().info("[Debug] Persona is being created with the RP name of " + persona.getName());
         }
-
-        ArchePersona oldPersona = store.registerPersona(persona);
+		
+		ArchePersona oldPersona = store.registerPersona(persona);
         if (oldPersona != null) {
             PersonaRemoveEvent event2 = new PersonaRemoveEvent(oldPersona, true);
             Bukkit.getPluginManager().callEvent(event2);
@@ -228,47 +247,27 @@ public class ArchePersonaHandler implements PersonaHandler {
             SkinCache.getInstance().clearSkin(oldPersona);
         }
 
-/*		//Load skills for the Persona
-        for(ArcheSkill s : ArcheSkillFactory.getSkills().values()){
-			persona.addSkill(s, null);
-		}*/
+        consumer.queueRow(new InsertPersonaRow(persona));
 
-		persona.createEmptyTags();
-
-        Player p = persona.getPlayer();
-
-		for(PotionEffect ps : p.getActivePotionEffects())
-			p.removePotionEffect(ps.getType());
-
-        consumer.queueRow(new PersonaInsertRow(persona, p.getLocation().getBlock()));
-
-        persona.saveMinecraftSpecifics(p);
-
-        persona.setUnspentPoints(22);
-        //persona.attributes.addModifier(AttributeRegistry.SCORE_UNSPENT, new AttributeModifier(PersonaHandler.SCORE_ID, "unspent_points", 22, AttributeModifier.Operation.ADD_NUMBER), true, true);
-        Arrays.asList(AbilityScore.values()).parallelStream().filter(AbilityScore::isChangeable).forEach(a -> persona.attributes.addModifier(AttributeRegistry.getSAttribute(a.getName()), new AttributeModifier(SCORE_ID, a.getName(), 1, AttributeModifier.Operation.ADD_NUMBER), true, true));
+        persona.attributes().addModifier(AttributeRegistry.SCORE_UNSPENT, new AttributeModifier(PersonaHandler.SCORE_ID, "unspent_points", 22, AttributeModifier.Operation.ADD_NUMBER), true, true);
+        Arrays.asList(AbilityScore.values()).parallelStream().filter(AbilityScore::isChangeable).forEach(a -> persona.attributes().addModifier(AttributeRegistry.getSAttribute(a.getName()), new AttributeModifier(SCORE_ID, a.getName(), 1, AttributeModifier.Operation.ADD_NUMBER), true, true));
 
         RaceBonusHandler.apply(persona, persona.getRace());
-        persona.updateDisplayName(p);
-
+        persona.updateDisplayName();
+        
+        Player p = persona.getPlayer();
         switchPersona(p, persona.getSlot()); //This teleport will fail due to the Location being null still
 
 		if (ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
 			Location to;
-			try {
-				if (!racespawns.containsKey(persona.getRace())) {
-					World w = ArcheCore.getControls().getNewPersonaWorld();
-					to = w == null ? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
-				} else {
-					to = racespawns.get(persona.getRace());
-				}
-				p.teleport(to);
-			}catch (Exception e){
-				Bukkit.getLogger().info("Could not tp player to race spawn!");
+			if (!racespawns.containsKey(persona.getRace())) {
+				World w = ArcheCore.getControls().getNewPersonaWorld();
+				to = w == null ? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
+			} else {
+				to = racespawns.get(persona.getRace());
 			}
+			p.teleport(to);
 		}
-
-		return true;
 	}
 
 	@Override
@@ -281,29 +280,12 @@ public class ArchePersonaHandler implements PersonaHandler {
         String c = ChatColor.BLUE + "";
         String l = ChatColor.GRAY + "";
 
-        boolean masked = !op.isLoaded() && ((ArchePersona) op).hasTagKey("masked");
+        Persona p = op.getPersona();
+        boolean masked = op.isLoaded() && p.tags().hasTag("masked");
 
         result.add(new TextComponent(l + "~~~~ " + r + ((masked) ? op.getName() : op.getPlayerName()) + ((mod && masked) ? l + "(" + op.getPlayerName() + ")" + r : "") + "'s Roleplay Persona" + l + " ~~~~"));
+        result.add(getPersonaHeader(op));
 
-        if (op.getPersonaType() != PersonaType.NORMAL) {
-            result.add(new TextComponent(op.getPersonaType().personaViewLine));
-        } else if (op.getTotalPlaytime() < ArcheCore.getPlugin().getNewbieProtectDelay()) {
-            Player player = ArcheCore.getPlayer(op.getPlayerUUID());
-            if (player != null && !player.hasPermission("archecore.persona.nonewbie"))
-                result.add(new TextComponent(ChatColor.LIGHT_PURPLE + "((Persona was recently made and can't engage in PvP))"));
-            else
-                result.add(new TextComponent(op.getPersonaType().personaViewLine));
-        } else if (ArcheCore.getPlugin().getNewbieNotificationDelay() > 0 && op.getTotalPlaytime() < 600) {
-            OfflinePlayer player = ArcheCore.getPlayer(op.getPlayerUUID());
-            long age = player == null ? Integer.MAX_VALUE : System.currentTimeMillis() - player.getFirstPlayed();
-            int mins = (int) (age / DateUtils.MILLIS_PER_MINUTE);
-            if (ArcheCore.getPlugin().getNewbieNotificationDelay() > mins && !(player != null && player.isOnline() && ((Player) player).hasPermission("archecore.persona.nonewbie")))
-                result.add(new TextComponent(ChatColor.AQUA + "((This player is new to the server))"));
-            else
-                result.add(new TextComponent(op.getPersonaType().personaViewLine));
-        } else result.add(new TextComponent(op.getPersonaType().personaViewLine));
-
-        //----End of header----
         //Now we add all the actual relevant Persona tags in a list called subresult.
         List<BaseComponent> subresult = Lists.newArrayList();
 
@@ -313,9 +295,6 @@ public class ArchePersonaHandler implements PersonaHandler {
         if (gender != null) subresult.add(new TextComponent(c + "Gender: " + r + op.getGender()));
 
         if (op.isLoaded()) {
-            Persona p = (Persona) op;
-
-
             String race = p.getRaceString(mod);
             if (race != null && !race.isEmpty()) {
                 subresult.add(new TextComponent(c + "Race: " + r + race));
@@ -328,8 +307,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 
             if (desc != null)
                 subresult.add(new TextComponent(c + "Description: " + r + desc));
-        } else {
-
         }
 
         //Having added EVERYTHING relevant into subresult, we call the event around
@@ -359,12 +336,32 @@ public class ArchePersonaHandler implements PersonaHandler {
         }
 
 		return result;
-
 	}
 
 	@Override
 	public List<BaseComponent> whois(Player p, boolean mod) {
 		return whois(getPersona(p), mod);
+	}
+	
+	private BaseComponent getPersonaHeader(OfflinePersona op) {
+		Persona p = op.getPersona();
+        if (op.getPersonaType() != PersonaType.NORMAL) {
+            return new TextComponent(op.getPersonaType().personaViewLine);
+        } else if (op.isLoaded() && p.getTotalPlaytime() < ArcheCore.getPlugin().getNewbieProtectDelay()) {
+            Player player = ArcheCore.getPlayer(op.getPlayerUUID());
+            if (player != null && !player.hasPermission("archecore.persona.nonewbie"))
+                return new TextComponent(ChatColor.LIGHT_PURPLE + "((Persona was recently made and can't engage in PvP))");
+            else
+                return new TextComponent(op.getPersonaType().personaViewLine);
+        } else if (op.isLoaded() && ArcheCore.getPlugin().getNewbieNotificationDelay() > 0 && p.getTotalPlaytime() < 600) {
+            OfflinePlayer player = ArcheCore.getPlayer(op.getPlayerUUID());
+            long age = player == null ? Integer.MAX_VALUE : System.currentTimeMillis() - player.getFirstPlayed();
+            int mins = (int) (age / DateUtils.MILLIS_PER_MINUTE);
+            if (ArcheCore.getPlugin().getNewbieNotificationDelay() > mins && !(player != null && player.isOnline() && player.getPlayer().hasPermission("archecore.persona.nonewbie")))
+                return new TextComponent(ChatColor.AQUA + "((This player is new to the server))");
+            else
+                return new TextComponent(op.getPersonaType().personaViewLine);
+        } else return new TextComponent(op.getPersonaType().personaViewLine);
 	}
 
 	private BaseComponent getProfessionWhois(Persona p) {
@@ -428,17 +425,17 @@ public class ArchePersonaHandler implements PersonaHandler {
     }
 
     public void loadPlayer(UUID uuid, String playerName) {
-        store.loadPersonas(playerName, uuid);
+    	store.loadPersonas(playerName, uuid);
     }
-
-    public void joinPlayer(Player p) {
-        ArchePersona[] prs = store.implementPersonas(p);
-        RaceBonusHandler.reset(p);
-
+    
+	public void joinPlayer(Player p){
+		ArchePersona[] prs = store.implementPersonas(p);
+		RaceBonusHandler.reset(p);
+		ArcheCore.getConsumerControls().queueRow(new ReplacePlayerRow(p));
+		
 		if(countPersonas(prs) == 0){
-            ArcheCore.getConsumerControls().queueRow(new PlayerInsertRow(p));
-            if (p.hasPermission("archecore.mayuse")) {
-                if(p.hasPermission("archecore.exempt")){
+			if(p.hasPermission("archecore.mayuse")){
+				if(p.hasPermission("archecore.exempt")){
 					if(p.hasPermission("archecore.command.beaconme")) p.sendMessage(ChatColor.LIGHT_PURPLE + "No Personas found. Maybe use " + ChatColor.ITALIC + "/beaconme");
 				}else{
 					if(ArcheCore.getControls().teleportNewPersonas()){
@@ -449,73 +446,73 @@ public class ArchePersonaHandler implements PersonaHandler {
 					Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> new CreationDialog().makeFirstPersona(p), 30L);
 				}
 			}
-        } else {
-            ArchePersona ps = getPersona(p);
-            if (ps == null) { //has no current Persona, but does have SOME personas. Rectify.
-                ps = Arrays.stream(prs).filter(Objects::nonNull).findFirst().get();
-                ps.setCurrent(true);
-            }
+		} else {
+			ArchePersona ps = getPersona(p);
+			if(ps == null) { //has no current Persona, but does have SOME personas. Rectify.
+				ps = Arrays.stream(prs).filter(Objects::nonNull).findFirst().get();
+				ps.setCurrent(true);
+			} 
+			
+			Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
+			ps.attributes().handleLogin();
+			ps.restoreMinecraftSpecifics(p);
+            ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
+		}
+		
+	}
 
-            Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
-            ps.attributes().handleLogin();
-            ps.restoreMinecraftSpecifics(p);
-            ArcheCore.getConsumerControls().queueRow(new UpdatePlayerRow(p));
-            ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis()), false));
-        }
-    }
-
-    public void initRacespawns() {
-        SQLHandler handler = ArcheCore.getPlugin().getSQLHandler();
-        ResultSet rs = null;
-        try {
-            rs = handler.query("SELECT * FROM persona_race_spawns");
-            List<String> toRemove = Lists.newArrayList();
-            while (rs.next()) {
-                Race r = Race.valueOf(rs.getString(1));
-                World w = Bukkit.getWorld(rs.getString(2));
-                if (w == null) {
-                    toRemove.add(rs.getString(1));
-                } else {
-                    int x = rs.getInt(3);
-                    int y = rs.getInt(4);
-                    int z = rs.getInt(5);
-                    float yaw = rs.getFloat(6);
-                    Location l = new Location(w, x, y, z, yaw, 0);
-                    racespawns.put(r, l);
-                }
-            }
-            rs.next();
-            rs.getStatement().close();
-            if (handler instanceof WhySQLHandler) {
-                rs.getStatement().getConnection().close();
-            }
-            if (!toRemove.isEmpty()) {
-                PreparedStatement stat = handler.getConnection().prepareStatement("DELETE FROM persona_race_spawns WHERE race=?");
-                for (String ss : toRemove) {
-                    stat.setString(1, ss);
-                    stat.execute();
-                }
-                stat.close();
-                if (handler instanceof WhySQLHandler) {
-                    stat.getConnection().close();
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            SQLUtils.closeStatement(rs);
-        }
-    }
+	public void initRacespawns(){
+		SQLHandler handler = ArcheCore.getPlugin().getSQLHandler();
+		ResultSet rs = null;
+		try {
+			rs = handler.query("SELECT * FROM persona_race_spawns");
+			List<String> toRemove = Lists.newArrayList();
+			while (rs.next()) {
+				Race r = Race.valueOf(rs.getString(1));
+				World w = Bukkit.getWorld(rs.getString(2));
+				if (w == null) {
+					toRemove.add(rs.getString(1));
+				} else {
+					int x = rs.getInt(3);
+					int y = rs.getInt(4);
+					int z = rs.getInt(5);
+					float yaw = rs.getFloat(6);
+					Location l = new Location(w, x, y, z, yaw, 0);
+					racespawns.put(r, l);
+				}
+			}
+			rs.next();
+			rs.getStatement().close();
+			if (handler instanceof WhySQLHandler) {
+				rs.getStatement().getConnection().close();
+			}
+			if (!toRemove.isEmpty()) {
+				PreparedStatement stat = handler.getConnection().prepareStatement("DELETE FROM persona_race_spawns WHERE race=?");
+				for (String ss : toRemove) {
+					stat.setString(1, ss);
+					stat.execute();
+				}
+				stat.close();
+				if (handler instanceof WhySQLHandler) {
+					stat.getConnection().close();
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			SQLUtils.closeStatement(rs);
+		}
+	}
 
 	void deleteSkills(ArchePersona p){
         for (Skill sname : ArcheSkillFactory.getSkills().values()) {
-            consumer.queueRow(new DelSkillRow(p, sname));
+            consumer.queueRow(new DeleteSkillRow(p, sname));
         }
 	}
 
 	public void removeMagic(Magic magic) {
         store.getLoadedPersonas().forEach(pers -> pers.removeMagicAttachment(magic));
-    }
+	}
 
 	@Override
 	public List<Persona> getAllActivePersonas() {
@@ -570,6 +567,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		map.put("race", r.name());
 		ArcheCore.getControls().getSQLHandler().remove("persona_race_spawns", map);
 	}
+
 
 
 }

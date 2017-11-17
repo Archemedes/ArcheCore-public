@@ -29,47 +29,46 @@ public final class ArcheTables {
 
             String end = getEndingString(sqlHandler);
 
-            Logger l = ArcheCore.getPlugin().getLogger();
-            if (debug) l.info("[Debug] Creating player table...");
+            Logger l = ArcheCore.getPlugin().getLogger();            
+            if(debug) l.info("[Debug] Creating player table...");
             createPlayerTable(statement, end);
-            if (debug) l.info("[Debug] Done with Player! Creating skins table...");
+            if(debug) l.info("[Debug] Done with Player! Creating skins table...");
             createPersonaSkinsTable(statement, end);
-            if (debug) l.info("[Debug] Done with Skins! Creating skills table...");
+            if(debug) l.info("[Debug] Done with Skins! Creating skills table...");
             createSkillsTable(statement, end);
-            if (debug) l.info("[Debug] Done with skills! Creating persona...");
+            if(debug) l.info("[Debug] Done with skills! Creating persona...");
             createPersonaTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona! Creating persona stats...");
-            createPerPersonaSkinTable(statement, end);
+            if(debug) l.info("[Debug] Done with persona! Creating persona stats...");
             createPersonaStatsTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona stats! Creating persona tags...");
+            if(debug) l.info("[Debug] Done with persona stats! Creating persona tags...");
             createPersonaTagsTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona tags! Creating archetypes...");
+            if(debug) l.info("[Debug] Done with persona tags! Creating archetypes...");
             createArchetypeTable(statement, end);
-            if (debug) l.info("[Debug] Done with archetypes! Creating magics...");
+            if(debug) l.info("[Debug] Done with archetypes! Creating magics...");
             createMagicTable(statement, end);
-            if (debug) l.info("[Debug] Done with magics! Creating weaknesses....");
+            if(debug) l.info("[Debug] Done with magics! Creating weaknesses....");
             createMagicWeaknesses(statement, end);
-            if (debug) l.info("[Debug] Done with weaknesses! Creating creatures...");
+            if(debug) l.info("[Debug] Done with weaknesses! Creating creatures...");
             createCreaturesTable(statement, end);
-            if (debug) l.info("[Debug] Done with creatures! Creating creature creators...");
+            if(debug) l.info("[Debug] Done with creatures! Creating creature creators...");
             createCreatureCreators(statement, end);
-            if (debug) l.info("[Debug] Done with creature creators! Creating creature abilities...");
+            if(debug) l.info("[Debug] Done with creature creators! Creating creature abilities...");
             createCreatureAbilities(statement, end);
-            if (debug) l.info("[Debug] Done with creature abilities! Creating persona vitals...");
+            if(debug) l.info("[Debug] Done with creature abilities! Creating persona vitals...");
             createPersonaVitalsTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona vitals! Creating persona attributes...");
+            if(debug) l.info("[Debug] Done with persona vitals! Creating persona attributes...");
             createPersonaAttributes(statement, end);
-            if (debug) l.info("[Debug] Done with persona attributes! Creating racial skills...");
+            if(debug) l.info("[Debug] Done with persona attributes! Creating racial skills...");
             createRacialSkillsTable(statement, end);
-            if (debug) l.info("[Debug] Done with racial skills! Creating persona skills...");
+            if(debug) l.info("[Debug] Done with racial skills! Creating persona skills...");
             createPersonaSkillsTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona skills! Creating persona magics...");
+            if(debug) l.info("[Debug] Done with persona skills! Creating persona magics...");
             createPersonaMagicsTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona magics! Creating persona names...");
+            if(debug) l.info("[Debug] Done with persona magics! Creating persona names...");
             createPersonaNamesTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona names! Creating persona spawns...");
+            if(debug) l.info("[Debug] Done with persona names! Creating persona spawns...");
             createPersonaSpawnsTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona spawns! Creating block registry...");
+            if(debug) l.info("[Debug] Done with persona spawns! Creating block registry...");
             createBlockRegistryTable(statement, end);
 
             if (sqlHandler instanceof WhySQLHandler) {
@@ -78,9 +77,9 @@ public final class ArcheTables {
                 //If we're using MySQL. Sorry SQLite fangays.
 
                 //If it's SQLite check net.lordofthecraft.arche.save.rows.persona.delete.PersonaDeleteRow for how it's handled.
-                if (debug) l.info("[Debug] Done with block registry! Creating logging tables...");
+                if(debug) l.info("[Debug] Done with block registry! Creating logging tables...");
                 createLoggingTables(statement, end, false);
-                if (debug) l.info("[Debug] Done with logging tables! Creating delete procedure...");
+                if(debug) l.info("[Debug] Done with logging tables! Creating delete procedure...");
                 try {
                     createDeleteProcedure(statement);
                     ArcheCore.getPlugin().setUseDeleteProcedure(true);
@@ -89,7 +88,7 @@ public final class ArcheTables {
                 }
             }
             createEconomyLogging(statement, end);
-            if (debug) l.info("[Debug] Done with economy log! All done!");
+            if(debug) l.info("[Debug] Done with economy log! All done!");
             conn.commit();
             l.info("We've finished with committing all tables now.");
             statement.close();
@@ -107,7 +106,6 @@ public final class ArcheTables {
     protected static void createPlayerTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS players (" +
                 "player CHAR(36)," +
-                "force_preload BOOLEAN DEFAULT FALSE," +
                 "player_name TEXT DEFAULT NULL," +
                 "PRIMARY KEY (player)" +
                 ")" +
@@ -160,25 +158,14 @@ public final class ArcheTables {
                 "descr TEXT DEFAULT NULL," +
                 "prefix TEXT DEFAULT NULL," +
                 "curr BOOLEAN DEFAULT FALSE," +
-                "money DOUBLE DEFAULT 0.0," +
+                "money DOUBLE DEFAULT "+ArcheCore.getEconomyControls().getBeginnerAllowance()+"," +
                 "profession VARCHAR(255) DEFAULT NULL," +
                 "fatigue DOUBLE DEFAULT 0.0," +
-                "max_fatigue DOUBLE DEFAULT 100.00," +
                 "last_played TIMESTAMP," +
+                "skin_id_fk INT DEFAULT -1," +
                 "PRIMARY KEY (persona_id)," +
                 "FOREIGN KEY (player_fk) REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT," +
                 "FOREIGN KEY (profession) REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE SET NULL" +
-                ")" +
-                end);
-    }
-
-    protected static void createPerPersonaSkinTable(Statement statement, String end) throws SQLException {
-        statement.execute("CREATE TABLE IF NOT EXISTS per_persona_skins (" +
-                "persona_id_fk INT UNSIGNED," +
-                "skin_id_fk INT," +
-                "PRIMARY KEY (persona_id_fk)," +
-                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE," +
-                "FOREIGN KEY (skin_id_fk) REFERENCES persona_skins (skin_id) ON UPDATE CASCADE ON DELETE SET NULL" +
                 ")" +
                 end);
     }
@@ -259,7 +246,7 @@ public final class ArcheTables {
     protected static void createPersonaVitalsTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS persona_vitals (" +
                 "persona_id_fk INT UNSIGNED," +
-                "world CHAR(36)," +
+                "world CHAR(36) DEFAULT 'gofuckyourselfgofuckyourselfgofuckyo'," +
                 "x INT NOT NULL," +
                 "y INT NOT NULL," +
                 "z INT NOT NULL," +
@@ -270,7 +257,6 @@ public final class ArcheTables {
                 "hunger INT DEFAULT 20," +
                 "saturation FLOAT DEFAULT 0.0," +
                 "creature VARCHAR(255) DEFAULT NULL," +
-                "unspent_points INT UNSIGNED DEFAULT 0," +
                 "PRIMARY KEY (persona_id_fk)," +
                 "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT," +
                 "FOREIGN KEY (creature) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE RESTRICT" +
@@ -301,6 +287,7 @@ public final class ArcheTables {
                 "persona_id_fk INT UNSIGNED," +
                 "tag_key VARCHAR(255) NOT NULL," +
                 "tag_value TEXT," +
+                "offline BOOLEAN DEFAULT FALSE," +
                 "PRIMARY KEY (persona_id_fk,tag_key)," +
                 "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id)" +
                 ")" +
@@ -385,22 +372,6 @@ public final class ArcheTables {
                 ")" +
                 end);
     }
-
-    protected static void createBlockTable(Statement statement, String end) throws SQLException {
-        statement.executeUpdate("CREATE TABLE IF NOT EXISTS blocks (" +
-                "date TIMESTAMP," +
-                "world CHAR(36) NOT NULL," +
-                "x INT," +
-                "y INT," +
-                "z INT," +
-                "drop BOOLEAN DEFAULT TRUE," +
-                "decay BOOLEAN DEFAULT FALSE," +
-                "" +
-                ")" +
-                end);
-    }
-
-
 
     protected static void createBlockRegistryTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS blockregistry (" +

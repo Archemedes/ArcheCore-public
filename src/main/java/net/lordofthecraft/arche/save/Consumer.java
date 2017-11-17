@@ -1,24 +1,26 @@
 package net.lordofthecraft.arche.save;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.interfaces.IConsumer;
-import net.lordofthecraft.arche.save.rows.ArcheMergeableRow;
-import net.lordofthecraft.arche.save.rows.ArchePreparedStatementRow;
-import net.lordofthecraft.arche.save.rows.ArcheRow;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.Queue;
 import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.SQLUtils;
+import net.lordofthecraft.arche.interfaces.IConsumer;
+import net.lordofthecraft.arche.save.rows.ArcheRow;
+import net.lordofthecraft.arche.save.rows.StatementRow;
 
 public class Consumer extends TimerTask implements IConsumer {
     private final Queue<ArcheRow> queue = new LinkedBlockingQueue<>();
@@ -87,106 +89,70 @@ public class Consumer extends TimerTask implements IConsumer {
                 return;
             }
             conn.setAutoCommit(false);
-            state = conn.createStatement();
-
-            process:
-            while (!queue.isEmpty() && (System.currentTimeMillis() - starttime < timePerRun || (count < forceToProcess && !bypassForce))) {
+            state = conn.createStatement();        
+            PreparedStatement[] pending = null;
+            
+            while (!queue.isEmpty() && (System.currentTimeMillis() - starttime < timePerRun || (count < (pending == null? forceToProcess : forceToProcess*1.5) && !bypassForce))) {
                 ArcheRow row = queue.poll();
-                if (row == null) {
-                    continue;
-                }
-                long taskstart = System.currentTimeMillis();
-                if (debugConsumer) {
-                    pl.getLogger().info("[Consumer] Beginning process for " + row.toString());
-                }
-                if (row instanceof ArchePreparedStatementRow) {
-                    ArchePreparedStatementRow apsr = (ArchePreparedStatementRow) row;
-                    if (row instanceof ArcheMergeableRow) {
-                        int batchCount = count;
-                        if (count > forceToProcess) {
-                            batchCount = forceToProcess / 2;
-                        }
-                        while (!queue.isEmpty()) {
-                            ArcheMergeableRow amRow = (ArcheMergeableRow) row;
-                            ArcheRow peeked = queue.peek();
-                            if (peeked == null) {
-                                break;
-                            }
-                            if (!(peeked instanceof ArcheMergeableRow)) {
-                                break;
-                            }
-                            ArcheMergeableRow mergeRow = (ArcheMergeableRow) peeked;
-                            if (amRow.canMerge(mergeRow)) {
-                                apsr = amRow.merge((ArcheMergeableRow) queue.poll());
-                                count++;
-                                batchCount++;
-                                if (batchCount > forceToProcess) {
-                                    break;
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-                    }
-                    if (apsr != null) {
-                        apsr.setConnection(conn);
-                        try {
-                            apsr.executeStatements();
-                        } catch (final SQLException ex) {
-                            pl.getLogger().log(Level.SEVERE, "[Consumer] SQL Exception in Consumer: ", ex);
-                            break;
-                        }
-                    } else {
-                        pl.getLogger().warning("Error! Looks like some rows failed to merge, our row was null! This usually happens if ArcheMergeableRow#merge returns a null!");
-                    }
-                    //If you are reading through this code to see how this works
-                    //Understand that if you close or edit a connection in your row it will explode everything violently.
-                    //If this happens, it wont be funny
-                    //And you'll be the one getting fucking stabbed.
-                    //Thanks.
-                    if (conn.isClosed()) {
-                        //I hate you.
-                        pl.getLogger().severe("[Consumer] So we have an acid-dunk worthy individual who closed the connection we gave them in their ArcheRow, despite specific documentation telling them not to. Offender: " + apsr.getClass().getSimpleName());
+                if (row == null) continue;
+                if (debugConsumer) pl.getLogger().info("[Consumer] Beginning process for " + row.toString());
+                long taskstart = System.currentTimeMillis();         
+          
+                try {
+                	if(row instanceof StatementRow) {
+                		StatementRow sRow = (StatementRow) row;
+                		boolean inBatch = pending != null;
 
-                        pl.getLogger().warning("[Consumer] So we're going to terminate this consumer run. This data is visiting ol' yeller but cant really do anything about it");
-                        pl.getLogger().info("[Consumer] (Whoever did this needs to go find a bridge)");
+                		if(!inBatch) pending = sRow.prepare(conn);
+                		sRow.setValues(pending);
+
+                		ArcheRow other;
+                		if(!sRow.isUnique() && (other = queue.peek()) != null && other.getClass() == sRow.getClass() 
+                				&& !((StatementRow) other).isUnique()) { 
+                			//At least one more of this Row type is behind in queue
+                			for(PreparedStatement s : pending) s.addBatch();
+                		} else { //None of this Row behind in queue
+                			for(PreparedStatement s : pending) {
+                				if(inBatch) {s.addBatch(); s.executeBatch();} 
+                				else {s.execute();}
+                			}
+                			pending = null;
+                		}
+                	} else {
+                		for (final String toinsert : row.getInserts()) {
+                				state.execute(toinsert);
+                		}
+                	}
+                } catch(SQLException e) {
+    				pl.getLogger().log(Level.SEVERE, "[Consumer] SQL exception on "+row.getClass().getSimpleName()+": ", e);
+    				Arrays.stream(pending).forEach(ps-> {pl.getLogger().severe("Lost Statement: "+ps.toString()); SQLUtils.close(ps);});
+    				pending = null;
+    				continue;
+                } finally {
+                	if (conn.isClosed()) {
+                        pl.getLogger().severe("[Consumer] Connection found to be closed after handling a " + row.getClass().getSimpleName());
+                        pl.getLogger().severe("[Consumer] Cannot recover. Will abort the saving process.");
                         break;
                     } else if (conn.isReadOnly()) {
-                        pl.getLogger().severe("[Consumer] So some not max level retard but definitely over 9000 level retard set the connection to read only, either maliciously or as a meme. Either way, rapid termination of life should occur. Offender: " + apsr.getClass().getSimpleName());
+                        pl.getLogger().warning("[Consumer] Connection found to be readOnly after handling a " + row.getClass().getSimpleName() );
                         conn.setReadOnly(false);
                     } else if (conn.getAutoCommit()) {
-                        pl.getLogger().severe("[Consumer] This might be a genuine mistake but probably not, some idiot set the connection for Consumer to auto commit which will nuke performance into kingdom come. We're fixing this but the idiotic code is here: " + apsr.getClass().getSimpleName());
+                        pl.getLogger().warning("[Consumer] Connection auto commit: " + row.getClass().getSimpleName());
                         conn.setAutoCommit(false);
                     }
-                } else {
-                    for (final String toinsert : row.getInserts()) {
-                        try {
-                            state.execute(toinsert);
-                        } catch (final SQLException ex) {
-                            pl.getLogger().log(Level.SEVERE, "[Consumer] SQL exception on " + toinsert + ": ", ex);
-                            break process;
-                        }
-                    }
                 }
-                if (debugConsumer) {
-                    pl.getLogger().info("[Consumer] Process took " + (System.currentTimeMillis() - taskstart) + "ms for " + row.toString());
-                }
+                
                 count++;
+                if (debugConsumer) pl.getLogger().info("[Consumer] Process took " + (System.currentTimeMillis() - taskstart) + "ms for " + row.toString());
             }
             conn.commit();
         } catch (final SQLException ex) {
             pl.getLogger().log(Level.SEVERE, "[Consumer] We failed to complete Consumer SQL Processes.", ex);
         } finally {
-            try {
-                if (state != null) {
-                    state.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                pl.getLogger().log(Level.SEVERE, "[Consumer] Failed to finish our Consumer out, either statement or connection failed to close.", e);
-            }
+        	StatementRow.close();
+        	SQLUtils.close(state);
+        	SQLUtils.close(conn);
+        	
             lock.unlock();
 
             long time = System.currentTimeMillis() - starttime;
@@ -206,8 +172,8 @@ public class Consumer extends TimerTask implements IConsumer {
         final long time = System.currentTimeMillis();
 
         int counter = 0;
-        new File("plugins/ArcheCore/import/").mkdirs();
-        PrintWriter writer = new PrintWriter(new File("plugins/ArcheCore/import/queue-" + time + "-0.sql"));
+        new File( String.format("plugins%cArcheCore%<cimport%<c", File.separatorChar) ).mkdirs();
+        PrintWriter writer = new PrintWriter(new File( String.format("plugins%cArcheCore%<cimport%<cqueue-%d-0.sql",File.separatorChar,time)) );
         while (!queue.isEmpty()) {
             final ArcheRow r = queue.poll();
             if (r == null) {
@@ -219,7 +185,7 @@ public class Consumer extends TimerTask implements IConsumer {
             counter++;
             if (counter % 1000 == 0) {
                 writer.close();
-                writer = new PrintWriter(new File("plugins/ArcheCore/import/queue-" + time + "-" + counter / 1000 + ".sql"));
+                writer = new PrintWriter(new File(String.format("plugins%cArcheCore%<cimport%<cqueue-%d-%d.sql",File.separatorChar,time,counter/1000)));
             }
         }
         writer.close();

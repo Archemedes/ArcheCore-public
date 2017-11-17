@@ -1,67 +1,54 @@
 package net.lordofthecraft.arche.persona;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.interfaces.IConsumer;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.save.rows.persona.delete.DelPersTagRow;
-import net.lordofthecraft.arche.save.rows.persona.insert.PersTagRow;
-import net.lordofthecraft.arche.save.rows.persona.update.UpdatePersTagRow;
+import java.util.UUID;
 
-import java.util.Collections;
-import java.util.Map;
-
-/**
- * Created on 6/16/2017
- *
- * @author 501warhead
- */
 public class TagAttachment {
-    //private static final ArcheExecutor buffer = ArcheExecutor.getInstance();
-    private static final IConsumer consumer = ArcheCore.getConsumerControls();
-    private final Map<String, String> tags;
-    private final Persona persona;
-    private final boolean save;
+	private final String key,value;
+	private final boolean offline;
 
-    public TagAttachment(Map<String, String> tags, Persona persona, boolean save) {
-        this.tags = tags;
-        this.persona = persona;
-        this.save = save;
-    }
-
-    public String getValue(String name) {
-        return tags.get(name);
-    }
-
-    public void setValue(String name, String value) {
-        if (tags.containsKey(name)) {
-            tags.replace(name, value);
-            if (save) consumer.queueRow(new UpdatePersTagRow(persona, name, value));
-        } else {
-            tags.put(name, value);
-            if (save) consumer.queueRow(new PersTagRow(persona, name, value));
-        }
-    }
-
-    public void delValue(String name) {
-        if (tags.containsKey(name)) {
-            tags.remove(name);
-            if (save) consumer.queueRow(new DelPersTagRow(persona, name));
-        }
-    }
-
-    public boolean hasKey(String name) {
-        return tags.containsKey(name);
-    }
-
-    public Map<String, String> getTags() {
-        return Collections.unmodifiableMap(tags);
-    }
-
-    public int getPersonaid() {
-        return persona.getPersonaId();
-    }
-
-    public Persona getPersona() {
-        return persona;
-    }
+	TagAttachment(String key, String value){
+		this(key, value, false);
+	}
+	
+	TagAttachment(String key, String value, boolean offline) {
+		this.key = key;
+		this.value = value;
+		this.offline = offline;
+	}
+	
+	public String getKey() {
+		return key;
+	}
+	
+	public String getAsString() {
+		return value;
+	}
+	
+	public String getValue() {
+		return value;
+	}
+	
+	public boolean isAvailableOffline() {
+		return offline;
+	}
+	
+	public int getAsInt() {
+		return Integer.parseInt(value);
+	}
+	
+	public double getAsDouble() {
+		return Double.parseDouble(value);
+	}
+	
+	public long getAsLong() {
+		return Long.parseLong(value);
+	}
+	
+	public UUID getAsUUID() {
+		return UUID.fromString(value);
+	}
+	
+	public boolean getAsBoolean() {
+		return Boolean.valueOf(value);
+	}
 }

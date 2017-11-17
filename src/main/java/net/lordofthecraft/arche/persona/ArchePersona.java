@@ -1,38 +1,18 @@
 package net.lordofthecraft.arche.persona;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.attributes.ArcheAttribute;
-import net.lordofthecraft.arche.attributes.AttributeRegistry;
-import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
-import net.lordofthecraft.arche.enums.AbilityScore;
-import net.lordofthecraft.arche.enums.PersonaType;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.event.persona.PersonaFatigueEvent;
-import net.lordofthecraft.arche.event.persona.PersonaRemoveEvent;
-import net.lordofthecraft.arche.event.persona.PersonaRenameEvent;
-import net.lordofthecraft.arche.event.persona.PersonaSwitchEvent;
-import net.lordofthecraft.arche.interfaces.*;
-import net.lordofthecraft.arche.listener.NewbieProtectListener;
-import net.lordofthecraft.arche.magic.ArcheMagic;
-import net.lordofthecraft.arche.magic.MagicData;
-import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.rows.magic.insert.MagicInsertRow;
-import net.lordofthecraft.arche.save.rows.persona.delete.DeletePersonaSkinRow;
-import net.lordofthecraft.arche.save.rows.persona.delete.PersonaDeleteRow;
-import net.lordofthecraft.arche.save.rows.persona.insert.SkinRow;
-import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
-import net.lordofthecraft.arche.save.rows.persona.update.VitalsUpdateRow;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-import net.lordofthecraft.arche.skin.ArcheSkin;
-import net.lordofthecraft.arche.skin.SkinCache;
-import net.lordofthecraft.arche.util.MessageUtil;
-import net.lordofthecraft.arche.util.WeakBlock;
+import java.lang.ref.WeakReference;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -41,27 +21,50 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 
-import java.lang.ref.WeakReference;
-import java.sql.*;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.attributes.AttributeRegistry;
+import net.lordofthecraft.arche.enums.AbilityScore;
+import net.lordofthecraft.arche.enums.PersonaType;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.event.persona.PersonaFatigueEvent;
+import net.lordofthecraft.arche.event.persona.PersonaRemoveEvent;
+import net.lordofthecraft.arche.event.persona.PersonaRenameEvent;
+import net.lordofthecraft.arche.event.persona.PersonaSwitchEvent;
+import net.lordofthecraft.arche.interfaces.Creature;
+import net.lordofthecraft.arche.interfaces.IConsumer;
+import net.lordofthecraft.arche.interfaces.Magic;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.PersonaHandler;
+import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.interfaces.Transaction;
+import net.lordofthecraft.arche.listener.NewbieProtectListener;
+import net.lordofthecraft.arche.magic.ArcheMagic;
+import net.lordofthecraft.arche.magic.MagicData;
+import net.lordofthecraft.arche.save.PersonaField;
+import net.lordofthecraft.arche.save.rows.magic.insert.MagicInsertRow;
+import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
+import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
+import net.lordofthecraft.arche.save.rows.persona.UpdateVitalsRow;
+import net.lordofthecraft.arche.skin.ArcheSkin;
+import net.lordofthecraft.arche.skin.SkinCache;
+import net.lordofthecraft.arche.util.WeakBlock;
 
 public final class ArchePersona extends ArcheOfflinePersona implements Persona, InventoryHolder {
-
+	private static final IConsumer consumer = ArcheCore.getConsumerControls();
 	private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
-    //private static final ArcheExecutor buffer = ArcheExecutor.getInstance();
 
-	final PersonaSkills skills = new PersonaSkills(this);
-    final PersonaMagics magics = new PersonaMagics(this);
-    final PersonaAttributes attributes = new PersonaAttributes(this);
-
+	private final PersonaSkills skills = new PersonaSkills(this);
+    private final PersonaMagics magics = new PersonaMagics(this);
+    private final PersonaAttributes attributes = new PersonaAttributes(this);
+    
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger charactersSpoken;
     String description = null;
@@ -69,18 +72,18 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	boolean current = true;
 	String raceHeader = null;
 	Timestamp lastRenamed;
+    int pastPlayTime; //stat_playtime_past
 	String player; //Last known minecraft name of the owning player
-	WeakBlock location = null;
-	double money = 0;
+	double money = ArcheCore.getEconomyControls().getBeginnerAllowance();
 	double fatigue = 0;
-	int food = 0;
+	int food = 20;
     float saturation = 0;
-    double health = 0;
-    int unspent_points = 0;
-    private Creature creature;
+    double health = 20;
+    PersonaInventory inv;
+	private Creature creature;
 	private WeakReference<Player> playerObject;
-	private TagAttachment attachment;
-    private ArcheSkin skin;
+	
+    ArcheSkin skin;
     private ArrayList<PotionEffect> effects = Lists.newArrayList();
 
     ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS, Timestamp lastPlayed) {
@@ -88,9 +91,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     }
 
     ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS, Timestamp lastPlayed, PersonaType type) {
-        //ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, boolean current, Race race, String gender, PersonaType type, String name) {
         super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, lastPlayed, false, race, gender, type, name);
-        //this.key = new ArchePersonaKey(persona_id, player, slot);
 		charactersSpoken = new AtomicInteger();
 		lastRenamed = new Timestamp(0);
 		pastPlayTime = 0;
@@ -99,26 +100,15 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		sqlCriteria.put("persona_id", persona_id);
 	}
 
-    ArchePersona(ArcheOfflinePersona persona) {
-        super(persona.personaKey, persona.creation, persona.lastPlayed, persona.current, persona.race, persona.gender, persona.type, persona.name);
-        player = persona.getPlayerName();
-        charactersSpoken = new AtomicInteger();
-        lastRenamed = new Timestamp(0);
-        pastPlayTime = 0;
-
-        sqlCriteria = Maps.newConcurrentMap();
-        sqlCriteria.put("persona_id", persona.getPersonaId());
-    }
-
 	@Override
     public int getPersonaId() {
         return personaKey.getPersonaID();
     }
-
-/*	public void addSkill(ArcheSkill skill, FutureTask<SkillData> future){
-        SkillAttachment attach = new SkillAttachment(skill, this, future);
-		skills.addSkillAttachment(attach);
-	}*/
+	
+    @Override
+    public int getTotalPlaytime() {
+        return pastPlayTime + getTimePlayed();
+    }
 
 	public PersonaSkills skills() {
 		return skills;
@@ -131,38 +121,16 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public SkillAttachment getSkill(Skill skill){
 		return skills.getSkill(skill);
 	}
-
-
-
-	@Override
-	public boolean hasTagKey(String s) {
-        return attachment.hasKey(s);
+	
+    @Override
+    public void setGender(String gender) {
+        this.gender = gender;
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.GENDER, gender));
     }
 
-	@Override
-	public Optional<String> getTagValue(String tag) {
-		String s = attachment.getValue(tag);
-		if (s == null) {
-			return Optional.empty();
-		} else {
-			return Optional.of(s);
-		}
-	}
-
-	@Override
-	public Map<String, String> getTags() {
-		return attachment.getTags();
-	}
-
-	@Override
-	public void setTag(String name, String value) {
-		attachment.setValue(name, value);
-	}
-
-	@Override
-	public void removeTag(String name) {
-		attachment.delValue(name);
-	}
+	public void setPlayerName(String name) {
+        this.player = name;
+    }
 
 	@Override
 	public double withdraw(double amount, Transaction cause) {
@@ -185,8 +153,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public void setMainSkill(Skill profession){
 		skills.setMainProfession(profession);
 		String name = profession == null? null : profession.getName();
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.SKILL_SELECTED, name, false));
-        //buffer.put(new UpdateTask(this,PersonaField.SKILL_SELECTED, name));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.SKILL_SELECTED, name));
     }
 
 
@@ -221,165 +188,15 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         if (this.current != current) {
 
 			this.current = current;
-            consumer.queueRow(new PersonaUpdateRow(this, PersonaField.CURRENT, this.current, false));
-            //buffer.put(new UpdateTask(this, PersonaField.CURRENT, current));
+            consumer.queueRow(new UpdatePersonaRow(this, PersonaField.CURRENT, this.current));
 
-			if (current) { // Persona becoming Player's current Persona.
-				Player p = Bukkit.getPlayer(getPlayerUUID());
-				if (p != null) {
-					updateDisplayName(p);
-
-					//Apply Racial bonuses
-					if (ArcheCore.getControls().areRacialBonusesEnabled())
-                        RaceBonusHandler.apply(this, race);
-
-
-				} else {
-					ArcheCore.getPlugin().getLogger().info("Player " + player + " was not found (null) as her Persona was switched.");
-				}
-			}
+            if(current) {
+            	Validate.notNull(getPlayer(), "Persona can't be switched while Player offline");
+            	updateDisplayName();
+            	RaceBonusHandler.apply(this, race);
+            }
 		}
 	}
-
-    void loadSkin(Connection connection) {
-        String sql = "SELECT skin_id_fk FROM per_persona_skins WHERE persona_id_fk=?";
-        try {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, personaKey.getPersonaID());
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                ArcheSkin skin = SkinCache.getInstance().getSkinByID(rs.getInt("skin_id_fk"));
-                if (skin != null) {
-                    this.skin = skin;
-                } else {
-                    consumer.queueRow(new DeletePersonaSkinRow(this));
-                }
-            }
-            rs.close();
-            statement.close();
-        } catch (SQLException ex) {
-            ArcheCore.getPlugin().getLogger().log(Level.WARNING, "Failed to create skin for persona " + MessageUtil.identifyPersona(this), ex);
-        }
-    }
-
-    void loadSkills(Connection connection) {
-        String sql = "SELECT skill_id,xp,visible FROM persona_skills WHERE persona_id_fk=?";
-        try {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, personaKey.getPersonaID());
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                String skill_id = rs.getString(1);
-                double xp = rs.getDouble(2);
-                boolean visible = rs.getBoolean(3);
-                Skill skill = ArcheSkillFactory.getSkill(skill_id);
-
-                SkillAttachment attach = new SkillAttachment(skill, this, xp, visible);
-                skills.addSkillAttachment(attach);
-            }
-
-            rs.close();
-            statement.close();
-        } catch (SQLException ex) {
-            ArcheCore.getPlugin().getLogger().log(Level.WARNING, "Failed to create skills for persona " + MessageUtil.identifyPersona(this), ex);
-        }
-    }
-
-    void loadAttributes(Connection conn) {
-        try {
-            if (!ArcheCore.usingSQLite()) {
-                conn.setReadOnly(true);
-            }
-            PreparedStatement statement = conn.prepareStatement("SELECT mod_uuid,attribute_type,mod_name,mod_value,operation,decayticks,decaytype,lostondeath FROM persona_attributes WHERE persona_id_fk=?");
-            statement.setInt(1, personaKey.getPersonaID());
-            ResultSet rs = statement.executeQuery();
-            AttributeRegistry reg = AttributeRegistry.getInstance();
-            while (rs.next()) {
-                ArcheAttribute att = reg.getAttribute(rs.getString("attribute_type"));
-                String type = rs.getString("decaytype");
-                String sop = rs.getString("operation");
-                AttributeModifier.Operation op = null;
-                ExtendedAttributeModifier.Decay decaytype = null;
-                for (ExtendedAttributeModifier.Decay at : ExtendedAttributeModifier.Decay.values()) {
-                	if (at.name().equalsIgnoreCase(type)) {
-                		decaytype = at;
-                		break;
-                	}
-                }
-                for (AttributeModifier.Operation fop : AttributeModifier.Operation.values()) {
-                	if (fop.name().equalsIgnoreCase(sop)) {
-                		op = fop;
-                		break;
-                	}
-                }
-                if (decaytype != null && op != null) {
-                	UUID id = UUID.fromString(rs.getString("mod_uuid"));
-                    String name = rs.getString("mod_name");
-                    double amount = rs.getDouble("mod_value");
-                	long ticks = rs.getLong("decayticks");
-                	boolean lostondeath = rs.getBoolean("lostondeath");
-                	attributes.addModifierFromSQL(att, new ExtendedAttributeModifier(id, name, amount, op, decaytype, ticks, lostondeath));
-                }
-            }
-            rs.close();
-            statement.close();
-        } catch (SQLException e) {
-            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Warning! We failed to load attributes for the persona of " + player + "! [" + getPersonaId() + "]", e);
-        }
-    }
-
-    void loadTags(Connection conn) {
-        String sql = "SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=?";
-        try {
-            PreparedStatement stat = conn.prepareStatement(sql);
-            stat.setInt(1, getPersonaId());
-            ResultSet rs = stat.executeQuery();
-            Map<String, String> tags = Maps.newHashMap();
-            while (rs.next()) {
-                tags.putIfAbsent(rs.getString("tag_key"), rs.getString("tag_value"));
-            }
-            attachment = new TagAttachment(tags, this, true);
-            rs.close();
-            stat.close();
-        } catch (SQLException e) {
-            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "Failed to retrieve tags for the persona " + MessageUtil.identifyPersona(this), e);
-            attachment = new TagAttachment(Maps.newHashMap(), this, false);
-        }
-    }
-
-    void loadMagics(Connection conn) {
-        String sql = "SELECT magic_fk,tier,last_advanced,teacher,learned,visible FROM persona_magics WHERE persona_id_fk=?";
-        try {
-            if (!ArcheCore.usingSQLite()) {
-                conn.setReadOnly(true);
-            }
-            PreparedStatement stat = conn.prepareStatement(sql);
-            stat.setInt(1, getPersonaId());
-            ResultSet rs = stat.executeQuery();
-			while (rs.next()) {
-				MagicData data = null;
-				String magic = rs.getString("magic_fk");
-                Optional<Magic> armagic = ArcheCore.getMagicControls().getMagic(magic);
-                if (armagic.isPresent()) {
-					int tier = rs.getInt("tier");
-					Timestamp last_advanced = rs.getTimestamp("last_advanced");
-					Timestamp learned = rs.getTimestamp("learned");
-                    Integer teacher = rs.getInt("teacher");
-                    boolean visible = rs.getBoolean("visible");
-                    data = new MagicData(armagic.get(), tier, visible, teacher != null && teacher > 0, (teacher), learned.toInstant().toEpochMilli(), last_advanced.toInstant().toEpochMilli());
-                    magics.addMagicAttachment(new MagicAttachment(armagic.get(), this, data));
-                }
-			}
-			rs.close();
-			stat.close();
-        } catch (SQLException e) {
-			ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "An error occurred while loading " + player + "'s persona magics!!!", e);
-		}
-	}
-
-	void createEmptyTags() {
-        attachment = new TagAttachment(Maps.newConcurrentMap(), this, true);
-    }
 
 	void removeMagicAttachment(Magic magic) {
         magics.removeMagicAttachment(magic);
@@ -417,9 +234,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	@Override
 	public void setPrefix(String prefix){
 		this.prefix = prefix;
-		updateDisplayName(Bukkit.getPlayer(this.getPlayerUUID()));
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.PREFIX, prefix, false));
-        //buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
+		updateDisplayName();
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.PREFIX, prefix));
     }
 
 	@Override
@@ -430,12 +246,12 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	@Override
 	public void clearPrefix(){
 		prefix = null;
-		updateDisplayName(Bukkit.getPlayer(this.getPlayerUUID()));
-        //buffer.put(new UpdateTask(this,PersonaField.PREFIX, prefix));
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.PREFIX, prefix, false));
+		updateDisplayName();
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.PREFIX, prefix));
     }
 
-	void updateDisplayName(Player p){
+	void updateDisplayName(){
+		Player p = getPlayer();
 		if(handler.willModifyDisplayNames() && p != null){
 			if(hasPrefix() && ArcheCore.getPlugin().arePrefixesEnabled())
 				p.setDisplayName("[" + getPrefix() + "] " + name);
@@ -451,8 +267,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public void addTimePlayed(int timePlayed){
 		int val = this.timePlayed.addAndGet(timePlayed);
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.STAT_PLAYED, val, false));
-        //buffer.put(new UpdateTask(this, PersonaField.STAT_PLAYED, val));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.STAT_PLAYED, val));
     }
 
 	@Override
@@ -467,9 +282,13 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public void addCharactersSpoken(int charsSpoken){
 		int val = charactersSpoken.addAndGet(charsSpoken);
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.STAT_CHARS, val, false));
-        //buffer.put(new UpdateTask(this, PersonaField.STAT_CHARS, val));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.STAT_CHARS, val));
     }
+
+	//@Override
+	public String getPlayerName(){
+		return player;
+	}
 
 	@Override
 	public Player getPlayer(){
@@ -541,13 +360,17 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         this.name = name;
         lastRenamed = new Timestamp(System.currentTimeMillis());
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.NAME, name, false));
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.STAT_RENAMED, lastRenamed, false));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.NAME, name));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.STAT_RENAMED, lastRenamed));
 
-        if (current) {
-            Player p = Bukkit.getPlayer(getPlayerUUID());
-            updateDisplayName(p);
-        }
+        if (current) updateDisplayName();
+    }
+    
+    @Override
+    public void setPersonaType(PersonaType type) {
+        this.type = type;
+
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.TYPE, type));
     }
 
 	@Override
@@ -565,8 +388,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
                 p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 			}
 		}
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.RACE_REAL, race.name(), false));
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.RACE, "", false));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE_REAL, race.name()));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE, ""));
         this.raceHeader = null;
 	}
 
@@ -574,8 +397,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public void setApparentRace(String race){
 		raceHeader = race;
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.RACE, race, false));
-        //buffer.put(new UpdateTask(this, PersonaField.RACE, race));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE, race));
     }
 
 	@Override
@@ -586,8 +408,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	@Override
 	public void clearDescription(){
 		description = null;
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.DESCRIPTION, null, false));
-        //buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, null));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.DESCRIPTION, null));
     }
 
 	@Override
@@ -595,8 +416,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		if(description == null) description = addendum;
 		else description = description + " " + addendum;
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.DESCRIPTION, description, false));
-        //buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.DESCRIPTION, description));
     }
 
 	@Override
@@ -608,8 +428,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public void setDescription(String description) {
 		this.description = description;
 
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.DESCRIPTION, description, false));
-        //buffer.put(new UpdateTask(this, PersonaField.DESCRIPTION, description));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.DESCRIPTION, description));
     }
 
 	void saveMinecraftSpecifics(final Player p){
@@ -617,12 +436,11 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		food = p.getFoodLevel();
 		health = p.getHealth();
         saturation = p.getSaturation();
-        inv = PersonaInventory.store(p);
+        inv = PersonaInventory.store(this);
 		location = new WeakBlock(p.getLocation());
         String pots = savePotionEffects(p);
         ArcheCore.getPlugin().getLogger().info("Player world is " + p.getWorld().getName() + " which has a UID of " + p.getWorld().getUID().toString());
-        consumer.queueRow(new VitalsUpdateRow(this, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv, pots));
-        //buffer.put(new UpdateVitalsTask(persona_id, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv, pots));
+        consumer.queueRow(new UpdateVitalsRow(this, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv, pots));
         attributes.handleSwitch(false);
     }
 
@@ -695,18 +513,12 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		} else { //Clears the inv
 			pinv.clear();
             einv.clear();
-            pinv.setArmorContents(new ItemStack[4]);
 		}
         attributes.handleSwitch(false);
 
 		//Heal them so their Persona is fresh
 		double maxHp = p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
-		if (health == 0) {
-			health = maxHp;
-		}
-		if (food == 0) {
-			food = 20;
-		}
+
 		if (maxHp < health) p.setHealth(maxHp);
 		else p.setHealth(health);
 		p.setFoodLevel(food);
@@ -726,7 +538,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		PersonaRemoveEvent event = new PersonaRemoveEvent(this, false);
 		Bukkit.getPluginManager().callEvent(event);
 
-        consumer.queueRow(new PersonaDeleteRow(this));
+        consumer.queueRow(new DeletePersonaRow(this));
         //buffer.put(new PersonaDeleteTask(this));
         handler.deleteSkills(this);
 
@@ -799,24 +611,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		return inv;
 	}
 
-	public Location getLocation(){
-		if(location == null) return null;
-		else return location.toLocation();
-	}
 
-
-    @Override
-    public int hashCode() {
-        return personaKey.getPersonaID();
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if(object == null) return false;
-		if(!(object instanceof ArchePersona)) return false;
-		ArchePersona p = (ArchePersona) object;
-        return this.getPersonaId() == p.getPersonaId();
-    }
 	
 	@Override
 	public boolean isNewbie() {
@@ -839,23 +634,16 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		Bukkit.getPluginManager().callEvent(event);
 		if(!event.isCancelled()) {
 			this.fatigue = event.getNewFatigue();
-            consumer.queueRow(new PersonaUpdateRow(this, PersonaField.FATIGUE, fatigue, false));
-            //buffer.put(new UpdateFatigueTask(fatigue, persona_id, player));
+            consumer.queueRow(new UpdatePersonaRow(this, PersonaField.FATIGUE, fatigue));
         }
 	}
 
     @Override
     public void setSkin(ArcheSkin skin) {
-        boolean update = this.skin != null;
         this.skin = skin;
         skin.addPersona(this);
 
-        if (update) {
-            consumer.queueRow(new PersonaUpdateRow(this, PersonaField.ICON, skin.getSkinId(), false));
-        } else {
-            consumer.queueRow(new SkinRow(this));
-        }
-        //buffer.put(new UpdateTask(this, PersonaField.ICON, skin.getSkinId()));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.SKIN, skin.getSkinId()));
     }
 
     @Override
@@ -863,26 +651,12 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         skin.removePersona(this);
         this.skin = null;
 
-        consumer.queueRow(new DeletePersonaSkinRow(this));
-        //buffer.put(new UpdateTask(this, PersonaField.ICON, -1));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.SKIN, -1));
     }
 
     @Override
     public OfflinePersona unloadPersona() {
-        //super(persona.personaKey, persona.creation, persona.lastPlayed, persona.current, persona.race, persona.gender, persona.type, persona.name);
         return new ArcheOfflinePersona(personaKey, creation, lastPlayed, current, race, gender, type, name);
-    }
-
-    @Override
-    public void setUnspentPoints(int points) {
-        if (points < 0) points = 0;
-        this.unspent_points = points;
-        consumer.queueRow(new PersonaUpdateRow(this, PersonaField.POINTS, unspent_points, false));
-    }
-
-    @Override
-    public int getUnspentPoints() {
-        return unspent_points;
     }
 
     @Override
@@ -901,12 +675,12 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     }
 
     @Override
-    public Persona getPersona() {
+    public ArchePersona getPersona() {
         return this;
     }
 
     @Override
-    public Persona loadPersona(ResultSet rs) {
+    public Persona loadPersona() {
         return this;
     }
 }

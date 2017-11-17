@@ -1,6 +1,26 @@
 package net.lordofthecraft.arche.commands;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.scheduler.BukkitRunnable;
+
 import com.google.common.collect.Lists;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.enums.PersonaType;
@@ -12,25 +32,13 @@ import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.AttributeSelectMenu;
+import net.lordofthecraft.arche.persona.TagAttachment;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow;
+import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.util.CommandUtil;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class CommandPersona implements CommandExecutor {
 	private final HelpDesk helpdesk;
@@ -231,6 +239,7 @@ public class CommandPersona implements CommandExecutor {
 
 			//Go through process to find the Persona we want
             OfflinePersona opers = null;
+            boolean willTryToLoad = false;
             if ((cmd == PersonaCommand.VIEW || cmd == PersonaCommand.MORE || cmd == PersonaCommand.LIST)
                     && args.length > 1) {
                 opers = CommandUtil.personaFromArg(args[1]);
@@ -238,14 +247,18 @@ public class CommandPersona implements CommandExecutor {
                     && args.length > 1
                     && sender.hasPermission("archecore.mod.other")) {
                 opers = CommandUtil.personaFromArg(args[1]);
+                if(opers == null && sender instanceof Player) willTryToLoad = loadAndReexecute(args[1], (Player) sender, command, args);
             } else if (args.length > 2 && args[args.length - 2].equalsIgnoreCase("-p") && (sender.hasPermission("archecore.mod.other"))) {
                 opers = CommandUtil.personaFromArg(args[args.length - 1]);
+                
+                if(opers == null && sender instanceof Player) willTryToLoad = loadAndReexecute(args[args.length - 1], (Player) sender, command, args);
             } else if (sender instanceof Player) {
                 opers = handler.getPersona((Player) sender);
             }
 
             if (opers == null) {
-                sender.sendMessage(ChatColor.RED + "Error: No persona found to modify");
+                if(willTryToLoad) sender.sendMessage(ChatColor.LIGHT_PURPLE + "Error: Persona not loaded. Will try to load it now. Please wait...");
+                else sender.sendMessage(ChatColor.RED + "Error: No persona found to modify");
 				return true;
 			}
 
@@ -266,7 +279,6 @@ public class CommandPersona implements CommandExecutor {
                     return true;
                 } else if (cmd == PersonaCommand.TIME) {
                     sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(opers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + opers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
-                    sender.sendMessage(ChatColor.AQUA + "You have a total of " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(opers.getTotalPlaytime() / 60) + ChatColor.AQUA + " hours on " + opers.getName() + "!");
                     return true;
                 }
             } else {
@@ -339,10 +351,8 @@ public class CommandPersona implements CommandExecutor {
                             pers.setName(name);
                             sender.sendMessage(ChatColor.AQUA + "Persona name was set to: " + ChatColor.RESET + name);
                             if (sender == pers.getPlayer()) {
-                                //ArcheExecutor.getInstance().put(new UpdateTask(pers, PersonaField.STAT_RENAMED, new Timestamp(System.currentTimeMillis())));
-                                ArcheCore.getConsumerControls().queueRow(new PersonaUpdateRow(pers, PersonaField.STAT_RENAMED, new Timestamp(System.currentTimeMillis()), false));
+                                ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(pers, PersonaField.STAT_RENAMED, new Timestamp(System.currentTimeMillis())));
                             } //Player renamed by his own accord
-                            //ArcheExecutor.getInstance().put(new PersonaRenameTask(pers));
                         } else {
                             sender.sendMessage(ChatColor.RED + "Error: Name too long. Max length 32 characters");
                         }
@@ -476,11 +486,11 @@ public class CommandPersona implements CommandExecutor {
                     } else if (cmd == PersonaCommand.READTAG) {
                         sender.sendMessage("");
                         sender.sendMessage("~~~~ " + ChatColor.GOLD + pers.getName() + "" + ChatColor.RESET + "'s tags. ~~~~");
-                        if (pers.getTags().size() == 0) {
+                        if (pers.tags().getTags().size() == 0) {
                             sender.sendMessage(ChatColor.RED + "None!");
                         } else {
-                            for (Map.Entry<String, String> ent : pers.getTags().entrySet()) {
-                                sender.sendMessage(ChatColor.BLUE + ent.getKey() + ": " + ChatColor.GRAY + (ent.getValue().isEmpty() ? "Empty" : ent.getValue()));
+                            for (Map.Entry<String, TagAttachment> ent : pers.tags().getTagMap().entrySet()) {
+                                sender.sendMessage(ChatColor.BLUE + ent.getKey() + ": " + ChatColor.GRAY + (ent.getValue().getValue().isEmpty() ? "Empty" : ent.getValue()));
                             }
                         }
                         return true;
@@ -488,7 +498,7 @@ public class CommandPersona implements CommandExecutor {
                         if (args.length >= 3 && !args[1].equalsIgnoreCase("-p") && !args[2].equalsIgnoreCase("-p")) {
                             String key = args[1];
                             String value = args[2];
-                            pers.setTag(key, value);
+                            pers.tags().giveTag(key, value);
                             sender.sendMessage(ChatColor.AQUA + key + " has been set to " + value + " for " + MessageUtil.identifyPersona(pers));
                         } else {
                             sender.sendMessage(ChatColor.RED + "Use /help Persona Command to see the syntax for this.");
@@ -496,10 +506,10 @@ public class CommandPersona implements CommandExecutor {
                         return true;
                     } else if (cmd == PersonaCommand.DELTAG) {
                         if (!args[1].equalsIgnoreCase("-p")) {
-                            if (!pers.hasTagKey(args[1])) {
+                            if (!pers.tags().hasTag(args[1])) {
                                 sender.sendMessage(ChatColor.RED + "Error: " + MessageUtil.identifyPersona(pers) + " doesn't have a tag with the value of " + args[1]);
                             } else {
-                                pers.removeTag(args[1]);
+                                pers.tags().removeTag(args[1]);
                                 sender.sendMessage(ChatColor.GREEN + "Success! Removed the tag " + args[1] + " from " + MessageUtil.identifyPersona(pers));
                             }
                         }
@@ -572,6 +582,26 @@ public class CommandPersona implements CommandExecutor {
 				" hours";
 
 		return(sb);
+	}
+	
+	private boolean loadAndReexecute(String personaToLoad, Player caller, Command command, String[] args) {
+		final OfflinePersona offlinePersona = CommandUtil.offlinePersonaFromArg(personaToLoad);
+		if(offlinePersona == null) return false; //Nothing we can do at this point
+		if(offlinePersona.isLoaded()) throw new IllegalStateException("Persona is already loaded!");
+		
+		//Run async to load then use
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				ArchePersona persona = (ArchePersona) offlinePersona.loadPersona();
+				Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->{
+							ArchePersonaHandler.getInstance().getPersonaStore().addOnlinePersona(persona);
+							caller.performCommand(command.getName() + ' ' + StringUtils.join(args, ' '));
+						});
+			}
+		}.runTaskAsynchronously(ArcheCore.getPlugin());
+		
+		return true;
 	}
 
 }

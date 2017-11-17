@@ -17,7 +17,6 @@ public class PersonaSkills {
 		this.persona = persona;
 	}
 	
-	//TODO: Add this if the skill was loaded from SQL by ArchePersonaHandler
 	void addSkillAttachment(SkillAttachment att) {
 		profs.add(att);
 	}

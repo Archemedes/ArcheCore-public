@@ -21,7 +21,7 @@ public class PersonaPointNagRunnable implements Runnable {
                 .parallelStream()
                 .filter(aop -> aop.isLoaded() && aop.isCurrent())
                 .map(ArchePersona.class::cast)
-                .filter(p -> ((int) p.attributes.getAttributeValue(AttributeRegistry.SCORE_UNSPENT)) > 0 && p.getPlayer() != null)
+                .filter(p -> ((int) p.attributes().getAttributeValue(AttributeRegistry.SCORE_UNSPENT)) > 0 && p.getPlayer() != null)
                 .forEach(PersonaPointNagRunnable::nag);
     }
 

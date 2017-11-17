@@ -4,8 +4,10 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.save.rows.skills.DelSkillRow;
-import net.lordofthecraft.arche.save.rows.skills.UpdateSkillRow;
+import net.lordofthecraft.arche.save.rows.skills.DeleteSkillRow;
+import net.lordofthecraft.arche.save.rows.skills.InsertSkillRow;
+import net.lordofthecraft.arche.save.rows.skills.SkillVisibleRow;
+import net.lordofthecraft.arche.save.rows.skills.SkillXpRow;
 import net.lordofthecraft.arche.skill.ArcheSkill;
 
 import java.sql.JDBCType;
@@ -35,7 +37,6 @@ public class SkillAttachment {
     private final Persona persona;
 	private double xp;
 	private boolean canSee;
-	private boolean error = false;
 	private boolean inPersonaSkills = true;
 
 	//NB: This constructor is ONLY called from PersonaSkills when it is NEWLY INITIALIZED
@@ -94,33 +95,19 @@ public class SkillAttachment {
 		performSQLUpdate(Field.XP);
 	}
 
-	private Object getValueForField(Field f) {
-		switch (f) {
-			case XP:
-				return xp;
-			case VISIBLE:
-				return canSee;
-			default:
-				return null;
-		}
-	}
-	
-	private void performSQLUpdate(Field f){
-		if(error) return;
-		
+	private void performSQLUpdate(Field f){	
 		if(inPersonaSkills && hasDefaultValues()) {
-            //buffer.put(new SkillDeleteTask(skill.getName(), persona_id));
-            consumer.queueRow(new DelSkillRow(persona, skill));
-            handle.removeSkillAttachment(this);
+			consumer.queueRow(new DeleteSkillRow(persona, skill));
+			handle.removeSkillAttachment(this);
 			inPersonaSkills = false;
-		} else {
-            //ArcheTask task = new SkillUpdateTask(persona_id, skill.getName(), f, getValueForField(f));
-            //buffer.put(task);
-            consumer.queueRow(new UpdateSkillRow(persona, skill, f, getValueForField(f)));
-            if(!inPersonaSkills) { //Start tracking this skill in PersonaSkills
-				handle.addSkillAttachment(this);
-				inPersonaSkills = true;
-			}
+		} else if(!inPersonaSkills && !hasDefaultValues()) { //Start tracking this skill in PersonaSkills
+			handle.addSkillAttachment(this);
+			consumer.queueRow(new InsertSkillRow(persona, skill, xp, canSee));
+			inPersonaSkills = true;
+		} else if (inPersonaSkills){
+			if(f == Field.XP) consumer.queueRow(new SkillXpRow(persona, skill, xp)); 
+			else if(f == Field.VISIBLE) consumer.queueRow(new SkillVisibleRow(persona, skill, canSee));
+			else throw new IllegalArgumentException("Great job asshole. You broke it.");
 		}
 	}
 	

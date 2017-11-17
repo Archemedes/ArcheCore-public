@@ -1,16 +1,13 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.enums.PersonaType;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.persona.PersonaInventory;
-import net.lordofthecraft.arche.save.rows.ArchePersonaRow;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.inventory.Inventory;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.UUID;
+
+import org.bukkit.OfflinePlayer;
+
+import net.lordofthecraft.arche.enums.PersonaType;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.save.rows.ArchePersonaRow;
 
 public interface OfflinePersona {
 
@@ -60,13 +57,6 @@ public interface OfflinePersona {
     PersonaType getPersonaType();
 
     /**
-     * Set the underlying type of this persona
-     *
-     * @param type The type of persona it should be.
-     */
-    void setPersonaType(PersonaType type);
-
-    /**
      * Get the human-readable Gender of this Persona
      *
      * @return The Persona's gender
@@ -74,25 +64,11 @@ public interface OfflinePersona {
     String getGender();
 
     /**
-     * Assign a persona's gender to the specified gender.
-     *
-     * @param gender The persona's new gender.
-     */
-    void setGender(String gender);
-
-    /**
      * Retrieve the Roleplay name of this Persona
      *
      * @return The Persona's RP name.
      */
     String getName();
-
-    /**
-     * Set the new RP name of this Persona. This also updates the time at which this Persona was last renamed
-     *
-     * @param name The new RP name.
-     */
-    void setName(String name);
 
     /**
      * Retrieve the immutable Race of this Persona.
@@ -107,21 +83,6 @@ public interface OfflinePersona {
      * @return the Player's unique id.
      */
     UUID getPlayerUUID();
-
-    /**
-     * @return The EnderChest inventory for this persona
-     */
-    Inventory getEnderChest();
-
-    /**
-     * @return The PersonaInventory for this persona
-     */
-    PersonaInventory getPInv();
-
-    /**
-     * @return the inventory of this persona as an Inventory object
-     */
-    Inventory getInventory();
 
     /**
      * @return the creation time of this persona in milliseconds
@@ -150,11 +111,12 @@ public interface OfflinePersona {
     boolean remove();
 
     /**
-     * Load persona from SQL.
-     *
+     * Load persona from SQL. This makes no attempt to register the Persona inside PersonaHandler
+     * as a result there is no guarantee any save-to-db methods on Persona will be updated in time 
+     * if the Persona is requested for loading by another resource or by ArcheCore itself.
      * @return The loaded persona
      */
-    Persona loadPersona(ResultSet rs) throws SQLException;
+    Persona loadPersona();
 
     /**
      * Check whether or not this Persona has had it's SQL removed.
@@ -170,16 +132,19 @@ public interface OfflinePersona {
     boolean isDeleted();
 
     /**
-     * @return the total playtime of this persona(all maps added)
-     */
-    int getTotalPlaytime();
-
-    /**
      * Retrieve the total Playtime this Persona has seen since its creation.
      *
      * @return Playtime in minutes
      */
     int getTimePlayed();
+    
+    /**
+     * Persona tags are additional data that is automatically made persistent by ArcheCore's SQL backend
+     * Dependent plugins can set and check tags for each Persona. Tags can also be modified by command.
+     * Persona must be loaded (i.e. instanceof ArchePersona) for modifying methods to be successful.
+     * @return The Persona-bound tag handler.
+     */
+    PersonaTags tags();
 
     OfflinePlayer getPlayer();
 }

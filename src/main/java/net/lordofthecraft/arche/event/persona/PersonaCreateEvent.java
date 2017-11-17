@@ -1,16 +1,15 @@
 package net.lordofthecraft.arche.event.persona;
 
-import net.lordofthecraft.arche.interfaces.Persona;
 import org.bukkit.event.HandlerList;
+
+import net.lordofthecraft.arche.interfaces.Persona;
 
 /**
  *Event called when a Player creates a Persona
  */
-public class PersonaCreateEvent extends PersonaEvent {
-    private static final HandlerList handlers = new HandlerList();
-    private final Persona replaces;
-	//Generic Cancellable implementation
-	private boolean cancelled = false;
+public class PersonaCreateEvent extends PersonaEvent{
+	private static final HandlerList handlers = new HandlerList();
+	private final Persona replaces;
 
 	public PersonaCreateEvent(Persona persona, Persona replaces) {
 		super(persona);
