@@ -12,20 +12,24 @@ public class PersonaTagRow extends SingleStatementRow {
         this.persona = persona;
         this.att = att;
     }
-    
-	@Override
-	protected String getStatement() {
-		return "REPLACE INTO persona_tags(persona_id_fk,tag_key,tag_value,offline) VALUES (?,?,?,?)";
-	}
 
-	@Override
-	protected Object getValueFor(int index) {
-		switch(index) {
-		case 1: return persona.getPersonaId();
-		case 2: return att.getKey();
-		case 3: return att.getValue();
-		default: throw new IllegalArgumentException();
-		}
-	}
+    @Override
+    protected String getStatement() {
+        return "REPLACE INTO persona_tags(persona_id_fk,tag_key,tag_value,offline) VALUES (?,?,?,?)";
+    }
+
+    @Override
+    protected Object getValueFor(int index) {
+        switch (index) {
+            case 1:
+                return persona.getPersonaId();
+            case 2:
+                return att.getKey();
+            case 3:
+                return att.getValue();
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
 
 }

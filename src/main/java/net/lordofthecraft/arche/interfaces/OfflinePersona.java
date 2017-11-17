@@ -1,13 +1,12 @@
 package net.lordofthecraft.arche.interfaces;
 
-import java.sql.Timestamp;
-import java.util.UUID;
-
-import org.bukkit.OfflinePlayer;
-
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.save.rows.ArchePersonaRow;
+import org.bukkit.OfflinePlayer;
+
+import java.sql.Timestamp;
+import java.util.UUID;
 
 public interface OfflinePersona {
 
@@ -137,11 +136,12 @@ public interface OfflinePersona {
      * @return Playtime in minutes
      */
     int getTimePlayed();
-    
+
     /**
      * Persona tags are additional data that is automatically made persistent by ArcheCore's SQL backend
      * Dependent plugins can set and check tags for each Persona. Tags can also be modified by command.
      * Persona must be loaded (i.e. instanceof ArchePersona) for modifying methods to be successful.
+     *
      * @return The Persona-bound tag handler.
      */
     PersonaTags tags();

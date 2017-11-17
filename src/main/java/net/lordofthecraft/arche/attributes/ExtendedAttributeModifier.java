@@ -1,16 +1,15 @@
 package net.lordofthecraft.arche.attributes;
 
-import java.sql.Timestamp;
-import java.util.UUID;
-
-import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.scheduler.BukkitRunnable;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.rows.attribute.AttributeRemoveRow;
 import net.lordofthecraft.arche.save.rows.attribute.AttributeUpdateRow;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.sql.Timestamp;
+import java.util.UUID;
 
 //Slightly more data for temp atts, which is not serialized through the bukkit method
 //Note that by default this is a permanent attribute
@@ -38,9 +37,9 @@ public class ExtendedAttributeModifier extends AttributeModifier implements Clon
         this.ticksRemaining = ticksRemaining;
         this.lostOnDeath = lostOnDeath;
     }
-    
+
     public ExtendedAttributeModifier clone() {
-    	return new ExtendedAttributeModifier(this.getUniqueId(), this.getName(), this.getAmount(), this.getOperation(), this.decay, this.ticksRemaining, this.lostOnDeath);
+        return new ExtendedAttributeModifier(this.getUniqueId(), this.getName(), this.getAmount(), this.getOperation(), this.decay, this.ticksRemaining, this.lostOnDeath);
     }
 
     public boolean isLostOnDeath() {

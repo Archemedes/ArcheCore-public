@@ -1,26 +1,6 @@
 package net.lordofthecraft.arche.commands;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.scheduler.BukkitRunnable;
-
 import com.google.common.collect.Lists;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.enums.PersonaType;
@@ -39,6 +19,20 @@ import net.lordofthecraft.arche.util.CommandUtil;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class CommandPersona implements CommandExecutor {
 	private final HelpDesk helpdesk;
@@ -247,20 +241,23 @@ public class CommandPersona implements CommandExecutor {
                     && args.length > 1
                     && sender.hasPermission("archecore.mod.other")) {
                 opers = CommandUtil.personaFromArg(args[1]);
-                if(opers == null && sender instanceof Player) willTryToLoad = loadAndReexecute(args[1], (Player) sender, command, args);
+                if (opers == null && sender instanceof Player)
+                    willTryToLoad = loadAndReexecute(args[1], (Player) sender, command, args);
             } else if (args.length > 2 && args[args.length - 2].equalsIgnoreCase("-p") && (sender.hasPermission("archecore.mod.other"))) {
                 opers = CommandUtil.personaFromArg(args[args.length - 1]);
-                
-                if(opers == null && sender instanceof Player) willTryToLoad = loadAndReexecute(args[args.length - 1], (Player) sender, command, args);
+
+                if (opers == null && sender instanceof Player)
+                    willTryToLoad = loadAndReexecute(args[args.length - 1], (Player) sender, command, args);
             } else if (sender instanceof Player) {
                 opers = handler.getPersona((Player) sender);
             }
 
             if (opers == null) {
-                if(willTryToLoad) sender.sendMessage(ChatColor.LIGHT_PURPLE + "Error: Persona not loaded. Will try to load it now. Please wait...");
+                if (willTryToLoad)
+                    sender.sendMessage(ChatColor.LIGHT_PURPLE + "Error: Persona not loaded. Will try to load it now. Please wait...");
                 else sender.sendMessage(ChatColor.RED + "Error: No persona found to modify");
-				return true;
-			}
+                return true;
+            }
 
             if (cmd.acceptsOffline) {
                 if (cmd == PersonaCommand.VIEW || cmd == PersonaCommand.MORE) {
@@ -583,25 +580,25 @@ public class CommandPersona implements CommandExecutor {
 
 		return(sb);
 	}
-	
-	private boolean loadAndReexecute(String personaToLoad, Player caller, Command command, String[] args) {
-		final OfflinePersona offlinePersona = CommandUtil.offlinePersonaFromArg(personaToLoad);
-		if(offlinePersona == null) return false; //Nothing we can do at this point
-		if(offlinePersona.isLoaded()) throw new IllegalStateException("Persona is already loaded!");
-		
-		//Run async to load then use
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				ArchePersona persona = (ArchePersona) offlinePersona.loadPersona();
-				Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->{
-							ArchePersonaHandler.getInstance().getPersonaStore().addOnlinePersona(persona);
-							caller.performCommand(command.getName() + ' ' + StringUtils.join(args, ' '));
-						});
-			}
-		}.runTaskAsynchronously(ArcheCore.getPlugin());
-		
-		return true;
-	}
+
+    private boolean loadAndReexecute(String personaToLoad, Player caller, Command command, String[] args) {
+        final OfflinePersona offlinePersona = CommandUtil.offlinePersonaFromArg(personaToLoad);
+        if (offlinePersona == null) return false; //Nothing we can do at this point
+        if (offlinePersona.isLoaded()) throw new IllegalStateException("Persona is already loaded!");
+
+        //Run async to load then use
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                ArchePersona persona = (ArchePersona) offlinePersona.loadPersona();
+                Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> {
+                    ArchePersonaHandler.getInstance().getPersonaStore().addOnlinePersona(persona);
+                    caller.performCommand(command.getName() + ' ' + StringUtils.join(args, ' '));
+                });
+            }
+        }.runTaskAsynchronously(ArcheCore.getPlugin());
+
+        return true;
+    }
 
 }

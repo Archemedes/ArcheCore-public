@@ -95,20 +95,20 @@ public class SkillAttachment {
 		performSQLUpdate(Field.XP);
 	}
 
-	private void performSQLUpdate(Field f){	
-		if(inPersonaSkills && hasDefaultValues()) {
-			consumer.queueRow(new DeleteSkillRow(persona, skill));
-			handle.removeSkillAttachment(this);
-			inPersonaSkills = false;
-		} else if(!inPersonaSkills && !hasDefaultValues()) { //Start tracking this skill in PersonaSkills
-			handle.addSkillAttachment(this);
-			consumer.queueRow(new InsertSkillRow(persona, skill, xp, canSee));
-			inPersonaSkills = true;
-		} else if (inPersonaSkills){
-			if(f == Field.XP) consumer.queueRow(new SkillXpRow(persona, skill, xp)); 
-			else if(f == Field.VISIBLE) consumer.queueRow(new SkillVisibleRow(persona, skill, canSee));
-			else throw new IllegalArgumentException("Great job asshole. You broke it.");
-		}
-	}
+    private void performSQLUpdate(Field f) {
+        if (inPersonaSkills && hasDefaultValues()) {
+            consumer.queueRow(new DeleteSkillRow(persona, skill));
+            handle.removeSkillAttachment(this);
+            inPersonaSkills = false;
+        } else if (!inPersonaSkills && !hasDefaultValues()) { //Start tracking this skill in PersonaSkills
+            handle.addSkillAttachment(this);
+            consumer.queueRow(new InsertSkillRow(persona, skill, xp, canSee));
+            inPersonaSkills = true;
+        } else if (inPersonaSkills) {
+            if (f == Field.XP) consumer.queueRow(new SkillXpRow(persona, skill, xp));
+            else if (f == Field.VISIBLE) consumer.queueRow(new SkillVisibleRow(persona, skill, canSee));
+            else throw new IllegalArgumentException("Great job asshole. You broke it.");
+        }
+    }
 	
 }

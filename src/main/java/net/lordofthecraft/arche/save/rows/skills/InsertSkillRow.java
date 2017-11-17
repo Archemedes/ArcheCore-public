@@ -17,22 +17,28 @@ public class InsertSkillRow extends SingleStatementRow {
         this.xp = xp;
         this.visible = visible;
     }
-	@Override
-	protected String getStatement() {
-		return "INSERT INTO persona_skills (persona_id_fk,skill_id_fk,xp,visible) VALUES (?,?,?,?)";
-	}
 
-	@Override
-	protected Object getValueFor(int index) {
-		switch(index) {
-		case 1: return persona.getPersonaId();
-		case 2: return skill.getName();
-		case 3: return xp;
-		case 4: return visible;
-		default: throw new IllegalArgumentException();
-		}
-	}
-	
+    @Override
+    protected String getStatement() {
+        return "INSERT INTO persona_skills (persona_id_fk,skill_id_fk,xp,visible) VALUES (?,?,?,?)";
+    }
+
+    @Override
+    protected Object getValueFor(int index) {
+        switch (index) {
+            case 1:
+                return persona.getPersonaId();
+            case 2:
+                return skill.getName();
+            case 3:
+                return xp;
+            case 4:
+                return visible;
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
     @Override
     public String toString() {
         return "SkillRow{" +

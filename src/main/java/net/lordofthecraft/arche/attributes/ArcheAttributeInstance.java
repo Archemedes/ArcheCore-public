@@ -1,21 +1,15 @@
 package net.lordofthecraft.arche.attributes;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
+import com.google.common.base.Preconditions;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.PersonaKey;
+import net.lordofthecraft.arche.save.rows.attribute.AttributeInsertRow;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
 
-import com.google.common.base.Preconditions;
-
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.interfaces.PersonaKey;
-import net.lordofthecraft.arche.save.rows.attribute.AttributeInsertRow;
+import java.util.*;
 
 public class ArcheAttributeInstance implements AttributeInstance {
 	private final ArcheAttribute parent;

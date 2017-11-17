@@ -59,13 +59,13 @@ public class CommandUtil {
         PersonaHandler hand = ArcheCore.getControls().getPersonaHandler();
 
         @SuppressWarnings("deprecation")
-		OfflinePlayer p = Bukkit.getOfflinePlayer(player);
+        OfflinePlayer p = Bukkit.getOfflinePlayer(player);
         
         if (p == null) {
             return null;
         }
-        return id < 0 || id > ArcheCore.getControls().personaSlots() ? 
-        		hand.getPersona(p) : hand.getAllPersonas(p)[id];
+        return id < 0 || id > ArcheCore.getControls().personaSlots() ?
+                hand.getPersona(p) : hand.getAllPersonas(p)[id];
         
     }
 	

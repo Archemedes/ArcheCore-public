@@ -9,21 +9,26 @@ public class DeleteBlockRegistryRow extends SingleStatementRow {
     public DeleteBlockRegistryRow(WeakBlock wb) {
         this.wb = wb;
     }
-    
-	@Override
-	protected String getStatement() {
-		return "DELETE FROM blockregistry WHERE world=? AND x=? AND y=? AND z=?";
-	}
 
-	@Override
-	protected Object getValueFor(int index) {
-		switch(index) {
-		case 1: return wb.getWorld();
-		case 2: return wb.getX();
-		case 3: return wb.getY();
-		case 4: return wb.getZ();
-		default: throw new IllegalArgumentException();
-		}
-	}
+    @Override
+    protected String getStatement() {
+        return "DELETE FROM blockregistry WHERE world=? AND x=? AND y=? AND z=?";
+    }
+
+    @Override
+    protected Object getValueFor(int index) {
+        switch (index) {
+            case 1:
+                return wb.getWorld();
+            case 2:
+                return wb.getX();
+            case 3:
+                return wb.getY();
+            case 4:
+                return wb.getZ();
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
 
 }
