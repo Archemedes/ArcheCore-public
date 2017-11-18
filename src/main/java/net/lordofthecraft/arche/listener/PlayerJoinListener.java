@@ -1,24 +1,18 @@
 package net.lordofthecraft.arche.listener;
 
-import java.sql.Timestamp;
-
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
-import net.lordofthecraft.arche.event.persona.PersonaDeactivateEvent;
-import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.RaceBonusHandler;
-import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 
 public class PlayerJoinListener implements Listener {
 	private final ArchePersonaHandler handler;
@@ -29,9 +23,11 @@ public class PlayerJoinListener implements Listener {
         timer = ArcheCore.getPlugin().getMethodTimer();
     }
 	
-	@EventHandler(priority = EventPriority.LOWEST)
+    
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onJoin(AsyncPlayerPreLoginEvent e) {
-		handler.loadPlayer(e.getUniqueId(), e.getName());
+		if(e.getLoginResult() == Result.ALLOWED) 
+			handler.loadPlayer(e.getUniqueId(), e.getName());
 	}
     
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -46,24 +42,14 @@ public class PlayerJoinListener implements Listener {
 	@EventHandler (priority = EventPriority.LOW)
 	public void onLeave(PlayerQuitEvent e){
 		if(timer != null) timer.startTiming("logout");
-		ArcheCore plug = ArcheCore.getPlugin();
+
 		Player p = e.getPlayer();
-		
-		Persona ps = handler.getPersona(p);
-		if(ps != null) Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(ps, PersonaDeactivateEvent.Reason.LOGOUT));
-
-		RaceBonusHandler.reset(p);
-        if (ps != null) ps.attributes().handleSwitch(true);
-
-        //Stop dupe?
-        p.saveData();
-
-        ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
+		handler.leavePlayer(p);
 
         if(timer != null){
 			timer.stopTiming("logout");
-			int size = plug.getPersonaHandler().getPersonas().size();
-			plug.getLogger().info("[Debug] Seen Personas of " + size + " players at logout of "  + e.getPlayer().getName());
+			int size = handler.getPersonas().size();
+			ArcheCore.getPlugin().getLogger().info("[Debug] Seen Personas of " + size + " players at logout of "  + p.getName());
 		}
 	}
 }

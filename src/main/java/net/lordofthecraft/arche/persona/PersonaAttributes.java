@@ -214,8 +214,11 @@ public class PersonaAttributes {
 			
 			aai.getModifiers().stream()
 			.map(ExtendedAttributeModifier.class::cast)
-			.forEach(m -> {if(logoff) m.handleLogoff(persona, aa); else m.handleSwitch(aa, persona);} );
-			
+			.forEach(m -> {
+				if(logoff) m.handleLogoff(persona, aa); 
+				else m.handleSwitch(aa, persona);
+				} );
+
 			if(aa instanceof VanillaAttribute) {
 				if(logoff || !persona.isCurrent()) deactivateVanilla((VanillaAttribute) aa);
 				else aa.tryApply(aai);

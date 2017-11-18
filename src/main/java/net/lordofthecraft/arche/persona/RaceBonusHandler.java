@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 public class RaceBonusHandler {
 
     private static final UUID UUID_ARCHE = UUID.fromString("22a6b068-6e20-4295-87e7-4fd0c176307e");
-    public static final UUID UUID_RACIAL_SCORE = UUID.fromString("aba33abe-febe-4ef7-af85-ec052f1158ba");
 
     private RaceBonusHandler() {
     }
@@ -37,10 +36,8 @@ public class RaceBonusHandler {
     }
 
 
-    public static void apply(Persona p, Race race) {
-        if (race == null) {
-            return;
-        }
+    public static void apply(Persona p) {
+    	Race race = p.getRace();
 
         if (!ArcheCore.getPlugin().areRacialBonusesEnabled()) return;
         Map<ArcheAttribute, List<AttributeModifier>> vals = Maps.newHashMap();

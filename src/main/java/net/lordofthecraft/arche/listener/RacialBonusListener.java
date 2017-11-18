@@ -86,12 +86,10 @@ public class RacialBonusListener implements Listener {
 	public void onRespawn(PlayerRespawnEvent e){
 		Player p = e.getPlayer();
 		RaceBonusHandler.reset(p);
-		//AttributeBase.clearModifiers(p, AttributeType.MOVEMENT_SPEED);
-		//AttributeBase.clearModifiers(p, AttributeType.ATTACK_DAMAGE);
 
 		Persona ps = handler.getPersona(p);
 		if (ps != null) {
-            RaceBonusHandler.apply(ps, ps.getRace());
+            RaceBonusHandler.apply(ps);
             if (handler.getRacespawns().containsKey(ps.getRace())) {
 				e.setRespawnLocation(handler.getRacespawns().get(ps.getRace()));
 			}

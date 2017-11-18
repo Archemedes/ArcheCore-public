@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,7 +28,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
@@ -63,8 +63,9 @@ public class PersonaStore {
     private final Map<Integer, ArcheOfflinePersona> allPersonas = new HashMap<>();
 	private final Map<UUID, ArchePersona[]> onlinePersonas = new HashMap<>();
 	
+	private final Set<UUID> loadedThisSession = new HashSet<>();
 	private final Map<UUID, ArchePersona[]> pendingBlobs = new ConcurrentHashMap<>();
-	private final Map<UUID, Integer> pendingTasks = new ConcurrentHashMap<>();
+	//private final Map<UUID, Integer> pendingTasks = new ConcurrentHashMap<>();
 	
     public Collection<ArcheOfflinePersona> getPersonas() {
         return Collections.unmodifiableCollection(allPersonas.values());
@@ -136,10 +137,15 @@ public class PersonaStore {
 		return old;
 	}
 
-	public void loadPersonas(String playerName, UUID uuid) { //Run this async	
+	public void loadPersonas(String playerName, UUID uuid) { //Run this async
+		//We don't unload personas for players once loaded since we have memory for miles
+		//So instead once a player logged in, they remain loaded for the session
+		//We obviously won't have to bother reloading their personas another time then
+		if(loadedThisSession.contains(uuid)) return; 
+		
 		ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
 		if (timer != null) timer.startTiming("Loading Personas of " + playerName);
-		
+	
 		ArchePersona[] prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
 		boolean hasCurrent = false, any = false;
 
@@ -172,13 +178,8 @@ public class PersonaStore {
 			SQLUtils.close(statement);
 			SQLUtils.close(connection);
 			
-			if(any) {
-				pendingBlobs.put(uuid, prs);
-				int taskId = new BukkitRunnable(){
-					@Override public void run() { pendingBlobs.remove(uuid); pendingTasks.remove(uuid); }
-				}.runTaskLaterAsynchronously(ArcheCore.getPlugin(), 20*90).getTaskId();
-				pendingTasks.put(uuid, taskId);
-			}
+			if(any) pendingBlobs.put(uuid, prs);
+			loadedThisSession.add(uuid);
         }
         
         if (timer != null) timer.stopTiming("Loading Personas of " + playerName);
@@ -438,8 +439,8 @@ public class PersonaStore {
 				if(aop.isLoaded()) prs[i] = aop.getPersona();
 				else allPersonas.put(p.getPersonaId(), p);
 			}
-			Integer taskId = pendingTasks.get(uuid);
-			Bukkit.getScheduler().cancelTask(taskId);
+			//Integer taskId = pendingTasks.get(uuid);
+			//Bukkit.getScheduler().cancelTask(taskId);
 		}
 		return prs;
 	}

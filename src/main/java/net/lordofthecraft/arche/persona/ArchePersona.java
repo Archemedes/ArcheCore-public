@@ -177,7 +177,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
             if(current) {
             	Validate.notNull(getPlayer(), "Persona can't be switched while Player offline");
             	updateDisplayName();
-            	RaceBonusHandler.apply(this, race);
+            	RaceBonusHandler.apply(this);
             }
 		}
 	}
@@ -368,7 +368,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 			Player p = getPlayer();
 			if (p != null && this.isCurrent()) {
 				RaceBonusHandler.reset(p);
-                RaceBonusHandler.apply(this, race);
+                RaceBonusHandler.apply(this);
                 p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 			}
 		}

@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.lang.time.DateUtils;
@@ -246,7 +245,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
         consumer.queueRow(new InsertPersonaRow(persona));
 
-        RaceBonusHandler.apply(persona, persona.getRace());
+        RaceBonusHandler.apply(persona);
         persona.updateDisplayName();
         
         Player p = persona.getPlayer();
@@ -442,17 +441,22 @@ public class ArchePersonaHandler implements PersonaHandler {
 			}
 		} else {
 			ArchePersona ps = getPersona(p);
-			if(ps == null) { //has no current Persona, but does have SOME personas. Rectify.
-				ps = Arrays.stream(prs).filter(Objects::nonNull).findFirst().get();
-				ps.setCurrent(true);
-			} 
-			
 			Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
+			RaceBonusHandler.apply(ps);
 			ps.attributes().handleLogin();
-			ps.restoreMinecraftSpecifics(p);
             ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
 		}
-		
+	}
+	
+	public void leavePlayer(Player p) {
+		Persona ps = getPersona(p);
+		RaceBonusHandler.reset(p);
+        if (ps != null) {
+        	Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(ps, PersonaDeactivateEvent.Reason.LOGOUT));
+        	ps.attributes().handleSwitch(true);
+        }
+
+        ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
 	}
 
 	public void initRacespawns(){
