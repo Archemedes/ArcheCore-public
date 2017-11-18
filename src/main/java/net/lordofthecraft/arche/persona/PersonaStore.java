@@ -114,29 +114,6 @@ public class PersonaStore {
 		else return prs;
 	}
 	
-	public void addOnlinePersona(ArchePersona persona) {
-		ArcheOfflinePersona old = allPersonas.get(persona.getPersonaId());
-		if(old.isLoaded()) return;
-		
-		allPersonas.put(persona.getPersonaId(), persona);
-	}
-	
-	public ArchePersona registerPersona(ArchePersona persona) {
-		Player player = persona.getPlayer();
-		ArchePersona[] prs = onlinePersonas.get(player.getUniqueId());
-		ArchePersona old;
-		if(prs == null) {
-			prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
-			onlinePersonas.put(player.getUniqueId(), prs);
-			old = null;
-		} else {
-			old = prs[persona.getSlot()];
-		}
-		
-		prs[persona.getSlot()] = persona;
-		return old;
-	}
-
 	public void loadPersonas(String playerName, UUID uuid) { //Run this async
 		//We don't unload personas for players once loaded since we have memory for miles
 		//So instead once a player logged in, they remain loaded for the session
@@ -367,7 +344,7 @@ public class PersonaStore {
 	
 	private void loadTags(ArcheOfflinePersona persona, Connection c, boolean offline) {
 		String sql = "SELECT tag_key,tag_value FROM persona_tags WHERE persona_id_fk=" + persona.getPersonaId()
-			+ (offline? " AND offline" : "");
+			+ " AND " + (offline? "" : "NOT ") + "offline"; 
 		try(Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)){
 			persona.tags.init(rs, offline);
 		} catch (SQLException e) { e.printStackTrace(); }
@@ -436,14 +413,43 @@ public class PersonaStore {
 				ArchePersona p = prs[i];
 				if(p == null) continue;
 				ArcheOfflinePersona aop = allPersonas.get(p.getPersonaId());
-				if(aop.isLoaded()) prs[i] = aop.getPersona();
-				else allPersonas.put(p.getPersonaId(), p);
+				if(aop.isLoaded()) {
+					prs[i] = aop.getPersona();
+				}else {
+					p.tags.merge(aop.tags);
+					allPersonas.put(p.getPersonaId(), p);
+				}
 			}
 			//Integer taskId = pendingTasks.get(uuid);
 			//Bukkit.getScheduler().cancelTask(taskId);
 		}
 		return prs;
 	}
+	
+	public void addOnlinePersona(ArchePersona persona) {
+		ArcheOfflinePersona old = allPersonas.get(persona.getPersonaId());
+		if(old.isLoaded()) return;
+		
+		persona.tags.merge(old.tags);
+		allPersonas.put(persona.getPersonaId(), persona);
+	}
+	
+	public ArchePersona registerPersona(ArchePersona persona) {
+		Player player = persona.getPlayer();
+		ArchePersona[] prs = onlinePersonas.get(player.getUniqueId());
+		ArchePersona old;
+		if(prs == null) {
+			prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
+			onlinePersonas.put(player.getUniqueId(), prs);
+			old = null;
+		} else {
+			old = prs[persona.getSlot()];
+		}
+		
+		prs[persona.getSlot()] = persona;
+		return old;
+	}
+
 	
 	private String personaSelectStatement(boolean forOffline) {
 		List<String> fields = new ArrayList<>();

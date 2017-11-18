@@ -51,7 +51,7 @@ public interface PersonaTags extends PersonaExtension {
     /**
      * Give a Tag to be attached and saved with the Persona.
      * @param tag The tag you wish to add
-     * @throws IllegalStateException if used while Persona does not allow writing (i.e. is offline)
+     * @throws IllegalArgumentException if trying to use Tag for online-reading on offline persona
      */
     public void giveTag(TagAttachment tag);
 
@@ -59,7 +59,6 @@ public interface PersonaTags extends PersonaExtension {
      * Remove a tag related to the Persona.
      * @param tag The tag you wish to remove
      * @return if the tag existed
-     * @throws IllegalStateException if used while Persona does not allow writing (i.e. is offline)
      */
     public boolean removeTag(String key);
 }
