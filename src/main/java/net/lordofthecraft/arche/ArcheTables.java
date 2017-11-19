@@ -384,9 +384,6 @@ public final class ArcheTables {
                 "PRIMARY KEY (world,x,y,z)" +
                 ")" +
                 end);
-
-        //TODO reimplement
-        //statement.execute("DELETE FROM blockregistry WHERE ROWID IN (SELECT ROWID FROM blockregistry ORDER BY ROWID DESC LIMIT -1 OFFSET 5000);");
     }
 
     protected static void createEconomyLogging(Statement statement, String end) throws SQLException {
