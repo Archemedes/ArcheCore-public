@@ -20,11 +20,11 @@ import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 
 public class PersonaInventory {
-	private final OfflinePersona persona;
+	private final Persona persona;
 	private final Inventory inv;
 	private final Inventory enderInv;
 
-    public PersonaInventory(OfflinePersona persona, ItemStack[] contents, ItemStack[] enderContents) {
+    private PersonaInventory(Persona persona, ItemStack[] contents, ItemStack[] enderContents) {
     	this.persona = persona;
     	inv = PersonaInventoryHolder.get(this, InventoryType.PLAYER);
     	inv.setContents(contents);
@@ -33,7 +33,7 @@ public class PersonaInventory {
     }
 
     @SuppressWarnings("unchecked")
-	public static PersonaInventory restore(OfflinePersona persona, String inv, String enderinv) {
+	public static PersonaInventory restore(Persona persona, String inv, String enderinv) {
     	YamlConfiguration config = new YamlConfiguration();
     	ItemStack[] contents, enderContents;
     	try {
@@ -75,7 +75,7 @@ public class PersonaInventory {
     	return new PersonaInventory(persona, p.getInventory().getContents(), p.getEnderChest().getContents());
     }
     
-    public OfflinePersona getPersona() {
+    public Persona getPersona() {
     	return persona;
     }
 

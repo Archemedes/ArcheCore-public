@@ -444,16 +444,26 @@ public class ArchePersonaHandler implements PersonaHandler {
 			Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
 			RaceBonusHandler.apply(ps);
 			ps.attributes().handleLogin();
+			if(ps.tags().removeTag("refreshMCSpecifics")) ps.restoreMinecraftSpecifics(p);
             ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
 		}
 	}
 	
 	public void leavePlayer(Player p) {
-		Persona ps = getPersona(p);
+		ArchePersona ps = getPersona(p);
+		
+		//Attribute Bonuses stick around forever. To prevent lingering ones, just in
+        //case the plugin is to be removed, we perform this method.
 		RaceBonusHandler.reset(p);
         if (ps != null) {
         	Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(ps, PersonaDeactivateEvent.Reason.LOGOUT));
+        	
+            //Attribute bonuses form the Persona Handler, similarly, linger around
+            //We want these cleanly removed from Players on shutdown
+            //As a side-effect, this is also a good time to save them for current Personas
         	ps.attributes().handleSwitch(true);
+        	
+        	ps.saveMinecraftSpecifics(p);
         }
 
         ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
