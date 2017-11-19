@@ -113,10 +113,6 @@ public class CommandSkin implements CommandExecutor {
 
 				String name = args[2];
 				int index = cache.storeSkin(p, i, name);
-                if (index == -2) {
-                    p.sendMessage(ChatColor.RED + "An error occurred while saving your skin. Please try again or report on our bug tracker.");
-                    return true;
-                }
                 if(index > 0) {
 					p.sendMessage("You already have this skin saved in slot: " + ChatColor.RESET + index);
 					return true;

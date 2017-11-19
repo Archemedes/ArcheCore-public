@@ -20,7 +20,7 @@ public enum PersonaField {
     GENDER("gender", MASTER, INTEGER, true),
     FATIGUE("fatigue", MASTER, DOUBLE),
     STAT_LAST_PLAYED("last_played", MASTER, TIMESTAMP, true),
-	SKIN("skin_id_fk", MASTER, INTEGER),
+	SKIN("skin_slot", MASTER, INTEGER),
 	
     STAT_PLAYED("played", STATS, INTEGER),
     STAT_CHARS("chars", STATS, INTEGER),

@@ -306,7 +306,7 @@ public class PersonaStore {
 
 		int skinId = res.getInt(PersonaField.SKIN.field());
 		if(skinId >=0 ) {
-			ArcheSkin skin = SkinCache.getInstance().getSkinByID(skinId);
+			ArcheSkin skin = SkinCache.getInstance().getSkinAtSlot(pl.getUniqueId(), skinId);
 			if (skin != null) persona.skin = skin;
             else ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(persona, PersonaField.SKIN, -1)); 
 		}

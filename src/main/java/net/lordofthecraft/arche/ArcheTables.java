@@ -115,7 +115,6 @@ public final class ArcheTables {
 
     protected static void createPersonaSkinsTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS persona_skins (" +
-                "skin_id INT AUTO_INCREMENT," +
                 "player CHAR(36) NOT NULL," +
                 "slot INT," +
                 "name TEXT," +
@@ -124,7 +123,7 @@ public final class ArcheTables {
                 "skinValue TEXT," +
                 "skinSignature TEXT," +
                 "refresh TIMESTAMP," +
-                "PRIMARY KEY (skin_id)" +
+                "PRIMARY KEY (player,slot)" +
                 ")" +
                 end);
 
@@ -162,7 +161,7 @@ public final class ArcheTables {
                 "profession VARCHAR(255) DEFAULT NULL," +
                 "fatigue DOUBLE DEFAULT 0.0," +
                 "last_played TIMESTAMP," +
-                "skin_id_fk INT DEFAULT -1," +
+                "skin_slot INT DEFAULT -1," +
                 "PRIMARY KEY (persona_id)," +
                 "FOREIGN KEY (player_fk) REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT," +
                 "FOREIGN KEY (profession) REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE SET NULL" +

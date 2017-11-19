@@ -627,7 +627,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         this.skin = skin;
         skin.addPersona(this);
 
-        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.SKIN, skin.getSkinId()));
+        consumer.queueRow(new UpdatePersonaRow(this, PersonaField.SKIN, skin.getIndex()));
     }
 
     @Override

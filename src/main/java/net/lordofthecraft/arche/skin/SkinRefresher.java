@@ -1,8 +1,8 @@
 package net.lordofthecraft.arche.skin;
 
 import com.google.common.collect.Lists;
-import com.mojang.authlib.exceptions.AuthenticationException;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.skin.MojangCommunicator.AuthenticationException;
 import net.lordofthecraft.arche.skin.MojangCommunicator.MinecraftAccount;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.json.simple.parser.ParseException;

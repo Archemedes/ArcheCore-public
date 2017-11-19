@@ -17,14 +17,16 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.mojang.authlib.exceptions.AuthenticationException;
-import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.properties.PropertyMap;
+import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 
 public class MojangCommunicator {
-
+	public static class AuthenticationException extends Exception {
+		private static final long serialVersionUID = -2260469046718388024L; 
+		public AuthenticationException(String msg) { super(msg);}
+	} 
+	
 	@SuppressWarnings("unchecked")
-	public static AuthenthicationData authenthicate(MinecraftAccount account) throws IOException, ParseException, AuthenticationException {
+	public static AuthenthicationData authenthicate(MinecraftAccount account) throws IOException, ParseException, AuthenticationException{
 		//See wiki.vg/Authenthication		
 		InputStream in = null;
 		BufferedWriter out = null;
@@ -112,8 +114,7 @@ public class MojangCommunicator {
 		}
 	}
 	
-	public static PropertyMap requestSkin(String uuidUser) throws IOException, ParseException {
-		//See Kowaman (if you see him ask him to read up on resource leaks)
+	public static WrappedSignedProperty requestSkin(String uuidUser) throws IOException, ParseException {
 		InputStreamReader in = null;
 		HttpURLConnection con = null;
 
@@ -136,10 +137,8 @@ public class MojangCommunicator {
 			String signature = textures.get("signature").toString();
 			
 			Validate.isTrue("textures".equals(name), "Skin properties file fetched from Mojang had wrong name: " + name);
-			PropertyMap props = new PropertyMap();
-			Property textureProperty = new Property("textures", value, signature);
-			props.put("textures", textureProperty);
-			return props;
+			WrappedSignedProperty textureProperty = new WrappedSignedProperty("textures", value, signature);
+			return textureProperty;
 		} finally { if(in != null) in.close(); if (con != null) con.disconnect();}
 	}
 
