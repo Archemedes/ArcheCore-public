@@ -1,27 +1,27 @@
 package net.lordofthecraft.arche.save;
 
-import java.sql.SQLType;
+import java.sql.*;
 
-import static java.sql.JDBCType.*;
 import static net.lordofthecraft.arche.save.PersonaTable.*;
+import static java.sql.JDBCType.*;
 
 public enum PersonaField {
-    PERSONA_ID("persona_id", MASTER, INTEGER, true),
-    SLOT("slot", MASTER, INTEGER, true),
+	PERSONA_ID("persona_id", MASTER, INTEGER, true),
+	SLOT("slot", MASTER, INTEGER, true),
     PREFIX("prefix", MASTER, VARCHAR),
     NAME("name", MASTER, VARCHAR, true),
     RACE("race_header", MASTER, VARCHAR),
     RACE_REAL("race", MASTER, VARCHAR, true),
     DESCRIPTION("descr", MASTER, VARCHAR),
     SKILL_SELECTED("profession", MASTER, VARCHAR),
-    CURRENT("curr", MASTER, BOOLEAN, true),
+    CURRENT("curr", MASTER, BOOLEAN,true),
     MONEY("money", MASTER, DOUBLE),
     TYPE("p_type", MASTER, VARCHAR, true),
     GENDER("gender", MASTER, INTEGER, true),
     FATIGUE("fatigue", MASTER, DOUBLE),
     STAT_LAST_PLAYED("last_played", MASTER, TIMESTAMP, true),
-    SKIN("skin_id_fk", MASTER, INTEGER),
-
+	SKIN("skin_slot", MASTER, INTEGER),
+	
     STAT_PLAYED("played", STATS, INTEGER),
     STAT_CHARS("chars", STATS, INTEGER),
     STAT_RENAMED("renamed", STATS, TIMESTAMP),
@@ -38,26 +38,27 @@ public enum PersonaField {
     FOOD("hunger", VITALS, INTEGER),
     SATURATION("saturation", VITALS, FLOAT),
     POTIONS("potions", VITALS, VARCHAR);
+	
 
 
     private final String field;
     public final PersonaTable table;
     public final SQLType type;
     private final boolean offline;
-
+    
     PersonaField(String field, PersonaTable table, SQLType type) {
-        this(field, table, type, false);
+    	this(field, table, type, false);
     }
-
+    
     PersonaField(String field, PersonaTable table, SQLType type, boolean offline) {
         this.field = field;
         this.table = table;
         this.type = type;
         this.offline = offline;
     }
-
+    
     public boolean isForOfflinePersona() {
-        return offline;
+    	return offline;
     }
     
     public String field() { return this.field; }

@@ -1,5 +1,24 @@
 package net.lordofthecraft.arche.skin;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
+
+import org.apache.commons.codec.binary.Base64;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
@@ -13,40 +32,19 @@ import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.exceptions.AuthenticationException;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaSkinListener;
-import net.lordofthecraft.arche.save.ArcheExecutor;
 import net.lordofthecraft.arche.skin.MojangCommunicator.AuthenthicationData;
+import net.lordofthecraft.arche.skin.MojangCommunicator.AuthenticationException;
 import net.lordofthecraft.arche.skin.MojangCommunicator.MinecraftAccount;
 import net.lordofthecraft.arche.util.ProtocolUtil;
-import org.apache.commons.codec.binary.Base64;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.*;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
 
 public class SkinCache {
 	private static final SkinCache INSTANCE = new SkinCache();
 	
 	private Multimap<UUID, ArcheSkin> skinCache = HashMultimap.create();
-    //private Map<Integer, ArcheSkin> applied = Maps.newHashMap(); //TODO add as a field of Persona and update SQL?
 
     //private final SkinRefresher refreshTask;
 	
@@ -81,36 +79,21 @@ public class SkinCache {
 		boolean slim = metadata != null;
 		String skinUrl = skinJson.get("url").toString();
 
-        ArcheSkinCallable call = new ArcheSkinCallable(index, p.getUniqueId(), null, skinUrl, slim, ((GameProfile) profile.getHandle()).getProperties().get("textures").iterator().next(), new Timestamp(0));
-        Future<ArcheSkin> futskin = ArcheExecutor.getInstance().prepareCallable(call);
-        try {
-            ArcheSkin skin = futskin.get(150, TimeUnit.MILLISECONDS);
-            skin.timeLastRefreshed = new Timestamp(0);
-            skin.mojangSkinData = ((GameProfile) profile.getHandle()).getProperties();
-            return skin;
-        } catch (InterruptedException e) {
-            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We were interrupted while creating an ArcheSkin! Consider increasing the Timeout time!", e);
-        } catch (ExecutionException | TimeoutException e) {
-            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We had an exception/timeout while creating an ArcheSkin!", e);
-        } catch (Exception e) {
-            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "An unhandled exception has been caught while creating an ArcheSkin.", e);
-        }
-        return null;
+		ArcheSkin skin = new ArcheSkin(p.getUniqueId(), index, skinUrl, slim);
+		skin.timeLastRefreshed = new Timestamp(0);
+		skin.mojangSkinData = profile.getProperties().get("textures").iterator().next();
+		
+		return skin;
     }
 	
 	public int storeSkin(Player p, int index, String name) throws UnsupportedEncodingException, ParseException {
 		ArcheSkin skin = savePlayerSkin(p, index);
-
-        if (skin == null) {
-            return -2;
-        }
 
         for(ArcheSkin sk : skinCache.get(p.getUniqueId())) {
 			if(skin.getURL().equals(sk.getURL())){
 				return sk.getIndex();
 			}
 		}
-		
 		
 		skin.setName(name);
 		Iterator<ArcheSkin> skins = skinCache.get(p.getUniqueId()).iterator();
@@ -143,10 +126,6 @@ public class SkinCache {
 		.filter(s -> s.getIndex() == index)
 		.findAny().orElse(null);
 	}
-
-    public ArcheSkin getSkinByID(int i) {
-        return skinCache.values().stream().filter(s -> s.getSkinId() == i).findAny().orElse(null);
-    }
 
     private void init() {
         try {

@@ -163,26 +163,14 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     public void onDisable() {
 
-        if (personaHandler != null) {
-            Bukkit.getOnlinePlayers().forEach(p -> {
-                //This part must be done for safety reasons.
-                //Disables are messy, and in the brief period of Bukkit downtime
-                //Players may shift inventories around and dupe items they shouldn't dupe
-                p.closeInventory();
+    	Bukkit.getOnlinePlayers().forEach(p -> {
+    		//This part must be done for safety reasons.
+    		//Disables are messy, and in the brief period of Bukkit downtime
+    		//Players may shift inventories around and dupe items they shouldn't dupe
+    		p.closeInventory();
 
-                //Attribute Bonuses stick around forever. To prevent lingering ones, just in
-                //case the plugin is to be removed, we perform this method.
-                RaceBonusHandler.reset(p);
-
-                //Attribute bonuses form the Persona Handler, similarly, linger around
-                //We want these cleanly removed from Players on shutdown
-                //As a side-effect, this is also a good time to save them for current Personas
-                if (hasPersona(p)) {
-                    ArchePersona persona = personaHandler.getPersona(p);
-                    persona.attributes().handleSwitch(true);
-                }
-            });
-        }
+    		personaHandler.leavePlayer(p);
+    	});
 
         if (archeTimer != null) {
             archeTimer.cancel();
@@ -345,7 +333,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         FileConfiguration config = getConfig(); // Get the config file either out of our .jar our datafolder
         saveDefaultConfig(); //Save the config file to disk if it doesn't exist yet.
 
-        maxPersonaSlots = Math.max(8, Math.min(17, config.getInt("persona.slots.maximum")));
+        maxPersonaSlots = Math.max(1, Math.min(17, config.getInt("persona.slots.maximum")));
         helpOverriden = config.getBoolean("override.help.command");
         legacyCommands = config.getBoolean("enable.legacy.commands");
         nameChangeDelay = config.getInt("name.change.delay");

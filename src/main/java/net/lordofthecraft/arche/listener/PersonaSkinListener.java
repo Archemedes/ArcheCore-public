@@ -1,5 +1,11 @@
 package net.lordofthecraft.arche.listener;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
@@ -9,18 +15,13 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction;
 import com.comphenix.protocol.wrappers.PlayerInfoData;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
-import com.google.common.collect.Lists;
+import com.comphenix.protocol.wrappers.WrappedSignedProperty;
+import com.google.common.collect.Multimap;
+
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheGameProfile;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.skin.ArcheSkin;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
-import java.util.List;
-import java.util.UUID;
 
 public class PersonaSkinListener{
 
@@ -36,8 +37,8 @@ public class PersonaSkinListener{
 						PlayerInfoAction at = packet.getPlayerInfoAction().read(0);
 						
 						if (at == PlayerInfoAction.ADD_PLAYER) {
+							boolean changed = false;
 							List<PlayerInfoData> pidl = packet.getPlayerInfoDataLists().read(0);
-							List<PlayerInfoData> pidl_new = Lists.newArrayList();
 							
 							for(PlayerInfoData pid : pidl) {
 								UUID uuid = pid.getProfile().getUUID();
@@ -47,20 +48,15 @@ public class PersonaSkinListener{
 									if(ps != null) {
                                         ArcheSkin skin = ps.getSkin();
                                         if(skin != null) {
-											WrappedGameProfile reskinnedProfile = 
-													ArcheGameProfile.reskin(pid.getProfile(), skin.getMojangSkinData());
-											PlayerInfoData pid_new = new PlayerInfoData(reskinnedProfile,
-													pid.getLatency(),
-													pid.getGameMode(),
-													pid.getDisplayName());
-											pidl_new.add(pid_new);
-											continue;
+                                        	changed = true;
+                                        	Multimap<String, WrappedSignedProperty> properties = pid.getProfile().getProperties();
+                                        	properties.removeAll("textures");
+                                        	properties.put("textures", skin.getMojangProperty());
 										}
 									}
 								}
-								pidl_new.add(pid);
 							}
-						packet.getPlayerInfoDataLists().write(0, pidl_new);
+						if(changed) packet.getPlayerInfoDataLists().write(0, pidl);
 						}
 					}
 				});
