@@ -15,7 +15,7 @@ public abstract class SingleStatementRow extends MultiStatementRow {
             bits[i] = its[its.length - 1];
         }
 
-        for (int i = 1; i <= bits.length; i++) {
+        for (int i = 1; i < bits.length; i++) {
             bits[i - 1] = bits[i - 1] + getValueFor(i).toString();
         }
 

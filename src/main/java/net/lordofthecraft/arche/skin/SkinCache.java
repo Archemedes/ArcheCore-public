@@ -1,24 +1,5 @@
 package net.lordofthecraft.arche.skin;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.commons.codec.binary.Base64;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
@@ -32,7 +13,6 @@ import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaSkinListener;
@@ -40,6 +20,20 @@ import net.lordofthecraft.arche.skin.MojangCommunicator.AuthenthicationData;
 import net.lordofthecraft.arche.skin.MojangCommunicator.AuthenticationException;
 import net.lordofthecraft.arche.skin.MojangCommunicator.MinecraftAccount;
 import net.lordofthecraft.arche.util.ProtocolUtil;
+import org.apache.commons.codec.binary.Base64;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
 
 public class SkinCache {
 	private static final SkinCache INSTANCE = new SkinCache();
@@ -79,11 +73,11 @@ public class SkinCache {
 		boolean slim = metadata != null;
 		String skinUrl = skinJson.get("url").toString();
 
-		ArcheSkin skin = new ArcheSkin(p.getUniqueId(), index, skinUrl, slim);
-		skin.timeLastRefreshed = new Timestamp(0);
-		skin.mojangSkinData = profile.getProperties().get("textures").iterator().next();
-		
-		return skin;
+        ArcheSkin skin = new ArcheSkin(p.getUniqueId(), index, skinUrl, slim);
+        skin.timeLastRefreshed = new Timestamp(0);
+        skin.mojangSkinData = profile.getProperties().get("textures").iterator().next();
+
+        return skin;
     }
 	
 	public int storeSkin(Player p, int index, String name) throws UnsupportedEncodingException, ParseException {
@@ -131,7 +125,7 @@ public class SkinCache {
         try {
             Connection conn = ArcheCore.getSQLControls().getConnection();
             conn.setReadOnly(true);
-            PreparedStatement selectStatement = conn.prepareStatement("SELECT skin_id,player,slot,name,skinUrl,slim,skinValue,skinSignature,refresh FROM persona_skins");
+            PreparedStatement selectStatement = conn.prepareStatement("SELECT player,slot,name,skinUrl,slim,skinValue,skinSignature,refresh FROM persona_skins");
             ResultSet res = selectStatement.executeQuery();
 			while(res.next()) {
 				ArcheSkin skin = ArcheSkin.fromSQL(res);

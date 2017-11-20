@@ -22,7 +22,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
-public class Consumer extends TimerTask implements IConsumer {
+public final class Consumer extends TimerTask implements IConsumer {
     private final Queue<ArcheRow> queue = new LinkedBlockingQueue<>();
     private final SQLHandler handler;
     private final Lock lock = new ReentrantLock();

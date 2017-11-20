@@ -23,7 +23,7 @@ public class ReplacePlayerRow extends SingleStatementRow {
             case 2:
                 return player.getName();
             default:
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException(index + " was passed in.");
         }
     }
 

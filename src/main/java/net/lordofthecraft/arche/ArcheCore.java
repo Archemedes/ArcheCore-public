@@ -12,7 +12,9 @@ import net.lordofthecraft.arche.help.HelpFile;
 import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.listener.*;
 import net.lordofthecraft.arche.magic.Archenomicon;
-import net.lordofthecraft.arche.persona.*;
+import net.lordofthecraft.arche.persona.ArcheEconomy;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.FatigueDecreaser;
 import net.lordofthecraft.arche.save.ArcheExecutor;
 import net.lordofthecraft.arche.save.Consumer;
 import net.lordofthecraft.arche.save.DumpedDBReader;
@@ -163,14 +165,14 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     public void onDisable() {
 
-    	Bukkit.getOnlinePlayers().forEach(p -> {
-    		//This part must be done for safety reasons.
-    		//Disables are messy, and in the brief period of Bukkit downtime
-    		//Players may shift inventories around and dupe items they shouldn't dupe
-    		p.closeInventory();
+        Bukkit.getOnlinePlayers().forEach(p -> {
+            //This part must be done for safety reasons.
+            //Disables are messy, and in the brief period of Bukkit downtime
+            //Players may shift inventories around and dupe items they shouldn't dupe
+            p.closeInventory();
 
-    		personaHandler.leavePlayer(p);
-    	});
+            personaHandler.leavePlayer(p);
+        });
 
         if (archeTimer != null) {
             archeTimer.cancel();
