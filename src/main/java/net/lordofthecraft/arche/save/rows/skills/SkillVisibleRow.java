@@ -14,19 +14,23 @@ public class SkillVisibleRow extends SingleStatementRow {
         this.skill = skill;
         this.visible = visible;
     }
-    
-	@Override
-	protected String getStatement() {
-		return "UPDATE persona_skills SET visible=? WHERE persona_id_fk=? AND skill_id_fk=?";
-	}
 
-	@Override
-	protected Object getValueFor(int index) {
-		switch(index) {
-		case 1: return visible;
-		case 2: return persona.getPersonaId();
-		case 3: return skill.getName();
-		default: throw new IllegalArgumentException();
-		}
-	}
+    @Override
+    protected String getStatement() {
+        return "UPDATE persona_skills SET visible=? WHERE persona_id_fk=? AND skill_id_fk=?";
+    }
+
+    @Override
+    protected Object getValueFor(int index) {
+        switch (index) {
+            case 1:
+                return visible;
+            case 2:
+                return persona.getPersonaId();
+            case 3:
+                return skill.getName();
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
 }

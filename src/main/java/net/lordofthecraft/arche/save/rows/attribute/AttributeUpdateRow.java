@@ -17,25 +17,32 @@ public class AttributeUpdateRow extends SingleStatementRow {
         this.persona = persona;
         this.attribute = attribute;
     }
-    
-	@Override
-	protected String getStatement() {
-		return "UPDATE persona_attributes SET decaytype=?, decayticks=?, lostondeath=? WHERE persona_id_fk=? AND mod_uuid=? AND attribute_type=?";
-	}
 
-	@Override
-	protected Object getValueFor(int index) {
-		switch(index) {
-		case 1: return mod.getDecayStrategy().name();
-		case 2: return mod.getTicksRemaining();
-		case 3: return mod.isLostOnDeath();
-		case 4: return persona.getPersonaId();
-		case 5: return mod.getUniqueId();
-		case 6: return attribute.getName();
-		default: throw new IllegalArgumentException();
-		}
-	}
-	
+    @Override
+    protected String getStatement() {
+        return "UPDATE persona_attributes SET decaytype=?, decayticks=?, lostondeath=? WHERE persona_id_fk=? AND mod_uuid=? AND attribute_type=?";
+    }
+
+    @Override
+    protected Object getValueFor(int index) {
+        switch (index) {
+            case 1:
+                return mod.getDecayStrategy().name();
+            case 2:
+                return mod.getTicksRemaining();
+            case 3:
+                return mod.isLostOnDeath();
+            case 4:
+                return persona.getPersonaId();
+            case 5:
+                return mod.getUniqueId();
+            case 6:
+                return attribute.getName();
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
     @Override
     public String toString() {
         return "AttributeUpdateRow{" +

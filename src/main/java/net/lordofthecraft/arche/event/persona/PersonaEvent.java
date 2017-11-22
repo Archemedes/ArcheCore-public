@@ -1,8 +1,7 @@
 package net.lordofthecraft.arche.event.persona;
 
-import org.bukkit.event.player.PlayerEvent;
-
 import net.lordofthecraft.arche.interfaces.Persona;
+import org.bukkit.event.player.PlayerEvent;
 
 /**
  * Represents an event related to a Persona, the Roleplay Character object of a Player

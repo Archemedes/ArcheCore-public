@@ -54,7 +54,7 @@ public enum Race {
     Race(String name, String supRace) {
         this(name, supRace, 500);
     }
-    
+
     Race(String name, String supRace, int maxAge) {
         this.name = name;
         this.supRace = supRace;

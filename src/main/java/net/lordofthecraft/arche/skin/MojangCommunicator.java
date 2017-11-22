@@ -1,34 +1,30 @@
 package net.lordofthecraft.arche.skin;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedWriter;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-
+import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import org.apache.commons.lang.Validate;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.comphenix.protocol.wrappers.WrappedSignedProperty;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 
 public class MojangCommunicator {
-	public static class AuthenticationException extends Exception {
-		private static final long serialVersionUID = -2260469046718388024L; 
-		public AuthenticationException(String msg) { super(msg);}
-	} 
-	
-	@SuppressWarnings("unchecked")
-	public static AuthenthicationData authenthicate(MinecraftAccount account) throws IOException, ParseException, AuthenticationException{
-		//See wiki.vg/Authenthication		
-		InputStream in = null;
+    public static class AuthenticationException extends Exception {
+        private static final long serialVersionUID = -2260469046718388024L;
+
+        public AuthenticationException(String msg) {
+            super(msg);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static AuthenthicationData authenthicate(MinecraftAccount account) throws IOException, ParseException, AuthenticationException {
+        //See wiki.vg/Authenthication
+        InputStream in = null;
 		BufferedWriter out = null;
 		HttpURLConnection conn = null;
 		try {
@@ -113,10 +109,10 @@ public class MojangCommunicator {
 			if(conn != null) conn.disconnect();
 		}
 	}
-	
-	public static WrappedSignedProperty requestSkin(String uuidUser) throws IOException, ParseException {
-		InputStreamReader in = null;
-		HttpURLConnection con = null;
+
+    public static WrappedSignedProperty requestSkin(String uuidUser) throws IOException, ParseException {
+        InputStreamReader in = null;
+        HttpURLConnection con = null;
 
 		try {//Request player profile from mojang api
 			URL url;
@@ -137,10 +133,13 @@ public class MojangCommunicator {
 			String signature = textures.get("signature").toString();
 			
 			Validate.isTrue("textures".equals(name), "Skin properties file fetched from Mojang had wrong name: " + name);
-			WrappedSignedProperty textureProperty = new WrappedSignedProperty("textures", value, signature);
-			return textureProperty;
-		} finally { if(in != null) in.close(); if (con != null) con.disconnect();}
-	}
+            WrappedSignedProperty textureProperty = new WrappedSignedProperty("textures", value, signature);
+            return textureProperty;
+        } finally {
+            if (in != null) in.close();
+            if (con != null) con.disconnect();
+        }
+    }
 
 	
 	public static class MinecraftAccount{ public String username,password;}

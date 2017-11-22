@@ -6,7 +6,6 @@ import net.lordofthecraft.arche.interfaces.FatigueHandler;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.save.rows.persona.FatigueReduceRow;
-
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.stream.Collectors;

@@ -1,5 +1,12 @@
 package net.lordofthecraft.arche.save;
 
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.SQLUtils;
+import net.lordofthecraft.arche.interfaces.IConsumer;
+import net.lordofthecraft.arche.save.rows.ArcheRow;
+import net.lordofthecraft.arche.save.rows.StatementRow;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -15,14 +22,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.SQLUtils;
-import net.lordofthecraft.arche.interfaces.IConsumer;
-import net.lordofthecraft.arche.save.rows.ArcheRow;
-import net.lordofthecraft.arche.save.rows.StatementRow;
-
-public class Consumer extends TimerTask implements IConsumer {
+public final class Consumer extends TimerTask implements IConsumer {
     private final Queue<ArcheRow> queue = new LinkedBlockingQueue<>();
     private final SQLHandler handler;
     private final Lock lock = new ReentrantLock();
@@ -89,70 +89,78 @@ public class Consumer extends TimerTask implements IConsumer {
                 return;
             }
             conn.setAutoCommit(false);
-            state = conn.createStatement();        
+            state = conn.createStatement();
             PreparedStatement[] pending = null;
-            
-            while (!queue.isEmpty() && (System.currentTimeMillis() - starttime < timePerRun || (count < (pending == null? forceToProcess : forceToProcess*1.5) && !bypassForce))) {
+
+            while (!queue.isEmpty() && (System.currentTimeMillis() - starttime < timePerRun || (count < (pending == null ? forceToProcess : forceToProcess * 1.5) && !bypassForce))) {
                 ArcheRow row = queue.poll();
                 if (row == null) continue;
                 if (debugConsumer) pl.getLogger().info("[Consumer] Beginning process for " + row.toString());
-                long taskstart = System.currentTimeMillis();         
-          
+                long taskstart = System.currentTimeMillis();
+
                 try {
-                	if(row instanceof StatementRow) {
-                		StatementRow sRow = (StatementRow) row;
-                		boolean inBatch = pending != null;
+                    if (row instanceof StatementRow) {
+                        StatementRow sRow = (StatementRow) row;
+                        boolean inBatch = pending != null;
 
-                		if(!inBatch) pending = sRow.prepare(conn);
-                		sRow.setValues(pending);
+                        if (!inBatch) pending = sRow.prepare(conn);
+                        sRow.setValues(pending);
 
-                		ArcheRow other;
-                		if(!sRow.isUnique() && (other = queue.peek()) != null && other.getClass() == sRow.getClass() 
-                				&& !((StatementRow) other).isUnique()) { 
-                			//At least one more of this Row type is behind in queue
-                			for(PreparedStatement s : pending) s.addBatch();
-                		} else { //None of this Row behind in queue
-                			for(PreparedStatement s : pending) {
-                				if(inBatch) {s.addBatch(); s.executeBatch();} 
-                				else {s.execute();}
-                			}
-                			pending = null;
-                		}
-                	} else {
-                		for (final String toinsert : row.getInserts()) {
-                				state.execute(toinsert);
-                		}
-                	}
-                } catch(SQLException e) {
-    				pl.getLogger().log(Level.SEVERE, "[Consumer] SQL exception on "+row.getClass().getSimpleName()+": ", e);
-    				Arrays.stream(pending).forEach(ps-> {pl.getLogger().severe("Lost Statement: "+ps.toString()); SQLUtils.close(ps);});
-    				pending = null;
-    				continue;
+                        ArcheRow other;
+                        if (!sRow.isUnique() && (other = queue.peek()) != null && other.getClass() == sRow.getClass()
+                                && !((StatementRow) other).isUnique()) {
+                            //At least one more of this Row type is behind in queue
+                            for (PreparedStatement s : pending) s.addBatch();
+                        } else { //None of this Row behind in queue
+                            for (PreparedStatement s : pending) {
+                                if (inBatch) {
+                                    s.addBatch();
+                                    s.executeBatch();
+                                } else {
+                                    s.execute();
+                                }
+                            }
+                            pending = null;
+                        }
+                    } else {
+                        for (final String toinsert : row.getInserts()) {
+                            state.execute(toinsert);
+                        }
+                    }
+                } catch (SQLException e) {
+                    pl.getLogger().log(Level.SEVERE, "[Consumer] SQL exception on " + row.getClass().getSimpleName() + ": ", e);
+                    Arrays.stream(pending).forEach(ps -> {
+                        pl.getLogger().severe("Lost Statement: " + ps.toString());
+                        SQLUtils.close(ps);
+                    });
+                    pending = null;
+                    continue;
                 } finally {
-                	if (conn.isClosed()) {
+                    if (conn.isClosed()) {
                         pl.getLogger().severe("[Consumer] Connection found to be closed after handling a " + row.getClass().getSimpleName());
                         pl.getLogger().severe("[Consumer] Cannot recover. Will abort the saving process.");
                         break;
                     } else if (conn.isReadOnly()) {
-                        pl.getLogger().warning("[Consumer] Connection found to be readOnly after handling a " + row.getClass().getSimpleName() );
+                        pl.getLogger().warning("[Consumer] Connection found to be readOnly after handling a " + row.getClass().getSimpleName());
                         conn.setReadOnly(false);
                     } else if (conn.getAutoCommit()) {
                         pl.getLogger().warning("[Consumer] Connection auto commit: " + row.getClass().getSimpleName());
                         conn.setAutoCommit(false);
                     }
                 }
-                
+
                 count++;
-                if (debugConsumer) pl.getLogger().info("[Consumer] Process took " + (System.currentTimeMillis() - taskstart) + "ms for " + row.toString());
+                if (debugConsumer)
+                    pl.getLogger().info("[Consumer] Process took " + (System.currentTimeMillis() - taskstart) + "ms for " + row.toString());
             }
             conn.commit();
         } catch (final SQLException ex) {
             pl.getLogger().log(Level.SEVERE, "[Consumer] We failed to complete Consumer SQL Processes.", ex);
         } finally {
-        	StatementRow.close();
-        	SQLUtils.close(state);
-        	SQLUtils.close(conn);
-        	
+            StatementRow.close();
+            SQLUtils.close(state);
+            SQLUtils.close(conn);
+
             lock.unlock();
 
             long time = System.currentTimeMillis() - starttime;
@@ -172,8 +180,8 @@ public class Consumer extends TimerTask implements IConsumer {
         final long time = System.currentTimeMillis();
 
         int counter = 0;
-        new File( String.format("plugins%cArcheCore%<cimport%<c", File.separatorChar) ).mkdirs();
-        PrintWriter writer = new PrintWriter(new File( String.format("plugins%cArcheCore%<cimport%<cqueue-%d-0.sql",File.separatorChar,time)) );
+        new File(String.format("plugins%cArcheCore%<cimport%<c", File.separatorChar)).mkdirs();
+        PrintWriter writer = new PrintWriter(new File(String.format("plugins%cArcheCore%<cimport%<cqueue-%d-0.sql", File.separatorChar, time)));
         while (!queue.isEmpty()) {
             final ArcheRow r = queue.poll();
             if (r == null) {
@@ -185,7 +193,7 @@ public class Consumer extends TimerTask implements IConsumer {
             counter++;
             if (counter % 1000 == 0) {
                 writer.close();
-                writer = new PrintWriter(new File(String.format("plugins%cArcheCore%<cimport%<cqueue-%d-%d.sql",File.separatorChar,time,counter/1000)));
+                writer = new PrintWriter(new File(String.format("plugins%cArcheCore%<cimport%<cqueue-%d-%d.sql", File.separatorChar, time, counter / 1000)));
             }
         }
         writer.close();

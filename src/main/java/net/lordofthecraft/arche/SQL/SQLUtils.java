@@ -68,35 +68,35 @@ public class SQLUtils {
             }
         }
     }
-    
+
     public static void close(ResultSet closable) {
-    	if(closable != null){
-    		try {
-    			closable.close();
-    		} catch(SQLException e) {
-    			e.printStackTrace();
-    		}
-    	}
+        if (closable != null) {
+            try {
+                closable.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
-    
+
     public static void close(Statement closable) {
-    	if(closable != null){
-    		try {
-    			closable.close();
-    		} catch(SQLException e) {
-    			e.printStackTrace();
-    		}
-    	}
+        if (closable != null) {
+            try {
+                closable.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
-    
+
     public static void close(Connection closable) {
-    	if(closable != null){
-    		try {
-    			closable.close();
-    		} catch(SQLException e) {
-    			e.printStackTrace();
-    		}
-    	}
+        if (closable != null) {
+            try {
+                closable.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
     
     

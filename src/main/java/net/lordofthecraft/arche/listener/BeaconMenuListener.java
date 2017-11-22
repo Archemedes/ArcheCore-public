@@ -1,8 +1,13 @@
 package net.lordofthecraft.arche.listener;
 
-import java.util.Map;
-import java.util.UUID;
-
+import com.google.common.collect.Maps;
+import net.lordofthecraft.arche.ArcheBeacon;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.CreationDialog;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -19,15 +24,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.google.common.collect.Maps;
-
-import net.lordofthecraft.arche.ArcheBeacon;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.CreationDialog;
+import java.util.Map;
+import java.util.UUID;
 
 public class BeaconMenuListener implements Listener {
 	private final Map<UUID, Long> switchCooldown = Maps.newConcurrentMap();
@@ -49,9 +47,9 @@ public class BeaconMenuListener implements Listener {
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
 	public void onClick(InventoryClickEvent e){
 		Inventory inv = e.getInventory();
-		if (ArcheBeacon.BEACON_HEADER == inv.getTitle()) {
-			e.setCancelled(true);
-			final Player p = (Player) e.getWhoClicked();
+        if (ArcheBeacon.BEACON_HEADER == inv.getTitle()) {
+            e.setCancelled(true);
+            final Player p = (Player) e.getWhoClicked();
 			final int s = e.getRawSlot();
 			
 			if(e.getClickedInventory() instanceof PlayerInventory 
@@ -77,9 +75,9 @@ public class BeaconMenuListener implements Listener {
 						if(apply != null) inv.setItem(s, apply);
 					} catch(Throwable t) {
 						t.printStackTrace();
-						p.sendMessage(ChatColor.RED + "There's an error with this button! Please report this occurrence.");
-						Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->{
-							p.closeInventory();
+                        p.sendMessage(ChatColor.RED + "There's an error with this button! Please report this occurrence.");
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> {
+                            p.closeInventory();
 						});
 						return;
 					}
@@ -98,16 +96,16 @@ public class BeaconMenuListener implements Listener {
 
 				int count = 0;
 				int current = -1;
-				int firstFree = -1;
-				for(int i = 0; i < prs.length; i++){
-					if(prs[i] != null){
+                int firstFree = -1;
+                for (int i = 0; i < prs.length; i++) {
+                    if(prs[i] != null){
 						count++;
 						if(prs[i].isCurrent())
 							current = i;
-					} else if(firstFree < 0) {
-						firstFree = i;
-					}
-				}
+                    } else if (firstFree < 0) {
+                        firstFree = i;
+                    }
+                }
 
 				int t = s - 10;
 
@@ -115,18 +113,23 @@ public class BeaconMenuListener implements Listener {
 				CreationDialog dialog = new CreationDialog();
 
 				if(prs[t] == null){ //Clicked Persona does NOT exist
-					if(count < handler.getAllowedPersonas(p) && t == firstFree){
-						if (!ArcheCore.getControls().canCreatePersonas()) {
-							p.sendMessage(ChatColor.RED + "Persona creation is disabled for this server, please go to the main server to create your persona.");
-						} else {
-							//Player may make new persona here, let's do so now.
-							dialog.addPersona(p, t, true);
-							new BukkitRunnable(){@Override public void run(){ p.closeInventory();}}.runTask(plugin);
-						}
-					}
-					return;
-				} else { //Clicked Persona does exist
-					if(e.isShiftClick()){ // Tried to modify persona somehow
+                    if (count < handler.getAllowedPersonas(p) && t == firstFree) {
+                        if (!ArcheCore.getControls().canCreatePersonas()) {
+                            p.sendMessage(ChatColor.RED + "Persona creation is disabled for this server, please go to the main server to create your persona.");
+                        } else {
+                            //Player may make new persona here, let's do so now.
+                            dialog.addPersona(p, t, true);
+                            new BukkitRunnable() {
+                                @Override
+                                public void run() {
+                                    p.closeInventory();
+                                }
+                            }.runTask(plugin);
+                        }
+                    }
+                    return;
+                } else { //Clicked Persona does exist
+                    if(e.isShiftClick()){ // Tried to modify persona somehow
 						if(e.isLeftClick()){ //Create new
 							if (!ArcheCore.getControls().canCreatePersonas()) {
 								p.sendMessage(ChatColor.RED + "Persona creation is disabled for this server, please go to the main server to create your persona.");

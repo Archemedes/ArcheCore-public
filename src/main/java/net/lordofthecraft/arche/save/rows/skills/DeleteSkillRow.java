@@ -12,17 +12,21 @@ public class DeleteSkillRow extends SingleStatementRow {
         this.persona = persona.getPersonaId();
         this.skill = skill;
     }
-	@Override
-	protected String getStatement() {
-		return "DELETE FROM persona_skills WHERE persona_id_fk=? AND skill_id_fk=?";
-	}
 
-	@Override
-	protected Object getValueFor(int index) {
-		switch(index) {
-		case 1: return persona;
-		case 2: return skill.getName();
-		default: throw new IllegalArgumentException();
-		}
-	}
+    @Override
+    protected String getStatement() {
+        return "DELETE FROM persona_skills WHERE persona_id_fk=? AND skill_id_fk=?";
+    }
+
+    @Override
+    protected Object getValueFor(int index) {
+        switch (index) {
+            case 1:
+                return persona;
+            case 2:
+                return skill.getName();
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
 }

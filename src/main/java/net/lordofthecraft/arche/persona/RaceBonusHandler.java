@@ -37,7 +37,7 @@ public class RaceBonusHandler {
 
 
     public static void apply(Persona p) {
-    	Race race = p.getRace();
+        Race race = p.getRace();
 
         if (!ArcheCore.getPlugin().areRacialBonusesEnabled()) return;
         Map<ArcheAttribute, List<AttributeModifier>> vals = Maps.newHashMap();

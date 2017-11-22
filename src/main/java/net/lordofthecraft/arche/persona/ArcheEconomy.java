@@ -1,7 +1,5 @@
 package net.lordofthecraft.arche.persona;
 
-import org.bukkit.configuration.file.FileConfiguration;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.IConsumer;
@@ -10,6 +8,7 @@ import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.logging.TransactionRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
+import org.bukkit.configuration.file.FileConfiguration;
 
 public class ArcheEconomy implements Economy {
     public enum TransactionType {

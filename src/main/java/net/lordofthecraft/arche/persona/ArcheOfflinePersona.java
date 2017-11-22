@@ -1,17 +1,5 @@
 package net.lordofthecraft.arche.persona;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
@@ -21,10 +9,17 @@ import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.PersonaTags;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+
+import java.sql.*;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ArcheOfflinePersona implements OfflinePersona {
-	final ArchePersonaTags tags = new ArchePersonaTags(this);
-	
+    final ArchePersonaTags tags = new ArchePersonaTags(this);
+
     boolean deleted = false;
     final AtomicInteger timePlayed;
     final PersonaKey personaKey;
@@ -101,22 +96,22 @@ public class ArcheOfflinePersona implements OfflinePersona {
     public String getGender() {
         return gender;
     }
-    
+
     @Override
     public boolean isMale() {
-    	return "Male".equals(gender);
+        return "Male".equals(gender);
     }
-    
+
     @Override
     public boolean isFemale() {
-    	return "Female".equals(gender);
+        return "Female".equals(gender);
     }
 
     @Override
     public PersonaType getPersonaType() {
         return type;
     }
-    
+
     @Override
     public String getName() {
         return name;
@@ -135,16 +130,16 @@ public class ArcheOfflinePersona implements OfflinePersona {
 
     @Override
     public Persona loadPersona() {
-    	PersonaStore store = ArchePersonaHandler.getInstance().getPersonaStore();
-		String select = store.personaSelect + " AND persona_id=" + personaKey.getPersonaID();
-		
-		try(Connection connection = ArcheCore.getSQLControls().getConnection();
-			Statement statement = connection.createStatement();
-			ResultSet rs = statement.executeQuery(select)) {
-				return store.buildPersona(rs, this.getPlayer());
-		}catch(SQLException e) {
-			throw new RuntimeException(e); //zero fucks given
-		}
+        PersonaStore store = ArchePersonaHandler.getInstance().getPersonaStore();
+        String select = store.personaSelect + " AND persona_id=" + personaKey.getPersonaID();
+
+        try (Connection connection = ArcheCore.getSQLControls().getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet rs = statement.executeQuery(select)) {
+            return store.buildPersona(rs, this.getPlayer());
+        } catch (SQLException e) {
+            throw new RuntimeException(e); //zero fucks given
+        }
     }
 
     @Override
@@ -164,10 +159,10 @@ public class ArcheOfflinePersona implements OfflinePersona {
     public boolean isDeleted() {
         return deleted;
     }
-    
+
     @Override
     public PersonaTags tags() {
-    	return tags;
+        return tags;
     }
 
     public void setDeleted(boolean deleted) {
@@ -183,30 +178,30 @@ public class ArcheOfflinePersona implements OfflinePersona {
     public int getTimePlayed() {
         return timePlayed.get();
     }
-    
+
     @Override
     public int hashCode() {
         return personaKey.getPersonaID();
     }
-    
-	public Location getLocation(){
-		if(location == null) return null;
-		else return location.toLocation();
-	}
-    
+
+    public Location getLocation() {
+        if (location == null) return null;
+        else return location.toLocation();
+    }
+
     @Override
     public boolean equals(Object object) {
-        if(object == null) return false;
+        if (object == null) return false;
         //Note that due to demanding exact class equality (comrade)
         //this equals also works for ArchePersona equals ArchePersona
         //but not equal for ArchePersona and ArcheOfflinePersona 
-		if(object.getClass() != this.getClass()) return false;
-		ArcheOfflinePersona p = (ArcheOfflinePersona) object;
+        if (object.getClass() != this.getClass()) return false;
+        ArcheOfflinePersona p = (ArcheOfflinePersona) object;
         return this.getPersonaId() == p.getPersonaId();
     }
-    
+
     @Override
     public String toString() { //Also works for ArchePersona
-    	return this.getClass().getSimpleName() + ": " + MessageUtil.identifyPersona(this);
+        return this.getClass().getSimpleName() + ": " + MessageUtil.identifyPersona(this);
     }
 }

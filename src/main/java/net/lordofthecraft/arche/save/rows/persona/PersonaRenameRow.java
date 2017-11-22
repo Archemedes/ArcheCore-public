@@ -11,20 +11,23 @@ public class PersonaRenameRow extends SingleStatementRow {
         this.persona = persona;
         this.name = name;
     }
-	
-	
-	@Override
-	protected String getStatement() {
-		return "INSERT INTO persona_names (persona_id_fk,name) VALUES (?,?)";
-	}
 
-	@Override
-	protected Object getValueFor(int index) {
-		switch(index) {
-		case 1: return persona.getPersonaId();
-		case 2: return name;
-		default: throw new IllegalArgumentException();
-		}
-	}
+
+    @Override
+    protected String getStatement() {
+        return "INSERT INTO persona_names (persona_id_fk,name) VALUES (?,?)";
+    }
+
+    @Override
+    protected Object getValueFor(int index) {
+        switch (index) {
+            case 1:
+                return persona.getPersonaId();
+            case 2:
+                return name;
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
 
 }

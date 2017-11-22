@@ -1,20 +1,18 @@
 package net.lordofthecraft.arche;
 
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.save.rows.logging.BlockRegistryRow;
 import net.lordofthecraft.arche.save.rows.logging.DeleteBlockRegistryRow;
 import net.lordofthecraft.arche.util.WeakBlock;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public class BlockRegistry {
 	final Set<WeakBlock> playerPlaced = Sets.newHashSetWithExpectedSize(3000);

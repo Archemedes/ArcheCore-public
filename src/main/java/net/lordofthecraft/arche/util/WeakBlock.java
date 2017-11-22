@@ -53,8 +53,12 @@ public class WeakBlock {
 		int z = getZ();
 		return new Location(w, x, y, z);
 	}
-	
-	@Override
+
+    public boolean isValid() {
+        return Bukkit.getWorld(world) != null;
+    }
+
+    @Override
 	public boolean equals(Object o){
 		if(!(o instanceof WeakBlock)) return false;
 		WeakBlock other = (WeakBlock) o;

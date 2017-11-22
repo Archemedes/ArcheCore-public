@@ -35,10 +35,10 @@ public class ArchePersonaKey implements PersonaKey {
 
     @Override
     public Persona getPersona(){
-		return ArchePersonaHandler.getInstance().getPersona(uuid,slot);
-	}
-	
-	@Override
+        return ArchePersonaHandler.getInstance().getPersona(uuid, slot);
+    }
+
+    @Override
 	public int hashCode(){
         return slot + uuid.hashCode();
     }

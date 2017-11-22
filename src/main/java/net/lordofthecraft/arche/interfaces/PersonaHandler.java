@@ -7,7 +7,10 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public interface PersonaHandler {
     UUID SCORE_ID = UUID.fromString("6898332e-abce-4da9-a284-9b34c4df751a");

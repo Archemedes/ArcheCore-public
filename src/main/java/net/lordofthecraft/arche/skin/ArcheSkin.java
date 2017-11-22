@@ -1,23 +1,21 @@
 package net.lordofthecraft.arche.skin;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Collections;
-import java.util.Set;
-import java.util.UUID;
-
-import org.bukkit.inventory.ItemStack;
-
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.google.common.collect.Sets;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.rows.skin.DeleteSkinRow;
 import net.lordofthecraft.arche.save.rows.skin.InsertSkinRow;
 import net.lordofthecraft.arche.save.rows.skin.UpdateSkinRow;
 import net.lordofthecraft.arche.util.ItemUtil;
+import org.bukkit.inventory.ItemStack;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Collections;
+import java.util.Set;
+import java.util.UUID;
 
 public class ArcheSkin {
     private final int index;
@@ -27,8 +25,8 @@ public class ArcheSkin {
 
     Timestamp timeLastRefreshed = new Timestamp(0); //We need this to make sure we refresh every 24 hrs.
     WrappedSignedProperty mojangSkinData; //This is valid data to add to GameProfile
-	
-	private String name;
+
+    private String name;
 
     Set<Persona> inUse = Sets.newConcurrentHashSet();
 
@@ -70,10 +68,10 @@ public class ArcheSkin {
     public Timestamp getLastRefreshed() {
         return timeLastRefreshed;
 	}
-	
-	public WrappedSignedProperty getMojangProperty() {
-		return this.mojangSkinData;
-	}
+
+    public WrappedSignedProperty getMojangProperty() {
+        return this.mojangSkinData;
+    }
 
     public void removeAllPersonas() {
         inUse.forEach(Persona::removeSkin);
@@ -89,32 +87,32 @@ public class ArcheSkin {
     }
 
     public ItemStack getHeadItem() {
-		return ItemUtil.getSkullFromTexture(getMojangProperty().getValue());
-	}
-	
-	void insertSql() {
-		ArcheCore.getConsumerControls().queueRow(new InsertSkinRow(this));
-	}
-	
-	void updateSql() {
-		ArcheCore.getConsumerControls().queueRow(new UpdateSkinRow(this));
-	}
-	
-	void deleteSql() {
-		ArcheCore.getConsumerControls().queueRow(new DeleteSkinRow(this));
-	}
+        return ItemUtil.getSkullFromTexture(getMojangProperty().getValue());
+    }
+
+    void insertSql() {
+        ArcheCore.getConsumerControls().queueRow(new InsertSkinRow(this));
+    }
+
+    void updateSql() {
+        ArcheCore.getConsumerControls().queueRow(new UpdateSkinRow(this));
+    }
+
+    void deleteSql() {
+        ArcheCore.getConsumerControls().queueRow(new DeleteSkinRow(this));
+    }
 
     public static ArcheSkin fromSQL(ResultSet res) throws SQLException {
         UUID owner = UUID.fromString(res.getString("player"));
         int index = res.getInt("slot");
-        
+
         boolean slim = res.getBoolean("slim");
         String skinUrl = res.getString("skinUrl");
-        
+
         ArcheSkin skin = new ArcheSkin(owner, index, skinUrl, slim);
 
         skin.name = res.getString("name");
-        
+
         String value = res.getString("skinValue");
         String signature = res.getString("skinSignature");
         skin.mojangSkinData = new WrappedSignedProperty("textures", value, signature);
