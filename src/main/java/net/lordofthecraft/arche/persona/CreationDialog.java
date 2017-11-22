@@ -526,7 +526,7 @@ public class CreationDialog {
                 ArcheCore.getPlugin().getLogger().info("New persona created in the world " + p.getWorld().getName() + " with the uuid of " + p.getWorld().getUID());
             }
 
-            ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, gender, new Timestamp(creationTimeMS), new Timestamp(System.currentTimeMillis()));
+            ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, 0, gender, new Timestamp(creationTimeMS), new Timestamp(System.currentTimeMillis()));
 
             persona.setPlayerName(p.getName());
             ArchePersonaHandler.getInstance().registerPersona(persona);

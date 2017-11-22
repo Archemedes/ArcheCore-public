@@ -56,6 +56,11 @@ public interface OfflinePersona {
     PersonaType getPersonaType();
 
     /**
+     * @return Persona's year of birth
+     */
+    int getDateOfBirth();
+    
+    /**
      * Get the human-readable Gender of this Persona
      *
      * @return The Persona's gender

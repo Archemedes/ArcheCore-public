@@ -27,6 +27,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
     Timestamp lastPlayed;
     boolean current = false;
     Race race;
+    int birthdate;
     String gender;
     protected PersonaType type;
     WeakBlock location;
@@ -34,23 +35,27 @@ public class ArcheOfflinePersona implements OfflinePersona {
     Timestamp lastRenamed;
 
 
-    ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, boolean current, Race race, String gender, PersonaType type, String name) {
+    ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, boolean current, 
+    		Race race, int birthdate, String gender, PersonaType type, String name) {
         this.personaKey = personaKey;
         this.creation = creation;
         this.current = current;
         this.race = race;
+        this.birthdate = birthdate;
         this.gender = gender;
         this.type = type;
         this.name = name;
         timePlayed = new AtomicInteger(0);
     }
 
-    ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, boolean current, Race race, String gender, PersonaType type, String name) {
+    ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, boolean current, 
+    		Race race, int birthdate, String gender, PersonaType type, String name) {
         this.personaKey = personaKey;
         this.creation = creation;
         this.lastPlayed = lastPlayed;
         this.current = current;
         this.race = race;
+        this.birthdate = birthdate;
         this.gender = gender;
         this.type = type;
         this.name = name;
@@ -92,6 +97,11 @@ public class ArcheOfflinePersona implements OfflinePersona {
         return creation;
     }
 
+    @Override
+    public int getDateOfBirth() {
+    	return birthdate;
+    }
+    
     @Override
     public String getGender() {
         return gender;

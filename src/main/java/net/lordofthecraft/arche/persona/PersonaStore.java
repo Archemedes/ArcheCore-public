@@ -221,12 +221,16 @@ public class PersonaStore {
         boolean current = res.getBoolean(PersonaField.CURRENT.field());
         Race race = Race.valueOf(res.getString(PersonaField.RACE_REAL.field()));
         String type = res.getString(PersonaField.TYPE.field());
+        int birthdate = res.getInt(PersonaField.DATE_OF_BIRTH.field());
         String gender = res.getString(PersonaField.GENDER.field());
         Timestamp creationTimeMS = res.getTimestamp(PersonaField.STAT_CREATION.field());
         Timestamp lastPlayed = res.getTimestamp(PersonaField.STAT_LAST_PLAYED.field());
 
         PersonaType ptype = PersonaType.valueOf(type);
-        ArcheOfflinePersona persona = new ArcheOfflinePersona(new ArchePersonaKey(persona_id, pl.getUniqueId(), slot), creationTimeMS, lastPlayed, current, race, gender, ptype, name);
+        ArcheOfflinePersona persona = new ArcheOfflinePersona(
+        		new ArchePersonaKey(persona_id, pl.getUniqueId(), slot), 
+        		creationTimeMS, lastPlayed, current, race, 
+        		birthdate, gender, ptype, name);
 
         String wstr = res.getString(PersonaField.WORLD.field());
         if (!res.wasNull()) {
@@ -254,6 +258,7 @@ public class PersonaStore {
                 op.getSlot(),
                 op.getName(),
                 op.getRace(),
+                op.getDateOfBirth(),
                 op.getGender(),
                 op.getCreationTime(),
                 op.lastPlayed,

@@ -70,12 +70,14 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     ArcheSkin skin;
     private ArrayList<PotionEffect> effects = Lists.newArrayList();
 
-    ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS, Timestamp lastPlayed) {
-        this(persona_id, player, slot, name, race, gender, creationTimeMS, lastPlayed, PersonaType.NORMAL);
+    ArchePersona(int persona_id, UUID player, int slot, String name, Race race, 
+    		int birthdate, String gender, Timestamp creationTimeMS, Timestamp lastPlayed) {
+        this(persona_id, player, slot, name, race, birthdate, gender, creationTimeMS, lastPlayed, PersonaType.NORMAL);
     }
 
-    ArchePersona(int persona_id, UUID player, int slot, String name, Race race, String gender, Timestamp creationTimeMS, Timestamp lastPlayed, PersonaType type) {
-        super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, lastPlayed, false, race, gender, type, name);
+    ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
+    		String gender, Timestamp creationTimeMS, Timestamp lastPlayed, PersonaType type) {
+        super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, lastPlayed, false, race, birthdate, gender, type, name);
 		charactersSpoken = new AtomicInteger();
 		lastRenamed = new Timestamp(0);
 		pastPlayTime = 0;
@@ -106,6 +108,12 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		return skills.getSkill(skill);
 	}
 
+	@Override
+	public void setDateOfBirth(int birthdate) {
+		this.birthdate = birthdate;
+		consumer.queueRow(new UpdatePersonaRow(this, PersonaField.DATE_OF_BIRTH, birthdate));
+	}
+	
     @Override
     public void setGender(String gender) {
         this.gender = gender;
@@ -626,7 +634,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
     @Override
     public OfflinePersona unloadPersona() {
-        return new ArcheOfflinePersona(personaKey, creation, lastPlayed, current, race, gender, type, name);
+        return new ArcheOfflinePersona(personaKey, creation, lastPlayed, current, race, birthdate, gender, type, name);
     }
 
     @Override

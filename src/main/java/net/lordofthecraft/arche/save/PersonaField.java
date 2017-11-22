@@ -17,6 +17,7 @@ public enum PersonaField {
     CURRENT("curr", MASTER, BOOLEAN, true),
     MONEY("money", MASTER, DOUBLE),
     TYPE("p_type", MASTER, VARCHAR, true),
+    DATE_OF_BIRTH("birthdate", MASTER, INTEGER, true),
     GENDER("gender", MASTER, INTEGER, true),
     FATIGUE("fatigue", MASTER, DOUBLE),
     STAT_LAST_PLAYED("last_played", MASTER, TIMESTAMP, true),

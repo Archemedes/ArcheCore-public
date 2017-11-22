@@ -93,6 +93,11 @@ public interface Persona extends OfflinePersona {
     Optional<MagicAttachment> createAttachment(Magic magic, int tier, Persona teacher, boolean visible);
 
     /**
+     * Set a Persona's year of birth
+     */
+    void setDateOfBirth(int birthdate);
+    
+    /**
      * Assign a persona's gender to the specified gender.
      *
      * @param gender The persona's new gender.

@@ -50,6 +50,7 @@ public class CommandPersona implements CommandExecutor {
         PREFIX("archecore.command.persona.prefix", false, "prefix", "setprefix"),
         CLEARPREFIX("archcecore.command.persona.prefix.clear", false, "clearprefix", "delprefix", "rmprefix", "noprefix", "removeprefix"),
         AGE("archecore.command.persona.age", false, "age", "setage"),
+        BIRTHDATE("archecore.command.persona.age", false, "birthdate", "setbirthdate","birthyear","setbirthyear"),
         CLEARINFO("archecore.command.persona.desc.clear", false, "clearbio", "cleardesc", "deldesc", "delinfo", "clearinfo", "delbio", "cleardescription"),
         ADDINFO("archecore.command.persona.desc", false, "addinfo", "addbio", "bioadd"),
         SETINFO("archecore.command.persona.desc", false, "setbio", "setinfo", "info", "bio"),
@@ -378,6 +379,15 @@ public class CommandPersona implements CommandExecutor {
                             sender.sendMessage(ChatColor.RED + "Error: Prefix too long. Max length 16 characters");
                         }
                         return true;
+                    } else if (cmd == PersonaCommand.BIRTHDATE) {
+                        try {
+                        	int birthyear = Integer.parseInt(args[1]);
+                        	pers.setDateOfBirth(birthyear);
+                        	sender.sendMessage(ChatColor.AQUA + "Set birthyear of " + pers.getName() + " to: " + ChatColor.RESET + birthyear);                    		
+                        	return true;
+                        } catch(NumberFormatException e) {
+                        	return false;
+                        }
                     } else if (cmd == PersonaCommand.ADDINFO) {
                         int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
                         String line = StringUtils.join(args, ' ', 1, parseTo);
