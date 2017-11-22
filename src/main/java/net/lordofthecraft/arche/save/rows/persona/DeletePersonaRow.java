@@ -1,13 +1,13 @@
 package net.lordofthecraft.arche.save.rows.persona;
 
-import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.save.rows.MultiStatementRow;
 
 public class DeletePersonaRow extends MultiStatementRow {
-	private final Persona persona;
+	private final int persona;
 	
-	public DeletePersonaRow(Persona persona) {
-		this.persona = persona;
+	public DeletePersonaRow(OfflinePersona persona) {
+		this.persona = persona.getPersonaId();
 	}
 	
 	@Override
@@ -26,7 +26,7 @@ public class DeletePersonaRow extends MultiStatementRow {
 
 	@Override
 	protected Object getValueFor(int statement, int varIndex) {
-		return persona.getPersonaId();
+		return persona;
 	}
 
 }

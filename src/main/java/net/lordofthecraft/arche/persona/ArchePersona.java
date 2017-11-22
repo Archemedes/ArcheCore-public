@@ -523,8 +523,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		Bukkit.getPluginManager().callEvent(event);
 
         consumer.queueRow(new DeletePersonaRow(this));
-        //buffer.put(new PersonaDeleteTask(this));
-        handler.deleteSkills(this);
 
 		ArchePersona[] prs = handler.getAllPersonas(this.getPlayerUUID());
         prs[getSlot()] = null;

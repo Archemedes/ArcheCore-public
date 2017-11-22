@@ -42,6 +42,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.PersonaField;
+import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.InsertPersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.save.rows.player.ReplacePlayerRow;
@@ -239,7 +240,7 @@ public class ArchePersonaHandler implements PersonaHandler {
             Bukkit.getPluginManager().callEvent(event2);
 
 			//delete all skill records
-            deleteSkills(oldPersona);
+            consumer.queueRow(new DeletePersonaRow(oldPersona));
             SkinCache.getInstance().clearSkin(oldPersona);
         }
 
@@ -510,12 +511,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 		} finally {
 			SQLUtils.closeStatement(rs);
 		}
-	}
-
-	void deleteSkills(ArchePersona p){
-        for (Skill sname : ArcheSkillFactory.getSkills().values()) {
-            consumer.queueRow(new DeleteSkillRow(p, sname));
-        }
 	}
 
 	public void removeMagic(Magic magic) {
