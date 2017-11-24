@@ -103,6 +103,13 @@ public class ArcheOfflinePersona implements OfflinePersona {
     }
     
     @Override
+    public int getAge() {
+    	int currentYear = ArcheCore.getControls().getCalendar().getYear();
+    	int age = currentYear - birthdate;
+    	return age;
+    }
+    
+    @Override
     public String getGender() {
         return gender;
     }
