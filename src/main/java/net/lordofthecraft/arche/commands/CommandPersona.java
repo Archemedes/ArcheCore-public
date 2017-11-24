@@ -390,11 +390,17 @@ public class CommandPersona implements CommandExecutor {
                         	int parsedArg = Integer.parseInt(args[1]);
                         	int birthyear = cmd == PersonaCommand.AGE? currentYear - parsedArg : parsedArg;
                         	
-                        	if(birthyear >= currentYear || birthyear <= 0 || birthyear < currentYear - 1000)
+                        	if(birthyear >= currentYear || birthyear <= 0)
                         		return false;
+                        	int age = currentYear - birthyear;
+                        	if(!sender.hasPermission("archecore.ageless") && (age < 5 || age > pers.getRace().getMaximumAge())) {
+                        		sender.sendMessage(ChatColor.RED + "Error: Age outside of the acceptable age range of " + ChatColor.RESET + "5-"+pers.getRace().getMaximumAge());
+                        		return false;
+                        	}
                         	
                         	pers.setDateOfBirth(birthyear);
-                        	sender.sendMessage(ChatColor.AQUA + "Set birthyear of " + pers.getName() + " to: " + ChatColor.RESET + birthyear);                    		
+                        	sender.sendMessage(ChatColor.AQUA + "Set birthyear of " + pers.getName() + " to: " + ChatColor.RESET + birthyear 
+                        			+ ChatColor.AQUA + " (age: " + ChatColor.RESET + age + ChatColor.AQUA + ")");                    		
                         	return true;
                         } catch(NumberFormatException e) {
                         	return false;
