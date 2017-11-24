@@ -49,6 +49,7 @@ public class CommandPersona implements CommandExecutor {
         NAME("archecore.command.persona.name", false, true, "name", "rename", "setname"),
         PREFIX("archecore.command.persona.prefix", false, "prefix", "setprefix"),
         CLEARPREFIX("archcecore.command.persona.prefix.clear", false, "clearprefix", "delprefix", "rmprefix", "noprefix", "removeprefix"),
+        CLEARAGE("archecore.command.persona.age", false, "clearage", "resetage","removeage","noage"),
         AGE("archecore.command.persona.age", false, "age", "setage"),
         BIRTHDATE("archecore.command.persona.age", false, "birthdate", "setbirthdate","birthyear","setbirthyear"),
         CLEARINFO("archecore.command.persona.desc.clear", false, "clearbio", "cleardesc", "deldesc", "delinfo", "clearinfo", "delbio", "cleardescription"),
@@ -149,8 +150,8 @@ public class CommandPersona implements CommandExecutor {
 				+ i + "$</persona name >name [new name]$: " + a + "Rename your Persona to the given name.\n"
 				+ (prefix ? (i + "$</persona prefix >prefix [prefix]$: " + a + "Sets Persona Prefix (delete with $</persona clearprefix>clearprefix$).\n") : "")
 				+ i + "$</persona profession >profession [skill]$: " + a + "Sets your Persona's profession.\n"
-				+ i + "$</persona age >age [new age]$: " + a + "Set your character's age.\n"
-				+ i + "$</persona autoage>autoage$: " + a + "Toggle automatic aging for this persona.\n"
+				+ i + "$</persona age >age [new age]$: " + a + "Set your Persona's age.\n"
+				+ i + "$</persona clearage>clearage$: " + a + "Stop persona age from being shown.\n"
 				+ i + "$</persona addbio >addinfo$: " + a + "Add a line of text to your Persona's description..\n"
 				+ i + "$</persona clearbio>clearinfo$: " + a + "Clear your Persona's description completely.\n"
 				+ i + "$</persona time>time$: " + a + "View the hours spent playing your Persona.\n"
@@ -297,6 +298,10 @@ public class CommandPersona implements CommandExecutor {
                     pers.clearDescription();
                     sender.sendMessage(ChatColor.AQUA + "Persona description was cleared for " + pers.getName() + ".");
                     return true;
+                } else if (cmd == PersonaCommand.CLEARAGE) {
+                    pers.setDateOfBirth(0);
+                    sender.sendMessage(ChatColor.AQUA + "Persona age was cleared for " + pers.getName() + ".");
+                    return true;
                 } else if (cmd == PersonaCommand.LIST) {
                     ArchePersona[] personas = handler.getAllPersonas(pers.getPlayerUUID());
                     sender.sendMessage(ChatColor.AQUA + ArcheCore.getPlugin().getServer().getOfflinePlayer(pers.getPlayerUUID()).getName() + "'s personas:");
@@ -379,9 +384,15 @@ public class CommandPersona implements CommandExecutor {
                             sender.sendMessage(ChatColor.RED + "Error: Prefix too long. Max length 16 characters");
                         }
                         return true;
-                    } else if (cmd == PersonaCommand.BIRTHDATE) {
+                    } else if (cmd == PersonaCommand.AGE || cmd == PersonaCommand.BIRTHDATE) {
                         try {
-                        	int birthyear = Integer.parseInt(args[1]);
+                        	/* wow still no women on the dev team? Didn't you know its*/ int currentYear =  ArcheCore.getControls().getCalendar().getYear();
+                        	int parsedArg = Integer.parseInt(args[1]);
+                        	int birthyear = cmd == PersonaCommand.AGE? currentYear - parsedArg : parsedArg;
+                        	
+                        	if(birthyear >= currentYear || birthyear <= 0 || birthyear < currentYear - 1000)
+                        		return false;
+                        	
                         	pers.setDateOfBirth(birthyear);
                         	sender.sendMessage(ChatColor.AQUA + "Set birthyear of " + pers.getName() + " to: " + ChatColor.RESET + birthyear);                    		
                         	return true;
