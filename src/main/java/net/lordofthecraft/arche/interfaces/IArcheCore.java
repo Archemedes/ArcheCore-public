@@ -1,17 +1,19 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.BlockRegistry;
-import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.help.HelpFile;
-import net.lordofthecraft.arche.magic.Archenomicon;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-import net.lordofthecraft.arche.skin.SkinCache;
+import java.util.UUID;
+
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.plugin.Plugin;
 
-import java.util.UUID;
+import net.lordofthecraft.arche.BlockRegistry;
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.help.HelpFile;
+import net.lordofthecraft.arche.magic.Archenomicon;
+import net.lordofthecraft.arche.seasons.LotcianCalendar;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.skin.SkinCache;
 
 public interface IArcheCore {
 
@@ -203,6 +205,13 @@ public interface IArcheCore {
 	 * @return Whether Economy is enabled
 	 */
 	boolean usesEconomy();
+
+	/**
+	 * The Calendar is ArcheCore's timekeeping method to regulate minecraft's day/night cycle as well as seasons
+	 * Personas age in accordance with this calendar.
+	 * @return The LotcianCalendar running with ArcheCore
+	 */
+	LotcianCalendar getCalendar();
 	
 	/**
 	 * the Economy objects holds some of the customizable settings of the ArcheCore economy

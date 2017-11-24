@@ -86,6 +86,9 @@ commands:
    skin:
       usage: Please see /<command> help for a list of commands
       description: store and load skins
+   date:
+      aliases: [currentdate, lotcdate, calendar]
+      description: Displays calendar date.
 
 permissions:
   archecore.arsql:

@@ -64,6 +64,24 @@ blockregistry.delete.days: 30
 remove.custom.blocks: true
 
 #########################
+##  Seasons settings   ##
+#########################
+
+#ArcheCore's calendar origin point is somewhat arbitrary and based on unix time
+#Using this variable you can shift the offset point by a certain amount of years to your taste 
+calendar.offset.years: -860
+
+#Worlds mentioned in this list will have their day/night cycle adjusted according to the calendar
+#This means a full day will take 1 hour and day/night duration varies based on seasons
+seasonal.tracked.worlds:
+  - world
+
+#If switched on, we run a biome switcher which enables wintery effects in the colder season
+seasonal.biome.switch: true
+
+
+
+#########################
 ##   Bungee Settings   ##
 #########################
 

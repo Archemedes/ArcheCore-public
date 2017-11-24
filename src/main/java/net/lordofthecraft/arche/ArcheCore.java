@@ -18,6 +18,7 @@ import net.lordofthecraft.arche.persona.FatigueDecreaser;
 import net.lordofthecraft.arche.save.ArcheExecutor;
 import net.lordofthecraft.arche.save.Consumer;
 import net.lordofthecraft.arche.save.DumpedDBReader;
+import net.lordofthecraft.arche.seasons.LotcianCalendar;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
 import net.lordofthecraft.arche.skin.SkinCache;
@@ -39,6 +40,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Timer;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -57,6 +59,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private SkinCache skinCache;
     private ArcheTimer timer;
     private ArcheEconomy economy;
+    private LotcianCalendar calendar;
     private Consumer archeConsumer;
     private Timer archeTimer = null;
 
@@ -280,6 +283,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         fatigueHandler.fatigueDecreaseHours = this.fullFatigueRestore;
         timer = debugMode? new ArcheTimer(this) : null;
         personaHandler.setModifyDisplayNames(modifyDisplayNames);
+        
         //Preloads our skills from SQL so that they are persistent at all times.
         //May also create a command/field to flag a skill as forcibly disabled.
         //-501
@@ -384,6 +388,12 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
         if(config.getBoolean("enable.economy"))
             economy = new ArcheEconomy(config);
+        
+		List<String> trackedWorlds = config.getStringList("seasonal.tracked.worlds");
+		int offsetYears = config.getInt("calendar.offset.years");
+		boolean switchBiomes = config.getBoolean("seasonal.biome.switch");
+        calendar = new LotcianCalendar(trackedWorlds, switchBiomes, offsetYears);
+        calendar.onEnable();
     }
 
     private void initCommands(){
@@ -397,14 +407,13 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         getCommand("money").setExecutor(new CommandMoney(helpdesk, economy));
         getCommand("namelog").setExecutor(new CommandNamelog());
         getCommand("arsql").setExecutor(new CommandSql());
-        //501 added these
         getCommand("arclone").setExecutor(new CommandSqlClone());
         getCommand("newbies").setExecutor(new CommandNewbies(personaHandler));
         getCommand("racespawn").setExecutor(new CommandRaceSpawn(personaHandler));
         getCommand("attribute").setExecutor(new CommandAttribute());
         getCommand("attribute").setTabCompleter(new CommandAttributeTabCompleter());
-        //But not these
         getCommand("skin").setExecutor(new CommandSkin(this));
+        getCommand("date").setExecutor(new CommandDate(this));
     }
 
     private void initListeners(){
@@ -686,6 +695,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     @Override
     public boolean usesEconomy() {
         return economy != null;
+    }
+    
+    @Override
+    public LotcianCalendar getCalendar() {
+    	return calendar;
     }
 
     @Override
