@@ -152,7 +152,7 @@ public final class ArcheTables {
                 "race VARCHAR(255) NOT NULL," +
                 "name TEXT," +
                 "race_header TEXT DEFAULT NULL," +
-                "birthdate INT," +
+                "birthdate INT DEFAULT 0," +
                 "gender TEXT DEFAULT 'Other'," +
                 "p_type TEXT DEFAULT 'NORMAL'," +
                 "descr TEXT DEFAULT NULL," +
