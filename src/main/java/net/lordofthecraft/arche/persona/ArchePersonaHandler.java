@@ -288,7 +288,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         if(birthyear > 0) subresult.add(new TextComponent(c + "Age: " + r + age + c + " (born in " + r + birthyear + c + ")"));
         
         String gender = op.getGender();
-        if (gender != null) subresult.add(new TextComponent(c + "Gender: " + r + op.getGender()));
+        if (gender != null && !"Other".equals(gender)) subresult.add(new TextComponent(c + "Gender: " + r + op.getGender()));
         
         if (op.isLoaded()) {
             String race = p.getRaceString(mod);
