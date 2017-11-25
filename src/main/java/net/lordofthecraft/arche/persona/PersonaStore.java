@@ -309,6 +309,7 @@ public class PersonaStore {
         loadTags(persona, connection, false);
         loadAttributes(persona, connection);
         loadSkills(persona, connection);
+        loadNamelog(persona, connection);
         connection.close();
 
         return persona;
@@ -395,6 +396,18 @@ public class PersonaStore {
 
                 SkillAttachment attach = new SkillAttachment(skill, persona, xp, visible);
                 persona.skills().addSkillAttachment(attach);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void loadNamelog(ArchePersona persona, Connection c) {
+    	String sql = "SELECT name FROM persona_name WHERE persona_id_fk=" + persona.getPersonaId();
+        try (Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)) {
+            while (rs.next()) {
+                String name = rs.getString(1);
+                persona.namelog.add(name);
             }
         } catch (SQLException e) {
             e.printStackTrace();

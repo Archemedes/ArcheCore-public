@@ -11,6 +11,7 @@ import org.bukkit.inventory.Inventory;
 
 import java.sql.Timestamp;
 import java.util.Optional;
+import java.util.Set;
 
 public interface Persona extends OfflinePersona {
 
@@ -111,6 +112,11 @@ public interface Persona extends OfflinePersona {
      */
     void setName(String name);
 
+    /**
+     * @return All previous names this Persona has had
+     */
+	Set<String> getPastNames();
+    
     /**
      * Set the underlying type of this persona
      *

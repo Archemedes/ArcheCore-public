@@ -2,6 +2,8 @@ package net.lordofthecraft.arche.persona;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
@@ -16,6 +18,7 @@ import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.magic.insert.MagicInsertRow;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
+import net.lordofthecraft.arche.save.rows.persona.NamelogRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdateVitalsRow;
 import net.lordofthecraft.arche.skin.ArcheSkin;
@@ -66,9 +69,11 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     PersonaInventory inv;
     private Creature creature;
     private WeakReference<Player> playerObject;
-
+    
     ArcheSkin skin;
+    final Set<String> namelog = Sets.newHashSet(); 
     private ArrayList<PotionEffect> effects = Lists.newArrayList();
+    
 
     ArchePersona(int persona_id, UUID player, int slot, String name, Race race, 
     		int birthdate, String gender, Timestamp creationTimeMS, Timestamp lastPlayed) {
@@ -331,6 +336,11 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		}
 	}
 
+	@Override
+    public Set<String> getPastNames(){
+    	return Collections.unmodifiableSet(namelog);
+    }
+	
     @Override
     public void setName(String name) {
         PersonaRenameEvent event = new PersonaRenameEvent(this, name);
@@ -342,9 +352,12 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
         consumer.queueRow(new UpdatePersonaRow(this, PersonaField.NAME, name));
         consumer.queueRow(new UpdatePersonaRow(this, PersonaField.STAT_RENAMED, lastRenamed));
-
+        if(namelog.add(name)) consumer.queueRow(new NamelogRow(this.getPersonaId(), name));
+        
         if (current) updateDisplayName();
     }
+    
+
 
     @Override
     public void setPersonaType(PersonaType type) {
