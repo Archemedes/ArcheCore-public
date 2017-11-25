@@ -1,8 +1,7 @@
 package net.lordofthecraft.arche.commands;
 
-import net.lordofthecraft.arche.SQL.WhySQLHandler;
-import net.lordofthecraft.arche.save.ArcheExecutor;
-import net.lordofthecraft.arche.save.tasks.ArcheTask;
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -10,12 +9,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.UUID;
-
 public class CommandNamelog implements CommandExecutor {
-
+	//TODO make this work with consumer
 	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onCommand(final CommandSender sender, Command command, String label, String[] args) {
@@ -28,7 +23,7 @@ public class CommandNamelog implements CommandExecutor {
 			if(play == null){
 				sender.sendMessage(ChatColor.RED + "No player was found with the provided name");
 			} else {
-				final UUID uuid = play.getUniqueId();
+/*				final UUID uuid = play.getUniqueId();
 				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Retrieving a Persona name history for " + ChatColor.WHITE + play.getName());
                 ArcheExecutor.getInstance().put(new ArcheTask() {
                     @Override
@@ -70,7 +65,7 @@ public class CommandNamelog implements CommandExecutor {
 							
 						}catch(SQLException e){e.printStackTrace();}
 					}
-				});
+				});*/
 			}
 			return true;
 		}

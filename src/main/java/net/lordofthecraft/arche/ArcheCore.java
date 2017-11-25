@@ -15,7 +15,6 @@ import net.lordofthecraft.arche.magic.Archenomicon;
 import net.lordofthecraft.arche.persona.ArcheEconomy;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.FatigueDecreaser;
-import net.lordofthecraft.arche.save.ArcheExecutor;
 import net.lordofthecraft.arche.save.Consumer;
 import net.lordofthecraft.arche.save.DumpedDBReader;
 import net.lordofthecraft.arche.seasons.LotcianCalendar;
@@ -45,12 +44,10 @@ import java.util.Timer;
 import java.util.UUID;
 import java.util.logging.Level;
 
-//TODO BungeeCord implementation
 public class ArcheCore extends JavaPlugin implements IArcheCore {
     private static ArcheCore instance;
 
     private SQLHandler sqlHandler;
-    private ArcheExecutor archeExecutor;
     private BlockRegistry blockRegistry;
     private ArchePersonaHandler personaHandler;
     private ArcheFatigueHandler fatigueHandler;
@@ -225,52 +222,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
         //Initialize our config file
         initConfig();
+        
+        //Setup the SQL stuff for ArcheCore
+        initSql();
 
         //Find our Singletons and assign them.
-        getLogger().info("Loading " + (usingMySQL ? "MySQL" : "SQLite") + " handler now.");
-        if (usingMySQL) {
-            String username = getConfig().getString("mysql.user");
-            String password = getConfig().getString("mysql.password");
-            try {
-                getLogger().info("Logging into MySQL at " + WhySQLHandler.getUrl() + ", Username: " + username);
-                sqlHandler = new WhySQLHandler(username, password);
-            } catch (Exception e) {
-                getLogger().log(Level.SEVERE, "Failed to initialize MySQL DB on url " + WhySQLHandler.getUrl() + " with username " + username + " and password " + password, e);
-                sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
-            }
-        } else {
-            sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
-        }
-
-        archeExecutor = ArcheExecutor.getInstance();
-        //This will import data that might have failed to save before ArcheCore was last disabled.
-        //MUST complete before we progress so it's done on the main thread, if a persona creation or deletion is in here that is VITAL that it is performed before we load anything.
-        getServer().getScheduler().runTask(this, new DumpedDBReader(this));
-        archeConsumer = new Consumer(sqlHandler, this, consumerRun, consumerForceProcessMin, consumerWarningSize, debugConsumer);
-        economy.init();
-        if (consumerShouldUseBukkitScheduler) {
-            if (Bukkit.getScheduler().runTaskTimerAsynchronously(this, archeConsumer, consumerRunDelay < 20 ? 20 : consumerRunDelay, consumerRunDelay).getTaskId() > 0) {
-                getLogger().info("[Consumer] Started using Bukkit Scheduler with a delay of " + consumerRunDelay + " ticks");
-            } else {
-                getLogger().warning("[Consumer] Failed to use the Bukkit Scheduler as specified, task did not register. Using timer now.");
-                archeTimer = new Timer();
-                archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
-                getLogger().info("[Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
-            }
-        } else {
-            archeTimer = new Timer();
-            archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
-            getLogger().info("[Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
-        }
-        if (!ArcheTables.setUpSQLTables(sqlHandler)) {
-            return;
-        }
-        if (sqlHandler instanceof WhySQLHandler) {
-            sqlHandler.execute("DELETE FROM blockregistry WHERE date>DATE_ADD(NOW(), INTERVAL " + blockregistryPurgeDelay + " DAY)" + (blockregistryKillCustom ? " WHERE data IS NULL;" : ";"));
-        } else {
-            sqlHandler.execute("DELETE FROM blockregistry WHERE date>DateTime('Now', 'LocalTime', '+" + blockregistryPurgeDelay + " Day')" + (blockregistryKillCustom ? " WHERE data IS NULL;" : ";"));
-        }
-        //archeExecutor.put(new CreateDatabaseTask());
         blockRegistry = new BlockRegistry();
         archenomicon = Archenomicon.getInstance();
         personaHandler = ArchePersonaHandler.getInstance();
@@ -286,7 +242,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         
         //Preloads our skills from SQL so that they are persistent at all times.
         //May also create a command/field to flag a skill as forcibly disabled.
-        //-501
         ArcheSkillFactory.preloadSkills(sqlHandler);
         archenomicon.init(sqlHandler);
 
@@ -335,7 +290,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     }
 
     private void initConfig(){
-        //Initialize from config
         FileConfiguration config = getConfig(); // Get the config file either out of our .jar our datafolder
         saveDefaultConfig(); //Save the config file to disk if it doesn't exist yet.
 
@@ -395,6 +349,51 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         calendar = new LotcianCalendar(trackedWorlds, switchBiomes, offsetYears);
         calendar.onEnable();
     }
+    
+    private void initSql() {
+        getLogger().info("Loading " + (usingMySQL ? "MySQL" : "SQLite") + " handler now.");
+        if (usingMySQL) {
+            String username = getConfig().getString("mysql.user");
+            String password = getConfig().getString("mysql.password");
+            try {
+                getLogger().info("Logging into MySQL at " + WhySQLHandler.getUrl() + ", Username: " + username);
+                sqlHandler = new WhySQLHandler(username, password);
+            } catch (Exception e) {
+                getLogger().log(Level.SEVERE, "Failed to initialize MySQL DB on url " + WhySQLHandler.getUrl() + " with username " + username + " and password " + password, e);
+                sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
+            }
+        } else {
+            sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
+        }
+
+        //This will import data that might have failed to save before ArcheCore was last disabled.
+        //MUST complete before we progress so it's done on the main thread, if a persona creation or deletion is in here that is VITAL that it is performed before we load anything.
+        new DumpedDBReader(this).run();
+        archeConsumer = new Consumer(sqlHandler, this, consumerRun, consumerForceProcessMin, consumerWarningSize, debugConsumer);
+        economy.init();
+        if (consumerShouldUseBukkitScheduler) {
+            if (Bukkit.getScheduler().runTaskTimerAsynchronously(this, archeConsumer, consumerRunDelay < 20 ? 20 : consumerRunDelay, consumerRunDelay).getTaskId() > 0) {
+                getLogger().info("[Consumer] Started using Bukkit Scheduler with a delay of " + consumerRunDelay + " ticks");
+            } else {
+                getLogger().warning("[Consumer] Failed to use the Bukkit Scheduler as specified, task did not register. Using timer now.");
+                archeTimer = new Timer();
+                archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
+                getLogger().info("[Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
+            }
+        } else {
+            archeTimer = new Timer();
+            archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
+            getLogger().info("[Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
+        }
+        if (!ArcheTables.setUpSQLTables(sqlHandler)) {
+            return;
+        }
+        if (sqlHandler instanceof WhySQLHandler) {
+            sqlHandler.execute("DELETE FROM blockregistry WHERE date>DATE_ADD(NOW(), INTERVAL " + blockregistryPurgeDelay + " DAY)" + (blockregistryKillCustom ? " WHERE data IS NULL;" : ";"));
+        } else {
+            sqlHandler.execute("DELETE FROM blockregistry WHERE date>DateTime('Now', 'LocalTime', '+" + blockregistryPurgeDelay + " Day')" + (blockregistryKillCustom ? " WHERE data IS NULL;" : ";"));
+        }
+    }
 
     private void initCommands(){
         getCommand("archehelp").setExecutor(new CommandArchehelp(helpdesk, helpOverriden));
@@ -452,11 +451,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     }
 
     private void initHelp(){
-
-        //Set the essential Help files
-
         final String div = ChatColor.LIGHT_PURPLE +  "\n--------------------------------------------------\n";
 
+        //Set the essential Help files
         String persHelp = ChatColor.YELLOW + "Your " + ChatColor.ITALIC + "Persona" + ChatColor.YELLOW + " is an uncouth sailor, fair Elven maiden or parent-slaying Orc. " +
                 "in Lord of the Craft, you speak and act as your current Persona, and know only what they know." +
                 div + ChatColor.GREEN + "Once accepted, creating your Persona is the first step of your adventure."
