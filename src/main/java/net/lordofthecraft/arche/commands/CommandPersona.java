@@ -235,7 +235,7 @@ public class CommandPersona implements CommandExecutor {
 
 			//Go through process to find the Persona we want
             OfflinePersona opers = null;
-            boolean willTryToLoad = false;
+            boolean willTryToLoad = false;	
             if ((cmd == PersonaCommand.VIEW || cmd == PersonaCommand.MORE || cmd == PersonaCommand.LIST)
                     && args.length > 1) {
                 opers = CommandUtil.personaFromArg(args[1]);
@@ -420,7 +420,7 @@ public class CommandPersona implements CommandExecutor {
 
                         return true;
                     } else if (cmd == PersonaCommand.PROFESSION) {
-                        if (pers.getMainSkill() == null || sender.hasPermission("archecore.persona.switchprofession")) {
+                        if (pers.getMainSkill() == null || sender.hasPermission("archecore.command.persona.profession.switch")) {
                             Skill skill = ArcheCore.getControls().getSkill(args[1]);
                             if (skill == null) {
                                 sender.sendMessage(ChatColor.RED + "Error: This profession could not be found!");
