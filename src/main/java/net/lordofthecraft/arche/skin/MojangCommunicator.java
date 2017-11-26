@@ -1,16 +1,28 @@
 package net.lordofthecraft.arche.skin;
 
-import com.comphenix.protocol.wrappers.WrappedSignedProperty;
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang.Validate;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import com.comphenix.protocol.wrappers.WrappedSignedProperty;
+import com.google.common.base.Charsets;
+import com.google.common.io.ByteStreams;
+
+import net.lordofthecraft.arche.ArcheCore;
 
 public class MojangCommunicator {
     public static class AuthenticationException extends Exception {
@@ -53,7 +65,7 @@ public class MojangCommunicator {
 			int responseCode = conn.getResponseCode();
 			if(responseCode == 200) {
 				in = new BufferedInputStream(conn.getInputStream());
-				String result = org.apache.commons.io.IOUtils.toString(in, "UTF-8");
+				String result = new String(ByteStreams.toByteArray(in), Charsets.UTF_8);
 				JSONParser parser = new JSONParser();
 				JSONObject responseJson = (JSONObject) parser.parse(result);
 
@@ -99,10 +111,14 @@ public class MojangCommunicator {
 			out = new DataOutputStream(conn.getOutputStream());  
 			out.writeBytes(query);
 
-			in = new BufferedInputStream(conn.getInputStream());
-			String result = org.apache.commons.io.IOUtils.toString(in, "UTF-8");
-			in.close();	
-			System.out.println(result);
+			if(ArcheCore.isDebugging()) {
+				in = new BufferedInputStream(conn.getInputStream());
+				String result = new String(ByteStreams.toByteArray(in), Charsets.UTF_8);
+				in.close();	
+				Logger l = ArcheCore.getPlugin().getLogger();
+				l.info("[Debug] Mojang response to setting skin: ");
+				l.info(result);
+			}
 		} finally {
 			if(in != null) in.close();
 			if(out != null) out.close();

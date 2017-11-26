@@ -1,20 +1,19 @@
 package net.lordofthecraft.arche.util;
 
+import com.comphenix.protocol.utility.MinecraftReflection;
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
-import net.minecraft.server.v1_12_R1.Container;
-import net.minecraft.server.v1_12_R1.Slot;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventoryView;
-import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Animals;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -422,13 +421,24 @@ public class InventoryUtil {
 				v.getTopInventory().getHolder() instanceof Animals);
 	}
 	
-	//TODO not nms stuff
+	private static Method civ_getHandle = null;
+	private static Method con_getSlot = null;
+	private static Method slot_isAllowed = null;
+	
 	private static boolean isItemAllowed(int rawSlot, ItemStack is, InventoryView view) {
 		if(is.getType() == Material.AIR) return true;
+		Object nmsItem = MinecraftReflection.getMinecraftItemStack(is);
 		
-		Container container = ((CraftInventoryView) view).getHandle();
-		Slot slot = container.getSlot(rawSlot);
-		return slot.isAllowed(CraftItemStack.asNMSCopy(is));
+		try {
+			if(civ_getHandle == null) civ_getHandle = view.getClass().getMethod("getHandle");
+			Object container = civ_getHandle.invoke(view);
+			if(con_getSlot == null) con_getSlot = container.getClass().getMethod("getSlot", int.class);
+			Object slot = con_getSlot.invoke(container, rawSlot);
+			if(slot_isAllowed == null) slot_isAllowed = slot.getClass().getMethod("isAllowed", nmsItem.getClass());
+			return (boolean) slot_isAllowed.invoke(slot, nmsItem);
+		} catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | SecurityException e) {
+			throw new IllegalStateException("Reflection failed. MC probably changed its method handles. This is bad. Call someone", e);
+		}
 	}
 	
 	private static void handleMoveToOther(List<MovedItem> result, int raw, InventoryView view) {
