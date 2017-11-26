@@ -1,8 +1,36 @@
 package net.lordofthecraft.arche.persona;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.Player;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
-import net.lordofthecraft.arche.SQL.SQLUtils;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
@@ -18,18 +46,8 @@ import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
+import net.lordofthecraft.arche.util.SQLUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
-import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.entity.Player;
-
-import java.sql.*;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
 
 public class PersonaStore {
     final String personaSelect;
@@ -138,9 +156,9 @@ public class PersonaStore {
         } catch (SQLException e1) {
             e1.printStackTrace();
         } finally {
-            SQLUtils.close(res);
-            SQLUtils.close(statement);
-            SQLUtils.close(connection);
+            SQLUtil.close(res);
+            SQLUtil.close(statement);
+            SQLUtil.close(connection);
 
             if (any) pendingBlobs.put(uuid, prs);
             loadedThisSession.add(uuid);
@@ -174,9 +192,9 @@ public class PersonaStore {
         } catch (SQLException e) {
             ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to set up our persona ID!!! We can't create personas!", e);
         } finally {
-            SQLUtils.close(rs);
-            SQLUtils.close(statement);
-            SQLUtils.close(connection);
+            SQLUtil.close(rs);
+            SQLUtil.close(statement);
+            SQLUtil.close(connection);
         }
 
         ArcheCore.getPlugin().getLogger().info("[ArchePersonaHandler] Persona ID is now set at " + max_persona_id);
@@ -206,9 +224,9 @@ public class PersonaStore {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            SQLUtils.close(res);
-            SQLUtils.close(offlineSelectStat);
-            SQLUtils.close(connection);
+            SQLUtil.close(res);
+            SQLUtil.close(offlineSelectStat);
+            SQLUtil.close(connection);
         }
         
         if (timer != null) timer.stopTiming("Preloading personas");

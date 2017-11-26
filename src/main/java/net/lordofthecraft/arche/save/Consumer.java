@@ -1,12 +1,5 @@
 package net.lordofthecraft.arche.save;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.SQLUtils;
-import net.lordofthecraft.arche.interfaces.IConsumer;
-import net.lordofthecraft.arche.save.rows.ArcheRow;
-import net.lordofthecraft.arche.save.rows.StatementRow;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -21,6 +14,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.interfaces.IConsumer;
+import net.lordofthecraft.arche.save.rows.ArcheRow;
+import net.lordofthecraft.arche.save.rows.StatementRow;
+import net.lordofthecraft.arche.util.SQLUtil;
 
 public final class Consumer extends TimerTask implements IConsumer {
     private final Queue<ArcheRow> queue = new LinkedBlockingQueue<>();
@@ -131,7 +131,7 @@ public final class Consumer extends TimerTask implements IConsumer {
                     pl.getLogger().log(Level.SEVERE, "[Consumer] SQL exception on " + row.getClass().getSimpleName() + ": ", e);
                     Arrays.stream(pending).forEach(ps -> {
                         pl.getLogger().severe("Lost Statement: " + ps.toString());
-                        SQLUtils.close(ps);
+                        SQLUtil.close(ps);
                     });
                     pending = null;
                     continue;
@@ -158,8 +158,8 @@ public final class Consumer extends TimerTask implements IConsumer {
             pl.getLogger().log(Level.SEVERE, "[Consumer] We failed to complete Consumer SQL Processes.", ex);
         } finally {
             StatementRow.close();
-            SQLUtils.close(state);
-            SQLUtils.close(conn);
+            SQLUtil.close(state);
+            SQLUtil.close(conn);
 
             lock.unlock();
 

@@ -25,7 +25,6 @@ import com.google.common.collect.Maps;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.SQLUtils;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
@@ -49,6 +48,7 @@ import net.lordofthecraft.arche.save.rows.player.ReplacePlayerRow;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.MessageUtil;
+import net.lordofthecraft.arche.util.SQLUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -512,7 +512,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            SQLUtils.closeStatement(rs);
+            SQLUtil.closeStatement(rs);
         }
     }
 
