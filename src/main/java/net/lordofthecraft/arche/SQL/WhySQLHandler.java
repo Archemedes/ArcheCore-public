@@ -19,10 +19,10 @@ import java.util.logging.Level;
  */
 public class WhySQLHandler extends SQLHandler {
 
-    private final MySQLConnectionPool pool;
+    private final ConnectionPool pool;
 
     public WhySQLHandler(String user, String password) throws ClassNotFoundException {
-        pool = new MySQLConnectionPool(getUrl(), user, password);
+        pool = ConnectionPool.makeMysqlConnectionPool(getUrl(), user, password);
     }
 
     public static String getUrl() {

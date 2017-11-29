@@ -52,10 +52,10 @@ public abstract class SQLHandler {
     public abstract DataSource getDataSource();
 
     /**
-     * Retrieves the underlying SQLite/MySQLConnectionPool object that handles database queries and statement creations.
+     * Retrieves the underlying SQLite/ConnectionPool object that handles database queries and statement creations.
      * You should need to call this method for formatted SQLite queries. Use {@link #query(String)} instead.
      *
-     * @return The SQLite/MySQLConnectionPool object.
+     * @return The SQLite/ConnectionPool object.
      */
     public abstract Closeable getSQL();
 

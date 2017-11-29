@@ -1,8 +1,10 @@
 package net.lordofthecraft.arche.SQL;
 
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.io.Closeable;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -12,11 +14,19 @@ import java.sql.SQLException;
  * @author diddiz
  * @author 501warhead
  */
-public class MySQLConnectionPool implements Closeable {
+public class ConnectionPool implements Closeable {
 
     private final HikariDataSource ds;
 
-    public MySQLConnectionPool(String url, String user, String password) throws ClassNotFoundException {
+    public static ConnectionPool makeMysqlConnectionPool(String url, String user, String password) throws ClassNotFoundException {
+        return new ConnectionPool(url, user, password);
+    }
+
+    public static ConnectionPool makeSQLiteConnectionPool(File file) throws ClassNotFoundException {
+        return new ConnectionPool(file);
+    }
+
+    public ConnectionPool(String url, String user, String password) throws ClassNotFoundException {
         this.ds = new HikariDataSource();
         ds.setJdbcUrl(url);
         ds.setUsername(user);
@@ -33,6 +43,15 @@ public class MySQLConnectionPool implements Closeable {
         ds.addDataSourceProperty("cachePrepStmts", "true");
         ds.addDataSourceProperty("prepStmtCacheSize", "250");
         ds.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+    }
+
+    private ConnectionPool(File file) throws ClassNotFoundException {
+        HikariConfig config = new HikariConfig();
+        config.setPoolName("ArcheCore-Connection-Pool");
+        config.setDriverClassName("org.sqlite.JDBC");
+        config.setJdbcUrl("jdbc:sqlite:" + file.getAbsolutePath());
+        config.setMaximumPoolSize(10);
+        ds = new HikariDataSource(config);
     }
 
     @Override

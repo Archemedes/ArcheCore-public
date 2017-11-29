@@ -124,7 +124,9 @@ public class SkinCache {
     private void init() {
         try {
             Connection conn = ArcheCore.getSQLControls().getConnection();
-            conn.setReadOnly(true);
+            if (!ArcheCore.usingSQLite()) {
+                conn.setReadOnly(true);
+            }
             PreparedStatement selectStatement = conn.prepareStatement("SELECT player,slot,name,skinUrl,slim,skinValue,skinSignature,refresh FROM persona_skins");
             ResultSet res = selectStatement.executeQuery();
 			while(res.next()) {
