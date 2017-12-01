@@ -170,6 +170,11 @@ consumer.debug: false
 #a MySQL database. If false ArcheCore will use a SQLite instance
 enable.mysql: false
 
+#Settings for the ConnectionPool used to power ArcheCore.
+hikari:
+  #The timeout of connections in the pool. This should be /less/ than the ones inside /etc/my.cnf
+  timeoutms: 1700
+
 #login info for the MySQL instance, required if the above is true
 mysql:
   #The username for the mysql connection

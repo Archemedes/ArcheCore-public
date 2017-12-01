@@ -17,13 +17,15 @@ public final class ArcheTables {
     }
 
     public static boolean setUpSQLTables(SQLHandler sqlHandler) {
+        Connection conn = sqlHandler.getConnection();
+        boolean toreturn = true;
         try {
             ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
             boolean debug = timer != null;
             if (debug) {
                 timer.startTiming("Database Creation");
             }
-            Connection conn = sqlHandler.getConnection();
+
             conn.setAutoCommit(false);
             Statement statement = conn.createStatement();
 
@@ -92,15 +94,21 @@ public final class ArcheTables {
             conn.commit();
             l.info("We've finished with committing all tables now.");
             statement.close();
-            conn.close();
             if (timer != null) {
                 timer.stopTiming("Database Creation");
             }
+            toreturn = true;
         } catch (Exception e) {
             ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to create Archecore.db! Stopping!", e);
-            return false;
+            toreturn = false;
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-        return true;
+        return toreturn;
     }
 
     protected static void createPlayerTable(Statement statement, String end) throws SQLException {

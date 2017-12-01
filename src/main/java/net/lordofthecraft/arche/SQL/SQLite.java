@@ -20,13 +20,14 @@ public /*abstract*/ class SQLite implements Closeable {
     // protected String dbprefix;
     @SuppressWarnings("unused")
     private int lastUpdate; //Exclusively a debug tool
-    private ConnectionPool pool;
+    ConnectionPool pool;
+    private int timeout;
     //private volatile Object syncObject = new Object();
     //private volatile boolean shouldWait = false;
 
     private SQLiteUtils utils; //Port
 
-    public SQLite(Logger logger, String prefix, String directory, String filename) //constructor
+    public SQLite(Logger logger, String prefix, String directory, String filename, int timeout) //constructor
     {
         if (logger == null) {
             Logger.getLogger("SimpleSQL").severe("logger cannot be null!");
@@ -36,6 +37,7 @@ public /*abstract*/ class SQLite implements Closeable {
             Logger.getLogger("SimpleSQL").severe("prefix cannot be null!");
             return;
         }
+        this.timeout = timeout;
         this.prefix = prefix;
         this.logger = logger;
         this.utils = new SQLiteUtils(this);
@@ -50,7 +52,7 @@ public /*abstract*/ class SQLite implements Closeable {
     {
         if (initialize()) {
             try {
-                pool = ConnectionPool.makeSQLiteConnectionPool(getFile());
+                pool = ConnectionPool.makeSQLiteConnectionPool(getFile(), timeout);
                 return true;
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();

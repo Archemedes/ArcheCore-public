@@ -51,6 +51,8 @@ public abstract class SQLHandler {
 
     public abstract DataSource getDataSource();
 
+    public abstract ConnectionPool getPool();
+
     /**
      * Retrieves the underlying SQLite/ConnectionPool object that handles database queries and statement creations.
      * You should need to call this method for formatted SQLite queries. Use {@link #query(String)} instead.
