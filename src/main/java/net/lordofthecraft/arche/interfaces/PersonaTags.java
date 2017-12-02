@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Map;
 
 public interface PersonaTags extends PersonaExtension {
+	public static final String REFRESH_MC_SPECIFICS = "refreshMCSpecifics";
+	
     /**
      * @param key the tag key
      * @return The associated tag value as a string, or null if not found

@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.SQLUtils;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
@@ -19,6 +18,7 @@ import net.lordofthecraft.arche.save.rows.player.ReplacePlayerRow;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.MessageUtil;
+import net.lordofthecraft.arche.util.SQLUtil;
 import net.md_5.bungee.api.chat.*;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.time.DateUtils;
@@ -424,16 +424,15 @@ public class ArchePersonaHandler implements PersonaHandler {
             if (ps == null) {
                 Arrays.stream(prs).findFirst().ifPresent(pers -> pers.setCurrent(true));
                 ps = getPersona(p);
+                ps.restoreMinecraftSpecifics(p);
             }
-            if (ps != null) {
-                Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
-                RaceBonusHandler.apply(ps);
-                ps.attributes().handleLogin();
-                if (ps.tags().removeTag("refreshMCSpecifics")) ps.restoreMinecraftSpecifics(p);
-                ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
-            } else { //A persona is not current, somehow.
-                ArcheCore.getPlugin().getLogger().severe("Somehow PersonaStore#getPersona(org.bukkit.Player) returned null at this stage for " + p.getName() + "!?!?!");
-            }
+            
+            Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
+            RaceBonusHandler.apply(ps);
+            ps.attributes().handleLogin();
+            ArcheCore.getControls().getFatigueHandler().showFatigueBar(p, ps);
+            if (ps.tags().removeTag(PersonaTags.REFRESH_MC_SPECIFICS)) ps.restoreMinecraftSpecifics(p);
+            ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
         }
     }
 
@@ -496,7 +495,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            SQLUtils.closeStatement(rs);
+            SQLUtil.closeStatement(rs);
         }
     }
 

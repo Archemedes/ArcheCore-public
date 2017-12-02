@@ -1,10 +1,5 @@
 package net.lordofthecraft.arche.SQL;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import net.lordofthecraft.arche.ArcheCore;
-
-import javax.sql.DataSource;
 import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -13,6 +8,14 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javax.sql.DataSource;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.util.SQLUtil;
 
 /**
  * Represents a object to mediate between plugins and a SQL Database, functioning for MySQL or SQLite
@@ -103,7 +106,7 @@ public abstract class SQLHandler {
         }
 
         String pretext = "SELECT " + cols + " FROM " + table;
-        String query = pretext + SQLUtils.giveOptionalWhere(criteria);
+        String query = pretext + SQLUtil.giveOptionalWhere(criteria);
         try {
             res = query(query);
 
@@ -126,7 +129,7 @@ public abstract class SQLHandler {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            SQLUtils.closeStatement(res);
+            SQLUtil.closeStatement(res);
         }
         return result;
     }
@@ -142,9 +145,9 @@ public abstract class SQLHandler {
         if (values == null) throw new NullPointerException("Columns to set cannot be null");
 
         String pretext = "UPDATE " + table + " SET ";
-        String vals = SQLUtils.formatSetClause(values);
+        String vals = SQLUtil.formatSetClause(values);
 
-        String query = pretext + vals + SQLUtils.giveOptionalWhere(criteria);
+        String query = pretext + vals + SQLUtil.giveOptionalWhere(criteria);
         execute(query);
     }
 
@@ -186,12 +189,12 @@ public abstract class SQLHandler {
                 query(query);
                 res = query("SELECT last_insert_rowid() FROM " + table);
                 if (res.next()) result = res.getInt("last_insert_rowid()");
-                SQLUtils.closeStatement(res);
+                SQLUtil.closeStatement(res);
             }
         } catch (SQLException se) {
             se.printStackTrace();
         } finally {
-            SQLUtils.closeStatement(res);
+            SQLUtil.closeStatement(res);
         }
 
         return result;

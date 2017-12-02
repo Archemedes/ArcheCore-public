@@ -7,7 +7,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
 import net.md_5.bungee.api.chat.HoverEvent;
-import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.attribute.Attribute;
@@ -101,7 +101,7 @@ public class CommandAttribute implements CommandExecutor {
                 } else if (args.length >= 3) {
                     if ("-r".equalsIgnoreCase(args[2]) && args.length >= 4) {
                         AttributeModifier toRemove = null;
-                        if (NumberUtils.isCreatable(args[3])) {
+                        if (NumberUtils.isNumber(args[3])) {
                             int id = Integer.valueOf(args[3]);
                             if (id <= mods.size()) {
                                 int count = 0;

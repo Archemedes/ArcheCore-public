@@ -21,6 +21,7 @@ import net.lordofthecraft.arche.seasons.LotcianCalendar;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
 import net.lordofthecraft.arche.skin.SkinCache;
+import net.lordofthecraft.arche.util.SQLUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -249,8 +250,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         ArcheSkillFactory.preloadSkills(sqlHandler);
         archenomicon.init(sqlHandler);
 
+        ResultSet res = null;
         try{
-            ResultSet res = sqlHandler.query("SELECT world,x,y,z,data FROM blockregistry");
+            res = sqlHandler.query("SELECT world,x,y,z,data FROM blockregistry");
             while(res.next()){
                 String world = res.getString("world");
                 int x = res.getInt("x");
@@ -265,8 +267,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             }
             res.getStatement().close();
             res.getStatement().getConnection().close();
-        }catch(SQLException e){e.printStackTrace();}
-
+        }
+        catch(SQLException e){e.printStackTrace();}
+        finally {SQLUtil.closeStatement(res);}
+        
         //Incase of a reload, load all Personas for currently logged in players
         for (Player p : Bukkit.getOnlinePlayers()) {
             personaHandler.getPersonaStore().loadPersonas(p.getName(), p.getUniqueId());
@@ -365,6 +369,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
                 sqlHandler = new WhySQLHandler(username, password, timeout);
             } catch (Exception e) {
                 getLogger().log(Level.SEVERE, "Failed to initialize MySQL DB on url " + WhySQLHandler.getUrl() + " with username " + username + " and password " + password, e);
+                usingMySQL = false;
                 sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore", timeout);
             }
         } else {

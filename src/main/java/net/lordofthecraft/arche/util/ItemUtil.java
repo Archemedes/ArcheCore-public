@@ -1,15 +1,8 @@
 package net.lordofthecraft.arche.util;
 
-import com.comphenix.protocol.utility.MinecraftReflection;
-import com.comphenix.protocol.wrappers.nbt.NbtCompound;
-import com.comphenix.protocol.wrappers.nbt.NbtFactory;
-import com.comphenix.protocol.wrappers.nbt.NbtList;
-import com.mojang.authlib.GameProfile;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.TranslatableComponent;
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import static net.lordofthecraft.arche.util.ReflectionUtil.compoundConstructor;
+import static net.lordofthecraft.arche.util.ReflectionUtil.itemNameMethod;
+import static net.lordofthecraft.arche.util.ReflectionUtil.saveToJson;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +10,18 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static net.lordofthecraft.arche.util.ReflectionUtil.*;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import com.comphenix.protocol.utility.MinecraftReflection;
+import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.comphenix.protocol.wrappers.nbt.NbtCompound;
+import com.comphenix.protocol.wrappers.nbt.NbtFactory;
+import com.comphenix.protocol.wrappers.nbt.NbtList;
+
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.TranslatableComponent;
 
 public class ItemUtil {
 	
@@ -49,7 +53,7 @@ public class ItemUtil {
 	 * @param profile The profile to get a skin from
 	 * @return a textured Minecraft SKULL_ITEM 
 	 */
-	public static ItemStack getSkullFromProfile(GameProfile profile) {
+	public static ItemStack getSkullFromProfile(WrappedGameProfile profile) {
 		String value = profile.getProperties().get("textures").iterator().next().getValue();
 		System.out.println("value");
 		return getSkullFromTexture(value);

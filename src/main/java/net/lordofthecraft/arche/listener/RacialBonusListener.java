@@ -1,17 +1,31 @@
 package net.lordofthecraft.arche.listener;
 
-import com.google.common.collect.Lists;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.RaceBonusHandler;
-import org.bukkit.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPolarBear;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.*;
+import org.bukkit.entity.AreaEffectCloud;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Donkey;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Horse;
+import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Llama;
+import org.bukkit.entity.Mule;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -30,9 +44,14 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.spigotmc.event.entity.EntityMountEvent;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+import com.google.common.collect.Lists;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.RaceBonusHandler;
 
 public class RacialBonusListener implements Listener {
 	//private final UUID random_uuid = UUID.randomUUID();
@@ -382,7 +401,6 @@ public class RacialBonusListener implements Listener {
 	}
 
 
-	@SuppressWarnings("deprecation")
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onEntityMount(EntityMountEvent e) {
 		if (isMountable(e.getMount()) && e.getEntity() instanceof Player) {
@@ -396,7 +414,7 @@ public class RacialBonusListener implements Listener {
 	}
 
 	private boolean isMountable(Entity e){
-		return e instanceof Horse || e instanceof Donkey || e instanceof Mule || e instanceof CraftPolarBear || e instanceof Llama;
+		return e instanceof Horse || e instanceof Donkey || e instanceof Mule || e instanceof Llama;
 	}
 
 	@EventHandler(priority=EventPriority.LOWEST)

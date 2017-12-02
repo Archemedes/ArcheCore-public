@@ -1,9 +1,5 @@
 package net.lordofthecraft.arche.SQL;
 
-import net.lordofthecraft.arche.ArcheCore;
-import org.bukkit.plugin.Plugin;
-
-import javax.sql.DataSource;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,6 +12,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.logging.Level;
+
+import javax.sql.DataSource;
+
+import org.bukkit.plugin.Plugin;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.util.SQLUtil;
 
 public class ArcheSQLiteHandler extends SQLHandler {
 	private final SQLite sqlite;
@@ -213,13 +216,13 @@ public class ArcheSQLiteHandler extends SQLHandler {
 	@Override
 	public void remove(String table, Map<String, Object> criteria){
 		String pretext = "DELETE FROM " + table;
-		String query = pretext + SQLUtils.giveOptionalWhere(criteria);
+		String query = pretext + SQLUtil.giveOptionalWhere(criteria);
 
 		execute(query);
 	}
 
 	@Override
-	public synchronized void execute(String query){
+	public void execute(String query){
 		ResultSet res = null;
 
 		try {
@@ -227,7 +230,7 @@ public class ArcheSQLiteHandler extends SQLHandler {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			SQLUtils.closeStatement(res);
+			SQLUtil.closeStatement(res);
 		}
 	}
 

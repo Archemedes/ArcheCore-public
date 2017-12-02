@@ -1,9 +1,5 @@
 package net.lordofthecraft.arche.SQL;
 
-import net.lordofthecraft.arche.ArcheCore;
-import org.bukkit.configuration.ConfigurationSection;
-
-import javax.sql.DataSource;
 import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -11,6 +7,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 import java.util.logging.Level;
+
+import javax.sql.DataSource;
+
+import org.bukkit.configuration.ConfigurationSection;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.util.SQLUtil;
 
 /**
  * Represents an SQLHandler affiliated with MySQL
@@ -190,7 +193,7 @@ public class WhySQLHandler extends SQLHandler {
     @Override
     public void remove(String table, Map<String, Object> criteria) {
         String pretext = "DELETE FROM " + table;
-        String query = pretext + SQLUtils.giveOptionalWhere(criteria);
+        String query = pretext + SQLUtil.giveOptionalWhere(criteria);
 
         execute(query);
     }
@@ -203,7 +206,7 @@ public class WhySQLHandler extends SQLHandler {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            SQLUtils.closeStatement(res);
+            SQLUtil.closeStatement(res);
         }
     }
 

@@ -1,6 +1,5 @@
 package net.lordofthecraft.arche.SQL;
 
-import javax.sql.DataSource;
 import java.io.Closeable;
 import java.io.File;
 import java.sql.Connection;
@@ -8,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Logger;
+
+import javax.sql.DataSource;
 
 interface StatementsList {
 } //Simple tagging. Might need public modifier.
@@ -111,15 +112,13 @@ public /*abstract*/ class SQLite implements Closeable {
     public final ResultSet query(String query) throws SQLException {
         //doWait();
         queryValidation(this.getStatement(query));
-        Statement statement = this.getConnection().createStatement();
+        Connection c = this.getConnection();
+        Statement statement = c.createStatement();
         if (statement.execute(query)) {
-            //this.shouldWait = true;
             return statement.getResultSet();
         } else {
-            //int uc = statement.getUpdateCount();
             statement.close();
-            //this.lastUpdate = uc;
-            //return this.getConnection().createStatement().executeQuery("SELECT " + uc);
+            statement.getConnection().close();
             return null;
         }
     }

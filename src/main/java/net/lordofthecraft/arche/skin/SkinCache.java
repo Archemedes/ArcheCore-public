@@ -20,7 +20,6 @@ import net.lordofthecraft.arche.skin.MojangCommunicator.AuthenthicationData;
 import net.lordofthecraft.arche.skin.MojangCommunicator.AuthenticationException;
 import net.lordofthecraft.arche.skin.MojangCommunicator.MinecraftAccount;
 import net.lordofthecraft.arche.util.ProtocolUtil;
-import org.apache.commons.codec.binary.Base64;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.json.simple.JSONObject;
@@ -31,6 +30,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -63,7 +63,7 @@ public class SkinCache {
                 .findFirst()
 		.get();
 		
-		String actualValue = new String(Base64.decodeBase64(encodedValue), "UTF-8");
+		String actualValue = new String(Base64.getDecoder().decode(encodedValue), "UTF-8");
 		JSONParser parser = new JSONParser();
 		JSONObject topJson = (JSONObject) parser.parse(actualValue);
 		JSONObject textureJson = (JSONObject) topJson.get("textures");
