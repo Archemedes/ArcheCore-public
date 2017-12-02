@@ -222,7 +222,7 @@ public class ArcheSQLiteHandler extends SQLHandler {
 	}
 
 	@Override
-	public synchronized void execute(String query){
+	public void execute(String query){
 		ResultSet res = null;
 
 		try {
