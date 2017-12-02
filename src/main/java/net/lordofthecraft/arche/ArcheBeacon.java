@@ -125,7 +125,7 @@ public class ArcheBeacon {
 			return;
 
 		Logger log = ArcheCore.getPlugin().getLogger();
-		//log.info("ArcheBeacon opened");
+		if(ArcheCore.isDebugging()) log.info("ArcheBeacon opened by " + p.getName());
 		ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
 		if(handler.mayUse(p) || (handler.countPersonas(p) == 0 && !p.hasPermission("archecore.exempt"))){
 			ArchePersona[] prs = handler.getAllPersonas(p);

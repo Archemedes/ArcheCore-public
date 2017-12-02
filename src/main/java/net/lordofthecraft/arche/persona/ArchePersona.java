@@ -56,7 +56,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	final AtomicInteger charactersSpoken;
     String description = null;
 	volatile String prefix = null;
-	boolean current = true;
+	boolean current = false;
 	String raceHeader = null;
 	Timestamp lastRenamed;
     int pastPlayTime; //stat_playtime_past

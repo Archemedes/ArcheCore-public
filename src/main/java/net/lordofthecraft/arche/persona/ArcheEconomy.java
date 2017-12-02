@@ -33,7 +33,7 @@ public class ArcheEconomy implements Economy {
 		proximity = config.getBoolean("require.pay.proximity");
 	}
 	
-	public void init(){
+	public void onEnable(){
         consumer = ArcheCore.getConsumerControls();
     }
 	

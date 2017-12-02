@@ -12,7 +12,7 @@ public class ReplacePlayerRow extends SingleStatementRow {
 
     @Override
     protected String getStatement() {
-        return "INSERT INTO players (player,player_name) VALUES (?,?) ON DUPLICATE KEY UPDATE player_name=?";
+        return "REPLACE INTO players (player,player_name) VALUES (?,?)";
     }
 
     @Override

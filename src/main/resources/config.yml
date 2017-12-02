@@ -156,7 +156,7 @@ consumer.run.time: 1000
 #Force the consumer to process a minimum of the following transactions
 consumer.force.process.minimum: 20
 #Delay between consumer runs.
-consumer.run.delay: 10
+consumer.run.delay: 400
 #Whether or not to create a Java Timer or use AsyncTaskScheduler in Bukkit
 consumer.use.bukkit.scheduler: true
 #The warning size of the queue, when it reaches this threshhold it will warn about overload.

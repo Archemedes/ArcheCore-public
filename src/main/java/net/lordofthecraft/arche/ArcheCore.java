@@ -236,7 +236,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         skinCache = SkinCache.getInstance();
 
         personaHandler.onEnable();
-
+        economy.onEnable();
+        
         fatigueHandler.fatigueDecreaseHours = this.fullFatigueRestore;
         timer = debugMode? new ArcheTimer(this) : null;
         personaHandler.setModifyDisplayNames(modifyDisplayNames);
@@ -372,21 +373,16 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         //MUST complete before we progress so it's done on the main thread, if a persona creation or deletion is in here that is VITAL that it is performed before we load anything.
         new DumpedDBReader(this).run();
         archeConsumer = new Consumer(sqlHandler, this, consumerRun, consumerForceProcessMin, consumerWarningSize, debugConsumer);
-        economy.init();
+        
         if (consumerShouldUseBukkitScheduler) {
-            if (Bukkit.getScheduler().runTaskTimerAsynchronously(this, archeConsumer, consumerRunDelay < 20 ? 20 : consumerRunDelay, consumerRunDelay).getTaskId() > 0) {
-                getLogger().info("[Consumer] Started using Bukkit Scheduler with a delay of " + consumerRunDelay + " ticks");
-            } else {
-                getLogger().warning("[Consumer] Failed to use the Bukkit Scheduler as specified, task did not register. Using timer now.");
-                archeTimer = new Timer();
-                archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
-                getLogger().info("[Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
-            }
+        	Bukkit.getScheduler().runTaskTimerAsynchronously(this, archeConsumer, consumerRunDelay < 20 ? 20 : consumerRunDelay, consumerRunDelay).getTaskId();
+        	getLogger().info("[Consumer] Started using Bukkit Scheduler with a delay of " + consumerRunDelay + " ticks");
         } else {
             archeTimer = new Timer();
             archeTimer.schedule(archeConsumer, consumerRunDelay < 20 ? 1000 : consumerRunDelay * 50, consumerRunDelay * 50);
             getLogger().info("[Consumer] Started using Java Timer with a delay of " + (consumerRunDelay * 50) + "ms");
         }
+        
         if (!ArcheTables.setUpSQLTables(sqlHandler)) {
             return;
         }
