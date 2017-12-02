@@ -43,7 +43,7 @@ public class ExhaustionListener implements Listener {
                 double totalExtraFood = exhaustion / divider;
                 int extraFood = (int) (exhaustion / divider);
                 double remainder = (totalExtraFood - extraFood) / totalExtraFood * 4.0;
-                System.out.println("Exhaustion: " + exhaustion + " " + extraFood + " " + remainder);
+                //System.out.println("Exhaustion: " + exhaustion + " " + extraFood + " " + remainder);
                 foodLevel = Math.max(0, foodLevel - extraFood);
 				e.setFoodLevel(foodLevel);
 				p.setExhaustion((float) remainder);
