@@ -12,7 +12,7 @@ public class ReplacePlayerRow extends SingleStatementRow {
 
     @Override
     protected String getStatement() {
-        return "REPLACE INTO players(player,player_name) VALUES (?,?)";
+        return "INSERT INTO players (player,player_name) VALUES (?,?) ON DUPLICATE KEY UPDATE player_name=?";
     }
 
     @Override
@@ -21,6 +21,7 @@ public class ReplacePlayerRow extends SingleStatementRow {
             case 1:
                 return player.getUniqueId();
             case 2:
+            case 3:
                 return player.getName();
             default:
                 throw new IllegalArgumentException(index + " was passed in.");

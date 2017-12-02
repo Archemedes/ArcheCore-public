@@ -352,18 +352,19 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     
     private void initSql() {
         getLogger().info("Loading " + (usingMySQL ? "MySQL" : "SQLite") + " handler now.");
+        int timeout = getConfig().getInt("hikari.timeoutms");
         if (usingMySQL) {
             String username = getConfig().getString("mysql.user");
             String password = getConfig().getString("mysql.password");
             try {
                 getLogger().info("Logging into MySQL at " + WhySQLHandler.getUrl() + ", Username: " + username);
-                sqlHandler = new WhySQLHandler(username, password);
+                sqlHandler = new WhySQLHandler(username, password, timeout);
             } catch (Exception e) {
                 getLogger().log(Level.SEVERE, "Failed to initialize MySQL DB on url " + WhySQLHandler.getUrl() + " with username " + username + " and password " + password, e);
-                sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
+                sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore", timeout);
             }
         } else {
-            sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore");
+            sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore", timeout);
         }
 
         //This will import data that might have failed to save before ArcheCore was last disabled.

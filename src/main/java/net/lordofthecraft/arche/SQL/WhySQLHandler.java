@@ -22,10 +22,15 @@ import net.lordofthecraft.arche.util.SQLUtil;
  */
 public class WhySQLHandler extends SQLHandler {
 
-    private final MySQLConnectionPool pool;
+    private final ConnectionPool pool;
 
-    public WhySQLHandler(String user, String password) throws ClassNotFoundException {
-        pool = new MySQLConnectionPool(getUrl(), user, password);
+    public WhySQLHandler(String user, String password, int timeout) throws ClassNotFoundException {
+        pool = ConnectionPool.makeMysqlConnectionPool(getUrl(), user, password, timeout);
+    }
+
+    @Override
+    public ConnectionPool getPool() {
+        return pool;
     }
 
     public static String getUrl() {

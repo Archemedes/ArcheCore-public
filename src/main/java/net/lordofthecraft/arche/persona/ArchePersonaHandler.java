@@ -1,45 +1,15 @@
 package net.lordofthecraft.arche.persona;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import org.apache.commons.lang.time.DateUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-import org.jsoup.helper.Validate;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.event.persona.PersonaActivateEvent;
-import net.lordofthecraft.arche.event.persona.PersonaDeactivateEvent;
-import net.lordofthecraft.arche.event.persona.PersonaRemoveEvent;
-import net.lordofthecraft.arche.event.persona.PersonaSwitchEvent;
-import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent;
+import net.lordofthecraft.arche.event.persona.*;
 import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent.Query;
-import net.lordofthecraft.arche.interfaces.IConsumer;
-import net.lordofthecraft.arche.interfaces.Magic;
-import net.lordofthecraft.arche.interfaces.OfflinePersona;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.PersonaHandler;
-import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.InsertPersonaRow;
@@ -49,11 +19,17 @@ import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.SQLUtil;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.*;
+import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.time.DateUtils;
+import org.bukkit.*;
+import org.bukkit.entity.Player;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.*;
 
 public class ArchePersonaHandler implements PersonaHandler {
 	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
@@ -445,11 +421,19 @@ public class ArchePersonaHandler implements PersonaHandler {
             }
         } else {
             ArchePersona ps = getPersona(p);
-            Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
-            RaceBonusHandler.apply(ps);
-            ps.attributes().handleLogin();
-            if (ps.tags().removeTag("refreshMCSpecifics")) ps.restoreMinecraftSpecifics(p);
-            ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
+            if (ps == null) {
+                Arrays.stream(prs).findFirst().ifPresent(pers -> pers.setCurrent(true));
+                ps = getPersona(p);
+            }
+            if (ps != null) {
+                Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
+                RaceBonusHandler.apply(ps);
+                ps.attributes().handleLogin();
+                if (ps.tags().removeTag("refreshMCSpecifics")) ps.restoreMinecraftSpecifics(p);
+                ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
+            } else { //A persona is not current, somehow.
+                ArcheCore.getPlugin().getLogger().severe("Somehow PersonaStore#getPersona(org.bukkit.Player) returned null at this stage for " + p.getName() + "!?!?!");
+            }
         }
     }
 

@@ -1,7 +1,5 @@
 package net.lordofthecraft.arche.SQL;
 
-import org.sqlite.SQLiteDataSource;
-
 import javax.sql.DataSource;
 import java.io.Closeable;
 import java.io.File;
@@ -22,13 +20,14 @@ public /*abstract*/ class SQLite implements Closeable {
     // protected String dbprefix;
     @SuppressWarnings("unused")
     private int lastUpdate; //Exclusively a debug tool
-    private SQLiteDataSource ds;
+    ConnectionPool pool;
+    private int timeout;
     //private volatile Object syncObject = new Object();
     //private volatile boolean shouldWait = false;
 
     private SQLiteUtils utils; //Port
 
-    public SQLite(Logger logger, String prefix, String directory, String filename) //constructor
+    public SQLite(Logger logger, String prefix, String directory, String filename, int timeout) //constructor
     {
         if (logger == null) {
             Logger.getLogger("SimpleSQL").severe("logger cannot be null!");
@@ -38,6 +37,7 @@ public /*abstract*/ class SQLite implements Closeable {
             Logger.getLogger("SimpleSQL").severe("prefix cannot be null!");
             return;
         }
+        this.timeout = timeout;
         this.prefix = prefix;
         this.logger = logger;
         this.utils = new SQLiteUtils(this);
@@ -45,18 +45,22 @@ public /*abstract*/ class SQLite implements Closeable {
     }
 
     public DataSource getDataSource() {
-        return ds;
+        return pool.getDatasource();
     }
 
     public boolean open() //Overridden
     {
         if (initialize()) {
-            SQLiteDataSource ds = new SQLiteDataSource();
-            ds.setUrl("jdbc:sqlite:" + this.getFile().getAbsolutePath());
-            this.ds = ds;
+            try {
+                pool = ConnectionPool.makeSQLiteConnectionPool(getFile(), timeout);
+                return true;
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
             //this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.getFile().getAbsolutePath());
 
-            return true;
+
             /*try {
 
             } catch (SQLException e) {
@@ -83,7 +87,7 @@ public /*abstract*/ class SQLite implements Closeable {
     }
 
     public final Connection getConnection() throws SQLException {
-        return ds.getConnection();
+        return pool.getConnection();
     }
 
     protected void printError(String error) {

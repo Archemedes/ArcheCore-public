@@ -30,8 +30,8 @@ public class ArcheSQLiteHandler extends SQLHandler {
 	 * @param plugin The Plugin to create this database for; this affects the db file's location
 	 * @param identifier The (file)name of the database.
 	 */
-	public ArcheSQLiteHandler(Plugin plugin, String identifier) {
-		sqlite = new SQLite(plugin.getLogger(), identifier, plugin.getDataFolder().getAbsolutePath(), identifier);
+    public ArcheSQLiteHandler(Plugin plugin, String identifier, int timeout) {
+        sqlite = new SQLite(plugin.getLogger(), identifier, plugin.getDataFolder().getAbsolutePath(), identifier, timeout);
         this.folder = plugin.getDataFolder();
         name = identifier;
 	    try 
@@ -44,8 +44,13 @@ public class ArcheSQLiteHandler extends SQLHandler {
 	    }
 	}
 
-	@Override
-	public DataSource getDataSource() {
+    @Override
+    public ConnectionPool getPool() {
+        return sqlite.pool;
+    }
+
+    @Override
+    public DataSource getDataSource() {
 		return sqlite.getDataSource();
 	}
 
