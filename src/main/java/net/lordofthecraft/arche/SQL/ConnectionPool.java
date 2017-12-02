@@ -35,9 +35,9 @@ public class ConnectionPool implements Closeable {
         ds.setPoolName("ArcheCore-Connection-Pool");
 
         ds.setMinimumIdle(2);
-        ds.setIdleTimeout(timeout);
+        ds.setIdleTimeout(timeout-20000);
         ds.setMaxLifetime(timeout);
-        ds.setLeakDetectionThreshold(100000);
+        ds.setLeakDetectionThreshold(timeout - 10000);
         ds.addDataSourceProperty("useUnicode", "true");
         ds.addDataSourceProperty("characterEncoding", "utf-8");
         ds.addDataSourceProperty("rewriteBatchedStatements", "true");
@@ -55,9 +55,9 @@ public class ConnectionPool implements Closeable {
         config.setDriverClassName("org.sqlite.JDBC");
         config.setJdbcUrl("jdbc:sqlite:" + file.getAbsolutePath());
         config.setMaximumPoolSize(10);
-        config.setIdleTimeout(timeout);
+        config.setIdleTimeout(timeout-20000);
         config.setMaxLifetime(timeout);
-        config.setLeakDetectionThreshold(100000);
+        config.setLeakDetectionThreshold(timeout - 10000);
         ds = new HikariDataSource(config);
     }
 

@@ -81,6 +81,7 @@ public class SQLUtil {
             try {
                 rs.close();
                 rs.getStatement().close();
+                rs.getStatement().getConnection().close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
