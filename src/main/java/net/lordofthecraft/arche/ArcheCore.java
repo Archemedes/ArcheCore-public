@@ -143,6 +143,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         return getControls().getArchenomicon();
     }
 
+    public static OfflinePersona getPersona(int persona_id) {
+        return instance.personaHandler.getPersonaById(persona_id);
+    }
+
     public static Persona getPersona(Player p) {
         return instance.getPersonaHandler().getPersona(p);
     }

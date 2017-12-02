@@ -7,6 +7,7 @@ import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.persona.ArcheOfflinePersona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -40,6 +41,12 @@ public class CommandUtil {
     }
 
     public static OfflinePersona offlinePersonaFromArg(String a) {
+        if (a.startsWith("pid:")) {
+            String sid = a.substring(4);
+            if (NumberUtils.isDigits(sid)) {
+                return ArcheCore.getPersonaControls().getPersonaById(Integer.valueOf(sid));
+            }
+        }
         int c = StringUtils.countMatches(a, "@");
         String player;
         int id = -1;
