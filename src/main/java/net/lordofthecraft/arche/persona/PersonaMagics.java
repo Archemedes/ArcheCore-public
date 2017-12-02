@@ -51,6 +51,10 @@ public class PersonaMagics {
         return magics.stream().filter(ma -> ma.getMagic().equals(m)).findFirst();
     }
 
+    public boolean isMagical() {
+    	return !magics.isEmpty();
+    }
+    
     public BaseComponent[] getMagicText() {
         ComponentBuilder b = new ComponentBuilder("");
         AtomicBoolean start = new AtomicBoolean(true);

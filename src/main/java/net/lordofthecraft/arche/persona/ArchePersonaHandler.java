@@ -247,7 +247,8 @@ public class ArchePersonaHandler implements PersonaHandler {
         String r = ChatColor.RESET + "";
         String c = ChatColor.BLUE + "";
         String l = ChatColor.GRAY + "";
-
+        String u = ChatColor.DARK_GRAY + "";
+        
         Persona p = op.getPersona();
         boolean masked = op.isLoaded() && p.tags().hasTag("masked");
 
@@ -261,7 +262,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
         int birthyear = op.getDateOfBirth();
         int age = op.getAge();
-        if(birthyear > 0) subresult.add(new TextComponent(c + "Age: " + r + age + c + " (born in " + r + birthyear + c + ")"));
+        if(birthyear > 0) subresult.add(new TextComponent(c + "Age: " + r + age + u + " (born in " + r + birthyear + u + ")"));
         
         String gender = op.getGender();
         if (gender != null && !"Other".equals(gender)) subresult.add(new TextComponent(c + "Gender: " + r + op.getGender()));
@@ -296,7 +297,7 @@ public class ArchePersonaHandler implements PersonaHandler {
             List<BaseComponent> extendedWhois = getExtendedWhoisInfo(op, mod);
             event = new PersonaWhoisEvent(op, extendedWhois, Query.EXTENDED_PROBE, mod);
             Bukkit.getPluginManager().callEvent(event);
-
+            
             if (!event.isCancelled() && !event.getSent().isEmpty()) {
                 result.add(new ComponentBuilder("Click for more...")
                         .color(MessageUtil.convertColor(ChatColor.GRAY))
@@ -359,7 +360,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	@Override
     public List<BaseComponent> whoisMore(OfflinePersona p, boolean mod, boolean self) {
         List<BaseComponent> extendedWhois = getExtendedWhoisInfo(p, mod);
-		PersonaWhoisEvent event = new PersonaWhoisEvent(p, extendedWhois, Query.EXTENDED_PROBE, mod);
+		PersonaWhoisEvent event = new PersonaWhoisEvent(p, extendedWhois, Query.EXTENDED, mod);
 		Bukkit.getPluginManager().callEvent(event);
 
 		if(event.isCancelled() || event.getSent().isEmpty()) {
@@ -391,7 +392,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         List<BaseComponent> components = Lists.newArrayList();
         if (op.isLoaded()) {
             Persona p = (Persona) op;
-            components.addAll(Arrays.asList(p.magics().getMagicText()));
+            if(p.magics().isMagical()) components.addAll(Arrays.asList(p.magics().getMagicText()));
         }
         return components;
     }
