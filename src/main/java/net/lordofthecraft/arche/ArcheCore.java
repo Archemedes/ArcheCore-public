@@ -81,7 +81,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private UUID newbieWorldUUID;
     private boolean useWiki;
     private String worldName;
-    private boolean racialSwingTimer;
     private boolean enderchestInMenu;
     private boolean usingMySQL;
     private int fullFatigueRestore;
@@ -316,7 +315,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         protectiveTeleport = config.getBoolean("teleport.to.rescue");
         teleportNewbies = config.getBoolean("new.persona.to.spawn");
         worldName = config.getString("server.world.name");
-        racialSwingTimer = config.getBoolean("racial.swing.timer");
         enderchestInMenu = config.getBoolean("persona.menu.enderchest");
         usingMySQL = config.getBoolean("enable.mysql");
         fullFatigueRestore = config.getInt("persona.fatigue.restore");
@@ -733,11 +731,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     @Override
     public String getServerWorldName() {
         return worldName;
-    }
-
-    @Override
-    public boolean isRacialSwingEnabled() {
-        return racialSwingTimer;
     }
 
     @Override

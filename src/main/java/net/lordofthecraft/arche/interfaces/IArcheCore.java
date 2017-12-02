@@ -248,11 +248,6 @@ public interface IArcheCore {
 	String getServerWorldName();
 
 	/**
-	 * @return If the racial swing timers are enabled
-	 */
-	boolean isRacialSwingEnabled();
-
-	/**
 	 * @return Whether or not the Persona menu will have a button in the menu
 	 */
 	boolean showEnderchestInMenu();
