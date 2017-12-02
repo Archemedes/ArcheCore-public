@@ -11,8 +11,6 @@ import java.util.Arrays;
 import java.util.Queue;
 import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
 import net.lordofthecraft.arche.ArcheCore;
@@ -25,7 +23,6 @@ import net.lordofthecraft.arche.util.SQLUtil;
 public final class Consumer extends TimerTask implements IConsumer {
     private final Queue<ArcheRow> queue = new LinkedBlockingQueue<>();
     private final SQLHandler handler;
-    private final Lock lock = new ReentrantLock();
     private final ArcheCore pl;
     private final int timePerRun;
     private final int forceToProcess;
@@ -67,15 +64,7 @@ public final class Consumer extends TimerTask implements IConsumer {
             if (debugConsumer) pl.getLogger().info("[Consumer] The consumer has no queue, not running.");
             return;
         }
-        if (!lock.tryLock()) {
-            if (debugConsumer)
-                pl.getLogger().info("[Consumer] The consumer is still locked and we attempted to run, we are not running.");
-            return;
-        } else {
-            if (debugConsumer) {
-                pl.getLogger().info("[Consumer] We have locked the consumer and are beginning now.");
-            }
-        }
+        
         final Connection conn = handler.getConnection();
         Statement state = null;
         final long starttime = System.currentTimeMillis();
@@ -160,8 +149,6 @@ public final class Consumer extends TimerTask implements IConsumer {
             StatementRow.close();
             SQLUtil.close(state);
             SQLUtil.close(conn);
-
-            lock.unlock();
 
             long time = System.currentTimeMillis() - starttime;
             pl.getLogger().info("[Consumer] Finished saving in " + time + "ms.");
