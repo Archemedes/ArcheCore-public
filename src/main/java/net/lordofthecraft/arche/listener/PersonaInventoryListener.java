@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.listener;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.PersonaTags;
 import net.lordofthecraft.arche.persona.PersonaInventory;
 import net.lordofthecraft.arche.persona.PersonaInventory.PersonaInventoryHolder;
 import net.lordofthecraft.arche.save.rows.persona.UpdateInventoryRow;
@@ -35,7 +36,7 @@ public class PersonaInventoryListener implements Listener {
                         player.sendMessage("Your inventory has been updated through administrative action");
                     }
                 } else {
-                    persona.tags().giveTag("refreshMCSpecifics", "true");
+                    persona.tags().giveTag(PersonaTags.REFRESH_MC_SPECIFICS, "true");
                 }
             }
         }
