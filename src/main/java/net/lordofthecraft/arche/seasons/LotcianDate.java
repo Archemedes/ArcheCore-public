@@ -26,7 +26,7 @@ public final class LotcianDate implements Comparable<LotcianDate> {
 	}
 	
 	public LotcianDate(int year, Month month, int day) {
-		Validate.isTrue(day > 0 && day < DAYS_PER_MONTH);
+		Validate.isTrue(day > 0 && day < DAYS_PER_MONTH, "Tried to make calendar with illegal day: " + day);
 		
 		this.year = year;
 		this.month = month;
