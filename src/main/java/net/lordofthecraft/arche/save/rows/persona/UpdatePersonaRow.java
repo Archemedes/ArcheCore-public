@@ -5,7 +5,7 @@ import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.PersonaTable;
 import net.lordofthecraft.arche.save.rows.StatementRow;
-import org.jsoup.helper.Validate;
+import org.apache.commons.lang.Validate;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

@@ -6,7 +6,7 @@ import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.PersonaTags;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaTagRow;
 import net.lordofthecraft.arche.save.rows.persona.PersonaTagRow;
-import org.jsoup.helper.Validate;
+import org.apache.commons.lang.Validate;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,7 +28,8 @@ public class ArchePersonaTags implements PersonaTags {
     }
 
     void init(ResultSet rs, boolean isForOffline) throws SQLException {
-        Validate.isFalse(wasInit, "Can only init a PersonaTags instance once");
+        Validate.isTrue(!wasInit, "Can only init a PersonaTags instance once");
+
 
         forOffline = isForOffline;
         while (rs.next()) {
@@ -41,7 +42,7 @@ public class ArchePersonaTags implements PersonaTags {
     }
 
     void merge(ArchePersonaTags fromOffline) {
-        Validate.isFalse(forOffline, "Trying to merge INTO PersonaTags that are for OFFLINE Persona");
+        Validate.isTrue(!forOffline, "Trying to merge INTO PersonaTags that are for OFFLINE Persona");
         Validate.isTrue(fromOffline.forOffline, "Trying to merge FROM PersonaTags that are for ONLINE Persona");
 
         fromOffline.getTags().forEach(t -> tags.put(t.getKey(), t));
