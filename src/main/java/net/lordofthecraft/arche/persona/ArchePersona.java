@@ -176,9 +176,12 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
             consumer.queueRow(new UpdatePersonaRow(this, PersonaField.CURRENT, this.current));
 
             if (current) {
-                Validate.notNull(getPlayer(), "Persona can't be switched while Player offline");
-                updateDisplayName();
-                RaceBonusHandler.apply(this);
+               if(getPlayer() != null) {
+            	   updateDisplayName();
+            	   RaceBonusHandler.apply(this);
+               } else {
+            	   tags.giveTag(PersonaTags.REFRESH_MC_SPECIFICS, "true");
+               }
             }
         }
     }
