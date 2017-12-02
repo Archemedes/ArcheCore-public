@@ -246,6 +246,7 @@ public class PersonaStore {
 
         Connection connection = ArcheCore.getSQLControls().getConnection();
         loadTags(persona, connection, true);
+        SQLUtils.close(connection);
         return persona;
     }
 
