@@ -421,11 +421,19 @@ public class ArchePersonaHandler implements PersonaHandler {
             }
         } else {
             ArchePersona ps = getPersona(p);
-            Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
-            RaceBonusHandler.apply(ps);
-            ps.attributes().handleLogin();
-            if (ps.tags().removeTag("refreshMCSpecifics")) ps.restoreMinecraftSpecifics(p);
-            ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
+            if (ps == null) {
+                Arrays.stream(prs).findFirst().ifPresent(pers -> pers.setCurrent(true));
+                ps = getPersona(p);
+            }
+            if (ps != null) {
+                Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
+                RaceBonusHandler.apply(ps);
+                ps.attributes().handleLogin();
+                if (ps.tags().removeTag("refreshMCSpecifics")) ps.restoreMinecraftSpecifics(p);
+                ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
+            } else { //A persona is not current, somehow.
+                ArcheCore.getPlugin().getLogger().severe("Somehow PersonaStore#getPersona(org.bukkit.Player) returned null at this stage for " + p.getName() + "!?!?!");
+            }
         }
     }
 

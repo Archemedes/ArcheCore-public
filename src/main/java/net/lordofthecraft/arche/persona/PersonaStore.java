@@ -8,7 +8,6 @@ import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.interfaces.Creature;
 import net.lordofthecraft.arche.interfaces.Magic;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.magic.MagicData;
@@ -55,7 +54,7 @@ public class PersonaStore {
     
     public Collection<ArchePersona> getLoadedPersonas() {
         Collection<ArchePersona> result = new ArrayList<>();
-        onlinePersonas.values().stream().forEach(ps -> Arrays.stream(ps).filter(Objects::nonNull).forEach(result::add));
+        onlinePersonas.values().forEach(ps -> Arrays.stream(ps).filter(Objects::nonNull).forEach(result::add));
         return result;
     }
 
@@ -287,8 +286,8 @@ public class PersonaStore {
         persona.lastRenamed = res.getTimestamp(PersonaField.STAT_RENAMED.field());
 
         persona.skills().setMainProfession(ArcheSkillFactory.getSkill(res.getString(PersonaField.SKILL_SELECTED.field())));
-        Optional<Creature> creature = ArcheCore.getMagicControls().getCreatureById(res.getString("creature"));
-        creature.ifPresent(persona.magics()::setCreature);
+        /*Optional<Creature> creature = ArcheCore.getMagicControls().getCreatureById(res.getString("creature"));
+        creature.ifPresent(persona.magics()::setCreature);*/
 
         String invString = res.getString(PersonaField.INV.field());
         String enderinvString = res.getString(PersonaField.ENDERINV.field());
@@ -387,7 +386,7 @@ public class PersonaStore {
     }
 
     private void loadSkills(ArchePersona persona, Connection c) {
-        String sql = "SELECT skill_id,xp,visible FROM persona_skills WHERE persona_id_fk=" + persona.getPersonaId();
+        String sql = "SELECT skill_id_fk,xp,visible FROM persona_skills WHERE persona_id_fk=" + persona.getPersonaId();
         try (Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)) {
             while (rs.next()) {
                 String skill_id = rs.getString(1);
