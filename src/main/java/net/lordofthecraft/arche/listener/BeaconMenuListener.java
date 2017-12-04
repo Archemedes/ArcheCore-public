@@ -1,13 +1,8 @@
 package net.lordofthecraft.arche.listener;
 
-import com.google.common.collect.Maps;
-import net.lordofthecraft.arche.ArcheBeacon;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.CreationDialog;
+import java.util.Map;
+import java.util.UUID;
+
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -24,8 +19,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Map;
-import java.util.UUID;
+import com.google.common.collect.Maps;
+
+import net.lordofthecraft.arche.ArcheBeacon;
+import net.lordofthecraft.arche.ArcheBeacon.ArcheBeaconHolder;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.CreationDialog;
 
 public class BeaconMenuListener implements Listener {
 	private final Map<UUID, Long> switchCooldown = Maps.newConcurrentMap();
@@ -47,7 +50,7 @@ public class BeaconMenuListener implements Listener {
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
 	public void onClick(InventoryClickEvent e){
 		Inventory inv = e.getInventory();
-        if (ArcheBeacon.BEACON_HEADER == inv.getTitle()) {
+        if (inv.getHolder() instanceof ArcheBeaconHolder) {
             e.setCancelled(true);
             final Player p = (Player) e.getWhoClicked();
 			final int s = e.getRawSlot();
@@ -172,7 +175,7 @@ public class BeaconMenuListener implements Listener {
 	@EventHandler(ignoreCancelled = true)
 	public void onDrag(InventoryDragEvent e){
 		Inventory inv = e.getInventory();
-		if (ArcheBeacon.BEACON_HEADER.equals(inv.getTitle())) {
+		if (inv.getHolder() instanceof ArcheBeaconHolder) {
 			e.setCancelled(true);
 		}
 	}

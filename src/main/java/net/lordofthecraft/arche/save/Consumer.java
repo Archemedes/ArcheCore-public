@@ -116,6 +116,7 @@ public final class Consumer extends TimerTask implements IConsumer {
                     }
                 } catch (SQLException e) {
                     pl.getLogger().log(Level.SEVERE, "[Consumer] SQL exception on " + row.getClass().getSimpleName() + ": ", e);
+                    pl.getLogger().log(Level.SEVERE, "[Consumer] Statement body: " + row.toString());
                     Arrays.stream(pending).forEach(ps -> {
                         pl.getLogger().severe("Lost Statement: " + ps.toString());
                         SQLUtil.close(ps);

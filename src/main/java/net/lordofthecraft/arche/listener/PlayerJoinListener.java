@@ -2,8 +2,13 @@ package net.lordofthecraft.arche.listener;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
+import net.lordofthecraft.arche.persona.ArcheOfflinePersona;
+import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import org.bukkit.Bukkit;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -35,8 +40,14 @@ public class PlayerJoinListener implements Listener {
         if (timer != null) timer.startTiming("login " + p.getName());
         handler.joinPlayer(p);
         if (timer != null) timer.stopTiming("login" + p.getName());
-        if (ArcheCore.getPlugin().debugMode())
-            ArcheCore.getPlugin().getLogger().info("{Login} Currently have " + handler.getPersonas().size() + " persona files for " + Bukkit.getOnlinePlayers().size() + " players.");
+        if (ArcheCore.getPlugin().debugMode()) {
+			Collection<ArcheOfflinePersona> personas = handler.getPersonas();
+			int offlines = personas.stream().filter(ps -> ps.getClass() == ArcheOfflinePersona.class).collect(Collectors.toList()).size();
+			int onlines = personas.stream().filter(ps -> ps.getClass() == ArchePersona.class).collect(Collectors.toList()).size();
+			int playerCount = handler.getPersonaStore().getOnlinePersonas().size();
+			ArcheCore.getPlugin().getLogger().info("[Login] " + personas.size() + " persona files (" + offlines + " offl. / " + onlines + "onl.) for " + playerCount + " players.");
+		}
+            
     }
 
     @EventHandler(priority = EventPriority.LOW)

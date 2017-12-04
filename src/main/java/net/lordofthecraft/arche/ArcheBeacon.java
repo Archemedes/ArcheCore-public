@@ -16,6 +16,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -25,7 +26,13 @@ import java.util.function.BiFunction;
 import java.util.logging.Logger;
 
 public class ArcheBeacon {
-	public static final String BEACON_HEADER = ChatColor.AQUA + "" + ChatColor.BOLD + "Your settings:";
+	//public static final String BEACON_HEADER = ChatColor.AQUA + "" + ChatColor.BOLD + "Your settings:";
+	public static class ArcheBeaconHolder implements InventoryHolder{
+		private Inventory inv;
+		public Inventory getInventory() {return inv;}
+		private void setInventory(Inventory inv) {this.inv = inv;}
+	}
+	
 	
 	@SuppressWarnings("unchecked")
 	private static final BiFunction<ClickType, Persona, ItemStack>[] FUNCTIONS = new BiFunction[8];
@@ -153,8 +160,11 @@ public class ArcheBeacon {
 			int max = handler.getAllowedPersonas(p);
 			int absmax = ArcheCore.getControls().personaSlots();
 			int requiredSize = requiredSize(highestUsed, max, absmax, firstFree);
-			Inventory inv = Bukkit.createInventory(p, 9*(2 + requiredSize/9 ), BEACON_HEADER);
-
+			ArcheBeaconHolder hh = new ArcheBeaconHolder();
+			Inventory inv = Bukkit.createInventory(hh, 9*(2 + requiredSize/9 ), ArcheCore.getControls().getCalendar().toPrettyString());
+			hh.setInventory(inv);
+			
+			
 			ItemStack is;
 			final String r = ChatColor.RESET.toString();
 			final String g = ChatColor.DARK_GRAY.toString();

@@ -73,9 +73,12 @@ public class CalendarRunnable extends BukkitRunnable
     	
     	for(World w :  myWorlds) {
     		long fullTime = w.getFullTime();
-    		final int remainder = (int) (fullTime % 24000L);
+    		int remainder = (int) (fullTime % 24000L);
+    		if(remainder < 2000 && toSet > 22000) remainder += 24000L;
+    		else if(remainder > 22000 & toSet < 2000) remainder -= 24000L;
     		
-    		fullTime += (toSet - remainder) + ((remainder > toSet) ? 24000 : 0);
+    		fullTime += toSet - remainder;
+    		//fullTime += (toSet - remainder) + ((remainder > toSet) ? 24000 : 0);
     		w.setFullTime(fullTime);
     	}
     }

@@ -247,7 +247,6 @@ public class CommandPersona implements CommandExecutor {
                     willTryToLoad = loadAndReexecute(args[1], (Player) sender, command, args);
             } else if (args.length > 2 && args[args.length - 2].equalsIgnoreCase("-p") && (sender.hasPermission("archecore.mod.other"))) {
                 opers = CommandUtil.personaFromArg(args[args.length - 1]);
-
                 if (opers == null && sender instanceof Player)
                     willTryToLoad = loadAndReexecute(args[args.length - 1], (Player) sender, command, args);
             } else if (sender instanceof Player) {

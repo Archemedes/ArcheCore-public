@@ -91,6 +91,10 @@ public class PersonaStore {
 
         return null;
     }
+    
+    public Collection<ArchePersona[]> getOnlinePersonas(){
+    	return Collections.unmodifiableCollection(onlinePersonas.values());
+    }
 
     public ArchePersona getPersona(UUID uuid, int id) {
         ArchePersona[] prs = onlinePersonas.get(uuid);

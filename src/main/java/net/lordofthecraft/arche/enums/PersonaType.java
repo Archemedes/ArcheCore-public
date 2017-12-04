@@ -8,8 +8,8 @@ import org.bukkit.ChatColor;
  * @author 501warhead
  */
 public enum PersonaType {
-    LORE("Lore", ChatColor.YELLOW + "((This is a notable Lore Character))"),
-    STAFF("Staff", ChatColor.RED + "((This is a Staff Persona, used for Staff-related matters))"),
+    LORE("Lore", ChatColor.GREEN + "((This is a notable Lore Character))"),
+    STAFF("Staff", ChatColor.BLUE + "((This is a Staff Persona, used for Staff-related matters))"),
     EVENT("Event", ChatColor.DARK_GREEN + "((This is an Event Character))"),
     NORMAL("Normal", ChatColor.DARK_RED + "((Please remember not to meta-game this information))");
 

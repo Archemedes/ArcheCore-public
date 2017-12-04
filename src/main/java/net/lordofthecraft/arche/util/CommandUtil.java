@@ -64,10 +64,10 @@ public class CommandUtil {
         } else return null;
 
         PersonaHandler hand = ArcheCore.getControls().getPersonaHandler();
-
+        
+        
         @SuppressWarnings("deprecation")
         OfflinePlayer p = Bukkit.getOfflinePlayer(player);
-        
         if (p == null) {
             return null;
         }

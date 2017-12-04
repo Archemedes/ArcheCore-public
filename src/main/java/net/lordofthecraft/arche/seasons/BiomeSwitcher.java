@@ -17,39 +17,48 @@ public class BiomeSwitcher{
 	private final AtomicBoolean winter;
 	private final ArcheCore plugin;
 	private final LotcianCalendar calendar;
+	private final boolean switchBiomes;
 
-	BiomeSwitcher(final ArcheCore plugin,  final LotcianCalendar calendar) {
+	BiomeSwitcher(final ArcheCore plugin,  final LotcianCalendar calendar, boolean switchBiomes) {
 		this.plugin = plugin;
 		this.calendar = calendar;
 		final boolean isWinter = calendar.getMonth().getSeason() == Season.WINTER;
 		this.winter = new AtomicBoolean(isWinter);
+		this.switchBiomes = switchBiomes;
+		
+		System.out.println("SwitchBiomes: " + switchBiomes);
 	}
 	
 	public void startListening() {
-		ProtocolLibrary.getProtocolManager().getAsynchronousManager().registerAsyncHandler(
-			new PacketAdapter(plugin, PacketType.Play.Server.MAP_CHUNK, PacketType.Play.Server.UPDATE_TIME) {
-			public void onPacketSending(final PacketEvent event) {
-				if(event.getPacketType() == PacketType.Play.Server.MAP_CHUNK) {
-					if (winter.get()) {
-						PacketContainer packet = event.getPacket();
-	
-						boolean groundUpContinuous = packet.getBooleans().read(0);
-						if(!groundUpContinuous) return; //Don't change this chunk
-						ChunkInfo info = new ChunkInfo(event.getPlayer(), packet.getIntegers().readSafely(2), 0, true, packet.getByteArrays().readSafely(0), 0);
-						BiomeSwitcher.this.translateChunkInfo(info, Season.WINTER);
-					}		
-				} else {
-					String worldname = event.getPlayer().getWorld().getName();
-					if(calendar.getRunnable().getTrackedWorlds().contains(worldname)) {
-						PacketContainer packet = event.getPacket();
-						StructureModifier<Long> longs = packet.getLongs();
-						long time = longs.read(1);
-						if(time > 0) time *= -1;
-						longs.write(1, time);
+		
+		if(switchBiomes) ProtocolLibrary.getProtocolManager().getAsynchronousManager().registerAsyncHandler(
+				new PacketAdapter(plugin, PacketType.Play.Server.MAP_CHUNK) {
+					public void onPacketSending(final PacketEvent event) {
+						if (winter.get()) {
+							PacketContainer packet = event.getPacket();
+
+							boolean groundUpContinuous = packet.getBooleans().read(0);
+							if(!groundUpContinuous) return; //Don't change this chunk
+							ChunkInfo info = new ChunkInfo(event.getPlayer(), packet.getIntegers().readSafely(2), 0, true, packet.getByteArrays().readSafely(0), 0);
+							BiomeSwitcher.this.translateChunkInfo(info, Season.WINTER);
+						}		
 					}
-				}
-			}
-		}).start();
+				}).start();
+		
+		ProtocolLibrary.getProtocolManager().getAsynchronousManager().registerAsyncHandler(
+				new PacketAdapter(plugin, PacketType.Play.Server.UPDATE_TIME) {
+					public void onPacketSending(final PacketEvent event) {
+						String worldname = event.getPlayer().getWorld().getName();
+						if(calendar.getRunnable().getTrackedWorlds().contains(worldname)) {
+							PacketContainer packet = event.getPacket();
+							StructureModifier<Long> longs = packet.getLongs();
+							long time = longs.read(1);
+							//System.out.println("Time was: (spam " + time + " but also " + longs.read(0));
+							if(time > 0) time *= -1;
+							longs.write(1, time);
+						}
+					}
+				}).start();
 	}
 
 	public void setWinter(final boolean winter) {

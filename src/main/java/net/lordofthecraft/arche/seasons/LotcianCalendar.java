@@ -35,12 +35,12 @@ public class LotcianCalendar {
         date = new LotcianDate(year, month, day);
         
         runnable = new CalendarRunnable(this,  millis, trackedWorlds);
-        switcher = switchBiomes? new BiomeSwitcher(ArcheCore.getPlugin(), this) : null;
+        switcher = new BiomeSwitcher(ArcheCore.getPlugin(), this, switchBiomes);
     }
     
     public void onEnable() {
     	runnable.runTaskTimer(ArcheCore.getPlugin(), 43l, 7l);
-    	if(switcher != null) switcher.startListening();
+    	switcher.startListening();
     }
     
     void increment(final long millis) {
