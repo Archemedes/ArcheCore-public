@@ -15,6 +15,8 @@ import java.util.Set;
 public abstract class StatementRow implements ArcheRow {
     protected static Set<PreparedStatement> statPool = identityHashSet();
 
+    private String briefStackTrace = null;
+    
     public static void close() { //Called by consumer
         statPool.forEach(t -> {
             try {
@@ -27,6 +29,20 @@ public abstract class StatementRow implements ArcheRow {
         statPool = identityHashSet();
     }
 
+    public StatementRow() {
+    	if(ArcheCore.getConsumerControls().isDebugging()) {
+    		StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+    		int i = 0;
+    		while(!stackTrace[i].getClassName().equals(this.getClass().getName())) i++;
+    		
+    		briefStackTrace = stackTrace[i+1].toString() + '\n' + stackTrace[i+2].toString();
+    	}
+    }
+    
+    public String getOriginStackTrace() {
+    	return briefStackTrace;
+    }
+    
     public abstract boolean isUnique();
 
     public abstract PreparedStatement[] prepare(Connection connection) throws SQLException;

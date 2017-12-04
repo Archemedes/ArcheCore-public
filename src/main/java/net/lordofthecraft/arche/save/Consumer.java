@@ -42,6 +42,11 @@ public final class Consumer extends TimerTask implements IConsumer {
     public void bypassForce() {
         bypassForce = true;
     }
+    
+    @Override
+    public boolean isDebugging() {
+    	return debugConsumer;
+    }
 
     @Override
     public void queueRow(ArcheRow row) {
@@ -88,6 +93,7 @@ public final class Consumer extends TimerTask implements IConsumer {
                 try {
                     if (row instanceof StatementRow) {
                         StatementRow sRow = (StatementRow) row;
+                        if(debugConsumer) pl.getLogger().info("StatementRow Origin Trace:\n" + sRow.getOriginStackTrace());
                         boolean inBatch = pending != null;
 
                         if (!inBatch) pending = sRow.prepare(conn);
@@ -139,7 +145,7 @@ public final class Consumer extends TimerTask implements IConsumer {
 
                 count++;
                 if (debugConsumer)
-                    pl.getLogger().info("[Consumer] Process took " + (System.currentTimeMillis() - taskstart) + "ms for " + row.toString());
+                    pl.getLogger().info("[Consumer] took " + (System.currentTimeMillis() - taskstart) + "ms for " + row.getClass().getSimpleName());
             }
             conn.commit();
         } catch (final SQLException ex) {

@@ -11,6 +11,11 @@ public interface IConsumer {
      * @param row The ArcheRow to be queued.
      */
     void queueRow(ArcheRow row);
+    
+    /**
+     * @return If config is set to debug to consumer
+     */
+    boolean isDebugging();
 
     int getQueueSize();
 }
