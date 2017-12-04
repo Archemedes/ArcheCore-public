@@ -45,9 +45,7 @@ public final class Consumer extends TimerTask implements IConsumer {
 
     @Override
     public void queueRow(ArcheRow row) {
-        if (!queue.contains(row)) {
             queue.add(row);
-        }
     }
 
     @Override
@@ -81,9 +79,9 @@ public final class Consumer extends TimerTask implements IConsumer {
             state = conn.createStatement();
             PreparedStatement[] pending = null;
 
-            while (!queue.isEmpty() && (System.currentTimeMillis() - starttime < timePerRun || (count < (pending == null ? forceToProcess : forceToProcess * 1.5) && !bypassForce))) {
+            while ((System.currentTimeMillis() - starttime < timePerRun || (count < (pending == null ? forceToProcess : forceToProcess * 1.5) && !bypassForce))) {
                 ArcheRow row = queue.poll();
-                if (row == null) continue;
+                if (row == null) break;
                 if (debugConsumer) pl.getLogger().info("[Consumer] Beginning process for " + row.toString());
                 long taskstart = System.currentTimeMillis();
 
