@@ -21,14 +21,11 @@ public class PersonaTagRow extends SingleStatementRow {
     @Override
     protected Object getValueFor(int index) {
         switch (index) {
-            case 1:
-                return persona.getPersonaId();
-            case 2:
-                return att.getKey();
-            case 3:
-                return att.getValue();
-            default:
-                throw new IllegalArgumentException();
+            case 1: return persona.getPersonaId();
+            case 2: return att.getKey();
+            case 3: return att.getValue();
+            case 4: return att.isAvailableOffline();
+            default: throw new IllegalArgumentException();
         }
     }
 

@@ -24,6 +24,11 @@ public final class UpdatePersonaRow extends StatementRow {
         this.field = field;
         this.value = value;
     }
+    
+    @Override
+    public String toString() {
+    	return "PersonaUpdateRow:{" + field.toString() + "=" + value + " for id:" + persona+'}';
+    }
 
     @Override
     public boolean isUnique() {

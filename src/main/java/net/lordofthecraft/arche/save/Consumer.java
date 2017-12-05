@@ -87,7 +87,13 @@ public final class Consumer extends TimerTask implements IConsumer {
             while ((System.currentTimeMillis() - starttime < timePerRun || (count < (pending == null ? forceToProcess : forceToProcess * 1.5) && !bypassForce))) {
                 ArcheRow row = queue.poll();
                 if (row == null) break;
-                if (debugConsumer) pl.getLogger().info("[Consumer] Beginning process for " + row.toString());
+                
+                if (debugConsumer) try {
+                	pl.getLogger().info("[Consumer] Beginning process for " + row.toString());
+                } catch(RuntimeException e) {
+                	pl.getLogger().info("[Consumer] Beginning process for FAULTY " + row.getClass().getSimpleName());
+                }
+                
                 long taskstart = System.currentTimeMillis();
 
                 try {
