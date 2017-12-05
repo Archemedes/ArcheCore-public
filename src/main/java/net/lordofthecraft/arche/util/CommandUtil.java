@@ -14,7 +14,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class CommandUtil {	
@@ -68,12 +67,11 @@ public class CommandUtil {
         
         @SuppressWarnings("deprecation")
         OfflinePlayer p = Bukkit.getOfflinePlayer(player);
-        if (p == null) {
-            return null;
-        }
-        return id < 0 || id > ArcheCore.getControls().personaSlots() ?
-                hand.getPersona(p) : hand.getAllPersonas(p)[id];
+        if (p == null) return null;
         
+        return id < 0 || id >= ArcheCore.getControls().personaSlots() ?
+        		hand.getOfflinePersona(p.getUniqueId()) : 
+        		hand.getOfflinePersona(p.getUniqueId(), id);
     }
 	
 	public static Persona currentPersonaFromArg(String a){
@@ -91,16 +89,4 @@ public class CommandUtil {
         }
 		return null;
 	}
-
-    private static OfflinePersona getPersonaFromName(UUID player) {
-        PersonaHandler hand = ArcheCore.getControls().getPersonaHandler();
-        /*for(Persona persona : hand.getPersonas().parallelStream().filter(p -> p instanceof ArchePersona).map(ArchePersona.class::cast).collect(Collectors.toList())) {
-            if(persona.getPlayerName().equals(name)) return persona;
-		}*/
-        return hand.getPersonas()
-                .parallelStream()
-                .filter(p -> p.getPlayerUUID().equals(player) && p.isCurrent())
-                .findFirst()
-                .orElse(null);
-    }
 }

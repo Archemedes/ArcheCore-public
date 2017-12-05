@@ -111,6 +111,16 @@ public class ArchePersonaHandler implements PersonaHandler {
     }
 
 	@Override
+	public ArcheOfflinePersona getOfflinePersona(UUID player) {
+		return store.getOfflinePersona(player);
+	}
+	
+	@Override
+	public ArcheOfflinePersona getOfflinePersona(UUID player, int slot) {
+		return store.getOfflinePersona(player, slot);
+	}
+
+	@Override
 	public ArchePersona getPersona(OfflinePlayer p){
 		if(p == null) return null;
 		return getPersona(p.getUniqueId());

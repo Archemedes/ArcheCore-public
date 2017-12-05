@@ -29,6 +29,9 @@ import org.bukkit.World;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
@@ -60,11 +63,12 @@ public class PersonaStore {
     private int max_persona_id = 0;
 
     private final Map<Integer, ArcheOfflinePersona> allPersonas = new HashMap<>();
+    private final Multimap<UUID, ArcheOfflinePersona> offlinePersonas = 
+    		MultimapBuilder.hashKeys().arrayListValues(ArcheCore.getControls().personaSlots()).build();
     private final Map<UUID, ArchePersona[]> onlinePersonas = new HashMap<>();
 
     private final Set<UUID> loadedThisSession = new HashSet<>();
     private final Map<UUID, ArchePersona[]> pendingBlobs = new ConcurrentHashMap<>();
-    //private final Map<UUID, Integer> pendingTasks = new ConcurrentHashMap<>();
 
     public Collection<ArcheOfflinePersona> getPersonas() {
         return Collections.unmodifiableCollection(allPersonas.values());
@@ -78,6 +82,18 @@ public class PersonaStore {
 
     public ArcheOfflinePersona getPersonaById(int persona_id) {
         return allPersonas.get(persona_id);
+    }
+    
+    public ArcheOfflinePersona getOfflinePersona(UUID player) {
+    	return offlinePersonas.get(player).stream()
+    	.filter(ArcheOfflinePersona::isCurrent)
+    	.findAny().orElse(null);
+    }
+    
+    public ArcheOfflinePersona getOfflinePersona(UUID player, int slot) {
+    	return offlinePersonas.get(player).stream()
+    	.filter(op->op.getSlot() == slot)
+    	.findAny().orElse(null);
     }
 
     public ArchePersona getPersona(Player p) {
@@ -144,7 +160,9 @@ public class PersonaStore {
 
             while (res.next()) {
                 any = true;
-                ArchePersona blob = buildPersona(res, Bukkit.getOfflinePlayer(uuid));
+                OfflinePlayer pl = Bukkit.getOfflinePlayer(uuid);
+                ArcheOfflinePersona op = buildOfflinePersona(res, pl);
+                ArchePersona blob = buildPersona(res, pl, op);
                 prs[blob.getSlot()] = blob;
 
                 if (blob.current) {
@@ -222,6 +240,7 @@ public class PersonaStore {
                 OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
                 ArcheOfflinePersona offline = buildOfflinePersona(res, player);
                 allPersonas.put(offline.getPersonaId(), offline);
+                offlinePersonas.put(offline.getPlayerUUID(), offline);
             }
 
         } catch (SQLException e) {
@@ -271,8 +290,7 @@ public class PersonaStore {
         return persona;
     }
 
-    ArchePersona buildPersona(ResultSet res, OfflinePlayer pl) throws SQLException {
-        ArcheOfflinePersona op = buildOfflinePersona(res, pl);
+    ArchePersona buildPersona(ResultSet res, OfflinePlayer pl, ArcheOfflinePersona op) throws SQLException {
 
         ArchePersona persona = new ArchePersona(
                 op.getPersonaId(),
@@ -452,8 +470,7 @@ public class PersonaStore {
                 if (aop.isLoaded()) {
                     prs[i] = aop.getPersona();
                 } else {
-                    p.tags.merge(aop.tags);
-                    allPersonas.put(p.getPersonaId(), p);
+                    addOnlinePersona(p);
                 }
             }
             //Integer taskId = pendingTasks.get(uuid);
@@ -468,6 +485,14 @@ public class PersonaStore {
 
         persona.tags.merge(old.tags);
         allPersonas.put(persona.getPersonaId(), persona);
+        
+        UUID uuid = persona.getPlayerUUID();
+        offlinePersonas.remove(uuid, 
+        		offlinePersonas.get(uuid).stream()
+        		.filter(op -> op.getPersonaId() == persona.getPersonaId())
+        		.findAny().get() 
+        		);
+        offlinePersonas.put(uuid, persona);
     }
 
     public ArchePersona registerPersona(ArchePersona persona) {

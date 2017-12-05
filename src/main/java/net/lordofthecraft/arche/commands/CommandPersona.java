@@ -62,8 +62,8 @@ public class CommandPersona implements CommandExecutor {
         SETRACE("archecore.command.persona.setrace", false, "setrace", "setvisiblerace", "setapparentrace"),
         REALRACE("archecore.command.persona.realrace", false, "realrace", "viewrealrace", "underlyingrace", "viewunderrace"),
         WIPERACE("archecore.command.persona.wiperace", false, "wiperace", "clearrace", "clearvisrace", "clearoverlying"),
-        OPENINV("archecore.command.persona.openinv", true, true, "openinv", "inv", "viewinv"),
-        OPENENDER("archecore.command.persona.openender", true, true, "openender", "ender", "viewender"),
+        OPENINV("archecore.command.persona.openinv", true, "openinv", "inv", "viewinv"),
+        OPENENDER("archecore.command.persona.openender", true, "openender", "ender", "viewender"),
         ICON("archecore.command.persona.icon", true, "icon", "head", "seticon", "sethead"),
         CREATED("archecore.command.persona.created", true, "created", "viewcreateddate", "viewcreation"),
         CONSTRUCT("archecore.command.persona.construct", true, "construct", "setconstruct"),
@@ -245,7 +245,8 @@ public class CommandPersona implements CommandExecutor {
                 opers = CommandUtil.personaFromArg(args[1]);
                 if (opers == null && sender instanceof Player)
                     willTryToLoad = loadAndReexecute(args[1], (Player) sender, command, args);
-            } else if (args.length > 2 && args[args.length - 2].equalsIgnoreCase("-p") && (sender.hasPermission("archecore.mod.other"))) {
+            } else if (args.length > 2 && args[args.length - 2].equalsIgnoreCase("-p") 
+            		&& (sender.hasPermission("archecore.mod.other"))) {
                 opers = CommandUtil.personaFromArg(args[args.length - 1]);
                 if (opers == null && sender instanceof Player)
                     willTryToLoad = loadAndReexecute(args[args.length - 1], (Player) sender, command, args);
@@ -494,13 +495,8 @@ public class CommandPersona implements CommandExecutor {
                         if (sender instanceof Player) {
                             Player pl = (Player) sender;
                             pl.closeInventory();
-                            Inventory inv = pers.getInventory();
-                            if (inv == null)
-                                sender.sendMessage(ChatColor.RED + "This persona is currently active! Please use /openinv <player>");
-                            else {
-                                sender.sendMessage(ChatColor.AQUA + "Opening inventory contents for " + pers.getName() + ".");
-                                pl.openInventory(pers.getInventory());
-                            }
+                            sender.sendMessage(ChatColor.AQUA + "Opening inventory contents for " + pers.getName() + ".");
+                            pl.openInventory(pers.getInventory());
 
                         } else {
                             sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
@@ -511,13 +507,8 @@ public class CommandPersona implements CommandExecutor {
                             Player pl = (Player) sender;
                             pl.closeInventory();
                             Inventory inv = pers.getEnderChest();
-                            if (inv == null) {
-                                sender.sendMessage(ChatColor.RED + "Something went wrong opening the enderchest.");
-                            } else {
-                                sender.sendMessage(ChatColor.AQUA + "Opening enderchest contents for " + pers.getName() + ".");
-                                pl.openInventory(inv);
-                            }
-
+                            sender.sendMessage(ChatColor.AQUA + "Opening enderchest contents for " + pers.getName() + ".");
+                            pl.openInventory(inv);
                         } else {
                             sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
                         }
@@ -529,7 +520,7 @@ public class CommandPersona implements CommandExecutor {
                             sender.sendMessage(ChatColor.RED + "None!");
                         } else {
                             for (Map.Entry<String, TagAttachment> ent : pers.tags().getTagMap().entrySet()) {
-                                sender.sendMessage(ChatColor.BLUE + ent.getKey() + ": " + ChatColor.GRAY + (ent.getValue().getValue().isEmpty() ? "Empty" : ent.getValue()));
+                                sender.sendMessage(ChatColor.BLUE + ent.getKey() + ": \"" + ChatColor.GRAY + ent.getValue().getValue() + '"') ;
                             }
                         }
                         return true;
@@ -635,7 +626,9 @@ public class CommandPersona implements CommandExecutor {
                 ArchePersona persona = (ArchePersona) offlinePersona.loadPersona();
                 Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> {
                     ArchePersonaHandler.getInstance().getPersonaStore().addOnlinePersona(persona);
-                    caller.performCommand(command.getName() + ' ' + StringUtils.join(args, ' '));
+                    String cmd = command.getName() + ' ' + StringUtils.join(args, ' ');
+                    System.out.println(cmd);
+                    caller.performCommand(cmd);
                 });
             }
         }.runTaskAsynchronously(ArcheCore.getPlugin());

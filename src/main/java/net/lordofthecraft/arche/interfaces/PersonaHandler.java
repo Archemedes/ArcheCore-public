@@ -62,6 +62,21 @@ public interface PersonaHandler {
 	 * @return Current Persona, or 'null' if not found.
 	 */
 	Persona getPersona(OfflinePlayer p);
+	
+	/**
+	 * Method that will return an (Offline)Persona, the player's current Persona, regardless of player login status
+	 * @param player Player UUID
+	 * @return Player's current Persona, or null if no current persona can be found
+	 */
+	OfflinePersona getOfflinePersona(UUID player);
+	
+	/**
+	 * Method that will return an (Offline)Persona, at a given slot, regardless of player login status
+	 * @param player Player UUID
+	 * @param slot the persona slot
+	 * @return Player's current Persona, or null if no current persona can be found
+	 */
+	OfflinePersona getOfflinePersona(UUID player, int slot);
 
     /**
      * Gets the person by the <b>Persona ID</b> - This <i>is not</i> a player UUID. Persona UUID is unique to each persona

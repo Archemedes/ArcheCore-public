@@ -578,12 +578,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		if (current && getPlayer() != null) {
 			return getPlayer().getInventory();
 		} else {
-			if (inv == null || inv.getContents() == null) {
-				return null;
-			}
-            Inventory binv = Bukkit.createInventory(this, InventoryType.PLAYER.getDefaultSize(), "Persona Inventory: " + player + "@" + getSlot());
-            binv.setContents(inv.getContents());
-			return binv;
+			return inv.getInventory();
 		}
 	}
 
@@ -592,12 +587,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         if (current && getPlayer() != null) {
             return getPlayer().getEnderChest();
         } else {
-            if (inv == null || inv.getEnderContents() == null) {
-                return null;
-            }
-            Inventory einv = Bukkit.createInventory(this, InventoryType.ENDER_CHEST.getDefaultSize(), "Persona Enderchest: " + player + "@" + getSlot());
-            einv.setContents(inv.getEnderContents());
-            return einv;
+        	return inv.getEnderInventory();
         }
     }
 

@@ -25,8 +25,6 @@ public class BiomeSwitcher{
 		final boolean isWinter = calendar.getMonth().getSeason() == Season.WINTER;
 		this.winter = new AtomicBoolean(isWinter);
 		this.switchBiomes = switchBiomes;
-		
-		System.out.println("SwitchBiomes: " + switchBiomes);
 	}
 	
 	public void startListening() {
@@ -99,7 +97,7 @@ public class BiomeSwitcher{
 		public ChunkInfo(final Player player, final int chunkMask, final int extraMask, final boolean hasContinous, final byte[] data, final int startIndex) {
 			super();
 			this.player = player;
-			this.chunkMask = chunkMask;
+			this.chunkMask = chunkMask;	
 			this.extraMask = extraMask;
 			this.hasContinous = hasContinous;
 			this.data = data;
