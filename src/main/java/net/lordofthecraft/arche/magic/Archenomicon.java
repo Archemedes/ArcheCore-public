@@ -252,7 +252,7 @@ public class Archenomicon {
     }
 
     public Set<Magic> listMagicsByArchetype(MagicType type) {
-        return magics.parallelStream().filter(m -> m.getType().equals(type)).collect(Collectors.toSet());
+        return magics.stream().filter(m -> m.getType().equals(type)).collect(Collectors.toSet());
     }
 
     public Set<Magic> getMagics() {

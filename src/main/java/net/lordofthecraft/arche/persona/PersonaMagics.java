@@ -58,7 +58,7 @@ public class PersonaMagics {
     public BaseComponent[] getMagicText() {
         ComponentBuilder b = new ComponentBuilder("");
         AtomicBoolean start = new AtomicBoolean(true);
-        magics.parallelStream().filter(MagicAttachment::isVisible).forEach(m -> {
+        magics.stream().filter(MagicAttachment::isVisible).forEach(m -> {
             if (!start.get()) {
                 b.append(new TextComponent[]{new TextComponent(ChatColor.DARK_GRAY + ",")});
             }

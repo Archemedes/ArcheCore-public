@@ -519,7 +519,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		p.setFoodLevel(food);
         p.setSaturation(saturation);
         //Add their potion effects back :)
-        p.getActivePotionEffects().parallelStream().forEach(e -> p.removePotionEffect(e.getType()));
+        p.getActivePotionEffects().stream().forEach(e -> p.removePotionEffect(e.getType()));
         effects.forEach(e -> e.apply(p));
     }
 

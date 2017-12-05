@@ -98,6 +98,6 @@ public class BlockRegistry {
      */
     public Optional<String> getData(Block b) {
         WeakBlock wb = new WeakBlock(b);
-        return data.entrySet().parallelStream().filter(ent -> ent.getKey().equals(wb)).map(Map.Entry::getValue).findFirst();
+        return data.entrySet().stream().filter(ent -> ent.getKey().equals(wb)).map(Map.Entry::getValue).findFirst();
     }
 }

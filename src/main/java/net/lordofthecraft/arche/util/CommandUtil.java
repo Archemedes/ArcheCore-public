@@ -82,7 +82,10 @@ public class CommandUtil {
 
 	private static Persona getPreloadedPersonaFromName(String name) {
 		PersonaHandler hand = ArcheCore.getControls().getPersonaHandler();
-        for (Persona persona : hand.getPersonas().parallelStream().filter(ArcheOfflinePersona::isLoaded).map(ArchePersona.class::cast).collect(Collectors.toList())) {
+        for (Persona persona : hand.getPersonas().stream()
+        		.filter(ArcheOfflinePersona::isLoaded)
+        		.map(ArchePersona.class::cast)
+        		.collect(Collectors.toList())) {
             if (persona == null) continue;
             else if (persona.getPlayerName().equals(name)) return persona;
             else break;

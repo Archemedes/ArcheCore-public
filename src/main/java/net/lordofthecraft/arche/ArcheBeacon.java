@@ -66,7 +66,7 @@ public class ArcheBeacon {
 				m.setDisplayName(ChatColor.AQUA + "Persona Modifiers:");
 				
 				List<String> lore = new ArrayList<>();
-                pers.attributes().getExistingInstances().parallelStream().forEach(aa ->
+                pers.attributes().getExistingInstances().stream().forEach(aa ->
                         pers.attributes().getInstance(aa).getModifiers().stream()
                                 .map(ExtendedAttributeModifier.class::cast)
                                 .forEach(mod-> lore.add(

@@ -61,7 +61,7 @@ public class CommandPersonaTabCompleter implements TabCompleter {
                     } else if (commandSender instanceof Player) {
                         Player pl = (Player) commandSender;
                         if (pscmd == CommandPersona.PersonaCommand.PROFESSION) {
-                            return ArcheSkillFactory.getSkills().values().parallelStream().filter(m -> m.isVisible(pl)).map(ArcheSkill::getName).filter(ss -> args[1].isEmpty() || ss.startsWith(args[1].toUpperCase())).collect(Collectors.toList());
+                            return ArcheSkillFactory.getSkills().values().stream().filter(m -> m.isVisible(pl)).map(ArcheSkill::getName).filter(ss -> args[1].isEmpty() || ss.startsWith(args[1].toUpperCase())).collect(Collectors.toList());
                         }
 
                     }
@@ -88,7 +88,7 @@ public class CommandPersonaTabCompleter implements TabCompleter {
     private List<String> getValuesForPlayer(String username) {
         Player pl = Bukkit.getPlayerExact(username);
         if (pl == null) {
-            return Bukkit.getOnlinePlayers().parallelStream()
+            return Bukkit.getOnlinePlayers().stream()
                     .filter(ArcheCore::hasPersona)
                     .map(Player::getName)
                     .filter(ss -> username.isEmpty() || ss.startsWith(username))
