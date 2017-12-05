@@ -228,12 +228,12 @@ public class ArchePersonaHandler implements PersonaHandler {
             SkinCache.getInstance().clearSkin(oldPersona);
         }
 
-        consumer.queueRow(new InsertPersonaRow(persona));
+        Player p = persona.getPlayer();
+        consumer.queueRow(new InsertPersonaRow(persona, p.getLocation()));
 
         RaceBonusHandler.apply(persona);
         persona.updateDisplayName();
 
-        Player p = persona.getPlayer();
         switchPersona(p, persona.getSlot()); //This teleport will fail due to the Location being null still
 
 		if (ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn

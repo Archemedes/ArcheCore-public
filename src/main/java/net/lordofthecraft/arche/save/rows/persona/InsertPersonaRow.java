@@ -1,16 +1,24 @@
 package net.lordofthecraft.arche.save.rows.persona;
 
+import java.sql.Timestamp;
+import java.util.UUID;
+
+import org.bukkit.Location;
+
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.rows.MultiStatementRow;
-
-import java.sql.Timestamp;
+import net.lordofthecraft.arche.util.WeakBlock;
 
 public class InsertPersonaRow extends MultiStatementRow {
     private final Persona persona;
+    private final UUID world;
+    private final WeakBlock location;
     private final Timestamp now;
 
-    public InsertPersonaRow(Persona persona) {
+    public InsertPersonaRow(Persona persona, Location l) {
         this.persona = persona;
+        world = l.getWorld().getUID();
+        location = new WeakBlock(l);
         now = now();
     }
 
@@ -18,7 +26,8 @@ public class InsertPersonaRow extends MultiStatementRow {
     protected String[] getStatements() {
         return new String[]{
                 "INSERT INTO persona(persona_id,player_fk,slot,race,name,gender,last_played) VALUES (?,?,?,?,?,?,?)",
-                "INSERT INTO persona_stats(persona_id_fk,renamed,date_created) VALUES (?,?,?)"
+                "INSERT INTO persona_stats(persona_id_fk,renamed,date_created) VALUES (?,?,?)",
+                "INSERT INTO persona_vitals(persona_id_fk,world,x,y,z) VALUES (?,?,?,?,?)"
         };
     }
 
@@ -43,7 +52,7 @@ public class InsertPersonaRow extends MultiStatementRow {
                 default:
                     throw new IllegalArgumentException();
             }
-        } else { //The stats statement
+        } else if (statement == 2) { //The stats statement
             switch (index) {
                 case 1:
                     return persona.getPersonaId();
@@ -53,6 +62,15 @@ public class InsertPersonaRow extends MultiStatementRow {
                     return now;
                 default:
                     throw new IllegalArgumentException();
+            }
+        } else { // persona vitals statement
+            switch (index) {
+            case 1: return persona.getPersonaId();
+            case 2: return world;
+            case 3: return location.getX();
+            case 4: return location.getY();
+            case 5: return location.getZ();
+            default: throw new IllegalArgumentException();
             }
         }
     }

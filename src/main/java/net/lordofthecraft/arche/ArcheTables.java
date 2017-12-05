@@ -261,7 +261,7 @@ public final class ArcheTables {
                 "inv TEXT," +
                 "ender_inv TEXT," +
                 "potions TEXT DEFAULT NULL," +
-                "health DOUBLE DEFAULT 10.0," +
+                "health DOUBLE DEFAULT 20.0," +
                 "hunger INT DEFAULT 20," +
                 "saturation FLOAT DEFAULT 0.0," +
                 "creature VARCHAR(255) DEFAULT NULL," +

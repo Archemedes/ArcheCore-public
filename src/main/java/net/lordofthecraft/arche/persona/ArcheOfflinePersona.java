@@ -8,7 +8,6 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.PersonaTags;
 import net.lordofthecraft.arche.util.MessageUtil;
-import net.lordofthecraft.arche.util.SQLUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -151,26 +150,16 @@ public class ArcheOfflinePersona implements OfflinePersona {
         PersonaStore store = ArchePersonaHandler.getInstance().getPersonaStore();
         String select = store.personaSelect + " AND persona_id=?";
         
-        ResultSet rs = null;
-        
         try (Connection connection = ArcheCore.getSQLControls().getConnection();
              PreparedStatement statement = connection.prepareStatement(select)) {
         	statement.setString(1, getPlayerUUID().toString());
         	statement.setInt(2, getPersonaId());
-        	rs = statement.executeQuery();
+        	ResultSet rs = statement.executeQuery(); //closed when PrepStat is closed
         	
             return store.buildPersona(rs, this.getPlayer(), this);
         } catch (SQLException e) {
             throw new RuntimeException(e); //zero fucks given
-        } finally {
-        	try {
-				System.out.println("Is closed? " + rs.isClosed());
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
         }
-        
     }
 
     @Override

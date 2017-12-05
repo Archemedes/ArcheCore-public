@@ -31,7 +31,6 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.PlayerInventory;
@@ -440,7 +439,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         attributes.handleSwitch(false);
     }
 
-    String savePotionEffects(Player pl) {
+    private String savePotionEffects(Player pl) {
         effects = Lists.newArrayList(pl.getActivePotionEffects());
         YamlConfiguration config = new YamlConfiguration();
         List<Map<String, Object>> contentslist = Lists.newArrayList();
