@@ -384,7 +384,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         inv = PersonaInventory.store(this);
         location = new WeakBlock(p.getLocation());
         String pots = savePotionEffects(p);
-        ArcheCore.getPlugin().getLogger().info("Player world is " + p.getWorld().getName() + " which has a UID of " + p.getWorld().getUID().toString());
+        if(ArcheCore.isDebugging()) ArcheCore.getPlugin().getLogger().info("Player world is " + p.getWorld().getName() + " which has a UID of " + p.getWorld().getUID().toString());
         consumer.queueRow(new UpdateVitalsRow(this, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv, pots));
         attributes.handleSwitch(false);
     }

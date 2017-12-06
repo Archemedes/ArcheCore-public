@@ -42,7 +42,6 @@ public class ProtocolUtil {
 		try {
 			manager.sendServerPacket(p, packet);
 			manager.sendServerPacket(p, teleport);
-			
 			//Some wizardry here to make the right amount of hearts how up
 			if(p.getGameMode() == GameMode.ADVENTURE || p.getGameMode() == GameMode.SURVIVAL) {
 				boolean toggle = p.isHealthScaled();

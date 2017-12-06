@@ -56,7 +56,7 @@ public class SkinCache {
 	private int refreshThresholdInHours = 15;
 	
 	private ArcheSkin savePlayerSkin(Player p, int index) throws UnsupportedEncodingException, ParseException {
-		WrappedGameProfile profile = WrappedGameProfile.fromPlayer(p); //Protocollib for version independence	}
+		WrappedGameProfile profile = WrappedGameProfile.fromPlayer(p); //Protocollib for version independence
 		Multimap<String, WrappedSignedProperty> properties = profile.getProperties();
 		String encodedValue = properties.get("textures").stream() //Should be only 1
                 .map(WrappedSignedProperty::getValue)
@@ -164,7 +164,6 @@ public class SkinCache {
 		.filter(x -> (x != p))
 		.filter(x -> x.canSee(p))
 		.forEach(x -> {x.hidePlayer(p); x.showPlayer(p);});
-		
 		
 		final ProtocolManager manager = ProtocolLibrary.getProtocolManager();
 		
