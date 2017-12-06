@@ -33,8 +33,10 @@ public class RaceBonusHandler {
         
         if (!ArcheCore.getPlugin().areRacialBonusesEnabled()) return;
         
+        
         Race race = p.getRace();
         Player player = p.getPlayer();
+        reset(player);
         switch (race) {
         case HIGH_ELF:
         case WOOD_ELF:
