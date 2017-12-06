@@ -34,7 +34,7 @@ public class ArchePersonaTags implements PersonaTags {
         forOffline = isForOffline;
         while (rs.next()) {
             String key = rs.getString("tag_key");
-            TagAttachment att = new TagAttachment(key, rs.getString("tag_value"), rs.getBoolean("offline"));
+            TagAttachment att = new TagAttachment(key, rs.getString("tag_value"), forOffline);
             tags.put(key, att);
         }
 
