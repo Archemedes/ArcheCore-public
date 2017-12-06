@@ -85,7 +85,8 @@ public final class ArcheTables {
             }
             toreturn = true;
         } catch (Exception e) {
-            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to create Archecore.db! Stopping!", e);
+        	ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to create Archecore.db! Stopping!", e);
+        	e.printStackTrace();
             toreturn = false;
         } finally {
             try {
@@ -178,7 +179,7 @@ public final class ArcheTables {
                 "hunger INT DEFAULT 20," +
                 "saturation FLOAT DEFAULT 0.0," +
                 "PRIMARY KEY (persona_id_fk)," +
-                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT" +
                 ")" +
                 end);
     }
