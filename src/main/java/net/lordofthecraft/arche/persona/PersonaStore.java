@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,9 +38,7 @@ import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.interfaces.Magic;
 import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.PersonaTable;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
@@ -326,8 +323,6 @@ public class PersonaStore {
         persona.lastRenamed = res.getTimestamp(PersonaField.STAT_RENAMED.field());
 
         persona.skills().setMainProfession(ArcheSkillFactory.getSkill(res.getString(PersonaField.SKILL_SELECTED.field())));
-        /*Optional<Creature> creature = ArcheCore.getMagicControls().getCreatureById(res.getString("creature"));
-        creature.ifPresent(persona.magics()::setCreature);*/
 
         String invString = res.getString(PersonaField.INV.field());
         String enderinvString = res.getString(PersonaField.ENDERINV.field());
@@ -345,7 +340,6 @@ public class PersonaStore {
         }
 
         Connection connection = ArcheCore.getSQLControls().getConnection();
-        loadMagics(persona, connection);
         loadTags(persona, connection, false);
         loadAttributes(persona, connection);
         loadSkills(persona, connection);
@@ -353,29 +347,6 @@ public class PersonaStore {
         connection.close();
 
         return persona;
-    }
-
-    private void loadMagics(ArchePersona persona, Connection c) {
-        String sql = "SELECT magic_fk,tier,last_advanced,teacher,learned,visible FROM persona_magics WHERE persona_id_fk=" + persona.getPersonaId();
-
-        try (Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)) {
-            while (rs.next()) {
-                MagicData data = null;
-                String magic = rs.getString("magic_fk");
-                Optional<Magic> armagic = ArcheCore.getMagicControls().getMagic(magic);
-                if (armagic.isPresent()) {
-                    int tier = rs.getInt("tier");
-                    Timestamp last_advanced = rs.getTimestamp("last_advanced");
-                    Timestamp learned = rs.getTimestamp("learned");
-                    Integer teacher = rs.getInt("teacher");
-                    boolean visible = rs.getBoolean("visible");
-                    data = new MagicData(armagic.get(), tier, visible, teacher != null && teacher > 0, (teacher), learned.toInstant().toEpochMilli(), last_advanced.toInstant().toEpochMilli());
-                    persona.magics().addMagicAttachment(new MagicAttachment(armagic.get(), persona, data));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     private void loadTags(ArcheOfflinePersona persona, Connection c, boolean offline) {

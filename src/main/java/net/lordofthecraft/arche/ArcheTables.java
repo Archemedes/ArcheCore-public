@@ -44,19 +44,7 @@ public final class ArcheTables {
             createPersonaStatsTable(statement, end);
             if (debug) l.info("[Debug] Done with persona stats! Creating persona tags...");
             createPersonaTagsTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona tags! Creating archetypes...");
-            createArchetypeTable(statement, end);
-            if (debug) l.info("[Debug] Done with archetypes! Creating magics...");
-            createMagicTable(statement, end);
-            if (debug) l.info("[Debug] Done with magics! Creating weaknesses....");
-            createMagicWeaknesses(statement, end);
-            if (debug) l.info("[Debug] Done with weaknesses! Creating creatures...");
-            createCreaturesTable(statement, end);
-            if (debug) l.info("[Debug] Done with creatures! Creating creature creators...");
-            createCreatureCreators(statement, end);
-            if (debug) l.info("[Debug] Done with creature creators! Creating creature abilities...");
-            createCreatureAbilities(statement, end);
-            if (debug) l.info("[Debug] Done with creature abilities! Creating persona vitals...");
+            if (debug) l.info("[Debug] Done with persona tags! Creating persona vitals...");
             createPersonaVitalsTable(statement, end);
             if (debug) l.info("[Debug] Done with persona vitals! Creating persona attributes...");
             createPersonaAttributes(statement, end);
@@ -64,9 +52,7 @@ public final class ArcheTables {
             createRacialSkillsTable(statement, end);
             if (debug) l.info("[Debug] Done with racial skills! Creating persona skills...");
             createPersonaSkillsTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona skills! Creating persona magics...");
-            createPersonaMagicsTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona magics! Creating persona names...");
+            if (debug) l.info("[Debug] Done with persona skills! Creating persona names...");
             createPersonaNamesTable(statement, end);
             if (debug) l.info("[Debug] Done with persona names! Creating persona spawns...");
             createPersonaSpawnsTable(statement, end);
@@ -178,79 +164,6 @@ public final class ArcheTables {
                 end);
     }
 
-    protected static void createArchetypeTable(Statement statement, String end) throws SQLException {
-        statement.execute("CREATE TABLE IF NOT EXISTS magic_archetypes (" +
-                "id_key VARCHAR(255)," +
-                "name TEXT NOT NULL," +
-                "parent_type VARCHAR(255) DEFAULT NULL," +
-                "descr TEXT DEFAULT NULL," +
-                "PRIMARY KEY (id_key)," +
-                "FOREIGN KEY (parent_type) REFERENCES magic_archetypes (id_key) ON UPDATE CASCADE ON DELETE RESTRICT" +
-                ")" +
-                end);
-    }
-
-    protected static void createMagicTable(Statement statement, String end) throws SQLException {
-        statement.execute("CREATE TABLE IF NOT EXISTS magics (" +
-                "id_key VARCHAR(255)," +
-                "max_tier INT DEFAULT 5," +
-                "extra_tier BOOLEAN DEFAULT FALSE," +
-                "self_teach BOOLEAN DEFAULT FALSE," +
-                "teachable BOOLEAN DEFAULT TRUE," +
-                "description TEXT DEFAULT NULL," +
-                "label TEXT NOT NULL," +
-                "days_to_max INT UNSIGNED DEFAULT 120," +
-                "days_to_extra INT UNSIGNED DEFAULT 0," +
-                "archetype VARCHAR(255) NOT NULL," +
-                "PRIMARY KEY (id_key)," +
-                "FOREIGN KEY (archetype) REFERENCES magic_archetypes (id_key) ON UPDATE CASCADE ON DELETE RESTRICT" +
-                ")" +
-                end);
-    }
-
-    protected static void createCreaturesTable(Statement statement, String end) throws SQLException {
-        statement.execute("CREATE TABLE IF NOT EXISTS magic_creatures (" +
-                "id_key VARCHAR(255)," +
-                "name TEXT NOT NULL," +
-                "descr TEXT DEFAULT NULL," +
-                "PRIMARY KEY (id_key)" +
-                ")" +
-                end);
-    }
-
-    protected static void createMagicWeaknesses(Statement statement, String end) throws SQLException {
-        statement.execute("CREATE TABLE IF NOT EXISTS magic_weaknesses (" +
-                "fk_source_magic VARCHAR(255)," +
-                "fk_weakness_magic VARCHAR(255)," +
-                "modifier FLOAT DEFAULT 1.0," +
-                "PRIMARY KEY (fk_source_magic,fk_weakness_magic)," +
-                "FOREIGN KEY (fk_source_magic) REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE," +
-                "FOREIGN KEY (fk_weakness_magic) REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE" +
-                ")" +
-                end);
-    }
-
-    protected static void createCreatureCreators(Statement statement, String end) throws SQLException {
-        statement.execute("CREATE TABLE IF NOT EXISTS creature_creators (" +
-                "magic_id_fk VARCHAR(255)," +
-                "creature_fk VARCHAR(255)," +
-                "PRIMARY KEY (magic_id_fk,creature_fk)," +
-                "FOREIGN KEY (magic_id_fk) REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE," +
-                "FOREIGN KEY (creature_fk) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE CASCADE" +
-                ")" +
-                end);
-    }
-
-    protected static void createCreatureAbilities(Statement statement, String end) throws SQLException {
-        statement.execute("CREATE TABLE IF NOT EXISTS creature_abilities (" +
-                "creature_fk VARCHAR(255)," +
-                "ability VARCHAR(255)," +
-                "PRIMARY KEY (creature_fk,ability)," +
-                "FOREIGN KEY (creature_fk) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE CASCADE" +
-                ")" +
-                end);
-    }
-
     protected static void createPersonaVitalsTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS persona_vitals (" +
                 "persona_id_fk INT UNSIGNED," +
@@ -264,10 +177,8 @@ public final class ArcheTables {
                 "health DOUBLE DEFAULT 20.0," +
                 "hunger INT DEFAULT 20," +
                 "saturation FLOAT DEFAULT 0.0," +
-                "creature VARCHAR(255) DEFAULT NULL," +
                 "PRIMARY KEY (persona_id_fk)," +
                 "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT," +
-                "FOREIGN KEY (creature) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE RESTRICT" +
                 ")" +
                 end);
     }
@@ -324,23 +235,6 @@ public final class ArcheTables {
                 "racial_mod DOUBLE DEFAULT 1.0," +
                 "PRIMARY KEY (skill_id_fk,race)," +
                 "FOREIGN KEY (skill_id_fk) REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE CASCADE" +
-                ")" +
-                end);
-    }
-
-    protected static void createPersonaMagicsTable(Statement statement, String end) throws SQLException {
-        statement.execute("CREATE TABLE IF NOT EXISTS persona_magics (" +
-                "magic_fk VARCHAR(255)," +
-                "persona_id_fk INT UNSIGNED," +
-                "tier INT DEFAULT 0," +
-                "last_advanced TIMESTAMP," +
-                "teacher INT UNSIGNED," +
-                "learned TIMESTAMP," +
-                "visible BOOLEAN DEFAULT TRUE," +
-                "PRIMARY KEY (magic_fk,persona_id_fk)," +
-                "FOREIGN KEY (magic_fk) REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE RESTRICT," +
-                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT," +
-                "FOREIGN KEY (teacher) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE SET NULL" +
                 ")" +
                 end);
     }
@@ -438,7 +332,6 @@ public final class ArcheTables {
                 "health DOUBLE DEFAULT 10.0," +
                 "hunger INT DEFAULT 20," +
                 "saturation FLOAT DEFAULT 0.0," +
-                "creature VARCHAR(255) DEFAULT NULL," +
                 "played INT UNSIGNED DEFAULT 0," +
                 "chars INT UNSIGNED DEFAULT 0," +
                 "renamed TIMESTAMP," +
@@ -455,19 +348,6 @@ public final class ArcheTables {
                 "xp DOUBLE DEFAULT 0.0," +
                 "visible BOOLEAN DEFAULT TRUE," +
                 "PRIMARY KEY (persona_id_fk,skill_id_fk)," +
-                "FOREIGN KEY (persona_id_fk) REFERENCES persona_log (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT" +
-                ")" +
-                end);
-
-        statement.execute("CREATE TABLE IF NOT EXISTS persona_magics_log (" +
-                "magic_fk VARCHAR(255)," +
-                "persona_id_fk INT UNSIGNED," +
-                "tier INT DEFAULT 0," +
-                "last_advanced TIMESTAMP," +
-                "teacher CHAR(36)," +
-                "learned TIMESTAMP," +
-                "visible BOOLEAN DEFAULT TRUE," +
-                "PRIMARY KEY (persona_id_fk,magic_fk)," +
                 "FOREIGN KEY (persona_id_fk) REFERENCES persona_log (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT" +
                 ")" +
                 end);
@@ -504,20 +384,18 @@ public final class ArcheTables {
                         "DETERMINISTIC " +
                         "COMMENT 'Logs and deletes persona entries based off of a persona ID number.' " +
                         "BEGIN " +
-                        "INSERT INTO persona_log(persona_id,player_fk,slot,race,name,race_header,gender,p_type,descr,prefix,curr,money,skin,profession,fatigue,world,x,y,z,inv,ender_inv,potions,health,hunger,saturation,creature,played,chars,renamed,playtime_past,date_created,last_played) " +
-                        "SELECT persona_id,player_fk,slot,race,name,race_header,gender,p_type,descr,prefix,curr,money,skin,profession,fatigue,world,x,y,z,inv,ender_inv,health,hunger,saturation,creature,played,chars,renamed,playtime_past,date_created,last_played " +
+                        "INSERT INTO persona_log(persona_id,player_fk,slot,race,name,race_header,gender,p_type,descr,prefix,curr,money,skin,profession,fatigue,world,x,y,z,inv,ender_inv,potions,health,hunger,saturation,played,chars,renamed,playtime_past,date_created,last_played) " +
+                        "SELECT persona_id,player_fk,slot,race,name,race_header,gender,p_type,descr,prefix,curr,money,skin,profession,fatigue,world,x,y,z,inv,ender_inv,health,hunger,saturation,played,chars,renamed,playtime_past,date_created,last_played " +
                         "FROM persona JOIN persona_vitals ON persona.persona_id = persona_vitals.persona_id_fk " +
                         "JOIN persona_stats ON persona.persona_id = persona_stats.persona_id_fk " +
                         "WHERE persona.persona_id = pers_id; " +
                         "INSERT INTO persona_skills_log(persona_id_fk,skill_id_fk,xp,visible) SELECT persona_id_fk,skill_id_fk,xp,visible FROM persona_skills WHERE persona_id_fk = pers_id; " +
-                        "INSERT INTO persona_magics_log(magic_fk,persona_id_fk,tier,teacher,learned,visible) SELECT magic_fk,persona_id_fk,tier,teacher,learned,visible FROM persona_magics WHERE persona_id_fk = pers_id; " +
                         "INSERT INTO persona_tags_log(persona_id_fk,tag_key,tag_value) SELECT persona_id_fk,tag_key,tag_value FROM persona_tags WHERE persona_id_fk = pers_id; " +
                         "INSERT INTO persona_attributes_log(mod_uuid,persona_id_fk,attribute_type,mod_name,mod_value,operation,created,decaytime) SELECT mod_uuid,persona_id_fk,attribute_type,mod_name,operation,created,decaytime FROM persona_attributes WHERE persona_id_fk = pers_id; " +
                         "DELETE FROM persona_stats WHERE persona_id_fk = pers_id; " +
                         "DELETE FROM persona_vitals WHERE persona_id_fk = pers_id; " +
                         "DELETE FROM persona_tags WHERE persona_id_fk = pers_id; " +
                         "DELETE FROM persona_skills WHERE persona_id_fk = pers_id; " +
-                        "DELETE FROM persona_magics WHERE persona_id_fk = pers_id; " +
                         "DELETE FROM persona_attributes WHERE persona_id_fk = pers_id; " +
                         "DELETE FROM persona WHERE persona_id = pers_id; " +
                         "END");

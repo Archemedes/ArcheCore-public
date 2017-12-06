@@ -13,10 +13,7 @@ import net.lordofthecraft.arche.event.persona.PersonaRenameEvent;
 import net.lordofthecraft.arche.event.persona.PersonaSwitchEvent;
 import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
-import net.lordofthecraft.arche.magic.ArcheMagic;
-import net.lordofthecraft.arche.magic.MagicData;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.rows.magic.insert.MagicInsertRow;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.NamelogRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
@@ -48,7 +45,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
 
     private final PersonaSkills skills = new PersonaSkills(this);
-    private final PersonaMagics magics = new PersonaMagics(this);
     private final PersonaAttributes attributes = new PersonaAttributes(this);
     
 	final Map<String,Object> sqlCriteria;
@@ -66,7 +62,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     float saturation = 0;
     double health = 20;
     PersonaInventory inv;
-    private Creature creature;
     private WeakReference<Player> playerObject;
     
     ArcheSkin skin;
@@ -163,11 +158,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		return current;
 	}
 
-    @Override
-    public PersonaMagics magics() {
-        return magics;
-    }
-
     void setCurrent(boolean current) {
         if (this.current != current) {
 
@@ -183,34 +173,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
                }
             }
         }
-    }
-
-	void removeMagicAttachment(Magic magic) {
-        magics.removeMagicAttachment(magic);
-    }
-
-	public Optional<MagicAttachment> getMagicAttachment(Magic m) {
-        return magics.getMagicAttachment(m);
-    }
-
-	@Override
-	public boolean hasMagic(Magic m) {
-        return magics.hasMagic(m);
-    }
-
-	@Override
-	public boolean hasAchievedMagicTier(Magic m, int tier) {
-        return magics.achievedTier(m, tier);
-    }
-
-	@Override
-    public Optional<MagicAttachment> createAttachment(Magic m, int tier, Persona teacher, boolean visible) {
-        if (magics.hasMagic(m)) {
-            return getMagicAttachment(m);
-        }
-        MagicData data = new MagicData(m, tier, visible, teacher != null, (teacher == null ? null : teacher.getPersonaId()), System.currentTimeMillis(), System.currentTimeMillis());
-        consumer.queueRow(new MagicInsertRow(this, (ArcheMagic) m, tier, (teacher == null ? null : teacher.getPersonaId()), visible));
-        return Optional.of(new MagicAttachment(m, this, data));
     }
 
 	@Override
@@ -303,19 +265,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     @Override
     public String getRaceString(boolean mod) {
         StringBuilder sb = new StringBuilder();
-        if (magics.hasCreature()) {
-            sb.append(magics.getCreature().getName()).append(" ");
-            if (mod) {
-                sb.append(ChatColor.GRAY);
-                String end = "";
-                if (raceHeader != null && !raceHeader.isEmpty()) {
-                    sb.append("[").append(raceHeader).append(" ");
-                    end = ChatColor.GRAY + "]";
-                }
-                sb.append(ChatColor.DARK_GRAY).append("(").append(race.getName()).append(")");
-                sb.append(end);
-            }
-        } else if (raceHeader != null && !raceHeader.isEmpty()) {
+        if (raceHeader != null && !raceHeader.isEmpty()) {
             if (mod) {
                 sb.append(ChatColor.GRAY).append("(").append(race.getName()).append(") ");
             }

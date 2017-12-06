@@ -1,16 +1,13 @@
 package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.enums.PersonaType;
-import net.lordofthecraft.arche.persona.MagicAttachment;
 import net.lordofthecraft.arche.persona.PersonaAttributes;
-import net.lordofthecraft.arche.persona.PersonaMagics;
 import net.lordofthecraft.arche.persona.PersonaSkills;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import java.sql.Timestamp;
-import java.util.Optional;
 import java.util.Set;
 
 public interface Persona extends OfflinePersona {
@@ -43,13 +40,6 @@ public interface Persona extends OfflinePersona {
      * @return The personaAttributes object
      */
     PersonaAttributes attributes();
-
-    /**
-     * Retrieve the object which stores a persona's magic data
-     *
-     * @return the PersonaMagic object
-     */
-    PersonaMagics magics();
     
 	/**
 	 * A method that retrieves the Persona's 'main' skill or profession, which they can set for RP purposes.
@@ -62,36 +52,6 @@ public interface Persona extends OfflinePersona {
 	 * @param profession The skill to be set as main.
 	 */
 	void setMainSkill(Skill profession);
-
-    /**
-     * See if this persona has a specific magic
-	 *
-	 * @param magic The magic to check for
-	 * @return Whether or not the persona has this Magic
-	 */
-	boolean hasMagic(Magic magic);
-
-	/**
-	 * Check to see if this persona has reached a specific tier of a specific magic
-	 *
-	 * @param magic The magic to check the tier of
-	 * @param tier  The tier level to check if it has been achieved
-	 * @return Whether or not the persona has achieved this tier. Will return false if the persona doesn't have this magic.
-	 */
-	boolean hasAchievedMagicTier(Magic magic, int tier);
-
-	/**
-	 * Teach a persona a magic.
-	 *
-	 * @param magic   The magic for the persona to learn
-	 * @param tier    The tier the persona should be at in this magic
-	 * @param teacher The nullable persona which taught this persona
-	 * @param visible Whether or not this magic should be visible on the character card
-	 * @return An Optional wrapped Future value of the MagicAttachment
-	 * @see java.util.Optional View this to see more information on Optionals and how they work
-	 * @see java.util.concurrent.Future View this to see more information on Futures and how they work
-	 */
-    Optional<MagicAttachment> createAttachment(Magic magic, int tier, Persona teacher, boolean visible);
 
     /**
      * Set a Persona's year of birth

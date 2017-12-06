@@ -404,10 +404,7 @@ public class ArchePersonaHandler implements PersonaHandler {
     private List<BaseComponent> getExtendedWhoisInfo(OfflinePersona op, boolean mod) {
         //Possible to move 'profession' back here
         List<BaseComponent> components = Lists.newArrayList();
-        if (op.isLoaded()) {
-            Persona p = (Persona) op;
-            if(p.magics().isMagical()) components.addAll(Arrays.asList(p.magics().getMagicText()));
-        }
+
         return components;
     }
 
@@ -512,10 +509,6 @@ public class ArchePersonaHandler implements PersonaHandler {
         } finally {
             SQLUtil.closeStatement(rs);
         }
-    }
-
-	public void removeMagic(Magic magic) {
-        store.getLoadedPersonas().forEach(pers -> pers.removeMagicAttachment(magic));
     }
 
 	@Override

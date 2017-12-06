@@ -64,68 +64,6 @@ CREATE TABLE IF NOT EXISTS persona (
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS magic_archetypes (
-    id_key      VARCHAR(255),
-    name        TEXT NOT NULL,
-    parent_type VARCHAR(255) DEFAULT NULL,
-    descr       TEXT DEFAULT NULL,
-    PRIMARY KEY (id_key)
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-ALTER TABLE magic_archetypes ADD CONSTRAINT fk_parent_type FOREIGN KEY (parent_type) REFERENCES magic_archetypes (id_key);
-
-CREATE TABLE IF NOT EXISTS magics (
-    id_key          VARCHAR(255),
-    max_tier        INT DEFAULT 5,
-    extra_tier      BOOLEAN DEFAULT FALSE,
-    self_teach      BOOLEAN DEFAULT FALSE,
-    teachable       BOOLEAN DEFAULT TRUE,
-    description     TEXT DEFAULT NULL,
-    label           TEXT NOT NULL,
-    days_to_max     INT UNSIGNED DEFAULT 120,
-    days_to_extra   INT UNSIGNED DEFAULT 0,
-    archetype       VARCHAR(255) NOT NULL,
-    PRIMARY KEY (id_key),
-    FOREIGN KEY (archetype) REFERENCES magic_archetypes(id_key) ON UPDATE CASCADE
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS magic_weaknesses (
-    fk_source_magic     VARCHAR(255),
-    fk_weakness_magic   VARCHAR(255),
-    modifier            FLOAT DEFAULT 1.0,
-    PRIMARY KEY (fk_source_magic,fk_weakness_magic),
-    FOREIGN KEY (fk_source_magic) REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (fk_weakness_magic) REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS magic_creatures (
-    id_key      VARCHAR(255),
-    name        TEXT NOT NULL,
-    descr       TEXT DEFAULT NULL,
-    PRIMARY KEY (id_key)
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS creature_creators (
-    magic_id_fk     VARCHAR(255),
-    creature_fk     VARCHAR(255),
-    PRIMARY KEY (magic_id_fk),
-    FOREIGN KEY (magic_id_fk) REFERENCES magics(id_key) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (creature_fk) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE CASCADE
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS creature_abilities (
-    creature_fk VARCHAR(255) NOT NULL,
-    ability     TEXT,
-    PRIMARY KEY (creature_fk,ability),
-    FOREIGN KEY (creature_fk) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE ON DELETE CASCADE
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 /* Child */
 CREATE TABLE IF NOT EXISTS persona_vitals (
     persona_id_fk 	INT UNSIGNED,
@@ -138,10 +76,8 @@ CREATE TABLE IF NOT EXISTS persona_vitals (
     health          DOUBLE DEFAULT 10.0,
     hunger          INT DEFAULT 0,
     saturation      INT DEFAULT 0,
-    creature_fk     VARCHAR(255) DEFAULT NULL,
     PRIMARY KEY (persona_id_fk),
     FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE,
-    FOREIGN KEY (creature_fk) REFERENCES magic_creatures (id_key) ON UPDATE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -165,20 +101,6 @@ CREATE TABLE IF NOT EXISTS persona_stats (
     last_played 		TIMESTAMP DEFAULT NOW(),
     PRIMARY KEY (persona_id_fk),
     FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS persona_magics (
-    magic_fk        VARCHAR(255) NOT NULL,
-    persona_id_fk   INT UNSIGNED NOT NULL,
-    tier            INT,
-    last_advanced   TIMESTAMP DEFAULT NOW(),
-    teacher         INT DEFAULT -1,
-    learned         TIMESTAMP DEFAULT NOW(),
-    visible         BOOLEAN DEFAULT TRUE,
-    PRIMARY KEY (magic_fk,persona_id_fk),
-    FOREIGN KEY (magic_fk) REFERENCES magics (id_key) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

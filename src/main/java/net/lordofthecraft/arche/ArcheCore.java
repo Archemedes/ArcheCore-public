@@ -11,7 +11,6 @@ import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.help.HelpFile;
 import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.listener.*;
-import net.lordofthecraft.arche.magic.Archenomicon;
 import net.lordofthecraft.arche.persona.ArcheEconomy;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.FatigueDecreaser;
@@ -52,7 +51,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private BlockRegistry blockRegistry;
     private ArchePersonaHandler personaHandler;
     private ArcheFatigueHandler fatigueHandler;
-    private Archenomicon archenomicon;
     private HelpDesk helpdesk;
     private SkinCache skinCache;
     private ArcheTimer timer;
@@ -136,10 +134,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     public static IConsumer getConsumerControls() {
         return getControls().getConsumer();
-    }
-
-    public static Archenomicon getMagicControls() {
-        return getControls().getArchenomicon();
     }
 
     public static OfflinePersona getPersona(int persona_id) {
@@ -232,7 +226,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
         //Find our Singletons and assign them.
         blockRegistry = new BlockRegistry();
-        archenomicon = Archenomicon.getInstance();
         personaHandler = ArchePersonaHandler.getInstance();
         fatigueHandler = ArcheFatigueHandler.getInstance();
         helpdesk = HelpDesk.getInstance();
@@ -248,7 +241,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         //Preloads our skills from SQL so that they are persistent at all times.
         //May also create a command/field to flag a skill as forcibly disabled.
         ArcheSkillFactory.preloadSkills(sqlHandler);
-        archenomicon.init(sqlHandler);
 
         ResultSet res = null;
         try{
@@ -529,11 +521,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
             }
         }
 
-    }
-
-    @Override
-    public Archenomicon getArchenomicon() {
-        return archenomicon;
     }
 
     @Override
