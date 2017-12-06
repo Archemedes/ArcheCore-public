@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface PersonaHandler {
-    UUID SCORE_ID = UUID.fromString("6898332e-abce-4da9-a284-9b34c4df751a");
 
 	/**
 	 * Set whether or not ArcheCore should continue to modify Bukkit Display Names to reflect Persona names
@@ -145,9 +144,10 @@ public interface PersonaHandler {
 	 * Make a Player switch his current Persona. Players may have 4 personas contained in an array of length 4
 	 * @param p Player in question
 	 * @param id the ID of the persona, between 0-3, corresponding to the Persona array index
+	 * @param force Force the switch, ignoring the SwitchEvent's cancelled status
 	 * @return If the switch was successful
 	 */
-	boolean switchPersona(Player p, int id);
+	boolean switchPersona(Player p, int id, boolean force);
 
 	/**
 	 * Method that provides a human-readable list of information about a Persona, to be used in prints

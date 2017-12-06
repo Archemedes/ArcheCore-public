@@ -161,7 +161,7 @@ public class BeaconMenuListener implements Listener {
 								switchCooldown.put(p.getUniqueId(), System.currentTimeMillis());
 							}
 
-							final boolean suc = handler.switchPersona(p, t);
+							final boolean suc = handler.switchPersona(p, t, false);
 							if (suc) p.sendMessage(ChatColor.AQUA + "You are now Roleplaying as: " + ChatColor.YELLOW + "" + ChatColor.ITALIC + prs[t].getName());
 						}
 						new BukkitRunnable(){@Override public void run(){ p.closeInventory();}}.runTask(plugin);

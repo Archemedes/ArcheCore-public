@@ -161,9 +161,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	@Override
-	public boolean switchPersona(final Player p, int id){
+	public boolean switchPersona(final Player p, int id, boolean force){
 		int slots = ArcheCore.getControls().personaSlots();
-        Validate.isTrue(id >= 0 && id < slots, "Only Persona IDs higher than 0 and at most " + slots + " are allowed.");
+        Validate.isTrue(id >= 0 && id < slots, "Only Persona IDs at least 0 and at most " + slots + " are allowed.");
 
         ArchePersona[] prs = getAllPersonas(p.getUniqueId());
         ArchePersona after = prs[id];
@@ -171,7 +171,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		PersonaSwitchEvent event = new PersonaSwitchEvent(prs[id]);
 		Bukkit.getPluginManager().callEvent(event);
 
-		if(event.isCancelled()) return false;
+		if(event.isCancelled() && !force) return false;
 
         after.setCurrent(true);
         Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(after, PersonaActivateEvent.Reason.SWITCH));
@@ -215,9 +215,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 
     public void registerPersona(ArchePersona persona) {
         if (ArcheCore.getPlugin().debugMode()) {
-            ArcheCore.getPlugin().getLogger().info("[Debug] Persona is being created with the RP name of " + persona.getName());
+            ArcheCore.getPlugin().getLogger().info("[Debug] Persona is being created: " + MessageUtil.identifyPersona(persona));
         }
-
+        
         ArchePersona oldPersona = store.registerPersona(persona);
         if (oldPersona != null) {
             PersonaRemoveEvent event2 = new PersonaRemoveEvent(oldPersona, true);
@@ -229,22 +229,26 @@ public class ArchePersonaHandler implements PersonaHandler {
         }
 
         Player p = persona.getPlayer();
+        boolean forceSwitch = oldPersona != null; 
+        //Expected switch restoreMinecraftSpecifics behavior:
+        //health, saturation, hunger set to persona defaults
+        //Inventories, potion effects cleared.
+        //This teleport will fail due to the Location being null still
+        boolean couldSwitch = switchPersona(p, persona.getSlot(), forceSwitch);
         consumer.queueRow(new InsertPersonaRow(persona, p.getLocation()));
-
-        RaceBonusHandler.apply(persona);
-        persona.updateDisplayName();
-
-        switchPersona(p, persona.getSlot()); //This teleport will fail due to the Location being null still
-
-		if (ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
-			Location to;
-            if (!racespawns.containsKey(persona.getRace())) {
-                World w = ArcheCore.getControls().getNewPersonaWorld();
-                to = w == null ? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
-            } else {
-                to = racespawns.get(persona.getRace());
+        if(couldSwitch) {
+        	persona.updateDisplayName();
+        	
+    		if (ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
+    			Location to;
+                if (!racespawns.containsKey(persona.getRace())) {
+                    World w = ArcheCore.getControls().getNewPersonaWorld();
+                    to = w == null ? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
+                } else {
+                    to = racespawns.get(persona.getRace());
+                }
+                p.teleport(to);
             }
-            p.teleport(to);
         }
     }
 
