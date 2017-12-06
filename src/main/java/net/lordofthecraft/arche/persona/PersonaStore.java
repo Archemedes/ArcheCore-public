@@ -496,17 +496,21 @@ public class PersonaStore {
     }
 
     public ArchePersona registerPersona(ArchePersona persona) {
-        Player player = persona.getPlayer();
-        ArchePersona[] prs = onlinePersonas.get(player.getUniqueId());
+        UUID uuid = persona.getPlayerUUID();
+        ArchePersona[] prs = onlinePersonas.get(uuid);
         ArchePersona old;
         if (prs == null) {
             prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
-            onlinePersonas.put(player.getUniqueId(), prs);
+            onlinePersonas.put(uuid, prs);
             old = null;
         } else {
             old = prs[persona.getSlot()];
+            if(old != null) offlinePersonas.remove(uuid, old);
         }
 
+        allPersonas.put(persona.getPersonaId(), persona);
+        offlinePersonas.put(uuid, persona);
+        
         prs[persona.getSlot()] = persona;
         return old;
     }
