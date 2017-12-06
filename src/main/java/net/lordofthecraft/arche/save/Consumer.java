@@ -164,9 +164,7 @@ public final class Consumer extends TimerTask implements IConsumer {
             long time = System.currentTimeMillis() - starttime;
             pl.getLogger().info("[Consumer] Finished saving in " + time + "ms.");
             if (debugConsumer && count > 0) {
-                float perRowTime = count / time;
-                pl.getLogger().log(Level.INFO, "[Consumer] Total rows processed: " + count + ". Row/time: " + String.format("%.4f", perRowTime));
-                pl.getLogger().log(Level.INFO, "[Consumer] There are " + queue.size() + " rows left in queue");
+                pl.getLogger().log(Level.INFO, "[Consumer] Total rows processed: " + count + ". " + queue.size() + " rows left in queue");
             } else if (count == 0) {
                 pl.getLogger().warning("[Consumer] Ran with 0 tasks, this shouldn't happen?");
             }
