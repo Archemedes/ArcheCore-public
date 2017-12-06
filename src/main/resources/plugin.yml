@@ -33,12 +33,6 @@ commands:
       usage: /<command> [true/false]
       permission: archecore.admin
       permission-message: §4Insufficient Permission for this command
-   skill:
-      description: Manage your Skills or teach others.
-      usage: Invalid syntax! Use /<command> help for a list of commands
-      permission: archecore.mayuse
-      permission-message: §4Insufficient Permission for this command
-      aliases: sk
    treasurechest:
       description: Handle the loot obtainable from the Treasure Chest items
       permission: archecore.command.treasurechest
