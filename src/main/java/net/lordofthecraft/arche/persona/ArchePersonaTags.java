@@ -8,6 +8,8 @@ import net.lordofthecraft.arche.save.rows.persona.DeletePersonaTagRow;
 import net.lordofthecraft.arche.save.rows.persona.PersonaTagRow;
 import org.apache.commons.lang.Validate;
 
+import com.google.common.base.Objects;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -74,7 +76,16 @@ public class ArchePersonaTags implements PersonaTags {
         if (forOffline && !tag.isAvailableOffline())
             throw new IllegalArgumentException("Trying to add online-only tags to an Offline Persona");
 
-        tags.put(tag.getKey(), tag);
+        String k = tag.getKey();
+        
+        if(tags.containsKey(k)) {
+        	TagAttachment othertag = tags.get(k);
+        	if(tag.isAvailableOffline() == othertag.isAvailableOffline() 
+        			&& Objects.equal(othertag.getValue(), tag.getValue()))
+        		return; //Tag already exists fully
+        }
+        
+        tags.put(k, tag);
         consumer.queueRow(new PersonaTagRow(persona, tag));
     }
 
