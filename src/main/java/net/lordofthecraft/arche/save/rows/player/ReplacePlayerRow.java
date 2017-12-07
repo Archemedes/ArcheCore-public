@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.save.rows.player;
 
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.save.rows.SingleStatementRow;
 import org.bukkit.entity.Player;
 
@@ -12,7 +13,11 @@ public class ReplacePlayerRow extends SingleStatementRow {
 
     @Override
     protected String getStatement() {
-        return "REPLACE INTO players (player,player_name) VALUES (?,?)";
+        if (ArcheCore.usingSQLite()) {
+            return "REPLACE INTO players (player,player_name) VALUES (?,?)";
+        } else {
+            return "INSERT INTO players (player,player_name) VALUES (?,?) ON DUPLICATE KEY UPDATE player_name=?";
+        }
     }
 
     @Override
