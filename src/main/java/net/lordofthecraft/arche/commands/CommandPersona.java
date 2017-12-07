@@ -625,9 +625,12 @@ public class CommandPersona implements CommandExecutor {
             public void run() {
                 ArchePersona persona = (ArchePersona) offlinePersona.loadPersona();
                 Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> {
-                    ArchePersonaHandler.getInstance().getPersonaStore().addOnlinePersona(persona);
+                    ArchePersona otherPersona = ArchePersonaHandler.getInstance().getPersonaStore().addOnlinePersona(persona);
+                    if(otherPersona != persona) {
+                    	ArcheCore.getPlugin().getLogger().warning("Interleaved Persona loading: Persona " + MessageUtil.identifyPersona(persona)
+                    	+ " has come online while " + caller.getName() +  " also tried to load it.");
+                    }
                     String cmd = command.getName() + ' ' + StringUtils.join(args, ' ');
-                    System.out.println(cmd);
                     caller.performCommand(cmd);
                 });
             }

@@ -436,29 +436,27 @@ public class PersonaStore {
         UUID uuid = player.getUniqueId();
         ArchePersona[] prs = pendingBlobs.remove(uuid);
         if (prs == null) {
+        	if(ArcheCore.isDebugging()) ArcheCore.getPlugin().getLogger().info("[Debug] Player " + player.getName() + " logged in without pending Personas. Either rejoined or no personas on file!" );
             prs = onlinePersonas.get(uuid);
             if (prs == null) prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
+            else if(ArcheCore.isDebugging()) ArcheCore.getPlugin().getLogger().info("[Debug] Personas DID exist in-store: Rejoin is likely.");
         } else {
             onlinePersonas.put(uuid, prs);
             for (int i = 0; i < prs.length; i++) {
-                ArchePersona p = prs[i];
-                if (p == null) continue;
-                ArcheOfflinePersona aop = allPersonas.get(p.getPersonaId());
-                if (aop.isLoaded()) {
-                    prs[i] = aop.getPersona();
-                } else {
-                    addOnlinePersona(p);
-                }
+                if (prs[i] == null) continue;
+                //Method returns input Persona IF input Persona has been used by store as the Persona on record
+                //In this case prs[i] is replaced by itself, no actual change
+                //Returns other persona if allPersonas already had an online Persona on file
+                //In this case the prs[] array takes this on-file one instead of the one that was loaded from SQL
+                prs[i] = addOnlinePersona(prs[i]);
             }
-            //Integer taskId = pendingTasks.get(uuid);
-            //Bukkit.getScheduler().cancelTask(taskId);
         }
         return prs;
     }
 
-    public void addOnlinePersona(ArchePersona persona) {
+    public ArchePersona addOnlinePersona(ArchePersona persona) {
         ArcheOfflinePersona old = allPersonas.get(persona.getPersonaId());
-        if (old.isLoaded()) return;
+        if (old.isLoaded()) return old.getPersona();
 
         persona.tags.merge(old.tags);
         allPersonas.put(persona.getPersonaId(), persona);
@@ -470,6 +468,7 @@ public class PersonaStore {
         		.findAny().get() 
         		);
         offlinePersonas.put(uuid, persona);
+        return persona;
     }
 
     public ArchePersona registerPersona(ArchePersona persona) {
