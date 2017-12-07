@@ -9,6 +9,7 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -44,8 +45,8 @@ public class PlayerJoinListener implements Listener {
 			Collection<ArcheOfflinePersona> personas = handler.getPersonas();
 			int offlines = personas.stream().filter(ps -> ps.getClass() == ArcheOfflinePersona.class).collect(Collectors.toList()).size();
 			int onlines = personas.stream().filter(ps -> ps.getClass() == ArchePersona.class).collect(Collectors.toList()).size();
-			int playerCount = handler.getPersonaStore().getOnlinePersonas().size();
-			ArcheCore.getPlugin().getLogger().info("[Login] " + personas.size() + " persona files (" + offlines + " offl. / " + onlines + "onl.) for " + playerCount + " players.");
+			int playerCount = handler.getPersonaStore().getOnlineImplementedPersonas().size();
+			ArcheCore.getPlugin().getLogger().info("[Login] " + personas.size() + " persona files (" + offlines + " offl. / " + onlines + "onl.) for "+Bukkit.getOnlinePlayers().size()+" (" + playerCount + ") players.");
 		}
             
     }

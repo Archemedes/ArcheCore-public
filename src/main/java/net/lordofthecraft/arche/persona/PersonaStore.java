@@ -15,11 +15,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -68,17 +70,11 @@ public class PersonaStore {
 
     private final Set<UUID> loadedThisSession = new HashSet<>();
     private final Map<UUID, ArchePersona[]> pendingBlobs = new ConcurrentHashMap<>();
-
+    
     public Collection<ArcheOfflinePersona> getPersonas() {
         return Collections.unmodifiableCollection(allPersonas.values());
     }
     
-    public Collection<ArchePersona> getLoadedPersonas() {
-        Collection<ArchePersona> result = new ArrayList<>();
-        onlinePersonas.values().forEach(ps -> Arrays.stream(ps).filter(Objects::nonNull).forEach(result::add));
-        return result;
-    }
-
     public ArcheOfflinePersona getPersonaById(int persona_id) {
         return allPersonas.get(persona_id);
     }
@@ -108,9 +104,30 @@ public class PersonaStore {
     }
     
     public Collection<ArchePersona[]> getOnlinePersonas(){
+    	return onlinePersonas.entrySet().stream()
+    			.filter(entry -> Bukkit.getOfflinePlayer(entry.getKey()) != null)
+    			.map(Entry::getValue)
+    			.collect(Collectors.toList());
+    }
+    
+    public Collection<ArchePersona[]> getOnlineImplementedPersonas(){
     	return Collections.unmodifiableCollection(onlinePersonas.values());
     }
 
+    public Collection<ArchePersona> getOnlineAndPendingPersonas(){
+    	Set<ArchePersona> result = new HashSet<>();
+    	allPersonas.values().stream()
+    		.filter(ArchePersona.class::isInstance)
+    		.map(ArchePersona.class::cast)
+    		.forEach(result::add);
+    	
+    	pendingBlobs.values().forEach( prs ->  
+    			Arrays.stream(prs).filter(Objects::nonNull).forEach(result::add)
+    		);
+    	
+    	return result;
+    }
+    
     public ArchePersona getPersona(UUID uuid, int id) {
         ArchePersona[] prs = onlinePersonas.get(uuid);
         if (prs != null) return prs[id];
