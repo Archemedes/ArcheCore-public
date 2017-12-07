@@ -27,6 +27,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
@@ -38,6 +39,7 @@ import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.event.persona.AsyncPersonaLoadEvent;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.PersonaTable;
@@ -344,7 +346,11 @@ public class PersonaStore {
         loadAttributes(persona, connection);
         loadSkills(persona, connection);
         loadNamelog(persona, connection);
-        connection.close();
+        
+        Event event = new AsyncPersonaLoadEvent(persona, connection);
+        Bukkit.getPluginManager().callEvent(event);
+        if(connection.isClosed()) ArcheCore.getPlugin().getLogger().severe("A consumer of AsyncPersonaLoadEvent is closing the provided connection!!");
+        else connection.close();
 
         return persona;
     }
