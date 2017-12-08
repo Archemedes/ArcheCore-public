@@ -42,6 +42,8 @@ import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.persona.AsyncPersonaLoadEvent;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
+import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.PersonaTable;
@@ -113,20 +115,6 @@ public class PersonaStore {
     public Collection<ArchePersona[]> getOnlineImplementedPersonas(){
     	return Collections.unmodifiableCollection(onlinePersonas.values());
     }
-
-    public Collection<ArchePersona> getOnlineAndPendingPersonas(){
-    	Set<ArchePersona> result = new HashSet<>();
-    	allPersonas.values().stream()
-    		.filter(ArchePersona.class::isInstance)
-    		.map(ArchePersona.class::cast)
-    		.forEach(result::add);
-    	
-    	pendingBlobs.values().forEach( prs ->  
-    			Arrays.stream(prs).filter(Objects::nonNull).forEach(result::add)
-    		);
-    	
-    	return result;
-    }
     
     public ArchePersona getPersona(UUID uuid, int id) {
         ArchePersona[] prs = onlinePersonas.get(uuid);
@@ -143,6 +131,22 @@ public class PersonaStore {
         return null;
     }
 
+    public Collection<Persona> getPersonasUnordered(UUID uuid){
+    	return Arrays.stream(onlinePersonas.get(uuid))
+    			.filter(Objects::nonNull)
+    			.collect(Collectors.toList());
+    }
+    
+    public Collection<OfflinePersona> getOfflinePersonasUnordered(UUID uuid){
+    	return Collections.unmodifiableCollection(offlinePersonas.get(uuid));
+    }
+
+    public ArcheOfflinePersona[] getAllOfflinePersonas(UUID uuid) {
+    	ArcheOfflinePersona[] result = new ArcheOfflinePersona[ArcheCore.getControls().personaSlots()];
+    	offlinePersonas.get(uuid).forEach(aop -> result[aop.getPersonaId()] = aop);
+    	return result;
+    }
+    
     public ArchePersona[] getAllPersonas(UUID uuid) {
         ArchePersona[] prs = this.onlinePersonas.get(uuid);
         if (prs == null) return new ArchePersona[ArcheCore.getControls().personaSlots()];

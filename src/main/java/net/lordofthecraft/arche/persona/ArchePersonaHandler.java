@@ -132,14 +132,34 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	@Override
-	public ArchePersona[] getAllPersonas(OfflinePlayer p){
+	public ArchePersona[] getAllPersonas(Player p){
 		return getAllPersonas(p.getUniqueId());
 	}
+	
+	@Override
+	public ArcheOfflinePersona[] getAllPersonas(OfflinePlayer p){
+		return getAllOfflinePersonas(p.getUniqueId());
+	}
 
+	@Override
+	public ArcheOfflinePersona[] getAllOfflinePersonas(UUID uuid){
+        return store.getAllOfflinePersonas(uuid);
+    }
+	
 	@Override
 	public ArchePersona[] getAllPersonas(UUID uuid){
         return store.getAllPersonas(uuid);
     }
+	
+	@Override
+	public Collection<Persona> getPersonasUnordered(Player p){
+		return store.getPersonasUnordered(p.getUniqueId());
+	}
+	
+	@Override
+	public Collection<OfflinePersona> getPersonasUnordered(OfflinePlayer p){
+		return store.getOfflinePersonasUnordered(p.getUniqueId());
+	}
 
 	@Override
 	public int countPersonas(UUID uuid) {

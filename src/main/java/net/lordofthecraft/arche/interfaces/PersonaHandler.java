@@ -103,12 +103,36 @@ public interface PersonaHandler {
 	boolean hasPersona(Player p);
 
 	/**
-	 * Returns all of the Player's current Personas. Each persona's ID should correspond
+	 * Returns all of the Player's Personas.
+	 * @param p The Player in question
+	 * @return An array of the Player's persona.
+	 */
+	Collection<Persona> getPersonasUnordered(Player p);
+	
+	/**
+	 * Returns all of the Player's Personas.
+	 * Personas might be either off- or online variant of the Persona.
+	 * @param p The OfflinePlayer in question
+	 * @return An array of the Player's persona.
+	 */
+	Collection<OfflinePersona> getPersonasUnordered(OfflinePlayer p);
+	
+	/**
+	 * Returns all of the Player's Personas. Each persona's ID should correspond
 	 * to the index of the Persona in the returned Array.
 	 * @param p The Player in question
 	 * @return An array of the Player's persona.
 	 */
-	Persona[] getAllPersonas(OfflinePlayer p);
+	Persona[] getAllPersonas(Player p);
+	
+	/**
+	 * Returns all of the OfflinePlayer's Personas. Each persona's ID should correspond
+	 * to the index of the Persona in the returned Array.
+	 * Personas might be either off- or online variant of the Persona.
+	 * @param p The OfflinePlayer in question
+	 * @return An array of the Player's OfflinePersonas.
+	 */
+	OfflinePersona[] getAllPersonas(OfflinePlayer p);
 
 	/**
 	 * Returns all of the Player's current Personas. Each persona's ID should correspond
@@ -117,6 +141,15 @@ public interface PersonaHandler {
 	 * @return An array of the Player's persona.
 	 */
 	Persona[] getAllPersonas(UUID uuid);
+	
+	/**
+	 * Returns all of a Player's Personas. Each persona's ID should correspond
+	 * to the index of the Persona in the returned Array.
+	 * Personas might be either off- or online variant of the Persona.
+	 * @param uuid The UUID of the Player in question (needn't be online)
+	 * @return An array of the Player's OfflinePersonas.
+	 */
+	OfflinePersona[] getAllOfflinePersonas(UUID uuid);
 
 	/**
 	 * Gives the amount of Personas the current player possesses. This only counts
