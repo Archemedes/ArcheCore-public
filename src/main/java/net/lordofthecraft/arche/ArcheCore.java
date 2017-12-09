@@ -432,6 +432,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         pm.registerEvents(new PersonaInventoryListener(), this);
         pm.registerEvents(new ArmorListener(), this);
         pm.registerEvents(new ExhaustionListener(), this);
+        pm.registerEvents(new SeasonListener(calendar), this);
 
         if (showXpToPlayers) {
             pm.registerEvents(new ExperienceOrbListener(), this);
