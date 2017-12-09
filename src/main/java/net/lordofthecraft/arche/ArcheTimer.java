@@ -28,15 +28,15 @@ public class ArcheTimer {
 		Validate.notNull(why);
 		
 		if(timings.containsKey(why)){
-			long took = time - timings.get(why);
-			logger.info("[Debug] operation '" + why + "' took " + took + "ns");
+			long took = (time - timings.get(why))/1000;
+			logger.info("[Debug] operation '" + why + "' took " + took + "μs");
 		}
 	}
 	
 	public void stopAllTiming(){
 		long time = System.nanoTime();
 		for(Entry<String, Long> t : timings.entrySet())
-			logger.info("[Debug] timed action '" + t.getKey() + "' taking " + (time - t.getValue()) + "ns");
+			logger.info("[Debug] timed action '" + t.getKey() + "' taking " + (time - t.getValue())/1000 + "μs");
 		
 		timings.clear();
 	}	

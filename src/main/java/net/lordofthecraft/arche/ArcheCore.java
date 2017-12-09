@@ -41,6 +41,7 @@ import com.google.common.collect.HashBiMap;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -225,6 +226,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         //Initialize our config file
         initConfig();
         
+        //Set up the debug timer, if necessary.
+    	timer = debugMode? new ArcheTimer(this) : null;
+
         //Setup the SQL stuff for ArcheCore
         initSql();
 
@@ -235,9 +239,12 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         helpdesk = HelpDesk.getInstance();
         skinCache = SkinCache.getInstance();
 
+
+        
         ResultSet res = null;
-        try{
-        	res = sqlHandler.query("SELECT player,player_name FROM players");
+        try(Connection c = sqlHandler.getConnection()){
+        	timer.startTiming("Loading player UUID/name map");
+        	res = c.createStatement().executeQuery("SELECT player,player_name FROM players");
         	while(res.next()) {
         		UUID uuid = UUID.fromString(res.getString("player"));
         		String name = res.getString("player_name");
@@ -245,8 +252,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         	}
         	res.close();
             res.getStatement().close();
+            timer.stopTiming("Loading player UUID/name map");
             
-            res = sqlHandler.query("SELECT world,x,y,z,data FROM blockregistry");
+            res = c.createStatement().executeQuery("SELECT world,x,y,z,data FROM blockregistry");
             while(res.next()){
                 String world = res.getString("world");
                 int x = res.getInt("x");
@@ -262,12 +270,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         }
         catch(SQLException e){e.printStackTrace();}
         finally {SQLUtil.closeStatement(res);}
-        
+
         personaHandler.onEnable();
         economy.onEnable();
         
         fatigueHandler.fatigueDecreaseHours = this.fullFatigueRestore;
-        timer = debugMode? new ArcheTimer(this) : null;
         personaHandler.setModifyDisplayNames(modifyDisplayNames);
         
         //Preloads our skills from SQL so that they are persistent at all times.
@@ -362,6 +369,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     }
     
     private void initSql() {
+    	if(timer != null) timer.startTiming("ArcheCore SQL Init");
+    	
         getLogger().info("Loading " + (usingMySQL ? "MySQL" : "SQLite") + " handler now.");
         int timeout = getConfig().getInt("hikari.timeoutms");
         if (usingMySQL) {
@@ -401,6 +410,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         } else {
             sqlHandler.execute("DELETE FROM blockregistry WHERE date>DateTime('Now', 'LocalTime', '+" + blockregistryPurgeDelay + " Day')" + (blockregistryKillCustom ? " WHERE data IS NULL;" : ";"));
         }
+        
+        if(timer != null) timer.stopTiming("ArcheCore SQL Init");
     }
 
     private void initCommands(){
