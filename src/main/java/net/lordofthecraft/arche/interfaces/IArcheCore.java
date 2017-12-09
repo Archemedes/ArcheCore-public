@@ -261,6 +261,16 @@ public interface IArcheCore {
 	 * @return maximum number of persona slots
 	 */
 	int personaSlots();
+	
+	/**
+	 * @return ArcheCore's last known Player Name for this UUID
+	 */
+    String getPlayerNameFromUUID(UUID playerUUID);
+    
+    /**
+     * @return ArcheCore's best guess at Player UUID for this player name.
+     */
+    UUID getPlayerUUIDFromName(String playerName);
 
     /**
      * Checks whether or not ArcheCore is using SQLite.

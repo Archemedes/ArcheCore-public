@@ -2,13 +2,18 @@ package net.lordofthecraft.arche.save.rows.player;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.save.rows.SingleStatementRow;
+
+import java.util.UUID;
+
 import org.bukkit.entity.Player;
 
 public class ReplacePlayerRow extends SingleStatementRow {
-    private final Player player;
+    private final UUID uuid;
+    private final String name;
 
     public ReplacePlayerRow(Player player) {
-        this.player = player;
+        uuid = player.getUniqueId();
+        name = player.getName();
     }
 
     @Override
@@ -23,11 +28,10 @@ public class ReplacePlayerRow extends SingleStatementRow {
     @Override
     protected Object getValueFor(int index) {
         switch (index) {
-            case 1:
-                return player.getUniqueId();
+            case 1: return uuid;
             case 2:
             case 3:
-                return player.getName();
+                return name;
             default:
                 throw new IllegalArgumentException(index + " was passed in.");
         }

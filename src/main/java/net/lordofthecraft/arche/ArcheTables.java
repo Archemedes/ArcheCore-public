@@ -102,7 +102,7 @@ public final class ArcheTables {
         statement.execute("CREATE TABLE IF NOT EXISTS players (" +
                 "player CHAR(36)," +
                 "player_name TEXT DEFAULT NULL," +
-                "PRIMARY KEY (player)" +
+                "PRIMARY KEY (player), UNIQUE (player_name)" +
                 ")" +
                 end);
     }

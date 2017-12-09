@@ -107,7 +107,7 @@ public class PersonaStore {
     
     public Collection<ArchePersona[]> getOnlinePersonas(){
     	return onlinePersonas.entrySet().stream()
-    			.filter(entry -> Bukkit.getOfflinePlayer(entry.getKey()) != null)
+    			.filter(entry -> Bukkit.getPlayer(entry.getKey()) != null )
     			.map(Entry::getValue)
     			.collect(Collectors.toList());
     }
@@ -180,9 +180,8 @@ public class PersonaStore {
 
             while (res.next()) {
                 any = true;
-                OfflinePlayer pl = Bukkit.getOfflinePlayer(uuid);
-                ArcheOfflinePersona op = buildOfflinePersona(res, pl);
-                ArchePersona blob = buildPersona(res, pl, op);
+                ArcheOfflinePersona op = buildOfflinePersona(res, uuid);
+                ArchePersona blob = buildPersona(res, op);
                 prs[blob.getSlot()] = blob;
 
                 if (blob.current) {
@@ -257,8 +256,7 @@ public class PersonaStore {
             while (res.next()) { //Looping for every player we know to have personas
                 UUID uuid = UUID.fromString(res.getString("player_fk"));
 
-                OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-                ArcheOfflinePersona offline = buildOfflinePersona(res, player);
+                ArcheOfflinePersona offline = buildOfflinePersona(res, uuid);
                 allPersonas.put(offline.getPersonaId(), offline);
                 offlinePersonas.put(offline.getPlayerUUID(), offline);
             }
@@ -274,7 +272,7 @@ public class PersonaStore {
         if (timer != null) timer.stopTiming("Preloading personas");
     }
 
-    private ArcheOfflinePersona buildOfflinePersona(ResultSet res, OfflinePlayer pl) throws SQLException {
+    private ArcheOfflinePersona buildOfflinePersona(ResultSet res, UUID pUUID) throws SQLException {
         int persona_id = res.getInt(PersonaField.PERSONA_ID.field());
         int slot = res.getInt(PersonaField.SLOT.field());
         String name = res.getString(PersonaField.NAME.field());
@@ -288,7 +286,7 @@ public class PersonaStore {
 
         PersonaType ptype = PersonaType.valueOf(type);
         ArcheOfflinePersona persona = new ArcheOfflinePersona(
-        		new ArchePersonaKey(persona_id, pl.getUniqueId(), slot), 
+        		new ArchePersonaKey(persona_id, pUUID, slot), 
         		creationTimeMS, lastPlayed, current, race, 
         		birthdate, gender, ptype, name);
 
@@ -310,7 +308,7 @@ public class PersonaStore {
         return persona;
     }
 
-    ArchePersona buildPersona(ResultSet res, OfflinePlayer pl, ArcheOfflinePersona op) throws SQLException {
+    ArchePersona buildPersona(ResultSet res, ArcheOfflinePersona op) throws SQLException {
 
         ArchePersona persona = new ArchePersona(
                 op.getPersonaId(),
@@ -327,7 +325,6 @@ public class PersonaStore {
 
         persona.location = op.location;
         persona.current = op.current;
-        persona.player = pl.getName();
 
         String rheader = res.getString(PersonaField.RACE.field());
         if (rheader != null && !rheader.equals("null") && !rheader.isEmpty()) {
@@ -357,7 +354,7 @@ public class PersonaStore {
 
         int skinId = res.getInt(PersonaField.SKIN.field());
         if (skinId >= 0) {
-            ArcheSkin skin = SkinCache.getInstance().getSkinAtSlot(pl.getUniqueId(), skinId);
+            ArcheSkin skin = SkinCache.getInstance().getSkinAtSlot(op.getPlayerUUID(), skinId);
             if (skin != null) persona.skin = skin;
             else ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(persona, PersonaField.SKIN, -1));
         }

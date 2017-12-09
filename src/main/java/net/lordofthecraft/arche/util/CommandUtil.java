@@ -10,10 +10,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class CommandUtil {	
@@ -66,12 +66,11 @@ public class CommandUtil {
         
         
         @SuppressWarnings("deprecation")
-        OfflinePlayer p = Bukkit.getOfflinePlayer(player);
-        if (p == null) return null;
+        UUID uuid = ArcheCore.getControls().getPlayerUUIDFromName(player);
         
         return id < 0 || id >= ArcheCore.getControls().personaSlots() ?
-        		hand.getOfflinePersona(p.getUniqueId()) : 
-        		hand.getOfflinePersona(p.getUniqueId(), id);
+        		hand.getOfflinePersona(uuid) : 
+        		hand.getOfflinePersona(uuid, id);
     }
 	
 	public static Persona currentPersonaFromArg(String a){

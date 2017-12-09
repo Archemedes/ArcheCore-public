@@ -31,8 +31,10 @@ public class ArcheOfflinePersona implements OfflinePersona {
     String gender;
     protected PersonaType type;
     WeakBlock location;
-    volatile String name;
+    String name;
     Timestamp lastRenamed;
+    
+    String playerName;
 
 
     ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, boolean current, 
@@ -46,6 +48,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
         this.type = type;
         this.name = name;
         timePlayed = new AtomicInteger(0);
+        playerName = ArcheCore.getControls().getPlayerNameFromUUID(personaKey.getPlayerUUID());
     }
 
     ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, boolean current, 
@@ -60,6 +63,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
         this.type = type;
         this.name = name;
         timePlayed = new AtomicInteger(0);
+        playerName = ArcheCore.getControls().getPlayerNameFromUUID(personaKey.getPlayerUUID());
     }
 
     @Override
@@ -79,7 +83,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 
     @Override
     public String getPlayerName() {
-        return Bukkit.getOfflinePlayer(personaKey.getPlayerUUID()).getName();
+        return playerName;
     }
 
     @Override
@@ -156,7 +160,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
         	statement.setInt(2, getPersonaId());
         	ResultSet rs = statement.executeQuery(); //closed when PrepStat is closed
         	
-            return store.buildPersona(rs, this.getPlayer(), this);
+            return store.buildPersona(rs, this);
         } catch (SQLException e) {
             throw new RuntimeException(e); //zero fucks given
         }

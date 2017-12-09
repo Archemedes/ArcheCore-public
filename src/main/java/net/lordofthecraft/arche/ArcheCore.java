@@ -16,6 +16,7 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.FatigueDecreaser;
 import net.lordofthecraft.arche.save.Consumer;
 import net.lordofthecraft.arche.save.DumpedDBReader;
+import net.lordofthecraft.arche.save.rows.player.ReplacePlayerRow;
 import net.lordofthecraft.arche.seasons.LotcianCalendar;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
@@ -34,6 +35,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -98,11 +102,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     private int blockregistryPurgeDelay;
     private boolean blockregistryKillCustom;
-
-    //private Thread saverThread = null;
-
     private boolean shouldClone = false;
-
+    
+    private final BiMap<UUID, String> playerNameMap = HashBiMap.create();
+    
     public static PersonaKey getPersonaKey(UUID uuid, int pid) {
         Persona pers = getPersonaControls().getPersona(uuid, pid);
         if (pers != null) {
@@ -231,19 +234,17 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         helpdesk = HelpDesk.getInstance();
         skinCache = SkinCache.getInstance();
 
-        personaHandler.onEnable();
-        economy.onEnable();
-        
-        fatigueHandler.fatigueDecreaseHours = this.fullFatigueRestore;
-        timer = debugMode? new ArcheTimer(this) : null;
-        personaHandler.setModifyDisplayNames(modifyDisplayNames);
-        
-        //Preloads our skills from SQL so that they are persistent at all times.
-        //May also create a command/field to flag a skill as forcibly disabled.
-        ArcheSkillFactory.preloadSkills(sqlHandler);
-
         ResultSet res = null;
         try{
+        	res = sqlHandler.query("SELECT player,player_name FROM players");
+        	while(res.next()) {
+        		UUID uuid = UUID.fromString(res.getString("player"));
+        		String name = res.getString("player_name");
+        		playerNameMap.put(uuid, name);
+        	}
+        	res.close();
+            res.getStatement().close();
+            
             res = sqlHandler.query("SELECT world,x,y,z,data FROM blockregistry");
             while(res.next()){
                 String world = res.getString("world");
@@ -257,11 +258,23 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
                     blockRegistry.data.putIfAbsent(wb, data);
                 }
             }
-            res.getStatement().close();
-            res.getStatement().getConnection().close();
         }
         catch(SQLException e){e.printStackTrace();}
         finally {SQLUtil.closeStatement(res);}
+        
+        personaHandler.onEnable();
+        economy.onEnable();
+        
+        fatigueHandler.fatigueDecreaseHours = this.fullFatigueRestore;
+        timer = debugMode? new ArcheTimer(this) : null;
+        personaHandler.setModifyDisplayNames(modifyDisplayNames);
+        
+        //Preloads our skills from SQL so that they are persistent at all times.
+        //May also create a command/field to flag a skill as forcibly disabled.
+        ArcheSkillFactory.preloadSkills(sqlHandler);
+
+        
+
         
         //Incase of a reload, load all Personas for currently logged in players
         for (Player p : Bukkit.getOnlinePlayers()) {
@@ -669,6 +682,27 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     public boolean getWikiUsage(){
         return useWiki;
+    }
+    
+    public void updateNameMap(Player player) {
+    	UUID u = player.getUniqueId();
+    	String n = player.getName();
+    	
+    	if(!playerNameMap.containsKey(u) || !n.equals(playerNameMap.get(u))) {
+    		if(isDebugging()) getLogger().info("[Debug] Updating Player Name Map: " + u + "=" + n);
+    		playerNameMap.put(player.getUniqueId(), player.getName());
+        	getConsumer().queueRow(new ReplacePlayerRow(player));
+    	}
+    }
+    
+    @Override
+    public String getPlayerNameFromUUID(UUID playerUUID) {
+    	return playerNameMap.get(playerUUID);
+    }
+    
+    @Override
+    public UUID getPlayerUUIDFromName(String playerName) {
+    	return playerNameMap.inverse().get(playerName);
     }
 
     @Override

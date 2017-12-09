@@ -55,7 +55,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	String raceHeader = null;
 	Timestamp lastRenamed;
     int pastPlayTime; //stat_playtime_past
-    String player; //Last known minecraft name of the owning player
     double money = ArcheCore.getEconomyControls().getBeginnerAllowance();
     double fatigue = 0;
     int food = 20;
@@ -117,10 +116,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     public void setGender(String gender) {
         this.gender = gender;
         consumer.queueRow(new UpdatePersonaRow(this, PersonaField.GENDER, gender));
-    }
-
-    public void setPlayerName(String name) {
-        this.player = name;
     }
 
 	@Override
@@ -232,11 +227,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		int val = charactersSpoken.addAndGet(charsSpoken);
 
         consumer.queueRow(new UpdatePersonaRow(this, PersonaField.STAT_CHARS, val));
-    }
-
-    //@Override
-    public String getPlayerName() {
-        return player;
     }
 
 	@Override
@@ -509,7 +499,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 			boolean cleared = cache.clearSkin(this);
 			if (!success) {
 				Plugin plugin = ArcheCore.getPlugin();
-				plugin.getLogger().warning("Player " + player + " removed his final usable Persona!");
+				plugin.getLogger().warning("Player " + playerName + " removed his final usable Persona!");
 				RaceBonusHandler.reset(p); //Clear Racial bonuses, for now...
 				if(p.hasPermission("archecore.mayuse") && !p.hasPermission("archecore.exempt")) new CreationDialog().makeFirstPersona(p);
 			} else {

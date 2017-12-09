@@ -528,7 +528,6 @@ public class CreationDialog {
 
             ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, 0, gender, new Timestamp(creationTimeMS), new Timestamp(System.currentTimeMillis()));
 
-            persona.setPlayerName(p.getName());
             ArchePersonaHandler.getInstance().registerPersona(persona);
             p.sendMessage(ChatColor.GOLD + "" + ChatColor.UNDERLINE + "Created your new Persona: " + ChatColor.GREEN + name + ChatColor.GOLD + "!");
 

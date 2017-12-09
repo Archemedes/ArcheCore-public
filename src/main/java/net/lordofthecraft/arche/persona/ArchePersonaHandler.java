@@ -14,7 +14,6 @@ import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.InsertPersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
-import net.lordofthecraft.arche.save.rows.player.ReplacePlayerRow;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.MessageUtil;
@@ -435,7 +434,7 @@ public class ArchePersonaHandler implements PersonaHandler {
     public void joinPlayer(Player p) {
         ArchePersona[] prs = store.implementPersonas(p);
         RaceBonusHandler.reset(p);
-        ArcheCore.getConsumerControls().queueRow(new ReplacePlayerRow(p));
+        ArcheCore.getPlugin().updateNameMap(p);
 
         if (countPersonas(prs) == 0) {
             if (p.hasPermission("archecore.mayuse")) {

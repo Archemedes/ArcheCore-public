@@ -304,7 +304,7 @@ public class CommandPersona implements CommandExecutor {
                     return true;
                 } else if (cmd == PersonaCommand.LIST) {
                     ArchePersona[] personas = handler.getAllPersonas(pers.getPlayerUUID());
-                    sender.sendMessage(ChatColor.AQUA + ArcheCore.getPlugin().getServer().getOfflinePlayer(pers.getPlayerUUID()).getName() + "'s personas:");
+                    sender.sendMessage(ChatColor.AQUA + ArcheCore.getControls().getPlayerNameFromUUID(pers.getPlayerUUID()) + "'s personas:");
                     for (int i = 0; i <= 3; i++) {
                         Persona persona = personas[i];
                         if (persona != null) {
