@@ -17,6 +17,7 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.save.rows.ArcheRow;
+import net.lordofthecraft.arche.save.rows.RunnerRow;
 import net.lordofthecraft.arche.save.rows.StatementRow;
 import net.lordofthecraft.arche.util.SQLUtil;
 
@@ -97,7 +98,9 @@ public final class Consumer extends TimerTask implements IConsumer {
                 long taskstart = System.currentTimeMillis();
 
                 try {
-                    if (row instanceof StatementRow) {
+                	if(row instanceof RunnerRow) {
+                		((RunnerRow) row).run(conn);
+                	} else if (row instanceof StatementRow) {
                         StatementRow sRow = (StatementRow) row;
                         if(debugConsumer) pl.getLogger().info("StatementRow Origin Trace:\n" + sRow.getOriginStackTrace());
                         boolean inBatch = pending != null;

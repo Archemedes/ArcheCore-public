@@ -15,6 +15,7 @@ import net.lordofthecraft.arche.persona.TagAttachment;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.util.AsyncRunner;
 import net.lordofthecraft.arche.util.CommandUtil;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -29,7 +30,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -619,22 +619,21 @@ public class CommandPersona implements CommandExecutor {
         if (offlinePersona == null) return false; //Nothing we can do at this point
         if (offlinePersona.isLoaded()) throw new IllegalStateException("Persona is already loaded!");
 
-        //Run async to load then use
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                ArchePersona persona = (ArchePersona) offlinePersona.loadPersona();
-                Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> {
-                    ArchePersona otherPersona = ArchePersonaHandler.getInstance().getPersonaStore().addOnlinePersona(persona);
-                    if(otherPersona != persona) {
-                    	ArcheCore.getPlugin().getLogger().warning("Interleaved Persona loading: Persona " + MessageUtil.identifyPersona(persona)
-                    	+ " has come online while " + caller.getName() +  " also tried to load it.");
-                    }
-                    String cmd = command.getName() + ' ' + StringUtils.join(args, ' ');
-                    caller.performCommand(cmd);
-                });
-            }
-        }.runTaskAsynchronously(ArcheCore.getPlugin());
+        new AsyncRunner(ArcheCore.getPlugin()) {
+			ArchePersona persona = null;
+			
+			public void doAsync() { persona = (ArchePersona) offlinePersona.loadPersona();}
+
+			@Override
+			public void andThen() {
+                ArchePersona otherPersona = ArchePersonaHandler.getInstance().getPersonaStore().addOnlinePersona(persona);
+                if(otherPersona != persona) {
+                	ArcheCore.getPlugin().getLogger().warning("Interleaved Persona loading: Persona " + MessageUtil.identifyPersona(persona)
+                	+ " has come online while " + caller.getName() +  " also tried to load it.");
+                }
+                caller.performCommand(command.getName() + ' ' + StringUtils.join(args, ' '));
+			}
+        }.go();
 
         return true;
     }
