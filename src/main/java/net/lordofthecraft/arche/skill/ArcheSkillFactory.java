@@ -20,8 +20,6 @@ import java.util.*;
 import java.util.logging.Level;
 
 public class ArcheSkillFactory implements SkillFactory {
-	private static final Map<String, String> VALS;
-	
 	private static final Map<String, ArcheSkill> skills = Maps.newLinkedHashMap();
 
     /**
@@ -56,13 +54,13 @@ public class ArcheSkillFactory implements SkillFactory {
         if (!skills.isEmpty()) {
             return;
         }
-        try {
-            Connection fetcherConn = handler.getConnection();
-            if (handler instanceof WhySQLHandler) {
+        try(Connection fetcherConn = handler.getConnection();
+        	PreparedStatement fetcher = fetcherConn.prepareStatement("SELECT skill_id,hidden,help_text,help_icon,inert,male_name,female_name FROM skills"); 
+        	PreparedStatement racialFetch = fetcherConn.prepareStatement("SELECT race,racial_skill,racial_mod FROM skill_races WHERE skill_id_fk=?");){
+        	
+        	if (handler instanceof WhySQLHandler) {
                 fetcherConn.setReadOnly(true);
             }
-            PreparedStatement fetcher = fetcherConn.prepareStatement("SELECT skill_id,hidden,help_text,help_icon,inert,male_name,female_name FROM skills");
-            PreparedStatement racialFetch = fetcherConn.prepareStatement("SELECT race,racial_skill,racial_mod FROM skill_races WHERE skill_id_fk=?");
 
             ResultSet rs = fetcher.executeQuery();
             while (rs.next()) {
@@ -74,7 +72,8 @@ public class ArcheSkillFactory implements SkillFactory {
                 String maleName = rs.getString("male_name");
                 String femaleName = rs.getString("female_name");
                 SkillFactory factory = ArcheSkillFactory.registerNewSkill(name, ArcheCore.getPlugin())
-                        .withFemaleProfessionalName(femaleName)
+                		.withProfessionalName(maleName)
+                		.withFemaleProfessionalName(femaleName)
                         .withVisibilityType(hidden)
                         .withXpGainWhileHidden(inert);
                 if (helpIconInfo != null && text != null) {
@@ -96,28 +95,10 @@ public class ArcheSkillFactory implements SkillFactory {
                 factory.register();
             }
             rs.close();
-            fetcher.close();
-            racialFetch.close();
-            if (handler instanceof WhySQLHandler) {
-                fetcherConn.close();
-            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
-	static{
-		Map<String, String> vals = Maps.newLinkedHashMap();
-		vals.put("player", "TEXT");
-		vals.put("id", "INT");
-		vals.put("xp", "DOUBLE NOT NULL");
-		vals.put("visible", "INT NOT NULL");
-		//vals.put("FOREIGN KEY (player, id)", "REFERENCES persona(player, id) ON DELETE CASCADE");
-		vals.put("UNIQUE (player, id)", "ON CONFLICT REPLACE");
-
-		VALS = Collections.unmodifiableMap(vals);
-
-	}
 
 	private final String name;
 	private String maleName, femaleName;
