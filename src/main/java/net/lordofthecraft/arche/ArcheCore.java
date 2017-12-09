@@ -220,6 +220,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     @Override
     public void onEnable() {
+    	long timeOnEnable = System.currentTimeMillis();
 
         //Initialize our config file
         initConfig();
@@ -296,6 +297,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
         //Start all our Event listeners
         initListeners();
+        
+        getLogger().info("ArcheCore booted up in " + (System.currentTimeMillis() - timeOnEnable) + "ms.");
     }
 
     private void initConfig(){
