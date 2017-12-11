@@ -1,6 +1,5 @@
 package net.lordofthecraft.arche;
 
-import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.executables.OpenEnderRunnable;
 import net.lordofthecraft.arche.help.HelpDesk;
@@ -53,7 +52,7 @@ public class ArcheBeacon {
 					});
 				}
 				ItemStack is = new ItemStack(Material.ENDER_CHEST);
-				return buildItem(is, ChatColor.RESET + "Ender Chest", ChatColor.GRAY + "Open your Ender Chest");
+				return ItemUtil.decorate(is, ChatColor.RESET + "Ender Chest", ChatColor.GRAY + "Open your Ender Chest");
 			} else {
 				return new ItemStack(Material.AIR); //Do not draw an item now
 			}
@@ -174,18 +173,18 @@ public class ArcheBeacon {
 				else log.warning("[Beacon] no current persona for: " + p.getName());
 			} else if(ArcheCore.getControls().showEnderchestInMenu()) {
 				is = new ItemStack(Material.ENDER_CHEST);
-				buildItem(is, r + "Ender Chest", g + "Open your Ender Chest");
+				ItemUtil.decorate(is, r + "Ender Chest", g + "Open your Ender Chest");
 				inv.setItem(1, is);
 			}	
 
 
             //Everybody gets these buttons
 			is = new ItemStack(Material.BOOK);
-			buildItem(is, r + "Help", g + "Receive help on", g + "various topics.");
+			ItemUtil.decorate(is, r + "Help", g + "Receive help on", g + "various topics.");
 			inv.setItem(0, is);
 
 			is = new ItemStack(Material.REDSTONE_COMPARATOR);
-            buildItem(is, r + "Your Personas to the right", ChatColor.GRAY + "Max Personas: " + ChatColor.LIGHT_PURPLE + max,
+			ItemUtil.decorate(is, r + "Your Personas to the right", ChatColor.GRAY + "Max Personas: " + ChatColor.LIGHT_PURPLE + max,
                     g + "Left Click to select", (ArcheCore.getControls().canCreatePersonas() ? g + "SHIFT + Left Click: Create new" : ChatColor.RED + "Creating new personas is disabled on this server"),
                     g + "SHIFT + Right Click: Permakill Persona",
                     ChatColor.GRAY + "Click me for more info.");
@@ -212,14 +211,14 @@ public class ArcheBeacon {
 				if(a == null){
 					if(mayMakeMore) {
 						is = new ItemStack(Material.SKULL_ITEM, 1, (short) 0);
-						buildItem(is, "Empty Persona", ChatColor.GREEN+""+ChatColor.ITALIC + "Click here", g + "To create a new Persona");
+						ItemUtil.decorate(is, "Empty Persona", ChatColor.GREEN+""+ChatColor.ITALIC + "Click here", g + "To create a new Persona");
                         mayMakeMore = false;
                     } else if (i < max) {
                         is = new ItemStack(Material.SKULL_ITEM, 1, (short) 2);
-						buildItem(is, "Empty Persona", ChatColor.GREEN+""+ChatColor.ITALIC + "Slot is available", g + "");
+                        ItemUtil.decorate(is, "Empty Persona", ChatColor.GREEN+""+ChatColor.ITALIC + "Slot is available", g + "");
 					}else {
 						is = new ItemStack(Material.SKULL_ITEM, 1, (short) 1);
-						buildItem(is, "Locked Slot", g + "Please " + ChatColor.GREEN+""+ChatColor.ITALIC + "Purchase", g + "You may purchase more personas in the store");
+						ItemUtil.decorate(is, "Locked Slot", g + "Please " + ChatColor.GREEN+""+ChatColor.ITALIC + "Purchase", g + "You may purchase more personas in the store");
                     }
                 } else {
                     ArcheSkin sk = a.getSkin();
@@ -228,7 +227,7 @@ public class ArcheBeacon {
 					String gender = a.getGender() == null? "" : a.getGender();
                     String desc = ChatColor.GRAY + a.getRaceString(false) + " " + gender;
                     String d2 = (i == current? ChatColor.DARK_GREEN + "Selected!": ChatColor.GREEN + "Click to select");
-                    buildItem(is, name, desc, d2);
+                    ItemUtil.decorate(is, name, desc, d2);
                 }
 
 				//Always do this
@@ -256,17 +255,5 @@ public class ArcheBeacon {
 
         return result;
     }
-
-    public static ItemStack buildItem(ItemStack is, String title, String... lore){
-		ItemMeta meta = is.getItemMeta();
-		meta.setDisplayName(title);
-		List<String> loreList = Lists.newLinkedList();
-
-		for(String x : lore) loreList.add(ChatColor.DARK_GRAY + x);
-		meta.setLore(loreList);
-
-		is.setItemMeta(meta);
-		return is;
-	}
 	
 }
