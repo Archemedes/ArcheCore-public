@@ -285,7 +285,9 @@ public class ArchePersonaHandler implements PersonaHandler {
         Persona p = op.getPersona();
         boolean masked = op.isLoaded() && p.tags().hasTag("masked");
 
-        result.add(new TextComponent(l + "~~~~ " + r + ((masked) ? op.getName() : op.getPlayerName()) + ((mod && masked) ? l + "(" + op.getPlayerName() + ")" + r : "") + "'s Roleplay Persona" + l + " ~~~~"));
+        result.add(new TextComponent(l + "~~~~ " + r + 
+        		((masked) ? op.getName() : op.getPlayerName()) + ((mod && masked) ? l + "(" + op.getPlayerName() + ")" + r : "") 
+        		+ "'s Roleplay Persona" + (mod? u+"(id:"+op.getPersonaId()+")" : "") + l + " ~~~~"));
         result.add(getPersonaHeader(op));
 
         //Now we add all the actual relevant Persona tags in a list called subresult.
@@ -314,7 +316,7 @@ public class ArchePersonaHandler implements PersonaHandler {
             if (desc != null)
                 subresult.add(new TextComponent(c + "Description: " + r + desc));
         }
-
+        
         //Having added EVERYTHING relevant into subresult, we call the event around
         //Plugins are allowed to modify the info in the event tags, though not in the header
         //They can cancel the event also in which case we show nothing (return empty list)
