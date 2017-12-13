@@ -253,6 +253,9 @@ public class ArchePersonaHandler implements PersonaHandler {
             SkinCache.getInstance().clearSkin(oldPersona);
         }
 
+        PersonaCreateEvent event3 = new PersonaCreateEvent(persona, oldPersona);
+        Bukkit.getPluginManager().callEvent(event3);
+        
         Player p = persona.getPlayer();
         boolean forceSwitch = oldPersona != null; 
         //Expected switch restoreMinecraftSpecifics behavior:
