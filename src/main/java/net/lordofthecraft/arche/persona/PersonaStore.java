@@ -498,7 +498,10 @@ public class PersonaStore {
             old = null;
         } else {
             old = prs[persona.getSlot()];
-            if(old != null) offlinePersonas.remove(uuid, old);
+            if(old != null) {
+            	offlinePersonas.remove(uuid, old);
+            	allPersonas.remove(old.getPersonaId());
+            }
         }
 
         allPersonas.put(persona.getPersonaId(), persona);
@@ -506,6 +509,15 @@ public class PersonaStore {
         
         prs[persona.getSlot()] = persona;
         return old;
+    }
+    
+    void removePersona(ArcheOfflinePersona toRemove){
+    	allPersonas.remove(toRemove.getPersonaId());
+    	
+    	UUID u = toRemove.getPlayerUUID();
+    	offlinePersonas.remove(u, toRemove);
+    	ArchePersona[] prs = onlinePersonas.get(u);
+    	if(prs != null) prs[toRemove.getSlot()] = null;
     }
 
 

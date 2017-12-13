@@ -473,16 +473,14 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		PersonaRemoveEvent event = new PersonaRemoveEvent(this, false);
 		Bukkit.getPluginManager().callEvent(event);
 
+		handler.getPersonaStore().removePersona(this);
         consumer.queueRow(new DeletePersonaRow(this));
-
-		ArchePersona[] prs = handler.getAllPersonas(this.getPlayerUUID());
-        prs[getSlot()] = null;
 
 		SkinCache cache = ArcheCore.getControls().getSkinCache();
 		boolean newPersonaHasSkin = false;
 		if(isCurrent()){
 			boolean success = false;
-			for (ArchePersona pr : prs) {
+			for (ArchePersona pr : handler.getPersonaStore().getAllPersonas(this.getPlayerUUID())) {
 				if (pr != null) {
 					PersonaSwitchEvent ev2 = new PersonaSwitchEvent(pr);
 					Bukkit.getPluginManager().callEvent(ev2);
