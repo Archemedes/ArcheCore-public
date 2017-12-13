@@ -9,6 +9,8 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.CreationDialog;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.util.ItemUtil;
+
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -68,10 +70,18 @@ public class ArcheBeacon {
                 pers.attributes().getExistingInstances().stream().forEach(aa ->
                         pers.attributes().getInstance(aa).getModifiers().stream()
                                 .map(ExtendedAttributeModifier.class::cast)
-                                .forEach(mod-> lore.add(
-							mod.asReadablePercentage(aa) + ' ' + aa.getName() + ' '
-							+ ChatColor.GRAY + "" + ChatColor.ITALIC + '('
-							+ mod.getName() + ')')) 
+                                .forEach(mod->{
+                                	String modName = mod.getName();
+                                	boolean isCommented = StringUtils.isEmpty(modName);
+                                	if(!isCommented) {
+                                		char first = modName.charAt(0);
+                                		isCommented = first == '#' || first == '/' || first == '\\';
+                                	}
+                                	
+                                	lore.add(	mod.asReadablePercentage(aa) + ' ' + aa.getName() + 
+                                    		(isCommented? "" : ( " " + ChatColor.GRAY + "" + ChatColor.ITALIC + '(' + mod.getName() + ')'))  
+                                    		);
+                                })
 				);
 				lore.add(ChatColor.GRAY + "Click to learn about attributes");
 				m.setLore(lore);
