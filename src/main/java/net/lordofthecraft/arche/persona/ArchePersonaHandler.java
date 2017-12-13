@@ -159,6 +159,12 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public Collection<OfflinePersona> getPersonasUnordered(OfflinePlayer p){
 		return store.getOfflinePersonasUnordered(p.getUniqueId());
 	}
+	
+	@Override
+	public Collection<OfflinePersona> getPersonasUnordered(UUID uuid){
+		return store.getOfflinePersonasUnordered(uuid);
+	}
+
 
 	@Override
 	public int countPersonas(UUID uuid) {

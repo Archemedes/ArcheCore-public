@@ -118,6 +118,14 @@ public interface PersonaHandler {
 	Collection<OfflinePersona> getPersonasUnordered(OfflinePlayer p);
 	
 	/**
+	 * Returns all of the Player's Personas.
+	 * Personas might be either off- or online variant of the Persona.
+	 * @param uuid UUID of player
+	 * @return An array of the Player's persona.
+	 */
+	Collection<OfflinePersona> getPersonasUnordered(UUID uuid);
+	
+	/**
 	 * Returns all of the Player's Personas. Each persona's ID should correspond
 	 * to the index of the Persona in the returned Array.
 	 * @param p The Player in question
