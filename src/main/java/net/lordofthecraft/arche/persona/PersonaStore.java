@@ -131,12 +131,14 @@ public class PersonaStore {
     }
 
     public Collection<Persona> getPersonasUnordered(UUID uuid){
+    	if(!onlinePersonas.containsKey(uuid)) return Collections.emptyList();
     	return Arrays.stream(onlinePersonas.get(uuid))
     			.filter(Objects::nonNull)
     			.collect(Collectors.toList());
     }
     
     public Collection<OfflinePersona> getOfflinePersonasUnordered(UUID uuid){
+    	if(!offlinePersonas.containsKey(uuid)) return Collections.emptyList();
     	return Collections.unmodifiableCollection(offlinePersonas.get(uuid));
     }
 
