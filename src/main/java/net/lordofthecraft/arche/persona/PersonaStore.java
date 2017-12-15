@@ -244,7 +244,8 @@ public class PersonaStore {
     public void preload() {
         ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
         if (timer != null) timer.startTiming("Preloading personas");
-
+        int amount = 0;
+        
         Connection connection = null;
         PreparedStatement offlineSelectStat = null;
 
@@ -255,6 +256,7 @@ public class PersonaStore {
             res = offlineSelectStat.executeQuery();
 
             while (res.next()) { //Looping for every player we know to have personas
+            	amount++;
                 UUID uuid = UUID.fromString(res.getString("player_fk"));
 
                 ArcheOfflinePersona offline = buildOfflinePersona(res, uuid);
@@ -270,7 +272,10 @@ public class PersonaStore {
             SQLUtil.close(connection);
         }
         
-        if (timer != null) timer.stopTiming("Preloading personas");
+        if (timer != null) {
+        	ArcheCore.getPlugin().getLogger().info("[Debug] Successfully preloaded " + amount + " personas.");
+        	timer.stopTiming("Preloading personas");
+        }
     }
 
     private ArcheOfflinePersona buildOfflinePersona(ResultSet res, UUID pUUID) throws SQLException {
