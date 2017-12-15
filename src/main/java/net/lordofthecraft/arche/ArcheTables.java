@@ -101,7 +101,7 @@ public final class ArcheTables {
     protected static void createPlayerTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS players (" +
                 "player CHAR(36)," +
-                "player_name TEXT DEFAULT NULL," +
+                "player_name VARCHAR(16) DEFAULT NULL," +
                 "PRIMARY KEY (player), UNIQUE (player_name)" +
                 ")" +
                 end);
@@ -148,8 +148,8 @@ public final class ArcheTables {
                 "name TEXT," +
                 "race_header TEXT DEFAULT NULL," +
                 "birthdate INT DEFAULT 0," +
-                "gender TEXT DEFAULT 'Other'," +
-                "p_type TEXT DEFAULT 'NORMAL'," +
+                "gender VARCHAR(255) DEFAULT 'Other'," +
+                "p_type VARCHAR(16) DEFAULT 'NORMAL'," +
                 "descr TEXT DEFAULT NULL," +
                 "prefix TEXT DEFAULT NULL," +
                 "curr BOOLEAN DEFAULT FALSE," +
@@ -217,11 +217,11 @@ public final class ArcheTables {
     protected static void createPersonaStatsTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS persona_stats (" +
                 "persona_id_fk INT UNSIGNED," +
+                "date_created TIMESTAMP," +
                 "played INT UNSIGNED DEFAULT 0," +
                 "chars INT UNSIGNED DEFAULT 0," +
                 "renamed TIMESTAMP," +
                 "playtime_past INT UNSIGNED DEFAULT 0," +
-                "date_created TIMESTAMP," +
                 "PRIMARY KEY (persona_id_fk)," +
                 "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT" +
                 ")" +

@@ -14,6 +14,7 @@ import net.lordofthecraft.arche.listener.*;
 import net.lordofthecraft.arche.persona.ArcheEconomy;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.FatigueDecreaser;
+import net.lordofthecraft.arche.persona.ThisSQLThing;
 import net.lordofthecraft.arche.save.Consumer;
 import net.lordofthecraft.arche.save.DumpedDBReader;
 import net.lordofthecraft.arche.save.rows.player.ReplacePlayerRow;
@@ -221,6 +222,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     @Override
     public void onEnable() {
+    	
+    	
     	long timeOnEnable = System.currentTimeMillis();
 
         //Initialize our config file
@@ -231,6 +234,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
         //Setup the SQL stuff for ArcheCore
         initSql();
+        
 
         //Find our Singletons and assign them.
         blockRegistry = new BlockRegistry();
@@ -239,7 +243,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         helpdesk = HelpDesk.getInstance();
         skinCache = SkinCache.getInstance();
 
-
+        ThisSQLThing.go();
         
         ResultSet res = null;
         try(Connection c = sqlHandler.getConnection()){
