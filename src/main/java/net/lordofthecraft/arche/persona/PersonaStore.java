@@ -144,7 +144,7 @@ public class PersonaStore {
 
     public ArcheOfflinePersona[] getAllOfflinePersonas(UUID uuid) {
     	ArcheOfflinePersona[] result = new ArcheOfflinePersona[ArcheCore.getControls().personaSlots()];
-    	offlinePersonas.get(uuid).forEach(aop -> result[aop.getPersonaId()] = aop);
+    	offlinePersonas.get(uuid).forEach(aop -> result[aop.getSlot()] = aop);
     	return result;
     }
     
