@@ -118,7 +118,7 @@ public final class ArcheTables {
                 "skinValue TEXT," +
                 "skinSignature TEXT," +
                 //TODO update
-                "refresh DATETIME," +
+                "refresh DATETIME(3)," +
                 "PRIMARY KEY (player,slot)" +
                 ")" +
                 end);
@@ -157,7 +157,7 @@ public final class ArcheTables {
                 "money DOUBLE DEFAULT " + ArcheCore.getEconomyControls().getBeginnerAllowance() + "," +
                 "profession VARCHAR(255) DEFAULT NULL," +
                 "fatigue DOUBLE DEFAULT 0.0," +
-                "last_played DATETIME," +
+                "last_played DATETIME(3)," +
                 "skin_slot INT DEFAULT -1," +
                 "PRIMARY KEY (persona_id)," +
                 "FOREIGN KEY (player_fk) REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT," +
@@ -193,7 +193,7 @@ public final class ArcheTables {
                 "mod_name TEXT NOT NULL," +
                 "mod_value DOUBLE DEFAULT 0.0," +
                 "operation TEXT NOT NULL," +
-                "created DATETIME," +
+                "created DATETIME(3)," +
                 "decayticks LONG," +
                 "decaytype TEXT," +
                 "lostondeath BOOLEAN DEFAULT FALSE," +
@@ -219,11 +219,11 @@ public final class ArcheTables {
         statement.execute("CREATE TABLE IF NOT EXISTS persona_stats (" +
                 "persona_id_fk INT UNSIGNED," +
                 //TODO Update
-                "date_created DATETIME," +
+                "date_created DATETIME(3)," +
                 "played INT UNSIGNED DEFAULT 0," +
                 "chars INT UNSIGNED DEFAULT 0," +
                 //TODO update
-                "renamed DATETIME," +
+                "renamed DATETIME(3)," +
                 "playtime_past INT UNSIGNED DEFAULT 0," +
                 "PRIMARY KEY (persona_id_fk)," +
                 "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT" +
@@ -282,7 +282,7 @@ public final class ArcheTables {
     protected static void createBlockRegistryTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS blockregistry (" +
                 //TODO Update?
-                "date DATETIME," +
+                "date DATETIME(3)," +
                 "world CHAR(36) NOT NULL," +
                 "x INT," +
                 "y INT," +
@@ -296,7 +296,7 @@ public final class ArcheTables {
     protected static void createEconomyLogging(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS econ_log(" +
                 //TODO Update
-                "date DATETIME," +
+                "date DATETIME(3)," +
                 "persona_id_fk INT UNSIGNED," +
                 "type VARCHAR(255)," +
                 "amount DOUBLE," +
@@ -338,7 +338,7 @@ public final class ArcheTables {
         statement.execute("CREATE TABLE IF NOT EXISTS persona_log (" +
                 "persona_id INT UNSIGNED," +
                 //TODO Update
-                "removed_date DATETIME," +
+                "removed_date DATETIME(3)," +
                 "player_fk CHAR(36) NOT NULL," +
                 "slot INT UNSIGNED NOT NULL," +
                 "race VARCHAR(255) NOT NULL," +
@@ -366,10 +366,10 @@ public final class ArcheTables {
                 "saturation FLOAT DEFAULT 0.0," +
                 "played INT UNSIGNED DEFAULT 0," +
                 "chars INT UNSIGNED DEFAULT 0," +
-                "renamed DATETIME," +
+                "renamed DATETIME(3)," +
                 "playtime_past INT UNSIGNED DEFAULT 0," +
-                "date_created DATETIME," +
-                "last_played DATETIME," +
+                "date_created DATETIME(3)," +
+                "last_played DATETIME(3)," +
                 "PRIMARY KEY (persona_id)" +
                 ")" +
                 end);
