@@ -365,9 +365,6 @@ public class CommandPersona implements CommandExecutor {
                         } else if (name.length() <= 32 || sender.hasPermission("archecore.persona.longname")) {
                             pers.setName(name);
                             sender.sendMessage(ChatColor.AQUA + "Persona name was set to: " + ChatColor.RESET + name);
-                            if (sender == pers.getPlayer()) {
-                                ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(pers, PersonaField.STAT_RENAMED, new Timestamp(System.currentTimeMillis())));
-                            } //Player renamed by his own accord
                         } else {
                             sender.sendMessage(ChatColor.RED + "Error: Name too long. Max length 32 characters");
                         }

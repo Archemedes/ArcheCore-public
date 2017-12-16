@@ -13,7 +13,7 @@ public class NamelogRow extends SingleStatementRow {
 	
 	@Override
 	protected String getStatement() {
-		return "INSERT INTO persona_name(persona_id_fk,name) VALUES (?,?)";
+		return "REPLACE INTO persona_name(persona_id_fk,name) VALUES (?,?)";
 	}
 
 	@Override
