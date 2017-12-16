@@ -1,14 +1,13 @@
 package net.lordofthecraft.arche.save.rows.persona;
 
-import java.sql.Timestamp;
-import java.util.UUID;
-
-import org.bukkit.Location;
-
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.rows.MultiStatementRow;
 import net.lordofthecraft.arche.util.WeakBlock;
+import org.bukkit.Location;
+
+import java.sql.Timestamp;
+import java.util.UUID;
 
 public class InsertPersonaRow extends MultiStatementRow {
     private final int persona;
@@ -82,4 +81,19 @@ public class InsertPersonaRow extends MultiStatementRow {
         }
     }
 
+    @Override
+    public String toString() {
+        return "InsertPersonaRow{" +
+                "persona=" + persona +
+                ", player=" + player +
+                ", slot=" + slot +
+                ", race=" + race +
+                ", name='" + name + '\'' +
+                ", gender='" + gender + '\'' +
+                ", current=" + current +
+                ", world=" + world +
+                ", location=" + location +
+                ", now=" + now +
+                '}';
+    }
 }

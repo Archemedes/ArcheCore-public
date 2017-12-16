@@ -3,7 +3,6 @@ package net.lordofthecraft.arche.persona;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
@@ -257,7 +256,9 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         StringBuilder sb = new StringBuilder();
         if (raceHeader != null && !raceHeader.isEmpty()) {
             if (mod) {
-                sb.append(ChatColor.GRAY).append("(").append(race.getName()).append(") ");
+                sb.append(raceHeader).append(ChatColor.GRAY).append("(").append(race.getName()).append(")");
+            } else {
+                sb.append(raceHeader);
             }
         } else {
             if (race != Race.UNSET) {

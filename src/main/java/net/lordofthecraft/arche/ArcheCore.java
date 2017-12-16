@@ -1,5 +1,7 @@
 package net.lordofthecraft.arche;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
@@ -36,9 +38,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -407,6 +406,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         }
         
         if (!ArcheTables.setUpSQLTables(sqlHandler)) {
+            Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
         if (sqlHandler instanceof WhySQLHandler) {

@@ -117,7 +117,8 @@ public final class ArcheTables {
                 "slim BOOLEAN DEFAULT FALSE," +
                 "skinValue TEXT," +
                 "skinSignature TEXT," +
-                "refresh TIMESTAMP," +
+                //TODO update
+                "refresh DATETIME," +
                 "PRIMARY KEY (player,slot)" +
                 ")" +
                 end);
@@ -156,7 +157,7 @@ public final class ArcheTables {
                 "money DOUBLE DEFAULT " + ArcheCore.getEconomyControls().getBeginnerAllowance() + "," +
                 "profession VARCHAR(255) DEFAULT NULL," +
                 "fatigue DOUBLE DEFAULT 0.0," +
-                "last_played TIMESTAMP," +
+                "last_played DATETIME," +
                 "skin_slot INT DEFAULT -1," +
                 "PRIMARY KEY (persona_id)," +
                 "FOREIGN KEY (player_fk) REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT," +
@@ -168,7 +169,7 @@ public final class ArcheTables {
     protected static void createPersonaVitalsTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS persona_vitals (" +
                 "persona_id_fk INT UNSIGNED," +
-                "world CHAR(36) DEFAULT 'gofuckyourselfgofuckyourselfgofuckyo'," +
+                "world CHAR(36)," +
                 "x INT NOT NULL," +
                 "y INT NOT NULL," +
                 "z INT NOT NULL," +
@@ -192,7 +193,7 @@ public final class ArcheTables {
                 "mod_name TEXT NOT NULL," +
                 "mod_value DOUBLE DEFAULT 0.0," +
                 "operation TEXT NOT NULL," +
-                "created TIMESTAMP," +
+                "created DATETIME," +
                 "decayticks LONG," +
                 "decaytype TEXT," +
                 "lostondeath BOOLEAN DEFAULT FALSE," +
@@ -217,10 +218,12 @@ public final class ArcheTables {
     protected static void createPersonaStatsTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS persona_stats (" +
                 "persona_id_fk INT UNSIGNED," +
-                "date_created TIMESTAMP," +
+                //TODO Update
+                "date_created DATETIME," +
                 "played INT UNSIGNED DEFAULT 0," +
                 "chars INT UNSIGNED DEFAULT 0," +
-                "renamed TIMESTAMP," +
+                //TODO update
+                "renamed DATETIME," +
                 "playtime_past INT UNSIGNED DEFAULT 0," +
                 "PRIMARY KEY (persona_id_fk)," +
                 "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE RESTRICT" +
@@ -278,7 +281,8 @@ public final class ArcheTables {
 
     protected static void createBlockRegistryTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS blockregistry (" +
-                "date TIMESTAMP," +
+                //TODO Update?
+                "date DATETIME," +
                 "world CHAR(36) NOT NULL," +
                 "x INT," +
                 "y INT," +
@@ -291,7 +295,8 @@ public final class ArcheTables {
 
     protected static void createEconomyLogging(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS econ_log(" +
-                "date TIMESTAMP," +
+                //TODO Update
+                "date DATETIME," +
                 "persona_id_fk INT UNSIGNED," +
                 "type VARCHAR(255)," +
                 "amount DOUBLE," +
@@ -305,24 +310,50 @@ public final class ArcheTables {
     }
 
     protected static void createLoggingTables(Statement statement, String end, boolean sqlite) throws SQLException {
-        statement.execute("CREATE TABLE IF NOT EXISTS persona_log (" +
+                /*
+                statement.execute("CREATE TABLE IF NOT EXISTS persona (" +
                 "persona_id INT UNSIGNED," +
-                "removed_date TIMESTAMP," +
                 "player_fk CHAR(36) NOT NULL," +
                 "slot INT UNSIGNED NOT NULL," +
                 "race VARCHAR(255) NOT NULL," +
                 "name TEXT," +
                 "race_header TEXT DEFAULT NULL," +
-                "gender TEXT DEFAULT 'Other'," +
-                "p_type TEXT DEFAULT 'NORMAL'," +
+                "birthdate INT DEFAULT 0," +
+                "gender VARCHAR(255) DEFAULT 'Other'," +
+                "p_type VARCHAR(16) DEFAULT 'NORMAL'," +
                 "descr TEXT DEFAULT NULL," +
                 "prefix TEXT DEFAULT NULL," +
                 "curr BOOLEAN DEFAULT FALSE," +
-                "money DOUBLE DEFAULT 0.0," +
-                "skin INT DEFAULT -1," +
+                "money DOUBLE DEFAULT " + ArcheCore.getEconomyControls().getBeginnerAllowance() + "," +
                 "profession VARCHAR(255) DEFAULT NULL," +
                 "fatigue DOUBLE DEFAULT 0.0," +
-                "max_fatigue DOUBLE DEFAULT 100.00," +
+                "last_played TIMESTAMP," +
+                "skin_slot INT DEFAULT -1," +
+                "PRIMARY KEY (persona_id)," +
+                "FOREIGN KEY (player_fk) REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT," +
+                "FOREIGN KEY (profession) REFERENCES skills (skill_id) ON UPDATE CASCADE ON DELETE SET NULL" +
+                ")" +
+                end);
+         */
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_log (" +
+                "persona_id INT UNSIGNED," +
+                //TODO Update
+                "removed_date DATETIME," +
+                "player_fk CHAR(36) NOT NULL," +
+                "slot INT UNSIGNED NOT NULL," +
+                "race VARCHAR(255) NOT NULL," +
+                "name TEXT," +
+                "race_header TEXT DEFAULT NULL," +
+                "birthdate INT DEFAULT 0," +
+                "gender VARCHAR(255) DEFAULT 'Other'," +
+                "p_type VARCHAR(16) DEFAULT 'NORMAL'," +
+                "descr TEXT DEFAULT NULL," +
+                "prefix TEXT DEFAULT NULL," +
+                "curr BOOLEAN DEFAULT FALSE," +
+                "money DOUBLE DEFAULT " + ArcheCore.getEconomyControls().getBeginnerAllowance() + "," +
+                "skin_slot INT DEFAULT -1," +
+                "profession VARCHAR(255) DEFAULT NULL," +
+                "fatigue DOUBLE DEFAULT 0.0," +
                 "world VARCHAR(255) NOT NULL," +
                 "x INT NOT NULL," +
                 "y INT NOT NULL," +
@@ -335,10 +366,10 @@ public final class ArcheTables {
                 "saturation FLOAT DEFAULT 0.0," +
                 "played INT UNSIGNED DEFAULT 0," +
                 "chars INT UNSIGNED DEFAULT 0," +
-                "renamed TIMESTAMP," +
+                "renamed DATETIME," +
                 "playtime_past INT UNSIGNED DEFAULT 0," +
-                "date_created TIMESTAMP," +
-                "last_played TIMESTAMP," +
+                "date_created DATETIME," +
+                "last_played DATETIME," +
                 "PRIMARY KEY (persona_id)" +
                 ")" +
                 end);
@@ -353,16 +384,28 @@ public final class ArcheTables {
                 ")" +
                 end);
 
+                /*
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_tags (" +
+                "persona_id_fk INT UNSIGNED," +
+                "tag_key VARCHAR(255) NOT NULL," +
+                "tag_value TEXT," +
+                "offline BOOLEAN DEFAULT FALSE," +
+                "PRIMARY KEY (persona_id_fk,tag_key)," +
+                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id)" +
+                ")" +
+                end);
+         */
         statement.execute("CREATE TABLE IF NOT EXISTS persona_tags_log (" +
                 "persona_id_fk INT UNSIGNED," +
                 "tag_key VARCHAR(255) NOT NULL," +
                 "tag_value TEXT," +
+                "offline BOOLEAN DEFAULT FALSE," +
                 "PRIMARY KEY (persona_id_fk,tag_key)," +
                 "FOREIGN KEY (persona_id_fk) REFERENCES persona_log (persona_id)" +
                 ")" +
                 end);
 
-        statement.execute("CREATE TABLE IF NOT EXISTS persona_attributes_log (" +
+        /*statement.execute("CREATE TABLE IF NOT EXISTS persona_attributes_log (" +
                 "mod_uuid CHAR(36)," +
                 "persona_id_fk INT UNSIGNED," +
                 "attribute_type VARCHAR(255)," +
@@ -374,25 +417,27 @@ public final class ArcheTables {
                 "PRIMARY KEY (mod_uuid,persona_id_fk,attribute_type)," +
                 "FOREIGN KEY (persona_id_fk) REFERENCES persona_log (persona_id) ON UPDATE CASCADE ON DELETE CASCADE" +
                 ")" +
-                end);
+                end);*/
 
     }
 
     protected static void createDeleteProcedure(Statement statement) throws SQLException {
+
+
         statement.execute(
                 "CREATE PROCEDURE delete_persona(IN pers_id CHAR(36)) " +
                         "LANGUAGE SQL " +
                         "DETERMINISTIC " +
                         "COMMENT 'Logs and deletes persona entries based off of a persona ID number.' " +
                         "BEGIN " +
-                        "INSERT INTO persona_log(persona_id,player_fk,slot,race,name,race_header,gender,p_type,descr,prefix,curr,money,skin,profession,fatigue,world,x,y,z,inv,ender_inv,potions,health,hunger,saturation,played,chars,renamed,playtime_past,date_created,last_played) " +
-                        "SELECT persona_id,player_fk,slot,race,name,race_header,gender,p_type,descr,prefix,curr,money,skin,profession,fatigue,world,x,y,z,inv,ender_inv,health,hunger,saturation,played,chars,renamed,playtime_past,date_created,last_played " +
+                        "INSERT INTO persona_log(persona_id,player_fk,slot,race,name,race_header,birthdate,gender,p_type,descr,prefix,curr,money,skin_slot,profession,fatigue,world,x,y,z,inv,ender_inv,potions,health,hunger,saturation,played,chars,renamed,playtime_past,date_created,last_played) " +
+                        "SELECT persona_id,player_fk,slot,race,name,race_header,birthdate,gender,p_type,descr,prefix,curr,money,skin_slot,profession,fatigue,world,x,y,z,inv,ender_inv,potions,health,hunger,saturation,played,chars,renamed,playtime_past,date_created,last_played " +
                         "FROM persona JOIN persona_vitals ON persona.persona_id = persona_vitals.persona_id_fk " +
                         "JOIN persona_stats ON persona.persona_id = persona_stats.persona_id_fk " +
                         "WHERE persona.persona_id = pers_id; " +
                         "INSERT INTO persona_skills_log(persona_id_fk,skill_id_fk,xp,visible) SELECT persona_id_fk,skill_id_fk,xp,visible FROM persona_skills WHERE persona_id_fk = pers_id; " +
-                        "INSERT INTO persona_tags_log(persona_id_fk,tag_key,tag_value) SELECT persona_id_fk,tag_key,tag_value FROM persona_tags WHERE persona_id_fk = pers_id; " +
-                        "INSERT INTO persona_attributes_log(mod_uuid,persona_id_fk,attribute_type,mod_name,mod_value,operation,created,decaytime) SELECT mod_uuid,persona_id_fk,attribute_type,mod_name,operation,created,decaytime FROM persona_attributes WHERE persona_id_fk = pers_id; " +
+                        "INSERT INTO persona_tags_log(persona_id_fk,tag_key,tag_value,offline) SELECT persona_id_fk,tag_key,tag_value,offline FROM persona_tags WHERE persona_id_fk = pers_id; " +
+                        /*"INSERT INTO persona_attributes_log(mod_uuid,persona_id_fk,attribute_type,mod_name,mod_value,operation,created,decaytime) SELECT mod_uuid,persona_id_fk,attribute_type,mod_name,operation,created,decaytime FROM persona_attributes WHERE persona_id_fk = pers_id; " +*/
                         "DELETE FROM persona_stats WHERE persona_id_fk = pers_id; " +
                         "DELETE FROM persona_vitals WHERE persona_id_fk = pers_id; " +
                         "DELETE FROM persona_tags WHERE persona_id_fk = pers_id; " +
@@ -400,6 +445,15 @@ public final class ArcheTables {
                         "DELETE FROM persona_attributes WHERE persona_id_fk = pers_id; " +
                         "DELETE FROM persona WHERE persona_id = pers_id; " +
                         "END");
+        /*
+        	            "DELETE FROM persona_skills WHERE persona_id_fk=?",
+	            "DELETE FROM persona_vitals WHERE persona_id_fk=?",
+	            "DELETE FROM persona_stats WHERE persona_id_fk=?",
+	            "DELETE FROM persona_tags WHERE persona_id_fk=?",
+	            "DELETE FROM persona_name WHERE persona_id_fk=?",
+	            "DELETE FROM persona_attributes WHERE persona_id_fk=?",
+	            "DELETE FROM persona WHERE persona_id=?"
+         */
     }
 
     private static String getEndingString(SQLHandler handler) {
