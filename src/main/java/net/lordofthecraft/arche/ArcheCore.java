@@ -16,7 +16,6 @@ import net.lordofthecraft.arche.listener.*;
 import net.lordofthecraft.arche.persona.ArcheEconomy;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.FatigueDecreaser;
-import net.lordofthecraft.arche.persona.ThisSQLThing;
 import net.lordofthecraft.arche.save.Consumer;
 import net.lordofthecraft.arche.save.DumpedDBReader;
 import net.lordofthecraft.arche.save.rows.player.ReplacePlayerRow;
@@ -242,11 +241,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         helpdesk = HelpDesk.getInstance();
         skinCache = SkinCache.getInstance();
 
-        ThisSQLThing.go();
+        //ThisSQLThing.go();
         
         ResultSet res = null;
         try(Connection c = sqlHandler.getConnection()){
-        	timer.startTiming("Loading player UUID/name map");
+            if (timer != null) timer.startTiming("Loading player UUID/name map");
         	res = c.createStatement().executeQuery("SELECT player,player_name FROM players");
         	while(res.next()) {
         		UUID uuid = UUID.fromString(res.getString("player"));
@@ -255,7 +254,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         	}
         	res.close();
             res.getStatement().close();
-            timer.stopTiming("Loading player UUID/name map");
+            if (timer != null) timer.stopTiming("Loading player UUID/name map");
             
             res = c.createStatement().executeQuery("SELECT world,x,y,z,data FROM blockregistry");
             while(res.next()){

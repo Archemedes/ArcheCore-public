@@ -16,7 +16,7 @@ public class InsertPlayerUUIDRow extends SingleStatementRow {
 
     @Override
     protected String getStatement() {
-        return "INSERT IGNORE INTO players (player,player_name) VALUES (?,?)";
+        return "INSERT OR IGNORE INTO players (player,player_name) VALUES (?,?)";
     }
 
     @Override
