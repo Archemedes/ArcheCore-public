@@ -256,7 +256,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         StringBuilder sb = new StringBuilder();
         if (raceHeader != null && !raceHeader.isEmpty()) {
             if (mod) {
-                sb.append(raceHeader).append(ChatColor.GRAY).append("(").append(race.getName()).append(")");
+                sb.append(raceHeader).append(ChatColor.GRAY).append(" (").append(race.getName()).append(")");
             } else {
                 sb.append(raceHeader);
             }
