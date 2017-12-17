@@ -2,11 +2,11 @@ package net.lordofthecraft.arche.util;
 
 import org.apache.commons.lang.Validate;
 
-public class CaseInsensitiveStringWrapper {
+public class CaseString {
 	public final String value;
 	private final String value_lowercase;
 	
-	public CaseInsensitiveStringWrapper(String value) {
+	public CaseString(String value) {
 		Validate.notNull(value);
 		this.value = value;
 		this.value_lowercase = value.toLowerCase();
@@ -19,7 +19,10 @@ public class CaseInsensitiveStringWrapper {
 	
 	@Override
 	public boolean equals(Object other) {
-		return value_lowercase.equals(other);
+		if(other == null || other.getClass() != this.getClass())
+			return false;
+		
+		return value_lowercase.equals(((CaseString) other).value_lowercase);
 	}
 	
 	public String getValue() {
