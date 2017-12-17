@@ -240,8 +240,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         fatigueHandler = ArcheFatigueHandler.getInstance();
         helpdesk = HelpDesk.getInstance();
         skinCache = SkinCache.getInstance();
-
-        //ThisSQLThing.go();
         
         ResultSet res = null;
         try(Connection c = sqlHandler.getConnection()){
