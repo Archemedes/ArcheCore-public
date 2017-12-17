@@ -249,6 +249,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         	while(res.next()) {
         		UUID uuid = UUID.fromString(res.getString("player"));
         		String name = res.getString("player_name");
+
+              if (debugMode) {
+                  getLogger().info(name + " : " + uuid);
+              }
+
         		playerNameMap.put(uuid, new CaseString(name));
         	}
         	res.close();
