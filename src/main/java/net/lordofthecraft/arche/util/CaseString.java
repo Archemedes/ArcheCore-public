@@ -14,7 +14,8 @@ public class CaseString {
 	
 	@Override
 	public int hashCode() {
-		return value_lowercase.hashCode();
+		//return value_lowercase.hashCode();
+		return value.hashCode();
 	}
 	
 	@Override

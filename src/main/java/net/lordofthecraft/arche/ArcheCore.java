@@ -709,10 +709,12 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     public void updateNameMap(Player player) {
     	UUID u = player.getUniqueId();
     	String n = player.getName();
-    	
-    	if(!playerNameMap.containsKey(u) || !n.equals(playerNameMap.get(u).getValue())) {
+    	CaseString caseString = new CaseString(n);
+
+
+    	if(!playerNameMap.containsKey(u) || !caseString.equals(playerNameMap.get(u))) {
     		if(isDebugging()) getLogger().info("[Debug] Updating Player Name Map: " + u + "=" + n);
-    		playerNameMap.put(player.getUniqueId(), new CaseString(player.getName()));
+    		playerNameMap.put(player.getUniqueId(), caseString);
         	getConsumer().queueRow(new ReplacePlayerRow(player));
     	}
     }
