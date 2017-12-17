@@ -22,11 +22,12 @@ public class ExhaustionListener implements Listener {
 		
 		if(ps != null) {
 			int change = e.getFoodLevel() - p.getFoodLevel();
+			System.out.println("Change: " + change);
 			if(change > 0) {
 				double exhaustion = Math.max(0, 
 						Math.min(100, ps.attributes().getAttributeValue(AttributeRegistry.EXHAUSTION)) / 100.0);
-				
 				float saturation = p.getSaturation();
+				
 				Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), 
 						()-> {
 							float newSat = p.getSaturation();
@@ -38,11 +39,10 @@ public class ExhaustionListener implements Listener {
 				double exhaustion = ps.attributes().getAttributeValue(AttributeRegistry.EXHAUSTION);
 				if(exhaustion < 0) exhaustion = 0;
 				int foodLevel = e.getFoodLevel();
-				
 				int divider = 15;
                 double totalExtraFood = exhaustion / divider;
                 int extraFood = (int) (exhaustion / divider);
-                double remainder = (totalExtraFood - extraFood) / totalExtraFood * 4.0;
+                double remainder = totalExtraFood == 0? 0 : (totalExtraFood - extraFood) / totalExtraFood * 4.0;
                 //System.out.println("Exhaustion: " + exhaustion + " " + extraFood + " " + remainder);
                 foodLevel = Math.max(0, foodLevel - extraFood);
 				e.setFoodLevel(foodLevel);

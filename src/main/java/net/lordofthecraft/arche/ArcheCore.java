@@ -23,6 +23,7 @@ import net.lordofthecraft.arche.seasons.LotcianCalendar;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
 import net.lordofthecraft.arche.skin.SkinCache;
+import net.lordofthecraft.arche.util.CaseString;
 import net.lordofthecraft.arche.util.SQLUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Bukkit;
@@ -104,7 +105,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private boolean blockregistryKillCustom;
     private boolean shouldClone = false;
     
-    private final BiMap<UUID, String> playerNameMap = HashBiMap.create();
+    private final BiMap<UUID, CaseString> playerNameMap = HashBiMap.create();
     
     public static PersonaKey getPersonaKey(UUID uuid, int pid) {
         Persona pers = getPersonaControls().getPersona(uuid, pid);
@@ -248,7 +249,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         	while(res.next()) {
         		UUID uuid = UUID.fromString(res.getString("player"));
         		String name = res.getString("player_name");
-        		playerNameMap.put(uuid, name);
+        		playerNameMap.put(uuid, new CaseString(name));
         	}
         	res.close();
             res.getStatement().close();
@@ -704,21 +705,23 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     	UUID u = player.getUniqueId();
     	String n = player.getName();
     	
-    	if(!playerNameMap.containsKey(u) || !n.equals(playerNameMap.get(u))) {
+    	if(!playerNameMap.containsKey(u) || !n.equals(playerNameMap.get(u).getValue())) {
     		if(isDebugging()) getLogger().info("[Debug] Updating Player Name Map: " + u + "=" + n);
-    		playerNameMap.put(player.getUniqueId(), player.getName());
+    		playerNameMap.put(player.getUniqueId(), new CaseString(player.getName()));
         	getConsumer().queueRow(new ReplacePlayerRow(player));
     	}
     }
     
     @Override
     public String getPlayerNameFromUUID(UUID playerUUID) {
-    	return playerNameMap.get(playerUUID);
+    	CaseString w = playerNameMap.get(playerUUID);
+    	return w==null? null : w.getValue();
     }
     
     @Override
     public UUID getPlayerUUIDFromName(String playerName) {
-    	return playerNameMap.inverse().get(playerName);
+    	CaseString w = new CaseString(playerName);
+    	return playerNameMap.inverse().get(w);
     }
 
     @Override

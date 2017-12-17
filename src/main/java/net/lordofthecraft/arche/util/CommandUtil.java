@@ -55,7 +55,7 @@ public class CommandUtil {
             player = s[0];
             try {
                 id = Integer.parseInt(s[1]);
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 return null;
             }
         } else if (c == 0) {
@@ -63,9 +63,6 @@ public class CommandUtil {
         } else return null;
 
         PersonaHandler hand = ArcheCore.getControls().getPersonaHandler();
-        
-        
-        @SuppressWarnings("deprecation")
         UUID uuid = ArcheCore.getControls().getPlayerUUIDFromName(player);
         
         return id < 0 || id >= ArcheCore.getControls().personaSlots() ?
