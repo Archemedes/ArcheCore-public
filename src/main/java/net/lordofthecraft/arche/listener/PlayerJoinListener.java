@@ -38,6 +38,8 @@ public class PlayerJoinListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onJoin(PlayerJoinEvent e){
 		Player p = e.getPlayer();
+		p.setExhaustion(3.5f);
+		
         if (timer != null) timer.startTiming("login " + p.getName());
         handler.joinPlayer(p);
         if (timer != null) timer.stopTiming("login" + p.getName());
