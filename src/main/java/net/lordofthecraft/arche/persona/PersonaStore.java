@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -56,7 +57,8 @@ import net.lordofthecraft.arche.util.WeakBlock;
 public class PersonaStore {
     final String personaSelect;
     private final String offlinePersonaSelect;
-
+    private final Semaphore loginThrottle = new Semaphore(2, true);
+    
     public PersonaStore() {
         personaSelect = personaSelectStatement(false);
         offlinePersonaSelect = personaSelectStatement(true);
@@ -159,7 +161,8 @@ public class PersonaStore {
         //So instead once a player logged in, they remain loaded for the session
         //We obviously won't have to bother reloading their personas another time then
         if (loadedThisSession.contains(uuid)) return;
-
+        loginThrottle.acquireUninterruptibly();
+        
         ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
         if (timer != null) timer.startTiming("Loading Personas of " + playerName);
 
@@ -204,7 +207,8 @@ public class PersonaStore {
             if (any) pendingBlobs.put(uuid, prs);
             loadedThisSession.add(uuid);
         }
-
+        
+        loginThrottle.release();
         if (timer != null) timer.stopTiming("Loading Personas of " + playerName);
     }
 
