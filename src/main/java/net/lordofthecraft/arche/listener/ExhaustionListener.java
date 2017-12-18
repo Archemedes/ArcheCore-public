@@ -22,7 +22,6 @@ public class ExhaustionListener implements Listener {
 		
 		if(ps != null) {
 			int change = e.getFoodLevel() - p.getFoodLevel();
-			System.out.println("Change: " + change);
 			if(change > 0) {
 				double exhaustion = Math.max(0, 
 						Math.min(100, ps.attributes().getAttributeValue(AttributeRegistry.EXHAUSTION)) / 100.0);
