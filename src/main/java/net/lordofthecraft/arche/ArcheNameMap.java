@@ -39,7 +39,7 @@ public class ArcheNameMap {
      			try {
      				CaseString n1 = new CaseString(MojangCommunicator.requestCurrentUsername(uuid));
      				CaseString n2 = new CaseString(MojangCommunicator.requestCurrentUsername(otheruuid));
-     				
+
      				if(!name.equals(n2)) { //This replacement must be done first or it will still conflict with next insert.
      					getLogger().info(otheruuid + " was outdated. Setting new name: " + n2.value);
      					playerNameMap.put(otheruuid, n2);
@@ -81,8 +81,8 @@ public class ArcheNameMap {
     	if(playerNameMap.containsValue(caseString)) {
     		UUID o = playerNameMap.inverse().get(caseString);
     		if(!u.equals(o)) { //This name was used by a player with other UUID. We must update both
-         		if(ArcheCore.isDebugging()) getLogger().info("[Debug] Conflict in name map for value: " + n);
-    			playerNameMap.forcePut(u, caseString); //Force-put means old entry is wiped
+         		if(ArcheCore.isDebugging()) getLogger().info("[Debug] Updating CONFLICTING Player Name Map: " + u + "=" + n);
+         		playerNameMap.forcePut(u, caseString); //Force-put means old entry is wiped
     			plugin.getConsumer().queueRow(new ReplacePlayerRow(u,n));
    
 
@@ -154,6 +154,11 @@ public class ArcheNameMap {
     	}
     	
     	public String getValue() {
+    		return value;
+    	}
+    	
+    	@Override
+    	public String toString() {
     		return value;
     	}
     }

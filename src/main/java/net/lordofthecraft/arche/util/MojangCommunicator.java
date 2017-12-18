@@ -159,7 +159,7 @@ public class MojangCommunicator {
     }
     
     public static String requestCurrentUsername(UUID uuid) throws IOException, ParseException {
-    	String uuid_string = uuid.toString().replace('-', Character.MIN_VALUE);
+    	String uuid_string = uuid.toString().replaceAll("-", "");
     	
         InputStreamReader in = null;
         HttpURLConnection con = null;
@@ -168,12 +168,13 @@ public class MojangCommunicator {
 			URL url;
 			url = new URL("https://api.mojang.com/user/profiles/"+uuid_string+"/names");
 			con = (HttpURLConnection) url.openConnection();
-			con.setRequestProperty("Content-type", "application/json");
+			con.setRequestMethod("GET");
+			con.setDoInput(true);
 			in = new InputStreamReader(con.getInputStream());
 
 			JSONParser parser = new JSONParser();
 			JSONArray result = (JSONArray) parser.parse(in);
-			JSONObject firstName = (JSONObject) result.get(0);
+			JSONObject firstName = (JSONObject) result.get(result.size() - 1);
 			return String.valueOf(firstName.get("name"));
         } finally {
             if (in != null) in.close();
