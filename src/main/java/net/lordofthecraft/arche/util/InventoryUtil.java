@@ -1,24 +1,34 @@
 package net.lordofthecraft.arche.util;
 
+import static org.bukkit.event.inventory.InventoryAction.DROP_ONE_CURSOR;
+import static org.bukkit.event.inventory.InventoryAction.DROP_ONE_SLOT;
+import static org.bukkit.event.inventory.InventoryAction.HOTBAR_SWAP;
+import static org.bukkit.event.inventory.InventoryAction.PICKUP_ALL;
+import static org.bukkit.event.inventory.InventoryAction.PICKUP_HALF;
+import static org.bukkit.event.inventory.InventoryAction.PLACE_ALL;
+import static org.bukkit.event.inventory.InventoryAction.PLACE_ONE;
+
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.google.common.collect.Lists;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheTimer;
-import org.apache.commons.lang.Validate;
-import org.bukkit.Material;
-import org.bukkit.entity.Animals;
-import org.bukkit.event.inventory.*;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
-import org.bukkit.inventory.ItemStack;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static org.bukkit.event.inventory.InventoryAction.*;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheTimer;
+import org.apache.commons.lang.Validate;
+import org.bukkit.Material;
+import org.bukkit.entity.Animals;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryInteractEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
 
 public class InventoryUtil {
 
@@ -435,6 +445,7 @@ public class InventoryUtil {
 			if(con_getSlot == null) con_getSlot = container.getClass().getMethod("getSlot", int.class);
 			Object slot = con_getSlot.invoke(container, rawSlot);
 			if(slot_isAllowed == null) slot_isAllowed = slot.getClass().getMethod("isAllowed", nmsItem.getClass());
+			slot_isAllowed.setAccessible(true);
 			return (boolean) slot_isAllowed.invoke(slot, nmsItem);
 		} catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | SecurityException e) {
 			throw new IllegalStateException("Reflection failed. MC probably changed its method handles. This is bad. Call someone", e);
