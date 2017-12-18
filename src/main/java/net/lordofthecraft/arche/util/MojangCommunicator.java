@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche.skin;
+package net.lordofthecraft.arche.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.Validate;
@@ -151,6 +152,29 @@ public class MojangCommunicator {
 			Validate.isTrue("textures".equals(name), "Skin properties file fetched from Mojang had wrong name: " + name);
             WrappedSignedProperty textureProperty = new WrappedSignedProperty("textures", value, signature);
             return textureProperty;
+        } finally {
+            if (in != null) in.close();
+            if (con != null) con.disconnect();
+        }
+    }
+    
+    public static String requestCurrentUsername(UUID uuid) throws IOException, ParseException {
+    	String uuid_string = uuid.toString().replace('-', Character.MIN_VALUE);
+    	
+        InputStreamReader in = null;
+        HttpURLConnection con = null;
+
+		try {//Request player profile from mojang api
+			URL url;
+			url = new URL("https://api.mojang.com/user/profiles/"+uuid_string+"/names");
+			con = (HttpURLConnection) url.openConnection();
+			con.setRequestProperty("Content-type", "application/json");
+			in = new InputStreamReader(con.getInputStream());
+
+			JSONParser parser = new JSONParser();
+			JSONArray result = (JSONArray) parser.parse(in);
+			JSONObject firstName = (JSONObject) result.get(0);
+			return String.valueOf(firstName.get("name"));
         } finally {
             if (in != null) in.close();
             if (con != null) con.disconnect();

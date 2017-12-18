@@ -16,10 +16,12 @@ import com.google.common.collect.Multimap;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaSkinListener;
-import net.lordofthecraft.arche.skin.MojangCommunicator.AuthenthicationData;
-import net.lordofthecraft.arche.skin.MojangCommunicator.AuthenticationException;
-import net.lordofthecraft.arche.skin.MojangCommunicator.MinecraftAccount;
+import net.lordofthecraft.arche.util.MojangCommunicator;
 import net.lordofthecraft.arche.util.ProtocolUtil;
+import net.lordofthecraft.arche.util.MojangCommunicator.AuthenthicationData;
+import net.lordofthecraft.arche.util.MojangCommunicator.AuthenticationException;
+import net.lordofthecraft.arche.util.MojangCommunicator.MinecraftAccount;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.json.simple.JSONObject;
