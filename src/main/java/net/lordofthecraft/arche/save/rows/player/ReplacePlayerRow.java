@@ -1,19 +1,17 @@
 package net.lordofthecraft.arche.save.rows.player;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.save.rows.SingleStatementRow;
-
 import java.util.UUID;
 
-import org.bukkit.entity.Player;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.save.rows.SingleStatementRow;
 
 public class ReplacePlayerRow extends SingleStatementRow {
     private final UUID uuid;
     private final String name;
 
-    public ReplacePlayerRow(Player player) {
-        uuid = player.getUniqueId();
-        name = player.getName();
+    public ReplacePlayerRow(UUID uuid, String name) {
+        this.uuid = uuid;
+        this.name = name;
     }
 
     @Override

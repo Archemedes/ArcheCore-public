@@ -1,7 +1,5 @@
 package net.lordofthecraft.arche;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
@@ -18,12 +16,10 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.FatigueDecreaser;
 import net.lordofthecraft.arche.save.Consumer;
 import net.lordofthecraft.arche.save.DumpedDBReader;
-import net.lordofthecraft.arche.save.rows.player.ReplacePlayerRow;
 import net.lordofthecraft.arche.seasons.LotcianCalendar;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
 import net.lordofthecraft.arche.skin.SkinCache;
-import net.lordofthecraft.arche.util.CaseString;
 import net.lordofthecraft.arche.util.SQLUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Bukkit;
@@ -63,6 +59,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private LotcianCalendar calendar;
     private Consumer archeConsumer;
     private Timer archeTimer = null;
+    private ArcheNameMap nameMap = null;
 
     //Config settings
     private int maxPersonaSlots;
@@ -104,8 +101,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private int blockregistryPurgeDelay;
     private boolean blockregistryKillCustom;
     private boolean shouldClone = false;
-    
-    private final BiMap<UUID, CaseString> playerNameMap = HashBiMap.create();
     
     public static PersonaKey getPersonaKey(UUID uuid, int pid) {
         Persona pers = getPersonaControls().getPersona(uuid, pid);
@@ -221,8 +216,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     @Override
     public void onEnable() {
-    	
-    	
     	long timeOnEnable = System.currentTimeMillis();
 
         //Initialize our config file
@@ -236,6 +229,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         
 
         //Find our Singletons and assign them.
+        nameMap = new ArcheNameMap(this);
         blockRegistry = new BlockRegistry();
         personaHandler = ArchePersonaHandler.getInstance();
         fatigueHandler = ArcheFatigueHandler.getInstance();
@@ -244,22 +238,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         
         ResultSet res = null;
         try(Connection c = sqlHandler.getConnection()){
-            if (timer != null) timer.startTiming("Loading player UUID/name map");
-        	res = c.createStatement().executeQuery("SELECT player,player_name FROM players");
-        	while(res.next()) {
-        		UUID uuid = UUID.fromString(res.getString("player"));
-        		String name = res.getString("player_name");
-
-              if (debugMode) {
-                  getLogger().info(name + " : " + uuid);
-              }
-
-        		playerNameMap.put(uuid, new CaseString(name));
-        	}
-        	res.close();
-            res.getStatement().close();
-            if (timer != null) timer.stopTiming("Loading player UUID/name map");
-            
+        	nameMap.onEnable(c);
+        	
             res = c.createStatement().executeQuery("SELECT world,x,y,z,data FROM blockregistry");
             while(res.next()){
                 String world = res.getString("world");
@@ -707,28 +687,17 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     }
     
     public void updateNameMap(Player player) {
-    	UUID u = player.getUniqueId();
-    	String n = player.getName();
-    	CaseString caseString = new CaseString(n);
-
-
-    	if(!playerNameMap.containsKey(u) || !caseString.equals(playerNameMap.get(u))) {
-    		if(isDebugging()) getLogger().info("[Debug] Updating Player Name Map: " + u + "=" + n);
-    		playerNameMap.put(player.getUniqueId(), caseString);
-        	getConsumer().queueRow(new ReplacePlayerRow(player));
-    	}
+    	nameMap.updateNameMap(player.getName(), player.getUniqueId());
     }
     
     @Override
     public String getPlayerNameFromUUID(UUID playerUUID) {
-    	CaseString w = playerNameMap.get(playerUUID);
-    	return w==null? null : w.getValue();
+    	return nameMap.getPlayerNameFromUUID(playerUUID);
     }
     
     @Override
     public UUID getPlayerUUIDFromName(String playerName) {
-    	CaseString w = new CaseString(playerName);
-    	return playerNameMap.inverse().get(w);
+    	return nameMap.getPlayerUUIDFromName(playerName);
     }
 
     @Override
