@@ -214,8 +214,9 @@ public class ArcheBeacon {
             }
             
 			//Buttons for switching Personas
-            boolean mayMakeMore = (count < max && ArcheCore.getControls().canCreatePersonas());
-
+            int freeSlots = ArcheCore.getControls().canCreatePersonas()? max - count : 0;
+            boolean mayMakeMore = freeSlots > 0;
+            
 			for(int i = 0; i < requiredSize; i++){
 				ArchePersona a = prs[i];
 				if(a == null){
@@ -223,7 +224,8 @@ public class ArcheBeacon {
 						is = new ItemStack(Material.SKULL_ITEM, 1, (short) 0);
 						ItemUtil.decorate(is, "Empty Persona", ChatColor.GREEN+""+ChatColor.ITALIC + "Click here", g + "To create a new Persona");
                         mayMakeMore = false;
-                    } else if (i < max) {
+                        freeSlots--;
+                    } else if (freeSlots-- > 0) {
                         is = new ItemStack(Material.SKULL_ITEM, 1, (short) 2);
                         ItemUtil.decorate(is, "Empty Persona", ChatColor.GREEN+""+ChatColor.ITALIC + "Slot is available", g + "");
 					}else {
