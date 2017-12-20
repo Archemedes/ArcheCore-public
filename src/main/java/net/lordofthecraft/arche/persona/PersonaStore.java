@@ -211,6 +211,10 @@ public class PersonaStore {
         loginThrottle.release();
         if (timer != null) timer.stopTiming("Loading Personas of " + playerName);
     }
+    
+    public boolean isLoadedThisSession(Player p) {
+    	return loadedThisSession.contains(p.getUniqueId());
+    }
 
     public int getNextPersonaId() {
         return max_persona_id++;
@@ -376,6 +380,7 @@ public class PersonaStore {
         loadNamelog(persona, connection);
         
         Event event = new AsyncPersonaLoadEvent(persona, connection);
+        if(ArcheCore.isDebugging()) ArcheCore.getPlugin().getLogger().info("[Debug] AsyncPersonaLoadEvent firing. Is actually async: " + event.isAsynchronous());
         Bukkit.getPluginManager().callEvent(event);
         if(connection.isClosed()) ArcheCore.getPlugin().getLogger().severe("A consumer of AsyncPersonaLoadEvent is closing the provided connection!!");
         else connection.close();

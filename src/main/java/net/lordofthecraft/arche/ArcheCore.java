@@ -211,6 +211,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
     @Override
     public void onLoad(){
+    	if(!Bukkit.getServer().spigot().getConfig().getBoolean("settings.late-bind")) {
+    		getLogger().warning("late-bind is set to FALSE in spigot.yml! This hinders persona loading of early joiners!");
+    	}
         instance = this;
     }
 

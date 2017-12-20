@@ -41,6 +41,10 @@ public class PlayerJoinListener implements Listener {
 		p.setExhaustion(3.5f);
 		
         if (timer != null) timer.startTiming("login " + p.getName());
+        if(!handler.getPersonaStore().isLoadedThisSession(p)) {
+        	ArcheCore.getPlugin().getLogger().warning("Player " + p.getName() + " was NOT loaded Async. This is likely a late-bind issue");
+        	handler.loadPlayer(p.getUniqueId(), p.getName());
+        }
         handler.joinPlayer(p);
         if (timer != null) timer.stopTiming("login" + p.getName());
         if (ArcheCore.getPlugin().debugMode()) {

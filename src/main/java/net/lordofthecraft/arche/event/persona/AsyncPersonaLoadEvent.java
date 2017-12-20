@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.event.persona;
 
 import java.sql.Connection;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
@@ -11,6 +12,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
  * Simple Event that fires when ArcheCore has async built a Persona
  * Runs during {@link org.bukkit.event.player.AsyncPlayerPreLoginEvent} but gives access to Persona
  * Also runs when Persona is loaded through command.
+ * Runs sync in VERY rare cases, mostly to do with fresh startups where late-bind = false
  */
 public class AsyncPersonaLoadEvent extends Event {
 	private final Persona persona;
@@ -20,7 +22,7 @@ public class AsyncPersonaLoadEvent extends Event {
 	private static final HandlerList handlers = new HandlerList();
 	
 	public AsyncPersonaLoadEvent(Persona persona, Connection c) {
-		super(true);
+		super(!Bukkit.isPrimaryThread());
 		this.persona = persona;
 		this.c = c;
 	}
