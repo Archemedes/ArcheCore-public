@@ -40,8 +40,8 @@ public class CommandUtil {
     }
 
     public static OfflinePersona offlinePersonaFromArg(String a) {
-        if (a.startsWith("pid:")) {
-            String sid = a.substring(4);
+        if (a.startsWith("id:") || a.startsWith("#")) {
+            String sid = a.startsWith("#")? a.substring(1) : a.substring(3);
             if (NumberUtils.isDigits(sid)) {
                 return ArcheCore.getPersonaControls().getPersonaById(Integer.valueOf(sid));
             }
@@ -63,7 +63,11 @@ public class CommandUtil {
         } else return null;
 
         PersonaHandler hand = ArcheCore.getControls().getPersonaHandler();
-        UUID uuid = ArcheCore.getControls().getPlayerUUIDFromName(player);
+        
+        UUID uuid = null;
+        Player p = Bukkit.getPlayer(player);
+        if(p != null) uuid = p.getUniqueId();
+        else uuid = ArcheCore.getControls().getPlayerUUIDFromName(player);
         
         return id < 0 || id >= ArcheCore.getControls().personaSlots() ?
         		hand.getOfflinePersona(uuid) : 
