@@ -33,9 +33,6 @@ public class ArcheOfflinePersona implements OfflinePersona {
     WeakBlock location;
     String name;
     Timestamp lastRenamed;
-    
-    String playerName;
-
 
     ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, boolean current, 
     		Race race, int birthdate, String gender, PersonaType type, String name) {
@@ -48,7 +45,6 @@ public class ArcheOfflinePersona implements OfflinePersona {
         this.type = type;
         this.name = name;
         timePlayed = new AtomicInteger(0);
-        playerName = ArcheCore.getControls().getPlayerNameFromUUID(personaKey.getPlayerUUID());
     }
 
     ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, boolean current, 
@@ -63,7 +59,6 @@ public class ArcheOfflinePersona implements OfflinePersona {
         this.type = type;
         this.name = name;
         timePlayed = new AtomicInteger(0);
-        playerName = ArcheCore.getControls().getPlayerNameFromUUID(personaKey.getPlayerUUID());
     }
 
     @Override
@@ -83,7 +78,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 
     @Override
     public String getPlayerName() {
-        return playerName;
+        return ArcheCore.getPlugin().getPlayerNameFromUUID(getPlayerUUID());
     }
 
     @Override

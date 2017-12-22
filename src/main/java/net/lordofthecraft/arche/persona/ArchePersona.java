@@ -498,7 +498,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 			boolean cleared = cache.clearSkin(this);
 			if (!success) {
 				Plugin plugin = ArcheCore.getPlugin();
-				plugin.getLogger().warning("Player " + playerName + " removed his final usable Persona!");
+				plugin.getLogger().warning("Player " + getPlayerName() + " removed his final usable Persona!");
 				RaceBonusHandler.reset(p); //Clear Racial bonuses, for now...
 				if(p.hasPermission("archecore.mayuse") && !p.hasPermission("archecore.exempt")) new CreationDialog().makeFirstPersona(p);
 			} else {
