@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -58,6 +59,7 @@ public class PersonaStore {
     final String personaSelect;
     private final String offlinePersonaSelect;
     private final Semaphore loginThrottle = new Semaphore(2, true);
+    private final Logger log = ArcheCore.getPlugin().getLogger();
     
     public PersonaStore() {
         personaSelect = personaSelectStatement(false);
@@ -176,7 +178,7 @@ public class PersonaStore {
         try {
             connection = ArcheCore.getSQLControls().getConnection();
             if (ArcheCore.isDebugging()) {
-                ArcheCore.getPlugin().getLogger().info("[Debug] personaSelect: " + personaSelect);
+                log.info("[Debug] personaSelect: " + personaSelect);
             }
             statement = connection.prepareStatement(personaSelect);
             statement.setString(1, uuid.toString());
@@ -192,7 +194,7 @@ public class PersonaStore {
                     if (!hasCurrent) {
                         hasCurrent = true;
                     } else {
-                        ArcheCore.getPlugin().getLogger().warning("Multiple Current Personas for " + playerName);
+                        log.warning("Multiple Current Personas for " + playerName);
                         blob.current = false;
                     }
                 }
@@ -231,7 +233,7 @@ public class PersonaStore {
                 max_persona_id = rs.getInt(1);
                 max_persona_id++;
             } else {
-                ArcheCore.getPlugin().getLogger().warning("We could not retrieve the LAST_INSERT_ID for persona,"
+                log.warning("We could not retrieve the LAST_INSERT_ID for persona,"
                         + " either there are no personas or there is an error."
                         + " We'll be starting at 0. This will throw errors if there are actually personas in the Database.");
             }
@@ -239,14 +241,14 @@ public class PersonaStore {
             statement.close();
             connection.close();
         } catch (SQLException e) {
-            ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to set up our persona ID!!! We can't create personas!", e);
+            log.log(Level.SEVERE, "We failed to set up our persona ID!!! We can't create personas!", e);
         } finally {
             SQLUtil.close(rs);
             SQLUtil.close(statement);
             SQLUtil.close(connection);
         }
 
-        ArcheCore.getPlugin().getLogger().info("[ArchePersonaHandler] Persona ID is now set at " + max_persona_id);
+        log.info("[ArchePersonaHandler] Persona ID is now set at " + max_persona_id);
     }
 
     public void preload() {
@@ -281,7 +283,7 @@ public class PersonaStore {
         }
         
         if (timer != null) {
-        	ArcheCore.getPlugin().getLogger().info("[Debug] Successfully preloaded " + amount + " personas.");
+        	log.info("[Debug] Successfully preloaded " + amount + " personas.");
         	timer.stopTiming("Preloading personas");
         }
     }
@@ -380,9 +382,9 @@ public class PersonaStore {
         loadNamelog(persona, connection);
         
         Event event = new AsyncPersonaLoadEvent(persona, connection);
-        if(ArcheCore.isDebugging()) ArcheCore.getPlugin().getLogger().info("[Debug] AsyncPersonaLoadEvent firing. Is actually async: " + event.isAsynchronous());
+        if(ArcheCore.isDebugging()) log.info("[Debug] AsyncPersonaLoadEvent firing. Is actually async: " + event.isAsynchronous());
         Bukkit.getPluginManager().callEvent(event);
-        if(connection.isClosed()) ArcheCore.getPlugin().getLogger().severe("A consumer of AsyncPersonaLoadEvent is closing the provided connection!!");
+        if(connection.isClosed()) log.severe("A consumer of AsyncPersonaLoadEvent is closing the provided connection!!");
         else connection.close();
 
         return persona;
@@ -405,30 +407,17 @@ public class PersonaStore {
             AttributeRegistry reg = AttributeRegistry.getInstance();
             while (rs.next()) {
                 ArcheAttribute att = reg.getAttribute(rs.getString("attribute_type"));
-                String type = rs.getString("decaytype");
-                String sop = rs.getString("operation");
-                AttributeModifier.Operation op = null;
-                ExtendedAttributeModifier.Decay decaytype = null;
-                for (ExtendedAttributeModifier.Decay at : ExtendedAttributeModifier.Decay.values()) {
-                    if (at.name().equalsIgnoreCase(type)) {
-                        decaytype = at;
-                        break;
-                    }
-                }
-                for (AttributeModifier.Operation fop : AttributeModifier.Operation.values()) {
-                    if (fop.name().equalsIgnoreCase(sop)) {
-                        op = fop;
-                        break;
-                    }
-                }
-                if (decaytype != null && op != null) {
-                    UUID id = UUID.fromString(rs.getString("mod_uuid"));
-                    String name = rs.getString("mod_name");
-                    double amount = rs.getDouble("mod_value");
-                    long ticks = rs.getLong("decayticks");
-                    boolean lostondeath = rs.getBoolean("lostondeath");
-                    persona.attributes().addModifierFromSQL(att, new ExtendedAttributeModifier(id, name, amount, op, decaytype, ticks, lostondeath));
-                }
+                AttributeModifier.Operation op = AttributeModifier.Operation.valueOf("operation");
+                ExtendedAttributeModifier.Decay decaytype = ExtendedAttributeModifier.Decay.valueOf("decaytype");
+                UUID id = UUID.fromString(rs.getString("mod_uuid"));
+                String name = rs.getString("mod_name");
+                double amount = rs.getDouble("mod_value");
+                long ticks = rs.getLong("decayticks");
+                boolean lostondeath = rs.getBoolean("lostondeath");
+                ExtendedAttributeModifier eam = new ExtendedAttributeModifier(id, name, amount, op, decaytype, ticks, lostondeath);
+
+                if(ArcheCore.isDebugging()) log.info("[Debug] SQL-adding attribute: " + persona.attributes().toString(eam));
+                persona.attributes().getInstance(att).fromSQL(eam);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -469,10 +458,10 @@ public class PersonaStore {
         UUID uuid = player.getUniqueId();
         ArchePersona[] prs = pendingBlobs.remove(uuid);
         if (prs == null) {
-        	if(ArcheCore.isDebugging()) ArcheCore.getPlugin().getLogger().info("[Debug] Player " + player.getName() + " logged in without pending Personas. Either rejoined or no personas on file!" );
+        	if(ArcheCore.isDebugging()) log.info("[Debug] Player " + player.getName() + " logged in without pending Personas. Either rejoined or no personas on file!" );
             prs = onlinePersonas.get(uuid);
             if (prs == null) prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
-            else if(ArcheCore.isDebugging()) ArcheCore.getPlugin().getLogger().info("[Debug] Personas DID exist in-store: Rejoin is likely.");
+            else if(ArcheCore.isDebugging()) log.info("[Debug] Personas DID exist in-store: Rejoin is likely.");
         } else {
             onlinePersonas.put(uuid, prs);
             for (int i = 0; i < prs.length; i++) {

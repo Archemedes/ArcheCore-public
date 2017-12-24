@@ -8,6 +8,7 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.UUID;
 
@@ -27,10 +28,35 @@ public class ExtendedAttributeModifier extends AttributeModifier implements Clon
         super(other.getUniqueId(), other.getName(), other.getAmount(), other.getOperation());
     }
 
+    public ExtendedAttributeModifier(String name, double amount, Operation operation) {
+        this(name, amount, operation, true);
+    }
+    
+    public ExtendedAttributeModifier(String name, double amount, Operation operation, boolean save) {
+        this(UUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8)), name, amount, operation, save);
+    }
+    
     public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation) {
+        this(uuid, name, amount, operation, true);
+    }
+    
+    public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, boolean save) {
         super(uuid, name, amount, operation);
+        this.save = save;
+    }
+    
+    public ExtendedAttributeModifier(String name, double amount, Operation operation, Decay decay, long ticksRemaining) {
+        this(name, amount, operation, decay, ticksRemaining, false);
     }
 
+    public ExtendedAttributeModifier(String name, double amount, Operation operation, Decay decay, long ticksRemaining, boolean lostOnDeath) {
+        this(UUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8)), name, amount, operation, decay, ticksRemaining, lostOnDeath);
+    }
+    
+    public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, Decay decay, long ticksRemaining) {
+        this(uuid, name, amount, operation, decay, ticksRemaining, false);
+    }
+    
     public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, Decay decay, long ticksRemaining, boolean lostOnDeath) {
         super(uuid, name, amount, operation);
         this.decay = decay;
@@ -126,11 +152,7 @@ public class ExtendedAttributeModifier extends AttributeModifier implements Clon
 	
 	public void remove(Persona ps, ArcheAttribute aa) {
 		if(task != null) task.cancel();
-        if (save) {
-            save = true;
-            //ArcheExecutor.getInstance().put(new ArcheAttributeRemoveTask(this, ps, aa));
-            ArcheCore.getConsumerControls().queueRow(new AttributeRemoveRow(this, aa, ps));
-        }
+        if (save) ArcheCore.getConsumerControls().queueRow(new AttributeRemoveRow(this, aa, ps));
     }
 	
 	private void setupTask(ArcheAttribute a, Persona ps) {

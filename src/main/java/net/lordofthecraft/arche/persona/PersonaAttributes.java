@@ -40,9 +40,12 @@ public class PersonaAttributes {
     
     public ArcheAttributeInstance getInstance(ArcheAttribute a) {
         if (!customAttributes.containsKey(a)) {
-            customAttributes.put(a, new ArcheAttributeInstance(a, persona.getPersonaKey()));
+        	ArcheAttributeInstance inst = new ArcheAttributeInstance(a, persona.getPersonaKey());
+            customAttributes.put(a, inst);
+            return inst;
+        } else {
+        	return customAttributes.get(a);
         }
-        return customAttributes.get(a);
     }
     
     public Collection<ArcheAttribute> getExistingInstances(){
@@ -67,10 +70,10 @@ public class PersonaAttributes {
     }
 
     public void addModifier(ArcheAttribute a, AttributeModifier m) {
-        addModifier(a, m, false, false);
+        addModifier(a, m, false);
     }
 
-    public void addModifier(ArcheAttribute a, AttributeModifier m, boolean force, boolean save) {
+    public void addModifier(ArcheAttribute a, AttributeModifier m, boolean force) {
         ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
         String timerWhy = null;
         if(timer != null) {
@@ -88,61 +91,17 @@ public class PersonaAttributes {
             timer.startTiming(timerWhy);
         }
 
-        ArcheAttributeInstance inst = null;
-        if(!customAttributes.containsKey(a)) {
-            inst = new ArcheAttributeInstance(a, persona.getPersonaKey());
-            customAttributes.put(a, inst);
-        } else {
-            inst = customAttributes.get(a);
-        }
+        ArcheAttributeInstance inst = getInstance(a);
 
         if(inst.hasModifier(m)) {
             //We remove it because the values for this modifier may have changed
             inst.removeModifier(m);
         }
 
-        inst.addModifier(m, force, save, true);
+        inst.addModifier(m, force);
         a.tryApply(inst);
 
-        //ArcheExecutor.getInstance().put(new ArcheAttributeInsertTask(m));
         if(timer != null) timer.stopTiming(timerWhy);
-    }
-
-    void addModifierFromSQL(ArcheAttribute a, AttributeModifier m) {
-        ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
-        String timerWhy = null;
-        if (timer != null) {
-    		Logger logger = ArcheCore.getPlugin().getLogger();
-    		logger.info("[Debug] SQL-adding attribute: " + toString(m));
-    		logger.info("[Debug] Current attributes for " + a.getName() + ":");
-    		if(customAttributes.containsKey(a)) {
-    			customAttributes.get(a).getModifiers()
-    			.forEach(x-> logger.info("[Debug] " + toString(x)));
-    		} else {
-    			logger.info("[Debug] NONE!");
-    		}
-
-            timerWhy = "sql-adding attribute to " + MessageUtil.identifyPersona(persona);
-            timer.startTiming(timerWhy);
-        }
-
-        ArcheAttributeInstance inst = null;
-        if (!customAttributes.containsKey(a)) {
-            inst = new ArcheAttributeInstance(a, persona.getPersonaKey());
-            customAttributes.put(a, inst);
-        } else {
-            inst = customAttributes.get(a);
-        }
-
-        if (inst.hasModifier(m)) {
-            //We remove it because the values for this modifier may have changed
-            inst.removeModifier(m);
-        }
-
-        inst.addModifier(m);
-        a.tryApply(inst);
-
-        if (timer != null) timer.stopTiming(timerWhy);
     }
     
     public void removeModifier(Attribute a, AttributeModifier m) {
@@ -190,17 +149,13 @@ public class PersonaAttributes {
     				customAttributes.remove(a);
     			}
     		}
-    		
     	} //Else this modifier does not exist anyway
     	
     	if(timer != null) timer.stopTiming(timerWhy);
     }
     
     public void handleLogin() {
-		for(Entry<ArcheAttribute, ArcheAttributeInstance> entry : customAttributes.entrySet()) {
-			ArcheAttribute aa = entry.getKey();
-			aa.tryApply(entry.getValue());
-		}
+    	customAttributes.entrySet().forEach(e-> e.getKey().tryApply(e.getValue()));
     }
 
     public void handleSwitch(boolean logoff) {
@@ -235,7 +190,7 @@ public class PersonaAttributes {
         }
     }
     
-    private String toString(AttributeModifier m) {
+    String toString(AttributeModifier m) {
     	String base = "ATTMOD uuid:" + m.getUniqueId().toString().substring(0, 8) + " o:" + m.getOperation().ordinal() + ". a:" + m.getAmount() + " n:\"" + m.getName()  + "\"";
     	if(m instanceof ExtendedAttributeModifier) {
     		ExtendedAttributeModifier eam = (ExtendedAttributeModifier) m;

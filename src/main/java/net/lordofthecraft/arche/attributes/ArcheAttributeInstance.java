@@ -65,14 +65,10 @@ public class ArcheAttributeInstance implements AttributeInstance {
 	public void addModifier(AttributeModifier modifier) {
 		//I would prefer if the existing modifier would be replaced by the new modifier
 		//But this is how this function behaves in vanilla in case of conflict
-        addModifier(modifier, false, false);
+        addModifier(modifier, false);
     }
-
-    public boolean addModifier(AttributeModifier modifier, boolean force, boolean save) {
-        return addModifier(modifier, force, save, false);
-    }
-
-    public boolean addModifier(AttributeModifier modifier, boolean force, boolean save, boolean insert) {
+	
+    public boolean addModifier(AttributeModifier modifier, boolean force) {
         Preconditions.checkArgument(modifier != null, "modifier");
         UUID uuid = modifier.getUniqueId();
         boolean exists = mods.containsKey(uuid);
@@ -82,15 +78,14 @@ public class ArcheAttributeInstance implements AttributeInstance {
 
             ExtendedAttributeModifier mm = modifier instanceof ExtendedAttributeModifier ?
                     (ExtendedAttributeModifier) modifier : new ExtendedAttributeModifier(modifier);
-            if (!(modifier instanceof ExtendedAttributeModifier)) {
-                mm.setShouldSave(save);
-            }
             mods.put(uuid, mm);
-            if (mm.save && insert) {
-                ArcheCore.getConsumerControls().queueRow(new AttributeInsertRow(mm, persona.getPersona(), parent));
-            }
+            if (mm.save) ArcheCore.getConsumerControls().queueRow(new AttributeInsertRow(mm, persona.getPersona(), parent));
             return !exists;
         }
+    }
+    
+    public void fromSQL(ExtendedAttributeModifier modifier) {
+    	mods.put(modifier.getUniqueId(), modifier);
     }
 
 	@Override
