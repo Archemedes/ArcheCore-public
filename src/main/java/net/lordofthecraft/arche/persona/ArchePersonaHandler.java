@@ -198,10 +198,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		if(event.isCancelled() && !force) return false;
 
-        after.setCurrent(true);
-        Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(after, PersonaActivateEvent.Reason.SWITCH));
-        ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(after, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
-
+		after.setCurrent(true);
+		activate(after);
+        
         ArchePersona before = (ArchePersona) event.getOriginPersona();
         if (before != null) {
             Validate.isTrue(before != after, "Player tried to switch to same persona!");
@@ -467,15 +466,24 @@ public class ArchePersonaHandler implements PersonaHandler {
                 Arrays.stream(prs).findFirst().ifPresent(pers -> pers.setCurrent(true));
                 ps = getPersona(p);
                 ps.restoreMinecraftSpecifics(p);
+                if(ArcheCore.isDebugging()) ArcheCore.getPlugin().getLogger().info("[Debug] No current Persona on login, so switched to " + MessageUtil.identifyPersona(ps));
             }
+
+            activate(ps);
             
-            Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
-            RaceBonusHandler.apply(ps);
             ps.attributes().handleLogin();
-            ArcheCore.getControls().getFatigueHandler().showFatigueBar(p, ps);
             if (ps.tags().removeTag(PersonaTags.REFRESH_MC_SPECIFICS)) ps.restoreMinecraftSpecifics(p);
-            ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
         }
+    }
+    
+    private void activate(ArchePersona ps) {
+        Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
+        ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
+
+  	   RaceBonusHandler.apply(ps);
+  	   
+       ps.updateDisplayName();
+       ArcheCore.getControls().getFatigueHandler().showFatigueBar(ps);
     }
 
     public void leavePlayer(Player p) {

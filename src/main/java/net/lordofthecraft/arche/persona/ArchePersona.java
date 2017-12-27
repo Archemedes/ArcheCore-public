@@ -152,22 +152,14 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		return current;
 	}
 
-    void setCurrent(boolean current) {
-        if (this.current != current) {
-
+	void setCurrent(boolean current) {
+		if (this.current != current) {
 			this.current = current;
-            consumer.queueRow(new UpdatePersonaRow(this, PersonaField.CURRENT, this.current));
+			consumer.queueRow(new UpdatePersonaRow(this, PersonaField.CURRENT, this.current));
 
-            if (current) {
-               if(getPlayer() != null) {
-            	   updateDisplayName();
-            	   RaceBonusHandler.apply(this);
-               } else {
-            	   tags.giveTag(PersonaTags.REFRESH_MC_SPECIFICS, "true");
-               }
-            }
-        }
-    }
+			if (current && getPlayer() == null) tags.giveTag(PersonaTags.REFRESH_MC_SPECIFICS, "true");
+		}
+	}
 
 	@Override
 	public String getPrefix() {
