@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 import java.util.Set;
 
 public interface Persona extends OfflinePersona {
-
+	
 	/**
 	 * Take money from a Persona. Negative amounts possible, but consider using {@link #deposit(double, Transaction)} instead.
 	 *
@@ -131,8 +131,7 @@ public interface Persona extends OfflinePersona {
 	int getCharactersSpoken();
 
 	/**
-	 * Retrieve the Player to which this Persona belongs. The Persona object does not hold any references (not even weak ones)
-	 * belonging to its owning Player. The object will be found by iterating over all online players and comparing their UUID.
+	 * Retrieve the Player to which this Persona belongs, but only if the Player is online.
 	 * @return The Player belonging to this character, or null if the player is not online
 	 */
 	Player getPlayer();
