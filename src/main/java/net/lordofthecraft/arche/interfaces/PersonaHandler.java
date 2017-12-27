@@ -34,7 +34,8 @@ public interface PersonaHandler {
 	boolean mayUse(Player p);
 
 	/**
-	 * Check the maximum amount of Personas a Player is allowed to have. Between 0-4
+	 * Check the maximum amount of Personas a Player is allowed to have. 
+	 * This can be between 0 and 17 but depends on the config setting for max personas.
 	 * @param p Player to check for
 	 * @return Amount of Personas Player may have, based on Permission Nodes
 	 */
@@ -182,9 +183,9 @@ public interface PersonaHandler {
 	int countPersonas(Player p);
 
 	/**
-	 * Make a Player switch his current Persona. Players may have 4 personas contained in an array of length 4
+	 * Make a Player switch his current Persona.
 	 * @param p Player in question
-	 * @param id the ID of the persona, between 0-3, corresponding to the Persona array index
+	 * @param id the ID of the persona, between 0-maxSlots(), corresponding to the Persona array index
 	 * @param force Force the switch, ignoring the SwitchEvent's cancelled status
 	 * @return If the switch was successful
 	 */
