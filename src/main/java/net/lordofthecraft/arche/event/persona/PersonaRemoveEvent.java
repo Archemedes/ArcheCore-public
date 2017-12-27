@@ -5,7 +5,6 @@ import org.bukkit.event.HandlerList;
 
 /**
  * Called when a Persona is removed, even if to make room for a new Persona that is being created.
- * Cancelling this event will also cancel Persona creation if two Personas compete for the same id.
  */
 public class PersonaRemoveEvent extends PersonaDeactivateEvent {
     private static final HandlerList handlers = new HandlerList();
