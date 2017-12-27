@@ -153,30 +153,27 @@ public class PersonaAttributes {
     	
     	if(timer != null) timer.stopTiming(timerWhy);
     }
-    
-    public void handleLogin() {
-    	customAttributes.entrySet().forEach(e-> e.getKey().tryApply(e.getValue()));
-    }
 
     public void handleSwitch(boolean logoff) {
     	//Logoff logic:
     	//true: player left server or ArcheCore plugin was disabled
-    	//false: persona is being switched to or from.
+    	//false: persona is being activated or deactivated
     	
 		for(Entry<ArcheAttribute, ArcheAttributeInstance> entry : customAttributes.entrySet()) {
 			ArcheAttribute aa = entry.getKey();
 			ArcheAttributeInstance aai = entry.getValue();
 			
 			aai.getModifiers().stream()
-			.map(ExtendedAttributeModifier.class::cast)
-                    .forEach(m -> {
-                        if (logoff) m.handleLogoff(persona, aa);
-                        else m.handleSwitch(aa, persona);
-                    });
+				.map(ExtendedAttributeModifier.class::cast)
+                .forEach(m -> {
+                    if (logoff) m.handleSwitch(aa, persona, false);
+                    else m.handleSwitch(aa, persona, persona.isCurrent());
+                });
 
+			if(!logoff && persona.isCurrent()) aa.tryApply(aai);
+				
 			if(aa instanceof VanillaAttribute) {
 				if(logoff || !persona.isCurrent()) deactivateVanilla((VanillaAttribute) aa);
-				else aa.tryApply(aai);
 			} 
 		}
     }
@@ -194,7 +191,7 @@ public class PersonaAttributes {
     	String base = "ATTMOD uuid:" + m.getUniqueId().toString().substring(0, 8) + " o:" + m.getOperation().ordinal() + ". a:" + m.getAmount() + " n:\"" + m.getName()  + "\"";
     	if(m instanceof ExtendedAttributeModifier) {
     		ExtendedAttributeModifier eam = (ExtendedAttributeModifier) m;
-    		base += " save:" + (eam.save? 'y' : 'n');
+    		base += " save:" + (eam.willSave()? 'y' : 'n');
     	}
     	
     	return base;

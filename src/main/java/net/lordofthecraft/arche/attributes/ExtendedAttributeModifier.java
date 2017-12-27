@@ -12,20 +12,22 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-//Slightly more data for temp atts, which is not serialized through the bukkit method
-//Note that by default this is a permanent attribute
+/** 
+ * Slightly more data for temp atts, which is not serialized through the bukkit method
+ * Note that by default this is a permanent attribute
+ */
 public class ExtendedAttributeModifier extends AttributeModifier implements Cloneable {
 
-	public boolean lostOnDeath = false;
-	public boolean save = true; 
+	private final boolean lostOnDeath;
+	private final boolean save; 
 
 	//Variables to keep track of AttributeModifier removal time
-	private Decay decay = Decay.NEVER;
+	private final Decay decay;
 	private AttributeModifierRemover task = null;
 	private long ticksRemaining = -1;
 
     public ExtendedAttributeModifier(AttributeModifier other) {
-        super(other.getUniqueId(), other.getName(), other.getAmount(), other.getOperation());
+        this(other.getUniqueId(), other.getName(), other.getAmount(), other.getOperation());
     }
 
     public ExtendedAttributeModifier(String name, double amount, Operation operation) {
@@ -41,8 +43,14 @@ public class ExtendedAttributeModifier extends AttributeModifier implements Clon
     }
     
     public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, boolean save) {
+        this(uuid, name, amount, operation, save, false);
+    }
+    
+    public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, boolean save, boolean lostOnDeath) {
         super(uuid, name, amount, operation);
         this.save = save;
+        this.lostOnDeath = lostOnDeath;
+        this.decay = Decay.NEVER;
     }
     
     public ExtendedAttributeModifier(String name, double amount, Operation operation, Decay decay, long ticksRemaining) {
@@ -58,7 +66,12 @@ public class ExtendedAttributeModifier extends AttributeModifier implements Clon
     }
     
     public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, Decay decay, long ticksRemaining, boolean lostOnDeath) {
+    	this(uuid, name, amount, operation, true, decay, ticksRemaining, lostOnDeath);
+    }
+    
+    public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, boolean save, Decay decay, long ticksRemaining, boolean lostOnDeath) {
         super(uuid, name, amount, operation);
+        this.save = save;
         this.decay = decay;
         this.ticksRemaining = ticksRemaining;
         this.lostOnDeath = lostOnDeath;
@@ -71,115 +84,49 @@ public class ExtendedAttributeModifier extends AttributeModifier implements Clon
     public boolean isLostOnDeath() {
         return lostOnDeath;
 	}
+    
+    public boolean willSave() {
+    	return save;
+    }
 	
 	public Decay getDecayStrategy() {
 		return decay;
-	}
-	
-	public void setLostOnDeath(boolean lost) {
-		lostOnDeath = lost;
 	}
 
     public long getTicksRemaining() {
         return ticksRemaining;
     }
-
-    public void setDecayStrategy(ArcheAttribute a, Persona ps, Decay decay, long ticksFromNow) {
-        if(this.decay != Decay.NEVER) {
-            stopDecay();
-        }
-		
-		this.decay = decay;
-		this.ticksRemaining = ticksFromNow;
-		setupTask(a, ps);
-        trySave(ps, a);
+    
+    public void init(ArcheAttribute a, Persona ps) {
+    	if(decay == Decay.OFFLINE || (decay == Decay.ACTIVE && ps.isCurrent() && ps.getPlayer() != null)) {
+    		setupTask(a, ps);
+    	}
     }
 	
-	public void stopDecay() {
-		decay = Decay.NEVER;
-		if(task != null) {
-			task.cancel();
-			task = null;
-			ticksRemaining = -1;
-		}
-	}
-	
-	public void handleSwitch(ArcheAttribute a, Persona ps) {
+	public void handleSwitch(ArcheAttribute a, Persona ps, boolean current) {
 		if(decay == Decay.ACTIVE) {
-			if(ps.isCurrent()) {
+			if(current) {
 				if(this.ticksRemaining > 0) {
 					setupTask(a, ps);
 				}
-			} else {
-				interruptTask();
+			} else if(task != null) { //Interrupt ongoing tasks
+				long progress = System.currentTimeMillis() - task.creation.getTime();
+				this.ticksRemaining -= (progress / 50); //Amount of ticks that we progressed during active Persona time
+				task.cancel();
+				task = null;
+				if(save) ArcheCore.getConsumerControls().queueRow(new AttributeUpdateRow(this, ps, a));
 			}
 		}
-		
-		//Most important time to save is as a persona is switched away from
-		//It is thus handled as if it were a Minecraft vitals component
-		//Note however that ACTUAL vanilla attmods are not made persistent in AC
-		if(!ps.isCurrent()) {
-			trySave(ps, a);
-		}
 	}
-	
-	public void handleLogoff(Persona ps, ArcheAttribute a) {
-		if(decay == Decay.ACTIVE && task != null) {
-			interruptTask();
-		}
-		trySave(ps, a);
-	}
-	
-	private void interruptTask() {
-		if(task != null) {
-			long progress = System.currentTimeMillis() - task.creation.getTime();
-			this.ticksRemaining -= (progress / 50); //Amount of ticks that we progressed during active Persona time
-			task.cancel();
-			task = null;
-		}
-	}
-	
-	public void setShouldSave(boolean save) {
-		this.save = save;
-	}
-	
-	private void trySave(Persona ps, ArcheAttribute aa) {
-		if(save) {
-            ArcheCore.getConsumerControls().queueRow(new AttributeUpdateRow(this, ps, aa));
-        }
-	}
-	
 	
 	public void remove(Persona ps, ArcheAttribute aa) {
 		if(task != null) task.cancel();
         if (save) ArcheCore.getConsumerControls().queueRow(new AttributeRemoveRow(this, aa, ps));
     }
 	
-	private void setupTask(ArcheAttribute a, Persona ps) {
+	public void setupTask(ArcheAttribute a, Persona ps) {
 		task = new AttributeModifierRemover(a, this, ps);
 		task.runTaskLater(ArcheCore.getPlugin(), this.ticksRemaining);
-	}
-	
-	
-	public enum Decay { NEVER, ACTIVE, OFFLINE }
-	
-	private static class AttributeModifierRemover extends BukkitRunnable {
-		private final ArcheAttribute attribute;
-		private final ExtendedAttributeModifier modifier;
-		private final Persona ps;
-		private final Timestamp creation;
-		
-		private AttributeModifierRemover(ArcheAttribute a, ExtendedAttributeModifier m, Persona ps) {
-			attribute = a;
-			modifier = m;
-			this.ps = ps;
-			this.creation = new Timestamp(System.currentTimeMillis());
-		}
-		
-		@Override
-		public void run() {
-			ps.attributes().removeModifier(attribute, modifier);
-		}
 	}
 	
 	public static String readablePercentage(AttributeModifier mod, ArcheAttribute aa) {
@@ -211,4 +158,25 @@ public class ExtendedAttributeModifier extends AttributeModifier implements Clon
                 ", superModifier=" + super.toString() +
                 '}';
     }
+	
+	public enum Decay { NEVER, ACTIVE, OFFLINE }
+	
+	private static class AttributeModifierRemover extends BukkitRunnable {
+		private final ArcheAttribute attribute;
+		private final ExtendedAttributeModifier modifier;
+		private final Persona ps;
+		private final Timestamp creation;
+		
+		private AttributeModifierRemover(ArcheAttribute a, ExtendedAttributeModifier m, Persona ps) {
+			attribute = a;
+			modifier = m;
+			this.ps = ps;
+			this.creation = new Timestamp(System.currentTimeMillis());
+		}
+		
+		@Override
+		public void run() {
+			ps.attributes().removeModifier(attribute, modifier);
+		}
+	}
 }

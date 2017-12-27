@@ -199,7 +199,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 		if(event.isCancelled() && !force) return false;
 
 		after.setCurrent(true);
-		activate(after);
         
         ArchePersona before = (ArchePersona) event.getOriginPersona();
         if (before != null) {
@@ -210,7 +209,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 
             //Store and switch Persona-related specifics: Location and Inventory.
             before.saveMinecraftSpecifics(p);
-
+            before.attributes().handleSwitch(false);
+            
 			//Transfer fatigue from previous persona to new persona IF previous value was higher
 			//This should prevent some alt abuse where players chain their fatigue bars to grind
 			if(before.getFatigue() > after.getFatigue()) {
@@ -220,6 +220,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			}
 		}
 
+        activate(after);
         after.restoreMinecraftSpecifics(p);
 
         //Check if switched-to Persona will require a different skin from storage
@@ -247,7 +248,6 @@ public class ArchePersonaHandler implements PersonaHandler {
             PersonaRemoveEvent event2 = new PersonaRemoveEvent(oldPersona, true);
             Bukkit.getPluginManager().callEvent(event2);
 
-			//delete all skill records
             consumer.queueRow(new DeletePersonaRow(oldPersona));
             SkinCache.getInstance().clearSkin(oldPersona);
         }
@@ -256,26 +256,22 @@ public class ArchePersonaHandler implements PersonaHandler {
         Bukkit.getPluginManager().callEvent(event3);
         
         Player p = persona.getPlayer();
-        boolean forceSwitch = oldPersona != null; 
+        boolean forceSwitch = oldPersona != null && oldPersona.isCurrent(); 
         //Expected switch restoreMinecraftSpecifics behavior:
         //health, saturation, hunger set to persona defaults
         //Inventories, potion effects cleared.
         //This teleport will fail due to the Location being null still
         boolean couldSwitch = switchPersona(p, persona.getSlot(), forceSwitch);
         consumer.queueRow(new InsertPersonaRow(persona, p.getLocation()));
-        if(couldSwitch) {
-        	persona.updateDisplayName();
-        	
-    		if (ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
-    			Location to;
-                if (!racespawns.containsKey(persona.getRace())) {
-                    World w = ArcheCore.getControls().getNewPersonaWorld();
-                    to = w == null ? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
-                } else {
-                    to = racespawns.get(persona.getRace());
-                }
-                p.teleport(to);
-            }
+        if(couldSwitch && ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
+        	Location to;
+        	if (!racespawns.containsKey(persona.getRace())) {
+        		World w = ArcheCore.getControls().getNewPersonaWorld();
+        		to = w == null ? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
+        	} else {
+        		to = racespawns.get(persona.getRace());
+        	}
+        	p.teleport(to);
         }
     }
 
@@ -469,10 +465,8 @@ public class ArchePersonaHandler implements PersonaHandler {
                 if(ArcheCore.isDebugging()) ArcheCore.getPlugin().getLogger().info("[Debug] No current Persona on login, so switched to " + MessageUtil.identifyPersona(ps));
             }
 
-            activate(ps);
-            
-            ps.attributes().handleLogin();
             if (ps.tags().removeTag(PersonaTags.REFRESH_MC_SPECIFICS)) ps.restoreMinecraftSpecifics(p);
+            activate(ps);
         }
     }
     
@@ -481,7 +475,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
 
   	   RaceBonusHandler.apply(ps);
-  	   
+  	   ps.attributes().handleSwitch(false);
        ps.updateDisplayName();
        ArcheCore.getControls().getFatigueHandler().showFatigueBar(ps);
     }

@@ -48,6 +48,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.PersonaTable;
+import net.lordofthecraft.arche.save.rows.attribute.AttributeRemoveRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.ArcheSkin;
@@ -401,21 +402,35 @@ public class PersonaStore {
     }
 
     private void loadAttributes(ArchePersona persona, Connection c) {
-        String sql = "SELECT mod_uuid,attribute_type,mod_name,mod_value,operation,decayticks,decaytype,lostondeath FROM persona_attributes WHERE persona_id_fk=" + persona.getPersonaId();
+        String sql = "SELECT mod_uuid,attribute_type,mod_name,mod_value,operation,created,decayticks,decaytype,lostondeath FROM persona_attributes WHERE persona_id_fk=" + persona.getPersonaId();
 
         try (Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)) {
             AttributeRegistry reg = AttributeRegistry.getInstance();
             while (rs.next()) {
                 ArcheAttribute att = reg.getAttribute(rs.getString("attribute_type"));
-                AttributeModifier.Operation op = AttributeModifier.Operation.valueOf("operation");
-                ExtendedAttributeModifier.Decay decaytype = ExtendedAttributeModifier.Decay.valueOf("decaytype");
                 UUID id = UUID.fromString(rs.getString("mod_uuid"));
                 String name = rs.getString("mod_name");
                 double amount = rs.getDouble("mod_value");
+                AttributeModifier.Operation op = AttributeModifier.Operation.valueOf("operation");
+                long created = rs.getTimestamp("created").getTime();
                 long ticks = rs.getLong("decayticks");
+                ExtendedAttributeModifier.Decay decaytype = ExtendedAttributeModifier.Decay.valueOf("decaytype");
                 boolean lostondeath = rs.getBoolean("lostondeath");
+                
+                boolean decayOffline = decaytype == ExtendedAttributeModifier.Decay.OFFLINE; 
+                if(decayOffline) ticks -= (System.currentTimeMillis() - created) / 50;
                 ExtendedAttributeModifier eam = new ExtendedAttributeModifier(id, name, amount, op, decaytype, ticks, lostondeath);
-
+                
+                if(decayOffline) {
+                	if(ticks > 200) { 
+                		eam.setupTask(att, persona);
+                	} else { //Don't bother doing all this nonsense on logged in Personas for <10 seconds of mod
+                		ArcheCore.getConsumerControls().queueRow(new AttributeRemoveRow(eam, att, persona));
+                        if(ArcheCore.isDebugging()) log.info("[Debug] Clearing attribute which has decayed while offline: " + persona.attributes().toString(eam));
+                		continue; //Not adding it to the list
+                	}
+                }
+                
                 if(ArcheCore.isDebugging()) log.info("[Debug] SQL-adding attribute: " + persona.attributes().toString(eam));
                 persona.attributes().getInstance(att).fromSQL(eam);
             }

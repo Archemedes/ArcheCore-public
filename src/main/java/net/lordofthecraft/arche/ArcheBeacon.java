@@ -70,14 +70,10 @@ public class ArcheBeacon {
                 pers.attributes().getExistingInstances().stream().forEach(aa ->
                         pers.attributes().getInstance(aa).getModifiers().stream()
                                 .map(ExtendedAttributeModifier.class::cast)
+                                .filter(mod -> StringUtils.isEmpty(mod.getName()) || !mod.getName().startsWith("/"))
                                 .forEach(mod->{
                                 	String modName = mod.getName();
-                                	boolean isCommented = StringUtils.isEmpty(modName);
-                                	if(!isCommented) {
-                                		char first = modName.charAt(0);
-                                		isCommented = first == '#' || first == '/' || first == '\\';
-                                	}
-                                	
+                                	boolean isCommented = StringUtils.isEmpty(modName) || modName.startsWith("#");
                                 	lore.add(	mod.asReadablePercentage(aa) + ' ' + aa.getName() + 
                                     		(isCommented? "" : ( " " + ChatColor.GRAY + "" + ChatColor.ITALIC + '(' + mod.getName() + ')'))  
                                     		);

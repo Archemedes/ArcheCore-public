@@ -369,7 +369,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         String pots = savePotionEffects(p);
         if(ArcheCore.isDebugging()) ArcheCore.getPlugin().getLogger().info("Player world is " + p.getWorld().getName() + " which has a UID of " + p.getWorld().getUID().toString());
         consumer.queueRow(new UpdateVitalsRow(this, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv, pots));
-        attributes.handleSwitch(false);
     }
 
     private String savePotionEffects(Player pl) {
@@ -480,6 +479,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 					if (ev2.isCancelled()) continue;
 
 					pr.setCurrent(true);
+					pr.attributes.handleSwitch(false);
 					pr.restoreMinecraftSpecifics(p);
 					success = true;
                     newPersonaHasSkin = pr.hasSkin();

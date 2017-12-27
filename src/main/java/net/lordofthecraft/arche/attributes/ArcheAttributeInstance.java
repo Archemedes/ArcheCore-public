@@ -75,11 +75,11 @@ public class ArcheAttributeInstance implements AttributeInstance {
         if (exists && !force) {
             throw new IllegalArgumentException("Modifier is already applied on this CUSTOM(ARCHE) attribute!");
         } else {
-
             ExtendedAttributeModifier mm = modifier instanceof ExtendedAttributeModifier ?
                     (ExtendedAttributeModifier) modifier : new ExtendedAttributeModifier(modifier);
             mods.put(uuid, mm);
-            if (mm.save) ArcheCore.getConsumerControls().queueRow(new AttributeInsertRow(mm, persona.getPersona(), parent));
+            mm.init(parent, persona.getPersona());
+            if (mm.willSave()) ArcheCore.getConsumerControls().queueRow(new AttributeInsertRow(mm, persona.getPersona(), parent));
             return !exists;
         }
     }
