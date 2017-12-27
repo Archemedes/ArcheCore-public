@@ -312,26 +312,14 @@ public class CommandPersona implements CommandExecutor {
                     }
                     return true;
                 } else if (cmd == PersonaCommand.PERMAKILL) {
-                    Player other = pers.getPlayer();
 
                     if (!(args.length > 1)) {
                         sender.sendMessage(ChatColor.RED + "Don't delete yourself by mistake friend!");
                         return true;
                     }
 
-                    //Only do if online else problems
-                    else if (other == null) {
-                        sender.sendMessage(ChatColor.RED + "Too risky to remove personas of offline players");
-                        return true;
-                    }
-
-                    if (pers.remove()) {
-                        if (handler.countPersonas(other) == 0 && !other.hasPermission("archecore.exempt"))
-                            other.kickPlayer("Your final Persona was Permakilled. Please relog.");
-                        else
-                            other.sendMessage(ChatColor.AQUA + "A persona of yours was Permakilled: " + ChatColor.RESET + pers.getName());
-                        sender.sendMessage(ChatColor.AQUA + "You have permakilled Persona " + ChatColor.WHITE + pers.getName() + ChatColor.AQUA + " belonging to " + ChatColor.WHITE + pers.getPlayerName());
-                    } else sender.sendMessage(ChatColor.RED + "I'm afraid I can't do that.");
+                    pers.remove();
+                    sender.sendMessage(ChatColor.AQUA + "You have permakilled Persona " + ChatColor.WHITE + pers.getName() + ChatColor.AQUA + " belonging to " + ChatColor.WHITE + pers.getPlayerName());
                     return true;
                 } else if (cmd == PersonaCommand.PROFESSION && args.length == 1 && sender instanceof Player) {
                     sender.sendMessage(ChatColor.BLUE + "Available Professions: " + ChatColor.DARK_GRAY + "[Click for Info]");

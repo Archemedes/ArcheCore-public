@@ -7,20 +7,15 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.persona.PersonaFatigueEvent;
-import net.lordofthecraft.arche.event.persona.PersonaRemoveEvent;
 import net.lordofthecraft.arche.event.persona.PersonaRenameEvent;
-import net.lordofthecraft.arche.event.persona.PersonaSwitchEvent;
 import net.lordofthecraft.arche.interfaces.*;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
 import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.NamelogRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdateVitalsRow;
 import net.lordofthecraft.arche.skin.ArcheSkin;
-import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.WeakBlock;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.attribute.Attribute;
@@ -40,8 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public final class ArchePersona extends ArcheOfflinePersona implements Persona, InventoryHolder {
-    private static final IConsumer consumer = ArcheCore.getConsumerControls();
-    private static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
 
     private final PersonaSkills skills = new PersonaSkills(this);
     private final PersonaAttributes attributes = new PersonaAttributes(this);
@@ -456,51 +449,29 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     }
 
 	@Override
-	public boolean remove() {
+	public void remove() {
 		Player p = Bukkit.getPlayer(getPlayerUUID());
 
-		//We enforce Player is online to do this right now
-		Validate.notNull(p);
-
-		PersonaRemoveEvent event = new PersonaRemoveEvent(this, false);
-		Bukkit.getPluginManager().callEvent(event);
-
-		handler.getPersonaStore().removePersona(this);
-        consumer.queueRow(new DeletePersonaRow(this));
-
-		SkinCache cache = ArcheCore.getControls().getSkinCache();
-		boolean newPersonaHasSkin = false;
-		if(isCurrent()){
-			boolean success = false;
-			for (ArchePersona pr : handler.getPersonaStore().getAllPersonas(this.getPlayerUUID())) {
-				if (pr != null) {
-					PersonaSwitchEvent ev2 = new PersonaSwitchEvent(pr, true);
-					Bukkit.getPluginManager().callEvent(ev2);
-					if (ev2.isCancelled()) continue;
-
-					pr.setCurrent(true);
-					pr.attributes.handleSwitch(false);
-					pr.restoreMinecraftSpecifics(p);
-					success = true;
-                    newPersonaHasSkin = pr.hasSkin();
-                    break;
+		if(p != null && isCurrent()) {
+			boolean hasOtherPersonas = false;
+			ArchePersona[] allPersonas = handler.getAllPersonas(p);
+			for(int i = 0; i < allPersonas.length; i++) {
+				if(allPersonas[i] != null){
+					handler.switchPersona(p, i, true);
+					hasOtherPersonas = true;
+					break;
 				}
 			}
-
-			boolean cleared = cache.clearSkin(this);
-			if (!success) {
+			
+			if(!hasOtherPersonas) {
 				Plugin plugin = ArcheCore.getPlugin();
 				plugin.getLogger().warning("Player " + getPlayerName() + " removed his final usable Persona!");
 				RaceBonusHandler.reset(p); //Clear Racial bonuses, for now...
 				if(p.hasPermission("archecore.mayuse") && !p.hasPermission("archecore.exempt")) new CreationDialog().makeFirstPersona(p);
-			} else {
-				if(!cleared && newPersonaHasSkin) cache.refreshPlayer(p);
 			}
-
-			p.sendMessage(ChatColor.DARK_PURPLE + "Your persona was removed: " + ChatColor.GRAY + this.getName());
 		}
-        deleted = true;
-        return true;
+		
+		super.remove();
 	}
 
 	@Override

@@ -3,10 +3,13 @@ package net.lordofthecraft.arche.persona;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.event.persona.PersonaRemoveEvent;
+import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.PersonaTags;
+import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Bukkit;
@@ -18,6 +21,9 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ArcheOfflinePersona implements OfflinePersona {
+    protected static final IConsumer consumer = ArcheCore.getConsumerControls();
+    protected static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
+	
     final ArchePersonaTags tags = new ArchePersonaTags(this);
 
     boolean deleted = false;
@@ -146,7 +152,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 
     @Override
     public Persona loadPersona() {
-        PersonaStore store = ArchePersonaHandler.getInstance().getPersonaStore();
+        PersonaStore store = handler.getPersonaStore();
         String select = store.personaSelect + " AND persona_id=?";
         
         try (Connection connection = ArcheCore.getSQLControls().getConnection();
@@ -170,8 +176,12 @@ public class ArcheOfflinePersona implements OfflinePersona {
     }
 
     @Override
-    public boolean remove() {
-        return false;
+    public void remove() {
+		PersonaRemoveEvent event = new PersonaRemoveEvent(this, false);
+		Bukkit.getPluginManager().callEvent(event);
+
+		handler.getPersonaStore().removePersona(this);
+        consumer.queueRow(new DeletePersonaRow(this));
     }
 
     @Override

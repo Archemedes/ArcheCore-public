@@ -1,17 +1,18 @@
 package net.lordofthecraft.arche.event.persona;
 
-import net.lordofthecraft.arche.interfaces.Persona;
 import org.bukkit.event.HandlerList;
+
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
 
 /**
  * Called when a Persona is removed, even if to make room for a new Persona that is being created.
  */
-public class PersonaRemoveEvent extends PersonaDeactivateEvent {
+public class PersonaRemoveEvent extends OfflinePersonaEvent {
     private static final HandlerList handlers = new HandlerList();
     private final boolean makeRoom;
 
-    public PersonaRemoveEvent(Persona persona, boolean makeRoom) {
-        super(persona, Reason.REMOVE);
+    public PersonaRemoveEvent(OfflinePersona persona, boolean makeRoom) {
+        super(persona);
 		this.makeRoom = makeRoom;
 	}
 

@@ -23,7 +23,7 @@ public class PersonaDeactivateEvent extends PersonaEvent {
 
 	@Override public HandlerList getHandlers() { return handlers ; }
 
-	public enum Reason {LOGOUT, SWITCH, REMOVE}
+	public enum Reason {LOGOUT, SWITCH}
 	
 }
 

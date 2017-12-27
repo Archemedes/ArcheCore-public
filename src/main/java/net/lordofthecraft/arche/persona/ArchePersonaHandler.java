@@ -244,13 +244,6 @@ public class ArchePersonaHandler implements PersonaHandler {
         }
         
         ArchePersona oldPersona = store.registerPersona(persona);
-        if (oldPersona != null) {
-            PersonaRemoveEvent event2 = new PersonaRemoveEvent(oldPersona, true);
-            Bukkit.getPluginManager().callEvent(event2);
-
-            consumer.queueRow(new DeletePersonaRow(oldPersona));
-            SkinCache.getInstance().clearSkin(oldPersona);
-        }
 
         PersonaCreateEvent event3 = new PersonaCreateEvent(persona, oldPersona);
         Bukkit.getPluginManager().callEvent(event3);
@@ -262,6 +255,15 @@ public class ArchePersonaHandler implements PersonaHandler {
         //Inventories, potion effects cleared.
         //This teleport will fail due to the Location being null still
         boolean couldSwitch = switchPersona(p, persona.getSlot(), forceSwitch);
+        
+        if (oldPersona != null) {
+            PersonaRemoveEvent event2 = new PersonaRemoveEvent(oldPersona, true);
+            Bukkit.getPluginManager().callEvent(event2);
+
+            consumer.queueRow(new DeletePersonaRow(oldPersona));
+            SkinCache.getInstance().clearSkin(oldPersona);
+        }
+        
         consumer.queueRow(new InsertPersonaRow(persona, p.getLocation()));
         if(couldSwitch && ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
         	Location to;
