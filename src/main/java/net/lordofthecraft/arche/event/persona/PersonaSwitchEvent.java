@@ -2,6 +2,8 @@ package net.lordofthecraft.arche.event.persona;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
+
+import org.apache.commons.lang.Validate;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
@@ -15,9 +17,11 @@ private static final HandlerList handlers = new HandlerList();
 	private Persona before;
 	//Generic Cancellable implementation
 	private boolean cancelled = false;
+	private final boolean forced;
 
-	public PersonaSwitchEvent(Persona persona) {
+	public PersonaSwitchEvent(Persona persona, boolean isForced) {
 		super(persona);
+		forced = isForced;
 		before = ArcheCore.getControls().getPersonaHandler().getPersona(persona.getPlayer());
 	}
 	
@@ -35,6 +39,13 @@ private static final HandlerList handlers = new HandlerList();
 
 	public Persona getOriginPersona(){ return before; }
 
+	public boolean isForcedSwitch() {
+		return forced;
+	}
+	
 	@Override public boolean isCancelled() { return cancelled ; }
-	@Override public void setCancelled(boolean cancelled) { this.cancelled = cancelled ; }
+	@Override public void setCancelled(boolean cancelled) { 
+		Validate.isTrue(!forced, "Some Persona switches are forced and cannot be cancelled. Check for this!");
+		this.cancelled = cancelled ; 
+	}
 }

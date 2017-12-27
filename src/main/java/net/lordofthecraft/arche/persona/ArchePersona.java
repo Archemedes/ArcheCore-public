@@ -474,7 +474,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 			boolean success = false;
 			for (ArchePersona pr : handler.getPersonaStore().getAllPersonas(this.getPlayerUUID())) {
 				if (pr != null) {
-					PersonaSwitchEvent ev2 = new PersonaSwitchEvent(pr);
+					PersonaSwitchEvent ev2 = new PersonaSwitchEvent(pr, true);
 					Bukkit.getPluginManager().callEvent(ev2);
 					if (ev2.isCancelled()) continue;
 

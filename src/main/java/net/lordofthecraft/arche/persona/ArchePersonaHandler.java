@@ -193,7 +193,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         ArchePersona[] prs = getAllPersonas(p.getUniqueId());
         ArchePersona after = prs[id];
 
-		PersonaSwitchEvent event = new PersonaSwitchEvent(prs[id]);
+		PersonaSwitchEvent event = new PersonaSwitchEvent(prs[id], force);
 		Bukkit.getPluginManager().callEvent(event);
 
 		if(event.isCancelled() && !force) return false;
