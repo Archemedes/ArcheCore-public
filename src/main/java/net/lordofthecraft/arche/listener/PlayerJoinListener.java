@@ -37,6 +37,7 @@ public class PlayerJoinListener implements Listener {
     
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onJoin(PlayerJoinEvent e){
+		e.setJoinMessage(null);
 		Player p = e.getPlayer();
 		p.setExhaustion(3.5f);
         if (timer != null) timer.startTiming("login " + p.getName());
@@ -58,6 +59,7 @@ public class PlayerJoinListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void onLeave(PlayerQuitEvent e) {
+    	e.setQuitMessage(null);
         if (timer != null) timer.startTiming("logout");
 
 		Player p = e.getPlayer();
