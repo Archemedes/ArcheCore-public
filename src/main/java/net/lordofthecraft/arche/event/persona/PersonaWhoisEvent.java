@@ -50,7 +50,7 @@ public class PersonaWhoisEvent extends OfflinePersonaEvent implements Cancellabl
 	}
 
     public enum Query {
-        BASIC, EXTENDED_PROBE, EXTENDED
+        BEACON_ICON, BASIC, EXTENDED_PROBE, EXTENDED
     }
 
     //Double boilerplate implementation

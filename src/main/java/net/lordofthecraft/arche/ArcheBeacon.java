@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche;
 
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
+import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent;
 import net.lordofthecraft.arche.executables.OpenEnderRunnable;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -9,6 +10,8 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.CreationDialog;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.util.ItemUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -21,10 +24,13 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.google.common.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class ArcheBeacon {
 	//public static final String BEACON_HEADER = ChatColor.AQUA + "" + ChatColor.BOLD + "Your settings:";
@@ -234,11 +240,19 @@ public class ArcheBeacon {
                     String name = ChatColor.YELLOW + "" + ChatColor.ITALIC + a.getName();
 					String gender = a.getGender() == null? "" : a.getGender();
                     String desc = ChatColor.GRAY + a.getRaceString(false) + " " + gender;
-                    String d2 = (i == current? ChatColor.DARK_GREEN + "Selected!": ChatColor.GREEN + "Click to select");
-                    ItemUtil.decorate(is, name, desc, d2);
+                    List<BaseComponent> sent = Lists.newArrayList(TextComponent.fromLegacyText(desc));
+                    boolean mod = p.hasPermission("archecore.mod") || p.hasPermission("archecore.admin");
+                    PersonaWhoisEvent event = new PersonaWhoisEvent(a, sent, PersonaWhoisEvent.Query.BEACON_ICON, mod);
+                    Bukkit.getPluginManager().callEvent(event);
+                    
+                    if(event.isCancelled()) continue; //This means the persona pip won't show up on the select screen and persona wont be selectable
+                    
+                    List<String> finalLore = event.getSent().stream().map(bc -> bc.toLegacyText()).collect(Collectors.toList());
+                    finalLore.add( (i == current? ChatColor.DARK_GREEN + "Selected!": ChatColor.GREEN + "Click to select") );
+                    ItemUtil.decorate(is, name, finalLore.toArray(new String[finalLore.size()]));
                 }
 
-				//Always do this
+				//Always do this (except if PersonaWhoisEvent is cancelled)
 				inv.setItem(10+i, is);
 			}
 
