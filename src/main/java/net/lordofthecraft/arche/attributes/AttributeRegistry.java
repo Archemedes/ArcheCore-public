@@ -1,9 +1,10 @@
 package net.lordofthecraft.arche.attributes;
 
-import com.google.common.collect.Sets;
+import org.apache.commons.lang.Validate;
 import org.bukkit.attribute.Attribute;
 
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AttributeRegistry {
 
@@ -14,7 +15,8 @@ public class AttributeRegistry {
     public static final ArcheAttribute ARROW_VELOCITY = new ArcheAttribute("Arrow Velocity", 1.0);
 
     private static AttributeRegistry INSTANCE = new AttributeRegistry();
-
+    public Map<String, ArcheAttribute> registeredAttributes = new HashMap<>();
+    
     public static AttributeRegistry getInstance() {
         return INSTANCE;
     }
@@ -31,24 +33,19 @@ public class AttributeRegistry {
         }
     }
 
-    public Set<ArcheAttribute> registeredAttributes = Sets.newConcurrentHashSet();
+
 
     public void register(ArcheAttribute attr) {
-        if (registeredAttributes.contains(attr)) {
-            return;
-        }
-        registeredAttributes.add(attr);
+        Validate.isTrue(!registeredAttributes.containsKey(attr.getName()), "Conflicting attribute name being registered: " + attr.getName());
+        registeredAttributes.put(attr.getName(), attr);
     }
 
     public VanillaAttribute getVanillaAttribute(Attribute attribute) {
-        return registeredAttributes.stream()
-                .filter(a -> a.getName().equalsIgnoreCase(attribute.toString()) && a instanceof VanillaAttribute)
-                .map(m -> (VanillaAttribute) m)
-                .findFirst().orElse(null);
+    	return (VanillaAttribute) registeredAttributes.get(attribute.toString());
     }
 
     public ArcheAttribute getAttribute(String name) {
-        return registeredAttributes.stream().filter(a -> a.getName().equals(name)).findFirst().orElse(null);
+        return registeredAttributes.get(name);
     }
 
     public static VanillaAttribute getSVanillaAttribute(Attribute attribute) {
