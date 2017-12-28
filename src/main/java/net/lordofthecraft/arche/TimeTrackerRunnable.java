@@ -1,13 +1,16 @@
 package net.lordofthecraft.arche;
 
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import java.util.Objects;
+
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import net.lordofthecraft.arche.interfaces.IArcheCore;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 
 public class TimeTrackerRunnable extends BukkitRunnable{
 	private final ArchePersonaHandler psh;
+	private final IArcheCore iac;
 	
 	/*Runs roughly once every minute
 	Adds a minute tick to each of the Online Players' current Personas
@@ -15,16 +18,15 @@ public class TimeTrackerRunnable extends BukkitRunnable{
 	
 	TimeTrackerRunnable(ArchePersonaHandler psh){
 		this.psh = psh;
+		this.iac = ArcheCore.getControls();
 	}
 	
 	@Override
 	public void run() {
-		for(Player p : Bukkit.getServer().getOnlinePlayers()){
-			ArchePersona pers = psh.getPersona(p);
-			if(pers != null){
-				pers.addTimePlayed(1);
-			}
-		}
+		Bukkit.getOnlinePlayers().stream()
+			.filter(p -> !iac.isAfk(p))
+			.map(psh::getPersona)
+			.filter(Objects::nonNull)
+			.forEach(pers -> pers.addTimePlayed(1));
 	}
-
 }

@@ -60,6 +60,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private Consumer archeConsumer;
     private Timer archeTimer = null;
     private ArcheNameMap nameMap = null;
+    private AfkListener afkListener = null;
 
     //Config settings
     private int maxPersonaSlots;
@@ -424,6 +425,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private void initListeners(){
         PluginManager pm = Bukkit.getPluginManager();
 
+        afkListener = new AfkListener();
+        pm.registerEvents(afkListener, this);
+        
         pm.registerEvents(new PlayerJoinListener(personaHandler), this);
         pm.registerEvents(new PlayerInteractListener(this), this);
         pm.registerEvents(new BeaconMenuListener(this, personaChangeDelay), this);
@@ -698,6 +702,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     @Override
     public UUID getPlayerUUIDFromName(String playerName) {
     	return nameMap.getPlayerUUIDFromName(playerName);
+    }
+    
+    @Override
+    public boolean isAfk(Player p) {
+    	return afkListener.isAfk(p);
     }
 
     @Override

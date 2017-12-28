@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import net.lordofthecraft.arche.BlockRegistry;
@@ -272,6 +273,12 @@ public interface IArcheCore {
      */
     UUID getPlayerUUIDFromName(String playerName);
 
+    /**
+     * @param p Player to check for afk status
+     * @return If player p is afk 
+     */
+    boolean isAfk(Player p);
+    
     /**
      * Checks whether or not ArcheCore is using SQLite.
      *
