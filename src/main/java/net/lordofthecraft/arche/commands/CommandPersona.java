@@ -52,9 +52,9 @@ public class CommandPersona implements CommandExecutor {
         CLEARINFO("archecore.command.persona.desc.clear", false, "clearbio", "cleardesc", "deldesc", "delinfo", "clearinfo", "delbio", "cleardescription"),
         ADDINFO("archecore.command.persona.desc", false, "addinfo", "addbio", "bioadd"),
         SETINFO("archecore.command.persona.desc", false, "setbio", "setinfo", "info", "bio"),
-        LIST("archecore.command.persona.list", true, "list", "listpersonas", "viewpersonas"),
+        LIST("archecore.command.persona.list", true, true, "list", "listpersonas", "viewpersonas"),
         PROFESSION("archecore.command.persona.profession", false, "profession", "setprofession", "setprof", "skill", "setskill", "sk"),
-        PERMAKILL("archecore.admin.command.persona.permakill", true, "permakill", "pk", "remove", "delete"),
+        PERMAKILL("archecore.admin.command.persona.permakill", true, true, "permakill", "pk", "remove", "delete"),
         TIME("archecore.command.persona.time", true, true, "time", "timeplayed", "played", "viewtime", "viewplayed"),
         SETRACE("archecore.command.persona.setrace", false, "setrace", "setvisiblerace", "setapparentrace"),
         REALRACE("archecore.command.persona.realrace", false, "realrace", "viewrealrace", "underlyingrace", "viewunderrace"),
@@ -62,7 +62,7 @@ public class CommandPersona implements CommandExecutor {
         OPENINV("archecore.command.persona.openinv", true, "openinv", "inv", "viewinv"),
         OPENENDER("archecore.command.persona.openender", true, "openender", "ender", "viewender"),
         ICON("archecore.command.persona.icon", true, "icon", "head", "seticon", "sethead"),
-        CREATED("archecore.command.persona.created", true, "created", "viewcreateddate", "viewcreation"),
+        CREATED("archecore.command.persona.created", true, true, "created", "viewcreateddate", "viewcreation"),
         CONSTRUCT("archecore.command.persona.construct", true, "construct", "setconstruct"),
         NECROLYTE("archecore.command.persona.necrolyte", true, "necrolyte", "setnecrolyte"),
         SPECTRE("archecore.command.persona.spectre", true, "spectre", "setspectre"),
@@ -233,9 +233,8 @@ public class CommandPersona implements CommandExecutor {
 			//Go through process to find the Persona we want
             OfflinePersona opers = null;
             boolean willTryToLoad = false;	
-            if ((cmd == PersonaCommand.VIEW || cmd == PersonaCommand.MORE || cmd == PersonaCommand.LIST)
-                    && args.length > 1) {
-                opers = CommandUtil.personaFromArg(args[1]);
+            if (cmd.acceptsOffline && args.length > 1) {
+                opers = CommandUtil.offlinePersonaFromArg(args[1]);
             } else if (cmd.onearg
                     && args.length > 1
                     && sender.hasPermission("archecore.mod.other")) {
@@ -276,6 +275,28 @@ public class CommandPersona implements CommandExecutor {
                 } else if (cmd == PersonaCommand.TIME) {
                     sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(opers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + opers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
                     return true;
+                } else if (cmd == PersonaCommand.CREATED) {
+                    String time = millsToDaysHours(System.currentTimeMillis() - opers.getCreationTime().getTime());
+                    sender.sendMessage(ChatColor.AQUA + "You created " + opers.getName() + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
+                    return true;
+                } else if (cmd == PersonaCommand.LIST) {
+                    ArchePersona[] personas = handler.getAllPersonas(opers.getPlayerUUID());
+                    sender.sendMessage(ChatColor.AQUA + opers.getPlayerName() + "'s personas:");
+                    for (int i = 0; i <= 3; i++) {
+                        Persona persona = personas[i];
+                        if (persona != null)sender.sendMessage(ChatColor.GRAY + "[" + i + "] " + ChatColor.AQUA + persona.getName());
+                        else sender.sendMessage(ChatColor.GRAY + "[" + i + "] " + ChatColor.WHITE + "Empty");
+                    }
+                    return true;
+                } else if (cmd == PersonaCommand.PERMAKILL) {
+                    if (!(args.length > 1)) {
+                        sender.sendMessage(ChatColor.RED + "Don't delete yourself by mistake friend!");
+                        return true;
+                    }
+
+                    opers.remove();
+                    sender.sendMessage(ChatColor.AQUA + "You have permakilled Persona " + ChatColor.WHITE + opers.getName() + ChatColor.AQUA + " belonging to " + ChatColor.WHITE + opers.getPlayerName());
+                    return true;
                 }
             } else {
                 if (!opers.isLoaded()) {
@@ -283,11 +304,7 @@ public class CommandPersona implements CommandExecutor {
                     return true;
                 }
                 Persona pers = (Persona) opers;
-                if (cmd == PersonaCommand.CREATED) {
-                    String time = millsToDaysHours(System.currentTimeMillis() - pers.getCreationTime().getTime());
-                    sender.sendMessage(ChatColor.AQUA + "You created " + pers.getName() + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
-                    return true;
-                } else if (cmd == PersonaCommand.CLEARPREFIX && prefix) {
+                if (cmd == PersonaCommand.CLEARPREFIX && prefix) {
                     pers.clearPrefix();
                     sender.sendMessage(ChatColor.AQUA + "Persona prefix was cleared for " + pers.getName() + ".");
                     return true;
@@ -298,28 +315,6 @@ public class CommandPersona implements CommandExecutor {
                 } else if (cmd == PersonaCommand.CLEARAGE) {
                     pers.setDateOfBirth(0);
                     sender.sendMessage(ChatColor.AQUA + "Persona age was cleared for " + pers.getName() + ".");
-                    return true;
-                } else if (cmd == PersonaCommand.LIST) {
-                    ArchePersona[] personas = handler.getAllPersonas(pers.getPlayerUUID());
-                    sender.sendMessage(ChatColor.AQUA + ArcheCore.getControls().getPlayerNameFromUUID(pers.getPlayerUUID()) + "'s personas:");
-                    for (int i = 0; i <= 3; i++) {
-                        Persona persona = personas[i];
-                        if (persona != null) {
-                            sender.sendMessage(ChatColor.GRAY + "[" + i + "] " + ChatColor.AQUA + persona.getName());
-                        } else {
-                            sender.sendMessage(ChatColor.GRAY + "[" + i + "] " + ChatColor.WHITE + "Empty");
-                        }
-                    }
-                    return true;
-                } else if (cmd == PersonaCommand.PERMAKILL) {
-
-                    if (!(args.length > 1)) {
-                        sender.sendMessage(ChatColor.RED + "Don't delete yourself by mistake friend!");
-                        return true;
-                    }
-
-                    pers.remove();
-                    sender.sendMessage(ChatColor.AQUA + "You have permakilled Persona " + ChatColor.WHITE + pers.getName() + ChatColor.AQUA + " belonging to " + ChatColor.WHITE + pers.getPlayerName());
                     return true;
                 } else if (cmd == PersonaCommand.PROFESSION && args.length == 1 && sender instanceof Player) {
                     sender.sendMessage(ChatColor.BLUE + "Available Professions: " + ChatColor.DARK_GRAY + "[Click for Info]");
