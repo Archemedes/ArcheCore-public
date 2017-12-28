@@ -9,6 +9,7 @@ import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.persona.ArcheOfflinePersona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.TagAttachment;
@@ -267,7 +268,7 @@ public class CommandPersona implements CommandExecutor {
                     } else {
                         //If the persona is found the Whois should always succeed
                         //We have assured the persona is found earlier
-                        boolean mod = sender.hasPermission("archecore.mod.other");
+                        boolean mod = sender.hasPermission("archecore.mod.other") || sender.hasPermission("archecore.admin");
                         (extendedInfo ? handler.whoisMore(opers, mod, sender == opers.getPlayer()) : handler.whois(opers, mod))
                                 .forEach(o -> MessageUtil.send(o, sender));
                     }
@@ -280,11 +281,12 @@ public class CommandPersona implements CommandExecutor {
                     sender.sendMessage(ChatColor.AQUA + "Created " + opers.getName() + " " + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
                     return true;
                 } else if (cmd == PersonaCommand.LIST) {
-                    ArchePersona[] personas = handler.getAllPersonas(opers.getPlayerUUID());
+                    ArcheOfflinePersona[] personas = handler.getAllOfflinePersonas(opers.getPlayerUUID());
                     sender.sendMessage(ChatColor.AQUA + opers.getPlayerName() + "'s personas:");
-                    for (int i = 0; i <= 3; i++) {
-                        Persona persona = personas[i];
-                        if (persona != null)sender.sendMessage(ChatColor.GRAY + "[" + i + "] " + ChatColor.AQUA + persona.getName());
+                    boolean mod = sender.hasPermission("archecore.mod.other") || sender.hasPermission("archecore.admin");
+                    for (int i = 0; i < personas.length; i++) {
+                        OfflinePersona persona = personas[i];
+                        if (persona != null)sender.sendMessage(ChatColor.GRAY + "[" + i + "] " + ChatColor.AQUA + persona.getName() + (mod? (ChatColor.DARK_GRAY + " (id:"+persona.getPersonaId()+")" ) : "") );
                         else sender.sendMessage(ChatColor.GRAY + "[" + i + "] " + ChatColor.WHITE + "Empty");
                     }
                     return true;
