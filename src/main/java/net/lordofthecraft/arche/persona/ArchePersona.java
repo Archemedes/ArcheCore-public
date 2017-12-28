@@ -456,7 +456,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 			boolean hasOtherPersonas = false;
 			ArchePersona[] allPersonas = handler.getAllPersonas(p);
 			for(int i = 0; i < allPersonas.length; i++) {
-				if(allPersonas[i] != null){
+				if(allPersonas[i] != null && allPersonas[i] != this){
 					handler.switchPersona(p, i, true);
 					hasOtherPersonas = true;
 					break;

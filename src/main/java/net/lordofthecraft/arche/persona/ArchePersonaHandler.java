@@ -461,7 +461,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         } else {
             ArchePersona ps = getPersona(p);
             if (ps == null) {
-                Arrays.stream(prs).findFirst().ifPresent(pers -> pers.setCurrent(true));
+                Arrays.stream(prs).filter(Objects::nonNull).findFirst().ifPresent(pers -> pers.setCurrent(true));
                 ps = getPersona(p);
                 ps.restoreMinecraftSpecifics(p);
                 if(ArcheCore.isDebugging()) ArcheCore.getPlugin().getLogger().info("[Debug] No current Persona on login, so switched to " + MessageUtil.identifyPersona(ps));

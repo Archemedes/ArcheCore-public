@@ -277,7 +277,7 @@ public class CommandPersona implements CommandExecutor {
                     return true;
                 } else if (cmd == PersonaCommand.CREATED) {
                     String time = millsToDaysHours(System.currentTimeMillis() - opers.getCreationTime().getTime());
-                    sender.sendMessage(ChatColor.AQUA + "You created " + opers.getName() + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
+                    sender.sendMessage(ChatColor.AQUA + "Created " + opers.getName() + " " + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
                     return true;
                 } else if (cmd == PersonaCommand.LIST) {
                     ArchePersona[] personas = handler.getAllPersonas(opers.getPlayerUUID());
