@@ -21,11 +21,18 @@ public interface PersonaKey {
      *
      * @return The immutable integer ID which represents this specific persona
      */
-    int getPersonaID();
+    int getPersonaId();
 
     /**
 	 * Attempts to retrieve a Persona uniquely corresponding to this key. Persona might not exist or might not be loaded. 
 	 * @return A Persona with this key
 	 */
 	Persona getPersona();
+	
+    /**
+	 * Attempts to retrieve an OfflinePersona uniquely corresponding to this key. 
+	 * Assuming the persona wasn't removed, this should always return a non-null result. 
+	 * @return An OfflinePersona with this key
+	 */
+	OfflinePersona getOfflinePersona();
 }

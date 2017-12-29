@@ -76,11 +76,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		sqlCriteria.put("persona_id", persona_id);
 	}
 
-	@Override
-    public int getPersonaId() {
-        return personaKey.getPersonaID();
-    }
-
     @Override
     public int getTotalPlaytime() {
         return pastPlayTime + getTimePlayed();

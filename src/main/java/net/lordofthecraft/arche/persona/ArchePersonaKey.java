@@ -17,14 +17,14 @@ public class ArchePersonaKey implements PersonaKey {
         this.persona_id = persona_id;
         this.slot = slot;
     }
-	
+    
 	@Override
 	public UUID getPlayerUUID(){
 		return uuid;
 	}
 	
 	@Override
-    public int getPersonaID() {
+    public int getPersonaId() {
         return persona_id;
     }
 
@@ -35,7 +35,14 @@ public class ArchePersonaKey implements PersonaKey {
 
     @Override
     public Persona getPersona(){
-        return ArchePersonaHandler.getInstance().getPersona(uuid, slot);
+        ArcheOfflinePersona p = getOfflinePersona();
+        if(p instanceof ArchePersona) return (ArchePersona) p;
+        else return null;
+    }
+    
+    @Override
+    public ArcheOfflinePersona getOfflinePersona() {
+    	return ArchePersonaHandler.getInstance().getPersonaById(persona_id);
     }
 
     @Override

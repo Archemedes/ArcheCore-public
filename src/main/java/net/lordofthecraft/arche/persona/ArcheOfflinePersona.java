@@ -69,7 +69,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 
     @Override
     public int getPersonaId() {
-        return personaKey.getPersonaID();
+        return personaKey.getPersonaId();
     }
 
     @Override
@@ -210,7 +210,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 
     @Override
     public int hashCode() {
-        return personaKey.getPersonaID();
+        return personaKey.getPersonaId();
     }
 
     public Location getLocation() {
