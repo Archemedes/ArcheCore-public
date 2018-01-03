@@ -164,5 +164,8 @@ public interface OfflinePersona {
      */
     PersonaTags tags();
 
-    OfflinePlayer getPlayer();
+    /**
+     * @return The Player this Persona belongs to
+     */
+    OfflinePlayer getOfflinePlayer();
 }

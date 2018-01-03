@@ -269,7 +269,7 @@ public class CommandPersona implements CommandExecutor {
                         //If the persona is found the Whois should always succeed
                         //We have assured the persona is found earlier
                         boolean mod = sender.hasPermission("archecore.mod.other") || sender.hasPermission("archecore.admin");
-                        (extendedInfo ? handler.whoisMore(opers, mod, sender == opers.getPlayer()) : handler.whois(opers, mod))
+                        (extendedInfo ? handler.whoisMore(opers, mod, sender == opers.getOfflinePlayer()) : handler.whois(opers, mod))
                                 .forEach(o -> MessageUtil.send(o, sender));
                     }
                     return true;

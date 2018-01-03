@@ -199,7 +199,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
     }
 
     @Override
-    public OfflinePlayer getPlayer() {
+    public OfflinePlayer getOfflinePlayer() {
         return Bukkit.getOfflinePlayer(personaKey.getPlayerUUID());
     }
 

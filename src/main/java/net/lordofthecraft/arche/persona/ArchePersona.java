@@ -18,6 +18,7 @@ import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -224,6 +225,13 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		}
 
 		return play;
+	}
+	
+	@Override
+	public OfflinePlayer getOfflinePlayer() {
+		Player play = getPlayer();
+		if(play != null) return play;
+		return super.getOfflinePlayer();
 	}
 
 	@Override
