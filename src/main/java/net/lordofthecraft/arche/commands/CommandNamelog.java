@@ -2,11 +2,11 @@ package net.lordofthecraft.arche.commands;
 
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.jsoup.helper.StringUtil;
 
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.util.CommandUtil;
@@ -24,7 +24,7 @@ public class CommandNamelog implements CommandExecutor {
 			} else {
 				Set<String> pastNames = persona.getPastNames();
 				sender.sendMessage(ChatColor.AQUA + "Showing all the used names of " + ChatColor.RESET);
-				sender.sendMessage(StringUtil.join(pastNames, ", "));
+				sender.sendMessage(StringUtils.join(pastNames, ", "));
 			}
 				
 			return true;

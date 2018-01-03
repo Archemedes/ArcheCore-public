@@ -9,13 +9,9 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.UUID;
 
 public class WikiHelpFile extends HelpFile {
@@ -89,11 +85,13 @@ public class WikiHelpFile extends HelpFile {
 			BufferedReader in = null;
 			try{
 				//HttpURLConnection.setFollowRedirects(true);
-				String topic = boss.getTopic().substring(2).replace("\\", "").replace("/", "").replace('?', ' ').replace(' ', '_');
+				
+				//JSOUP COMMENTOUT
+				/*String topic = boss.getTopic().substring(2).replace("\\", "").replace("/", "").replace('?', ' ').replace(' ', '_');
 				Document doc = Jsoup.connect(WIKI + topic).get();
 				Elements ele = doc.select("#mw-content-text p");
 				//we only want to get the first.
-				String text = ele.get(0).html();
+				String text = ele.get(0).html();*/
 
 				/*List<String> text = Lists.newArrayList();
 				ele.forEach(e -> text.add(e.text()));
@@ -105,13 +103,14 @@ public class WikiHelpFile extends HelpFile {
 					result += format;
 				}*/
 
-				return text.trim()
+				//JSOUP COMMENTOUT
+				/*return text.trim()
 						.replaceAll("<a href=\"(.*)\">", "@")
 						.replace("</a>", "@")
 						.replace("<b>", ChatColor.BOLD.toString())
 						.replace("</b>", ChatColor.RESET.toString())
 						.replace("<em>", ChatColor.ITALIC.toString())
-						.replace("</em>", ChatColor.RESET.toString());
+						.replace("</em>", ChatColor.RESET.toString());*/
 
 
 				/*ArcheCore.getPlugin().getLogger().info("topic is "+topic);
@@ -166,8 +165,9 @@ public class WikiHelpFile extends HelpFile {
 				}
 				*/
 			}
-			catch(MalformedURLException e){e.printStackTrace();}
-			catch (IOException e) { /*Means Wiki had no proper page*/}
+			//ABOVE 2 CATCHES = JSOUP COMMENTOUT
+			//catch(MalformedURLException e){e.printStackTrace();}
+			//catch (IOException e) { /*Means Wiki had no proper page*/}
 			finally{if(in != null) try {in.close();} catch (IOException e) {e.printStackTrace();}}
 			
 			
