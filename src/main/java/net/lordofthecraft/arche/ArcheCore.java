@@ -425,7 +425,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     private void initListeners(){
         PluginManager pm = Bukkit.getPluginManager();
 
-        afkListener = new AfkListener();
+        afkListener = new AfkListener(this);
         pm.registerEvents(afkListener, this);
         
         pm.registerEvents(new PlayerJoinListener(personaHandler), this);
