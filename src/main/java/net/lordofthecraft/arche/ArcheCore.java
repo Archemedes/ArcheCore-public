@@ -266,11 +266,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         
         fatigueHandler.fatigueDecreaseHours = this.fullFatigueRestore;
         personaHandler.setModifyDisplayNames(modifyDisplayNames);
-        
-        //Preloads our skills from SQL so that they are persistent at all times.
-        //May also create a command/field to flag a skill as forcibly disabled.
-        ArcheSkillFactory.preloadSkills(sqlHandler);
-        
+
         //Incase of a reload, load all Personas for currently logged in players
         for (Player p : Bukkit.getOnlinePlayers()) {
             personaHandler.getPersonaStore().loadPersonas(p.getName(), p.getUniqueId());

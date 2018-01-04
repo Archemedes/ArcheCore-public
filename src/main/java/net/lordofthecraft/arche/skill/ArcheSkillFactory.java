@@ -1,6 +1,20 @@
 package net.lordofthecraft.arche.skill;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+
+import org.bukkit.Material;
+import org.bukkit.plugin.Plugin;
+
 import com.google.common.collect.Maps;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
@@ -9,96 +23,9 @@ import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.interfaces.SkillFactory;
-import org.bukkit.Material;
-import org.bukkit.plugin.Plugin;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.logging.Level;
 
 public class ArcheSkillFactory implements SkillFactory {
 	private static final Map<String, ArcheSkill> skills = Maps.newLinkedHashMap();
-
-    /**
-     * This method fetches all skills that are in SQL and establishes them early.
-     * Any changes made to skill that are preloaded <b>will not</b> be effective unless FORCE = true on {@link #register()}
-     *
-     * @see #withForceUpdate(boolean) For setting a skill to force update
-     */
-    public static void preloadSkills(SQLHandler handler) {
-        /*
-	    CREATE TABLE IF NOT EXISTS skills (
-        skill_id    VARCHAR(255),
-        hidden 		INT DEFAULT 0,
-        help_text   TEXT DEFAULT 'UNSET',
-        help_icon   TEXT DEFAULT 'BARRIER',
-        PRIMARY KEY (skill_id)
-        )
-        ENGINE=InnoDB DEFAULT CHARSET=utf8;
-	     */
-
-	    /*
-	    CREATE TABLE IF NOT EXISTS skill_races (
-        skill_id_fk     VARCHAR(255),
-        race            TEXT NOT NULL,
-        racial_skill    BOOLEAN DEFAULT FALSE,
-        racial_mod      DOUBLE DEFAULT 1.0,
-        PRIMARY KEY (skill_id_fk,race),
-        FOREIGN KEY (skill_id_fk) REFERENCES skills (skill_id) ON UPDATE CASCADE
-        )
-        ENGINE=InnoDB DEFAULT CHARSET=utf8;
-	     */
-        if (!skills.isEmpty()) {
-            return;
-        }
-        try(Connection fetcherConn = handler.getConnection();
-        	PreparedStatement fetcher = fetcherConn.prepareStatement("SELECT skill_id,hidden,help_text,help_icon,inert,male_name,female_name FROM skills"); 
-        	PreparedStatement racialFetch = fetcherConn.prepareStatement("SELECT race,racial_skill,racial_mod FROM skill_races WHERE skill_id_fk=?");){
-        	
-        	if (handler instanceof WhySQLHandler) {
-                fetcherConn.setReadOnly(true);
-            }
-
-            ResultSet rs = fetcher.executeQuery();
-            while (rs.next()) {
-                String name = rs.getString("skill_id");
-                int hidden = rs.getInt("hidden");
-                String text = rs.getString("help_text");
-                String helpIconInfo = rs.getString("help_icon");
-                boolean inert = rs.getBoolean("inert");
-                String maleName = rs.getString("male_name");
-                String femaleName = rs.getString("female_name");
-                SkillFactory factory = ArcheSkillFactory.registerNewSkill(name, ArcheCore.getPlugin())
-                		.withProfessionalName(maleName)
-                		.withFemaleProfessionalName(femaleName)
-                        .withVisibilityType(hidden)
-                        .withXpGainWhileHidden(inert);
-                if (helpIconInfo != null && text != null) {
-                    factory.withHelpFile(text, Material.valueOf(helpIconInfo));
-                }
-
-                racialFetch.setString(1, name);
-                ResultSet rrs = racialFetch.executeQuery();
-                racialFetch.clearParameters();
-                while (rrs.next()) {
-                    Race race = Race.valueOf(rrs.getString("race"));
-                    if (rrs.getBoolean("racial_skill")) {
-                        factory.asRacialProfession(race);
-                    }
-                    factory.withRacialModifier(race, rrs.getDouble("racial_mod"));
-                }
-                rrs.close();
-                ((ArcheSkillFactory) factory).internal = true;
-                factory.register();
-            }
-            rs.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
 	private final String name;
 	private String maleName, femaleName;

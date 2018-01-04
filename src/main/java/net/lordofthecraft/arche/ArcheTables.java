@@ -36,9 +36,7 @@ public final class ArcheTables {
             createPlayerTable(statement, end);
             if (debug) l.info("[Debug] Done with Player! Creating skins table...");
             createPersonaSkinsTable(statement, end);
-            if (debug) l.info("[Debug] Done with Skins! Creating skills table...");
-            createSkillsTable(statement, end);
-            if (debug) l.info("[Debug] Done with skills! Creating persona...");
+            if (debug) l.info("[Debug] Done with skins! Creating persona...");
             createPersonaTable(statement, end);
             if (debug) l.info("[Debug] Done with persona! Creating persona stats...");
             createPersonaStatsTable(statement, end);
@@ -123,21 +121,6 @@ public final class ArcheTables {
                 ")" +
                 end);
 
-    }
-
-
-    protected static void createSkillsTable(Statement statement, String end) throws SQLException {
-        statement.execute("CREATE TABLE IF NOT EXISTS skills (" +
-                "skill_id VARCHAR(255)," +
-                "hidden INT DEFAULT 0," +
-                "help_text TEXT," +
-                "help_icon TEXT," +
-                "inert BOOLEAN DEFAULT FALSE," +
-                "male_name TEXT," +
-                "female_name TEXT," +
-                "PRIMARY KEY (skill_id)" +
-                ")" +
-                end);
     }
 
     protected static void createPersonaTable(Statement statement, String end) throws SQLException {
