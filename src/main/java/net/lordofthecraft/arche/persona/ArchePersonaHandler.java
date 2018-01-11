@@ -285,16 +285,9 @@ public class ArchePersonaHandler implements PersonaHandler {
 
         String r = ChatColor.RESET + "";
         String c = ChatColor.BLUE + "";
-        String l = ChatColor.GRAY + "";
         String u = ChatColor.DARK_GRAY + "";
-        
-        Persona p = op.getPersona();
-        boolean masked = op.isLoaded() && p.tags().hasTag("masked");
-
-        result.add(new TextComponent(l + "~~~~ " + r + 
-        		((masked) ? op.getName() : op.getPlayerName()) + ((mod && masked) ? l + "(" + op.getPlayerName() + ")" + r : "") 
-        		+ "'s Roleplay Persona" + (mod? u+"(id:"+op.getPersonaId()+")" : "") + l + " ~~~~"));
-        result.add(getPersonaHeader(op));
+        result.add(getPersonaHeader(op, mod));
+        result.add(getPersonaTypeHeader(op));
 
         //Now we add all the actual relevant Persona tags in a list called subresult.
         List<BaseComponent> subresult = Lists.newArrayList();
@@ -309,6 +302,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         if (gender != null && !"Other".equals(gender)) subresult.add(new TextComponent(c + "Gender: " + r + op.getGender()));
         
         if (op.isLoaded()) {
+        	Persona p = op.getPersona();
             String race = p.getRaceString(mod);
             if (race != null && !race.isEmpty()) {
                 subresult.add(new TextComponent(c + "Race: " + r + race));
@@ -357,7 +351,19 @@ public class ArchePersonaHandler implements PersonaHandler {
 		return whois(getPersona(p), mod);
 	}
 
-    private BaseComponent getPersonaHeader(OfflinePersona op) {
+	private BaseComponent getPersonaHeader(OfflinePersona op, boolean mod) {
+        String r = ChatColor.RESET + "";
+        String l = ChatColor.GRAY + "";
+        String u = ChatColor.DARK_GRAY + "";
+        
+		boolean masked = op.isLoaded() && op.getPersona().tags().hasTag("masked");
+		
+		return new TextComponent(l + "~~~~ " + r + 
+        		((masked) ? op.getName() : op.getPlayerName()) + ((mod && masked) ? l + "(" + op.getPlayerName() + ")" + r : "") 
+        		+ "'s Roleplay Persona" + (mod? u+"(id:"+op.getPersonaId()+")" : "") + l + " ~~~~");
+	}
+	
+    private BaseComponent getPersonaTypeHeader(OfflinePersona op) {
         Persona p = op.getPersona();
         if (op.getPersonaType() != PersonaType.NORMAL) {
             return new TextComponent(op.getPersonaType().personaViewLine);
@@ -411,11 +417,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		List<BaseComponent> result = Lists.newArrayList();
 		if(p == null) return result;
 
-		String r = ChatColor.RESET+"";
-		String l = ChatColor.GRAY+"";
-
-		result.add(new TextComponent(l+"~~~~ " + r + p.getPlayerName() + "'s Extended Roleplay Persona" + l + " ~~~~"));
-		result.add(new TextComponent(ChatColor.DARK_RED + "((Please remember not to metagame this information))"));
+		result.add(getPersonaHeader(p, mod));
+		result.add(getPersonaTypeHeader(p));
 
 		result.addAll(event.getSent());
 
