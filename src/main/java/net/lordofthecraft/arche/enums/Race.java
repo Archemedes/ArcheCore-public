@@ -6,7 +6,6 @@ public enum Race {
     DWARF("Dwarf", "Dwarf"),
     ORC("Orc", "Orc"),
     KHARAJYR("Kharajyr", "Kharajyr"),
-    HOUZI("Hou-zi", "Hou-zi", 300),
 
     NORTHENER("Highlander", "Human", 100),
     SOUTHERON("Farfolk", "Human", 100),
@@ -31,10 +30,6 @@ public enum Race {
     KHA_TIGRASI("Kha'Tigrasi", "Kharajyr"),
     KHA_CHEETRAH("Kha'Cheetrah", "Kharajyr"),
     KHA_PANTERA("Kha'Pantera", "Kharajyr"),
-
-    HOUZI_LAO("Laobai-Zhu", "Hou-zi", 300), //Normal
-    HOUZI_HEI("Hei-Zhu", "Hou-zi", 350), //Stronk and Slow
-    HOUZI_FEI("Fei-Zhu", "Hou-zi", 300), //Light and Fast
 
     CONSTRUCT("Construct", "Creature", 10000),
     SPECTRE("Spectre", "Creature", 10000),

@@ -85,15 +85,6 @@ public class RaceBonusHandler {
             	player.getAttribute(GENERIC_MOVEMENT_SPEED).addModifier(new AttributeModifier(UUID_ARCHE, "arche_speed", 0.12, AttributeModifier.Operation.ADD_SCALAR));
             	player.getAttribute(GENERIC_LUCK).addModifier(new AttributeModifier(UUID_ARCHE, "501_moreluck", 0.1, AttributeModifier.Operation.ADD_NUMBER));
                 break;
-            case HOUZI_LAO:
-            case HOUZI_FEI:
-            	player.getAttribute(GENERIC_MOVEMENT_SPEED).addModifier(new AttributeModifier(UUID_ARCHE, "arche_speed", 0.12, AttributeModifier.Operation.ADD_SCALAR));
-            	player.getAttribute(GENERIC_LUCK).addModifier(new AttributeModifier(UUID_ARCHE, "501_moreluck", 0.1, AttributeModifier.Operation.ADD_NUMBER));
-                break;
-            case HOUZI_HEI:
-            	player.getAttribute(GENERIC_MAX_HEALTH).addModifier(new AttributeModifier(UUID_ARCHE, "arche_healthboost", 0.2, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
-                player.getAttribute(GENERIC_LUCK).addModifier(new AttributeModifier(UUID_ARCHE, "501_moreluck", 0.1, AttributeModifier.Operation.ADD_NUMBER));
-                break;
             default: //Basic Humans, Default/Unset
                 break;
         }

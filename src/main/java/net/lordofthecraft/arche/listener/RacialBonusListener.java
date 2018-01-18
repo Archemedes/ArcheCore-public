@@ -91,8 +91,6 @@ public class RacialBonusListener implements Listener {
 		case KHA_PANTERA:
 		case KHA_LEPARDA:
 		case KHA_TIGRASI:
-		case HOUZI_FEI:
-		case HOUZI_LAO:
 		case NEPHILIM:
 		case SNOW_ELF:
 			return true;
@@ -273,24 +271,6 @@ public class RacialBonusListener implements Listener {
 					e.setDamage(DamageModifier.MAGIC, e.getDamage(DamageModifier.MAGIC) * 0.2);
 				} else if (r == Race.HIGH_ELF) {
 					e.setDamage(DamageModifier.MAGIC, e.getDamage(DamageModifier.MAGIC) * 0.7);
-				} else if (r.getParentRace().equalsIgnoreCase("hou-zi") && r != Race.HOUZI_HEI && !isWearingArmor(p)) {
-					e.setDamage(e.getDamage()*0.75);
-				}
-			}
-		}
-		if (e.getDamager() instanceof Player && e.getEntity() instanceof LivingEntity) {
-			Player p = (Player) e.getDamager();
-			LivingEntity ent = (LivingEntity) e.getEntity();
-			Persona pers = handler.getPersona(p);
-			if(pers != null) {
-				Race r = pers.getRace();
-				if (r.getParentRace().equalsIgnoreCase("hou-zi")
-						&& r != Race.HOUZI_HEI
-						&& p.hasPotionEffect(PotionEffectType.INVISIBILITY)
-						&& (p.getEquipment().getItemInMainHand() == null || p.getEquipment().getItemInMainHand().getType() == Material.AIR)) {
-					ent.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 100, 1));
-					p.removePotionEffect(PotionEffectType.INVISIBILITY);
-					ent.sendMessage(ChatColor.RED+"The "+r.getName()+" snuck up on you and delivered a quick strike, leaving you weakened!");
 				}
 			}
 		}
@@ -454,15 +434,6 @@ public class RacialBonusListener implements Listener {
 		return false;
 	}
 
-	private boolean isWearingArmor(Player p) {
-		for (ItemStack is : p.getEquipment().getArmorContents()) {
-			if (is != null && is.getType() != Material.ELYTRA && is.getType() != Material.PUMPKIN) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onDamage(EntityDamageEvent e){
@@ -498,10 +469,6 @@ public class RacialBonusListener implements Listener {
 				case KHA_LEPARDA:
 				case KHA_TIGRASI:
 				case KHA_PANTERA:
-				case HOUZI:
-				case HOUZI_FEI:
-				case HOUZI_LAO:
-				case HOUZI_HEI:
 					dmg -= 6;
 					if (dmg <= 0) e.setCancelled(true);
 					else e.setDamage(dmg);
