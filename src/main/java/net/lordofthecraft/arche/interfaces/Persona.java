@@ -130,6 +130,13 @@ public interface Persona extends OfflinePersona {
 	 */
 	int getCharactersSpoken();
 
+    /**
+     * Retrieve the total Playtime this Persona has seen since the last reset
+     *
+     * @return Playtime in minutes
+     */
+    int getTimePlayed();
+    
 	/**
 	 * Retrieve the Player to which this Persona belongs, but only if the Player is online.
 	 * @return The Player belonging to this character, or null if the player is not online

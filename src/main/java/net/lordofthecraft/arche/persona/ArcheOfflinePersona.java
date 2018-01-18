@@ -18,7 +18,6 @@ import org.bukkit.OfflinePlayer;
 
 import java.sql.*;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ArcheOfflinePersona implements OfflinePersona {
     protected static final IConsumer consumer = ArcheCore.getConsumerControls();
@@ -27,7 +26,6 @@ public class ArcheOfflinePersona implements OfflinePersona {
     final ArchePersonaTags tags = new ArchePersonaTags(this);
 
     boolean deleted = false;
-    final AtomicInteger timePlayed;
     final PersonaKey personaKey;
     final Timestamp creation;
     Timestamp lastPlayed;
@@ -38,7 +36,6 @@ public class ArcheOfflinePersona implements OfflinePersona {
     protected PersonaType type;
     WeakBlock location;
     String name;
-    Timestamp lastRenamed;
 
     ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, boolean current, 
     		Race race, int birthdate, String gender, PersonaType type, String name) {
@@ -50,7 +47,6 @@ public class ArcheOfflinePersona implements OfflinePersona {
         this.gender = gender;
         this.type = type;
         this.name = name;
-        timePlayed = new AtomicInteger(0);
     }
 
     ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, boolean current, 
@@ -64,7 +60,6 @@ public class ArcheOfflinePersona implements OfflinePersona {
         this.gender = gender;
         this.type = type;
         this.name = name;
-        timePlayed = new AtomicInteger(0);
     }
 
     @Override
@@ -201,11 +196,6 @@ public class ArcheOfflinePersona implements OfflinePersona {
     @Override
     public OfflinePlayer getOfflinePlayer() {
         return Bukkit.getOfflinePlayer(personaKey.getPlayerUUID());
-    }
-
-    @Override
-    public int getTimePlayed() {
-        return timePlayed.get();
     }
 
     @Override

@@ -47,6 +47,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	boolean current = false;
 	String raceHeader = null;
 	Timestamp lastRenamed;
+    final AtomicInteger timePlayed;
+
     int pastPlayTime; //stat_playtime_past
     double money = ArcheCore.getEconomyControls().getBeginnerAllowance();
     double fatigue = 0;
@@ -69,7 +71,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
     		String gender, Timestamp creationTimeMS, Timestamp lastPlayed, PersonaType type) {
         super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, lastPlayed, false, race, birthdate, gender, type, name);
-		charactersSpoken = new AtomicInteger();
+        timePlayed = new AtomicInteger();
+        charactersSpoken = new AtomicInteger();
 		lastRenamed = new Timestamp(0);
 		pastPlayTime = 0;
 
@@ -504,6 +507,11 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	@Override
 	public boolean isNewbie() {
 		return getTimePlayed() < ArcheCore.getControls().getNewbieDelay();
+	}
+	
+	@Override
+	public int getTimePlayed() {
+		return timePlayed.get();
 	}
 
 	@Override

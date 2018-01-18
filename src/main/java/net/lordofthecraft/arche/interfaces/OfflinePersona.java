@@ -149,13 +149,6 @@ public interface OfflinePersona {
     boolean isDeleted();
 
     /**
-     * Retrieve the total Playtime this Persona has seen since its creation.
-     *
-     * @return Playtime in minutes
-     */
-    int getTimePlayed();
-
-    /**
      * Persona tags are additional data that is automatically made persistent by ArcheCore's SQL backend
      * Dependent plugins can set and check tags for each Persona. Tags can also be modified by command.
      * Persona must be loaded (i.e. instanceof ArchePersona) for modifying methods to be successful.

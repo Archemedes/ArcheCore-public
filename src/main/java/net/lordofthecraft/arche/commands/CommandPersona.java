@@ -273,9 +273,6 @@ public class CommandPersona implements CommandExecutor {
                                 .forEach(o -> MessageUtil.send(o, sender));
                     }
                     return true;
-                } else if (cmd == PersonaCommand.TIME) {
-                    sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(opers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + opers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
-                    return true;
                 } else if (cmd == PersonaCommand.CREATED) {
                     String time = millsToDaysHours(System.currentTimeMillis() - opers.getCreationTime().getTime());
                     sender.sendMessage(ChatColor.AQUA + "Created " + opers.getName() + " " + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
@@ -317,6 +314,9 @@ public class CommandPersona implements CommandExecutor {
                 } else if (cmd == PersonaCommand.CLEARAGE) {
                     pers.setDateOfBirth(0);
                     sender.sendMessage(ChatColor.AQUA + "Persona age was cleared for " + pers.getName() + ".");
+                    return true;
+                } else if (cmd == PersonaCommand.TIME) {
+                    sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + opers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
                     return true;
                 } else if (cmd == PersonaCommand.PROFESSION && args.length == 1 && sender instanceof Player) {
                     sender.sendMessage(ChatColor.BLUE + "Available Professions: " + ChatColor.DARK_GRAY + "[Click for Info]");
