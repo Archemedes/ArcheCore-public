@@ -25,7 +25,7 @@ public class CommandSql implements CommandExecutor {
             //This removes comments from the SQL command.
             //Things like DR/**/OP DATABASE archecore; would be possible otherwise.
             statement = statement.replace("/*", "").replace("*/", "");
-            statement = statement.substring(statement.lastIndexOf(';') + 1); //Preventing SELECT * FROM persona;DROP persona;
+            statement = statement.substring(statement.lastIndexOf(';')); //Preventing SELECT * FROM persona;DROP persona;
             Connection c = null;
             try{
                 c = ArcheCore.getControls().getSQLHandler().getConnection();
@@ -63,7 +63,7 @@ public class CommandSql implements CommandExecutor {
             } catch (SQLException e) {
                 sender.sendMessage("SQLException: " + e);
             } finally {
-                if (c != null && !ArcheCore.usingSQLite()) {
+                if (c != null) {
                     try {
                         c.close();
                     } catch (SQLException e) {
