@@ -10,8 +10,11 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.Validate;
 import org.json.simple.JSONArray;
@@ -158,7 +161,7 @@ public class MojangCommunicator {
         }
     }
     
-    public static String requestCurrentUsername(UUID uuid) throws IOException, ParseException {
+    public static String requestCurrentUsername(UUID uuid) throws IOException {
     	String uuid_string = uuid.toString().replaceAll("-", "");
     	
         InputStreamReader in = null;
@@ -176,13 +179,81 @@ public class MojangCommunicator {
 			JSONArray result = (JSONArray) parser.parse(in);
 			JSONObject firstName = (JSONObject) result.get(result.size() - 1);
 			return String.valueOf(firstName.get("name"));
+        }catch(ParseException e) {
+        	throw new RuntimeException();
         } finally {
             if (in != null) in.close();
             if (con != null) con.disconnect();
         }
     }
+    
+    public static UUID requestPlayerUUID(String name) throws IOException {
+    	return requestPlayerUUIDs(new String[]{name} )[0];
+    }
 
-	
+    public static UUID[] requestPlayerUUIDs(String... names) throws IOException {
+    	if(names.length > 100) throw new ArrayIndexOutOfBoundsException("Can only request 100 uuids at a time");
+    	if(names.length > Arrays.stream(names)
+    			.filter(Objects::nonNull)
+    			.map(String::toLowerCase)
+    			.distinct()
+    			.collect(Collectors.toList()).size())
+    		throw new IllegalArgumentException("Needs an array of unique, non-null names");
+    	
+        InputStreamReader in = null;
+		BufferedWriter out = null;
+        HttpURLConnection con = null;
+
+        UUID[] uuids = new UUID[names.length];
+        
+		try {//Request player profile from mojang api
+			URL url = new URL("https://api.mojang.com/profiles/minecraft");
+			con = (HttpURLConnection) url.openConnection();
+			con.setDoOutput(true); 
+			con.setDoInput(true);
+
+			con.setRequestMethod("POST");
+			con.setRequestProperty( "Content-Type", "application/json" );
+
+			String payload = JSONArray.toJSONString(Arrays.asList(names));
+
+			out = new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
+			out.write(payload);
+			out.close();
+
+			in = new InputStreamReader(con.getInputStream());
+			
+			JSONParser parser = new JSONParser();
+			JSONArray result = (JSONArray) parser.parse(in);
+			int i = 0;
+			for(Object x : result) {
+				JSONObject o = (JSONObject) x;
+				String name = o.get("name").toString();
+				do {
+					while(uuids[i] != null) i++;
+					
+					if(name.equalsIgnoreCase(names[i])) {
+						String id = o.get("id").toString();
+						String uid = id.substring(0, 8) + '-' + id.substring(8,12) + '-'
+								+ id.substring(12,16) + '-' + id.substring(16, 20)
+								+ '-' + id.substring(20);
+						uuids[i++] = UUID.fromString(uid);
+						break;
+					}
+				}while(++i < names.length);
+				
+			}
+			return uuids;
+        }catch(ParseException e) {
+        	throw new RuntimeException();
+    	}finally {
+            if (in != null) in.close();
+            if (out != null) out.close();
+            if (con != null) con.disconnect();
+        }
+		
+    }
+    
 	public static class MinecraftAccount{ public String username,password;}
 	
 	public static class AuthenthicationData{ public String accessToken,uuid;}
