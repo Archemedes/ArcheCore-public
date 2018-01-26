@@ -18,6 +18,7 @@ import org.bukkit.OfflinePlayer;
 
 import java.sql.*;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ArcheOfflinePersona implements OfflinePersona {
     protected static final IConsumer consumer = ArcheCore.getConsumerControls();
@@ -29,6 +30,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
     final PersonaKey personaKey;
     final Timestamp creation;
     Timestamp lastPlayed;
+    final AtomicInteger timePlayed;
     boolean current = false;
     Race race;
     int birthdate;
@@ -36,9 +38,10 @@ public class ArcheOfflinePersona implements OfflinePersona {
     protected PersonaType type;
     WeakBlock location;
     String name;
+    
 
-    ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, boolean current, 
-    		Race race, int birthdate, String gender, PersonaType type, String name) {
+    ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, int played,
+    		boolean current, Race race, int birthdate, String gender, PersonaType type, String name) {
         this.personaKey = personaKey;
         this.creation = creation;
         this.current = current;
@@ -47,10 +50,11 @@ public class ArcheOfflinePersona implements OfflinePersona {
         this.gender = gender;
         this.type = type;
         this.name = name;
+        timePlayed = new AtomicInteger(played);
     }
 
-    ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, boolean current, 
-    		Race race, int birthdate, String gender, PersonaType type, String name) {
+    ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, int played,
+    		boolean current, Race race, int birthdate, String gender, PersonaType type, String name) {
         this.personaKey = personaKey;
         this.creation = creation;
         this.lastPlayed = lastPlayed;
@@ -60,6 +64,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
         this.gender = gender;
         this.type = type;
         this.name = name;
+        timePlayed = new AtomicInteger(played);
     }
 
     @Override
@@ -91,6 +96,11 @@ public class ArcheOfflinePersona implements OfflinePersona {
     public UUID getPlayerUUID() {
         return personaKey.getPlayerUUID();
     }
+    
+	@Override
+	public int getTimePlayed() {
+		return timePlayed.get();
+	}
 
     @Override
     public Timestamp getCreationTime() {

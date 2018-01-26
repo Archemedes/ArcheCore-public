@@ -47,7 +47,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	boolean current = false;
 	String raceHeader = null;
 	Timestamp lastRenamed;
-    final AtomicInteger timePlayed;
 
     int pastPlayTime; //stat_playtime_past
     double money = ArcheCore.getEconomyControls().getBeginnerAllowance();
@@ -63,15 +62,14 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     private ArrayList<PotionEffect> effects = Lists.newArrayList();
     
 
-    ArchePersona(int persona_id, UUID player, int slot, String name, Race race, 
-    		int birthdate, String gender, Timestamp creationTimeMS, Timestamp lastPlayed) {
-        this(persona_id, player, slot, name, race, birthdate, gender, creationTimeMS, lastPlayed, PersonaType.NORMAL);
+    ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate, 
+    		String gender, Timestamp creationTimeMS, Timestamp lastPlayed, int played) {
+        this(persona_id, player, slot, name, race, birthdate, gender, creationTimeMS, lastPlayed, played, PersonaType.NORMAL);
     }
 
     ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
-    		String gender, Timestamp creationTimeMS, Timestamp lastPlayed, PersonaType type) {
-        super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, lastPlayed, false, race, birthdate, gender, type, name);
-        timePlayed = new AtomicInteger();
+    		String gender, Timestamp creationTimeMS, Timestamp lastPlayed, int played, PersonaType type) {
+        super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, lastPlayed, played, false, race, birthdate, gender, type, name);
         charactersSpoken = new AtomicInteger();
 		lastRenamed = new Timestamp(0);
 		pastPlayTime = 0;
@@ -502,22 +500,10 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		return inv;
 	}
 
-
-	
 	@Override
 	public boolean isNewbie() {
 		return getTimePlayed() < ArcheCore.getControls().getNewbieDelay();
 	}
-	
-	@Override
-	public int getTimePlayed() {
-		return timePlayed.get();
-	}
-
-	@Override
-	public Timestamp getCreationTime() {
-        return creation;
-    }
 
 	@Override
 	public double getFatigue() {
@@ -552,7 +538,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
     @Override
     public OfflinePersona unloadPersona() {
-        return new ArcheOfflinePersona(personaKey, creation, lastPlayed, current, race, birthdate, gender, type, name);
+        return new ArcheOfflinePersona(personaKey, creation, lastPlayed, this.timePlayed.get(), current, race, birthdate, gender, type, name);
     }
 
     @Override

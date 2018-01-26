@@ -23,7 +23,7 @@ public enum PersonaField {
     STAT_LAST_PLAYED("last_played", MASTER, TIMESTAMP, true),
     SKIN("skin_slot", MASTER, INTEGER),
 
-    STAT_PLAYED("played", STATS, INTEGER),
+    STAT_PLAYED("played", STATS, INTEGER, true),
     STAT_CHARS("chars", STATS, INTEGER),
     STAT_RENAMED("renamed", STATS, TIMESTAMP),
     STAT_CREATION("date_created", STATS, TIMESTAMP, true),

@@ -300,11 +300,12 @@ public class PersonaStore {
         String gender = res.getString(PersonaField.GENDER.field());
         Timestamp creationTimeMS = res.getTimestamp(PersonaField.STAT_CREATION.field());
         Timestamp lastPlayed = res.getTimestamp(PersonaField.STAT_LAST_PLAYED.field());
-
+        int played = res.getInt(PersonaField.STAT_PLAYED.field());
+        
         PersonaType ptype = PersonaType.valueOf(type);
         ArcheOfflinePersona persona = new ArcheOfflinePersona(
         		new ArchePersonaKey(persona_id, pUUID, slot), 
-        		creationTimeMS, lastPlayed, current, race, 
+        		creationTimeMS, lastPlayed, played, current, race, 
         		birthdate, gender, ptype, name);
 
         String wstr = res.getString(PersonaField.WORLD.field());
@@ -337,6 +338,7 @@ public class PersonaStore {
                 op.getGender(),
                 op.getCreationTime(),
                 op.lastPlayed,
+                op.getTimePlayed(),
                 op.getPersonaType()
         );
 
@@ -355,7 +357,6 @@ public class PersonaStore {
         persona.food = res.getInt(PersonaField.FOOD.field());
         persona.saturation = res.getFloat(PersonaField.SATURATION.field());
 
-        persona.timePlayed.set(res.getInt(PersonaField.STAT_PLAYED.field()));
         persona.charactersSpoken.set(res.getInt(PersonaField.STAT_CHARS.field()));
         persona.lastRenamed = res.getTimestamp(PersonaField.STAT_RENAMED.field());
 

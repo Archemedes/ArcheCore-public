@@ -56,7 +56,7 @@ public class CommandPersona implements CommandExecutor {
         LIST("archecore.command.persona.list", true, true, "list", "listpersonas", "viewpersonas"),
         PROFESSION("archecore.command.persona.profession", false, "profession", "setprofession", "setprof", "skill", "setskill", "sk"),
         PERMAKILL("archecore.admin.command.persona.permakill", true, true, "permakill", "pk", "remove", "delete"),
-        TIME("archecore.command.persona.time", true, "time", "timeplayed", "played", "viewtime", "viewplayed"),
+        TIME("archecore.command.persona.time", true, true, "time", "timeplayed", "played", "viewtime", "viewplayed"),
         SETRACE("archecore.command.persona.setrace", false, "setrace", "setvisiblerace", "setapparentrace"),
         REALRACE("archecore.command.persona.realrace", false, "realrace", "viewrealrace", "underlyingrace", "viewunderrace"),
         WIPERACE("archecore.command.persona.wiperace", false, "wiperace", "clearrace", "clearvisrace", "clearoverlying"),
@@ -277,6 +277,9 @@ public class CommandPersona implements CommandExecutor {
                     String time = millsToDaysHours(System.currentTimeMillis() - opers.getCreationTime().getTime());
                     sender.sendMessage(ChatColor.AQUA + "Created " + opers.getName() + " " + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
                     return true;
+                } else if (cmd == PersonaCommand.TIME) {
+                    sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(opers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + opers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
+                    return true;
                 } else if (cmd == PersonaCommand.LIST) {
                     ArcheOfflinePersona[] personas = handler.getAllOfflinePersonas(opers.getPlayerUUID());
                     sender.sendMessage(ChatColor.AQUA + opers.getPlayerName() + "'s personas:");
@@ -314,9 +317,6 @@ public class CommandPersona implements CommandExecutor {
                 } else if (cmd == PersonaCommand.CLEARAGE) {
                     pers.setDateOfBirth(0);
                     sender.sendMessage(ChatColor.AQUA + "Persona age was cleared for " + pers.getName() + ".");
-                    return true;
-                } else if (cmd == PersonaCommand.TIME) {
-                    sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + opers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
                     return true;
                 } else if (cmd == PersonaCommand.PROFESSION && args.length == 1 && sender instanceof Player) {
                     sender.sendMessage(ChatColor.BLUE + "Available Professions: " + ChatColor.DARK_GRAY + "[Click for Info]");
