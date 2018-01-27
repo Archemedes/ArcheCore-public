@@ -537,11 +537,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     }
 
     @Override
-    public OfflinePersona unloadPersona() {
-        return new ArcheOfflinePersona(personaKey, creation, lastPlayed, this.timePlayed.get(), current, race, birthdate, gender, type, name);
-    }
-
-    @Override
     public ArcheSkin getSkin() {
         return skin;
     }

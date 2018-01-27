@@ -231,11 +231,4 @@ public interface Persona extends OfflinePersona {
      * @return the total playtime of this persona(all maps added)
      */
     int getTotalPlaytime();
-    
-    /**
-     * Returns a barebones {@link OfflinePersona} which is an unloaded version of this persona
-     *
-     * @return Unloaded Persona
-     */
-    OfflinePersona unloadPersona();
 }
