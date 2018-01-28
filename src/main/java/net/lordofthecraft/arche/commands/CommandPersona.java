@@ -62,7 +62,6 @@ public class CommandPersona implements CommandExecutor {
         WIPERACE("archecore.command.persona.wiperace", false, "wiperace", "clearrace", "clearvisrace", "clearoverlying"),
         OPENINV("archecore.command.persona.openinv", true, "openinv", "inv", "viewinv"),
         OPENENDER("archecore.command.persona.openender", true, "openender", "ender", "viewender"),
-        ICON("archecore.command.persona.icon", true, "icon", "head", "seticon", "sethead"),
         CREATED("archecore.command.persona.created", true, true, "created", "viewcreateddate", "viewcreation"),
         CONSTRUCT("archecore.command.persona.construct", true, "construct", "setconstruct"),
         NECROLYTE("archecore.command.persona.necrolyte", true, "necrolyte", "setnecrolyte"),
@@ -154,9 +153,7 @@ public class CommandPersona implements CommandExecutor {
 				+ i + "$</persona clearbio>clearinfo$: " + a + "Clear your Persona's description completely.\n"
 				+ i + "$</persona time>time$: " + a + "View the hours spent playing your Persona.\n"
 				+ i + "$</persona created>created$: " + a + "View how long ago you created your Persona.\n"
-				+ i + "$</persona icon>icon$: " + a + "Save your current skin as your persona icon.\n"
-                + i + "$</persona list>list$: " + a + "View all your Personas with names + IDs.\n"
-                + i + "$</persona points>points$: " + a + "View and spend your skill points.\n";
+                + i + "$</persona list>list$: " + a + "View all your Personas with names + IDs.\n";
 
         String modOutput = ChatColor.DARK_PURPLE + l + "How to use Persona Moderator Commands\n" +
                 d + "[M]" + i + " $</persona setrace >setrace [visiblerace]$: " + a + "Chance the apparent race of a persona. Changes the visible race but not the mechanical race. \n" +
