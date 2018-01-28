@@ -85,7 +85,8 @@ public final class Consumer extends TimerTask implements IConsumer {
             state = conn.createStatement();
             PreparedStatement[] pending = null;
 
-            while ((System.currentTimeMillis() - starttime < timePerRun || (count < (pending == null ? forceToProcess : forceToProcess * 1.5) && !bypassForce))) {
+            while (bypassForce || System.currentTimeMillis() - starttime < timePerRun 
+            		|| count < forceToProcess*(pending == null? 1:1.5) ) {
                 ArcheRow row = queue.poll();
                 if (row == null) break;
                 

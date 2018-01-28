@@ -243,7 +243,7 @@ public class ArchePersonaHandler implements PersonaHandler {
             ArcheCore.getPlugin().getLogger().info("[Debug] Persona is being created: " + MessageUtil.identifyPersona(persona));
         }
         
-        ArchePersona oldPersona = store.registerPersona(persona);
+        ArcheOfflinePersona oldPersona = store.registerPersona(persona);
 
         PersonaCreateEvent event3 = new PersonaCreateEvent(persona, oldPersona);
         Bukkit.getPluginManager().callEvent(event3);
@@ -254,27 +254,26 @@ public class ArchePersonaHandler implements PersonaHandler {
         //health, saturation, hunger set to persona defaults
         //Inventories, potion effects cleared.
         //This teleport will fail due to the Location being null still
-        boolean couldSwitch = switchPersona(p, persona.getSlot(), forceSwitch);
+        boolean couldSwitch = p == null? false : switchPersona(p, persona.getSlot(), forceSwitch);
         
         if (oldPersona != null) {
             PersonaRemoveEvent event2 = new PersonaRemoveEvent(oldPersona, true);
             Bukkit.getPluginManager().callEvent(event2);
 
             consumer.queueRow(new DeletePersonaRow(oldPersona));
-            SkinCache.getInstance().clearSkin(oldPersona);
+            if(oldPersona.isLoaded()) SkinCache.getInstance().clearSkin(oldPersona.getPersona());
         }
         
-        consumer.queueRow(new InsertPersonaRow(persona, p.getLocation()));
-        if(couldSwitch && ArcheCore.getControls().teleportNewPersonas()) { //new Personas may get teleported to spawn
-        	Location to;
-        	if (!racespawns.containsKey(persona.getRace())) {
-        		World w = ArcheCore.getControls().getNewPersonaWorld();
-        		to = w == null ? p.getWorld().getSpawnLocation() : w.getSpawnLocation();
-        	} else {
-        		to = racespawns.get(persona.getRace());
-        	}
-        	p.teleport(to);
+        Location to = racespawns.get(persona.getRace());
+        if(to == null) {
+        	World w = ArcheCore.getControls().getNewPersonaWorld();
+        	to = w != null? w.getSpawnLocation() : 
+        		 p != null? p.getWorld().getSpawnLocation() : 
+        			 Bukkit.getWorlds().get(0).getSpawnLocation();
         }
+
+        consumer.queueRow(new InsertPersonaRow(persona, to));
+        if(couldSwitch && ArcheCore.getControls().teleportNewPersonas()) p.teleport(to);
     }
 
 	@Override

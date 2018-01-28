@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -53,6 +52,7 @@ import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
+import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.SQLUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
 
@@ -74,7 +74,7 @@ public class PersonaStore {
     		MultimapBuilder.hashKeys().arrayListValues(ArcheCore.getControls().personaSlots()).build();
     private final Map<UUID, ArchePersona[]> onlinePersonas = new HashMap<>();
 
-    private final Set<UUID> loadedThisSession = new HashSet<>();
+    private final Set<UUID> loadedThisSession = ConcurrentHashMap.newKeySet();
     private final Map<UUID, ArchePersona[]> pendingBlobs = new ConcurrentHashMap<>();
     
     public Collection<ArcheOfflinePersona> getPersonas() {
@@ -170,7 +170,7 @@ public class PersonaStore {
         if (timer != null) timer.startTiming("Loading Personas of " + playerName);
 
         ArchePersona[] prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
-        boolean hasCurrent = false, any = false;
+        boolean hasCurrent = false;
 
         ResultSet res = null;
         Connection connection = null;
@@ -186,7 +186,6 @@ public class PersonaStore {
             res = statement.executeQuery();
 
             while (res.next()) {
-                any = true;
                 ArcheOfflinePersona op = buildOfflinePersona(res, uuid);
                 ArchePersona blob = buildPersona(res, op);
                 prs[blob.getSlot()] = blob;
@@ -207,7 +206,7 @@ public class PersonaStore {
             SQLUtil.close(statement);
             SQLUtil.close(connection);
 
-            if (any) pendingBlobs.put(uuid, prs);
+            pendingBlobs.put(uuid, prs);
             loadedThisSession.add(uuid);
         }
         
@@ -469,18 +468,31 @@ public class PersonaStore {
         }
     }
 
-
     public ArchePersona[] implementPersonas(Player player) {
         UUID uuid = player.getUniqueId();
         ArchePersona[] prs = pendingBlobs.remove(uuid);
+        
         if (prs == null) {
-        	if(ArcheCore.isDebugging()) log.info("[Debug] Player " + player.getName() + " logged in without pending Personas. Either rejoined or no personas on file!" );
-            prs = onlinePersonas.get(uuid);
-            if (prs == null) prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
-            else if(ArcheCore.isDebugging()) log.info("[Debug] Personas DID exist in-store: Rejoin is likely.");
+        	if(ArcheCore.isDebugging()) log.info("[Debug] Player " + player.getName() + " logged in without pending Personas." );
+        	boolean hasOnline = onlinePersonas.get(uuid) != null;
+        	if(hasOnline) if(ArcheCore.isDebugging()) log.info("[Debug] Player had online personas files. Likely he rejoined from earlier this session" );
+        	else log.severe("Player " + player.getName() + " DOES NOT have a Personas file anywhere! Dependent plugin might be to blame!");
         } else {
-            onlinePersonas.put(uuid, prs);
+        	onlinePersonas.put(uuid, prs);
+        	
+            //Pre-populate based on offlinePersonas that are already loaded
+            //Pre-loaded personas may come from plugins loading personas
+            //Or from personas being newly created while player is offline
+            ArchePersona[] preloaded = new ArchePersona[ArcheCore.getControls().personaSlots()];
+            offlinePersonas.get(uuid).stream()
+            	.filter(OfflinePersona::isLoaded).map(ArcheOfflinePersona::getPersona)
+            	.forEach(x->preloaded[x.getSlot()] = x);
+        	
             for (int i = 0; i < prs.length; i++) {
+            	if(preloaded[i] != null) {
+            		prs[i] = preloaded[i];
+            		continue;
+            	}
                 if (prs[i] == null) continue;
                 //Method returns input Persona IF input Persona has been used by store as the Persona on record
                 //In this case prs[i] is replaced by itself, no actual change
@@ -494,8 +506,7 @@ public class PersonaStore {
 
     public ArchePersona addOnlinePersona(ArchePersona persona) {
         ArcheOfflinePersona old = allPersonas.get(persona.getPersonaId());
-        if (old.isLoaded()) return old.getPersona();
-
+        if (old.isLoaded()) return old.getPersona(); //Persona was force-loaded by ways that isn't player joining
         persona.tags.merge(old.tags);
         allPersonas.put(persona.getPersonaId(), persona);
         
@@ -509,20 +520,25 @@ public class PersonaStore {
         return persona;
     }
 
-    public ArchePersona registerPersona(ArchePersona persona) {
+    public ArcheOfflinePersona registerPersona(ArchePersona persona) {
         UUID uuid = persona.getPlayerUUID();
         ArchePersona[] prs = onlinePersonas.get(uuid);
-        ArchePersona old;
+        ArcheOfflinePersona old;
         if (prs == null) {
-            prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
-            onlinePersonas.put(uuid, prs);
-            old = null;
+        	if(ArcheCore.isDebugging()) log.info("[Debug] Registering " + MessageUtil.identifyPersona(persona) + " while player not yet implemented.");
+            //No nice array available to check against unfortunately
+        	//We resort to using a slightly more intensive method
+        	old = offlinePersonas.get(uuid).stream()
+        		.filter(x -> x.getSlot() == persona.getSlot())
+        		.findAny().orElse(null);
+        	
         } else {
             old = prs[persona.getSlot()];
-            if(old != null) {
-            	offlinePersonas.remove(uuid, old);
-            	allPersonas.remove(old.getPersonaId());
-            }
+        }
+        
+        if(old != null) {
+        	offlinePersonas.remove(uuid, old);
+        	allPersonas.remove(old.getPersonaId());
         }
 
         allPersonas.put(persona.getPersonaId(), persona);
