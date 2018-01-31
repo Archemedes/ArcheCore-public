@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.ArcheOfflinePersona;
+import net.lordofthecraft.arche.persona.ArchePersona;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -224,4 +225,10 @@ public interface PersonaHandler {
 	 * @return An unmodifiable list of Race and Location
 	 */
 	Map<Race, Location> getRacespawns();
+
+	/**
+	 * Register a new Persona with the ArcheCore system. They will be registered for the player with the given UUID
+	 * @param persona Persona to register
+	 */
+	void registerPersona(Persona persona);
 }

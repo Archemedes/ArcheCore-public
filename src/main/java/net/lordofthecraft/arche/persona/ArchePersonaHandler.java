@@ -1,15 +1,47 @@
 package net.lordofthecraft.arche.persona;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.time.DateUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.event.persona.*;
+import net.lordofthecraft.arche.event.persona.PersonaActivateEvent;
+import net.lordofthecraft.arche.event.persona.PersonaCreateEvent;
+import net.lordofthecraft.arche.event.persona.PersonaDeactivateEvent;
+import net.lordofthecraft.arche.event.persona.PersonaRemoveEvent;
+import net.lordofthecraft.arche.event.persona.PersonaSwitchEvent;
+import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent;
 import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent.Query;
-import net.lordofthecraft.arche.interfaces.*;
+import net.lordofthecraft.arche.interfaces.IConsumer;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.PersonaHandler;
+import net.lordofthecraft.arche.interfaces.PersonaTags;
+import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.InsertPersonaRow;
@@ -18,17 +50,12 @@ import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.SQLUtil;
-import net.md_5.bungee.api.chat.*;
-import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.time.DateUtils;
-import org.bukkit.*;
-import org.bukkit.entity.Player;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.*;
+import net.lordofthecraft.arche.util.WeakBlock;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class ArchePersonaHandler implements PersonaHandler {
 	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
@@ -177,6 +204,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 	}
 
 	private int countPersonas(ArchePersona[] prs){
+		if(prs == null) return 0;
+		
 		int result = 0;
 		for (ArchePersona pr : prs) {
 			if (pr != null) result++;
@@ -238,7 +267,9 @@ public class ArchePersonaHandler implements PersonaHandler {
         return store.getNextPersonaId();
     }
 
-    public void registerPersona(ArchePersona persona) {
+    @Override
+    public void registerPersona(Persona pers) {
+    	ArchePersona persona = (ArchePersona) pers;
         if (ArcheCore.getPlugin().debugMode()) {
             ArcheCore.getPlugin().getLogger().info("[Debug] Persona is being created: " + MessageUtil.identifyPersona(persona));
         }
@@ -273,6 +304,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         }
 
         consumer.queueRow(new InsertPersonaRow(persona, to));
+        persona.location = new WeakBlock(to);
         if(couldSwitch && ArcheCore.getControls().teleportNewPersonas()) p.teleport(to);
     }
 

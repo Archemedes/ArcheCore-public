@@ -62,12 +62,12 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     private ArrayList<PotionEffect> effects = Lists.newArrayList();
     
 
-    ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate, 
+    public ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate, 
     		String gender, Timestamp creationTimeMS, Timestamp lastPlayed, int played) {
         this(persona_id, player, slot, name, race, birthdate, gender, creationTimeMS, lastPlayed, played, PersonaType.NORMAL);
     }
 
-    public ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
+    ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
     		String gender, Timestamp creationTimeMS, Timestamp lastPlayed, int played, PersonaType type) {
         super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, lastPlayed, played, false, race, birthdate, gender, type, name);
         charactersSpoken = new AtomicInteger();
@@ -142,7 +142,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		return current;
 	}
 
-	void setCurrent(boolean current) {
+	public void setCurrent(boolean current) {
 		if (this.current != current) {
 			this.current = current;
 			consumer.queueRow(new UpdatePersonaRow(this, PersonaField.CURRENT, this.current));
