@@ -475,8 +475,11 @@ public class PersonaStore {
         if (prs == null) {
         	if(ArcheCore.isDebugging()) log.info("[Debug] Player " + player.getName() + " logged in without pending Personas." );
         	prs = onlinePersonas.get(uuid);
-        	if(prs != null) if(ArcheCore.isDebugging()) log.info("[Debug] Player had online personas files. Likely he rejoined from earlier this session" );
-        	else log.severe("Player " + player.getName() + " DOES NOT have a Personas file anywhere! Dependent plugin might be to blame!");
+        	if(prs != null) {
+        		if(ArcheCore.isDebugging()) log.info("[Debug] Player had online personas files. Likely he rejoined from earlier this session" );
+        	} else {
+        		log.severe("Player " + player.getName() + " DOES NOT have a Personas file anywhere! Dependent plugin might be to blame!");
+        	}
         } else {
         	onlinePersonas.put(uuid, prs);
         	
