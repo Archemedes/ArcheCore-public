@@ -1,39 +1,7 @@
 package net.lordofthecraft.arche.persona;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
@@ -55,6 +23,21 @@ import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.SQLUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+
+import java.sql.*;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class PersonaStore {
     final String personaSelect;
@@ -411,10 +394,10 @@ public class PersonaStore {
                 UUID id = UUID.fromString(rs.getString("mod_uuid"));
                 String name = rs.getString("mod_name");
                 double amount = rs.getDouble("mod_value");
-                AttributeModifier.Operation op = AttributeModifier.Operation.valueOf("operation");
+                AttributeModifier.Operation op = AttributeModifier.Operation.valueOf(rs.getString("operation"));
                 long created = rs.getTimestamp("created").getTime();
                 long ticks = rs.getLong("decayticks");
-                ExtendedAttributeModifier.Decay decaytype = ExtendedAttributeModifier.Decay.valueOf("decaytype");
+                ExtendedAttributeModifier.Decay decaytype = ExtendedAttributeModifier.Decay.valueOf(rs.getString("decaytype"));
                 boolean lostondeath = rs.getBoolean("lostondeath");
                 
                 boolean decayOffline = decaytype == ExtendedAttributeModifier.Decay.OFFLINE; 
