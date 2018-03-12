@@ -1,6 +1,12 @@
 package net.lordofthecraft.arche.commands;
 
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.enums.PersonaType;
@@ -8,17 +14,14 @@ import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.persona.ArcheOfflinePersona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.TagAttachment;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.util.AsyncRunner;
 import net.lordofthecraft.arche.util.CommandUtil;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -29,9 +32,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class CommandPersona implements CommandExecutor {
 	private final HelpDesk helpdesk;
@@ -54,7 +54,7 @@ public class CommandPersona implements CommandExecutor {
         ADDINFO("archecore.command.persona.desc", false, "addinfo", "addbio", "bioadd"),
         SETINFO("archecore.command.persona.desc", false, "setbio", "setinfo", "info", "bio"),
         LIST("archecore.command.persona.list", true, true, "list", "listpersonas", "viewpersonas"),
-        PROFESSION("archecore.command.persona.profession", false, "profession", "setprofession", "setprof", "skill", "setskill", "sk"),
+        //PROFESSION("archecore.command.persona.profession", false, "profession", "setprofession", "setprof", "skill", "setskill", "sk"),
         PERMAKILL("archecore.admin.command.persona.permakill", true, true, "permakill", "pk", "remove", "delete"),
         TIME("archecore.command.persona.time", true, true, "time", "timeplayed", "played", "viewtime", "viewplayed"),
         SETRACE("archecore.command.persona.setrace", false, "setrace", "setvisiblerace", "setapparentrace"),
@@ -146,7 +146,7 @@ public class CommandPersona implements CommandExecutor {
 				+ i + "$</persona view >view {player}$: " + a + "View the current Character Card of {Player}.\n"
 				+ i + "$</persona name >name [new name]$: " + a + "Rename your Persona to the given name.\n"
 				+ (prefix ? (i + "$</persona prefix >prefix [prefix]$: " + a + "Sets Persona Prefix (delete with $</persona clearprefix>clearprefix$).\n") : "")
-				+ i + "$</persona profession >profession [skill]$: " + a + "Sets your Persona's profession.\n"
+				//+ i + "$</persona profession >profession [skill]$: " + a + "Sets your Persona's profession.\n"
 				+ i + "$</persona age >age [new age]$: " + a + "Set your Persona's age.\n"
 				+ i + "$</persona clearage>clearage$: " + a + "Stop persona age from being shown.\n"
 				+ i + "$</persona addbio >addinfo$: " + a + "Add a line of text to your Persona's description..\n"
@@ -315,7 +315,7 @@ public class CommandPersona implements CommandExecutor {
                     pers.setDateOfBirth(0);
                     sender.sendMessage(ChatColor.AQUA + "Persona age was cleared for " + pers.getName() + ".");
                     return true;
-                } else if (cmd == PersonaCommand.PROFESSION && args.length == 1 && sender instanceof Player) {
+                /*} else if (cmd == PersonaCommand.PROFESSION && args.length == 1 && sender instanceof Player) {
                     sender.sendMessage(ChatColor.BLUE + "Available Professions: " + ChatColor.DARK_GRAY + "[Click for Info]");
                     final BaseComponent m = new TextComponent();
                     ArcheSkillFactory.getSkills().values().stream().forEach(s -> {
@@ -332,7 +332,7 @@ public class CommandPersona implements CommandExecutor {
                     extra.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/persona skill "));
                     m2.addExtra(extra);
                     MessageUtil.send(m2, sender);
-                    return true;
+                    return true;*/
                 } else if (args.length > 1) {
                     if (cmd == PersonaCommand.NAME) {
                         int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
@@ -395,7 +395,7 @@ public class CommandPersona implements CommandExecutor {
                         }
 
                         return true;
-                    } else if (cmd == PersonaCommand.PROFESSION) {
+                    /*} else if (cmd == PersonaCommand.PROFESSION) {
                         if (pers.getMainSkill() == null || sender.hasPermission("archecore.command.persona.profession.switch")) {
                             Skill skill = ArcheCore.getControls().getSkill(args[1]);
                             if (skill == null) {
@@ -411,7 +411,7 @@ public class CommandPersona implements CommandExecutor {
                         } else {
                             sender.sendMessage(ChatColor.RED + "You have already selected a profession!");
                         }
-                        return true;
+                        return true;*/
                     } else if (cmd == PersonaCommand.SETINFO) {
                         int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
                         String line = StringUtils.join(args, ' ', 1, parseTo);

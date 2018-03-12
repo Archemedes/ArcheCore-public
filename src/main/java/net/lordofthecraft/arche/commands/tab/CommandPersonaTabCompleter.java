@@ -1,22 +1,19 @@
 package net.lordofthecraft.arche.commands.tab;
 
 import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.stream.Collectors;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.commands.CommandPersona;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.skill.ArcheSkill;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Provides in depth tab completion for /persona, hopefully making this command very moderator friendly.
@@ -58,13 +55,13 @@ public class CommandPersonaTabCompleter implements TabCompleter {
                             }
                         }
                         return Lists.newArrayList("-p");
-                    } else if (commandSender instanceof Player) {
+                    }/* else if (commandSender instanceof Player) {
                         Player pl = (Player) commandSender;
                         if (pscmd == CommandPersona.PersonaCommand.PROFESSION) {
                             return ArcheSkillFactory.getSkills().values().stream().filter(m -> m.isVisible(pl)).map(ArcheSkill::getName).filter(ss -> args[1].isEmpty() || ss.startsWith(args[1].toUpperCase())).collect(Collectors.toList());
                         }
 
-                    }
+                    }*/
                 }
             }
         }
