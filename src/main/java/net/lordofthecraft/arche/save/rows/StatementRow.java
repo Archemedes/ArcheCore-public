@@ -129,4 +129,8 @@ public abstract class StatementRow implements ArcheRow {
     protected static Set<PreparedStatement> identityHashSet() {
         return Collections.newSetFromMap(new IdentityHashMap<>());
     }
+    
+    public final void queue() {
+    	ArcheCore.getConsumerControls().queueRow(this);
+    }
 }

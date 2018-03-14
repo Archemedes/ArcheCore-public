@@ -17,6 +17,8 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.save.rows.ArcheRow;
+import net.lordofthecraft.arche.save.rows.FlexibleDeleteRow;
+import net.lordofthecraft.arche.save.rows.FlexibleInsertRow;
 import net.lordofthecraft.arche.save.rows.RunnerRow;
 import net.lordofthecraft.arche.save.rows.StatementRow;
 import net.lordofthecraft.arche.util.SQLUtil;
@@ -40,6 +42,23 @@ public final class Consumer extends TimerTask implements IConsumer {
         this.debugConsumer = debugConsumer;
     }
 
+    
+    public FlexibleInsertRow insert(String table) {
+    	return new FlexibleInsertRow(table, FlexibleInsertRow.Mode.INSERT);
+    }
+    
+    public FlexibleInsertRow insertIgnore(String table) {
+    	return new FlexibleInsertRow(table, FlexibleInsertRow.Mode.IGNORE);
+    }
+    
+    public FlexibleInsertRow replace(String table) {
+    	return new FlexibleInsertRow(table, FlexibleInsertRow.Mode.REPLACE);
+    }
+    
+    public FlexibleDeleteRow delete(String table) {
+    	return new FlexibleDeleteRow(table);
+    }
+    
     public void bypassForce() {
         bypassForce = true;
     }
