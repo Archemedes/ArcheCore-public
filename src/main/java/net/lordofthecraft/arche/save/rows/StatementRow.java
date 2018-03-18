@@ -81,31 +81,7 @@ public abstract class StatementRow implements ArcheRow {
             int amountOfVariables = StringUtils.countMatches(sql, "?");
             for (int i = 1; i <= amountOfVariables; i++) {
                 Object o = getValueFor(h + 1, i);
-
-                if (o instanceof Number) { //Numbers in order of decreasing likelihood
-                    if (o instanceof Integer) {
-                        statement.setInt(i, (Integer) o);
-                    } else if (o instanceof Double) {
-                        statement.setDouble(i, (Double) o);
-                    } else if (o instanceof Long) {
-                        statement.setLong(i, (Long) o);
-                    } else if (o instanceof Float) {
-                        statement.setFloat(i, (Float) o);
-                    } else if (o instanceof Short) {
-                        statement.setShort(i, (Short) o);
-                    } else if (o instanceof Byte) {
-                        statement.setByte(i, (Byte) o);
-                    } else {
-                        statement.setInt(i, ((Number) o).intValue());
-                        ArcheCore.getPlugin().getLogger().warning("unhandled Number implementation being used: " + o.getClass().getName() + ". Int assumed");
-                    }
-                } else if (o instanceof Timestamp) {
-                    statement.setTimestamp(i, (Timestamp) o);
-                } else if (o instanceof Boolean) {
-                    statement.setBoolean(i, (Boolean) o);
-                } else { //String, enums, uuid
-                    statement.setString(i, o == null ? null : o.toString());
-                }
+                SQLUtil.setValue(statement, i, o);
             }
         }
     }
