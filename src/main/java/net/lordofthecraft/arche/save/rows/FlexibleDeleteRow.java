@@ -10,7 +10,7 @@ public class FlexibleDeleteRow extends FlexibleRow {
 	
 	@Override
 	protected String getStatement() {
-		return prefix() + "WHERE " + setFromVars();
+		return prefix() + "WHERE " + whereFromVars();
 	}
 
 	@Override

@@ -49,8 +49,8 @@ public abstract class StatementRow implements ArcheRow {
 
     @Override
     public final String[] getInserts() { //Works in most cases else override
-        String sql[] = getStatements();
-        String finalResult[] = new String[sql.length];
+        String[] sql = getStatements();
+        String[] finalResult = new String[sql.length];
 
         for (int h = 0; h < sql.length; h++) {
             String[] bits = sql[h].split("\\?");
@@ -59,11 +59,7 @@ public abstract class StatementRow implements ArcheRow {
                 result.append(bits[i - 1]);
 
                 Object o = getValueFor(h, i);
-                if (o instanceof Number || o instanceof Boolean || o instanceof Timestamp) {
-                    result.append(o.toString());
-                } else { //String, UUID, enum
-                    result.append('\'').append(SQLUtil.mysqlTextEscape(o.toString())).append('\'');
-                }
+                result.append(SQLUtil.getAsSQLInsert(o));
             }
 
             finalResult[h] = result.toString();
@@ -107,6 +103,10 @@ public abstract class StatementRow implements ArcheRow {
     }
     
     public final void queue() {
+    	ArcheCore.getConsumerControls().queueRow(this);
+    }
+    
+    public final void queueAndFlush() {
     	ArcheCore.getConsumerControls().queueRow(this);
     }
 }

@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import net.lordofthecraft.arche.util.SQLUtil;
@@ -29,12 +30,20 @@ public abstract class FlexibleRow extends SingleStatementRow {
 		return operation + ' ' + table + ' ';
 	}
 	
-	protected String setFromVars() {
-		return setFromVars(vars);
+	protected String whereFromVars() {
+		return whereFromVars(vars);
 	}
 	
 	protected String setFromVars(Map<String, Object> x) {
-		return x.keySet().stream().map(SQLUtil::mysqlTextEscape).collect(Collectors.joining("=?,", "", "=?"));
+		return fromVars(x.keySet(), ",");
+	}
+	
+	protected String whereFromVars(Map<String, Object> x) {
+		return fromVars(x.keySet(), " AND ");
+	}
+	
+	private String fromVars(Set<String> x, String delimiter) {
+		return x.stream().map(SQLUtil::mysqlTextEscape).collect(Collectors.joining("=?" + delimiter, "", "=?"));
 	}
 	
 	protected Object valueAtIndex(int index) {
@@ -49,7 +58,6 @@ public abstract class FlexibleRow extends SingleStatementRow {
 		return it.next();
 	}
 	
-
 	
 	public FlexibleRow where(String column, Object value) {
 		vars.put(column, value);

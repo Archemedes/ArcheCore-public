@@ -12,7 +12,7 @@ public class FlexibleUpdateRow extends FlexibleRow {
 
 	@Override
 	protected String getStatement() {
-		return prefix() + "SET " + setFromVars(sets) + " WHERE " + setFromVars(); 
+		return prefix() + "SET " + setFromVars(sets) + " WHERE " + whereFromVars(); 
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -50,46 +51,19 @@ public class SQLUtil {
     }
 
     public static String formatWhereClause(Map<String, Object> val) {
-        String div = "";
-        StringBuilder result = new StringBuilder();
-        for (Map.Entry<String, Object> entry : val.entrySet()) {
-            result.append(div);
-            div = " AND ";
-            result.append(entry.getKey()).append('=');
-            Object o = entry.getValue();
-            if (o == null) o = new Syntax("NULL");
-            else if (o instanceof Boolean) o = ((Boolean) o) ? 1 : 0;
-            else if (o instanceof String) o = ((String) o).replace(';', ' ').replace("'", "''");
-            boolean noQuotes = (o instanceof Number) || (o instanceof Syntax);
-            String condition = noQuotes ? o.toString() : "'" + o.toString() + "'";
-            result.append(condition);
-        }
-
-        return result.toString();
+  		return val.entrySet().stream()
+  				.map(e-> (e.getKey() +"=" + getAsSQLInsert(e.getValue())) )
+  				.collect(Collectors.joining(" AND "));
     }
 
     public static String formatSetClause(Map<String, Object> val) {
-        String div = "";
-        StringBuilder result = new StringBuilder();
-        for (Map.Entry<String, Object> entry : val.entrySet()) {
-            result.append(div);
-            div = ",";
-            result.append(entry.getKey()).append('=');
-            Object o = entry.getValue();
-            if (o == null) o = new Syntax("NULL");
-            else if (o instanceof Boolean) o = ((Boolean) o) ? 1 : 0;
-            else if (o instanceof String)
-                o = ((String) o).replace('(', ' ').replace(')', ' ').replace(';', ' ').replace("'", "''");
-            boolean noQuotes = (o instanceof Number) || (o instanceof Syntax);
-            String condition = noQuotes ? o.toString() : "'" + o.toString() + "'";
-            result.append(condition);
-        }
-
-        return result.toString();
+    		return val.entrySet().stream()
+    				.map(e-> (e.getKey() +"=" + getAsSQLInsert(e.getValue())) )
+    				.collect(Collectors.joining(","));
     }
     
     
-    public static String getPreferredColumnName(Class<?> c) {
+    public static String getPreferredColumnType(Class<?> c) {
     	if(c.isPrimitive()) c = fromPrimitive(c);
     		
     	if(is(c, Number.class)) {
@@ -105,6 +79,24 @@ public class SQLUtil {
     		return "BOOLEAN";
     	} else { //Catch-all
     		return "VARCHAR(255)";
+    	}
+    }
+    
+    public static String getAsSQLInsert(Object o) {
+    	if(o == null) {
+    		return "NULL";
+    	} else if(o instanceof java.util.Date){
+    		return String.valueOf(((java.util.Date) o).getTime());
+    	} else if(o instanceof Number || o instanceof Boolean || o instanceof Syntax) {
+    		return String.valueOf(o);
+    	} else if (o instanceof Inventory) {
+    		String ser = serialize((Inventory) o);
+    		return '\''+ mysqlTextEscape(ser) + '\'';
+    	} else if (o instanceof ConfigurationSerializable) {
+    		String ser = serialize((ConfigurationSerializable) o);
+    		return '\''+ mysqlTextEscape(ser) + '\'';
+    	} else {
+    		return '\'' + mysqlTextEscape(o.toString()) + '\'';
     	}
     }
     
@@ -155,22 +147,30 @@ public class SQLUtil {
     	} else if (o instanceof Boolean) {
     		statement.setBoolean(i, (Boolean) o);
     	} else if (o instanceof Inventory) {
-        YamlConfiguration config = new YamlConfiguration();
-        ItemStack[] contents = ((Inventory) o).getContents();
-        List<Map<String, Object>> contentslist = Lists.newArrayList();
-        for (ItemStack j : contents) {
-            if (j == null) contentslist.add(null);
-            else contentslist.add(j.serialize());
-        }
-        config.set("v", contentslist);
-        statement.setString(i, config.saveToString());
+        statement.setString(i, serialize((Inventory) o));
     	} else if (o instanceof ConfigurationSerializable) {
-    		YamlConfiguration config = new YamlConfiguration();
-    		config.set("v", o);
-    		statement.setString(i, config.saveToString());
+    		statement.setString(i, serialize((ConfigurationSerializable) o));
     	} else { //String, enums, uuid
     		statement.setString(i, o == null ? null : o.toString());
     	}
+    }
+    
+    private static String serialize(Inventory i) {
+      YamlConfiguration config = new YamlConfiguration();
+      ItemStack[] contents = i.getContents();
+      List<Map<String, Object>> contentslist = Lists.newArrayList();
+      for (ItemStack j : contents) {
+          if (j == null) contentslist.add(null);
+          else contentslist.add(j.serialize());
+      }
+      config.set("v", contentslist);
+      return config.saveToString();
+    }
+    
+    private static String serialize(ConfigurationSerializable c) {
+  		YamlConfiguration config = new YamlConfiguration();
+  		config.set("v", c);
+  		return config.saveToString();
     }
 
     public static void closeStatement(ResultSet rs) {
