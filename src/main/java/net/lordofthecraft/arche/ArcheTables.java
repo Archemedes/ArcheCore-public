@@ -240,11 +240,9 @@ public final class ArcheTables {
     }
 
     protected static void createPersonaNamesTable(Statement statement, String end) throws SQLException {
-        statement.execute("CREATE TABLE IF NOT EXISTS persona_name (" +
+        statement.execute("CREATE TABLE IF NOT EXISTS persona_names (" +
                 "persona_id_fk INT UNSIGNED," +
-                "name TEXT NOT NULL," +
-                "PRIMARY KEY (persona_id_fk)," +
-                "FOREIGN KEY (persona_id_fk) REFERENCES persona (persona_id) ON UPDATE CASCADE ON DELETE CASCADE" +
+                "name VARCHAR(16) NOT NULL," +
                 ")" +
                 end);
     }
@@ -428,15 +426,6 @@ public final class ArcheTables {
                         "DELETE FROM persona_attributes WHERE persona_id_fk = pers_id; " +
                         "DELETE FROM persona WHERE persona_id = pers_id; " +
                         "END");
-        /*
-        	            "DELETE FROM persona_skills WHERE persona_id_fk=?",
-	            "DELETE FROM persona_vitals WHERE persona_id_fk=?",
-	            "DELETE FROM persona_stats WHERE persona_id_fk=?",
-	            "DELETE FROM persona_tags WHERE persona_id_fk=?",
-	            "DELETE FROM persona_name WHERE persona_id_fk=?",
-	            "DELETE FROM persona_attributes WHERE persona_id_fk=?",
-	            "DELETE FROM persona WHERE persona_id=?"
-         */
     }
 
     private static String getEndingString(SQLHandler handler) {

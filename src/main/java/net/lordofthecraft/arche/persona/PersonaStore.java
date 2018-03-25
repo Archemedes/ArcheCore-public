@@ -440,7 +440,7 @@ public class PersonaStore {
     }
     
     private void loadNamelog(ArchePersona persona, Connection c) {
-    	String sql = "SELECT name FROM persona_name WHERE persona_id_fk=" + persona.getPersonaId();
+    	String sql = "SELECT name FROM persona_names WHERE persona_id_fk=" + persona.getPersonaId();
         try (Statement stat = c.createStatement(); ResultSet rs = stat.executeQuery(sql)) {
             while (rs.next()) {
                 String name = rs.getString(1);
