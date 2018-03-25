@@ -33,11 +33,6 @@ commands:
       usage: /<command> [true/false]
       permission: archecore.admin
       permission-message: §4Insufficient Permission for this command
-   treasurechest:
-      description: Handle the loot obtainable from the Treasure Chest items
-      permission: archecore.command.treasurechest
-      permission-message: §4Insufficient Permission for this command
-      aliases: trch
    card: 
       description: Legacy command. Added for tab-complete purposes.
       usage: Please type /<command> <player>@<persona>
@@ -46,10 +41,6 @@ commands:
       permission: archecore.mayuse
       permission-message: §4Insufficient Permission for this command
       aliases: [name, nick]
-   autoage:
-      description: Age all eligible (auto-aging) personas by 1 year
-      permission: archecore.admin
-      permission-message: §4Insufficient Permission for this command
    money:
       description: interact with the Persona-based money balance
       permission: archecore.money
