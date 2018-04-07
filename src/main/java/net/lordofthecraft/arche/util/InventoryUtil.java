@@ -31,7 +31,8 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 public class InventoryUtil {
-
+	private InventoryUtil() {}
+	
 	/**
 	 * Counts all instances of an itemstack across an inventory using {@link ItemStack#isSimilar(ItemStack)} as a comparator
 	 * @param inv inventory to check in

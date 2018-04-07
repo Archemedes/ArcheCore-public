@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 
 public class LocationUtil {
+	private LocationUtil() {}
 
 	public static boolean isClose(Entity e, Location l) {
 		return isClose(e, l, 5);

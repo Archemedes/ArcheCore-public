@@ -17,6 +17,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class CommandUtil {	
+	private CommandUtil() {}
+	
 	public static Player getPlayerOrMessage(CommandSender sender) {
 		return getPlayerOrMessage(sender, ChatColor.DARK_RED + "ERROR: " + ChatColor.RED + " This command must be run by a player");
 	}

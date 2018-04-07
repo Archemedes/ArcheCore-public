@@ -17,6 +17,7 @@ import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
 import net.lordofthecraft.arche.ArcheFatigueHandler;
 
 public class ProtocolUtil {
+	private ProtocolUtil() {}
 
 	@SuppressWarnings("deprecation")
 	public static void fakeRespawn(Player p, Environment env) {

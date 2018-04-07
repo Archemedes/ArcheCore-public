@@ -8,6 +8,8 @@ import org.bukkit.Bukkit;
 import com.comphenix.protocol.utility.MinecraftReflection;
 
 public class ReflectionUtil {
+	private ReflectionUtil() {}
+	
 	final public static String PATH = "net.minecraft.server." + Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3] + "."; 
 
 	//NBT Compound tag construction

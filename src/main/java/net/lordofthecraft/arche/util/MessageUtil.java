@@ -17,6 +17,7 @@ import static org.bukkit.ChatColor.GRAY;
  * @author Sporadic
  */
 public class MessageUtil {
+	private MessageUtil() {}
 	
 	public static net.md_5.bungee.api.ChatColor convertColor(org.bukkit.ChatColor color){
 		return net.md_5.bungee.api.ChatColor.values()[color.ordinal()]; //This works since the order is the same

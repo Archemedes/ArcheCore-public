@@ -24,6 +24,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TranslatableComponent;
 
 public class ItemUtil {
+	private ItemUtil() {}
 	
 	/**
 	 * Method to easily make Minecraft skulls from arbitrary skin files
