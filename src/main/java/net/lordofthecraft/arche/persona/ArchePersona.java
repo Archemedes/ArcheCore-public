@@ -438,9 +438,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 			pinv.clear();
             einv.clear();
 		}
-        attributes.handleSwitch(false);
 
-		//Heal them so their Persona is fresh
+    //Heal them so their Persona is fresh
 		double maxHp = p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
 
 		if (maxHp < health) p.setHealth(maxHp);

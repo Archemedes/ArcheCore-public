@@ -1,22 +1,29 @@
 package net.lordofthecraft.arche.attributes.items;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.attributes.ModifierBuilder;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.util.ItemUtil;
 
-public class AppliedAttributes {
+public class EquipmentAttributes {
 	private final Persona persona;
 	@SuppressWarnings("unchecked")
 	private final List<ItemAttribute>[] atts = new ArrayList[EquipmentSlot.values().length]; 
 	
 	
-	public AppliedAttributes(Persona persona) {
+	public EquipmentAttributes(Persona persona) {
 		this.persona = persona;
 		
 		EquipmentSlot[] slots = EquipmentSlot.values();
@@ -27,6 +34,44 @@ public class AppliedAttributes {
 	
 	public Persona getPersona() {
 		return persona;
+	}
+	
+	public void queueFullCheck(boolean thorough) {
+		Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->{
+			Player p = persona.getPlayer();
+			if(p == null) return;
+			
+			PlayerInventory pinv = p.getInventory();
+			ItemStack is;
+
+			is = pinv.getHelmet();
+			if(ItemUtil.exists(is) || thorough) newItem(is, EquipmentSlot.HEAD);
+			is = pinv.getChestplate();
+			if(ItemUtil.exists(is) || thorough) newItem(is, EquipmentSlot.CHEST);
+			is = pinv.getLeggings();
+			if(ItemUtil.exists(is) || thorough) newItem(is, EquipmentSlot.LEGS);
+			is = pinv.getBoots();
+			if(ItemUtil.exists(is) || thorough) newItem(is, EquipmentSlot.FEET);
+			is = pinv.getItemInMainHand();
+			if(ItemUtil.exists(is) || thorough) newItem(is, EquipmentSlot.HAND);
+			is = pinv.getItemInOffHand();
+			if(ItemUtil.exists(is) || thorough) newItem(is, EquipmentSlot.OFF_HAND);
+
+		});
+	}
+	
+	public void clearItem(EquipmentSlot slot) {
+		newItem(null, slot);
+	}
+	
+	public void newItem(ItemStack item, EquipmentSlot slot) {
+		EquipmentAttributes aa = getPersona().attributes().getItemAttributes();
+		aa.clearMods(slot);
+		if(ItemUtil.exists(item)) ItemAttribute.get(item).forEach(aa::addMod);
+	}
+	
+	public void clearAllMods() {
+		Arrays.stream(EquipmentSlot.values()).forEach(this::clearMods);
 	}
 
 	public void clearMods(EquipmentSlot slot) {

@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.attributes.*;
+import net.lordofthecraft.arche.attributes.items.EquipmentAttributes;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.util.MessageUtil;
 import org.bukkit.attribute.Attribute;
@@ -30,13 +31,16 @@ public class PersonaAttributes {
     //Vanilla attributes can be persona-bound for various reasons, although vanilla mods shouldn't be in this map
     //For example, it is superfluous to keep the player sprinting movement speed boost in here
     private final Map<ArcheAttribute, ArcheAttributeInstance> customAttributes = Maps.newIdentityHashMap();
-
-	private Player player;
+    private final EquipmentAttributes fromItems;
     
     PersonaAttributes(Persona persona) {
         this.persona = persona;
+        fromItems = new EquipmentAttributes(persona);
     }
     
+    public EquipmentAttributes getItemAttributes() {
+    	return fromItems;
+    }
     
     public ArcheAttributeInstance getInstance(ArcheAttribute a) {
         if (!customAttributes.containsKey(a)) {
@@ -55,7 +59,7 @@ public class PersonaAttributes {
     public double getAttributeValue(ArcheAttribute a) {
     	if( a instanceof VanillaAttribute) {
     		Attribute ax = ((VanillaAttribute) a).getHandle();
-    		player = persona.getPlayer();
+    		Player player = persona.getPlayer();
     		return player.getAttribute(ax).getValue();
     	} else {
     		ArcheAttributeInstance instance = getInstance(a);
@@ -158,24 +162,28 @@ public class PersonaAttributes {
     	//Logoff logic:
     	//true: player left server or ArcheCore plugin was disabled
     	//false: persona is being activated or deactivated
-    	
-		for(Entry<ArcheAttribute, ArcheAttributeInstance> entry : customAttributes.entrySet()) {
-			ArcheAttribute aa = entry.getKey();
-			ArcheAttributeInstance aai = entry.getValue();
-			
-			aai.getModifiers().stream()
-				.map(ExtendedAttributeModifier.class::cast)
-                .forEach(m -> {
-                    if (logoff) m.handleSwitch(aa, persona, false);
-                    else m.handleSwitch(aa, persona, persona.isCurrent());
-                });
 
-			if(!logoff && persona.isCurrent()) aa.tryApply(aai);
-				
-			if(aa instanceof VanillaAttribute) {
-				if(logoff || !persona.isCurrent()) deactivateVanilla((VanillaAttribute) aa);
-			} 
-		}
+    	for(Entry<ArcheAttribute, ArcheAttributeInstance> entry : customAttributes.entrySet()) {
+    		ArcheAttribute aa = entry.getKey();
+    		ArcheAttributeInstance aai = entry.getValue();
+
+    		aai.getModifiers().stream()
+    		.map(ExtendedAttributeModifier.class::cast)
+    		.forEach(m -> {
+    			if (logoff) m.handleSwitch(aa, persona, false);
+    			else m.handleSwitch(aa, persona, persona.isCurrent());
+    		});
+
+    		if(!logoff && persona.isCurrent()) aa.tryApply(aai);
+
+    		if(aa instanceof VanillaAttribute && (logoff || !persona.isCurrent())) 
+    			deactivateVanilla((VanillaAttribute) aa);
+    		
+    	//Item attributes clearing out from Persona (it's cleaner to hard-check this each time persona gets used again).
+    	//Note that when plugin is disabled ItemAttributes do NOT save by logical default, so in that case this method is overkill
+    		if(logoff || !persona.isCurrent()) fromItems.clearAllMods();
+    		else fromItems.queueFullCheck(false);
+    	}
     }
     
     private void deactivateVanilla(VanillaAttribute va) {

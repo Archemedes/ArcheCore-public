@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche.listener;
 
-import org.bukkit.Bukkit;
+import java.util.Map.Entry;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -27,25 +28,21 @@ import com.comphenix.protocol.reflect.StructureModifier;
 
 import io.github.archemedes.customitem.CustomTag;
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.attributes.items.AppliedAttributes;
-import net.lordofthecraft.arche.attributes.items.AttributeHandler;
-import net.lordofthecraft.arche.event.persona.PersonaActivateEvent;
-import net.lordofthecraft.arche.event.persona.PersonaDeactivateEvent;
+import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
+import net.lordofthecraft.arche.attributes.ModifierBuilder;
+import net.lordofthecraft.arche.attributes.items.StoredAttribute;
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.util.ItemUtil;
 
 public class AttributeItemListener implements Listener {
-	private final AttributeHandler handle;
 	
 	public AttributeItemListener(){
-		handle = AttributeHandler.getInstance();
 		listenToPacket();
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void yummy(PlayerItemConsumeEvent e) {
 		Persona ps = ArcheCore.getPersona(e.getPlayer());
-		if(ps != null) handle.applyConsumable(ps, e.getItem());
+		if(ps != null) applyConsumable(ps, e.getItem());
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -56,7 +53,7 @@ public class AttributeItemListener implements Listener {
 			Persona ps = ArcheCore.getPersona(p);
 			if(ps != null) {
 				
-				boolean used =  handle.applyUseable(ps, item);
+				boolean used =  applyUseable(ps, item);
 				if(used) {
 					e.setUseItemInHand(Result.DENY);
 					item.setAmount(item.getAmount() - 1);
@@ -117,7 +114,7 @@ public class AttributeItemListener implements Listener {
 						
 						if(target != null) {
 							ItemStack is = packet.getItemModifier().read(0);
-							newItem(ps, is, target);
+							ps.attributes().getItemAttributes().newItem(is, target);
 						}
 					}
 					
@@ -126,43 +123,18 @@ public class AttributeItemListener implements Listener {
 		});
 	}
 	
-	private void queueFullCheck(Persona ps, boolean thorough) {
-		Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->{
-			Player p = ps.getPlayer();
-			if(p == null) return;
-			
-			PlayerInventory pinv = p.getInventory();
-			ItemStack is;
-
-			is = pinv.getHelmet();
-			if(ItemUtil.exists(is) || thorough) newItem(ps, is, EquipmentSlot.HEAD);
-			is = pinv.getChestplate();
-			if(ItemUtil.exists(is) || thorough) newItem(ps, is, EquipmentSlot.CHEST);
-			is = pinv.getLeggings();
-			if(ItemUtil.exists(is) || thorough) newItem(ps, is, EquipmentSlot.LEGS);
-			is = pinv.getBoots();
-			if(ItemUtil.exists(is) || thorough) newItem(ps, is, EquipmentSlot.FEET);
-			is = pinv.getItemInMainHand();
-			if(ItemUtil.exists(is) || thorough) newItem(ps, is, EquipmentSlot.HAND);
-			is = pinv.getItemInOffHand();
-			if(ItemUtil.exists(is) || thorough) newItem(ps, is, EquipmentSlot.OFF_HAND);
-
-		});
-	}
-	
-	
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void close(InventoryCloseEvent e){
 		Persona ps = ArcheCore.getPersona((Player) e.getPlayer());
 		if(ps == null) return;
 		
 		if(e.getInventory().getType() == InventoryType.CRAFTING) {
-			 queueFullCheck(ps, true);
+			 ps.attributes().getItemAttributes().queueFullCheck(true);
 		} else {
 			PlayerInventory pi = e.getPlayer().getInventory();
 			int rawSlot = pi.getHeldItemSlot() + 36;
 			ItemStack is = pi.getItem(rawSlot);
-			newItem(ps, is, EquipmentSlot.HAND);
+			ps.attributes().getItemAttributes().newItem(is, EquipmentSlot.HAND);
 		}
 	}
 	
@@ -173,37 +145,51 @@ public class AttributeItemListener implements Listener {
 		
 		if(ps != null) {
 			ItemStack item = p.getInventory().getItem(e.getNewSlot());
-			newItem(ps, item, EquipmentSlot.HAND);
+			ps.attributes().getItemAttributes().newItem(item, EquipmentSlot.HAND);
 		}
-	}
-	
-	@EventHandler
-	public void persona(PersonaActivateEvent e) {
-		Persona persona = e.getPersona();
-		handle.register(persona);
-		queueFullCheck(e.getPersona(), false);
-	}
-	
-	@EventHandler
-	public void persona(PersonaDeactivateEvent e) {
-		handle.unregister(e.getPersona());
 	}
 	
 	@EventHandler(ignoreCancelled = true)
 	public void player(PlayerDeathEvent e) {
 		Persona ps = ArcheCore.getPersona(e.getEntity());
 		for(EquipmentSlot s : EquipmentSlot.values()) {
-			clearItem(ps, s);
+			ps.attributes().getItemAttributes().clearItem(s);
 		}
 	}
 	
-	private void clearItem(Persona p, EquipmentSlot slot) {
-		newItem(p, null, slot);
+	//
+	//AttributeHandler methods: Consumeable and usable.
+	//
+	
+	public boolean applyConsumable(Persona ps, ItemStack item) {
+		return apply(ps, item, "nac_");
 	}
 	
-	private void newItem(Persona p, ItemStack item, EquipmentSlot slot) {
-		AppliedAttributes aa = handle.getFor(p);
-		aa.clearMods(slot);
-		if(ItemUtil.exists(item)) handle.getAttributes(item).forEach(aa::addMod);
+	public boolean applyUseable(Persona ps, ItemStack item) {
+		//if(ItemExpiry.hasExpired(item)) return false;
+		return apply(ps, item, "nar_");
+	}
+	
+	private boolean apply(Persona ps, ItemStack is, String prefix) {
+		boolean result = false;
+		CustomTag tag = CustomTag.getFrom(is);
+		for(Entry<String, String> entry : tag.entrySet()) {
+			String key = entry.getKey();
+			if(key.startsWith(prefix)) {
+				result = true;
+				StoredAttribute sad = StoredAttribute.fromTag(entry.getKey(), entry.getValue());
+				apply(ps, sad);
+			}
+		}
+		
+		return result;
+	}
+		
+	private void apply(Persona ps, StoredAttribute att) {
+		ExtendedAttributeModifier eam = new ModifierBuilder(att.getModifier())
+				.withDecayStrategy(att.getDecayStrategy(), att.getTicks())
+				.create();
+		
+		ps.attributes().addModifier(att.getAttribute(), eam);
 	}
 }

@@ -4,12 +4,14 @@ import java.util.UUID;
 
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
+import org.bukkit.inventory.ItemStack;
 
+import io.github.archemedes.customitem.CustomTag;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier.Decay;
 
-public class StoredAttribute {
+public class StoredAttribute implements TagAttribute {
 	private final ArcheAttribute attribute;
 	private final AttributeModifier modifier;
 	private final long ticks;
@@ -24,10 +26,12 @@ public class StoredAttribute {
 		this.consume = consume;
 	}
 	
+	@Override
 	public ArcheAttribute getAttribute() {
 		return attribute;
 	}
 	
+	@Override
 	public AttributeModifier getModifier() {
 		return modifier;
 	}
