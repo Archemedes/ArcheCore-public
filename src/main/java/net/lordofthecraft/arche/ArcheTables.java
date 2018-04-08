@@ -242,7 +242,7 @@ public final class ArcheTables {
     protected static void createPersonaNamesTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS persona_names (" +
                 "persona_id_fk INT UNSIGNED," +
-                "name VARCHAR(16) NOT NULL," +
+                "name VARCHAR(16) NOT NULL" +
                 ")" +
                 end);
     }

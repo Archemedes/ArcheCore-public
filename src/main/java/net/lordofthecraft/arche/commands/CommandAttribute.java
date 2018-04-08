@@ -26,6 +26,7 @@ import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier.Decay;
 import net.lordofthecraft.arche.attributes.ModifierBuilder;
 import net.lordofthecraft.arche.attributes.VanillaAttribute;
+import net.lordofthecraft.arche.attributes.items.Decorator;
 import net.lordofthecraft.arche.attributes.items.ItemAttribute;
 import net.lordofthecraft.arche.attributes.items.StoredAttribute;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -55,7 +56,7 @@ public class CommandAttribute implements CommandExecutor {
         	listAttributeTypes(sender);
         } else if(args[0].equalsIgnoreCase("list")) {
         	listPersonaAttributes(sender, target);
-        } else if(args.length < 6 && !(args[0].equalsIgnoreCase("remove") && args.length < 4) ) {
+        } else if(args.length < 4 || (args.length < 6 && !args[0].equalsIgnoreCase("remove") )) {
         	h(sender);
         } else {
         	//Meat of the exercise: Adding an attribute
@@ -72,14 +73,15 @@ public class CommandAttribute implements CommandExecutor {
         		}
         	}
           
-        	ArcheAttribute attribute = AttributeRegistry.getSAttribute(args[1].replace('_', ' '));
+        	ArcheAttribute attribute = AttributeRegistry.getSAttribute(args[1]);
+        	if(attribute == null) attribute = AttributeRegistry.getSAttribute(args[1].replace('_', ' '));
         	if(attribute == null) {
         		sender.sendMessage("Invalid Attribute Type. Use '/attribute types' to get a valid list");
         		return true;
         	}
         	
           ModifierBuilder b = new ModifierBuilder();          
-          b.name(args[2]);
+          b.name(args[2].replace('_', ' '));
           try { handleUUID(b, args[3]); } catch(IllegalArgumentException e) { sender.sendMessage("Invalid UUID argument"); return false; }
           
           if(tx == Target.REMOVE) {
@@ -87,7 +89,7 @@ public class CommandAttribute implements CommandExecutor {
           	sender.sendMessage(ChatColor.LIGHT_PURPLE + " Removed an attribute modifier from: " + ChatColor.RESET + target.getName());
           } else {
             try { handleValue(b, args[4]); } catch(NumberFormatException e) { sender.sendMessage("Invalid value argument"); return false; }
-            try { handleOperation(b, args[5]); } catch(NumberFormatException e) { sender.sendMessage("Invalid operation argument"); return false; }
+            try { handleOperation(b, args[5]); } catch(IllegalArgumentException e) { sender.sendMessage("Invalid operation argument"); return false; }
             
             if(args.length > 6) handleSave(b, args[6]);
             if(args.length > 8) try { handleDecay(b, args[7], args[8]); } catch(IllegalArgumentException e) { sender.sendMessage("Invalid decay args"); return false;}
@@ -113,7 +115,6 @@ public class CommandAttribute implements CommandExecutor {
     private void h(CommandSender s) {
         s.sendMessage(ChatColor.AQUA + "usage of the /attribute command:");
         s.sendMessage(ChatColor.GOLD + "/attribute " + ChatColor.BLUE + "[target] "  
-        		+ ChatColor.BLUE + "[target] "
         		+ ChatColor.YELLOW + "[att-type] "
         		+ ChatColor.GRAY + "[name] "
         		+ ChatColor.RED + "[uuid] "
@@ -123,7 +124,7 @@ public class CommandAttribute implements CommandExecutor {
         		+ ChatColor.DARK_AQUA + "{decay-type} "
         		+ ChatColor.DARK_GREEN + "{decay-ticks} ");
         s.sendMessage(ChatColor.YELLOW + "Use /attr types for the registered ArcheAttributes");
-        s.sendMessage(ChatColor.BLUE + "Target: remove/persona/consume/use/head/chest/legs/feet/hand/off_hand");
+        s.sendMessage(ChatColor.BLUE + "remove/persona/consume/use/head/chest/legs/feet/hand/off_hand");
         s.sendMessage(ChatColor.GRAY + "name of modifier ( no name with prefix # or hide fully with / )");
         s.sendMessage(ChatColor.RED + "uuid: random/namebased or any valid uuid (with dashes)");
         s.sendMessage(ChatColor.GREEN + "modifier value of att (remember 0 is x1 for multipliers)");
@@ -205,6 +206,7 @@ public class CommandAttribute implements CommandExecutor {
     		ExtendedAttributeModifier eam = b.create();
     		StoredAttribute sa = new StoredAttribute(attribute, eam, eam.getTicksRemaining(), eam.getDecayStrategy(), tx == Target.CONSUME);
     		is = sa.apply(i.getItemInMainHand());
+    		Decorator.showAttributes(is);
     		i.setItemInMainHand(is);
     		break;
     	default:
@@ -217,6 +219,7 @@ public class CommandAttribute implements CommandExecutor {
     		} else {
     			ItemAttribute ia = new ItemAttribute(attribute, b.create(), slot);
     			is = ia.apply(i.getItemInMainHand());
+    			Decorator.showAttributes(is);
     		}
 
     		i.setItemInMainHand(is);

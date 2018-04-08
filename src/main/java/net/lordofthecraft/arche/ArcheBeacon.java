@@ -80,7 +80,7 @@ public class ArcheBeacon {
 				.forEach(mod->{
 					String modName = mod.getName();
 					boolean isCommented = StringUtils.isEmpty(modName) || modName.startsWith("#");
-					lore.add(	mod.asReadablePercentage(aa) + ' ' + aa.getName() + 
+					lore.add(	mod.asReadablePercentage(aa) + ' ' + aa.getReadableName() + 
 							(isCommented? "" : ( " " + ChatColor.GRAY + "" + ChatColor.ITALIC + '(' + mod.getName() + ')'))  
 							);
 				})

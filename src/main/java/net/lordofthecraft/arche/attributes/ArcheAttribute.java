@@ -27,6 +27,10 @@ public class ArcheAttribute {
 		return name;
 	}
 	
+	public String getReadableName() {
+		return name;
+	}
+	
 	public boolean isHigherBetter() {
 		return higherIsBetter;
 	}

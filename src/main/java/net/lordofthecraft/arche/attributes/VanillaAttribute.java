@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.WordUtils;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -20,6 +21,11 @@ public final class VanillaAttribute extends ArcheAttribute{
 	}
 	
 	public Attribute getHandle() { return handle;}
+	
+	public String getReadableName() {
+		String lame = getName().substring(8).replace('_', ' ');
+		return WordUtils.capitalizeFully(lame);
+	}
 	
 	@Override
 	public void tryApply(ArcheAttributeInstance instance) {

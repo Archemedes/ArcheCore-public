@@ -67,7 +67,7 @@ public class EquipmentAttributes {
 	public void newItem(ItemStack item, EquipmentSlot slot) {
 		EquipmentAttributes aa = getPersona().attributes().getItemAttributes();
 		aa.clearMods(slot);
-		if(ItemUtil.exists(item)) ItemAttribute.get(item).forEach(aa::addMod);
+		if(ItemUtil.exists(item)) ItemAttribute.get(item).forEach(m->aa.addMod(m, slot));
 	}
 	
 	public void clearAllMods() {
@@ -81,7 +81,9 @@ public class EquipmentAttributes {
 		mods.clear();
 	}
 	
-	public void addMod(ItemAttribute attribute){
+	private void addMod(ItemAttribute attribute, EquipmentSlot slot){
+		if(slot != attribute.getSlot()) return;
+		
 		ExtendedAttributeModifier eam = new ModifierBuilder(attribute.getModifier())
 				.shouldSave(false)
 				.create();

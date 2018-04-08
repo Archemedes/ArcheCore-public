@@ -162,7 +162,12 @@ public class PersonaAttributes {
     	//Logoff logic:
     	//true: player left server or ArcheCore plugin was disabled
     	//false: persona is being activated or deactivated
-
+    	
+    	//Item attributes clearing out from Persona (it's cleaner to hard-check this each time persona gets used again).
+    	//Note that when plugin is disabled ItemAttributes do NOT save by logical default, so in that case this method is overkill
+    	if(logoff || !persona.isCurrent()) fromItems.clearAllMods();
+    	else fromItems.queueFullCheck(false);
+    		
     	for(Entry<ArcheAttribute, ArcheAttributeInstance> entry : customAttributes.entrySet()) {
     		ArcheAttribute aa = entry.getKey();
     		ArcheAttributeInstance aai = entry.getValue();
@@ -178,11 +183,6 @@ public class PersonaAttributes {
 
     		if(aa instanceof VanillaAttribute && (logoff || !persona.isCurrent())) 
     			deactivateVanilla((VanillaAttribute) aa);
-    		
-    	//Item attributes clearing out from Persona (it's cleaner to hard-check this each time persona gets used again).
-    	//Note that when plugin is disabled ItemAttributes do NOT save by logical default, so in that case this method is overkill
-    		if(logoff || !persona.isCurrent()) fromItems.clearAllMods();
-    		else fromItems.queueFullCheck(false);
     	}
     }
     
