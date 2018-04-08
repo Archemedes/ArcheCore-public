@@ -73,18 +73,18 @@ public class ArcheBeacon {
 				m.setDisplayName(ChatColor.AQUA + "Persona Modifiers:");
 				
 				List<String> lore = new ArrayList<>();
-                pers.attributes().getExistingInstances().stream().forEach(aa ->
-                        pers.attributes().getInstance(aa).getModifiers().stream()
-                                .map(ExtendedAttributeModifier.class::cast)
-                                .filter(mod -> StringUtils.isEmpty(mod.getName()) || !mod.getName().startsWith("/"))
-                                .forEach(mod->{
-                                	String modName = mod.getName();
-                                	boolean isCommented = StringUtils.isEmpty(modName) || modName.startsWith("#");
-                                	lore.add(	mod.asReadablePercentage(aa) + ' ' + aa.getName() + 
-                                    		(isCommented? "" : ( " " + ChatColor.GRAY + "" + ChatColor.ITALIC + '(' + mod.getName() + ')'))  
-                                    		);
-                                })
-				);
+				pers.attributes().getExistingInstances().stream().forEach(aa ->
+				pers.attributes().getInstance(aa).getModifiers().stream()
+				.map(ExtendedAttributeModifier.class::cast)
+				.filter(mod -> StringUtils.isEmpty(mod.getName()) || !mod.getName().startsWith("/"))
+				.forEach(mod->{
+					String modName = mod.getName();
+					boolean isCommented = StringUtils.isEmpty(modName) || modName.startsWith("#");
+					lore.add(	mod.asReadablePercentage(aa) + ' ' + aa.getName() + 
+							(isCommented? "" : ( " " + ChatColor.GRAY + "" + ChatColor.ITALIC + '(' + mod.getName() + ')'))  
+							);
+				})
+						);
 				lore.add(ChatColor.GRAY + "Click to learn about attributes");
 				m.setLore(lore);
 				icon.setItemMeta(m);
