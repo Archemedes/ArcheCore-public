@@ -3,6 +3,7 @@ package net.lordofthecraft.arche.attributes;
 import org.apache.commons.lang.Validate;
 import org.bukkit.attribute.Attribute;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +34,9 @@ public class AttributeRegistry {
         }
     }
 
-
+    public Map<String, ArcheAttribute> getAttributes() {
+    	return Collections.unmodifiableMap(registeredAttributes);
+    }
 
     public void register(ArcheAttribute attr) {
         Validate.isTrue(!registeredAttributes.containsKey(attr.getName()), "Conflicting attribute name being registered: " + attr.getName());

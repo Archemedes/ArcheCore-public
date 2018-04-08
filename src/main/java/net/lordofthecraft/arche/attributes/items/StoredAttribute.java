@@ -4,9 +4,7 @@ import java.util.UUID;
 
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
-import org.bukkit.inventory.ItemStack;
 
-import io.github.archemedes.customitem.CustomTag;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier.Decay;

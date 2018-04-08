@@ -63,7 +63,7 @@ commands:
       permission: archecore.mod.sign
       permission-message: §4Insufficient Permission for this command
    attribute:
-      usage: /<command>
+      usage: /<command> help
       description: Edit the attributes of an online player.
       permission: archecore.admin
       aliases: [attr, att, attri, atr]
