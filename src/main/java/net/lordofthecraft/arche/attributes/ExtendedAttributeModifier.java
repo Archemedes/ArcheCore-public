@@ -134,12 +134,12 @@ public class ExtendedAttributeModifier extends AttributeModifier implements Clon
 		ChatColor cc = negative? (aa.isHigherBetter()? ChatColor.RED : ChatColor.BLUE) :
 						(aa.isHigherBetter()? ChatColor.BLUE : ChatColor.RED);
 							
-		char plusle = negative? Character.MIN_VALUE : '+';
+		String plusle = negative? "" : "+";
 				
 		boolean addNumber = mod.getOperation() == Operation.ADD_NUMBER;
 		String value = addNumber? Double.toString(mod.getAmount()) : 
 			Integer.toString( (int) (mod.getAmount() * 100 ));
-		char percent = addNumber? Character.MIN_VALUE : '%';
+		String percent = addNumber? "" : "%";
 		return cc.toString() + plusle + value + percent;
 	}
 	

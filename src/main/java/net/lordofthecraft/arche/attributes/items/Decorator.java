@@ -54,19 +54,19 @@ public class Decorator {
 			}
 		}
 		
-		if(attributes != null && !attributes.isEmpty()){
+		if(!attributes.isEmpty()){
 			lore.add(TELANIR_DIVIDER);
 			lore.add(ChatColor.GRAY + "When equipped:");
 			attributes.stream().distinct().forEach(lore::add);
 		}
 		
-		if(rightclick_atts != null && !rightclick_atts.isEmpty()){
+		if(!rightclick_atts.isEmpty()){
 			lore.add(TELANIR_DIVIDER);
 			lore.add(ChatColor.GRAY + "When activated:");
 			rightclick_atts.forEach(lore::add);
 		}
 		
-		if(consumable_atts != null && !consumable_atts.isEmpty()){
+		if(!consumable_atts.isEmpty()){
 			lore.add(TELANIR_DIVIDER);
 			lore.add(ChatColor.GRAY + "When consumed:");
 			consumable_atts.forEach(lore::add);
