@@ -14,6 +14,8 @@ public class AttributeRegistry {
     public static final ArcheAttribute EXHAUSTION = new ArcheAttribute("Exhaustion", 0, false);
     public static final ArcheAttribute ARROW_DAMAGE = new ArcheAttribute("Archery Damage", 1.0);
     public static final ArcheAttribute ARROW_VELOCITY = new ArcheAttribute("Arrow Velocity", 1.0);
+    public static final ArcheAttribute SHROUD = new ArcheAttribute("Shroud", 0);
+    public static final ArcheAttribute PERCEPTION = new ArcheAttribute("Perception", 0);
 
     private static AttributeRegistry INSTANCE = new AttributeRegistry();
     public Map<String, ArcheAttribute> registeredAttributes = new HashMap<>();
@@ -28,7 +30,9 @@ public class AttributeRegistry {
         register(EXHAUSTION);
         register(ARROW_DAMAGE);
         register(ARROW_VELOCITY);
-
+        register(SHROUD);
+        register(PERCEPTION);
+        
         for (Attribute a : Attribute.values()) {
             register(new VanillaAttribute(a.toString(), 0.0, a));
         }

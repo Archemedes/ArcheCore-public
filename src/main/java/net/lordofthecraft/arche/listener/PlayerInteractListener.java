@@ -28,7 +28,7 @@ public class PlayerInteractListener implements Listener {
 		Player p = e.getPlayer();
 		if (e.getRightClicked() instanceof Player && p.isSneaking() && e.getHand() == EquipmentSlot.HAND) {
 			Player target = (Player) e.getRightClicked();
-			for (BaseComponent m : handler.whois(target, p.hasPermission("archecore.mod.other"))) {
+			for (BaseComponent m : handler.whois(target, p)) {
 				p.spigot().sendMessage(m);
 			}
 		}

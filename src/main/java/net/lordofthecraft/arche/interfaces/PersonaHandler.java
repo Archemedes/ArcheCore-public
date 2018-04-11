@@ -1,17 +1,18 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.persona.ArcheOfflinePersona;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.md_5.bungee.api.chat.BaseComponent;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.persona.ArcheOfflinePersona;
+import net.md_5.bungee.api.chat.BaseComponent;
 
 public interface PersonaHandler {
 
@@ -195,29 +196,28 @@ public interface PersonaHandler {
 	/**
 	 * Method that provides a human-readable list of information about a Persona, to be used in prints
 	 * @param p the Persona to be looked up
-	 * @param mod If the user viewing is a moderator
+	 * @param whosAsking the CommandSender querying for persona info
 	 * @return A list of initialised stats of the given Persona
 	 */
-    List<BaseComponent> whois(OfflinePersona p, boolean mod);
+    List<BaseComponent> whois(OfflinePersona p, CommandSender whosAsking);
 
 	/**
 	 * Method that provides a human-readable list of information about a
 	 * Player's current Persona, to be used in prints
 	 * @param p the Player to be looked up
-	 * @param mod If the user viewing is a moderator
+	 * @param whosAsking Player querying for persona info
 	 * @return A list of initialised stats of the given Persona
 	 */
-	List<BaseComponent> whois(Player p, boolean mod);
+	List<BaseComponent> whois(Player p, Player whosAsking);
 
 	/**
 	 * Method that provides a human-readable list of additional information, to be used in prints
 	 * @param p the Persona to be looked up
-	 * @param mod If the user viewing is a moderator
-	 * @param self If the user viewing is the owner of the persona
+	 * @param whosAsking the CommandSender querying for persona info
 	 * @return A list of initialised stats of the given Persona
 	 */
 
-    List<BaseComponent> whoisMore(OfflinePersona p, boolean mod, boolean self);
+    List<BaseComponent> whoisMore(OfflinePersona p, CommandSender whosAsking);
 
 	/**
 	 * Gets the races which have unique spawns assigned to them

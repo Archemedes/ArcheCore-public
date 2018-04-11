@@ -242,7 +242,7 @@ public class ArcheBeacon {
                     String desc = ChatColor.GRAY + a.getRaceString(false) + " " + gender;
                     List<BaseComponent> sent = Lists.newArrayList(TextComponent.fromLegacyText(desc));
                     boolean mod = p.hasPermission("archecore.mod") || p.hasPermission("archecore.admin");
-                    PersonaWhoisEvent event = new PersonaWhoisEvent(a, sent, PersonaWhoisEvent.Query.BEACON_ICON, mod);
+                    PersonaWhoisEvent event = new PersonaWhoisEvent(a, sent, PersonaWhoisEvent.Query.BEACON_ICON, mod, false);
                     Bukkit.getPluginManager().callEvent(event);
                     
                     if(event.isCancelled()) continue; //This means the persona pip won't show up on the select screen and persona wont be selectable

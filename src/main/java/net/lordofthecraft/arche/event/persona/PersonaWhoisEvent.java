@@ -15,12 +15,14 @@ public class PersonaWhoisEvent extends OfflinePersonaEvent implements Cancellabl
     final private List<BaseComponent> whatIsSend;
 	final private Query query;
 	final private boolean mod;
+	final private boolean disguised;
 
-    public PersonaWhoisEvent(OfflinePersona p, List<BaseComponent> sent, Query query, boolean mod) {
+    public PersonaWhoisEvent(OfflinePersona p, List<BaseComponent> sent, Query query, boolean mod, boolean disguised) {
         super(p);
 		this.query = query;
 		this.whatIsSend = sent;
 		this.mod = mod;
+		this.disguised = disguised;
 	}
 	
 	/**
@@ -38,6 +40,10 @@ public class PersonaWhoisEvent extends OfflinePersonaEvent implements Cancellabl
 	 */
 	public boolean isForMod() {
 		return mod;
+	}
+	
+	public boolean isDisguised() {
+		return disguised;
 	}
 	
 	/**
