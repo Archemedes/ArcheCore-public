@@ -331,7 +331,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         subresult.add(new TextComponent(c + "Name: " + r + op.getName()));
 
         boolean disguised = op.isLoaded()? canPerceive(op.getPersona(), whosAsking) : false;
-        if(!disguised) {
+        if(!disguised || mod) {
         	int birthyear = op.getDateOfBirth();
         	int age = op.getAge();
         	if(birthyear > 0) subresult.add(new TextComponent(c + "Age: " + r + age + u + " (born in " + r + birthyear + u + ")"));
