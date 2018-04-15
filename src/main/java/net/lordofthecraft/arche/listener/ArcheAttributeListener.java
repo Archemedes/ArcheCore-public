@@ -3,7 +3,9 @@ package net.lordofthecraft.arche.listener;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -62,21 +64,50 @@ public class ArcheAttributeListener implements Listener {
 	@EventHandler(ignoreCancelled = true)
 	public void ow(EntityDamageByEntityEvent e) {
 		Entity damager = e.getDamager();
-		if(damager instanceof Arrow) {
-			Arrow a = (Arrow) damager;
+		Entity damagee = e.getEntity();
+		if(damager instanceof Projectile) {
+			handleProjectile(e);
+		} else if(damager instanceof LivingEntity && damagee instanceof Player){
+			handleMobDamage(e, (Player) damagee, AttributeRegistry.MOB_DAMAGE_TAKE);
+		} else if (damager instanceof Player && damagee instanceof LivingEntity && !(damagee instanceof Player)) {
+			handleMobDamage(e, (Player) damager, AttributeRegistry.MOB_DAMAGE_DEAL);
+		}
+	}
+	
+	private void handleProjectile(EntityDamageByEntityEvent e) {
+		if(e.getDamager() instanceof Arrow) {
+		//Arrow damage from players can be influenced
+			Arrow a = (Arrow) e.getDamager();
 			ProjectileSource shooter = a.getShooter();
 			if(shooter instanceof Player) {
 				Persona ps = ArcheCore.getPersona((Player) shooter);
 				if(ps != null) {
 					double mod = ps.attributes().getAttributeValue(AttributeRegistry.ARROW_DAMAGE);
+					if(e.getEntity() instanceof LivingEntity && !(e.getEntity() instanceof Player))
+						mod *= ps.attributes().getAttributeValue(AttributeRegistry.MOB_DAMAGE_DEAL);
 					if(mod != 1.0) {
 						double newDmg = e.getDamage() * mod;
 						e.setDamage(newDmg);
 					}
 				}
 			}
+		} 
+		
+		//All projectiles from mobs can be influenced by Damage Taken From Mobs
+		Projectile p = (Projectile) e.getDamager();
+		ProjectileSource s = p.getShooter();
+		if(e.getEntity() instanceof Player && s instanceof LivingEntity && !(s instanceof Player) ) {
+			handleMobDamage(e, (Player) e.getEntity(), AttributeRegistry.MOB_DAMAGE_TAKE);
 		}
+		
 	}
 	
+	private void handleMobDamage(EntityDamageByEntityEvent e, Player p, ArcheAttribute a) {
+		Persona ps = ArcheCore.getPersona(p);
+		if(ps != null) {
+			double mod = ps.attributes().getAttributeValue(a);
+			if(mod != 1.0) e.setDamage(e.getDamage() * mod);
+		}
+	}
 	
 }
