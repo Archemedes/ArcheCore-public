@@ -24,6 +24,7 @@ import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheBeacon;
 import net.lordofthecraft.arche.ArcheBeacon.ArcheBeaconHolder;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
@@ -78,9 +79,9 @@ public class BeaconMenuListener implements Listener {
 						if(apply != null) inv.setItem(s, apply);
 					} catch(Throwable t) {
 						t.printStackTrace();
-                        p.sendMessage(ChatColor.RED + "There's an error with this button! Please report this occurrence.");
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> {
-                            p.closeInventory();
+						p.sendMessage(ChatColor.RED + "There's an error with this button! Please report this occurrence.");
+						Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), () -> {
+							p.closeInventory();
 						});
 						return;
 					}
@@ -93,7 +94,7 @@ public class BeaconMenuListener implements Listener {
 			default:
 				ArchePersona[] prs = handler.getAllPersonas(p);
 				if(prs == null){
-					plugin.getLogger().severe(" [Event] Player walking around without registered Personas File!");
+					CoreLog.severe("[Event] Player walking around without registered Personas File!");
 					return;
 				}
 

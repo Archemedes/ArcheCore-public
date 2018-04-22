@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
@@ -594,7 +595,7 @@ public class CommandPersona implements CommandExecutor {
 			public void andThen() {
                 ArchePersona otherPersona = ArchePersonaHandler.getInstance().getPersonaStore().addOnlinePersona(persona);
                 if(otherPersona != persona) {
-                	ArcheCore.getPlugin().getLogger().warning("Interleaved Persona loading: Persona " + MessageUtil.identifyPersona(persona)
+                	CoreLog.warning("Interleaved Persona loading: Persona " + MessageUtil.identifyPersona(persona)
                 	+ " has come online while " + caller.getName() +  " also tried to load it.");
                 }
                 caller.performCommand(command.getName() + ' ' + StringUtils.join(args, ' '));

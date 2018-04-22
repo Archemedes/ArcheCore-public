@@ -1,27 +1,42 @@
 package net.lordofthecraft.arche.persona;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
-import net.lordofthecraft.arche.util.MessageUtil;
-import net.md_5.bungee.api.chat.*;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.conversations.*;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.conversations.BooleanPrompt;
+import org.bukkit.conversations.Conversation;
+import org.bukkit.conversations.ConversationContext;
+import org.bukkit.conversations.ConversationFactory;
+import org.bukkit.conversations.ConversationPrefix;
+import org.bukkit.conversations.FixedSetPrompt;
+import org.bukkit.conversations.MessagePrompt;
+import org.bukkit.conversations.Prompt;
+import org.bukkit.conversations.ValidatingPrompt;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
+import net.lordofthecraft.arche.util.MessageUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class CreationDialog {
 
@@ -101,29 +116,29 @@ public class CreationDialog {
     }
 
     public void removePersona(ArchePersona pers){
-        Player p = Bukkit.getPlayer(pers.getPlayerUUID());
-        if(p == null){
-            plugin.getLogger().severe("We tried to engage Persona removal Dialog while owning player was offline!");
-            return;
-        }
+    	Player p = Bukkit.getPlayer(pers.getPlayerUUID());
+    	if(p == null){
+    		CoreLog.severe("We tried to engage Persona removal Dialog while owning player was offline!");
+    		return;
+    	}
 
-        if(!mayConverse(p)){
-            p.sendRawMessage(ChatColor.RED + "ERROR: " + ChatColor.DARK_RED + "You are already in a dialog!");
-            p.sendRawMessage(ChatColor.RED + "Type 'cancel' to abandon your current dialog.");
-            return;
-        }
+    	if(!mayConverse(p)){
+    		p.sendRawMessage(ChatColor.RED + "ERROR: " + ChatColor.DARK_RED + "You are already in a dialog!");
+    		p.sendRawMessage(ChatColor.RED + "Type 'cancel' to abandon your current dialog.");
+    		return;
+    	}
 
-        if (!canDelete(pers, p, false)) return;
+    	if (!canDelete(pers, p, false)) return;
 
-        addAbandoners();
+    	addAbandoners();
 
-        Map<Object, Object> data = Maps.newHashMap();
-        data.put("persona", pers);
+    	Map<Object, Object> data = Maps.newHashMap();
+    	data.put("persona", pers);
 
-        factory.withInitialSessionData(data)
-                .withFirstPrompt(new ConfirmRemovalPrompt())
-                .buildConversation(p)
-                .begin();
+    	factory.withInitialSessionData(data)
+    	.withFirstPrompt(new ConfirmRemovalPrompt())
+    	.buildConversation(p)
+    	.begin();
     }
 
     private boolean canDelete(Persona pers, Player p, boolean nullPersona) {
@@ -514,37 +529,35 @@ public class CreationDialog {
 
         @Override
         protected Prompt getNextPrompt(ConversationContext context) {
-            Player p = (Player) context.getForWhom();
+        	Player p = (Player) context.getForWhom();
 
-            int id = (Integer) context.getSessionData("slot");
-            String name = (String) context.getSessionData("name");
-            String gender = (String) context.getSessionData("gender");
-            Race race = (Race) context.getSessionData("race");
-            long creationTimeMS = System.currentTimeMillis();
+        	int id = (Integer) context.getSessionData("slot");
+        	String name = (String) context.getSessionData("name");
+        	String gender = (String) context.getSessionData("gender");
+        	Race race = (Race) context.getSessionData("race");
+        	long creationTimeMS = System.currentTimeMillis();
 
-            if (ArcheCore.getPlugin().debugMode()) {
-                ArcheCore.getPlugin().getLogger().info("New persona created in the world " + p.getWorld().getName() + " with the uuid of " + p.getWorld().getUID());
-            }
+        	CoreLog.debug("New persona created in the world " + p.getWorld().getName() + " with the uuid of " + p.getWorld().getUID());
 
-            ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, 0, gender, new Timestamp(creationTimeMS), new Timestamp(System.currentTimeMillis()), 0);
+        	ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, 0, gender, new Timestamp(creationTimeMS), new Timestamp(System.currentTimeMillis()), 0);
 
-            ArchePersonaHandler.getInstance().registerPersona(persona);
-            p.sendMessage(ChatColor.GOLD + "" + ChatColor.UNDERLINE + "Created your new Persona: " + ChatColor.GREEN + name + ChatColor.GOLD + "!");
+        	ArchePersonaHandler.getInstance().registerPersona(persona);
+        	p.sendMessage(ChatColor.GOLD + "" + ChatColor.UNDERLINE + "Created your new Persona: " + ChatColor.GREEN + name + ChatColor.GOLD + "!");
 
-            p.sendTitle(ChatColor.GOLD + "" + ChatColor.ITALIC + name,
-                    ChatColor.YELLOW + "Welcome to the realm of " + ArcheCore.getControls().getServerWorldName(),
-                    30, 120, 30);
+        	p.sendTitle(ChatColor.GOLD + "" + ChatColor.ITALIC + name,
+        			ChatColor.YELLOW + "Welcome to the realm of " + ArcheCore.getControls().getServerWorldName(),
+        			30, 120, 30);
 
-            if (context.getSessionData("first") != null) {
-                long treshold = System.currentTimeMillis() - (1000 * 90);
-                if (lastAnnounce < treshold) {
-                    lastAnnounce = System.currentTimeMillis();
-                    String message = ChatColor.DARK_GREEN + "Please welcome " + ChatColor.GOLD + name + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + " (" + p.getName() + ") " + ChatColor.DARK_GREEN + "the " + ChatColor.GOLD + race.getName() + ChatColor.DARK_GREEN + " to Lord of the Craft.";
-                    for (Player x : Bukkit.getOnlinePlayers()) if (x != p) x.sendMessage(message);
-                }
+        	if (context.getSessionData("first") != null) {
+        		long treshold = System.currentTimeMillis() - (1000 * 90);
+        		if (lastAnnounce < treshold) {
+        			lastAnnounce = System.currentTimeMillis();
+        			String message = ChatColor.DARK_GREEN + "Please welcome " + ChatColor.GOLD + name + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + " (" + p.getName() + ") " + ChatColor.DARK_GREEN + "the " + ChatColor.GOLD + race.getName() + ChatColor.DARK_GREEN + " to Lord of the Craft.";
+        			for (Player x : Bukkit.getOnlinePlayers()) if (x != p) x.sendMessage(message);
+        		}
 
-            }
-            return Prompt.END_OF_CONVERSATION;
+        	}
+        	return Prompt.END_OF_CONVERSATION;
         }
     }
 

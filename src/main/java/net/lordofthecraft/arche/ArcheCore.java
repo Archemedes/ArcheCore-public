@@ -226,8 +226,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         initConfig();
         
         //Set up the debug timer, if necessary.
-    	timer = debugMode? new ArcheTimer(this) : null;
-
+        timer = debugMode? new ArcheTimer(this) : null;
+        
         //Setup the SQL stuff for ArcheCore
         initSql();
         
@@ -292,63 +292,64 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     }
 
     private void initConfig(){
-        FileConfiguration config = getConfig(); // Get the config file either out of our .jar our datafolder
-        saveDefaultConfig(); //Save the config file to disk if it doesn't exist yet.
+    	FileConfiguration config = getConfig(); // Get the config file either out of our .jar our datafolder
+    	saveDefaultConfig(); //Save the config file to disk if it doesn't exist yet.
 
-        maxPersonaSlots = Math.max(1, Math.min(17, config.getInt("persona.slots.maximum")));
-        helpOverriden = config.getBoolean("override.help.command");
-        legacyCommands = config.getBoolean("enable.legacy.commands");
-        nameChangeDelay = config.getInt("name.change.delay");
-        personaChangeDelay = config.getInt("persona.change.delay");
-        personaPermakillDelay = config.getInt("persona.permakill.delay");
-        showXpToPlayers = config.getBoolean("show.exp.values");
-        racialBonuses = config.getBoolean("enable.racial.bonuses");
-        damageBonuses = config.getBoolean("enable.racial.damage.bonuses");
-        enablePrefixes = config.getBoolean("enable.persona.prefix");
-        modifyDisplayNames = config.getBoolean("modify.player.displayname");
-        newbieProtectDelay = config.getInt("persona.newbie.protect");
-        debugMode = config.getBoolean("enable.debug.mode");
-        newbieDelay = config.getInt("newbie.notification");
-        useWiki = config.getBoolean("enable.wiki.lookup");
-        protectiveTeleport = config.getBoolean("teleport.to.rescue");
-        teleportNewbies = config.getBoolean("new.persona.to.spawn");
-        worldName = config.getString("server.world.name");
-        enderchestInMenu = config.getBoolean("persona.menu.enderchest");
-        usingMySQL = config.getBoolean("enable.mysql");
-        fullFatigueRestore = config.getInt("persona.fatigue.restore");
-        canCreatePersonas = config.getBoolean("can.create.personas");
+    	debugMode = config.getBoolean("enable.debug.mode");
+    	//Make sure all our future logging messages show at the right times
+    	if(debugMode) getLogger().setLevel(Level.FINER); 
 
-        //Consumer variables
-        consumerRun = config.getInt("consumer.run.time");
-        consumerForceProcessMin = config.getInt("consumer.force.process.minimum");
-        consumerRunDelay = config.getInt("consumer.run.delay");
-        consumerShouldUseBukkitScheduler = config.getBoolean("consumer.use.bukkit.scheduler");
-        consumerWarningSize = config.getInt("consumer.queue.warning.size");
-        debugConsumer = config.getBoolean("consumer.debug");
+    	maxPersonaSlots = Math.max(1, Math.min(17, config.getInt("persona.slots.maximum")));
+    	helpOverriden = config.getBoolean("override.help.command");
+    	legacyCommands = config.getBoolean("enable.legacy.commands");
+    	nameChangeDelay = config.getInt("name.change.delay");
+    	personaChangeDelay = config.getInt("persona.change.delay");
+    	personaPermakillDelay = config.getInt("persona.permakill.delay");
+    	showXpToPlayers = config.getBoolean("show.exp.values");
+    	racialBonuses = config.getBoolean("enable.racial.bonuses");
+    	damageBonuses = config.getBoolean("enable.racial.damage.bonuses");
+    	enablePrefixes = config.getBoolean("enable.persona.prefix");
+    	modifyDisplayNames = config.getBoolean("modify.player.displayname");
+    	newbieProtectDelay = config.getInt("persona.newbie.protect");
+    	newbieDelay = config.getInt("newbie.notification");
+    	useWiki = config.getBoolean("enable.wiki.lookup");
+    	protectiveTeleport = config.getBoolean("teleport.to.rescue");
+    	teleportNewbies = config.getBoolean("new.persona.to.spawn");
+    	worldName = config.getString("server.world.name");
+    	enderchestInMenu = config.getBoolean("persona.menu.enderchest");
+    	usingMySQL = config.getBoolean("enable.mysql");
+    	fullFatigueRestore = config.getInt("persona.fatigue.restore");
+    	canCreatePersonas = config.getBoolean("can.create.personas");
 
-        if (debugMode) {
-            getLogger().info("[Consumer] Started with the following config options: " +
-                    "runTime: " + consumerRun + ", " +
-                    "forceProcessMin: " + consumerForceProcessMin + ", " +
-                    "runDelay: " + consumerRun + ", " +
-                    "useBukkitScheduler?: " + consumerShouldUseBukkitScheduler + ", " +
-                    "warningSize: " + consumerWarningSize);
-        }
+    	//Consumer variables
+    	consumerRun = config.getInt("consumer.run.time");
+    	consumerForceProcessMin = config.getInt("consumer.force.process.minimum");
+    	consumerRunDelay = config.getInt("consumer.run.delay");
+    	consumerShouldUseBukkitScheduler = config.getBoolean("consumer.use.bukkit.scheduler");
+    	consumerWarningSize = config.getInt("consumer.queue.warning.size");
+    	debugConsumer = config.getBoolean("consumer.debug");
 
-        if(teleportNewbies){
-            World w = Bukkit.getWorld(config.getString("preferred.spawn.world"));
-            if(w != null) this.newbieWorldUUID = w.getUID();
-            else getLogger().info("Could not find config-specified world. Will use default world instead.");
-        }
+    	getLogger().fine("[Consumer] Started with the following config options: " +
+    			"runTime: " + consumerRun + ", " +
+    			"forceProcessMin: " + consumerForceProcessMin + ", " +
+    			"runDelay: " + consumerRun + ", " +
+    			"useBukkitScheduler?: " + consumerShouldUseBukkitScheduler + ", " +
+    			"warningSize: " + consumerWarningSize);
 
-        if(config.getBoolean("enable.economy"))
-            economy = new ArcheEconomy(config);
-        
-		List<String> trackedWorlds = config.getStringList("seasonal.tracked.worlds");
-		int offsetYears = config.getInt("calendar.offset.years");
-		boolean switchBiomes = config.getBoolean("seasonal.biome.switch");
-        calendar = new LotcianCalendar(trackedWorlds, switchBiomes, offsetYears);
-        calendar.onEnable();
+    	if(teleportNewbies){
+    		World w = Bukkit.getWorld(config.getString("preferred.spawn.world"));
+    		if(w != null) this.newbieWorldUUID = w.getUID();
+    		else getLogger().info("Could not find config-specified world. Will use default world instead.");
+    	}
+
+    	if(config.getBoolean("enable.economy"))
+    		economy = new ArcheEconomy(config);
+
+    	List<String> trackedWorlds = config.getStringList("seasonal.tracked.worlds");
+    	int offsetYears = config.getInt("calendar.offset.years");
+    	boolean switchBiomes = config.getBoolean("seasonal.biome.switch");
+    	calendar = new LotcianCalendar(trackedWorlds, switchBiomes, offsetYears);
+    	calendar.onEnable();
     }
     
     private void initSql() {
@@ -548,11 +549,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     public boolean debugMode(){
         return debugMode;
     }
-
-    public static boolean isDebugging() {
-        return instance.debugMode;
-    }
-
+    
     public ArcheTimer getMethodTimer(){
         return timer;
     }

@@ -32,29 +32,29 @@ public final class ArcheTables {
             String end = getEndingString(sqlHandler);
 
             Logger l = ArcheCore.getPlugin().getLogger();
-            if (debug) l.info("[Debug] Creating player table...");
+            l.fine("Creating player table...");
             createPlayerTable(statement, end);
-            if (debug) l.info("[Debug] Done with Player! Creating skins table...");
+            l.fine("Done with Player! Creating skins table...");
             createPersonaSkinsTable(statement, end);
-            if (debug) l.info("[Debug] Done with skins! Creating persona...");
+            l.fine("Done with skins! Creating persona...");
             createPersonaTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona! Creating persona stats...");
+            l.fine("Done with persona! Creating persona stats...");
             createPersonaStatsTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona stats! Creating persona tags...");
+            l.fine("Done with persona stats! Creating persona tags...");
             createPersonaTagsTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona tags! Creating persona vitals...");
+            l.fine("Done with persona tags! Creating persona vitals...");
             createPersonaVitalsTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona vitals! Creating persona attributes...");
+            l.fine("Done with persona vitals! Creating persona attributes...");
             createPersonaAttributes(statement, end);
-            if (debug) l.info("[Debug] Done with persona attributes! Creating racial skills...");
+            l.fine("Done with persona attributes! Creating racial skills...");
             createRacialSkillsTable(statement, end);
-            if (debug) l.info("[Debug] Done with racial skills! Creating persona skills...");
+            l.fine("Done with racial skills! Creating persona skills...");
             createPersonaSkillsTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona skills! Creating persona names...");
+            l.fine("Done with persona skills! Creating persona names...");
             createPersonaNamesTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona names! Creating persona spawns...");
+            l.fine("Done with persona names! Creating persona spawns...");
             createPersonaSpawnsTable(statement, end);
-            if (debug) l.info("[Debug] Done with persona spawns! Creating block registry...");
+            l.fine("Done with persona spawns! Creating block registry...");
             createBlockRegistryTable(statement, end);
 
             if (sqlHandler instanceof WhySQLHandler) {
@@ -63,9 +63,9 @@ public final class ArcheTables {
                 //If we're using MySQL. Sorry SQLite fangays.
 
                 //If it's SQLite check net.lordofthecraft.arche.save.rows.persona.delete.PersonaDeleteRow for how it's handled.
-                if (debug) l.info("[Debug] Done with block registry! Creating logging tables...");
+                l.fine("Done with block registry! Creating logging tables...");
                 createLoggingTables(statement, end, false);
-                if (debug) l.info("[Debug] Done with logging tables! Creating delete procedure...");
+                l.fine("Done with logging tables! Creating delete procedure...");
                 try {
                     createDeleteProcedure(statement);
                     ArcheCore.getPlugin().setUseDeleteProcedure(true);
@@ -74,7 +74,7 @@ public final class ArcheTables {
                 }
             }
             createEconomyLogging(statement, end);
-            if (debug) l.info("[Debug] Done with economy log! All done!");
+            l.fine("Done with economy log! All done!");
             conn.commit();
             l.info("We've finished with committing all tables now.");
             statement.close();
@@ -83,7 +83,7 @@ public final class ArcheTables {
             }
             toreturn = true;
         } catch (Exception e) {
-        	ArcheCore.getPlugin().getLogger().log(Level.SEVERE, "We failed to create Archecore.db! Stopping!", e);
+        	CoreLog.log(Level.SEVERE, "We failed to create Archecore.db! Stopping!", e);
         	e.printStackTrace();
             toreturn = false;
         } finally {

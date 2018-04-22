@@ -14,7 +14,7 @@ import javax.sql.DataSource;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.util.SQLUtil;
 
 /**
@@ -46,9 +46,7 @@ public abstract class SQLHandler {
             buffer.append(entry.getValue()/*.toUpperCase()*/);
         }
         String createStatement = pretext + "(" + buffer.toString() + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;";
-        if (ArcheCore.getPlugin().debugMode()) {
-            ArcheCore.getPlugin().getLogger().info("Creating the following table: " + createStatement);
-        }
+        CoreLog.debug("Creating the following table: " + createStatement);
         execute(createStatement);
     }
 

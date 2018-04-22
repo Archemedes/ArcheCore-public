@@ -8,15 +8,12 @@ import static org.bukkit.event.inventory.InventoryAction.PICKUP_HALF;
 import static org.bukkit.event.inventory.InventoryAction.PLACE_ALL;
 import static org.bukkit.event.inventory.InventoryAction.PLACE_ONE;
 
-import com.comphenix.protocol.utility.MinecraftReflection;
-import com.google.common.collect.Lists;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheTimer;
+
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.entity.Animals;
@@ -29,6 +26,13 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+
+import com.comphenix.protocol.utility.MinecraftReflection;
+import com.google.common.collect.Lists;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheTimer;
+import net.lordofthecraft.arche.CoreLog;
 
 public class InventoryUtil {
 	private InventoryUtil() {}
@@ -420,7 +424,7 @@ public class InventoryUtil {
 			return result;
 		}finally {
 			if(ArcheCore.getPlugin().debugMode()) {
-				result.forEach(i -> ArcheCore.getPlugin().getLogger().info("[Debug] MovedItem {" + i.getInitialSlot() +"}->{"+ i.getFinalSlot() + "}: " + i.getItem()));
+				result.forEach(i -> CoreLog.debug("[Debug] MovedItem {" + i.getInitialSlot() +"}->{"+ i.getFinalSlot() + "}: " + i.getItem()));
 			}
 			if(timer != null) timer.stopTiming(dbg);
 		}

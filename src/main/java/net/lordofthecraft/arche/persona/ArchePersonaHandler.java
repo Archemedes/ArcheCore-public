@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
@@ -274,42 +275,40 @@ public class ArchePersonaHandler implements PersonaHandler {
     @Override
     public void registerPersona(Persona pers) {
     	ArchePersona persona = (ArchePersona) pers;
-        if (ArcheCore.getPlugin().debugMode()) {
-            ArcheCore.getPlugin().getLogger().info("[Debug] Persona is being created: " + MessageUtil.identifyPersona(persona));
-        }
-        
-        ArcheOfflinePersona oldPersona = store.registerPersona(persona);
+    	CoreLog.debug("Persona is being created: " + MessageUtil.identifyPersona(persona));
 
-        PersonaCreateEvent event3 = new PersonaCreateEvent(persona, oldPersona);
-        Bukkit.getPluginManager().callEvent(event3);
-        
-        Player p = persona.getPlayer();
-        boolean forceSwitch = oldPersona != null && oldPersona.isCurrent(); 
-        //Expected switch restoreMinecraftSpecifics behavior:
-        //health, saturation, hunger set to persona defaults
-        //Inventories, potion effects cleared.
-        //This teleport will fail due to the Location being null still
-        boolean couldSwitch = p == null? false : switchPersona(p, persona.getSlot(), forceSwitch);
-        
-        if (oldPersona != null) {
-            PersonaRemoveEvent event2 = new PersonaRemoveEvent(oldPersona, true);
-            Bukkit.getPluginManager().callEvent(event2);
+    	ArcheOfflinePersona oldPersona = store.registerPersona(persona);
 
-            consumer.queueRow(new DeletePersonaRow(oldPersona));
-            if(oldPersona.isLoaded()) SkinCache.getInstance().clearSkin(oldPersona.getPersona());
-        }
-        
-        Location to = racespawns.get(persona.getRace());
-        if(to == null) {
-        	World w = ArcheCore.getControls().getNewPersonaWorld();
-        	to = w != null? w.getSpawnLocation() : 
-        		 p != null? p.getWorld().getSpawnLocation() : 
-        			 Bukkit.getWorlds().get(0).getSpawnLocation();
-        }
+    	PersonaCreateEvent event3 = new PersonaCreateEvent(persona, oldPersona);
+    	Bukkit.getPluginManager().callEvent(event3);
 
-        consumer.queueRow(new InsertPersonaRow(persona, to));
-        persona.location = new WeakBlock(to);
-        if(couldSwitch && ArcheCore.getControls().teleportNewPersonas()) p.teleport(to);
+    	Player p = persona.getPlayer();
+    	boolean forceSwitch = oldPersona != null && oldPersona.isCurrent(); 
+    	//Expected switch restoreMinecraftSpecifics behavior:
+    	//health, saturation, hunger set to persona defaults
+    	//Inventories, potion effects cleared.
+    	//This teleport will fail due to the Location being null still
+    	boolean couldSwitch = p == null? false : switchPersona(p, persona.getSlot(), forceSwitch);
+
+    	if (oldPersona != null) {
+    		PersonaRemoveEvent event2 = new PersonaRemoveEvent(oldPersona, true);
+    		Bukkit.getPluginManager().callEvent(event2);
+
+    		consumer.queueRow(new DeletePersonaRow(oldPersona));
+    		if(oldPersona.isLoaded()) SkinCache.getInstance().clearSkin(oldPersona.getPersona());
+    	}
+
+    	Location to = racespawns.get(persona.getRace());
+    	if(to == null) {
+    		World w = ArcheCore.getControls().getNewPersonaWorld();
+    		to = w != null? w.getSpawnLocation() : 
+    			p != null? p.getWorld().getSpawnLocation() : 
+    				Bukkit.getWorlds().get(0).getSpawnLocation();
+    	}
+
+    	consumer.queueRow(new InsertPersonaRow(persona, to));
+    	persona.location = new WeakBlock(to);
+    	if(couldSwitch && ArcheCore.getControls().teleportNewPersonas()) p.teleport(to);
     }
 
 	@Override
@@ -522,7 +521,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 				Arrays.stream(prs).filter(Objects::nonNull).findFirst().ifPresent(pers -> pers.setCurrent(true));
 				ps = getPersona(p);
 				ps.restoreMinecraftSpecifics(p);
-				if(ArcheCore.isDebugging()) ArcheCore.getPlugin().getLogger().info("[Debug] No current Persona on login, so switched to " + MessageUtil.identifyPersona(ps));
+				CoreLog.debug("No current Persona on login, so switched to " + MessageUtil.identifyPersona(ps));
 			}
 
 			if (ps.tags().removeTag(PersonaTags.REFRESH_MC_SPECIFICS)) ps.restoreMinecraftSpecifics(p);

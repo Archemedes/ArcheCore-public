@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
@@ -36,14 +37,12 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class PersonaStore {
     final String personaSelect;
     private final String offlinePersonaSelect;
     private final Semaphore loginThrottle = new Semaphore(2, true);
-    private final Logger log = ArcheCore.getPlugin().getLogger();
     
     public PersonaStore() {
         personaSelect = personaSelectStatement(false);
@@ -161,9 +160,7 @@ public class PersonaStore {
 
         try {
             connection = ArcheCore.getSQLControls().getConnection();
-            if (ArcheCore.isDebugging()) {
-                log.info("[Debug] personaSelect: " + personaSelect);
-            }
+            CoreLog.debug("personaSelect: " + personaSelect);
             statement = connection.prepareStatement(personaSelect);
             statement.setString(1, uuid.toString());
             res = statement.executeQuery();
@@ -177,7 +174,7 @@ public class PersonaStore {
                     if (!hasCurrent) {
                         hasCurrent = true;
                     } else {
-                        log.warning("Multiple Current Personas for " + playerName);
+                        CoreLog.warning("Multiple Current Personas for " + playerName);
                         blob.current = false;
                     }
                 }
@@ -216,7 +213,7 @@ public class PersonaStore {
                 max_persona_id = rs.getInt(1);
                 max_persona_id++;
             } else {
-                log.warning("We could not retrieve the LAST_INSERT_ID for persona,"
+                CoreLog.warning("We could not retrieve the LAST_INSERT_ID for persona,"
                         + " either there are no personas or there is an error."
                         + " We'll be starting at 0. This will throw errors if there are actually personas in the Database.");
             }
@@ -224,14 +221,14 @@ public class PersonaStore {
             statement.close();
             connection.close();
         } catch (SQLException e) {
-            log.log(Level.SEVERE, "We failed to set up our persona ID!!! We can't create personas!", e);
+            CoreLog.log(Level.SEVERE, "We failed to set up our persona ID!!! We can't create personas!", e);
         } finally {
             SQLUtil.close(rs);
             SQLUtil.close(statement);
             SQLUtil.close(connection);
         }
 
-        log.info("[ArchePersonaHandler] Persona ID is now set at " + max_persona_id);
+        CoreLog.debug("[ArchePersonaHandler] Persona ID is now set at " + max_persona_id);
     }
 
     public void preload() {
@@ -264,11 +261,8 @@ public class PersonaStore {
             SQLUtil.close(offlineSelectStat);
             SQLUtil.close(connection);
         }
-        
-        if (timer != null) {
-        	log.info("[Debug] Successfully preloaded " + amount + " personas.");
-        	timer.stopTiming("Preloading personas");
-        }
+        CoreLog.debug("Successfully preloaded " + amount + " personas.");
+        if (timer != null) timer.stopTiming("Preloading personas");
     }
 
     private ArcheOfflinePersona buildOfflinePersona(ResultSet res, UUID pUUID) throws SQLException {
@@ -366,9 +360,9 @@ public class PersonaStore {
         loadNamelog(persona, connection);
         
         Event event = new AsyncPersonaLoadEvent(persona, connection);
-        if(ArcheCore.isDebugging()) log.info("[Debug] AsyncPersonaLoadEvent firing. Is actually async: " + event.isAsynchronous());
+        CoreLog.debug("AsyncPersonaLoadEvent firing. Is actually async: " + event.isAsynchronous());
         Bukkit.getPluginManager().callEvent(event);
-        if(connection.isClosed()) log.severe("A consumer of AsyncPersonaLoadEvent is closing the provided connection!!");
+        if(connection.isClosed()) CoreLog.severe("A consumer of AsyncPersonaLoadEvent is closing the provided connection!!");
         else connection.close();
 
         return persona;
@@ -409,12 +403,12 @@ public class PersonaStore {
                 		eam.setupTask(att, persona);
                 	} else { //Don't bother doing all this nonsense on logged in Personas for <10 seconds of mod
                 		ArcheCore.getConsumerControls().queueRow(new AttributeRemoveRow(eam, att, persona));
-                        if(ArcheCore.isDebugging()) log.info("[Debug] Clearing attribute which has decayed while offline: " + persona.attributes().toString(eam));
+                        CoreLog.debug("Clearing attribute which has decayed while offline: " + persona.attributes().toString(eam));
                 		continue; //Not adding it to the list
                 	}
                 }
                 
-                if(ArcheCore.isDebugging()) log.info("[Debug] SQL-adding attribute: " + persona.attributes().toString(eam));
+                CoreLog.debug("SQL-adding attribute: " + persona.attributes().toString(eam));
                 persona.attributes().getInstance(att).fromSQL(eam);
             }
         } catch (SQLException e) {
@@ -456,12 +450,12 @@ public class PersonaStore {
         ArchePersona[] prs = pendingBlobs.remove(uuid);
         
         if (prs == null) {
-        	if(ArcheCore.isDebugging()) log.info("[Debug] Player " + player.getName() + " logged in without pending Personas." );
+        	CoreLog.debug("Player " + player.getName() + " logged in without pending Personas." );
         	prs = onlinePersonas.get(uuid);
         	if(prs != null) {
-        		if(ArcheCore.isDebugging()) log.info("[Debug] Player had online personas files. Likely he rejoined from earlier this session" );
+        		CoreLog.debug("Player had online personas files. Likely he rejoined from earlier this session" );
         	} else {
-        		log.severe("Player " + player.getName() + " DOES NOT have a Personas file anywhere! Dependent plugin might be to blame!");
+        		CoreLog.severe("Player " + player.getName() + " DOES NOT have a Personas file anywhere! Dependent plugin might be to blame!");
         	}
         } else {
         	onlinePersonas.put(uuid, prs);
@@ -511,7 +505,7 @@ public class PersonaStore {
         ArchePersona[] prs = onlinePersonas.get(uuid);
         ArcheOfflinePersona old;
         if (prs == null) {
-        	if(ArcheCore.isDebugging()) log.info("[Debug] Registering " + MessageUtil.identifyPersona(persona) + " while player not yet implemented.");
+        	CoreLog.debug("Registering " + MessageUtil.identifyPersona(persona) + " while player not yet implemented.");
             //No nice array available to check against unfortunately
         	//We resort to using a slightly more intensive method
         	old = offlinePersonas.get(uuid).stream()

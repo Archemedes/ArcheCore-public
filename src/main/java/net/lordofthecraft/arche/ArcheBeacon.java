@@ -1,17 +1,9 @@
 package net.lordofthecraft.arche;
 
-import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
-import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent;
-import net.lordofthecraft.arche.executables.OpenEnderRunnable;
-import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.CreationDialog;
-import net.lordofthecraft.arche.skin.ArcheSkin;
-import net.lordofthecraft.arche.util.ItemUtil;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -26,11 +18,18 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.google.common.collect.Lists;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
+import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent;
+import net.lordofthecraft.arche.executables.OpenEnderRunnable;
+import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.CreationDialog;
+import net.lordofthecraft.arche.skin.ArcheSkin;
+import net.lordofthecraft.arche.util.ItemUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class ArcheBeacon {
 	//public static final String BEACON_HEADER = ChatColor.AQUA + "" + ChatColor.BOLD + "Your settings:";
@@ -142,13 +141,12 @@ public class ArcheBeacon {
 		if(!CreationDialog.mayConverse(p))
 			return;
 
-		Logger log = ArcheCore.getPlugin().getLogger();
-		if(ArcheCore.isDebugging()) log.info("ArcheBeacon opened by " + p.getName());
+		CoreLog.debug("ArcheBeacon opened by " + p.getName());
 		ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
 		if(handler.mayUse(p) || (handler.countPersonas(p) == 0 && !p.hasPermission("archecore.exempt"))){
 			ArchePersona[] prs = handler.getAllPersonas(p);
 			if(prs == null){
-				log.severe(" [Beacon] Player walking around without registered Personas File!");
+				CoreLog.severe(" [Beacon] Player walking around without registered Personas File!");
 				return;
 			}
 
@@ -181,8 +179,8 @@ public class ArcheBeacon {
 			final String g = ChatColor.DARK_GRAY.toString();
 
 			if(current < 0){
-				if(count == 0) log.warning("[Beacon] Zero personas for: " + p.getName());
-				else log.warning("[Beacon] no current persona for: " + p.getName());
+				if(count == 0) CoreLog.warning("[Beacon] Zero personas for: " + p.getName());
+				else CoreLog.warning("[Beacon] no current persona for: " + p.getName());
 			} else if(ArcheCore.getControls().showEnderchestInMenu()) {
 				is = new ItemStack(Material.ENDER_CHEST);
 				ItemUtil.decorate(is, r + "Ender Chest", g + "Open your Ender Chest");

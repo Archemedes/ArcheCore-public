@@ -23,6 +23,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.event.util.PlayerAfkEvent;
 
 public class AfkListener implements Listener {
@@ -44,7 +45,7 @@ public class AfkListener implements Listener {
 						long lastSeen = lastAction.get(p.getUniqueId());
 						long minsPassed = ( System.currentTimeMillis() - lastSeen) / (DateUtils.MILLIS_PER_MINUTE);
 						if(minsPassed >= AFK_THRESHOLD_MINUTES) {
-							if(ArcheCore.isDebugging()) plugin.getLogger().info("[Debug] Player has gone afk: " + p.getName());
+							CoreLog.debug("Player has gone afk: " + p.getName());
 							theAfks.add(p.getUniqueId());
 							Bukkit.getPluginManager().callEvent(new PlayerAfkEvent(p, true));
 						}
@@ -102,7 +103,7 @@ public class AfkListener implements Listener {
 		lastAction.put(u, System.currentTimeMillis());
 		
 		if(theAfks.contains(u)) {
-			if(ArcheCore.isDebugging()) plugin.getLogger().info("[Debug] Player is no longer afk: " + p.getName());
+			CoreLog.debug("Player is no longer afk: " + p.getName());
 			theAfks.remove(u);
 			Bukkit.getPluginManager().callEvent(new PlayerAfkEvent(p, false));
 		}

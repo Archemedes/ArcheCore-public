@@ -1,21 +1,16 @@
 package net.lordofthecraft.arche.persona;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.enums.PersonaType;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.event.persona.PersonaFatigueEvent;
-import net.lordofthecraft.arche.event.persona.PersonaRenameEvent;
-import net.lordofthecraft.arche.interfaces.*;
-import net.lordofthecraft.arche.listener.NewbieProtectListener;
-import net.lordofthecraft.arche.save.PersonaField;
-import net.lordofthecraft.arche.save.rows.persona.NamelogRow;
-import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
-import net.lordofthecraft.arche.save.rows.persona.UpdateVitalsRow;
-import net.lordofthecraft.arche.skin.ArcheSkin;
-import net.lordofthecraft.arche.util.WeakBlock;
+import java.lang.ref.WeakReference;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -26,14 +21,29 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 
-import java.lang.ref.WeakReference;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
+import net.lordofthecraft.arche.enums.PersonaType;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.event.persona.PersonaFatigueEvent;
+import net.lordofthecraft.arche.event.persona.PersonaRenameEvent;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.PersonaTags;
+import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.interfaces.Transaction;
+import net.lordofthecraft.arche.listener.NewbieProtectListener;
+import net.lordofthecraft.arche.save.PersonaField;
+import net.lordofthecraft.arche.save.rows.persona.NamelogRow;
+import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
+import net.lordofthecraft.arche.save.rows.persona.UpdateVitalsRow;
+import net.lordofthecraft.arche.skin.ArcheSkin;
+import net.lordofthecraft.arche.util.WeakBlock;
 
 public final class ArchePersona extends ArcheOfflinePersona implements Persona, InventoryHolder {
 
@@ -364,7 +374,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         inv = PersonaInventory.store(this);
         location = new WeakBlock(p.getLocation());
         String pots = savePotionEffects(p);
-        if(ArcheCore.isDebugging()) ArcheCore.getPlugin().getLogger().info("Player world is " + p.getWorld().getName() + " which has a UID of " + p.getWorld().getUID().toString());
+        CoreLog.debug("Player world is " + p.getWorld().getName() + " which has a UID of " + p.getWorld().getUID().toString());
         consumer.queueRow(new UpdateVitalsRow(this, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv, pots));
     }
 
@@ -467,8 +477,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 			}
 			
 			if(!hasOtherPersonas) {
-				Plugin plugin = ArcheCore.getPlugin();
-				plugin.getLogger().warning("Player " + getPlayerName() + " removed his final usable Persona!");
+				CoreLog.warning("Player " + getPlayerName() + " removed his final usable Persona!");
 				RaceBonusHandler.reset(p); //Clear Racial bonuses, for now...
 				if(p.hasPermission("archecore.mayuse") && !p.hasPermission("archecore.exempt")) new CreationDialog().makeFirstPersona(p);
 			}

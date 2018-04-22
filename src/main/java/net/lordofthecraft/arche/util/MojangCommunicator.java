@@ -13,7 +13,6 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.Validate;
@@ -27,6 +26,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.ByteStreams;
 
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 
 public class MojangCommunicator {
     public static class AuthenticationException extends Exception {
@@ -115,13 +115,12 @@ public class MojangCommunicator {
 			out = new DataOutputStream(conn.getOutputStream());  
 			out.writeBytes(query);
 
-			if(ArcheCore.isDebugging()) {
+			if(ArcheCore.getPlugin().debugMode()) {
 				in = new BufferedInputStream(conn.getInputStream());
 				String result = new String(ByteStreams.toByteArray(in), Charsets.UTF_8);
 				in.close();	
-				Logger l = ArcheCore.getPlugin().getLogger();
-				l.info("[Debug] Mojang response to setting skin: ");
-				l.info(result);
+				CoreLog.debug("[Debug] Mojang response to setting skin: ");
+				CoreLog.debug(result);
 			}
 		} finally {
 			if(in != null) in.close();

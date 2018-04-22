@@ -81,7 +81,7 @@ public class ArcheNameMap {
     	if(playerNameMap.containsValue(caseString)) {
     		UUID o = playerNameMap.inverse().get(caseString);
     		if(!u.equals(o)) { //This name was used by a player with other UUID. We must update both
-         		if(ArcheCore.isDebugging()) getLogger().info("[Debug] Updating CONFLICTING Player Name Map: " + u + "=" + n);
+         		CoreLog.debug("Updating CONFLICTING Player Name Map: " + u + "=" + n);
          		playerNameMap.forcePut(u, caseString); //Force-put means old entry is wiped
     			plugin.getConsumer().queueRow(new ReplacePlayerRow(u,n));
    
@@ -96,7 +96,7 @@ public class ArcheNameMap {
     		//There is no value linked to this name.
     		//Either this uuid is linked to a different name, or player uuid is not in map
     		//In both cases an update for this uuid is going to be needed
-    		if(ArcheCore.isDebugging()) getLogger().info("[Debug] Updating Player Name Map: " + u + "=" + n);
+    		CoreLog.debug("Updating Player Name Map: " + u + "=" + n);
     		playerNameMap.put(u, caseString);
         	plugin.getConsumer().queueRow(new ReplacePlayerRow(u, n));
     	}
@@ -115,7 +115,7 @@ public class ArcheNameMap {
 			protected void doAsync() {
 				try{
 					newName = MojangCommunicator.requestCurrentUsername(uuid);
-					if(ArcheCore.isDebugging()) getLogger().info("[Debug] New name obtained from mojang for " + uuid + ": " + newName);
+					CoreLog.debug("New name obtained from mojang for " + uuid + ": " + newName);
 				}catch(Exception e) {
 					e.printStackTrace();
 					newName = null;

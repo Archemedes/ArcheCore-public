@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.commands;
 
 import com.google.common.collect.Sets;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
@@ -122,7 +123,7 @@ public class CommandSkin implements CommandExecutor {
 			} catch (NumberFormatException | IndexOutOfBoundsException e) {
 				return false;
 			} catch (UnsupportedEncodingException | ParseException e) {
-				plugin.getLogger().severe("Failed parsing results. Mojang Likely changed its API response format. Error message: " + e.getMessage() );
+				CoreLog.severe("Failed parsing results. Mojang Likely changed its API response format. Error message: " + e.getMessage() );
 			}
 			return true;
 		} else {

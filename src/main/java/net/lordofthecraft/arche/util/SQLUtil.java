@@ -20,7 +20,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.google.common.collect.Lists;
 
-import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.SQL.Syntax;
 
 public class SQLUtil {
@@ -135,7 +135,7 @@ public class SQLUtil {
     			statement.setByte(i, (Byte) o);
     		} else {
     			statement.setInt(i, ((Number) o).intValue());
-    			ArcheCore.getPlugin().getLogger().warning("unhandled Number implementation being used: " + o.getClass().getName() + ". Int assumed");
+    			CoreLog.warning("unhandled Number implementation being used: " + o.getClass().getName() + ". Int assumed");
     		}
     	} else if (o instanceof java.util.Date) {
     		if (o instanceof Timestamp) {
