@@ -47,29 +47,30 @@ import net.lordofthecraft.arche.util.WeakBlock;
 
 public final class ArchePersona extends ArcheOfflinePersona implements Persona, InventoryHolder {
 
-    private final PersonaSkills skills = new PersonaSkills(this);
-    private final PersonaAttributes attributes = new PersonaAttributes(this);
-    
+	private final PersonaSkills skills = new PersonaSkills(this);
+	private final PersonaAttributes attributes = new PersonaAttributes(this);
+
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger charactersSpoken;
-    String description = null;
+	String description = null;
 	volatile String prefix = null;
 	boolean current = false;
 	String raceHeader = null;
 	Timestamp lastRenamed;
 
-    int pastPlayTime; //stat_playtime_past
-    double money = ArcheCore.getEconomyControls().getBeginnerAllowance();
-    double fatigue = 0;
-    int food = 20;
-    float saturation = 0;
-    double health = 20;
-    PersonaInventory inv;
-    private WeakReference<Player> playerObject;
-    
-    ArcheSkin skin;
-    final Set<String> namelog = Sets.newHashSet(); 
-    private ArrayList<PotionEffect> effects = Lists.newArrayList();
+	int pastPlayTime; //stat_playtime_past
+	double money = ArcheCore.getEconomyControls().getBeginnerAllowance();
+	double fatigue = 0;
+	int food = 20;
+	float saturation = 0;
+	double health = 20;
+	PersonaInventory inv;
+	private WeakReference<Player> playerObject;
+
+	ArcheSkin skin;
+	PlaySession session;
+	final Set<String> namelog = Sets.newHashSet(); 
+	private ArrayList<PotionEffect> effects = Lists.newArrayList();
     
 
     public ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate, 
@@ -159,6 +160,14 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 			if (current && getPlayer() == null) tags.giveTag(PersonaTags.REFRESH_MC_SPECIFICS, "true");
 		}
+	}
+	
+	void initSession() {
+		this.session = new PlaySession(this);
+	}
+	
+	void endSession() {
+		this.session.endSession();
 	}
 
 	@Override

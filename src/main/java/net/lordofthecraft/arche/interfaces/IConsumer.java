@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.save.rows.ArcheRow;
+import net.lordofthecraft.arche.save.rows.FlexibleRow;
 
 public interface IConsumer {
 
@@ -18,4 +19,9 @@ public interface IConsumer {
     boolean isDebugging();
 
     int getQueueSize();
+    
+    public FlexibleRow insert(String table);
+    public FlexibleRow insertIgnore(String table);
+    public FlexibleRow replace(String table);
+    public FlexibleRow delete(String table);
 }

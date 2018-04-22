@@ -238,9 +238,10 @@ public class ArchePersonaHandler implements PersonaHandler {
         if (before != null) {
             Validate.isTrue(before != after, "Player tried to switch to same persona!");
             before.setCurrent(false);
+            before.endSession();
             Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(before, PersonaDeactivateEvent.Reason.SWITCH));
             ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(before, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
-
+            
             //Store and switch Persona-related specifics: Location and Inventory.
             before.saveMinecraftSpecifics(p);
             before.attributes().handleSwitch(false);
@@ -532,7 +533,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 	private void activate(ArchePersona ps) {
 		Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
 		ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
-
+		ps.initSession();
+		
 		RaceBonusHandler.apply(ps);
 		ps.attributes().handleSwitch(false);
 		ps.updateDisplayName();
@@ -547,7 +549,8 @@ public class ArchePersonaHandler implements PersonaHandler {
 		RaceBonusHandler.reset(p);
 		if (ps != null) {
 			Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(ps, PersonaDeactivateEvent.Reason.LOGOUT));
-
+			ps.endSession(); //Causes Persona play session to be put in the log
+			
 			//Attribute bonuses form the Persona Handler, similarly, linger around
 			//We want these cleanly removed from Players on shutdown
 			//As a side-effect, this is also a good time to save them for current Personas

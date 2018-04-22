@@ -46,6 +46,8 @@ public final class ArcheTables {
             createPersonaVitalsTable(statement, end);
             l.fine("Done with persona vitals! Creating persona attributes...");
             createPersonaAttributes(statement, end);
+            l.fine("Done with persona attributes! Creating persona play sessions...");
+            createPersonaSessions(statement, end);
             l.fine("Done with persona attributes! Creating racial skills...");
             createRacialSkillsTable(statement, end);
             l.fine("Done with racial skills! Creating persona skills...");
@@ -185,6 +187,19 @@ public final class ArcheTables {
                 ")" +
                 end);
     }
+    
+    protected static void createPersonaSessions(Statement statement, String end) throws SQLException {
+      statement.execute("CREATE TABLE IF NOT EXISTS persona_playsessions (" +
+              "persona_id_fk INT UNSIGNED," +
+              "login LONG," +
+              "logout LONG," +
+              "locin TEXT" +
+              "locout TEXT" +
+              "time_played INT" +
+              ")" +
+              end);
+  }
+
 
     protected static void createPersonaTagsTable(Statement statement, String end) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS persona_tags (" +

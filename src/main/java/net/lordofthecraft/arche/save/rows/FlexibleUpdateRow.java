@@ -33,6 +33,7 @@ public class FlexibleUpdateRow extends FlexibleRow {
 		return (FlexibleUpdateRow) super.where(column, value);
 	}
 	
+	@Override
 	public FlexibleUpdateRow set(String column, Object value) {
 		sets.put(column, value);
 		return this;

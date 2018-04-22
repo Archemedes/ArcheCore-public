@@ -32,6 +32,7 @@ public class FlexibleInsertRow extends FlexibleRow {
 		}
 	}
 	
+	@Override
 	public FlexibleInsertRow set(String column, Object value) {
 		return (FlexibleInsertRow) this.where(column, value);
 	}

@@ -63,4 +63,8 @@ public abstract class FlexibleRow extends SingleStatementRow {
 		vars.put(column, value);
 		return this;
 	}
+	
+	public FlexibleRow set(String column, Object value) {
+		throw new UnsupportedOperationException();
+	}
 }

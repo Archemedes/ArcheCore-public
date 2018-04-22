@@ -42,19 +42,22 @@ public final class Consumer extends TimerTask implements IConsumer {
         this.debugConsumer = debugConsumer;
     }
 
-    
+    @Override
     public FlexibleInsertRow insert(String table) {
     	return new FlexibleInsertRow(table, FlexibleInsertRow.Mode.INSERT);
     }
     
+    @Override
     public FlexibleInsertRow insertIgnore(String table) {
     	return new FlexibleInsertRow(table, FlexibleInsertRow.Mode.IGNORE);
     }
     
+    @Override
     public FlexibleInsertRow replace(String table) {
     	return new FlexibleInsertRow(table, FlexibleInsertRow.Mode.REPLACE);
     }
     
+    @Override
     public FlexibleDeleteRow delete(String table) {
     	return new FlexibleDeleteRow(table);
     }
