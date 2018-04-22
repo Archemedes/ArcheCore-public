@@ -330,7 +330,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
         subresult.add(new TextComponent(c + "Name: " + r + op.getName()));
 
-        boolean disguised = op.isLoaded()? canPerceive(op.getPersona(), whosAsking) : false;
+        boolean disguised = op.isLoaded()? !canPerceive(op.getPersona(), whosAsking) : false;
         if(!disguised || mod) {
         	int birthyear = op.getDateOfBirth();
         	int age = op.getAge();
@@ -359,7 +359,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         //Having added EVERYTHING relevant into subresult, we call the event around
         //Plugins are allowed to modify the info in the event tags, though not in the header
         //They can cancel the event also in which case we show nothing (return empty list)
-        PersonaWhoisEvent event = new PersonaWhoisEvent(op, subresult, Query.BASIC, mod, disguised);
+        PersonaWhoisEvent event = new PersonaWhoisEvent(op, whosAsking, subresult, Query.BASIC, mod, disguised);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) { //Event is cancelled show nothing
             result = Lists.newArrayList();
@@ -369,7 +369,7 @@ public class ArchePersonaHandler implements PersonaHandler {
             //Check if we should show a "click for more..." button
             //Aka check if there is any extended info for this Persona
             List<BaseComponent> extendedWhois = Lists.newArrayList(); //Can need an EXTENDED WHOIS
-            event = new PersonaWhoisEvent(op, extendedWhois, Query.EXTENDED_PROBE, mod, disguised);
+            event = new PersonaWhoisEvent(op, whosAsking, extendedWhois, Query.EXTENDED_PROBE, mod, disguised);
             Bukkit.getPluginManager().callEvent(event);
             
             if (!event.isCancelled() && !event.getSent().isEmpty()) {
@@ -412,7 +412,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		int baseChance = (int) (shroud - perception);
 		if(baseChance <= 0) return true;
 		
-		long today = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
+		long today = System.currentTimeMillis() / TimeUnit.DAYS.toMillis(1);
 		long seed = (hider.getPersonaId() * 13l) + (ps.getPersonaId() * 3l) + today;
 		int roll = new Random(seed).nextInt(100);
 		
@@ -437,10 +437,10 @@ public class ArchePersonaHandler implements PersonaHandler {
 				return new TextComponent(ChatColor.AQUA + "((This player is new to the server))");
 			else
 				return new TextComponent(op.getPersonaType().personaViewLine);
-		} else if(op.isLoaded() && !canPerceive(op.getPersona(), whosAsking)) {
+		} else if(op.isLoaded() && op.getPersona().getPlayer() != whosAsking && !canPerceive(op.getPersona(), whosAsking)) {
 			return new TextComponent(ChatColor.DARK_GRAY + "((Persona is disguised and cannot be recognized by you))");
-		} else if(op.isLoaded() && op.getPersona().attributes().getAttributeValue(AttributeRegistry.SHROUD) > 0) {
-			return new TextComponent(ChatColor.GRAY + "((Persona attempted to disguise themselves, but you see through it))");
+		} else if(op.isLoaded() && op.getPersona().getPlayer() != whosAsking && op.getPersona().attributes().getAttributeValue(AttributeRegistry.SHROUD) > 0) {
+			return new TextComponent(ChatColor.GRAY + "((Persona unsuccessfully disguised themselves from you))");
 		}else return new TextComponent(op.getPersonaType().personaViewLine);
 	}
 
@@ -470,7 +470,7 @@ public class ArchePersonaHandler implements PersonaHandler {
     boolean mod = whosAsking.hasPermission("archecore.admin") || whosAsking.hasPermission("archecore.mod.other");
     boolean disguised = p.isLoaded()? canPerceive(p.getPersona(), whosAsking) : false;
 
-		PersonaWhoisEvent event = new PersonaWhoisEvent(p, extendedWhois, Query.EXTENDED, mod, disguised);
+		PersonaWhoisEvent event = new PersonaWhoisEvent(p, whosAsking, extendedWhois, Query.EXTENDED, mod, disguised);
 		Bukkit.getPluginManager().callEvent(event);
 
 		if(event.isCancelled() || event.getSent().isEmpty()) {

@@ -1,12 +1,13 @@
 package net.lordofthecraft.arche.commands.tab;
 
-import com.google.common.collect.Lists;
-import org.bukkit.attribute.Attribute;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
-import java.util.List;
+import net.lordofthecraft.arche.attributes.AttributeRegistry;
 
 /**
  * Created by Sean on 6/26/2016.
@@ -19,12 +20,12 @@ public class CommandAttributeTabCompleter implements TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String command, String[] args) {
         if (args.length == 2 && cmd.getName().equals("attribute")) {
-            List<String> attrs = Lists.newArrayList();
-            List<Attribute> attlist = Lists.newArrayList(Attribute.values());
             String partial = args[1];
-            attlist.removeIf(a -> !a.name().startsWith(partial.toUpperCase()));
-            attlist.forEach(at -> attrs.add(at.name()));
-            return attrs;
+            
+            return AttributeRegistry.getInstance().getAttributes().keySet().stream()
+            	.filter(a->a.toUpperCase().startsWith(partial.toUpperCase()))
+            	.map(s->s.replace(' ', '_'))
+            	.collect(Collectors.toList());
         }
         return null;
     }

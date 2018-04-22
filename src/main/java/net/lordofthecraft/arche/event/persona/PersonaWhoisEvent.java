@@ -1,28 +1,32 @@
 package net.lordofthecraft.arche.event.persona;
 
-import net.lordofthecraft.arche.interfaces.OfflinePersona;
-import net.md_5.bungee.api.chat.BaseComponent;
+import java.util.List;
+
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
-import java.util.List;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
+import net.md_5.bungee.api.chat.BaseComponent;
 
 /**
  * Event that is sent when a whois call is being made on a Persona
  * @author Sporadic
  */
 public class PersonaWhoisEvent extends OfflinePersonaEvent implements Cancellable {
-    final private List<BaseComponent> whatIsSend;
+	final private List<BaseComponent> whatIsSend;
+	final private CommandSender whosAsking;
 	final private Query query;
 	final private boolean mod;
 	final private boolean disguised;
 
-    public PersonaWhoisEvent(OfflinePersona p, List<BaseComponent> sent, Query query, boolean mod, boolean disguised) {
-        super(p);
-		this.query = query;
-		this.whatIsSend = sent;
-		this.mod = mod;
-		this.disguised = disguised;
+    public PersonaWhoisEvent(OfflinePersona p, CommandSender who, List<BaseComponent> sent, Query query, boolean mod, boolean disguised) {
+    	super(p);
+    	whosAsking = who;
+    	this.query = query;
+    	this.whatIsSend = sent;
+    	this.mod = mod;
+    	this.disguised = disguised;
 	}
 	
 	/**
@@ -44,6 +48,10 @@ public class PersonaWhoisEvent extends OfflinePersonaEvent implements Cancellabl
 	
 	public boolean isDisguised() {
 		return disguised;
+	}
+	
+	public CommandSender getWhosAsking() {
+		return whosAsking;
 	}
 	
 	/**
