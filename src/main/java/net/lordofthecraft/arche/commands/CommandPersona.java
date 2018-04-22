@@ -425,19 +425,10 @@ public class CommandPersona implements CommandExecutor {
                         sender.sendMessage(ChatColor.AQUA + "Set visible race of " + pers.getName() + " to: " + ChatColor.RESET + race);
                         return true;
                     } else if (cmd == PersonaCommand.ASSIGNGENDER) {
-                        String gender = args[1].toLowerCase();
-                        switch (gender) {
-                            case "male":
-                            case "female":
-                            case "other": {
-                                pers.setGender(gender);
-                                sender.sendMessage(ChatColor.AQUA + "Set gender of " + pers.getName() + " to: " + ChatColor.RESET + gender);
-                                return true;
-                            }
-                            default:
-                                sender.sendMessage(ChatColor.RED + "Please enter 'male', 'female', or 'other'.");
-                                return true;
-                        }
+                        String gender = args[1];
+                        pers.setGender(gender);
+                        sender.sendMessage(ChatColor.AQUA + "Set gender of " + pers.getName() + " to: " + ChatColor.RESET + gender);
+                        return true;
                     } else if (cmd == PersonaCommand.REALRACE) {
                         sender.sendMessage(ChatColor.AQUA + "Underlying for " + pers.getName() + " is: " + ChatColor.GOLD + pers.getRace().getName());
                         sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "(Visible: " + pers.getRaceString(sender.hasPermission("archecore.mod.persona")) + ")");
