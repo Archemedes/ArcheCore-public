@@ -12,8 +12,9 @@ public class AttributeRegistry {
     public static final ArcheAttribute MAX_FATIGUE = new AttributeMaxFatigue("Maximum Fatigue", 100.0);
     public static final ArcheAttribute FATIGUE_GAIN = new ArcheAttribute("Fatigue Gained", 1, false);
     public static final ArcheAttribute EXHAUSTION = new ArcheAttribute("Exhaustion", 0, false);
-    public static final ArcheAttribute MOB_DAMAGE_DEAL = new ArcheAttribute("Damage to Mobs", 1);
-    public static final ArcheAttribute MOB_DAMAGE_TAKE = new ArcheAttribute("Damage from Mobs", 1, false);
+    public static final ArcheAttribute MOB_DAMAGE_DEAL = new ArcheAttribute("Damage to Mobs", 1.0);
+    public static final ArcheAttribute MOB_DAMAGE_TAKE = new ArcheAttribute("Damage from Mobs", 1.0, false);
+    public static final ArcheAttribute REGENERATION = new ArcheAttribute("Regeneration", 1.0, false);
     public static final ArcheAttribute ARROW_DAMAGE = new ArcheAttribute("Archery Damage", 1.0);
     public static final ArcheAttribute ARROW_VELOCITY = new ArcheAttribute("Arrow Velocity", 1.0);
     public static final ArcheAttribute SHROUD = new ArcheAttribute("Shroud", 0);
@@ -32,6 +33,7 @@ public class AttributeRegistry {
         register(EXHAUSTION);
         register(MOB_DAMAGE_DEAL);
         register(MOB_DAMAGE_TAKE);
+        register(REGENERATION);
         register(ARROW_DAMAGE);
         register(ARROW_VELOCITY);
         register(SHROUD);

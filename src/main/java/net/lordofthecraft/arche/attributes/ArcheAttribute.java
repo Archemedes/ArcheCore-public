@@ -39,6 +39,10 @@ public class ArcheAttribute {
 		return defaultValue;
 	}
 	
+	public double getValue(Persona ps) {
+		return ps.attributes().getAttributeValue(this);
+	}
+	
 	public void tryApply(ArcheAttributeInstance instance) {
 		if(this.getClass() == ArcheAttribute.class) return; //200-IQ optimization it's OK to be impressed
 		Persona p = instance.getPersona().getPersona();

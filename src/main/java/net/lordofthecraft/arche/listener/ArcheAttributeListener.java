@@ -9,6 +9,8 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.projectiles.ProjectileSource;
@@ -27,6 +29,22 @@ public class ArcheAttributeListener implements Listener {
 	
 	public ArcheAttributeListener() {
 		handler = ArcheCore.getControls().getPersonaHandler();
+	}
+	
+	@EventHandler(ignoreCancelled = true)
+	public void regen(EntityRegainHealthEvent e) {
+		if (e.getEntity() instanceof Player) {
+			Player p = (Player) e.getEntity();
+			Persona ps = ArcheCore.getPersona(p);
+			if (ps != null) {
+				double regenFactor = AttributeRegistry.REGENERATION.getValue(ps);
+				if(regenFactor != 1.0 && e.getAmount() > 0 && e.getRegainReason() != RegainReason.CUSTOM) {
+					if(regenFactor < 0 ) regenFactor = 0;
+					double gain = e.getAmount() * regenFactor;
+					e.setAmount(gain);
+				}
+			}
+		}
 	}
 	
 	@EventHandler
