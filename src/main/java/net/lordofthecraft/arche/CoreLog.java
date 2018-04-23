@@ -29,7 +29,7 @@ public class CoreLog {
 	}
 	
 	public static void debug(String msg) {
-		get().fine(msg);
+		get().fine("[DEBUG] " + msg);
 	}
 	
 	private static Logger get() {
