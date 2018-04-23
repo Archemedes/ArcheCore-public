@@ -433,7 +433,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
         pm.registerEvents(new PersonaInventoryListener(), this);
         pm.registerEvents(new ArmorListener(), this);
-        pm.registerEvents(new ExhaustionListener(), this);
         pm.registerEvents(new SeasonListener(calendar), this);
         pm.registerEvents(new ArcheAttributeListener(), this);
         pm.registerEvents(new AttributeItemListener(), this);
