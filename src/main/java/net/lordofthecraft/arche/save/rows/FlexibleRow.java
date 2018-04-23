@@ -55,7 +55,7 @@ public abstract class FlexibleRow extends SingleStatementRow {
 		
 		Iterator<Entry<String, Object>> it = x.entrySet().iterator();
 		for(int i = 1; i < index; i++) it.next();
-		return it.next();
+		return it.next().getValue();
 	}
 	
 	

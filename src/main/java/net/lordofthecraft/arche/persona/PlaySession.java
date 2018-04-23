@@ -20,6 +20,7 @@ public class PlaySession {
 	
 	void endSession() {
 		ArcheCore.getConsumerControls().insert("persona_playsessions")
+			.set("persona_id_fk", persona.getPersonaId())
 			.set("login", startTime)
 			.set("logout", System.currentTimeMillis())
 			.set("locin", startLoc)
