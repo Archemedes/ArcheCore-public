@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -77,6 +78,44 @@ public class ArcheAttributeListener implements Listener {
 				if(mod != 1.0) {
 					Entity proj = e.getProjectile();
 					proj.setVelocity(proj.getVelocity().multiply(mod));
+				}
+			}
+		}
+	}
+	
+	@EventHandler(ignoreCancelled = true)
+	public void on(EntityDamageEvent e) {
+		if (e.getEntity() instanceof Player) {
+			Player p = (Player) e.getEntity();
+			Persona ps = ArcheCore.getPersona(p);
+			if (ps != null) {
+				ArcheAttribute a = null;
+				
+				switch(e.getCause()) {
+				case FIRE: case FIRE_TICK:
+					a = AttributeRegistry.FIRE_RESISTANCE;
+					break;
+				case POISON:
+					a = AttributeRegistry.POISON_RESISTANCE;
+					break;
+				case WITHER:
+					a = AttributeRegistry.WITHER_RESISTANCE;
+					break;
+				case MAGIC:
+					a = AttributeRegistry.MAGIC_RESISTANCE;
+					break;
+				case DROWNING:
+					a = AttributeRegistry.DROWNING_RESISTANCE;
+					break;
+				case BLOCK_EXPLOSION: case ENTITY_EXPLOSION:
+					a = AttributeRegistry.BLAST_RESISTANCE;
+					break;
+					default: break;
+				}
+				
+				if(a != null) {
+					double resistFactor = Math.max(0.0, 2.0 - a.getValue(ps));
+					if(resistFactor != 1.0) e.setDamage(e.getDamage() * resistFactor);
 				}
 			}
 		}

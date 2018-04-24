@@ -20,6 +20,14 @@ public class AttributeRegistry {
     public static final ArcheAttribute ARROW_VELOCITY = new ArcheAttribute("Arrow Velocity", 1.0);
     public static final ArcheAttribute SHROUD = new ArcheAttribute("Shroud", 0);
     public static final ArcheAttribute PERCEPTION = new ArcheAttribute("Perception", 0);
+    
+    //Resistance attributes
+    public static final ArcheAttribute POISON_RESISTANCE = new ArcheAttribute("Poison Resistance", 1.0);
+    public static final ArcheAttribute FIRE_RESISTANCE = new ArcheAttribute("Fire Resistance", 1.0);
+    public static final ArcheAttribute WITHER_RESISTANCE = new ArcheAttribute("Wither Resistance", 1.0);
+    public static final ArcheAttribute MAGIC_RESISTANCE = new ArcheAttribute("Magic Resistance", 1.0);
+    public static final ArcheAttribute DROWNING_RESISTANCE = new ArcheAttribute("Drowning Resistance", 1.0);
+    public static final ArcheAttribute BLAST_RESISTANCE = new ArcheAttribute("Blast Resistance", 1.0);
 
     private static AttributeRegistry INSTANCE = new AttributeRegistry();
     public Map<String, ArcheAttribute> registeredAttributes = new HashMap<>();
@@ -40,6 +48,13 @@ public class AttributeRegistry {
         register(ARROW_VELOCITY);
         register(SHROUD);
         register(PERCEPTION);
+        
+        register(POISON_RESISTANCE);
+        register(FIRE_RESISTANCE);
+        register(WITHER_RESISTANCE);
+        register(MAGIC_RESISTANCE);
+        register(DROWNING_RESISTANCE);
+        register(BLAST_RESISTANCE);
         
         for (Attribute a : Attribute.values()) {
             register(new VanillaAttribute(a.toString(), 0.0, a));
