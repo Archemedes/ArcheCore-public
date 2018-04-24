@@ -92,7 +92,7 @@ public class ArcheAttributeListener implements Listener {
 				ArcheAttribute a = null;
 				
 				switch(e.getCause()) {
-				case FIRE: case FIRE_TICK:
+				case FIRE: case FIRE_TICK: case LAVA:
 					a = AttributeRegistry.FIRE_RESISTANCE;
 					break;
 				case POISON:
@@ -113,7 +113,9 @@ public class ArcheAttributeListener implements Listener {
 				case PROJECTILE:
 					a = AttributeRegistry.PROJECTILE_RESISTANCE;
 					break;
-					
+				case LIGHTNING:
+					a = AttributeRegistry.LIGHTNING_RESISTANCE;
+					break;
 					default: break;
 				}
 				
