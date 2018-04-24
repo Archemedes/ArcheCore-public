@@ -110,6 +110,10 @@ public class ArcheAttributeListener implements Listener {
 				case BLOCK_EXPLOSION: case ENTITY_EXPLOSION:
 					a = AttributeRegistry.BLAST_RESISTANCE;
 					break;
+				case PROJECTILE:
+					a = AttributeRegistry.PROJECTILE_RESISTANCE;
+					break;
+					
 					default: break;
 				}
 				
