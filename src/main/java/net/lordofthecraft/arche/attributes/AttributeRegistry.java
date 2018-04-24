@@ -30,6 +30,7 @@ public class AttributeRegistry {
     public static final ArcheAttribute BLAST_RESISTANCE = new ArcheAttribute("Blast Resistance", 1.0);
     public static final ArcheAttribute PROJECTILE_RESISTANCE = new ArcheAttribute("Projectile Resistance", 1.0);
     public static final ArcheAttribute LIGHTNING_RESISTANCE = new ArcheAttribute("Lightning Resistance", 1.0);
+    public static final ArcheAttribute FALL_RESISTANCE = new ArcheAttribute("Fall Resistance", 1.0);
 
     private static AttributeRegistry INSTANCE = new AttributeRegistry();
     public Map<String, ArcheAttribute> registeredAttributes = new HashMap<>();
@@ -58,7 +59,8 @@ public class AttributeRegistry {
         register(DROWNING_RESISTANCE);
         register(BLAST_RESISTANCE);
         register(PROJECTILE_RESISTANCE);
-        register(LIGHTNING_RESISTANCE); 
+        register(LIGHTNING_RESISTANCE);
+        register(FALL_RESISTANCE); 
         
         for (Attribute a : Attribute.values()) {
             register(new VanillaAttribute(a.toString(), 0.0, a));

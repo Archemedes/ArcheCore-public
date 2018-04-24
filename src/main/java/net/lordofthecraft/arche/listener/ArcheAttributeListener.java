@@ -116,6 +116,9 @@ public class ArcheAttributeListener implements Listener {
 				case LIGHTNING:
 					a = AttributeRegistry.LIGHTNING_RESISTANCE;
 					break;
+				case FALL:
+					a = AttributeRegistry.FALL_RESISTANCE;
+					break;
 					default: break;
 				}
 				
