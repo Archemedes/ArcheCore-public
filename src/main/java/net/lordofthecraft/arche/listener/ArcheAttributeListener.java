@@ -88,7 +88,7 @@ public class ArcheAttributeListener implements Listener {
 		Entity damagee = e.getEntity();
 		if(damager instanceof Projectile) {
 			handleProjectile(e);
-		} else if(damager instanceof LivingEntity && damagee instanceof Player){
+		} else if(damager instanceof LivingEntity && damagee instanceof Player && !(damager instanceof Player)){
 			handleMobDamage(e, (Player) damagee, AttributeRegistry.MOB_DAMAGE_TAKE);
 		} else if (damager instanceof Player && damagee instanceof LivingEntity && !(damagee instanceof Player)) {
 			handleMobDamage(e, (Player) damager, AttributeRegistry.MOB_DAMAGE_DEAL);
