@@ -8,6 +8,7 @@ import net.lordofthecraft.arche.save.Consumer;
  *
  * @author 501warhead
  */
+@FunctionalInterface
 public interface ArcheRow {
 
     /**

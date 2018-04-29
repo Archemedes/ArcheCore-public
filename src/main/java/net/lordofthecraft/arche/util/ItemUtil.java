@@ -1,8 +1,6 @@
 package net.lordofthecraft.arche.util;
 
-import static net.lordofthecraft.arche.util.ReflectionUtil.compoundConstructor;
-import static net.lordofthecraft.arche.util.ReflectionUtil.itemNameMethod;
-import static net.lordofthecraft.arche.util.ReflectionUtil.saveToJson;
+import static net.lordofthecraft.arche.util.ReflectionUtil.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -10,9 +8,11 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
@@ -56,7 +56,6 @@ public class ItemUtil {
 	 */
 	public static ItemStack getSkullFromProfile(WrappedGameProfile profile) {
 		String value = profile.getProperties().get("textures").iterator().next().getValue();
-		System.out.println("value");
 		return getSkullFromTexture(value);
 	}
 	
@@ -114,7 +113,7 @@ public class ItemUtil {
 		}catch(Throwable t){t.printStackTrace();}
 		return null;
 	}
-	
+
 	/**
 	 * Convenience method for checking if an ItemStack is non-null and non-AIR
 	 * @param is ItemStack to check
@@ -124,19 +123,28 @@ public class ItemUtil {
 		return is != null && is.getType() != Material.AIR;
 	}
 
-    public static ItemStack make(Material mat, short durability, String displayName, String... lore) {
-        ItemStack is = new ItemStack(mat);
-        is.setDurability(durability);
-        return decorate(is, displayName, lore);
-    }
+	public static ItemStack make(Material mat, short durability, String displayName, String... lore) {
+		ItemStack is = new ItemStack(mat);
+		is.setDurability(durability);
+		return decorate(is, displayName, lore);
+	}
 
-    public static ItemStack make(Material mat, short durability, int amount, String displayName, String... lore) {
-        ItemStack is = new ItemStack(mat);
-        is.setDurability(durability);
-        is.setAmount(amount);
-        return decorate(is, displayName, lore);
-    }
-
+	public static ItemStack make(Material mat, short durability, int amount, String displayName, String... lore) {
+		ItemStack is = new ItemStack(mat);
+		is.setDurability(durability);
+		is.setAmount(amount);
+		return decorate(is, displayName, lore);
+	}
+	
+	public static ItemStack makePotion(Color color, String displayName, String... lore) {
+		ItemStack is = new ItemStack(Material.POTION);
+		PotionMeta m = (PotionMeta) is.getItemMeta();
+		m.setColor(color);
+		is.setItemMeta(m);
+		
+		return decorate(is, displayName, lore);
+	}
+	
 	/**
 	 * Conveniently make a new item.
 	 * @param mat Material of button

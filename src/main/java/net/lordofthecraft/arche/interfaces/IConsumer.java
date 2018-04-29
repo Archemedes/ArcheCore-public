@@ -24,4 +24,5 @@ public interface IConsumer {
     public FlexibleRow insertIgnore(String table);
     public FlexibleRow replace(String table);
     public FlexibleRow delete(String table);
+    public FlexibleRow update(String table);
 }

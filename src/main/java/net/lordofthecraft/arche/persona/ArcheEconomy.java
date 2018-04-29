@@ -21,13 +21,13 @@ public class ArcheEconomy implements Economy {
 	private final double lostOnDeath;
 	private final double beginnerAmount;
 	private final boolean proximity;
-    //private ArcheExecutor buffer = ArcheExecutor.getInstance();
-    private IConsumer consumer;
+	//private ArcheExecutor buffer = ArcheExecutor.getInstance();
+	private IConsumer consumer;
 
-    public ArcheEconomy(FileConfiguration config){
+	public ArcheEconomy(FileConfiguration config){
 		singular = config.getString("currency.name.singular");
 		plural = config.getString("currency.name.plural");
-		
+
 		lostOnDeath = config.getDouble("fraction.lost.on.death") / 100d;
 		beginnerAmount = config.getDouble("first.persona.money");
 		proximity = config.getBoolean("require.pay.proximity");

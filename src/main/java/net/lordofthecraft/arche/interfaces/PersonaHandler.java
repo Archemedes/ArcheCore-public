@@ -86,7 +86,7 @@ public interface PersonaHandler {
      * @param persona_id The int id of this persona
      * @return The Persona which is wrapped in an Optional
      */
-    ArcheOfflinePersona getPersonaById(int persona_id);
+    OfflinePersona getPersonaById(int persona_id);
 
     /**
      * Fetch a Player's current Persona
