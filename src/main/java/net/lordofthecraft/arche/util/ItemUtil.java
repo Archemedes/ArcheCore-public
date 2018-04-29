@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.util;
 
 import static net.lordofthecraft.arche.util.ReflectionUtil.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +21,7 @@ import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import com.comphenix.protocol.wrappers.nbt.NbtList;
 
+import io.github.archemedes.customitem.CustomTag;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TranslatableComponent;
 
@@ -176,5 +178,23 @@ public class ItemUtil {
         m.setLore(listLore);
         is.setItemMeta(m);
         return is;
+	}
+	
+	public static ItemStack boostDurability(ItemStack is, int percentage) {
+		if(percentage <= -100) throw new IllegalArgumentException("Cannot have -100% durability");
+		CustomTag tag = CustomTag.getFrom(is);
+		tag.put("durability", Integer.toString(percentage));
+		ItemMeta meta = CustomTag.applyTo(tag, is).getItemMeta();
+		
+		List<String> lore = meta.hasLore()? meta.getLore() : new ArrayList<>();
+		
+		ChatColor c = percentage < 0? ChatColor.RED : ChatColor.BLUE;
+		char plus = percentage < 0? '-' : '+';
+		String percent = Integer.toString(Math.abs(percentage));
+		
+		lore.add(c.toString() + plus + percent + "% Durability");
+		meta.setLore(lore);
+		is.setItemMeta(meta);
+		return is;
 	}
 }

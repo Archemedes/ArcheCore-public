@@ -80,13 +80,13 @@ public interface PersonaHandler {
 	 */
 	OfflinePersona getOfflinePersona(UUID player, int slot);
 
-    /**
-     * Gets the person by the <b>Persona ID</b> - This <i>is not</i> a player UUID. Persona UUID is unique to each persona
-     *
-     * @param persona_id The int id of this persona
-     * @return The Persona which is wrapped in an Optional
-     */
-    OfflinePersona getPersonaById(int persona_id);
+	/**
+	 * Gets the person by the <b>Persona ID</b> - This <i>is not</i> a player UUID. Persona UUID is unique to each persona
+	 *
+	 * @param persona_id The int id of this persona
+	 * @return The Persona which is wrapped in an Optional
+	 */
+	OfflinePersona getPersonaById(int persona_id);
 
     /**
      * Fetch a Player's current Persona

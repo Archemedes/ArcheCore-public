@@ -62,10 +62,10 @@ public class AttributeItemListener implements Listener {
 		}
 	}
 	
-	/*@EventHandler(ignoreCancelled = true)
+	@EventHandler(ignoreCancelled = true)
 	public void damage(PlayerItemDamageEvent e) {
 		ItemStack item = e.getItem();
-		String dura = CustomTag.getTagValue(item, "n_dura");
+		String dura = CustomTag.getTagValue(item, "durability");
 		
 		if(dura != null) {
 			int damage = e.getDamage();
@@ -79,7 +79,7 @@ public class AttributeItemListener implements Listener {
 			if(Math.random() < floatdamage) intdamage++;
 			e.setDamage(intdamage);
 		}
-	}*/
+	}
 	
 	private void listenToPacket() {
 		//Events this covers:

@@ -417,6 +417,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         getCommand("attribute").setTabCompleter(new CommandAttributeTabCompleter());
         getCommand("skin").setExecutor(new CommandSkin(this));
         getCommand("date").setExecutor(new CommandDate(this));
+        getCommand("durabilityboost").setExecutor(new CommandDurability());
     }
 
     private void initListeners(){

@@ -124,7 +124,7 @@ public class CommandAttribute implements CommandExecutor {
         		+ ChatColor.DARK_AQUA + "{decay-type} "
         		+ ChatColor.DARK_GREEN + "{decay-ticks} ");
         s.sendMessage(ChatColor.YELLOW + "Use /attr types for the registered ArcheAttributes");
-        s.sendMessage(ChatColor.BLUE + "remove/persona/consume/use/head/chest/legs/feet/hand/off_hand");
+        s.sendMessage(ChatColor.BLUE + "persona/consume/use/head/chest/legs/feet/hand/off_hand");
         s.sendMessage(ChatColor.GRAY + "name of modifier ( no name with prefix # or hide fully with / )");
         s.sendMessage(ChatColor.RED + "uuid: random/namebased or any valid uuid (with dashes)");
         s.sendMessage(ChatColor.GREEN + "modifier value of att (remember 0 is x1 for multipliers)");

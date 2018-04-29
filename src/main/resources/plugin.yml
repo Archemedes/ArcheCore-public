@@ -74,6 +74,12 @@ commands:
    date:
       aliases: [currentdate, lotcdate, calendar]
       description: Displays calendar date.
+   durabilityboost:
+      usage: /<command>
+      description: Add a durability boost of the held item
+      permission: archecore.mod
+      aliases: [duraboost, dub]
+      permission-message: §4Insufficient Permission for this command
 
 permissions:
   archecore.arsql:
