@@ -30,7 +30,7 @@ public class CommandDurability implements CommandExecutor {
 		if(ItemUtil.exists(is) && is.getType().getMaxDurability() > 0) {
 			 ItemUtil.boostDurability(is, NumberUtils.toInt(args[0]) );
 			 p.getInventory().setItemInMainHand(is);
-			 p.sendMessage("Boosted Durability :)");
+			 p.sendMessage(ChatColor.AQUA + "Boosted Durability of item in hand.");
 		} else {
 			p.sendMessage(ChatColor.RED + "Error: " + ChatColor.DARK_RED + " Must be holding a damageable item.");
 		}
