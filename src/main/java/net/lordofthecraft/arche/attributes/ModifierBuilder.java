@@ -78,7 +78,7 @@ public class ModifierBuilder {
 	
 	public ModifierBuilder withDecayStrategy(Decay decay, long ticks) {
 		Validate.notNull(decay);
-		Validate.isTrue(ticks > 0);
+		Validate.isTrue(ticks > 0 || decay == Decay.NEVER);
 		this.decay = decay;
 		this.ticks = ticks;
 		return this;

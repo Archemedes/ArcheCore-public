@@ -337,15 +337,18 @@ public class CommandPersona implements CommandExecutor {
                     if (cmd == PersonaCommand.NAME) {
                         int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
                         String name = StringUtils.join(args, ' ', 1, parseTo);
-
+                        boolean longname = sender.hasPermission("archecore.persona.longname");
+                        
                         long timeLeft = (pers.getRenamed().getTime() / 60000) - (System.currentTimeMillis() / 60000) + delay;
                         if (timeLeft > 0 && !sender.hasPermission("archecore.persona.quickrename")) {
-                            sender.sendMessage(ChatColor.RED + "You must wait " + timeLeft + " minutes before renaming again");
-                        } else if (name.length() <= 32 || sender.hasPermission("archecore.persona.longname")) {
-                            pers.setName(name);
-                            sender.sendMessage(ChatColor.AQUA + "Persona name was set to: " + ChatColor.RESET + name);
+                        	sender.sendMessage(ChatColor.RED + "You must wait " + timeLeft + " minutes before renaming again");
+                        } else if (name.matches("[^A-Za-zÀ-ÿ -'\\\"]") || !sender.hasPermission("archecore.mod.persona")) {
+                        	sender.sendMessage(ChatColor.RED + "Invalid Character in name. Can only use letters, quotes(\"') and dash (-)");
+                        } else if (name.length() <= 32 || (name.length() <= 64 && sender.hasPermission("archecore.persona.longname")) ) {
+                        	pers.setName(name);
+                        	sender.sendMessage(ChatColor.AQUA + "Persona name was set to: " + ChatColor.RESET + name);
                         } else {
-                            sender.sendMessage(ChatColor.RED + "Error: Name too long. Max length 32 characters");
+                        	sender.sendMessage(ChatColor.RED + "Error: Name too long! Max length " + (longname? "64":"32") + " characters.");
                         }
                         return true;
 

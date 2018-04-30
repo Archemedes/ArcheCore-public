@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import io.github.archemedes.customitem.CustomTag;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
+import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier.Decay;
 import net.md_5.bungee.api.ChatColor;
 
 public class Decorator {
@@ -80,24 +81,25 @@ public class Decorator {
 		StoredAttribute sa = StoredAttribute.fromTag(key, value);
 		
 		String beginning = beginning(sa);
+		long ticks = sa.getTicks();
 		
-		String[] parts = value.split("@");
-		long ticks = Long.parseLong(parts[4]);
-		
-		String time = null;
-		long TICKS_PER_DAY = 1728000;
-		long TICKS_PER_HOUR = 72000;
-		long TICKS_PER_MINUTE = 1200;
-		long TICKS_PER_SECOND = 20;
-		if(ticks > 2*TICKS_PER_DAY) {
-			time = Long.toString(ticks/TICKS_PER_DAY) + 'd' + Long.toString( (ticks%TICKS_PER_DAY)/TICKS_PER_HOUR ) + 'h';
-		} else if (ticks > 3*TICKS_PER_HOUR) {
-			time = Long.toString(ticks/TICKS_PER_HOUR) + 'h' + Long.toString( (ticks%TICKS_PER_HOUR)/TICKS_PER_MINUTE ) + 'm';
-		} else {
-			time = Long.toString(ticks/TICKS_PER_MINUTE) + ":" + Long.toString( (ticks%TICKS_PER_MINUTE)/TICKS_PER_SECOND );
-		}
-		
-		return beginning + " (" + time + ")";
+		if(sa.getDecayStrategy() != Decay.NEVER) {
+			String time = null;
+			long TICKS_PER_DAY = 1728000;
+			long TICKS_PER_HOUR = 72000;
+			long TICKS_PER_MINUTE = 1200;
+			long TICKS_PER_SECOND = 20;
+			if(ticks > 2*TICKS_PER_DAY) {
+				time = Long.toString(ticks/TICKS_PER_DAY) + 'd' + Long.toString( (ticks%TICKS_PER_DAY)/TICKS_PER_HOUR ) + 'h';
+			} else if (ticks > 3*TICKS_PER_HOUR) {
+				time = Long.toString(ticks/TICKS_PER_HOUR) + 'h' + Long.toString( (ticks%TICKS_PER_HOUR)/TICKS_PER_MINUTE ) + 'm';
+			} else {
+				time = Long.toString(ticks/TICKS_PER_MINUTE) + ":" + Long.toString( (ticks%TICKS_PER_MINUTE)/TICKS_PER_SECOND );
+			}
+			
+			return beginning + " (" + time + ")";
+		} else return beginning;
+
 	}
 	
 	private static String parseAttribute(String key, String value) {
