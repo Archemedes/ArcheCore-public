@@ -170,9 +170,8 @@ public class AttributeItemListener implements Listener {
 	}
 	
 	public boolean conflictUseable(Persona ps, ItemStack item) {
+		boolean maybe = false;
 		CustomTag tag = CustomTag.getFrom(item);
-		
-		if(tag.entrySet().isEmpty()) return false;
 		
 		for(Entry<String, String> entry : tag.entrySet()) {
 			String key = entry.getKey();
@@ -180,11 +179,12 @@ public class AttributeItemListener implements Listener {
 				StoredAttribute sad = StoredAttribute.fromTag(entry.getKey(), entry.getValue());
 				ArcheAttribute a = sad.getAttribute();
 				AttributeModifier m = sad.getModifier();
-				if(!ps.attributes().getInstance(a).hasModifier(m)) return false;
+				if(ps.attributes().getInstance(a).hasModifier(m)) maybe = true;
+				else return false;
 			}
 		}
 		
-		return true;
+		return maybe;
 	}
 	
 	public boolean applyUseable(Persona ps, ItemStack item) {
