@@ -13,25 +13,25 @@ import org.bukkit.block.Block;
 public class WeakBlock {
 	private final String world;
 	private final int x,y,z;
-	
+
 	public WeakBlock(World world, int x, int y, int z){
 		this.world = world.getName();
 		this.x = x;
 		this.y = y;
 		this.z = z;
 	}
-	
+
 	public WeakBlock(String world, int x, int y, int z){
 		this.world = world;
 		this.x = x;
 		this.y = y;
 		this.z = z;
 	}
-	
+
 	public WeakBlock(Block b){
 		this(b.getWorld(), b.getX(), b.getY(), b.getZ());
 	}
-	
+
 	public WeakBlock(Location location) {
 		this(location.getBlock());
 	}
@@ -40,12 +40,12 @@ public class WeakBlock {
 	public int getX(){return x;}
 	public int getY(){return y;}
 	public int getZ(){return z;}
-	
+
 	@Override
 	public int hashCode(){
 		return (this.y << 24 ^ this.x ^ this.z) + (world == null? 0 : 31 * world.hashCode());
 	}
-	
+
 	public Location toLocation(){
 		World w = Bukkit.getWorld(getWorld());
 		int x = getX();
@@ -54,17 +54,22 @@ public class WeakBlock {
 		return new Location(w, x, y, z);
 	}
 
-    public boolean isValid() {
-        return Bukkit.getWorld(world) != null;
-    }
+	public boolean isValid() {
+		return Bukkit.getWorld(world) != null;
+	}
 
-    @Override
+	@Override
 	public boolean equals(Object o){
 		if(!(o instanceof WeakBlock)) return false;
 		WeakBlock other = (WeakBlock) o;
-		
+
 		return this.x == other.x && this.y == other.y && this.z == other.z && ObjectUtils.equals(this.world, other.world);
 	}
 	
+	@Override
+	public String toString() {
+		return world + ':' + x + ':' + y + ':' + z;
+	}
+
 	
 }
