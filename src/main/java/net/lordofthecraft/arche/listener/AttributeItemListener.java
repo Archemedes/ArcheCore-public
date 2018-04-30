@@ -171,6 +171,9 @@ public class AttributeItemListener implements Listener {
 	
 	public boolean conflictUseable(Persona ps, ItemStack item) {
 		CustomTag tag = CustomTag.getFrom(item);
+		
+		if(tag.entrySet().isEmpty()) return false;
+		
 		for(Entry<String, String> entry : tag.entrySet()) {
 			String key = entry.getKey();
 			if(key.startsWith("nar_")) {
