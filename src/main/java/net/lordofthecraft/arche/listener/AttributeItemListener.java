@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.listener;
 
 import java.util.Map.Entry;
 
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -28,10 +29,12 @@ import com.comphenix.protocol.reflect.StructureModifier;
 
 import io.github.archemedes.customitem.CustomTag;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.attributes.ModifierBuilder;
 import net.lordofthecraft.arche.attributes.items.StoredAttribute;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.md_5.bungee.api.ChatColor;
 
 public class AttributeItemListener implements Listener {
 	
@@ -52,9 +55,10 @@ public class AttributeItemListener implements Listener {
 			Player p = e.getPlayer();
 			Persona ps = ArcheCore.getPersona(p);
 			if(ps != null) {
-				
-				boolean used =  applyUseable(ps, item);
-				if(used) {
+				if(conflictUseable(ps, item)) {
+					p.sendMessage(ChatColor.RED + "You won't benefit any further from using this");
+					e.setUseItemInHand(Result.DENY);
+				} else if(applyUseable(ps, item)) {
 					e.setUseItemInHand(Result.DENY);
 					item.setAmount(item.getAmount() - 1);
 				}
@@ -163,6 +167,21 @@ public class AttributeItemListener implements Listener {
 	
 	public boolean applyConsumable(Persona ps, ItemStack item) {
 		return apply(ps, item, "nac_");
+	}
+	
+	public boolean conflictUseable(Persona ps, ItemStack item) {
+		CustomTag tag = CustomTag.getFrom(item);
+		for(Entry<String, String> entry : tag.entrySet()) {
+			String key = entry.getKey();
+			if(key.startsWith("nar_")) {
+				StoredAttribute sad = StoredAttribute.fromTag(entry.getKey(), entry.getValue());
+				ArcheAttribute a = sad.getAttribute();
+				AttributeModifier m = sad.getModifier();
+				if(!ps.attributes().getInstance(a).hasModifier(m)) return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	public boolean applyUseable(Persona ps, ItemStack item) {
