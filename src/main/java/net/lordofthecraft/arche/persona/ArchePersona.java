@@ -29,6 +29,7 @@ import com.google.common.collect.Sets;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
+import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.persona.PersonaFatigueEvent;
@@ -194,14 +195,13 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
         consumer.queueRow(new UpdatePersonaRow(this, PersonaField.PREFIX, prefix));
     }
 
-    void updateDisplayName() {
-        Player p = getPlayer();
-        if (handler.willModifyDisplayNames() && p != null) {
-            if (hasPrefix() && ArcheCore.getPlugin().arePrefixesEnabled())
-                p.setDisplayName("[" + getPrefix() + "] " + name);
-            else
-                p.setDisplayName(name);
-        }
+	public void updateDisplayName() {
+		Player p = getPlayer();
+		if (handler.willModifyDisplayNames() && p != null) {
+			if(AttributeRegistry.SHROUD.getValue(this) > 0 ) p.setDisplayName("Shrouded (("+ p.getName() +"))");
+			else if (hasPrefix() && ArcheCore.getPlugin().arePrefixesEnabled()) p.setDisplayName("[" + getPrefix() + "] " + name);
+			else p.setDisplayName(name);
+		}
 	}
 
 	/**

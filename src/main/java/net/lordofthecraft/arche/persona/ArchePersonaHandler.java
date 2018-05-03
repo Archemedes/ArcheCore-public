@@ -328,10 +328,9 @@ public class ArchePersonaHandler implements PersonaHandler {
         //Now we add all the actual relevant Persona tags in a list called subresult.
         List<BaseComponent> subresult = Lists.newArrayList();
 
-        subresult.add(new TextComponent(c + "Name: " + r + op.getName()));
-
         boolean disguised = op.isLoaded()? !canPerceive(op.getPersona(), whosAsking) : false;
         if(!disguised || mod) {
+        	subresult.add(new TextComponent(c + "Name: " + r + op.getName()));
         	int birthyear = op.getDateOfBirth();
         	int age = op.getAge();
         	if(birthyear > 0) subresult.add(new TextComponent(c + "Age: " + r + age + u + " (born in " + r + birthyear + u + ")"));

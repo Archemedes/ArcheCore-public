@@ -1,11 +1,16 @@
 package net.lordofthecraft.arche.attributes;
 
-import org.apache.commons.lang.Validate;
-import org.bukkit.attribute.Attribute;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+
+import org.apache.commons.lang.Validate;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Player;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.persona.ArchePersona;
 
 public class AttributeRegistry {
 
@@ -18,8 +23,15 @@ public class AttributeRegistry {
     public static final ArcheAttribute HUNGER = new ArcheAttribute("Hunger", 1.0, false);
     public static final ArcheAttribute ARROW_DAMAGE = new ArcheAttribute("Archery Damage", 1.0);
     public static final ArcheAttribute ARROW_VELOCITY = new ArcheAttribute("Arrow Velocity", 1.0);
-    public static final ArcheAttribute SHROUD = new ArcheAttribute("Shroud", 0);
     public static final ArcheAttribute PERCEPTION = new ArcheAttribute("Perception", 0);
+
+    public static final ArcheAttribute SHROUD = new ArcheAttribute("Shroud", 0) {
+    	@Override public void calibrate(Player p, double value){ 
+    		Optional.ofNullable(ArcheCore.getPersona(p))
+    		.map(ArchePersona.class::cast)
+    		.ifPresent(ArchePersona::updateDisplayName);
+    	}
+    };
     
     //Resistance attributes
     public static final ArcheAttribute POISON_RESISTANCE = new ArcheAttribute("Poison Resistance", 1.0);
