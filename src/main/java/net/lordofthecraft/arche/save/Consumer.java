@@ -97,20 +97,18 @@ public final class Consumer extends TimerTask implements IConsumer {
             return;
         }
         
-        final Connection conn = handler.getConnection();
-        Statement state = null;
         final long starttime = System.currentTimeMillis();
         if (queue.size() >= warningSize) {
             pl.getLogger().warning("[Consumer] Warning! The Consumer Queue is overloaded! The size of the queue is " + queue.size() + " which is " + (queue.size() - warningSize) + " over our set threshold of " + warningSize + "! We're still running, but this should be looked into!");
         }
         int count = 0;
-        try {
+        try(Connection conn = handler.getConnection(); Statement state = conn.createStatement();) {
             if (conn == null) {
                 pl.getLogger().severe("[Consumer] Consumer failed to start, we could not Connect to the Database.");
                 return;
             }
             conn.setAutoCommit(false);
-            state = conn.createStatement();
+            
             PreparedStatement[] pending = null;
 
             while (bypassForce || System.currentTimeMillis() - starttime < timePerRun 
@@ -190,8 +188,6 @@ public final class Consumer extends TimerTask implements IConsumer {
             pl.getLogger().log(Level.SEVERE, "[Consumer] We failed to complete Consumer SQL Processes.", ex);
         } finally {
             StatementRow.close();
-            SQLUtil.close(state);
-            SQLUtil.close(conn);
 
             long time = System.currentTimeMillis() - starttime;
             pl.getLogger().info("[Consumer] Finished saving in " + time + "ms.");
