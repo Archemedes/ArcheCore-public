@@ -69,7 +69,7 @@ public class AttributeItemListener implements Listener {
 	@EventHandler(ignoreCancelled = true)
 	public void damage(PlayerItemDamageEvent e) {
 		ItemStack item = e.getItem();
-		String dura = CustomTag.getTagValue(item, "durability");
+		String dura = CustomTag.getTagValue(item, "n_durab");
 		
 		if(dura != null) {
 			int damage = e.getDamage();

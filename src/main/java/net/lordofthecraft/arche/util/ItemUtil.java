@@ -183,7 +183,7 @@ public class ItemUtil {
 	public static ItemStack boostDurability(ItemStack is, int percentage) {
 		if(percentage <= -100) throw new IllegalArgumentException("Cannot have -100% durability");
 		CustomTag tag = CustomTag.getFrom(is);
-		tag.put("durability", Integer.toString(percentage));
+		tag.put("n_durab", Integer.toString(percentage));
 		ItemMeta meta = CustomTag.applyTo(tag, is).getItemMeta();
 		
 		List<String> lore = meta.hasLore()? meta.getLore() : new ArrayList<>();
