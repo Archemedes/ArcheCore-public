@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.util.CommandUtil;
+import net.lordofthecraft.arche.util.MessageUtil;
 
 public class CommandNamelog implements CommandExecutor {
 
@@ -23,7 +24,8 @@ public class CommandNamelog implements CommandExecutor {
 				sender.sendMessage(ChatColor.RED + "Error: Persona not found");
 			} else {
 				Set<String> pastNames = persona.getPastNames();
-				sender.sendMessage(ChatColor.AQUA + "Showing all the used names of " + ChatColor.RESET);
+				sender.sendMessage(ChatColor.AQUA + "Showing all the used names of " 
+						+ ChatColor.RESET + MessageUtil.identifyPersona(persona));
 				sender.sendMessage(StringUtils.join(pastNames, ", "));
 			}
 				
