@@ -342,9 +342,9 @@ public class CommandPersona implements CommandExecutor {
                         long timeLeft = (pers.getRenamed().getTime() / 60000) - (System.currentTimeMillis() / 60000) + delay;
                         if (timeLeft > 0 && !sender.hasPermission("archecore.persona.quickrename")) {
                         	sender.sendMessage(ChatColor.RED + "You must wait " + timeLeft + " minutes before renaming again");
-                        } else if (name.matches("[^A-Za-zÀ-ÿ -'\\\"]") || !sender.hasPermission("archecore.mod.persona")) {
+                        } else if (name.matches(".*[^A-Za-zÀ-ÿ \\-'\"].*") && !sender.hasPermission("archecore.mod.persona")) {	
                         	sender.sendMessage(ChatColor.RED + "Invalid Character in name. Can only use letters, quotes(\"') and dash (-)");
-                        } else if (name.length() <= 32 || (name.length() <= 64 && sender.hasPermission("archecore.persona.longname")) ) {
+                        } else if (name.length() <= 32 || (name.length() <= 64 && longname) ) {
                         	pers.setName(name);
                         	sender.sendMessage(ChatColor.AQUA + "Persona name was set to: " + ChatColor.RESET + name);
                         } else {

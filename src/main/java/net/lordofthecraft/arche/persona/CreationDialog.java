@@ -246,7 +246,7 @@ public class CreationDialog {
         public String getPromptText(ConversationContext context) {
             Player p = (Player) context.getForWhom();
             String pretext = "Please type a name for your Roleplay Persona!";
-            String affix = "\n" + NOTE + "You may only change your Persona's name every 2 hours.";
+            String affix = "\n" + NOTE + "You can only use letters, quotes(\"') and dash (-)";
 
             return pretext + (p.hasPermission("archecore.persona.quickrename") ? "" : affix) + DIVIDER;
         }
@@ -256,9 +256,8 @@ public class CreationDialog {
             Player p = (Player) context.getForWhom();
 
             if (input.startsWith("/")) return false;
-            String lower = input.toLowerCase();
-            return !lower.contains("help") && !lower.contains("hello") && !lower.contains("why") && !lower.contains("?") && (p.hasPermission("archecore.longname") || input.length() <= 32);
-
+            if (input.matches(".*[^A-Za-zÀ-ÿ \\-'\"].*")) return false;
+            return ( (p.hasPermission("archecore.longname") && input.length() <= 64) || input.length() <= 32);
         }
 
         @Override
