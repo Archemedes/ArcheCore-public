@@ -29,6 +29,7 @@ import com.comphenix.protocol.reflect.StructureModifier;
 
 import io.github.archemedes.customitem.CustomTag;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.attributes.ModifierBuilder;
@@ -68,20 +69,27 @@ public class AttributeItemListener implements Listener {
 	
 	@EventHandler(ignoreCancelled = true)
 	public void damage(PlayerItemDamageEvent e) {
-		ItemStack item = e.getItem();
-		String dura = CustomTag.getTagValue(item, "n_durab");
 		
-		if(dura != null) {
-			int damage = e.getDamage();
-			double durability = Integer.parseInt(dura);
-			durability /= 100;
-			durability = 1 / ( 1 + durability);
-
-			double newDamage = damage * durability;
-			int intdamage = (int) newDamage;
-			double floatdamage = newDamage - intdamage;
-			if(Math.random() < floatdamage) intdamage++;
-			e.setDamage(intdamage);
+		ItemStack item = e.getItem();
+		try {
+			String dura = CustomTag.getTagValue(item, "n_durab");
+			
+			if(dura != null) {
+				int damage = e.getDamage();
+				double durability = Integer.parseInt(dura);
+				durability /= 100;
+				durability = 1 / ( 1 + durability);
+	
+				double newDamage = damage * durability;
+				int intdamage = (int) newDamage;
+				double floatdamage = newDamage - intdamage;
+				if(Math.random() < floatdamage) intdamage++;
+				e.setDamage(intdamage);
+			}	
+		} catch(Exception exception) {
+			CoreLog.warning("During Item Damage Event, Could not handle the durability CustomTag on an item:");
+			CoreLog.warning(item.toString());
+			exception.printStackTrace();
 		}
 	}
 	
