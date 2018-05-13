@@ -1,16 +1,20 @@
 package net.lordofthecraft.arche.util;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.apache.commons.lang.ObjectUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 /**
  * Represents a block that does not keep strong references to any CraftBukkit or Minecraft objects, allowing for
  * worry-free storage of them into Collections.
  */
-public class WeakBlock {
+public class WeakBlock implements ConfigurationSerializable {
 	private final String world;
 	private final int x,y,z;
 
@@ -27,9 +31,18 @@ public class WeakBlock {
 		this.y = y;
 		this.z = z;
 	}
+	
 
 	public WeakBlock(Block b){
 		this(b.getWorld(), b.getX(), b.getY(), b.getZ());
+	}
+	
+	public static WeakBlock deserialize(Map<String, Object> map) {
+		return new WeakBlock(map.get("world").toString(), 
+				(int) map.get("x"),
+				(int) map.get("y"),
+				(int) map.get("z")
+				);
 	}
 
 	public WeakBlock(Location location) {
@@ -71,5 +84,14 @@ public class WeakBlock {
 		return world + ':' + x + ':' + y + ':' + z;
 	}
 
+	@Override
+	public Map<String, Object> serialize() {
+		Map<String, Object> r = new LinkedHashMap<>();
+		r.put("world", world);
+		r.put("x", x);
+		r.put("y", y);
+		r.put("z", z);
+		return r;
+	}
 	
 }

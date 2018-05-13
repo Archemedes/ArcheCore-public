@@ -30,6 +30,7 @@ import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -215,7 +216,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
     	if(!Bukkit.getServer().spigot().getConfig().getBoolean("settings.late-bind")) {
     		getLogger().warning("late-bind is set to FALSE in spigot.yml! This hinders persona loading of early joiners!");
     	}
-        instance = this;
+    	instance = this;
+
+    	ConfigurationSerialization.registerClass(WeakBlock.class, "WeakBlock");
     }
 
     @Override
