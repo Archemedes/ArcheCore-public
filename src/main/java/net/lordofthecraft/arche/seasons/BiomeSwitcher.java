@@ -38,7 +38,7 @@ public class BiomeSwitcher{
 							boolean groundUpContinuous = packet.getBooleans().read(0);
 							if(!groundUpContinuous) return; //Don't change this chunk
 							ChunkInfo info = new ChunkInfo(event.getPlayer(), packet.getIntegers().readSafely(2), 0, true, packet.getByteArrays().readSafely(0), 0);
-							BiomeSwitcher.this.translateChunkInfo(info, Season.WINTER);
+							BiomeSwitcher.this.translateChunkInfo(info);
 						}		
 					}
 				}).start();
@@ -63,7 +63,7 @@ public class BiomeSwitcher{
 		this.winter.set(winter);
 	}
 
-	protected final boolean translateChunkInfo(final ChunkInfo info, final Season season) {
+	protected final boolean translateChunkInfo(final ChunkInfo info) {
 		if (info.hasContinous) {
 			for (int i = info.data.length - 256; i < info.data.length; ++i) {
 				final byte biome = info.data[i];
