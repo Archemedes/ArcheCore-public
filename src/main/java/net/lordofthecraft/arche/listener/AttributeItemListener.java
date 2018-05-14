@@ -88,6 +88,7 @@ public class AttributeItemListener implements Listener {
 			}	
 		} catch(Exception exception) {
 			CoreLog.warning("During Item Damage Event, Could not handle the durability CustomTag on an item:");
+			CoreLog.warning("Affected Player: " + e.getPlayer().getName());
 			CoreLog.warning(item.toString());
 			exception.printStackTrace();
 		}

@@ -12,6 +12,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 
 public class BiomeSwitcher{
 	private final AtomicBoolean winter;
@@ -28,7 +29,7 @@ public class BiomeSwitcher{
 	}
 	
 	public void startListening() {
-		
+		CoreLog.info("Starting up into Winter: " + winter.get());
 		if(switchBiomes) ProtocolLibrary.getProtocolManager().getAsynchronousManager().registerAsyncHandler(
 				new PacketAdapter(plugin, PacketType.Play.Server.MAP_CHUNK) {
 					public void onPacketSending(final PacketEvent event) {
@@ -61,6 +62,7 @@ public class BiomeSwitcher{
 
 	public void setWinter(final boolean winter) {
 		this.winter.set(winter);
+		CoreLog.info("Setting us to Winter: " + winter);
 	}
 
 	protected final boolean translateChunkInfo(final ChunkInfo info) {
