@@ -1,7 +1,9 @@
-package net.lordofthecraft.arche.seasons;
+package net.lordofthecraft.arche.event;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+
+import net.lordofthecraft.arche.seasons.Month;
 
 public class MonthChangeEvent extends Event
 {
