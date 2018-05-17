@@ -1,20 +1,17 @@
 package net.lordofthecraft.arche.persona;
 
-import org.bukkit.Location;
-
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.util.WeakBlock;
 
 public class PlaySession {
 	private final Persona persona;
 	private final long startTime;
-	private final Location startLoc;
 	private final int startPlaytime;
 	
 	PlaySession(Persona persona){
 		this.persona = persona;
 		startTime = System.currentTimeMillis();
-		startLoc = persona.getPlayer().getLocation();
 		startPlaytime = persona.getTimePlayed();
 	}
 	
@@ -23,8 +20,7 @@ public class PlaySession {
 			.set("persona_id_fk", persona.getPersonaId())
 			.set("login", startTime)
 			.set("logout", System.currentTimeMillis())
-			.set("locin", startLoc)
-			.set("locout", persona.getPlayer().getLocation())
+			.set("loc", new WeakBlock(persona.getPlayer().getLocation()))
 			.set("time_played", persona.getTimePlayed() - startPlaytime)
 			.queue();
 	}

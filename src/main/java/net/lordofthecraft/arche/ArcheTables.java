@@ -189,12 +189,11 @@ public final class ArcheTables {
     }
     
     protected static void createPersonaSessions(Statement statement, String end) throws SQLException {
-      statement.execute("CREATE TABLE IF NOT EXISTS persona_playsessions (" +
+      statement.execute("CREATE TABLE IF NOT EXISTS persona_sessions (" +
               "persona_id_fk INT UNSIGNED," +
               "login LONG," +
               "logout LONG," +
-              "locin TEXT," +
-              "locout TEXT," +
+              "loc TEXT," +
               "time_played INT" +
               ")" +
               end);
