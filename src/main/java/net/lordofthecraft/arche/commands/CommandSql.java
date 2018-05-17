@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class CommandSql implements CommandExecutor {
 
@@ -25,25 +26,22 @@ public class CommandSql implements CommandExecutor {
             //This removes comments from the SQL command.
             //Things like DR/**/OP DATABASE archecore; would be possible otherwise.
             statement = statement.replace("/*", "").replace("*/", "");
-            statement = statement.substring(statement.lastIndexOf(';')); //Preventing SELECT * FROM persona;DROP persona;
-            Connection c = null;
-            try{
-                c = ArcheCore.getControls().getSQLHandler().getConnection();
+            if(statement.contains(";")) statement = statement.substring(0, statement.indexOf(";"))+1; //Preventing SELECT * FROM persona;DROP persona;
+            try(Connection c = ArcheCore.getControls().getSQLHandler().getConnection(); Statement stat = c.createStatement()){
+                	if (!("2b8176ac-89fc-47c8-99a5-4ed206380c2b".equals(p.getUniqueId().toString()) //501warhead
+                			|| "eab9533c-9961-4e7d-aa0a-cc3e21fe8d48".equals(p.getUniqueId().toString())) //Awe
+                			) {
+                	sender.sendMessage(ChatColor.RED + "Error: DROP and DELETE statements should be either run through command line or run by 501warhead/Sporadic. Contact 501warhead or Sporadic for information.");
+                	sender.sendMessage(ChatColor.GRAY + "Note: This is to prevent commands from being run where you cannot see the full command and may make an error. You are fully capable of running this command from commandline and are encouraged to do so.");
+                	return true;
+                }
+                
                 boolean query = statement.toUpperCase().contains("SELECT");
-                boolean dangerous = statement.toUpperCase().contains("DROP") || statement.toUpperCase().contains("DELETE");
                 if (!query) {
-                    if (dangerous && !("2b8176ac-89fc-47c8-99a5-4ed206380c2b".equals(p.getUniqueId().toString()) //501warhead
-                            || "0c4846c1-975f-493b-b931-91d725125e0f".equals(p.getUniqueId().toString()) //Theryn
-                            || "eab9533c-9961-4e7d-aa0a-cc3e21fe8d48".equals(p.getUniqueId().toString())) //Awe
-                            ) {
-                        sender.sendMessage(ChatColor.RED + "Error: DROP and DELETE statements should be either run through command line or run by 501warhead/Sporadic. Contact 501warhead or Sporadic for information.");
-                        sender.sendMessage(ChatColor.GRAY + "Note: This is to prevent commands from being run where you cannot see the full command and may make an error. You are fully capable of running this command from commandline and are encouraged to do so.");
-                        return true;
-                    }
-                    int rows = c.createStatement().executeUpdate(statement);
+                    int rows = stat.executeUpdate(statement);
                     sender.sendMessage("Rows Affected: " + rows);
                 } else {
-                    ResultSet rs = c.createStatement().executeQuery(statement);
+                    ResultSet rs = stat.executeQuery(statement);
                     int count = 1;
                     while (rs.next() && count < 11) {
                         p.sendMessage(ChatColor.GOLD + "===> Row " + count);
@@ -58,18 +56,8 @@ public class CommandSql implements CommandExecutor {
                     }
                     sender.sendMessage("End of Results.");
                 }
-                /*boolean result = c.createStatement().execute(statement);
-				sender.sendMessage("Returned boolean: " + result);*/
             } catch (SQLException e) {
                 sender.sendMessage("SQLException: " + e);
-            } finally {
-                if (c != null) {
-                    try {
-                        c.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
             }
         }
 		
