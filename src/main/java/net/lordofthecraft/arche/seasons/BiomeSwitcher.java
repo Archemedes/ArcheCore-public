@@ -62,7 +62,7 @@ public class BiomeSwitcher{
 
 	public void setWinter(final boolean winter) {
 		this.winter.set(winter);
-		CoreLog.info("Setting us to Winter: " + winter);
+		CoreLog.debug("Setting us to Winter: " + winter);
 	}
 
 	protected final boolean translateChunkInfo(final ChunkInfo info) {

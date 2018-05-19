@@ -6,6 +6,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.Bukkit;
 
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.event.MonthChangeEvent;
 
 public class LotcianCalendar {
@@ -17,7 +18,7 @@ public class LotcianCalendar {
     
     public LotcianCalendar(List<String> trackedWorlds, boolean switchBiomes, int offsetYears) {
     	long millis = System.currentTimeMillis();
-        millis += (0.5* DateUtils.MILLIS_PER_DAY);
+        millis += (DateUtils.MILLIS_PER_DAY/2);
         long MILLIS_PER_WEEK = 7 * DateUtils.MILLIS_PER_DAY;
         int year = (int)(millis / MILLIS_PER_WEEK) - 860;
         millis %= MILLIS_PER_WEEK;
@@ -54,7 +55,10 @@ public class LotcianCalendar {
         	day += 1;
         	if(day > LotcianDate.DAYS_PER_MONTH) {
         		day = 1;
-
+        		
+        		CoreLog.info("Initiating a calendar month switch from " + month.getName() + " to " + month.nextMonth().getName());
+        		CoreLog.info("Month switch caused by an increment of " + millis + " leading to daytick=" + newtick);
+        		
         		if(month.getSeason() == Season.WINTER && month.nextMonth().getSeason() != Season.WINTER) {
         			switcher.setWinter(false);
         			runnable.refreshAllChunks();

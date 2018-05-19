@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -58,7 +59,7 @@ public class CalendarRunnable extends BukkitRunnable
     
     @Override
     public void run() {
-    	final long time = System.currentTimeMillis();
+    	final long time = System.currentTimeMillis() + (DateUtils.MILLIS_PER_DAY/2);
     	final long dt = time - this.lastUpdate;
     	this.calendar.increment(dt);
     	this.lastUpdate = time;
