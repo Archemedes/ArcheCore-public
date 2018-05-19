@@ -16,11 +16,15 @@ public class PlaySession {
 	}
 	
 	void endSession() {
+		WeakBlock wb = new WeakBlock(persona.getPlayer().getLocation());
 		ArcheCore.getConsumerControls().insert("persona_playsessions")
 			.set("persona_id_fk", persona.getPersonaId())
 			.set("login", startTime)
 			.set("logout", System.currentTimeMillis())
-			.set("loc", new WeakBlock(persona.getPlayer().getLocation()))
+			.set("world", wb.getWorld())
+			.set("x", wb.getX())
+			.set("y", wb.getY())
+			.set("z", wb.getZ())
 			.set("time_played", persona.getTimePlayed() - startPlaytime)
 			.queue();
 	}

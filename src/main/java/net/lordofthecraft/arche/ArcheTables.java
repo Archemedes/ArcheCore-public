@@ -193,7 +193,10 @@ public final class ArcheTables {
               "persona_id_fk INT UNSIGNED," +
               "login LONG," +
               "logout LONG," +
-              "loc TEXT," +
+              "world TEXT," +
+              "x INT," +
+              "y INT," +
+              "z INT," +
               "time_played INT" +
               ")" +
               end);
