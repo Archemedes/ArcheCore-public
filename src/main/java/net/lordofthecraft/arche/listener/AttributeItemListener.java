@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.listener;
 
 import java.util.Map.Entry;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
@@ -72,9 +73,9 @@ public class AttributeItemListener implements Listener {
 		
 		ItemStack item = e.getItem();
 		try {
-			String dura = CustomTag.getTagValue(item, "n_durab");
+			String dura = CustomTag.getTagValue(item, "dura_boost");
 			
-			if(dura != null) {
+			if(!StringUtils.isEmpty(dura)) {
 				int damage = e.getDamage();
 				double durability = Integer.parseInt(dura);
 				durability /= 100;
