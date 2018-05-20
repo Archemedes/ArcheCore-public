@@ -17,7 +17,7 @@ public class PlaySession {
 	
 	void endSession() {
 		WeakBlock wb = new WeakBlock(persona.getPlayer().getLocation());
-		ArcheCore.getConsumerControls().insert("persona_playsessions")
+		ArcheCore.getConsumerControls().insert("persona_sessions")
 			.set("persona_id_fk", persona.getPersonaId())
 			.set("login", startTime)
 			.set("logout", System.currentTimeMillis())
