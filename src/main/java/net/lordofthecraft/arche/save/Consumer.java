@@ -109,17 +109,12 @@ public final class Consumer extends TimerTask implements IConsumer {
             pl.getLogger().warning("[Consumer] Warning! The Consumer Queue is overloaded! The size of the queue is " + queue.size() + " which is " + (queue.size() - warningSize) + " over our set threshold of " + warningSize + "! We're still running, but this should be looked into!");
         }
         int count = 0;
-        try(Connection conn = handler.getConnection(); Statement state = conn.createStatement();) {
-            if (conn == null) {
-                pl.getLogger().severe("[Consumer] Consumer failed to start, we could not Connect to the Database.");
-                return;
-            }
+        try(Connection conn = handler.getConnection(); Statement state = conn.createStatement()) {
             conn.setAutoCommit(false);
             
             PreparedStatement[] pending = null;
 
-            while (bypassForce || System.currentTimeMillis() - starttime < timePerRun 
-            		|| count < forceToProcess*(pending == null? 1:1.5) ) {
+            while (bypassForce || System.currentTimeMillis() - starttime < timePerRun|| count < forceToProcess*(pending == null? 1:1.5) ) {
                 ArcheRow row = queue.poll();
                 if (row == null) break;
                 
@@ -166,11 +161,13 @@ public final class Consumer extends TimerTask implements IConsumer {
                 } catch (SQLException e) {
                     pl.getLogger().log(Level.SEVERE, "[Consumer] SQL exception on " + row.getClass().getSimpleName() + ": ", e);
                     pl.getLogger().log(Level.SEVERE, "[Consumer] Statement body: " + row.toString());
-                    Arrays.stream(pending).forEach(ps -> {
-                        pl.getLogger().severe("Lost Statement: " + String.valueOf(ps));
-                        SQLUtil.close(ps);
-                    });
-                    pending = null;
+                    if(pending != null) {
+                    	Arrays.stream(pending).forEach(ps -> {
+                    		pl.getLogger().severe("Lost Statement: " + String.valueOf(ps));
+                    		SQLUtil.close(ps);
+                    	});
+                    	pending = null;
+                    }
                     continue;
                 } finally {
                     if (conn.isClosed()) {
@@ -187,8 +184,7 @@ public final class Consumer extends TimerTask implements IConsumer {
                 }
 
                 count++;
-                if (debugConsumer)
-                    pl.getLogger().info("[Consumer] took " + (System.currentTimeMillis() - taskstart) + "ms for " + row.getClass().getSimpleName());
+                if (debugConsumer) pl.getLogger().info("[Consumer] took " + (System.currentTimeMillis() - taskstart) + "ms for " + row.getClass().getSimpleName());
             }
             conn.commit();
         } catch (final SQLException ex) {
@@ -197,7 +193,7 @@ public final class Consumer extends TimerTask implements IConsumer {
             StatementRow.close();
 
             long time = System.currentTimeMillis() - starttime;
-            pl.getLogger().info("[Consumer] Finished saving in " + time + "ms.");
+            pl.getLogger().info("[Consumer] Finished handling " + count + " rows in " + time + "ms.");
             if (debugConsumer && count > 0) {
                 pl.getLogger().log(Level.INFO, "[Consumer] Total rows processed: " + count + ". " + queue.size() + " rows left in queue");
             } else if (count == 0) {
