@@ -25,4 +25,9 @@ public interface IConsumer {
     public FlexibleRow replace(String table);
     public FlexibleRow delete(String table);
     public FlexibleRow update(String table);
+
+    /**
+     * Run until entire consumer is empty
+     */
+		void runForced();
 }

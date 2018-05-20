@@ -179,8 +179,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         getServer().getScheduler().cancelTasks(this);
         if (archeConsumer != null) {
             getLogger().info("[Consumer] Proceeding to shutdown SQL Consumer...");
-            archeConsumer.bypassForce();
-            archeConsumer.run();
+            archeConsumer.runForced();
             if (archeConsumer.getQueueSize() > 0) {
                 int tries = 9;
                 while (archeConsumer.getQueueSize() > 0) {

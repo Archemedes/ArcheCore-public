@@ -68,7 +68,7 @@ public final class Consumer extends TimerTask implements IConsumer {
     	return new FlexibleUpdateRow(table);
     }
     
-    public void bypassForce() {
+    public synchronized void bypassForce() {
         bypassForce = true;
     }
     
@@ -87,6 +87,13 @@ public final class Consumer extends TimerTask implements IConsumer {
         return queue.size();
     }
 
+    @Override
+    public synchronized void runForced() {
+    	this.bypassForce = true;
+    	run();
+    	this.bypassForce = false;
+    }
+    
     @Override
     public synchronized void run() {
         if (debugConsumer) {
