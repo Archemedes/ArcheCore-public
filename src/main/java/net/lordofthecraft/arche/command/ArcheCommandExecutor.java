@@ -37,8 +37,7 @@ public class ArcheCommandExecutor implements CommandExecutor {
 			args.remove(0);
 			runCommand(sender, subCommand, args);
 		} else {
-			RanCommand c = new RanCommand(command);
-			
+			RanCommand c = new RanCommand(command, args);
 		}
 		
 	}
