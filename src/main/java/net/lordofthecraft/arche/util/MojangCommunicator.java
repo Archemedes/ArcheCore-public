@@ -10,7 +10,9 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -160,30 +162,46 @@ public class MojangCommunicator {
         }
     }
     
-    public static String requestCurrentUsername(UUID uuid) throws IOException {
-    	String uuid_string = uuid.toString().replaceAll("-", "");
+		public static List<String> requestAllUsernames(UUID uuid) throws IOException{
+			List<String> result = new ArrayList<>();
+			JSONArray names = requestUsernamesJson(uuid);
+    	for(Object n : names) {
+    		JSONObject name = (JSONObject) n;
+    		result.add(String.valueOf(name.get("name")));
+    	}
     	
-        InputStreamReader in = null;
-        HttpURLConnection con = null;
+    	return result;
+    }
+    
+    public static String requestCurrentUsername(UUID uuid) throws IOException {
+  		JSONArray names = requestUsernamesJson(uuid);
+  		JSONObject firstName = (JSONObject) names.get(names.size() - 1);
+  		return String.valueOf(firstName.get("name"));
+    }
+    
+    private static JSONArray requestUsernamesJson(UUID uuid) throws IOException{
+    	String uuid_string = uuid.toString().replaceAll("-", "");
 
-		try {//Request player profile from mojang api
-			URL url;
-			url = new URL("https://api.mojang.com/user/profiles/"+uuid_string+"/names");
-			con = (HttpURLConnection) url.openConnection();
-			con.setRequestMethod("GET");
-			con.setDoInput(true);
-			in = new InputStreamReader(con.getInputStream());
+    	InputStreamReader in = null;
+    	HttpURLConnection con = null;
 
-			JSONParser parser = new JSONParser();
-			JSONArray result = (JSONArray) parser.parse(in);
-			JSONObject firstName = (JSONObject) result.get(result.size() - 1);
-			return String.valueOf(firstName.get("name"));
-        }catch(ParseException e) {
-        	throw new RuntimeException();
-        } finally {
-            if (in != null) in.close();
-            if (con != null) con.disconnect();
-        }
+    	try {//Request player profile from mojang api
+    		URL url;
+    		url = new URL("https://api.mojang.com/user/profiles/"+uuid_string+"/names");
+    		con = (HttpURLConnection) url.openConnection();
+    		con.setRequestMethod("GET");
+    		con.setDoInput(true);
+    		in = new InputStreamReader(con.getInputStream());
+
+    		JSONParser parser = new JSONParser();
+    		JSONArray result = (JSONArray) parser.parse(in);
+    		return result;
+    	}catch(ParseException e) {
+    		throw new RuntimeException();
+    	} finally {
+    		if (in != null) in.close();
+    		if (con != null) con.disconnect();
+    	}
     }
     
     public static UUID requestPlayerUUID(String name) throws IOException {
