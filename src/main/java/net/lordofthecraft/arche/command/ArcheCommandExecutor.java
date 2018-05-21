@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender;
 import com.google.common.collect.Lists;
 
 import lombok.RequiredArgsConstructor;
+import net.lordofthecraft.arche.interfaces.Persona;
 
 @RequiredArgsConstructor
 public class ArcheCommandExecutor implements CommandExecutor {
@@ -27,7 +28,7 @@ public class ArcheCommandExecutor implements CommandExecutor {
 
 	private void runCommand(CommandSender sender, ArcheCommand command, List<String> args) {
 		if("help".equals(args.get(0))) {
-			//TODO: help output
+			help(sender, command);
 			return;
 		}
 		
@@ -35,16 +36,29 @@ public class ArcheCommandExecutor implements CommandExecutor {
 		if(subCommand != null) {
 			args.remove(0);
 			runCommand(sender, subCommand, args);
+		} else if (wantsHelpFlag(args)) {
+			help(sender, command);
 		} else {
-			RanCommand c = new RanCommand(command, args);
+			RanCommand c = new RanCommand(command, sender);
+			c.parseAll(args);
+			
+			if(c.isInErrorState()) {
+				//TODO
+			}
 		}
 		
 	}
 	
-	
+	private boolean wantsHelpFlag(List<String> args) {
+		return args.stream().anyMatch("-h"::equals);
+	}
 	
 	private ArcheCommand wantsSubCommand(ArcheCommand cmd, String zeroArg) {
 		return null;
+	}
+	
+	private void help(CommandSender s, ArcheCommand ac) {
+		//todo
 	}
 	
 }

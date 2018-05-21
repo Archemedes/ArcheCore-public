@@ -18,18 +18,20 @@ import lombok.experimental.Accessors;
 //We're reaching levels of Telanir that shouldn't be even possible
 @Accessors(fluent=true)
 public class ArcheCommandBuilder {
+	private final ArcheCommandBuilder parentBuilder;
 	private final String mainCommand;
 	
 	@Setter private String description;
 	@Setter private String permission;
 	
-	boolean requirePlayer = false;
-	boolean requirePersona = false;
+	private boolean requirePlayer = false;
+	private boolean requirePersona = false;
+	private CmdFlag senderFlag;
 	
 	private final Set<String> aliases = new HashSet<>();
 	private final List<CmdArg<?>> args = new ArrayList<>();
 	private final List<CmdFlag> flags = new ArrayList<>();
-	private final List<ArcheCommandBuilder> subCommands = new ArrayList<>();
+	private final List<ArcheCommand> subCommands = new ArrayList<>();
 	
 	private final Map<CommandPart, Boolean> commandStructure = new LinkedHashMap<>();
 	
@@ -39,6 +41,8 @@ public class ArcheCommandBuilder {
 	
 	
 	ArcheCommandBuilder(PluginCommand command) {
+		parentBuilder = null;
+		
 		this.mainCommand = command.getName();
 		this.description = command.getDescription();
 		this.permission = command.getPermission();
@@ -46,8 +50,8 @@ public class ArcheCommandBuilder {
 		command.getAliases().stream().map(String::toLowerCase).forEach(aliases::add);
 	}
 	
-	ArcheCommandBuilder(String name){
-		//this.pluginCommand = null;
+	ArcheCommandBuilder(ArcheCommandBuilder dad, String name){
+		parentBuilder = dad;
 		this.mainCommand = name;
 	}
 	
@@ -62,6 +66,24 @@ public class ArcheCommandBuilder {
 	
 	void addArg(CmdArg<?> arg) {
 		args.add(arg);
+	}
+	
+	public ArgBuilder flag(String name, String... aliases) {
+		return CmdFlag.make(this, name, aliases);
+	}
+	
+	public ArgBuilder restrictedFlag(String name, String pex, String... aliases) {
+		return CmdFlag.make(this, name, pex, aliases);
+	}
+	
+	public ArcheCommandBuilder arglessFlag(String name, String... aliases) {
+		flag(name, aliases).asBoolean(true);
+		return this;
+	}
+	
+	public ArcheCommandBuilder restrictedArglessFlag(String name, String pex, String... aliases) {
+		restrictedFlag(name, pex, aliases).asBoolean(true);
+		return this;
 	}
 	
 	void addFlag(CmdFlag flag) {
@@ -97,7 +119,8 @@ public class ArcheCommandBuilder {
 		return this;
 	}
 	
-	public List<ArcheCommandBuilder> getSubCommands(){
-		return Collections.unmodifiableList(subCommands);
+	public ArcheCommandBuilder build() {
+		return parentBuilder;
 	}
+	
 }

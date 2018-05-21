@@ -5,6 +5,7 @@ import static org.bukkit.ChatColor.WHITE;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -12,63 +13,98 @@ import org.bukkit.entity.Player;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class RanCommand {
-	private static final String INVALID_FLAG_ARG = " Not a valid flag argument provided for: " + WHITE;
+	private static final String ERROR_FLAG_ARG = " Not a valid flag argument provided for: " + WHITE;
+	private static final String ERROR_NEEDS_PLAYER = " This command can only be ran by players.";
+	private static final String ERROR_NEEDS_PERSONA = " You need a valid Persona to run this command";
 	
-	@Getter private CommandSender sender;
-	@Getter private Player player;
-	@Getter private Persona persona;
+	final ArcheCommand command;
+	
+	@Getter final CommandSender sender;
+	@Getter Player player;
+	@Getter Persona persona;
 	
 	
-	private List<Object> argResults = Lists.newArrayList();
-	private Map<String, Object> context = Maps.newHashMap();
-	private Map<CmdFlag, Object> flags = Maps.newHashMap();
+	List<Object> argResults = Lists.newArrayList();
+	Map<String, Object> context = Maps.newHashMap();
+	Map<String, Object> flags = Maps.newHashMap();
 	
-	private boolean errorState = false;
-	private String errorMessage = null;
+	@Getter(AccessLevel.PACKAGE) boolean inErrorState = false;
+	@Getter(AccessLevel.PACKAGE) String errorMessage = null;
 	
-	public Object getArg(int i) {
-		return argResults.get(i);
+	
+	@SuppressWarnings("unchecked")
+	public <T> T getArg(int i) { //Static typing is for PUSSIES
+		return (T) argResults.get(i);
 	}
 	
 	public void addContext(String key, Object value) {
 		context.put(key, value);
 	}
 	
-	RanCommand(ArcheCommand producer, List<String> args){
-		parseFlags(producer, args);
-		if(errorState) return;
-		parseArgs(producer, args);
-		if(errorState) return;
+	RanCommand(ArcheCommand producer, CommandSender s){
+		command = producer;
+		sender = s;
 	}
 	
-	private void parseFlags(ArcheCommand ac, List<String> args) {
-		List<CmdFlag> f = new ArrayList<>(ac.getFlags());
+	void parseAll(List<String> args) {
+		try {
+			parseFlags(args);
+			getSenders();
+			parseArgs(args);
+		} catch(CmdParserException e) {
+			//We basically use this to signal a user error somewhere. Err msg will be send to CommandSender
+			inErrorState = true;
+			errorMessage = e.getMessage();
+		}
+	}
+	
+	private void getSenders() throws CmdParserException {
+		if(command.requiresPersona()) {
+			persona = (Persona) flags.get("p");
+			if(persona == null && sender instanceof Player) persona = ArcheCore.getPersona((Player) sender);
+			
+			if(persona == null) error(ERROR_NEEDS_PERSONA);
+			else player = persona.getPlayer();
+			
+			if(player == null && command.requiresPersona()) error(ERROR_NEEDS_PLAYER);
+			
+		} else if (command.requiresPlayer()) {
+			player = (Player) flags.get("p");
+			if(player == null && sender instanceof Player) player = (Player) sender;
+			if(player == null) error(ERROR_NEEDS_PLAYER);
+		}
+	}
+	
+	private void parseFlags(List<String> args) throws CmdParserException {
+	//Father forgive me for I have sinned
+		List<CmdFlag> f = new ArrayList<>(command.getFlags());
 		for(int i = 0; i < args.size(); i++) {
 			String a = args.get(i);
 			if(a.startsWith("-")) {
 				CmdFlag flag = matchFlag(a, f);
 				if(flag != null) {
+					if(!flag.mayUse(sender))
 					f.remove(flag);
 					args.remove(i);
 					String flagArg;
 					if(i < args.size() && !args.get(i).startsWith("-")) {
 						flagArg = args.remove(i);
-						i -= 1;
+						i -= 1; //NB
 					} else {
 						flagArg = flag.getArg().getDefaultInput();
 					}
 					
-					if(flagArg == null) {
-						errorState = true;
-						errorMessage = INVALID_FLAG_ARG + flag.getName();
-					} else {
-						Object resolve = flag.getArg().resolve(flagArg);
-						
-					}
+					Object resolved = Optional.of(flagArg).map(flag.getArg()::resolve).orElse(null);
+					if(resolved == null) error(ERROR_FLAG_ARG + flag.getName());
+					else flags.put(flag.getName(), resolved);
 				}
 			}
 		}
@@ -84,12 +120,23 @@ public class RanCommand {
 		return null;
 	}
 	
-	private void parseArgs(ArcheCommand ac, List<String> args) {
-		List<CmdArg<?>> cmdArgs = ac.getArgs();
+	private void parseArgs(List<String> args) {
+		List<CmdArg<?>> cmdArgs = command.getArgs();
 		for(int i = 0; i < cmdArgs.size(); i++) {
 			CmdArg<?> arg = cmdArgs.get(i);
 		}
 	}
 	
+	private void error(String err) throws CmdParserException {
+		throw new CmdParserException(err);
+	}
+	
+	private static class CmdParserException extends Exception{
+		private static final long serialVersionUID = 5283812808389224035L;
 
+		private CmdParserException(String err) {
+			super(err);
+		}
+	}
+	
 }

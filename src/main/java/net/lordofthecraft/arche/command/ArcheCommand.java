@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.bukkit.command.PluginCommand;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Value;
 
 @Value
@@ -16,8 +18,8 @@ public class ArcheCommand {
 	String description;
 	String permission;
 
-	boolean requirePlayer = false;
-	boolean requirePersona = false;
+	@Getter(AccessLevel.NONE) boolean requirePlayer = false;
+	@Getter(AccessLevel.NONE) boolean requirePersona = false;
 
 	List<CmdArg<?>> args = new ArrayList<>();
 	List<CmdFlag> flags = new ArrayList<>();
@@ -30,8 +32,11 @@ public class ArcheCommand {
 		return new ArcheCommandBuilder(command);
 	}
 
-	public static ArcheCommandBuilder builder(String name) {
-		return new ArcheCommandBuilder(name);
+	public boolean requiresPlayer() {
+		return requirePlayer;
 	}
-
+	
+	public boolean requiresPersona() {
+		return requirePersona;
+	}
 }

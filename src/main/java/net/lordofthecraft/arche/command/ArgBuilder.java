@@ -134,9 +134,26 @@ public class ArgBuilder {
 	}
 	
 	public ArcheCommandBuilder asOfflinePersona() {
-		defaultError("You must provide a valid Persona (online or offline");
+		defaultError("You must provide a valid Persona (online or offline)");
 		var arg = build(OfflinePersona.class);
 		arg.setMapper(CommandUtil::offlinePersonaFromArg);
+		return command;
+	}
+	
+	public ArcheCommandBuilder asBoolean() {
+		return asBoolean(false);
+	}
+	
+	public ArcheCommandBuilder asBoolean(boolean def) {
+		this.defaultInput = def? "y":"n";
+		defaultError("Please provide either yes/no.");
+		var arg = build(Boolean.class);
+		arg.setMapper(s -> {
+			if(Stream.of("true","yes","y").anyMatch(s::equalsIgnoreCase)) return true;
+			else if(Stream.of("false","no","n").anyMatch(s::equalsIgnoreCase)) return false;
+			else return null;
+		});
+		
 		return command;
 	}
 	
