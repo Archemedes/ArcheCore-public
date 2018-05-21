@@ -169,6 +169,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	
 	void endSession() {
 		this.session.endSession();
+		this.session = null;
 	}
 
 	@Override
