@@ -22,8 +22,12 @@ public class CmdFlag {
 		aliases = Arrays.asList(flagAliases);
 	}
 	
-	public static make(ArcheCommandBuilder target, String name, String... flagAliases) {
-		target.
+	public static ArgBuilder make(ArcheCommandBuilder target, String name, String... flagAliases) {
+		CmdFlag flag = new CmdFlag(name, flagAliases);
+		target.addFlag(flag);
+		ArgBuilder builder = new ArgBuilder(target);
+		return builder;
 	}
+	
 	
 }

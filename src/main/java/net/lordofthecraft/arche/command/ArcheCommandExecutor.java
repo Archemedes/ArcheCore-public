@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.command;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,10 +20,8 @@ public class ArcheCommandExecutor implements CommandExecutor {
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		List<String> cleanedArgs = Stream.of(args)
-				.map(String::toLowerCase)
-				.collect(Collectors.toCollection(()->Lists.newLinkedList()));
-		runCommand(sender, rootCommand, cleanedArgs);
+		List<String> listArgs = Arrays.asList(args);
+		runCommand(sender, rootCommand, listArgs);
 		return true;
 	}
 

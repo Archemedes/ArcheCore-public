@@ -33,13 +33,17 @@ public class ArcheCommandBuilder {
 	
 	private final Map<CommandPart, Boolean> commandStructure = new LinkedHashMap<>();
 	
+	//Builder state booleans
+	boolean argsHaveDefaults = false;
+	boolean noMoreArgs = false; //When an unity argument is used
+	
 	
 	ArcheCommandBuilder(PluginCommand command) {
-		//this.pluginCommand = command;
 		this.mainCommand = command.getName();
 		this.description = command.getDescription();
-		this.aliases.addAll(command.getAliases());
 		this.permission = command.getPermission();
+		
+		command.getAliases().stream().map(String::toLowerCase).forEach(aliases::add);
 	}
 	
 	ArcheCommandBuilder(String name){
@@ -48,11 +52,12 @@ public class ArcheCommandBuilder {
 	}
 	
 	public ArgBuilder arg() {
+		if(noMoreArgs) throw new IllegalStateException("This command cannot accept additional arguments.");
 		return new ArgBuilder(this);
 	}
 	
 	public ArgBuilder arg(String name) {
-		return new ArgBuilder(this).name(name);
+		return arg().name(name);
 	}
 	
 	void addArg(CmdArg<?> arg) {

@@ -27,16 +27,14 @@ public class ArgBuilder {
 
 	@Setter private String defaultInput;
 	@Setter private String name = null;
-	@Setter private String description = null;
 	@Setter private String errorMessage = null;
 
 	ArgBuilder(ArcheCommandBuilder command) {
-		this.command = command;
-		this.flag = null;
+		this(command, null);
 	}
 	
 	ArgBuilder(ArcheCommandBuilder command, CmdFlag flag) {
-		this.command = null;
+		this.command = command;
 		this.flag = flag;
 	}
 	
@@ -147,7 +145,7 @@ public class ArgBuilder {
 	}
 	
 	private <T> CmdArg<T> build(Class<T> clazz){
-		CmdArg<T> arg = new CmdArg<>(name, description, errorMessage, defaultInput);
+		CmdArg<T> arg = new CmdArg<>(name, errorMessage, defaultInput);
 		if(flag == null) command.addArg(arg);
 		else flag.setArg(arg);
 		return arg;

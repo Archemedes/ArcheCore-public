@@ -13,7 +13,7 @@ public class CmdArg<T> {
 	@Setter private Function<String, T> mapper; 
 	@Setter private Predicate<T> filter = $->true;
 	
-	private final String name, description, errorMessage, defaultInput;
+	private final String name, errorMessage, defaultInput;
 	
 	T resolve(String input) {
 		T mapped = mapper.apply(input);
