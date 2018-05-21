@@ -67,9 +67,15 @@ public class CommandUtil {
         PersonaHandler hand = ArcheCore.getControls().getPersonaHandler();
         
         UUID uuid = null;
-        Player p = Bukkit.getPlayer(player);
-        if(p != null) uuid = p.getUniqueId();
-        else uuid = ArcheCore.getControls().getPlayerUUIDFromName(player);
+        
+        if(player.length() == 36) {
+        	try { uuid = UUID.fromString(player); }
+        	catch(IllegalArgumentException e) { return null; }
+        } else {
+        	Player p = Bukkit.getPlayer(player);
+        	if(p != null) uuid = p.getUniqueId();
+        	else uuid = ArcheCore.getControls().getPlayerUUIDFromName(player);
+        }
         
         return id < 0 || id >= ArcheCore.getControls().personaSlots() ?
         		hand.getOfflinePersona(uuid) : 

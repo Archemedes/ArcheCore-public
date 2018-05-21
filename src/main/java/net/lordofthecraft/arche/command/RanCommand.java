@@ -1,6 +1,6 @@
 package net.lordofthecraft.arche.command;
 
-import static org.bukkit.ChatColor.WHITE;
+import static org.bukkit.ChatColor.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +21,9 @@ import net.lordofthecraft.arche.interfaces.Persona;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RanCommand {
+	public  static final String ERROR_PREFIX = DARK_RED + "Error: " + RED;
 	private static final String ERROR_FLAG_ARG = " Not a valid flag argument provided for: " + WHITE;
-	private static final String ERROR_NEEDS_PLAYER = " This command can only be ran by players.";
+	private static final String ERROR_NEEDS_PLAYER = " This command can only be run by players.";
 	private static final String ERROR_NEEDS_PERSONA = " You need a valid Persona to run this command";
 	
 	final ArcheCommand command;
@@ -43,6 +44,11 @@ public class RanCommand {
 	@SuppressWarnings("unchecked")
 	public <T> T getArg(int i) { //Static typing is for PUSSIES
 		return (T) argResults.get(i);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T getFlag(String flagName) {
+		return (T) flags.get(flagName);
 	}
 	
 	public void addContext(String key, Object value) {
@@ -120,10 +126,16 @@ public class RanCommand {
 		return null;
 	}
 	
-	private void parseArgs(List<String> args) {
+	private void parseArgs(List<String> args) throws CmdParserException {
 		List<CmdArg<?>> cmdArgs = command.getArgs();
 		for(int i = 0; i < cmdArgs.size(); i++) {
 			CmdArg<?> arg = cmdArgs.get(i);
+			Object o = null;
+			if(i >= args.size()) o = arg.resolveDefault();
+			else o = arg.resolve(args.get(i));
+			
+			if(o == null) error("at argument" + i + ": " + arg.getErrorMessage());
+			else argResults.add(o);
 		}
 	}
 	

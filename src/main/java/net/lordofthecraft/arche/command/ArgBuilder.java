@@ -1,10 +1,14 @@
 package net.lordofthecraft.arche.command;
 
+import java.util.UUID;
 import java.util.function.DoublePredicate;
 import java.util.function.IntPredicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
@@ -13,6 +17,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.experimental.var;
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.util.CommandUtil;
@@ -122,6 +127,34 @@ public class ArgBuilder {
 		arg.setMapper(s->{
 			try{ return Enum.valueOf(clazz, s); }
 			catch(IllegalArgumentException e) {return null;}
+		});
+		return command;
+	}
+	
+	public ArcheCommandBuilder asPlayer() {
+		defaultError("You must provide an online Player");
+		var arg = build(Player.class);
+		arg.setMapper(s->{
+			if(s.length() == 36) {
+				try {return Bukkit.getPlayer(UUID.fromString(s));}
+				catch(IllegalArgumentException e) {return null;}
+			} else {
+				return Bukkit.getPlayer(s);
+			}
+		});
+		return command;
+	}
+	
+	public ArcheCommandBuilder asOfflinePlayer() {
+		defaultError("You must provide a Player");
+		var arg = build(OfflinePlayer.class);
+		arg.setMapper(s->{
+			if(s.length() == 36) {
+				try {return Bukkit.getOfflinePlayer(UUID.fromString(s));}
+				catch(IllegalArgumentException e) {return null;}
+			} else {
+				return Bukkit.getOfflinePlayer( ArcheCore.getControls().getPlayerUUIDFromName(s) );
+			}
 		});
 		return command;
 	}

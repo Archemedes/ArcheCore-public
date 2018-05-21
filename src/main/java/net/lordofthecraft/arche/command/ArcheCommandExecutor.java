@@ -43,6 +43,8 @@ public class ArcheCommandExecutor implements CommandExecutor {
 			runCommand(sender, subCommand, args);
 		} else if (wantsHelpFlag(args)) {
 			help(sender, command);
+		} else if (!command.hasPermission(sender)) {
+			sender.sendMessage(RanCommand.ERROR_PREFIX + "You do not have permission to use this");
 		} else {
 			if(command.requiresPersona() && sender.hasPermission("archecore.mod.persona")) {
 				OfflinePersona pers = personaFlag(args);

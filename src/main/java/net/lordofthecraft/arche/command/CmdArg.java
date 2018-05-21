@@ -15,6 +15,11 @@ public class CmdArg<T> {
 	
 	private final String name, errorMessage, defaultInput;
 	
+	T resolveDefault() {
+		if(defaultInput == null) return null;
+		return resolve(defaultInput);
+	}
+	
 	T resolve(String input) {
 		T mapped = mapper.apply(input);
 		if(mapped == null || !filter.test(mapped)) return null;

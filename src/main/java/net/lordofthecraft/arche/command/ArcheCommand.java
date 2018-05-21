@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 
 import lombok.AccessLevel;
@@ -38,5 +40,9 @@ public class ArcheCommand {
 	
 	public boolean requiresPersona() {
 		return requirePersona;
+	}
+	
+	public boolean hasPermission(CommandSender s) {
+		return StringUtils.isEmpty(permission) || s.hasPermission(permission);
 	}
 }
