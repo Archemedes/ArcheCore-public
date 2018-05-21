@@ -12,6 +12,8 @@ import java.util.function.Predicate;
 
 import org.bukkit.command.PluginCommand;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
@@ -19,7 +21,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent=true)
 public class ArcheCommandBuilder {
 	private final ArcheCommandBuilder parentBuilder;
-	private final String mainCommand;
+	@Getter private final String mainCommand;
 	
 	@Setter private String description;
 	@Setter private String permission;
@@ -29,8 +31,8 @@ public class ArcheCommandBuilder {
 	private CmdFlag senderFlag;
 	
 	private final Set<String> aliases = new HashSet<>();
-	private final List<CmdArg<?>> args = new ArrayList<>();
-	private final List<CmdFlag> flags = new ArrayList<>();
+	@Getter(AccessLevel.PACKAGE) private final List<CmdArg<?>> args = new ArrayList<>();
+	@Getter(AccessLevel.PACKAGE) private final List<CmdFlag> flags = new ArrayList<>();
 	private final List<ArcheCommand> subCommands = new ArrayList<>();
 	
 	private final Map<CommandPart, Boolean> commandStructure = new LinkedHashMap<>();

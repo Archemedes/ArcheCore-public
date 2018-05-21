@@ -4,6 +4,7 @@ package net.lordofthecraft.arche.command;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -38,12 +39,18 @@ public class CmdFlag {
 	
 	public static ArgBuilder make(ArcheCommandBuilder target, String name, String pex, String... flagAliases) {
 		CmdFlag flag = new CmdFlag(name, pex, flagAliases);
+		if(flag.collidesWithAny(target.flags())) throw new IllegalStateException("Your flag aliases are overlapping for command: " + target.mainCommand());
+		
 		target.addFlag(flag);
 		ArgBuilder builder = new ArgBuilder(target);
 		return builder;
 	}
 	
-	boolean collidesWith(CmdFlag flag) {
+	public boolean collidesWithAny(List<CmdFlag> flags) {
+		return flags.stream().anyMatch(this::collidesWith);
+	}
+	
+	public boolean collidesWith(CmdFlag flag) {
 		for(String alias : aliases) {
 			if(flag.getAliases().stream().anyMatch(alias::equals)) return true;	
 		}
