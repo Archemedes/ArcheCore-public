@@ -13,10 +13,11 @@ import org.bukkit.entity.Player;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.val;
 import lombok.experimental.Accessors;
-import lombok.experimental.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -27,13 +28,14 @@ import net.md_5.bungee.api.ChatColor;
 public class ArgBuilder {
 	
 	//Either one of these is set, depending on what kind of arg
-	@Getter private final ArcheCommandBuilder command;
-	@Getter private final CmdFlag flag;
+	private final ArcheCommandBuilder command;
+	@Getter(AccessLevel.PACKAGE) private final CmdFlag flag;
 
 	@Setter private String defaultInput;
 	@Setter private String name = null;
 	@Setter private String errorMessage = null;
-
+	@Setter private String description = null;
+	
 	ArgBuilder(ArcheCommandBuilder command) {
 		this(command, null);
 	}
@@ -42,38 +44,37 @@ public class ArgBuilder {
 		this.command = command;
 		this.flag = flag;
 	}
-	
+
 	public ArcheCommandBuilder asInt(){
 		asIntInternal();
 		return command;
 	}
 	
 	public ArcheCommandBuilder asInt(int min){
-		defaultError("Must be a valid integer of %d or higher", min);
-		var arg = asIntInternal();
+		defaults("#","Must be a valid integer of %d or higher", min);
+		val arg = asIntInternal();
 		arg.setFilter(i->i>=min);
 		return command;
 	}
 	
 	public ArcheCommandBuilder asInt(int min, int max){
-		defaultError("Must be a valid integer between %d ad %d", min, max);
-		var arg = asIntInternal();
+		defaults("#","Must be a valid integer between %d ad %d", min, max);
+		val arg = asIntInternal();
 		arg.setFilter(i->(i>=min && i <= max));
 		return command;
 	}
 	
 	public ArcheCommandBuilder asInt(IntPredicate filter) {
-		var arg = asIntInternal();
+		val arg = asIntInternal();
 		arg.setFilter(i->filter.test(i));
 		return command;
 	}
 	
 	
 	private CmdArg<Integer> asIntInternal(){
-		defaultError("Not an accepted integer");
+		defaults("#","Not an accepted integer");
 		CmdArg<Integer> arg = build(Integer.class);
 		arg.setMapper(Ints::tryParse);
-		if(name == null) name = "#";
 		
 		return arg;
 	}
@@ -84,25 +85,25 @@ public class ArgBuilder {
 	}
 	
 	public ArcheCommandBuilder asDouble(double min){
-		var arg = asDoubleInternal();
+		val arg = asDoubleInternal();
 		arg.setFilter(d->d>=min);
 		return command;
 	}
 	
 	public ArcheCommandBuilder asDouble(double min, double max){
-		var arg = asDoubleInternal();
+		val arg = asDoubleInternal();
 		arg.setFilter(d->(d>=min && d <= max));
 		return command;
 	}
 	
 	public ArcheCommandBuilder asDouble(DoublePredicate filter) {
-		var arg = asDoubleInternal();
+		val arg = asDoubleInternal();
 		arg.setFilter(i->filter.test(i));
 		return command;
 	}
 	
 	private CmdArg<Double> asDoubleInternal(){
-		defaultError("Not an accepted number");
+		defaults("#","Not an accepted number");
 		CmdArg<Double> arg = build(Double.class);
 		arg.setMapper(Doubles::tryParse);
 		if(command != null) command.addArg(arg);
@@ -115,15 +116,15 @@ public class ArgBuilder {
 	}
 	
 	public ArcheCommandBuilder asString(String... options){
-		defaultError("Must be one of these: " + ChatColor.WHITE + StringUtils.join(options, ", "));
-		var arg = build(String.class);
+		defaults("*","Must be one of these: " + ChatColor.WHITE + StringUtils.join(options, ", "));
+		val arg = build(String.class);
 		arg.setFilter( s-> Stream.of(options).filter(s2->s2.equalsIgnoreCase(s)).findAny().isPresent() );
 		return command;
 	}
 	
 	public <T extends Enum<T>> ArcheCommandBuilder asEnum(Class<T>  clazz) {
-		defaultError("Not a valid " + clazz.getSimpleName());
-		var arg = build(clazz);
+		defaults(clazz.getSimpleName(),"Not a valid " + clazz.getSimpleName());
+		val arg = build(clazz);
 		arg.setMapper(s->{
 			try{ return Enum.valueOf(clazz, s); }
 			catch(IllegalArgumentException e) {return null;}
@@ -132,8 +133,8 @@ public class ArgBuilder {
 	}
 	
 	public ArcheCommandBuilder asPlayer() {
-		defaultError("You must provide an online Player");
-		var arg = build(Player.class);
+		defaults("player","You must provide an online Player");
+		val arg = build(Player.class);
 		arg.setMapper(s->{
 			if(s.length() == 36) {
 				try {return Bukkit.getPlayer(UUID.fromString(s));}
@@ -146,8 +147,8 @@ public class ArgBuilder {
 	}
 	
 	public ArcheCommandBuilder asOfflinePlayer() {
-		defaultError("You must provide a Player");
-		var arg = build(OfflinePlayer.class);
+		defaults("player","You must provide a Player");
+		val arg = build(OfflinePlayer.class);
 		arg.setMapper(s->{
 			if(s.length() == 36) {
 				try {return Bukkit.getOfflinePlayer(UUID.fromString(s));}
@@ -160,15 +161,15 @@ public class ArgBuilder {
 	}
 	
 	public ArcheCommandBuilder asPersona() {
-		defaultError("You must provide a valid Persona");
-		var arg = build(Persona.class);
+		defaults("persona","You must provide a valid Persona");
+		val arg = build(Persona.class);
 		arg.setMapper(CommandUtil::personaFromArg);
 		return command;
 	}
 	
 	public ArcheCommandBuilder asOfflinePersona() {
-		defaultError("You must provide a valid Persona (online or offline)");
-		var arg = build(OfflinePersona.class);
+		defaults("persona","You must provide a valid Persona (online or offline)");
+		val arg = build(OfflinePersona.class);
 		arg.setMapper(CommandUtil::offlinePersonaFromArg);
 		return command;
 	}
@@ -179,8 +180,8 @@ public class ArgBuilder {
 	
 	public ArcheCommandBuilder asBoolean(boolean def) {
 		this.defaultInput = def? "y":"n";
-		defaultError("Please provide either yes/no.");
-		var arg = build(Boolean.class);
+		defaults("y/n","Please provide either yes/no.");
+		val arg = build(Boolean.class);
 		arg.setMapper(s -> {
 			if(Stream.of("true","yes","y").anyMatch(s::equalsIgnoreCase)) return true;
 			else if(Stream.of("false","no","n").anyMatch(s::equalsIgnoreCase)) return false;
@@ -190,7 +191,8 @@ public class ArgBuilder {
 		return command;
 	}
 	
-	private void defaultError(String err, Object... formats) {
+	private void defaults(String name, String err, Object... formats) {
+		if(this.name == null) this.name = name;
 		if(errorMessage == null) this.errorMessage = String.format(err, formats);
 	}
 	

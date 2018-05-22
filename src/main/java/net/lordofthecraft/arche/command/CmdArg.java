@@ -26,4 +26,8 @@ public class CmdArg<T> {
 		
 		return mapped;
 	}
+	
+	public boolean hasDefaultInput() {
+		return defaultInput != null;
+	}
 }

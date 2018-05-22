@@ -39,10 +39,10 @@ public class CmdFlag {
 	
 	public static ArgBuilder make(ArcheCommandBuilder target, String name, String pex, String... flagAliases) {
 		CmdFlag flag = new CmdFlag(name, pex, flagAliases);
-		if(flag.collidesWithAny(target.flags())) throw new IllegalStateException("Your flag aliases are overlapping for command: " + target.mainCommand());
+		if(flag.collidesWithAny(target.flags())) throw new IllegalStateException("Flag aliases are overlapping for command: " + target.mainCommand());
 		
 		target.addFlag(flag);
-		ArgBuilder builder = new ArgBuilder(target);
+		ArgBuilder builder = new ArgBuilder(target).name(name);
 		return builder;
 	}
 	

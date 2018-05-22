@@ -28,7 +28,7 @@ public class ArcheCommandBuilder {
 	
 	private boolean requirePlayer = false;
 	private boolean requirePersona = false;
-	private CmdFlag senderFlag;
+	private CmdFlag senderParam = null;
 	
 	private final Set<String> aliases = new HashSet<>();
 	@Getter(AccessLevel.PACKAGE) private final List<CmdArg<?>> args = new ArrayList<>();
@@ -38,8 +38,9 @@ public class ArcheCommandBuilder {
 	private final Map<CommandPart, Boolean> commandStructure = new LinkedHashMap<>();
 	
 	//Builder state booleans
-	boolean argsHaveDefaults = false;
+	boolean argsHaveDefaults = false; //When arg is added that has default input
 	boolean noMoreArgs = false; //When an unity argument is used
+	boolean buildHelpFile = true;
 	
 	
 	ArcheCommandBuilder(PluginCommand command) {
@@ -50,6 +51,7 @@ public class ArcheCommandBuilder {
 		this.permission = command.getPermission();
 		
 		command.getAliases().stream().map(String::toLowerCase).forEach(aliases::add);
+		aliases.add(command.getName());
 	}
 	
 	ArcheCommandBuilder(ArcheCommandBuilder dad, String name){
@@ -57,34 +59,36 @@ public class ArcheCommandBuilder {
 		this.mainCommand = name;
 	}
 	
+	public ArgBuilder arg(String name) {
+		return arg().name(name);
+	}
+	
 	public ArgBuilder arg() {
 		if(noMoreArgs) throw new IllegalStateException("This command cannot accept additional arguments.");
 		return new ArgBuilder(this);
 	}
 	
-	public ArgBuilder arg(String name) {
-		return arg().name(name);
-	}
-	
 	void addArg(CmdArg<?> arg) {
+		if(arg.hasDefaultInput()) argsHaveDefaults = true;
+		else if(argsHaveDefaults) throw new IllegalStateException("For command" + this.mainCommand + ": argument at " + (args.size()-1) + " had no default but previous arguments do");
 		args.add(arg);
 	}
 	
-	public ArgBuilder flag(String name, String... aliases) {
+	public ArgBuilder param(String name, String... aliases) {
 		return CmdFlag.make(this, name, aliases);
 	}
 	
-	public ArgBuilder restrictedFlag(String name, String pex, String... aliases) {
+	public ArgBuilder restrictedParam(String name, String pex, String... aliases) {
 		return CmdFlag.make(this, name, pex, aliases);
 	}
 	
-	public ArcheCommandBuilder arglessFlag(String name, String... aliases) {
-		flag(name, aliases).asBoolean(true);
+	public ArcheCommandBuilder flag(String name, String... aliases) {
+		param(name, aliases).asBoolean(true);
 		return this;
 	}
 	
-	public ArcheCommandBuilder restrictedArglessFlag(String name, String pex, String... aliases) {
-		restrictedFlag(name, pex, aliases).asBoolean(true);
+	public ArcheCommandBuilder restrictedFlag(String name, String pex, String... aliases) {
+		restrictedParam(name, pex, aliases).asBoolean(true);
 		return this;
 	}
 	
@@ -93,26 +97,37 @@ public class ArcheCommandBuilder {
 	}
 	
 	public ArcheCommandBuilder alias(String alias) {
-		aliases.add(alias);
+		aliases.add(alias.toLowerCase());
 		return this;
 	}
 	
-	public ArcheCommandBuilder pex(String permission) { //Zero fucks given
-		return permission(permission);
-	}
-	
 	public ArcheCommandBuilder requiresPlayer() {
+		if(senderParam == null) {
+			ArgBuilder b = CmdFlag.make(this, "p", "archecore.mod", new String[0]);
+			senderParam = b.flag();
+			b.asPlayer();
+		}
 		requirePlayer = true;
 		return this;
 	}
 	
 	public ArcheCommandBuilder requiresPersona() {
+		if(senderParam == null || (requirePlayer && !requirePersona)) {
+			ArgBuilder b = CmdFlag.make(this, "p", "archecore.mod.persona", new String[0]);
+			senderParam = b.flag();
+			b.asOfflinePersona();
+		}
 		requirePersona = true;
 		return this;
 	}
 	
+	public ArcheCommandBuilder noHelp() {
+		buildHelpFile = false;
+		return this;
+	}
+	
 	public ArcheCommandBuilder condition(Predicate<RanCommand> p) {
-		
+		//TODO
 		return this;
 	}
 	
@@ -122,6 +137,22 @@ public class ArcheCommandBuilder {
 	}
 	
 	public ArcheCommandBuilder build() {
+		ArcheCommand built = new ArcheCommand(
+				mainCommand, 
+				Collections.unmodifiableSet(aliases),
+				description, 
+				permission, 
+				requirePlayer, 
+				requirePersona, 
+				Collections.unmodifiableList(args), 
+				Collections.unmodifiableList(flags),
+				Collections.unmodifiableList(subCommands));
+		
+		if(buildHelpFile) this.subCommands.add(new HelpCommand(built));
+		
+		//TODO manually addding the command structure
+		
+		if(parentBuilder != null) parentBuilder.subCommands.add(built);
 		return parentBuilder;
 	}
 	

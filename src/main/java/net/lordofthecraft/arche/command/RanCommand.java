@@ -17,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -51,6 +52,10 @@ public class RanCommand {
 		return (T) flags.get(flagName);
 	}
 	
+	public boolean hasFlag(String flagName) {
+		return flags.containsKey(flagName);
+	}
+	
 	public void addContext(String key, Object value) {
 		context.put(key, value);
 	}
@@ -74,19 +79,32 @@ public class RanCommand {
 	
 	private void getSenders() throws CmdParserException {
 		if(command.requiresPersona()) {
-			persona = (Persona) flags.get("p");
-			if(persona == null && sender instanceof Player) persona = ArcheCore.getPersona((Player) sender);
+			OfflinePersona potentialPersona = getFlag("p");
+			if(potentialPersona != null && potentialPersona.isLoaded()) {
+				persona = potentialPersona.getPersona();
+			} else if(potentialPersona == null) {
+				if(sender instanceof Player) persona = ArcheCore.getPersona((Player) sender);
+				
+				if(persona == null) error(ERROR_NEEDS_PERSONA);
+				else player = persona.getPlayer();
+				
+				if(player == null && command.requiresPlayer()) error(ERROR_NEEDS_PLAYER);
+			}
 			
-			if(persona == null) error(ERROR_NEEDS_PERSONA);
-			else player = persona.getPlayer();
-			
-			if(player == null && command.requiresPersona()) error(ERROR_NEEDS_PLAYER);
+			//The third case is when a potentialPersona exists but is unloaded.
+			//the ArcheCommandExecutor will pick up on this lacking persona and try to load
+			//So we do nothing additionally here.
 			
 		} else if (command.requiresPlayer()) {
 			player = (Player) flags.get("p");
 			if(player == null && sender instanceof Player) player = (Player) sender;
 			if(player == null) error(ERROR_NEEDS_PLAYER);
 		}
+	}
+	
+	void rectifySenders(Persona persona) {
+		this.persona = persona;
+		this.flags.put("p", persona);
 	}
 	
 	private void parseFlags(List<String> args) throws CmdParserException {
