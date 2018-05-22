@@ -51,12 +51,17 @@ public class ArcheCommandBuilder {
 		this.permission = command.getPermission();
 		
 		command.getAliases().stream().map(String::toLowerCase).forEach(aliases::add);
-		aliases.add(command.getName());
+		aliases.add(command.getName().toLowerCase());
 	}
 	
 	ArcheCommandBuilder(ArcheCommandBuilder dad, String name){
 		parentBuilder = dad;
 		this.mainCommand = name;
+		aliases.add(name.toLowerCase());
+	}
+	
+	public ArcheCommandBuilder subCommand(String name) {
+		return new ArcheCommandBuilder(this, name);
 	}
 	
 	public ArgBuilder arg(String name) {
@@ -148,7 +153,10 @@ public class ArcheCommandBuilder {
 				Collections.unmodifiableList(flags),
 				Collections.unmodifiableList(subCommands));
 		
-		if(buildHelpFile) this.subCommands.add(new HelpCommand(built));
+		if(buildHelpFile) {
+			this.subCommands.add(new HelpCommand(built));
+			this.flag("h", "help");
+		}
 		
 		//TODO manually addding the command structure
 		

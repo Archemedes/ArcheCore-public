@@ -40,6 +40,8 @@ public class ArcheCommandExecutor implements CommandExecutor {
 			c.parseAll(args);
 			if(c.isInErrorState()) {
 				sender.sendMessage(RanCommand.ERROR_PREFIX + c.getErrorMessage());
+			} else if(command.hasHelp() && c.hasFlag("h") && (boolean) c.getFlag("h")) {
+				runSubCommand(sender, command.getHelp(), "h", args);
 			} else if(command.requiresPersona() && c.getPersona() == null){
 				//The case where a persona flag was offered, meaning the command is not YET in error.
 				OfflinePersona pers = c.getFlag("p");

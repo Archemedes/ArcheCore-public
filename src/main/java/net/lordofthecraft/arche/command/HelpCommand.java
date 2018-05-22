@@ -8,6 +8,7 @@ import com.google.common.primitives.Ints;
 import lombok.val;
 
 public class HelpCommand extends ArcheCommand {
+	private final ArcheCommand parent;
 	
 	HelpCommand(ArcheCommand ac) {
 	  super("help", 
@@ -19,6 +20,9 @@ public class HelpCommand extends ArcheCommand {
 	  		Arrays.asList(helpPageArg()), 
 	  		Collections.emptyList(),
 	  		Collections.emptyList());
+	  
+	  parent = ac;
+	  
 	}
 	
 	private static CmdArg<Integer> helpPageArg(){
@@ -27,5 +31,14 @@ public class HelpCommand extends ArcheCommand {
 		c.setMapper(Ints::tryParse);
 		return c;
 	}
+	
+	private void outputBaseHelp(RanCommand c) {
+		
+	}
+	
+	private void outputSubcommands(RanCommand c, int page) {
+		//Arrays indexes start at 1
+	}
+	
 
 }
