@@ -37,8 +37,10 @@ public final class VanillaAttribute extends ArcheAttribute{
 				Set<UUID> list = under.getModifiers().stream().map(AttributeModifier::getUniqueId).collect(Collectors.toSet());
 						
 				instance.getModifiers().stream()
-				.filter(a -> !list.contains(a.getUniqueId()))
-				.forEach(under::addModifier);
+				.forEach(a->{
+					if(list.contains(a.getUniqueId())) under.removeModifier(a);
+					under.addModifier(a);
+				});
 			}
 		}
 	}
