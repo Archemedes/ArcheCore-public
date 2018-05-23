@@ -24,14 +24,7 @@ public class AttributeRegistry {
     public static final ArcheAttribute ARROW_DAMAGE = new ArcheAttribute("Archery Damage", 1.0);
     public static final ArcheAttribute ARROW_VELOCITY = new ArcheAttribute("Arrow Velocity", 1.0);
     public static final ArcheAttribute PERCEPTION = new ArcheAttribute("Perception", 0);
-
-    public static final ArcheAttribute SHROUD = new ArcheAttribute("Shroud", 0) {
-    	@Override public void calibrate(Player p, double value){ 
-    		Optional.ofNullable(ArcheCore.getPersona(p))
-    		.map(ArchePersona.class::cast)
-    		.ifPresent(ArchePersona::updateDisplayName);
-    	}
-    };
+    public static final ArcheAttribute SHROUD = new ArcheAttribute("Shroud", 0);
     
     //Resistance attributes
     public static final ArcheAttribute POISON_RESISTANCE = new ArcheAttribute("Poison Resistance", 1.0);

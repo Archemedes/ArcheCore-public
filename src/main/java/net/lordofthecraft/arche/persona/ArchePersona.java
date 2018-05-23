@@ -199,8 +199,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	public void updateDisplayName() {
 		Player p = getPlayer();
 		if (handler.willModifyDisplayNames() && p != null) {
-			if(AttributeRegistry.SHROUD.getValue(this) > 0 ) p.setDisplayName("Shrouded (("+ p.getName() +"))");
-			else if (hasPrefix() && ArcheCore.getPlugin().arePrefixesEnabled()) p.setDisplayName("[" + getPrefix() + "] " + name);
+			if (hasPrefix() && ArcheCore.getPlugin().arePrefixesEnabled()) p.setDisplayName("[" + getPrefix() + "] " + name);
 			else p.setDisplayName(name);
 		}
 	}
