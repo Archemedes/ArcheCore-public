@@ -1,5 +1,7 @@
 package net.lordofthecraft.arche.util;
 
+import java.util.List;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -33,6 +35,24 @@ public class LocationUtil {
 		return l1.getWorld() == l2.getWorld() && l1.distance(l2) <= maxDist;
 	}
 
+	public static <T extends Entity> T getNearest(Entity e, List<T> ents) {
+		ents.remove(e);
+		return getNearest(e.getLocation(), ents);
+	}
+	
+	public static <T extends Entity> T getNearest(Location l, List<T> ents) {
+		double dist = 99999999999999999999999d;
+		T result = null;
+		for(T e : ents) {
+			double dist2 = l.distanceSquared(e.getLocation());
+			if(dist2 < dist) {
+				dist = dist2;
+				result = e;
+			}
+		}
+		return result;
+	}
+	
 	public static boolean isFloating(LivingEntity le) {
 		return isInWater(le) || isInLava(le);
 	}
