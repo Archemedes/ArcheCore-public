@@ -21,16 +21,8 @@ import net.md_5.bungee.api.chat.TextComponent;
 public class ChatBuilder {
 	private final ComponentBuilder handle;
 	
-	private ChatBuilder(String initial) {
+	ChatBuilder(String initial) {
 		handle = new ComponentBuilder(initial);
-	}
-	
-	public static ChatBuilder builder() {
-		return builder("");
-	}
-	
-	public static ChatBuilder builder(String initial) {
-		return new ChatBuilder(initial);
 	}
 	
 	public ChatBuilder newline() {
