@@ -19,75 +19,74 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class CommandSql implements CommandExecutor {
-	
+
 	private ArrayList<UUID> authorized = Lists.newArrayList(
 			UUID.fromString("2b8176ac-89fc-47c8-99a5-4ed206380c2b"), //501
 			UUID.fromString("0c4846c1-975f-493b-b931-91d725125e0f"), //Theryn
 			UUID.fromString("f9501b86-bed3-4704-abd9-675d5c6e55f7"), //Llir
 			UUID.fromString("eab9533c-9961-4e7d-aa0a-cc3e21fe8d48") //Awe
 			);
-	
+
 	private final int MAX_QUERY = 30; // why 11 lmao
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if(args.length == 0 || !(sender instanceof Player)) return false;
-		
+
 		Player p = (Player) sender;
 		if(p.hasPermission("archecore.arsql")){
 			String statement = StringUtils.join(args, ' ');
-            //TODO further injection prevention
-            //This removes comments from the SQL command.
-            //Things like DR/**/OP DATABASE archecore; would be possible otherwise.
-            statement = statement.replace("/*", "").replace("*/", "");
-            if(statement.contains(";")) statement = statement.substring(0, statement.indexOf(";"))+1; //Preventing SELECT * FROM persona;DROP persona;
-            try(Connection c = ArcheCore.getControls().getSQLHandler().getConnection(); Statement stat = c.createStatement()){
-                	if (!("2b8176ac-89fc-47c8-99a5-4ed206380c2b".equals(p.getUniqueId().toString()) //501warhead
-                			|| "eab9533c-9961-4e7d-aa0a-cc3e21fe8d48".equals(p.getUniqueId().toString())) //Awe
-                			) {
-                	sender.sendMessage(ChatColor.RED + "Error: DROP and DELETE statements should be either run through command line or run by 501warhead/Sporadic. Contact 501warhead or Sporadic for information.");
-                	sender.sendMessage(ChatColor.GRAY + "Note: This is to prevent commands from being run where you cannot see the full command and may make an error. You are fully capable of running this command from commandline and are encouraged to do so.");
-                	return true;
-                }
-                
-                boolean query = statement.toUpperCase().contains("SELECT");
-	            boolean dangerous = statement.toUpperCase().contains("DROP") || statement.toUpperCase().contains("DELETE");
-	            if (!query) {
-                    if (dangerous && !isAuthorized(p)) {
-                        sender.sendMessage(ChatColor.RED + "Error: DROP and DELETE statements should be either run through command line or run by 501warhead/Sporadic/Llir. Contact the aforementioned for information.");
-                        sender.sendMessage(ChatColor.GRAY + "Note: This is to prevent commands from being run where you cannot see the full command and may make an error. You are fully capable of running this command from commandline and are encouraged to do so."); // lol this isn't even true because you don't let console run this command
-                        return true;
-                    } else if (!hasVerified(p, statement)){
-                    	sender.sendMessage(ChatColor.RED + "Warning! Executing DROP/DELETE, if you are sure, type this command again.");
-                    	return true;
-                    }
-                    verifying.remove(p.getUniqueId());
-                    int rows = c.createStatement().executeUpdate(statement);
-                    sender.sendMessage(ChatColor.GREEN + "Rows Affected: " + ChatColor.GRAY + rows);
-                } else {
-		            ResultSet rs = c.createStatement().executeQuery(statement);
-                    int count = 1;
-                    while (rs.next() && count < MAX_QUERY) {
-                        p.sendMessage(ChatColor.GOLD + "===> Row " + count);
-                        for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-                            p.sendMessage(ChatColor.BLUE + rs.getMetaData().getColumnName(i) + ChatColor.DARK_GRAY + "(" + rs.getMetaData().getColumnTypeName(i) + ")" + ChatColor.BLUE + ": " + ChatColor.GRAY + rs.getObject(i));
-                        }
-                        count++;
-                    }
-                    rs.close();
-                    if (count >= MAX_QUERY) {
-                        p.sendMessage(ChatColor.RED + "Query was too large! Use command line for large sized queries! The rest has been truncated."); //also a lie
-                    }
-                    sender.sendMessage("End of Results.");
-                }
-            } catch (SQLException e) {
-                sender.sendMessage("SQLException: " + e);
-            }
-        }
-		
+			//TODO further injection prevention
+			//This removes comments from the SQL command.
+			//Things like DR/**/OP DATABASE archecore; would be possible otherwise.
+			statement = statement.replace("/*", "").replace("*/", "");
+			statement = statement.split(";")[0]; //Preventing SELECT * FROM persona;DROP persona;
+			statement += ";";
+			final String execute = statement;
+			sender.sendMessage(ChatColor.YELLOW + "Attempting to execute: \n" + ChatColor.GRAY + statement);
+			ArcheCore.getPlugin().getServer().getScheduler().runTaskAsynchronously(ArcheCore.getPlugin(), () -> {
+				Connection c = null;
+				try{
+					c = ArcheCore.getControls().getSQLHandler().getConnection();
+					boolean query = execute.toUpperCase().contains("SELECT");
+					boolean dangerous = execute.toUpperCase().contains("DROP") || execute.toUpperCase().contains("DELETE");
+					if (!query) {
+						if (dangerous && !isAuthorized(p)) {
+							sender.sendMessage(ChatColor.RED + "Error: DROP and DELETE statements should be either run through command line or run by 501warhead/Sporadic/Llir. Contact the aforementioned for information.");
+							sender.sendMessage(ChatColor.GRAY + "Note: This is to prevent commands from being run where you cannot see the full command and may make an error. You are fully capable of running this command from commandline and are encouraged to do so."); // lol this isn't even true because you don't let console run this command
+							return;
+						} else if (!hasVerified(p, execute)){
+							sender.sendMessage(ChatColor.RED + "Warning! Executing DROP/DELETE, if you are sure, type this command again.");
+							return;
+						}
+						verifying.remove(p.getUniqueId());
+						int rows = c.createStatement().executeUpdate(execute);
+						sender.sendMessage(ChatColor.GREEN + "Rows Affected: " + ChatColor.GRAY + rows);
+					} else {
+						ResultSet rs = c.createStatement().executeQuery(execute);
+						int count = 1;
+						while (rs.next() && count < MAX_QUERY) {
+							p.sendMessage(ChatColor.GOLD + "===> Row " + count);
+							for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+								p.sendMessage(ChatColor.BLUE + rs.getMetaData().getColumnName(i) + ChatColor.DARK_GRAY + "(" + rs.getMetaData().getColumnTypeName(i) + ")" + ChatColor.BLUE + ": " + ChatColor.GRAY + rs.getObject(i));
+							}
+							count++;
+						}
+						rs.close();
+						if (count >= MAX_QUERY) {
+							p.sendMessage(ChatColor.RED + "Query was too large! Use command line for large sized queries! The rest has been truncated."); //also a lie
+						}
+						sender.sendMessage("End of Results.");
+					}
+				} catch (SQLException e) {
+					sender.sendMessage("SQLException: " + e);
+				}
+			});
+		}
+
 		return true;
 	}
-	
+
 	private HashMap<UUID, String> verifying = Maps.newHashMap();
 
 	private boolean hasVerified(Player p, String statement) {
@@ -105,5 +104,5 @@ public class CommandSql implements CommandExecutor {
 	public boolean isAuthorized(Player p) {
 		return (this.authorized.contains(p.getUniqueId()));
 	}
-	
+
 }
