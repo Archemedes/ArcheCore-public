@@ -3,6 +3,7 @@ package net.lordofthecraft.arche.commands;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.util.SQLUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -61,6 +62,7 @@ public class CommandSql implements CommandExecutor {
 						}
 						verifying.remove(p.getUniqueId());
 						int rows = c.createStatement().executeUpdate(execute);
+						SQLUtil.close(c);
 						sender.sendMessage(ChatColor.GREEN + "Rows Affected: " + ChatColor.GRAY + rows);
 					} else {
 						ResultSet rs = c.createStatement().executeQuery(execute);
@@ -72,7 +74,8 @@ public class CommandSql implements CommandExecutor {
 							}
 							count++;
 						}
-						rs.close();
+						SQLUtil.close(rs);
+						SQLUtil.close(c);
 						if (count >= MAX_QUERY) {
 							p.sendMessage(ChatColor.RED + "Query was too large! Use command line for large sized queries! The rest has been truncated."); //also a lie
 						}
