@@ -1,5 +1,7 @@
 package net.lordofthecraft.arche.commands;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import net.lordofthecraft.arche.ArcheCore;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
@@ -7,9 +9,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -36,7 +35,7 @@ public class CommandSql implements CommandExecutor {
 		
 		Player p = (Player) sender;
 		if(p.hasPermission("archecore.arsql")){
-			String statement = StringUtils.join(args, (char) ' ');
+			String statement = StringUtils.join(args, ' ');
             //TODO further injection prevention
             //This removes comments from the SQL command.
             //Things like DR/**/OP DATABASE archecore; would be possible otherwise.
@@ -52,11 +51,21 @@ public class CommandSql implements CommandExecutor {
                 }
                 
                 boolean query = statement.toUpperCase().contains("SELECT");
-                if (!query) {
-                    int rows = stat.executeUpdate(statement);
-                    sender.sendMessage("Rows Affected: " + rows);
+	            boolean dangerous = statement.toUpperCase().contains("DROP") || statement.toUpperCase().contains("DELETE");
+	            if (!query) {
+                    if (dangerous && !isAuthorized(p)) {
+                        sender.sendMessage(ChatColor.RED + "Error: DROP and DELETE statements should be either run through command line or run by 501warhead/Sporadic/Llir. Contact the aforementioned for information.");
+                        sender.sendMessage(ChatColor.GRAY + "Note: This is to prevent commands from being run where you cannot see the full command and may make an error. You are fully capable of running this command from commandline and are encouraged to do so."); // lol this isn't even true because you don't let console run this command
+                        return true;
+                    } else if (!hasVerified(p, statement)){
+                    	sender.sendMessage(ChatColor.RED + "Warning! Executing DROP/DELETE, if you are sure, type this command again.");
+                    	return true;
+                    }
+                    verifying.remove(p.getUniqueId());
+                    int rows = c.createStatement().executeUpdate(statement);
+                    sender.sendMessage(ChatColor.GREEN + "Rows Affected: " + ChatColor.GRAY + rows);
                 } else {
-                    ResultSet rs = stat.executeQuery(statement);
+		            ResultSet rs = c.createStatement().executeQuery(statement);
                     int count = 1;
                     while (rs.next() && count < MAX_QUERY) {
                         p.sendMessage(ChatColor.GOLD + "===> Row " + count);
