@@ -46,9 +46,7 @@ public class CommandSql implements CommandExecutor {
 			final String execute = statement;
 			sender.sendMessage(ChatColor.YELLOW + "Attempting to execute: \n" + ChatColor.GRAY + statement);
 			ArcheCore.getPlugin().getServer().getScheduler().runTaskAsynchronously(ArcheCore.getPlugin(), () -> {
-				Connection c = null;
-				try{
-					c = ArcheCore.getControls().getSQLHandler().getConnection();
+				try (Connection c = ArcheCore.getSQLControls().getConnection()) {
 					boolean query = execute.toUpperCase().contains("SELECT");
 					boolean dangerous = execute.toUpperCase().contains("DROP") || execute.toUpperCase().contains("DELETE");
 					if (!query) {
@@ -62,7 +60,6 @@ public class CommandSql implements CommandExecutor {
 						}
 						verifying.remove(p.getUniqueId());
 						int rows = c.createStatement().executeUpdate(execute);
-						SQLUtil.close(c);
 						sender.sendMessage(ChatColor.GREEN + "Rows Affected: " + ChatColor.GRAY + rows);
 					} else {
 						ResultSet rs = c.createStatement().executeQuery(execute);
@@ -75,7 +72,6 @@ public class CommandSql implements CommandExecutor {
 							count++;
 						}
 						SQLUtil.close(rs);
-						SQLUtil.close(c);
 						if (count >= MAX_QUERY) {
 							p.sendMessage(ChatColor.RED + "Query was too large! Use command line for large sized queries! The rest has been truncated."); //also a lie
 						}
