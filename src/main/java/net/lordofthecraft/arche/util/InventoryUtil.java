@@ -129,7 +129,7 @@ public class InventoryUtil {
 	
 	/**
 	 * Represents an item that was moved during a certain InventoryInteractEvent
-	 * Magic values CURSOR_SLOT and DROPPED_SLOT represent items moved from 
+	 * Magic values CURSOR_SLOT and DROPPED_SLOT represent items moved from
 	 * and to cursor, or items dropped to the ground
 	 * slots are always the raw slots
 	 */
@@ -154,7 +154,7 @@ public class InventoryUtil {
 	/**
 	 * Gets a list of ItemStacks that is potentially affected by this Inventory Event if not modified or cancelled.
 	 * This method is much coarser than {@link InventoryUtil#getResultOfEvent(InventoryInteractEvent)} and should execute faster, but is less accurate and provides less information
-	 * Note that while this method may potentially return items that won't be moved, it should never fail to include ItemStacks that will be touched 
+	 * Note that while this method may potentially return items that won't be moved, it should never fail to include ItemStacks that will be touched
 	 * @param e The inventory event to study
 	 * @return A list of ItemStacks this event MIGHT affect in vanilla. Note that the itemstacks in this list are mutable and modifying them will affect the provided event
 	 */
@@ -164,7 +164,7 @@ public class InventoryUtil {
 		String dbg = null;
 		
 		if(timer != null) {
-			dbg = "[Debug] InventoryUtil touched items " + (e instanceof InventoryClickEvent? 
+			dbg = "[Debug] InventoryUtil touched items " + (e instanceof InventoryClickEvent?
 					((InventoryClickEvent) e).getAction() : ((InventoryDragEvent) e).getType());
 			timer.startTiming(dbg);
 		}
@@ -236,7 +236,7 @@ public class InventoryUtil {
 	 * Predictive method to study an event and returning a list of ItemStacks being affected as well as the inventory slots they are moved from and to).
 	 * The itemstacks returned by this method are non-reflective. Changing them does not alter the event or involved inventories
 	 * This method should be accurate for everything except MOVE_TO_OTHER_INVENTORY
-	 * which has issues for {@link InventoryType} ANVIL, BEACON, BREWING, ENCHANTING and FURNACE 
+	 * which has issues for {@link InventoryType} ANVIL, BEACON, BREWING, ENCHANTING and FURNACE
 	 * @param e Event to handle
 	 * @return a list of MovedItems for this event given vanilla Minecraft behavior
 	 */
@@ -246,9 +246,9 @@ public class InventoryUtil {
 
 		List<MovedItem> result = new ArrayList<>();
 		
-		try {		
+		try {
 			if(timer != null) {
-				dbg = "[Debug] InventoryUtil moved items " + (e instanceof InventoryClickEvent? 
+				dbg = "[Debug] InventoryUtil moved items " + (e instanceof InventoryClickEvent?
 						((InventoryClickEvent) e).getAction() : ((InventoryDragEvent) e).getType());
 				timer.startTiming(dbg);
 			}
@@ -268,7 +268,7 @@ public class InventoryUtil {
 					//Cloning of stacks OUTSIDE of creative inventory (so player in creative mode but e.g. in chest)
 					//Since this doesnt move any items (just makes them out of thin air), do nothing
 					break;
-				case COLLECT_TO_CURSOR: 
+				case COLLECT_TO_CURSOR:
 					is = ev.getCursor();
 					//Full stack can't collect other items
 					if(is.getAmount() >= is.getMaxStackSize()) return result;
@@ -287,7 +287,7 @@ public class InventoryUtil {
 							if((type == InventoryType.CRAFTING || type == InventoryType.WORKBENCH) && j == 0)
 								continue; //Can't collect from the crafting result slot
 							ItemStack is2 = v.getItem(j);
-							if(!collected.contains(j) && is.isSimilar(is2) && is2.getAmount() <= is.getMaxStackSize() 
+							if(!collected.contains(j) && is.isSimilar(is2) && is2.getAmount() <= is.getMaxStackSize()
 									&& (phase == 1 || is2.getAmount() != is2.getMaxStackSize())) {
 								is2.getAmount();
 								int toAdd = Math.min(is.getMaxStackSize() - is.getAmount(), is2.getAmount());
@@ -374,7 +374,7 @@ public class InventoryUtil {
 						if(is.getType() != Material.AIR) result.add(new MovedItem(is.clone(), raw, hotbarRawSlot));
 					}
 					break;
-				case MOVE_TO_OTHER_INVENTORY: 
+				case MOVE_TO_OTHER_INVENTORY:
 					//Just cancel this event tbh
 					handleMoveToOther(result, ev.getRawSlot(), ev.getView());
 					break;
@@ -407,7 +407,7 @@ public class InventoryUtil {
 					}
 					break;
 				case SWAP_WITH_CURSOR:
-					is = ev.getCursor().clone(); 
+					is = ev.getCursor().clone();
 					result.add(new MovedItem(is, MovedItem.CURSOR_SLOT, ev.getRawSlot()));
 					is = ev.getCurrentItem().clone();
 					result.add(new MovedItem(is, ev.getRawSlot(), MovedItem.CURSOR_SLOT));
@@ -431,7 +431,7 @@ public class InventoryUtil {
 	}
 	
 	private static boolean isEnchantingSlot(int raw, InventoryView v) {
-		return (raw == 0 && v.getType() == InventoryType.ENCHANTING) 
+		return (raw == 0 && v.getType() == InventoryType.ENCHANTING)
 				|| (raw == 1 && v.getType() == InventoryType.CHEST &&
 				v.getTopInventory().getHolder() instanceof Animals);
 	}
@@ -443,7 +443,7 @@ public class InventoryUtil {
 	private static boolean isItemAllowed(int rawSlot, ItemStack is, InventoryView view) {
 		if(is.getType() == Material.AIR) return true;
 		Object nmsItem = MinecraftReflection.getMinecraftItemStack(is);
-		
+		Object isAllowed = null;
 		try {
 			if(civ_getHandle == null) civ_getHandle = view.getClass().getMethod("getHandle");
 			Object container = civ_getHandle.invoke(view);
@@ -451,9 +451,14 @@ public class InventoryUtil {
 			Object slot = con_getSlot.invoke(container, rawSlot);
 			if(slot_isAllowed == null) slot_isAllowed = slot.getClass().getMethod("isAllowed", nmsItem.getClass());
 			slot_isAllowed.setAccessible(true);
-			return (boolean) slot_isAllowed.invoke(slot, nmsItem);
+			isAllowed = slot_isAllowed.invoke(slot, nmsItem);
+			return (boolean) isAllowed;
 		} catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | SecurityException e) {
 			throw new IllegalStateException("Reflection failed. MC probably changed its method handles. This is bad. Call someone", e);
+		} catch (ClassCastException e) {
+			String clss = isAllowed == null? "null" : isAllowed.getClass().getName();
+			CoreLog.severe("bad class cast on isItemAllowed. Wanted boolean return but got " + clss + " from " + nmsItem);
+			throw e;
 		}
 	}
 	
@@ -468,7 +473,7 @@ public class InventoryUtil {
 		case FURNACE:
 			//Honestly for most I don't have the slightest clue what's gonna happen
 			//Assume that the clicked item goes to the other inventory, but leave it there.
-			int possibleTargetSpot = raw < view.getTopInventory().getSize()? 
+			int possibleTargetSpot = raw < view.getTopInventory().getSize()?
 					view.getTopInventory().getSize() : 0;
 			result.add(new MovedItem(view.getItem(raw).clone(), raw, possibleTargetSpot));
 		case CHEST:
@@ -527,7 +532,7 @@ public class InventoryUtil {
 				finalValue = 45; //Cannot move into the shield slot so skip slot 45
 				modder = 1;
 				moveToOtherMainLoop(result, view, raw, true, initialValue, finalValue, modder);
-			} else { 
+			} else {
 				//Inventory slot, move hotbar to invspace or vice-versa
 				ItemStack is = view.getItem(raw);
 				
@@ -555,7 +560,7 @@ public class InventoryUtil {
 					}
 				}
 				
-				//Now contraints are taken care of handle like the main loop		
+				//Now contraints are taken care of handle like the main loop
 				int invSpaceSize = 36; //The 27 slots over the armor slot
 				boolean toHotbar = raw < invSpaceSize; //clicked spots in the invspace get moved to hotbar
 				initialValue = toHotbar? invSpaceSize : 9;
@@ -598,8 +603,8 @@ public class InventoryUtil {
 		ItemStack is = view.getItem(raw);
 		int amount = is.getAmount(); //Amount to move to the next inventory
 		boolean oversized = amount > is.getMaxStackSize();
-		int maxInvRoom = topToBottom? view.getBottomInventory().getMaxStackSize() : view.getTopInventory().getMaxStackSize(); 
-		int maxRoom = oversized? maxInvRoom : Math.min(is.getMaxStackSize(), maxInvRoom); 
+		int maxInvRoom = topToBottom? view.getBottomInventory().getMaxStackSize() : view.getTopInventory().getMaxStackSize();
+		int maxRoom = oversized? maxInvRoom : Math.min(is.getMaxStackSize(), maxInvRoom);
 				
 		//Moving goes in 2 phases: First fill up existing stacks, then look for empty slots
 		for(int phase = (oversized? 1 : 0); phase < 2; phase++) {
