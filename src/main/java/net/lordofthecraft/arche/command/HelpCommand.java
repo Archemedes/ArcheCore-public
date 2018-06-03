@@ -3,9 +3,15 @@ package net.lordofthecraft.arche.command;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.commons.lang.ObjectUtils;
+import org.bukkit.command.CommandSender;
+
 import com.google.common.primitives.Ints;
 
 import lombok.val;
+import net.md_5.bungee.api.ChatColor;
+
+import static org.bukkit.ChatColor.*;
 
 public class HelpCommand extends ArcheCommand {
 	private final ArcheCommand parent;
@@ -33,7 +39,14 @@ public class HelpCommand extends ArcheCommand {
 	}
 	
 	private void outputBaseHelp(RanCommand c) {
+		CommandSender s = c.getSender();
+		Object desc = ObjectUtils.defaultIfNull(parent.getDescription(), "--None given--");
+		s.sendMessage("Description: " + GRAY + "" + ITALIC + desc);
 		
+		String perm = parent.getPermission();
+		if(perm != null) s.sendMessage(ChatColor.GREEN + "Permission: " + ChatColor.YELLOW + perm);
+		
+		List<String> describedA
 	}
 	
 	private void outputSubcommands(RanCommand c, int page) {
