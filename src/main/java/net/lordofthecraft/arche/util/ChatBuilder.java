@@ -13,8 +13,8 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 
 /**
- * Wrapper class around ComponentBuilder with lots of syntactic sugar. 
- * Doesn't extend {@link net.md_5.bungee.api.chat.ComponentBuilder} because it is final. 
+ * Wrapper class around ComponentBuilder with lots of syntactic sugar.
+ * Doesn't extend {@link net.md_5.bungee.api.chat.ComponentBuilder} because it is final.
  * Unfortunately this means we lose their javadoc on these methods
  * This hides calls that use {@link net.md_5.bungee.api.ChatColor} because it's not useful for us
  */
@@ -79,6 +79,14 @@ public class ChatBuilder {
 	public ChatBuilder reset() {
 		handle.reset();
 		return this;
+	}
+	
+	public ChatBuilder retainEvents() {
+		return retain(FormatRetention.EVENTS);
+	}
+	
+	public ChatBuilder retainColors() {
+		return retain(FormatRetention.FORMATTING);
 	}
 	
 	public ChatBuilder retain(FormatRetention retention) {
