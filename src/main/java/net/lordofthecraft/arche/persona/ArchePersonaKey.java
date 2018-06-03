@@ -1,66 +1,46 @@
 package net.lordofthecraft.arche.persona;
 
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.PersonaKey;
-import org.apache.commons.lang.Validate;
-
 import java.util.UUID;
 
+import lombok.Value;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.PersonaKey;
+
+@Value
 public class ArchePersonaKey implements PersonaKey {
-	private final UUID uuid;
-    private final int slot;
-    private final int persona_id;
+		int personaId;
+		UUID playerUUID;
+		int personaSlot;
 
-    public ArchePersonaKey(int persona_id, UUID uuid, int slot) {
-        Validate.notNull(uuid, "Personas must have UUID");
-		this.uuid = uuid;
-        this.persona_id = persona_id;
-        this.slot = slot;
-    }
-    
-	@Override
-	public UUID getPlayerUUID(){
-		return uuid;
-	}
-	
-	@Override
-    public int getPersonaId() {
-        return persona_id;
-    }
 
-    @Override
-    public int getPersonaSlot() {
-        return slot;
-    }
+		@Override
+		public Persona getPersona(){
+			ArcheOfflinePersona p = getOfflinePersona();
+			if(p instanceof ArchePersona) return (ArchePersona) p;
+			else return null;
+		}
 
-    @Override
-    public Persona getPersona(){
-        ArcheOfflinePersona p = getOfflinePersona();
-        if(p instanceof ArchePersona) return (ArchePersona) p;
-        else return null;
-    }
-    
-    @Override
-    public ArcheOfflinePersona getOfflinePersona() {
-    	return ArchePersonaHandler.getInstance().getPersonaById(persona_id);
-    }
+		@Override
+		public ArcheOfflinePersona getOfflinePersona() {
+			return ArchePersonaHandler.getInstance().getPersonaById(personaId);
+		}
 
-    @Override
-	public int hashCode(){
-        return slot + uuid.hashCode();
-    }
-	
-	@Override
-	public boolean equals(Object o){
-		if(o == null || !(o instanceof ArchePersonaKey)) return false;
-		
-		ArchePersonaKey other = (ArchePersonaKey) o;
-        return persona_id == other.persona_id;
-    }
-	
-	@Override
-	public String toString(){
-        return "ArchePersonaKey:" + uuid + "@" + slot + "[PID:" + persona_id + "]";
-    }
-	
+		@Override
+		public int hashCode(){
+			return personaId;
+		}
+
+		@Override
+		public boolean equals(Object o){
+			if(o == null || !(o instanceof ArchePersonaKey)) return false;
+
+			ArchePersonaKey other = (ArchePersonaKey) o;
+			return personaId == other.personaId;
+		}
+
+		@Override
+		public String toString(){
+			return "ArchePersonaKey:" + playerUUID + "@" + personaSlot + "[PID:" + personaId + "]";
+		}
+
 }

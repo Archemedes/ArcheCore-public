@@ -2,7 +2,6 @@ package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.save.rows.ArchePersonaRow;
 import org.bukkit.OfflinePlayer;
 
 import java.sql.Timestamp;
@@ -136,24 +135,11 @@ public interface OfflinePersona {
 
     /**
      * Load persona from SQL. This makes no attempt to register the Persona inside PersonaHandler
-     * as a result there is no guarantee any save-to-db methods on Persona will be updated in time 
+     * as a result there is no guarantee any save-to-db methods on Persona will be updated in time
      * if the Persona is requested for loading by another resource or by ArcheCore itself.
      * @return The loaded persona
      */
     Persona loadPersona();
-
-    /**
-     * Check whether or not this Persona has had it's SQL removed.
-     * <p>
-     * <b>Why?</b> When performing tasks such as {@link ArchePersonaRow} there is the chance that
-     * a persona might already be removed. In the efforts to ensure that we are not unneedingly running tasks on personas which have no longer exist
-     * this variable is set.
-     * <p>
-     * P.S. Don't set this value manually. Thanks.
-     *
-     * @return If this persona was successfully deleted
-     */
-    boolean isDeleted();
 
     /**
      * Persona tags are additional data that is automatically made persistent by ArcheCore's SQL backend

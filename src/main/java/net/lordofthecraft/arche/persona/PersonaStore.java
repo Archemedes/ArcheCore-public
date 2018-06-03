@@ -334,7 +334,7 @@ public class PersonaStore {
         persona.saturation = res.getFloat(PersonaField.SATURATION.field());
 
         persona.charactersSpoken.set(res.getInt(PersonaField.STAT_CHARS.field()));
-        persona.lastRenamed = res.getTimestamp(PersonaField.STAT_RENAMED.field());
+        persona.renamed = res.getTimestamp(PersonaField.STAT_RENAMED.field());
 
         persona.skills().setMainProfession(ArcheSkillFactory.getSkill(res.getString(PersonaField.SKILL_SELECTED.field())));
 
