@@ -55,6 +55,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	@Getter String prefix = null;
 	@Getter Timestamp renamed;
 	@Getter double fatigue = 0;
+	@Getter ArcheSkin skin;
 	
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger charactersSpoken;
@@ -64,14 +65,12 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	int food = 20;
 	float saturation = 0;
 	double health = 20;
+	private ArrayList<PotionEffect> effects = Lists.newArrayList();
 	
 	PersonaInventory inv;
-	private WeakReference<Player> playerObject;
-
-	ArcheSkin skin;
 	PlaySession session;
 	final Set<String> namelog = Sets.newHashSet();
-	private ArrayList<PotionEffect> effects = Lists.newArrayList();
+	private WeakReference<Player> playerObject;
 
 	
 	public ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
@@ -482,10 +481,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		}
 	}
 
-	public PersonaInventory getPInv() {
-		return inv;
-	}
-
 	@Override
 	public boolean isNewbie() {
 		return getTimePlayed() < ArcheCore.getControls().getNewbieDelay();
@@ -518,11 +513,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	}
 
 	@Override
-	public ArcheSkin getSkin() {
-		return skin;
-	}
-
-	@Override
 	public boolean hasSkin() {
 		return skin != null;
 	}
@@ -537,8 +527,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		return this;
 	}
 
-    @Override
-    public Persona loadPersona() {
-        return this;
-    }
+	@Override
+	public Persona loadPersona() {
+		return this;
+	}
 }
