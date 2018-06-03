@@ -14,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.util.InventoryUtil;
 import net.lordofthecraft.arche.util.ItemUtil;
@@ -48,14 +47,6 @@ public class ArcheExtension {
 	
 	public static Optional<Persona> persona(UUID uuid){
 		return persona(Bukkit.getPlayer(uuid));
-	}
-	
-	public static Optional<Persona> persona(Integer id){
-		return offlinePersona(id).filter(Persona.class::isInstance).map(Persona.class::cast);
-	}
-	
-	public static Optional<OfflinePersona> offlinePersona(Integer id){
-		return Optional.ofNullable(ArcheCore.getPersonaControls().getPersonaById(id));
 	}
 	
 	public static Optional<Persona> getPersona(PlayerEvent event){
