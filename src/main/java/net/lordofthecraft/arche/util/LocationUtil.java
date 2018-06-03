@@ -32,7 +32,7 @@ public class LocationUtil {
 	}
 	
 	public static boolean isClose(Location l1, Location l2, double maxDist) {
-		return l1.getWorld() == l2.getWorld() && l1.distance(l2) <= maxDist;
+		return l1.getWorld() == l2.getWorld() && l1.distanceSquared(l2) <= maxDist*maxDist;
 	}
 
 	public static <T extends Entity> T getNearest(Entity e, List<T> ents) {
