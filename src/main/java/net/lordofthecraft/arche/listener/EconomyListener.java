@@ -59,7 +59,7 @@ public class EconomyListener implements Listener {
 				Persona pers = ArcheCore.getControls().getPersonaHandler().getPersona(p);
 				ArcheCore.getControls().getEconomy().depositPersona(pers, amt, new ArcheCoreTransaction(MessageUtil.identifyPersona(pers) + " picked up off the ground"));
 				p.getWorld().playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 0.5f);
-				p.sendMessage(ChatColor.AQUA + "You pick up" + ChatColor.GOLD + amt + ChatColor.AQUA + (amt == 1 ? economy.currencyNameSingular() : economy.currencyNamePlural()));
+				p.sendMessage(ChatColor.AQUA + "You pick up " + ChatColor.GOLD + amt + ChatColor.AQUA + " " + (amt == 1 ? economy.currencyNameSingular() : economy.currencyNamePlural()));
 				e.setCancelled(true);
 				e.getItem().remove();
 			}

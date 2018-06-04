@@ -84,7 +84,7 @@ public class CommandMoney implements CommandExecutor {
 					econ.withdrawPersona(from, amt, new ArcheCoreTransaction(MessageUtil.identifyPersona(from) + " dropped through command"));
 					ItemStack coins = econ.getPhysical(amt);
 					Item dropped = p.getWorld().dropItem(p.getEyeLocation(), coins);
-					dropped.setVelocity(p.getLocation().getDirection().normalize());
+					dropped.setVelocity(p.getLocation().getDirection().multiply(0.25).normalize());
 				}
 			} 
 			return true;
@@ -195,7 +195,7 @@ public class CommandMoney implements CommandExecutor {
 
 		if(isMod(sender)){
 			sender.sendMessage(ChatColor.DARK_AQUA + "[M]" + ChatColor.WHITE + " /mn set <player> <amt>: "+ChatColor.GOLD+"sets a Persona's money to <amt>.");
-			sender.sendMessage(ChatColor.DARK_AQUA + "[M]" + ChatColor.WHITE + " /mn grant <player> <amt>: \"+ChatColor.GOLD+\"add [amt] to the Persona's money.");
+			sender.sendMessage(ChatColor.DARK_AQUA + "[M]" + ChatColor.WHITE + " /mn grant <player> <amt>: "+ChatColor.GOLD+"add [amt] to the Persona's money.");
 			sender.sendMessage(ChatColor.DARK_AQUA + "[M]" + ChatColor.WHITE + " You can use <player>@[personaid] to modify a different Persona");
 		}
 
