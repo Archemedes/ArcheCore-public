@@ -1,5 +1,7 @@
 package net.lordofthecraft.arche.interfaces;
 
+import org.bukkit.inventory.ItemStack;
+
 /**
  * The ArcheCore economy activates Persona-tied currency tracking and basic functionality to maniplate such 
  */
@@ -66,5 +68,7 @@ public interface Economy {
 	 * @return Whether or not usage of /money pay requires the receiving player to be nearby 
 	 */
 	boolean requirePaymentProximity();
+
+	ItemStack getPhysical(double amt);
 	
 }

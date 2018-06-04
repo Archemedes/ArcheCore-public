@@ -8,15 +8,23 @@ import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.logging.TransactionRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
+import net.md_5.bungee.api.ChatColor;
+
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import io.github.archemedes.customitem.CustomItem;
+import io.github.archemedes.customitem.CustomTag;
 
 public class ArcheEconomy implements Economy {
-    public enum TransactionType {
-        WITHDRAW,
-        DEPOSIT,
-        SET
-    }
-	
+	public enum TransactionType {
+		WITHDRAW,
+		DEPOSIT,
+		SET
+	}
+
 	private final String singular,plural;
 	private final double lostOnDeath;
 	private final double beginnerAmount;
@@ -32,60 +40,60 @@ public class ArcheEconomy implements Economy {
 		beginnerAmount = config.getDouble("first.persona.money");
 		proximity = config.getBoolean("require.pay.proximity");
 	}
-	
+
 	public void onEnable(){
-        consumer = ArcheCore.getConsumerControls();
-    }
-	
+		consumer = ArcheCore.getConsumerControls();
+	}
+
 	@Override
 	public boolean has(Persona p, double amount){
 		return ((ArchePersona) p).money >= amount;
 	}
-	
+
 	@Override
 	public double getBalance(Persona p){
 		return ((ArchePersona) p).money;
 	}
-	
+
 	@Override
-    public void setPersona(Persona p, double amount, Transaction transaction) {
-        double before = getBalance(p);
-        ((ArchePersona) p).money = amount;
-        consumer.queueRow(new UpdatePersonaRow(p, PersonaField.MONEY, ((ArchePersona) p).money));
-        consumer.queueRow(new TransactionRow(p, transaction, TransactionType.SET, amount, before, getBalance(p)));
-    }
+	public void setPersona(Persona p, double amount, Transaction transaction) {
+		double before = getBalance(p);
+		((ArchePersona) p).money = amount;
+		consumer.queueRow(new UpdatePersonaRow(p, PersonaField.MONEY, ((ArchePersona) p).money));
+		consumer.queueRow(new TransactionRow(p, transaction, TransactionType.SET, amount, before, getBalance(p)));
+	}
 
-    @Override
-    public void depositPersona(Persona p, double amount, Transaction transaction) {
-        double before = getBalance(p);
-        ((ArchePersona) p).money += amount;
-        consumer.queueRow(new UpdatePersonaRow(p, PersonaField.MONEY, ((ArchePersona) p).money));
-        consumer.queueRow(new TransactionRow(p, transaction, TransactionType.DEPOSIT, amount, before, getBalance(p)));
-    }
+	@Override
+	public void depositPersona(Persona p, double amount, Transaction transaction) {
+		double before = getBalance(p);
+		((ArchePersona) p).money += amount;
+		consumer.queueRow(new UpdatePersonaRow(p, PersonaField.MONEY, ((ArchePersona) p).money));
+		consumer.queueRow(new TransactionRow(p, transaction, TransactionType.DEPOSIT, amount, before, getBalance(p)));
+	}
 
-    @Override
-    public void withdrawPersona(Persona p, double amount, Transaction transaction) {
-        double before = getBalance(p);
-        ((ArchePersona) p).money -= amount;
-        consumer.queueRow(new UpdatePersonaRow(p, PersonaField.MONEY, ((ArchePersona) p).money));
-        consumer.queueRow(new TransactionRow(p, transaction, TransactionType.WITHDRAW, amount, before, getBalance(p)));
-    }
+	@Override
+	public void withdrawPersona(Persona p, double amount, Transaction transaction) {
+		double before = getBalance(p);
+		((ArchePersona) p).money -= amount;
+		consumer.queueRow(new UpdatePersonaRow(p, PersonaField.MONEY, ((ArchePersona) p).money));
+		consumer.queueRow(new TransactionRow(p, transaction, TransactionType.WITHDRAW, amount, before, getBalance(p)));
+	}
 
-    @Override
+	@Override
 	public String currencyNameSingular(){
 		return singular;
 	}
-	
+
 	@Override
 	public String currencyNamePlural(){
 		return plural;
 	}
-	
+
 	@Override
 	public double getFractionLostOnDeath(){
 		return lostOnDeath;
 	}
-	
+
 	@Override
 	public double getBeginnerAllowance(){
 		return beginnerAmount;
@@ -94,5 +102,15 @@ public class ArcheEconomy implements Economy {
 	@Override
 	public boolean requirePaymentProximity() {
 		return proximity;
+	}
+
+	@Override
+	public ItemStack getPhysical(double amt) {
+		ItemStack i = new ItemStack(Material.GOLD_NUGGET, 1);
+		ItemMeta im = i.getItemMeta();
+		im.setDisplayName(ChatColor.GOLD + "" + amt + " " + currencyNamePlural());
+		i.setItemMeta(im);
+		return CustomTag.apply("mina", amt + "", i);
+
 	}
 }
