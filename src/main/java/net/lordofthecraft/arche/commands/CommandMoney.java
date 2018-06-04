@@ -107,8 +107,7 @@ public class CommandMoney implements CommandExecutor {
 				amt = (double) ((int) (amt * 10)) / 10d;
 
 				ItemStack coins = econ.getPhysical(amt);
-				Item dropped = p.getWorld().dropItem(p.getLocation(), coins);
-				dropped.setVelocity(p.getLocation().getDirection().multiply(0.25).normalize());
+				p.getInventory().addItem(coins);
 			} 
 			return true;
 		} else if (args[0].equalsIgnoreCase("pay")) {
