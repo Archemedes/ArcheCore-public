@@ -106,8 +106,6 @@ public class CommandMoney implements CommandExecutor {
 
 				amt = (double) ((int) (amt * 10)) / 10d;
 
-				Persona from = ArcheCore.getControls().getPersonaHandler().getPersona(p);
-
 				ItemStack coins = econ.getPhysical(amt);
 				Item dropped = p.getWorld().dropItem(p.getLocation(), coins);
 				dropped.setVelocity(p.getLocation().getDirection().normalize());
