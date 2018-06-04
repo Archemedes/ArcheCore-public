@@ -70,9 +70,10 @@ public class CommandMoney implements CommandExecutor {
 				} catch (NumberFormatException e) {
 					return false;
 				}
-				if (amt < 0.01) return false;
-
+				
 				amt = (double) ((int) (amt * 10)) / 10d;
+				
+				if (amt < 0.01) return false;
 
 				Persona from = ArcheCore.getControls().getPersonaHandler().getPersona(p);
 
@@ -84,7 +85,7 @@ public class CommandMoney implements CommandExecutor {
 					econ.withdrawPersona(from, amt, new ArcheCoreTransaction(MessageUtil.identifyPersona(from) + " dropped through command"));
 					ItemStack coins = econ.getPhysical(amt);
 					Item dropped = p.getWorld().dropItem(p.getEyeLocation(), coins);
-					dropped.setVelocity(p.getLocation().getDirection().multiply(0.25).normalize());
+					dropped.setVelocity(p.getLocation().getDirection().multiply(0.1).normalize());
 				}
 			} 
 			return true;
@@ -158,7 +159,7 @@ public class CommandMoney implements CommandExecutor {
 
 			double amt;
 			try{amt = Double.parseDouble(args[2]);} catch(NumberFormatException e){return false;}
-			if(amt < 0) return false;
+			if(amt == 0) return false;
 
 			amt = (double)((int)(amt * 10)) / 10d;
 

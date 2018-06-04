@@ -55,7 +55,7 @@ public class EconomyListener implements Listener {
 			ItemStack is = e.getItem().getItemStack();
 			String s = CustomTag.getTagValue(is, "mina");
 			if (s != null) {
-				double amt = Double.valueOf(s);
+				double amt = Double.valueOf(s)*is.getAmount();
 				Persona pers = ArcheCore.getControls().getPersonaHandler().getPersona(p);
 				ArcheCore.getControls().getEconomy().depositPersona(pers, amt, new ArcheCoreTransaction(MessageUtil.identifyPersona(pers) + " picked up off the ground"));
 				p.getWorld().playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 0.5f);
