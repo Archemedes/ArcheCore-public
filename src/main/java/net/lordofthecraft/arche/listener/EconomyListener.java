@@ -32,6 +32,7 @@ public class EconomyListener implements Listener {
 		Persona p = ArcheCore.getControls().getPersonaHandler().getPersona(e.getEntity());
 		if (p != null) {
 			double penalty = economy.getBalance(p) * economy.getFractionLostOnDeath();
+			if (penalty <= 0) return;
 			economy.withdrawPersona(p, penalty, new ArcheCoreTransaction(MessageUtil.identifyPersona(p) + " received a death penalty"));
 			ItemStack i = economy.getPhysical(penalty);
 			p.getPlayer().getWorld().dropItemNaturally(p.getPlayer().getLocation(), i);
@@ -52,15 +53,15 @@ public class EconomyListener implements Listener {
 		Player p = (Player) e.getEntity();
 		if (e.getItem().getItemStack().getType() == Material.GOLD_NUGGET) {
 			ItemStack is = e.getItem().getItemStack();
-			if (is != null) {
-				String s = CustomTag.getTagValue(is, "mina");
-				if (s != null) {
-					int amt = Integer.valueOf(s);
-					Persona pers = ArcheCore.getControls().getPersonaHandler().getPersona(p);
-					ArcheCore.getControls().getEconomy().depositPersona(pers, amt, new ArcheCoreTransaction(MessageUtil.identifyPersona(pers) + " picked up off the ground"));
-					p.getWorld().playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 0.5f);
-					p.sendMessage(ChatColor.AQUA + "You pick up" + ChatColor.GOLD + amt + ChatColor.AQUA + (amt == 1 ? economy.currencyNameSingular() : economy.currencyNamePlural()));
-				}
+			String s = CustomTag.getTagValue(is, "mina");
+			if (s != null) {
+				double amt = Double.valueOf(s);
+				Persona pers = ArcheCore.getControls().getPersonaHandler().getPersona(p);
+				ArcheCore.getControls().getEconomy().depositPersona(pers, amt, new ArcheCoreTransaction(MessageUtil.identifyPersona(pers) + " picked up off the ground"));
+				p.getWorld().playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 0.5f);
+				p.sendMessage(ChatColor.AQUA + "You pick up" + ChatColor.GOLD + amt + ChatColor.AQUA + (amt == 1 ? economy.currencyNameSingular() : economy.currencyNamePlural()));
+				e.setCancelled(true);
+				e.getItem().remove();
 			}
 		}
 	}

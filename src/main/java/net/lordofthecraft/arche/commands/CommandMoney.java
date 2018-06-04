@@ -108,7 +108,7 @@ public class CommandMoney implements CommandExecutor {
 
 				ItemStack coins = econ.getPhysical(amt);
 				Item dropped = p.getWorld().dropItem(p.getLocation(), coins);
-				dropped.setVelocity(p.getLocation().getDirection().normalize());
+				dropped.setVelocity(p.getLocation().getDirection().multiply(0.25).normalize());
 			} 
 			return true;
 		} else if (args[0].equalsIgnoreCase("pay")) {
@@ -211,7 +211,7 @@ public class CommandMoney implements CommandExecutor {
 		double money = econ.getBalance(p);
 		money = (double)((int)(money * 10)) / 10d;
 
-		return ChatColor.RED + "" + ChatColor.ITALIC + "Note: " + econ.currencyNamePlural() + " on your persona are dropped on death. Find a bank to store them."
+		return ChatColor.RED + "" + ChatColor.ITALIC + "Note: " + econ.currencyNamePlural() + " on your persona are dropped on death. Find a bank to store them.\n"
 		+ ChatColor.AQUA + p.getName() + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + " (" + p.getPlayerName() + "#" + p.getPersonaId() +") " 
 		+ ChatColor.AQUA + "currently has " + ChatColor.GOLD + money + " " + ChatColor.AQUA
 		+ (money >= 1 && money < 2 ? econ.currencyNameSingular() : econ.currencyNamePlural())
