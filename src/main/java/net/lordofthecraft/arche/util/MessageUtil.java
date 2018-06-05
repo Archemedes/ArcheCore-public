@@ -19,11 +19,11 @@ import static org.bukkit.ChatColor.GRAY;
 public class MessageUtil {
 	private MessageUtil() {}
 	
-	public ChatBuilder builder() {
+	public static ChatBuilder builder() {
 		return builder("");
 	}
 	
-	public ChatBuilder builder(String initial) {
+	public static ChatBuilder builder(String initial) {
 		return new ChatBuilder(initial);
 	}
 	

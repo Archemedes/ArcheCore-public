@@ -30,6 +30,26 @@ public class ChatBuilder {
 		return this;
 	}
 	
+	public ChatBuilder append(char ch) {
+		handle.append(String.valueOf(ch));
+		return this;
+	}
+	
+	public ChatBuilder append(Object o) {
+		handle.append(String.valueOf(o));
+		return this;
+	}
+	
+	public ChatBuilder append(int i) {
+		handle.append(String.valueOf(i));
+		return this;
+	}
+	
+	public ChatBuilder append(long l) {
+		handle.append(String.valueOf(l));
+		return this;
+	}
+	
 	public ChatBuilder append(String text) {
 		handle.append(text);
 		return this;
@@ -203,6 +223,12 @@ public class ChatBuilder {
 		return this;
 	}
 	
+	public String toLegacyText() {
+		return BaseComponent.toLegacyText(handle.create());
+	}
 	
+	public String toPlainText() {
+		return BaseComponent.toPlainText(handle.create());
+	}
 	
 }
