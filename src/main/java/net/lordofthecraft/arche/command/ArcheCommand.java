@@ -48,6 +48,10 @@ public class ArcheCommand {
 		return StringUtils.isEmpty(permission) || s.hasPermission(permission);
 	}
 	
+	public boolean hasDescription() {
+		return StringUtils.isNotEmpty(description);
+	}
+	
 	public boolean hasHelp() {
 		return subCommands.stream().anyMatch(HelpCommand.class::isInstance);
 	}

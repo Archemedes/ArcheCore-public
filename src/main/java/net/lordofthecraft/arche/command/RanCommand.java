@@ -15,12 +15,15 @@ import com.google.common.collect.Maps;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
+@Getter
 public class RanCommand {
 	public  static final String ERROR_PREFIX = DARK_RED + "Error: " + RED;
 	private static final String ERROR_FLAG_ARG = " Not a valid flag argument provided for: " + WHITE;
@@ -28,10 +31,10 @@ public class RanCommand {
 	private static final String ERROR_NEEDS_PERSONA = " You need a valid Persona to run this command";
 	
 	final ArcheCommand command;
-	
-	@Getter final CommandSender sender;
-	@Getter Player player;
-	@Getter Persona persona;
+	final String usedAlias;
+	final CommandSender sender;
+	Player player;
+	Persona persona;
 	
 	
 	List<Object> argResults = Lists.newArrayList();
@@ -58,11 +61,6 @@ public class RanCommand {
 	
 	public void addContext(String key, Object value) {
 		context.put(key, value);
-	}
-	
-	RanCommand(ArcheCommand producer, CommandSender s){
-		command = producer;
-		sender = s;
 	}
 	
 	void parseAll(List<String> args) {

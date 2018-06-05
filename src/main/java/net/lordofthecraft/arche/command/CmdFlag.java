@@ -19,14 +19,12 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level=AccessLevel.PRIVATE)
 @Getter
 public class CmdFlag {
-	final String name;
 	final Set<String> aliases;
-	final String pex;
+	final String permission;
 	@Setter CmdArg<?> arg;
 	
 	private CmdFlag(String name, String pex, String... flagAliases){
-		this.name = name;
-		this.pex = pex;
+		this.permission = pex;
 		Set<String> als = new HashSet<>();
 		als.add(name);
 		als.addAll(Arrays.asList(flagAliases));
@@ -45,6 +43,14 @@ public class CmdFlag {
 		ArgBuilder builder = new ArgBuilder(target).name(name);
 		return builder;
 	}
+
+	public String getName() {
+		return arg.getName();
+	}
+	
+	public boolean needsPermission() {
+		return this.permission != null;
+	}
 	
 	public boolean collidesWithAny(List<CmdFlag> flags) {
 		return flags.stream().anyMatch(this::collidesWith);
@@ -52,13 +58,16 @@ public class CmdFlag {
 	
 	public boolean collidesWith(CmdFlag flag) {
 		for(String alias : aliases) {
-			if(flag.getAliases().stream().anyMatch(alias::equals)) return true;	
+			if(flag.getAliases().stream().anyMatch(alias::equals)) return true;
 		}
 		return false;
 	}
 	
+	
+	
 	boolean mayUse(CommandSender s) {
-		return StringUtils.isEmpty(pex) || s.hasPermission(pex);
+		return StringUtils.isEmpty(permission) || s.hasPermission(permission);
 	}
+	
 	
 }

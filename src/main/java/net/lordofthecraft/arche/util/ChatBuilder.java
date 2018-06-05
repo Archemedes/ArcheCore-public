@@ -218,7 +218,7 @@ public class ChatBuilder {
 	
 	public ChatBuilder send(CommandSender s) {
 		if(s instanceof Player) return send((Player) s);
-		s.sendMessage(this.build().toLegacyText());
+		s.sendMessage(toLegacyText());
 		
 		return this;
 	}

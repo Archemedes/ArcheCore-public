@@ -197,7 +197,7 @@ public class ArgBuilder {
 	}
 	
 	private <T> CmdArg<T> build(Class<T> clazz){
-		CmdArg<T> arg = new CmdArg<>(name, errorMessage, defaultInput);
+		CmdArg<T> arg = new CmdArg<>(name, errorMessage, defaultInput, description);
 		if(flag == null) command.addArg(arg);
 		else flag.setArg(arg);
 		return arg;

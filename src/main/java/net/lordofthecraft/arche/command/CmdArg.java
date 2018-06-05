@@ -10,10 +10,10 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @Getter
 public class CmdArg<T> {
-	@Setter private Function<String, T> mapper; 
+	@Setter private Function<String, T> mapper;
 	@Setter private Predicate<T> filter = $->true;
 	
-	private final String name, errorMessage, defaultInput;
+	private final String name, errorMessage, defaultInput, description;
 	
 	T resolveDefault() {
 		if(defaultInput == null) return null;
@@ -29,5 +29,9 @@ public class CmdArg<T> {
 	
 	public boolean hasDefaultInput() {
 		return defaultInput != null;
+	}
+	
+	public boolean hasDescription() {
+		return description != null;
 	}
 }
