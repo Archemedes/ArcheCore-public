@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 
 import lombok.RequiredArgsConstructor;
 import net.lordofthecraft.arche.ArcheCore;
@@ -18,7 +18,7 @@ import net.lordofthecraft.arche.util.AsyncRunner;
 import net.lordofthecraft.arche.util.MessageUtil;
 
 @RequiredArgsConstructor
-public class ArcheCommandExecutor implements CommandExecutor {
+public class ArcheCommandExecutor implements TabExecutor {
 	private final ArcheCommand rootCommand;
 	
 	
@@ -28,6 +28,12 @@ public class ArcheCommandExecutor implements CommandExecutor {
 		runCommand(sender, rootCommand, label, listArgs);
 		return true;
 	}
+	
+	@Override
+	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	private void runCommand(CommandSender sender, ArcheCommand command, String usedAlias, List<String> args) {
 		ArcheCommand subCommand = wantsSubCommand(command, args);
@@ -36,7 +42,7 @@ public class ArcheCommandExecutor implements CommandExecutor {
 		} else if (!command.hasPermission(sender)) {
 			sender.sendMessage(RanCommand.ERROR_PREFIX + "You do not have permission to use this");
 		} else {
-			RanCommand c = new RanCommand(command, sender);
+			RanCommand c = new RanCommand(command, usedAlias, sender);
 			c.parseAll(args);
 			if(c.isInErrorState()) {
 				sender.sendMessage(RanCommand.ERROR_PREFIX + c.getErrorMessage());
@@ -87,5 +93,7 @@ public class ArcheCommandExecutor implements CommandExecutor {
 		
 		return null;
 	}
+
+
 	
 }
