@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.command;
 
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -20,12 +21,17 @@ public class CmdArg<T> {
 		return resolve(defaultInput);
 	}
 	
+	T resolve(List<String> input, int i) {
+		return resolve(input.get(i));
+	}
+	
 	T resolve(String input) {
 		T mapped = mapper.apply(input);
 		if(mapped == null || !filter.test(mapped)) return null;
 		
 		return mapped;
 	}
+	
 	
 	public boolean hasDefaultInput() {
 		return defaultInput != null;

@@ -136,7 +136,7 @@ public class HelpCommand extends ArcheCommand {
 			String subber = sub.getMainCommand();
 			ChatBuilder b = MessageUtil.builder(subber)
 					.color(GOLD)
-					.command(alias + ' ' + subber)
+					.command(alias + ' ' + subber + " help")
 					.hover(GRAY + "Click for help on this subcommand!");
 			fillArgs(b, false);
 			
@@ -152,9 +152,9 @@ public class HelpCommand extends ArcheCommand {
 		}
 		
 		ChatBuilder b = MessageUtil.builder();
-		if(page > 1) b.appendButton("Prev Page", "/"+alias+" -h" + (page-1)).append(" ");
+		if(page > 1) b.appendButton("Prev Page", alias+" -h" + (page-1)).append(" ");
 		b.append(subs.size()).color(DARK_GRAY).append(" available subcommands");
-		if( (page+1)*6<subs.size() )  b.appendButton("Prev Page", "/"+alias+" -h " + (page+1));
+		if( (page+1)*6<subs.size() )  b.appendButton("Prev Page", alias+" -h " + (page+1));
 		b.send(s);
 	}
 }

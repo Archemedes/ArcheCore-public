@@ -148,7 +148,7 @@ public class RanCommand {
 			CmdArg<?> arg = cmdArgs.get(i);
 			Object o = null;
 			if(i >= args.size()) o = arg.resolveDefault();
-			else o = arg.resolve(args.get(i));
+			else o = arg.resolve(args, i);
 			
 			if(o == null) error("at argument" + i + ": " + arg.getErrorMessage());
 			else argResults.add(o);

@@ -191,6 +191,17 @@ public class ArgBuilder {
 		return command;
 	}
 	
+	public ArcheCommandBuilder asJoinedString() {
+		if(flag != null) throw new IllegalStateException("Cannot use joined arguments for parameters/flags");
+		
+		defaults("**", "Provide any sentence, spaces allowed.");
+		JoinedArg arg = new JoinedArg(name, errorMessage, defaultInput, description);
+		command.noMoreArgs = true;
+		command.addArg(arg);
+		return command;
+	}
+	
+	
 	private void defaults(String name, String err, Object... formats) {
 		if(this.name == null) this.name = name;
 		if(errorMessage == null) this.errorMessage = String.format(err, formats);
