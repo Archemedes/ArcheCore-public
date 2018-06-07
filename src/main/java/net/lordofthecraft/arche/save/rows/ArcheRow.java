@@ -1,6 +1,9 @@
 package net.lordofthecraft.arche.save.rows;
 
+import org.bukkit.scheduler.BukkitRunnable;
+
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.save.Consumer;
 
 /**
@@ -27,4 +30,16 @@ public interface ArcheRow {
      * @return The SQL commands for this particular entry or update
      */
     String[] getInserts();
+    
+    
+    public default void queue() {
+    	ArcheCore.getConsumerControls().queueRow(this);
+    }
+    
+    public default void queueAndFlush() {
+    	IConsumer cc = ArcheCore.getConsumerControls();
+    	cc.queueRow(this);
+    	new BukkitRunnable() {@Override public void run() {cc.runForced();}}
+    		.runTaskAsynchronously(ArcheCore.getPlugin());
+    }
 }

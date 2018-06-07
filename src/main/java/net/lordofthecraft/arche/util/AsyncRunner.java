@@ -76,6 +76,7 @@ public abstract class AsyncRunner {
 		public void run(Connection connection) {
 			runner.connection = connection;
 			runner.doAsync();
+			runner.connection = null; //Sorry about this -Sporadic
 			Bukkit.getScheduler().scheduleSyncDelayedTask(runner.plugin, ()->runner.andThen());
 		}
 	}
@@ -146,7 +147,7 @@ public abstract class AsyncRunner {
 		
 		@Override
 		public AsyncRunner andThen(Consumer<T> c) {
-			return new SupplierRunner<T>(plugin, c, s);
+			return new SupplierRunner<>(plugin, c, s);
 		}
 	};
 	
@@ -159,7 +160,7 @@ public abstract class AsyncRunner {
 		
 		@Override
 		public AsyncRunner andThen(Consumer<T> c) {
-			return new ConnectionRunner<T>(plugin, c, s);
+			return new ConnectionRunner<>(plugin, c, s);
 		}
 	};
 	
