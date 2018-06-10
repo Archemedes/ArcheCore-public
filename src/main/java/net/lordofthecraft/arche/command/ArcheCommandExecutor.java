@@ -3,6 +3,7 @@ package net.lordofthecraft.arche.command;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -45,7 +46,7 @@ public class ArcheCommandExecutor implements TabExecutor {
 			RanCommand c = new RanCommand(command, usedAlias, sender);
 			c.parseAll(args);
 			if(c.isInErrorState()) {
-				sender.sendMessage(RanCommand.ERROR_PREFIX + c.getErrorMessage());
+				if( !StringUtils.isEmpty(c.getErrorMessage())) sender.sendMessage(RanCommand.ERROR_PREFIX + c.getErrorMessage());
 			} else if(command.hasHelp() && c.hasFlag("h") && (boolean) c.getFlag("h")) {
 				runSubCommand(sender, command.getHelp(), "h", args);
 			} else if(command.requiresPersona() && c.getPersona() == null){
@@ -53,7 +54,7 @@ public class ArcheCommandExecutor implements TabExecutor {
 				OfflinePersona pers = c.getFlag("p");
 				getPersonaAndExecute(sender, command, c, args, pers);
 			} else {
-				executeCommand(sender, command, c, args);
+				executeCommand(command, c);
 			}
 		}
 	}
@@ -64,8 +65,8 @@ public class ArcheCommandExecutor implements TabExecutor {
 		runCommand(sender, subCommand, newAlias, args);
 	}
 	
-	private void executeCommand(CommandSender sender, ArcheCommand command, RanCommand c,  List<String> args) {
-		//TODO
+	private void executeCommand(ArcheCommand command, RanCommand c) {
+		command.execute(c);
 	}
 	
 	private void getPersonaAndExecute( CommandSender sender, ArcheCommand ac, RanCommand c, List<String> args, OfflinePersona o) {
@@ -79,7 +80,7 @@ public class ArcheCommandExecutor implements TabExecutor {
       	+ " has come online while " + sender.getName() +  " also tried to load it.");
       }
       c.rectifySenders(otherPersona);
-      executeCommand(sender, ac, c, args);
+      executeCommand(ac, c);
 		});
 	}
 	

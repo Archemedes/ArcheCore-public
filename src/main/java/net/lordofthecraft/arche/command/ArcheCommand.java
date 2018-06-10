@@ -1,8 +1,6 @@
 package net.lordofthecraft.arche.command;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -29,11 +27,15 @@ public class ArcheCommand {
 	List<CmdFlag> flags;
 	List<ArcheCommand> subCommands;
 
-	@Getter(AccessLevel.NONE) Map<CommandPart, Boolean> commandStructure = new LinkedHashMap<>();
+	@Getter(AccessLevel.NONE) CommandPart sequenceStart;
 
 
 	public static ArcheCommandBuilder builder(PluginCommand command) {
 		return new ArcheCommandBuilder(command);
+	}
+	
+	void execute(RanCommand rc) {
+		sequenceStart.execute(rc);
 	}
 
 	public boolean requiresPlayer() {
@@ -63,7 +65,4 @@ public class ArcheCommand {
 				.findAny().orElse(null);
 	}
 	
-	void processStructure(ArcheCommandBuilder builder) {
-		
-	}
 }

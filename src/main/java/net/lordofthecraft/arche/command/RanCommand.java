@@ -55,12 +55,31 @@ public class RanCommand {
 		return (T) flags.get(flagName);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public <T> T getContext(String key) {
+		return (T) context.get(key);
+	}
+	
 	public boolean hasFlag(String flagName) {
 		return flags.containsKey(flagName);
 	}
 	
 	public void addContext(String key, Object value) {
 		context.put(key, value);
+	}
+	
+	public void msg(String message, Object... format) {
+		if(format.length == 0) msgRaw(message);
+		else msgFormat(message, format);
+	}
+	
+	public void msgFormat(String message, Object... format) {
+		String formatted = String.format(message, format);
+		sender.sendMessage(formatted);
+	}
+	
+	public void msgRaw(String message) {
+		sender.sendMessage(message);
 	}
 	
 	void parseAll(List<String> args) {
@@ -155,11 +174,19 @@ public class RanCommand {
 		}
 	}
 	
-	private void error(String err) throws CmdParserException {
+	public void error(String err) {
 		throw new CmdParserException(err);
 	}
 	
-	private static class CmdParserException extends Exception{
+	public void validate(boolean condition) {
+		validate(condition, "An unspecified error occurred!");
+	}
+	
+	public void validate(boolean condition, String error) {
+		if(!condition) error(error);
+	}
+	
+	private static class CmdParserException extends RuntimeException{
 		private static final long serialVersionUID = 5283812808389224035L;
 
 		private CmdParserException(String err) {

@@ -3,26 +3,26 @@ package net.lordofthecraft.arche.command;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.bukkit.command.PluginCommand;
+import org.bukkit.plugin.Plugin;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.lordofthecraft.arche.command.CommandPart.Execution;
 
 //We're reaching levels of Telanir that shouldn't be even possible
 @Accessors(fluent=true)
 public class ArcheCommandBuilder {
 	private final ArcheCommandBuilder parentBuilder;
+	private final Plugin plugin;
 	@Getter private final String mainCommand;
-	
 	@Setter private String description;
 	@Setter private String permission;
 	
@@ -35,7 +35,8 @@ public class ArcheCommandBuilder {
 	@Getter(AccessLevel.PACKAGE) private final List<CmdFlag> flags = new ArrayList<>();
 	private final List<ArcheCommand> subCommands = new ArrayList<>();
 	
-	private final Map<CommandPart, Boolean> commandStructure = new LinkedHashMap<>();
+	private CommandPart firstPart;
+	private CommandPart tailPart;
 	
 	//Builder state booleans
 	boolean argsHaveDefaults = false; //When arg is added that has default input
@@ -45,6 +46,7 @@ public class ArcheCommandBuilder {
 	
 	ArcheCommandBuilder(PluginCommand command) {
 		parentBuilder = null;
+		plugin = command.getPlugin();
 		
 		this.mainCommand = command.getName();
 		this.description = command.getDescription();
@@ -56,6 +58,7 @@ public class ArcheCommandBuilder {
 	
 	ArcheCommandBuilder(ArcheCommandBuilder dad, String name){
 		parentBuilder = dad;
+		plugin = dad.plugin;
 		this.mainCommand = name;
 		aliases.add(name.toLowerCase());
 	}
@@ -131,27 +134,46 @@ public class ArcheCommandBuilder {
 		return this;
 	}
 	
-	public ArcheCommandBuilder condition(Predicate<RanCommand> p) {
-		//TODO
+	public ArcheCommandBuilder message(String message, Object... format) {
+		sequence(CommandPart.run(rc->rc.msg(message, format), Execution.SYNC));
+		return this;
+	}
+	
+	public ArcheCommandBuilder condition(Predicate<RanCommand> p, String orElseError) {
+		sequence(CommandPart.tester(p, orElseError));
 		return this;
 	}
 	
 	public ArcheCommandBuilder run(Consumer<RanCommand> c) {
-		commandStructure.put(CommandPart.asConsumer(c), false);
+		sequence(CommandPart.run(c, Execution.SYNC));
 		return this;
+	}
+	
+	public ArcheCommandBuilder runAsync(Consumer<RanCommand> c) {
+		sequence(CommandPart.run(c, Execution.ASYNC));
+		return this;
+	}
+	
+	void sequence(CommandPart newPart) {
+		if(tailPart == null) firstPart = newPart;
+		else tailPart.setNext(newPart);
+		
+		tailPart = newPart;
+		tailPart.setPlugin(plugin);
 	}
 	
 	public ArcheCommandBuilder build() {
 		ArcheCommand built = new ArcheCommand(
-				mainCommand, 
+				mainCommand,
 				Collections.unmodifiableSet(aliases),
-				description, 
-				permission, 
-				requirePlayer, 
-				requirePersona, 
-				Collections.unmodifiableList(args), 
+				description,
+				permission,
+				requirePlayer,
+				requirePersona,
+				Collections.unmodifiableList(args),
 				Collections.unmodifiableList(flags),
-				Collections.unmodifiableList(subCommands));
+				Collections.unmodifiableList(subCommands),
+				firstPart);
 		
 		if(buildHelpFile) {
 			this.subCommands.add(new HelpCommand(built));

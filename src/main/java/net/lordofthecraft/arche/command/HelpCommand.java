@@ -24,6 +24,7 @@ import net.lordofthecraft.arche.util.extension.UtilExtension;
 @ExtensionMethod({ArcheExtension.class,UtilExtension.class})
 public class HelpCommand extends ArcheCommand {
 	private static final ChatColor[] colors = new ChatColor[] {BLUE, LIGHT_PURPLE, AQUA, GREEN, YELLOW, DARK_GRAY, GOLD, RED, DARK_AQUA};
+	
 	private final ArcheCommand parent;
 	
 	HelpCommand(ArcheCommand ac) {
@@ -35,7 +36,8 @@ public class HelpCommand extends ArcheCommand {
 	  		false,
 	  		Arrays.asList(helpPageArg()),
 	  		Collections.emptyList(),
-	  		Collections.emptyList());
+	  		Collections.emptyList(),
+	  		null);
 	  
 	  parent = ac;
 	  
@@ -48,6 +50,13 @@ public class HelpCommand extends ArcheCommand {
 		return c;
 	}
 	
+	@Override
+	void execute(RanCommand c) {
+		int page = c.getArg(0);
+		if(page > 0) outputSubcommands(c, page);
+		else outputBaseHelp(c);
+	}
+	
 	private void outputBaseHelp(RanCommand c) {
 		CommandSender s = c.getSender();
 		commandHeadline(c).send(s);
@@ -58,7 +67,7 @@ public class HelpCommand extends ArcheCommand {
 		String perm = parent.getPermission();
 		if(perm != null) s.sendMessage(GREEN + "Permission: " + YELLOW + perm);
 		
-		val argHelp = getArgumentHelp(s);
+		val argHelp = getArgumentHelp(c);
 		if(!argHelp.isEmpty()) s.sendMessage(ChatColor.DARK_GRAY + "-=== Takes the following parameters: ===-");
 		argHelp.forEach(s::sendMessage);
 	}
@@ -84,7 +93,8 @@ public class HelpCommand extends ArcheCommand {
 		}
 	}
 	
-	private List<String> getArgumentHelp(CommandSender s) {
+	private List<String> getArgumentHelp(RanCommand c) {
+		CommandSender s = c.getSender();
 		val result = new ArrayList<String>();
 		
 		int i = 0;
@@ -112,7 +122,8 @@ public class HelpCommand extends ArcheCommand {
 		return colors[i%colors.length];
 	}
 	
-	private void outputSubcommands(CommandSender s, RanCommand c, int page) {
+	private void outputSubcommands(RanCommand c, int page) {
+		CommandSender s = c.getSender();
 		List<ArcheCommand> subs = parent.getSubCommands().stream()
 				.filter(sub->sub!=this)
 				.filter(sub->sub.hasPermission(s))
@@ -154,7 +165,7 @@ public class HelpCommand extends ArcheCommand {
 		ChatBuilder b = MessageUtil.builder();
 		if(page > 1) b.appendButton("Prev Page", alias+" -h" + (page-1)).append(" ");
 		b.append(subs.size()).color(DARK_GRAY).append(" available subcommands");
-		if( (page+1)*6<subs.size() )  b.appendButton("Prev Page", alias+" -h " + (page+1));
+		if( (page+1)*6<subs.size() )  b.append(" ").appendButton("Prev Page", alias+" -h " + (page+1));
 		b.send(s);
 	}
 }
