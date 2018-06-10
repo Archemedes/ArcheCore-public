@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.bukkit.plugin.Plugin;
@@ -12,6 +13,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.val;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import net.lordofthecraft.arche.save.rows.RunnerRow;
@@ -48,6 +50,7 @@ class CommandPart {
 			else r.runTaskAsynchronously(plugin);
 			break;
 		case CONSUMER:
+		//Note that 'conn' is not the method param, which would be null at this point in the code
 			RunnerRow wrapped = conn->next.execute(rc, conn);
 			wrapped.queueAndFlush();
 			break;
@@ -76,6 +79,10 @@ class CommandPart {
 		return run(c, Execution.SYNC);
 	}
 	
+	public static CommandPart consume(BiConsumer<RanCommand, Connection> bic) {
+		return new CommandPart(bic, Execution.CONSUMER);
+	}
+	
 	public static CommandPart run(Consumer<RanCommand> c, Execution strat) {
 		BiConsumer<RanCommand, Connection> cc = (rc,$)->c.accept(rc);
 		return new CommandPart(cc, strat);
@@ -87,6 +94,13 @@ class CommandPart {
 		private final ArcheCommandBuilder builder;
 		private final BiFunction<RanCommand, Connection, T> function;
 		private boolean forTheConsumer = true;
+		static <T> JoinedPart<T> forAsync(ArcheCommandBuilder b, Function<RanCommand, T> function){
+			BiFunction<RanCommand, Connection, T> wrapped = (rc,$)->function.apply(rc);
+			val result = new JoinedPart<>(b, wrapped);
+			result.forTheConsumer = false;
+			return result;
+		}
+		
 		public ArcheCommandBuilder andThen(BiConsumer<RanCommand, T> consumer) {
 			BiConsumer<RanCommand, Connection> wrappedFunction = (rc, c)->{
 				T result = function.apply(rc, c);

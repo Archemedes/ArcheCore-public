@@ -1,11 +1,15 @@
 package net.lordofthecraft.arche.command;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.bukkit.command.PluginCommand;
@@ -135,12 +139,22 @@ public class ArcheCommandBuilder {
 	}
 	
 	public ArcheCommandBuilder message(String message, Object... format) {
-		sequence(CommandPart.run(rc->rc.msg(message, format), Execution.SYNC));
+		sequence(CommandPart.messager(message, Execution.SYNC));
+		return this;
+	}
+	
+	public ArcheCommandBuilder messageAsync(String message, Object... format) {
+		sequence(CommandPart.messager(message, Execution.ANY));
 		return this;
 	}
 	
 	public ArcheCommandBuilder condition(Predicate<RanCommand> p, String orElseError) {
 		sequence(CommandPart.tester(p, orElseError));
+		return this;
+	}
+
+	public ArcheCommandBuilder condition(Predicate<RanCommand> p, Consumer<RanCommand> orElse) {
+		sequence(CommandPart.tester(p, orElse));
 		return this;
 	}
 	
@@ -152,6 +166,19 @@ public class ArcheCommandBuilder {
 	public ArcheCommandBuilder runAsync(Consumer<RanCommand> c) {
 		sequence(CommandPart.run(c, Execution.ASYNC));
 		return this;
+	}
+	
+	public ArcheCommandBuilder runConsumer(BiConsumer<RanCommand, Connection> bic) {
+		sequence(CommandPart.consume(bic));
+		return this;
+	}
+	
+	public <T> CommandPart.JoinedPart<T> fetchConsumer(BiFunction<RanCommand, Connection, T> function){
+		return new CommandPart.JoinedPart<>(this, function);
+	}
+	
+	public <T> CommandPart.JoinedPart<T> fetchAsync(Function<RanCommand, T> function){
+		return CommandPart.JoinedPart.forAsync(this, function);
 	}
 	
 	void sequence(CommandPart newPart) {
