@@ -3,7 +3,6 @@ package net.lordofthecraft.arche.command;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -44,10 +43,15 @@ public class ArcheCommandExecutor implements TabExecutor {
 			sender.sendMessage(RanCommand.ERROR_PREFIX + "You do not have permission to use this");
 		} else {
 			RanCommand c = new RanCommand(command, usedAlias, sender);
-			c.parseAll(args);
-			if(c.isInErrorState()) {
-				if( !StringUtils.isEmpty(c.getErrorMessage())) sender.sendMessage(RanCommand.ERROR_PREFIX + c.getErrorMessage());
-			} else if(command.hasHelp() && c.hasFlag("h") && (boolean) c.getFlag("h")) {
+			
+			try{
+				c.parseAll(args);
+			} catch(Exception e) {
+				c.handleException(e);
+				return;
+			}
+			
+			if(command.hasHelp() && c.hasFlag("h") && (boolean) c.getFlag("h")) {
 				runSubCommand(sender, command.getHelp(), "h", args);
 			} else if(command.requiresPersona() && c.getPersona() == null){
 				//The case where a persona flag was offered, meaning the command is not YET in error.

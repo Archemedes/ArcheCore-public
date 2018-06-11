@@ -207,9 +207,10 @@ public class ArcheCommandBuilder {
 			this.flag("h", "help");
 		}
 		
-		//TODO manually addding the command structure
-		
-		if(parentBuilder != null) parentBuilder.subCommands.add(built);
+		if(parentBuilder != null) {
+			parentBuilder.subCommands.add(built);
+			//TODO collision checks
+		}
 		return parentBuilder;
 	}
 	

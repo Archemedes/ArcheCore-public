@@ -20,7 +20,7 @@ import net.lordofthecraft.arche.save.rows.RunnerRow;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal=true)
 @RequiredArgsConstructor
-class CommandPart {
+final class CommandPart {
 	static enum Execution{ SYNC, ASYNC, CONSUMER, ANY}
 	
 	BiConsumer<RanCommand, Connection> runner;
@@ -34,8 +34,12 @@ class CommandPart {
 	}
 	
 	protected void execute(RanCommand rc, Connection c) {
-		runner.accept(rc, c);
-		runNext(rc, c);
+		try {
+			runner.accept(rc, c);
+			runNext(rc, c);
+		} catch(Exception e) {
+			rc.handleException(e);
+		}
 	}
 	
 	private void runNext(RanCommand rc, Connection c) {

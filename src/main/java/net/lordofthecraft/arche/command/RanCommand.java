@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -18,6 +19,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 
@@ -26,9 +28,10 @@ import net.lordofthecraft.arche.interfaces.Persona;
 @Getter
 public class RanCommand {
 	public  static final String ERROR_PREFIX = DARK_RED + "Error: " + RED;
-	private static final String ERROR_FLAG_ARG = " Not a valid flag argument provided for: " + WHITE;
-	private static final String ERROR_NEEDS_PLAYER = " This command can only be run by players.";
-	private static final String ERROR_NEEDS_PERSONA = " You need a valid Persona to run this command";
+	public  static final String ERROR_UNSPECIFIED = " An unhandled error occurred when processing the command.";
+	private static final String ERROR_FLAG_ARG = "Not a valid flag argument provided for: " + WHITE;
+	private static final String ERROR_NEEDS_PLAYER = "This command can only be run by players.";
+	private static final String ERROR_NEEDS_PERSONA = "You need a valid Persona to run this command";
 	
 	final ArcheCommand command;
 	final String usedAlias;
@@ -40,10 +43,6 @@ public class RanCommand {
 	List<Object> argResults = Lists.newArrayList();
 	Map<String, Object> context = Maps.newHashMap();
 	Map<String, Object> flags = Maps.newHashMap();
-	
-	@Getter(AccessLevel.PACKAGE) boolean inErrorState = false;
-	@Getter(AccessLevel.PACKAGE) String errorMessage = null;
-	
 	
 	@SuppressWarnings("unchecked")
 	public <T> T getArg(int i) { //Static typing is for PUSSIES
@@ -83,15 +82,9 @@ public class RanCommand {
 	}
 	
 	void parseAll(List<String> args) {
-		try {
 			parseFlags(args);
 			getSenders();
 			parseArgs(args);
-		} catch(CmdParserException e) {
-			//We basically use this to signal a user error somewhere. Err msg will be send to CommandSender
-			inErrorState = true;
-			errorMessage = e.getMessage();
-		}
 	}
 	
 	private void getSenders() throws CmdParserException {
@@ -122,6 +115,17 @@ public class RanCommand {
 	void rectifySenders(Persona persona) {
 		this.persona = persona;
 		this.flags.put("p", persona);
+	}
+	
+	void handleException(Exception e) {
+		if(e instanceof CmdParserException) {
+			String err = e.getMessage();
+			if(StringUtils.isEmpty(err)) CoreLog.info("An empty CmdParserException for command: " + usedAlias + " from " + sender + ". This might be intentional.");
+			else msgRaw(ERROR_PREFIX + e.getMessage());
+		} else {
+			msgRaw(ERROR_PREFIX + ERROR_UNSPECIFIED);
+			e.printStackTrace();
+		}
 	}
 	
 	private void parseFlags(List<String> args) throws CmdParserException {
@@ -176,10 +180,6 @@ public class RanCommand {
 	
 	public void error(String err) {
 		throw new CmdParserException(err);
-	}
-	
-	public void validate(boolean condition) {
-		validate(condition, "An unspecified error occurred!");
 	}
 	
 	public void validate(boolean condition, String error) {

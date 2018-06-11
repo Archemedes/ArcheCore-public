@@ -12,6 +12,14 @@ import lombok.Getter;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 
+//TODO XXX
+// completions
+// annotation stuff
+// joint interface
+// other stuff idk
+// subcommand overloading
+// make sure the errors are properly caught
+
 @Value
 @NonFinal
 public class ArcheCommand {
