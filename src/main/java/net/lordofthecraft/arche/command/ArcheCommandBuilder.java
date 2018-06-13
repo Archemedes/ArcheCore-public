@@ -95,22 +95,12 @@ public class ArcheCommandBuilder {
 		args.add(arg);
 	}
 	
-	public ArgBuilder param(String name, String... aliases) {
+	public ArgBuilder flag(String name, String... aliases) {
 		return CmdFlag.make(this, name, aliases);
 	}
 	
-	public ArgBuilder restrictedParam(String name, String pex, String... aliases) {
+	public ArgBuilder restrictedFlag(String name, String pex, String... aliases) {
 		return CmdFlag.make(this, name, pex, aliases);
-	}
-	
-	public ArcheCommandBuilder flag(String name, String... aliases) {
-		param(name, aliases).asBoolean(true);
-		return this;
-	}
-	
-	public ArcheCommandBuilder restrictedFlag(String name, String pex, String... aliases) {
-		restrictedParam(name, pex, aliases).asBoolean(true);
-		return this;
 	}
 	
 	void addFlag(CmdFlag flag) {
@@ -231,7 +221,7 @@ public class ArcheCommandBuilder {
 			HelpCommand help = new HelpCommand(built);
 			this.subCommands.add(help);
 			if(noneSpecified) firstPart.setNext(CommandPart.run(c->help.outputSubcommands(c, 1), Execution.SYNC));
-			param("h").defaultInput("0").asInt();
+			flag("h").defaultInput("0").asInt();
 		}
 		
 
