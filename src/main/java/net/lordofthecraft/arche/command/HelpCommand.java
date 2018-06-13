@@ -53,6 +53,10 @@ public class HelpCommand extends ArcheCommand {
 	@Override
 	void execute(RanCommand c) {
 		int page = c.getArg(0);
+		runHelp(c, page);
+	}
+	
+	public void runHelp(RanCommand c, int page) {
 		if(page > 0) outputSubcommands(c, page);
 		else outputBaseHelp(c);
 	}
@@ -122,7 +126,7 @@ public class HelpCommand extends ArcheCommand {
 		return colors[i%colors.length];
 	}
 	
-	private void outputSubcommands(RanCommand c, int page) {
+	void outputSubcommands(RanCommand c, int page) {
 		CommandSender s = c.getSender();
 		List<ArcheCommand> subs = parent.getSubCommands().stream()
 				.filter(sub->sub!=this)
@@ -147,7 +151,7 @@ public class HelpCommand extends ArcheCommand {
 			String subber = sub.getMainCommand();
 			ChatBuilder b = MessageUtil.builder(subber)
 					.color(GOLD)
-					.command(alias + ' ' + subber + " help")
+					.command(alias + ' ' + subber + " -h 0")
 					.hover(GRAY + "Click for help on this subcommand!");
 			fillArgs(b, false);
 			
@@ -163,7 +167,7 @@ public class HelpCommand extends ArcheCommand {
 		}
 		
 		ChatBuilder b = MessageUtil.builder();
-		if(page > 1) b.appendButton("Prev Page", alias+" -h" + (page-1)).append(" ");
+		if(page > 1) b.appendButton("Prev Page", alias+" -h " + (page-1)).append(" ");
 		b.append(subs.size()).color(DARK_GRAY).append(" available subcommands");
 		if( (page+1)*6<subs.size() )  b.append(" ").appendButton("Prev Page", alias+" -h " + (page+1));
 		b.send(s);

@@ -60,15 +60,24 @@ public class ArcheCommandBuilder {
 		aliases.add(command.getName().toLowerCase());
 	}
 	
-	ArcheCommandBuilder(ArcheCommandBuilder dad, String name){
+	ArcheCommandBuilder(ArcheCommandBuilder dad, String name, boolean inheritOptions){
 		parentBuilder = dad;
 		plugin = dad.plugin;
 		this.mainCommand = name;
 		aliases.add(name.toLowerCase());
+		if(inheritOptions) {
+			this.buildHelpFile = dad.buildHelpFile;
+			if(dad.requirePersona) requiresPersona();
+			if(dad.requirePlayer) requiresPlayer();
+		}
 	}
 	
 	public ArcheCommandBuilder subCommand(String name) {
-		return new ArcheCommandBuilder(this, name);
+		return subCommand(name, true);
+	}
+	
+	public ArcheCommandBuilder subCommand(String name, boolean inheritOptions) {
+		return new ArcheCommandBuilder(this, name, inheritOptions);
 	}
 	
 	public ArgBuilder arg(String name) {
@@ -108,8 +117,8 @@ public class ArcheCommandBuilder {
 		flags.add(flag);
 	}
 	
-	public ArcheCommandBuilder alias(String alias) {
-		aliases.add(alias.toLowerCase());
+	public ArcheCommandBuilder alias(String... aliases) {
+		for(String alias : aliases) this.aliases.add(alias.toLowerCase());
 		return this;
 	}
 	
@@ -190,6 +199,15 @@ public class ArcheCommandBuilder {
 	}
 	
 	public ArcheCommandBuilder build() {
+		boolean noneSpecified = firstPart == null;
+		if(noneSpecified) {
+			if(!args.isEmpty() || subCommands.isEmpty())
+				throw new IllegalStateException("Found no execution sequence for command: " + this.mainCommand
+						+ ". This is only possible if the command has subcommands and no arguments specified."
+						+ " It is VERY likely the command was built incorrectly.");
+			firstPart = CommandPart.run($->{}, Execution.SYNC);
+		}
+		
 		ArcheCommand built = new ArcheCommand(
 				mainCommand,
 				Collections.unmodifiableSet(aliases),
@@ -202,15 +220,21 @@ public class ArcheCommandBuilder {
 				Collections.unmodifiableList(subCommands),
 				firstPart);
 		
-		if(buildHelpFile) {
-			this.subCommands.add(new HelpCommand(built));
-			this.flag("h", "help");
+		if(parentBuilder != null) {
+			if(built.collides(parentBuilder.subCommands))
+				throw new IllegalStateException("Detected ambiguous subcommand: "
+			  + built.getMainCommand() + ". Aliases and argument range overlap with other commands!");
+			parentBuilder.subCommands.add(built);
 		}
 		
-		if(parentBuilder != null) {
-			parentBuilder.subCommands.add(built);
-			//TODO collision checks
+		if(buildHelpFile) {
+			HelpCommand help = new HelpCommand(built);
+			this.subCommands.add(help);
+			if(noneSpecified) firstPart.setNext(CommandPart.run(c->help.outputSubcommands(c, 1), Execution.SYNC));
+			param("h").defaultInput("0").asInt();
 		}
+		
+
 		return parentBuilder;
 	}
 	

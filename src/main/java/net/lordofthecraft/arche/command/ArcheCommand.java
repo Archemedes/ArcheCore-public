@@ -10,6 +10,7 @@ import org.bukkit.command.PluginCommand;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Value;
+import lombok.val;
 import lombok.experimental.NonFinal;
 
 //TODO XXX
@@ -19,7 +20,7 @@ import lombok.experimental.NonFinal;
 // other stuff idk
 // subcommand overloading
 // make sure the errors are properly caught
-
+// is the subcommand usage with max arg count really the best way to go? philosophize on use cases
 @Value
 @NonFinal
 public class ArcheCommand {
@@ -62,8 +63,22 @@ public class ArcheCommand {
 		return StringUtils.isNotEmpty(description);
 	}
 	
-	public boolean hasHelp() {
-		return subCommands.stream().anyMatch(HelpCommand.class::isInstance);
+	public boolean isAlias(String param) {
+		return aliases.contains(param);
+	}
+	
+	private boolean aliasOverlaps(ArcheCommand other) {
+		return aliases.stream().anyMatch(other::isAlias);
+	}
+	
+	private boolean argRangeOverlaps(ArcheCommand other) { //b1 <= a2 && a1 <= b2
+		return other.minArgs() <= maxArgs() && minArgs() <= other.maxArgs();
+	}
+	
+	boolean collides(List<ArcheCommand> subbos) {
+		return subbos.stream()
+		.filter(this::argRangeOverlaps)
+		.anyMatch(this::aliasOverlaps);
 	}
 	
 	HelpCommand getHelp() {
@@ -72,5 +87,27 @@ public class ArcheCommand {
 				.map(HelpCommand.class::cast)
 				.findAny().orElse(null);
 	}
+	
+	private int minArgs() {
+		int i = 0;
+		for(val arg : args) {
+			if(arg.hasDefaultInput()) return i;
+			i++;
+		}
+		
+		return i;
+	}
+	
+	private int maxArgs() {
+		int s = args.size();
+		if(s > 0 && args.get(s-1) instanceof JoinedArg) return 255;
+		else return s;
+	}
+	
+	public boolean fitsArgSize(int argSize) {
+		return argSize >= minArgs() && argSize <= maxArgs();
+	}
+	
+	
 	
 }

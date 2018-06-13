@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.command;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -51,8 +52,9 @@ public class ArcheCommandExecutor implements TabExecutor {
 				return;
 			}
 			
-			if(command.hasHelp() && c.hasFlag("h") && (boolean) c.getFlag("h")) {
-				runSubCommand(sender, command.getHelp(), "h", args);
+			HelpCommand help = command.getHelp();
+			if(help != null && c.hasFlag("h")) {
+				help.runHelp(c, c.getFlag("h"));
 			} else if(command.requiresPersona() && c.getPersona() == null){
 				//The case where a persona flag was offered, meaning the command is not YET in error.
 				OfflinePersona pers = c.getFlag("p");
@@ -89,13 +91,22 @@ public class ArcheCommandExecutor implements TabExecutor {
 	}
 	
 	private ArcheCommand wantsSubCommand(ArcheCommand cmd, List<String> args) {
-		if(args.size() == 0) return null;
+		if(args.isEmpty()) return null;
+		String subArg = args.get(0).toLowerCase();
 		
-		String possibleSubcommand = args.get(0).toLowerCase();
-		for(ArcheCommand sub : cmd.getSubCommands()) {
-			if(sub.getAliases().stream().anyMatch(possibleSubcommand::equals)) return sub;
+		List<ArcheCommand> matches = new ArrayList<>();
+		cmd.getSubCommands().stream()
+		  .filter(s->s.isAlias(subArg))
+		  .forEach(matches::add);
+		if(matches.isEmpty()) return null;
+		else if(matches.size() == 1) return matches.get(0);
+		
+		int s = args.size() - 1;
+		for(ArcheCommand match : matches) {
+			if(match.fitsArgSize(s)) return match;
 		}
 		
+		//Fallback, no subcommand wants the amount of given arguments
 		return null;
 	}
 
