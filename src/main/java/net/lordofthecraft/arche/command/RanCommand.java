@@ -20,13 +20,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
+import net.lordofthecraft.arche.interfaces.CommandHandle;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.util.MessageUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 @Getter
-public class RanCommand {
+public class RanCommand implements CommandHandle {
 	public  static final String ERROR_PREFIX = DARK_RED + "Error: " + RED;
 	public  static final String ERROR_UNSPECIFIED = " An unhandled error occurred when processing the command.";
 	private static final String ERROR_FLAG_ARG = "Not a valid flag argument provided for: " + WHITE;
@@ -67,16 +70,24 @@ public class RanCommand {
 		context.put(key, value);
 	}
 	
+	@Override
 	public void msg(String message, Object... format) {
-		if(format.length == 0) msgRaw(message);
-		else msgFormat(message, format);
-	}
-	
-	public void msgFormat(String message, Object... format) {
 		String formatted = String.format(message, format);
 		sender.sendMessage(formatted);
 	}
 	
+	@Override
+	public void msg(BaseComponent message) {
+		MessageUtil.send(message, sender);
+	}
+	
+	public void msgFormat(String message, Object... format) {
+		//XXX maybe MessageFormatter?
+		String formatted = String.format(message, format);
+		sender.sendMessage(formatted);
+	}
+	
+	@Override
 	public void msgRaw(String message) {
 		sender.sendMessage(message);
 	}
@@ -178,10 +189,12 @@ public class RanCommand {
 		}
 	}
 	
+	@Override
 	public void error(String err) {
 		throw new CmdParserException(err);
 	}
 	
+	@Override
 	public void validate(boolean condition, String error) {
 		if(!condition) error(error);
 	}

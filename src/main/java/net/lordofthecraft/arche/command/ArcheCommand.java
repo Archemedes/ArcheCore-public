@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.command;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
@@ -16,11 +17,11 @@ import lombok.experimental.NonFinal;
 //TODO XXX
 // completions
 // annotation stuff
-// joint interface
+// joint interface MEHHHH
 // other stuff idk
-// subcommand overloading
-// make sure the errors are properly caught
-// is the subcommand usage with max arg count really the best way to go? philosophize on use cases
+// subcommand overloading DONE
+// make sure the errors are properly caught MAYBE DONE
+
 @Value
 @NonFinal
 public class ArcheCommand {
@@ -39,8 +40,24 @@ public class ArcheCommand {
 	@Getter(AccessLevel.NONE) CommandPart sequenceStart;
 
 
+	/**
+	 * TODO
+	 * @param command The PluginCommand to wrap, defined by your plugin through YML or annotation
+	 * @return a chainable builder that will construct a CommandExecutor
+	 */
 	public static ArcheCommandBuilder builder(PluginCommand command) {
 		return new ArcheCommandBuilder(command);
+	}
+	
+	/**
+	 * 
+	 * @param command The PluginCommand to wrap, defined by your plugin through YML or annotation
+	 * @param template Object that creates instances of your CommandTemplate implementation. This MUST return distinct instances
+	 * or you will have issues when calling utility methods of the class from BukkitRunnables.
+	 * @return
+	 */
+	public static void template(PluginCommand command, Supplier<CommandTemplate> template) {
+		//TODO
 	}
 	
 	void execute(RanCommand rc) {
