@@ -13,8 +13,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.bukkit.command.PluginCommand;
-import org.bukkit.plugin.Plugin;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,7 +23,8 @@ import net.lordofthecraft.arche.command.CommandPart.Execution;
 @Accessors(fluent=true)
 public class ArcheCommandBuilder {
 	private final ArcheCommandBuilder parentBuilder;
-	private final Plugin plugin;
+	private final PluginCommand command;
+	
 	@Getter private final String mainCommand;
 	@Setter private String description;
 	@Setter private String permission;
@@ -50,7 +49,7 @@ public class ArcheCommandBuilder {
 	
 	ArcheCommandBuilder(PluginCommand command) {
 		parentBuilder = null;
-		plugin = command.getPlugin();
+		this.command = command;
 		
 		this.mainCommand = command.getName();
 		this.description = command.getDescription();
@@ -62,7 +61,7 @@ public class ArcheCommandBuilder {
 	
 	ArcheCommandBuilder(ArcheCommandBuilder dad, String name, boolean inheritOptions){
 		parentBuilder = dad;
-		plugin = dad.plugin;
+		command = dad.command;
 		this.mainCommand = name;
 		aliases.add(name.toLowerCase());
 		if(inheritOptions) {
@@ -185,7 +184,7 @@ public class ArcheCommandBuilder {
 		else tailPart.setNext(newPart);
 		
 		tailPart = newPart;
-		tailPart.setPlugin(plugin);
+		tailPart.setPlugin(command.getPlugin());
 	}
 	
 	public ArcheCommandBuilder build() {
@@ -224,7 +223,8 @@ public class ArcheCommandBuilder {
 			flag("h").defaultInput("0").asInt();
 		}
 		
-
+		//If there's no more builders up the chain we've reached the top. Means we're done and we can make an executor
+		if(parentBuilder == null) command.setExecutor(new ArcheCommandExecutor(built));
 		return parentBuilder;
 	}
 	
