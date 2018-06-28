@@ -1,32 +1,8 @@
 package net.lordofthecraft.arche.persona;
 
-import java.lang.ref.WeakReference;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.potion.PotionEffect;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import lombok.Getter;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
@@ -45,6 +21,23 @@ import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdateVitalsRow;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.util.WeakBlock;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.potion.PotionEffect;
+
+import java.lang.ref.WeakReference;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public final class ArchePersona extends ArcheOfflinePersona implements Persona, InventoryHolder {
 
@@ -439,28 +432,31 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	}
 
 	@Override
-	public void remove() {
-		Player p = Bukkit.getPlayer(getPlayerUUID());
+	public boolean remove() {
+		if (super.remove()) {
+			Player p = Bukkit.getPlayer(getPlayerUUID());
 
-		if(p != null && isCurrent()) {
-			boolean hasOtherPersonas = false;
-			ArchePersona[] allPersonas = handler.getAllPersonas(p);
-			for(int i = 0; i < allPersonas.length; i++) {
-				if(allPersonas[i] != null && allPersonas[i] != this){
-					handler.switchPersona(p, i, true);
-					hasOtherPersonas = true;
-					break;
+			if(p != null && isCurrent()) {
+				boolean hasOtherPersonas = false;
+				ArchePersona[] allPersonas = handler.getAllPersonas(p);
+				for(int i = 0; i < allPersonas.length; i++) {
+					if(allPersonas[i] != null && allPersonas[i] != this){
+						handler.switchPersona(p, i, true);
+						hasOtherPersonas = true;
+						break;
+					}
+				}
+
+				if(!hasOtherPersonas) {
+					CoreLog.warning("Player " + getPlayerName() + " removed his final usable Persona!");
+					RaceBonusHandler.reset(p); //Clear Racial bonuses, for now...
+					if(p.hasPermission("archecore.mayuse") && !p.hasPermission("archecore.exempt")) new CreationDialog().makeFirstPersona(p);
 				}
 			}
 
-			if(!hasOtherPersonas) {
-				CoreLog.warning("Player " + getPlayerName() + " removed his final usable Persona!");
-				RaceBonusHandler.reset(p); //Clear Racial bonuses, for now...
-				if(p.hasPermission("archecore.mayuse") && !p.hasPermission("archecore.exempt")) new CreationDialog().makeFirstPersona(p);
-			}
+			return true;
 		}
-
-		super.remove();
+		return false;
 	}
 
 	@Override
