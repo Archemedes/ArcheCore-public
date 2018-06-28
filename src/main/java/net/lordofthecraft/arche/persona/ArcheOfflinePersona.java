@@ -1,22 +1,31 @@
 package net.lordofthecraft.arche.persona;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.persona.PersonaRemoveEvent;
-import net.lordofthecraft.arche.interfaces.*;
+import net.lordofthecraft.arche.interfaces.IConsumer;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.PersonaKey;
+import net.lordofthecraft.arche.interfaces.PersonaTags;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-
-import java.sql.*;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 public class ArcheOfflinePersona implements OfflinePersona {
@@ -138,16 +147,12 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	}
 
 	@Override
-	public boolean remove() {
+	public void remove() {
 		PersonaRemoveEvent event = new PersonaRemoveEvent(this, false);
 		Bukkit.getPluginManager().callEvent(event);
 
-		if (!event.isCancelled()) {
-			handler.getPersonaStore().removePersona(this);
-			consumer.queueRow(new DeletePersonaRow(this));
-			return true;
-		}
-		return false;
+		handler.getPersonaStore().removePersona(this);
+		consumer.queueRow(new DeletePersonaRow(this));
 	}
 
 	@Override

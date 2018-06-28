@@ -130,10 +130,8 @@ public interface OfflinePersona {
 
     /**
      * Delete the Persona from the Plugin records.
-     *
-     * @return whether or not the remove was successful
      */
-    boolean remove();
+    void remove();
 
     /**
      * Load persona from SQL. This makes no attempt to register the Persona inside PersonaHandler

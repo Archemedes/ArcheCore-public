@@ -1,6 +1,12 @@
 package net.lordofthecraft.arche.commands;
 
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
@@ -27,9 +33,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class CommandPersona implements CommandExecutor {
 	private final HelpDesk helpdesk;
@@ -264,10 +267,8 @@ public class CommandPersona implements CommandExecutor {
 				return true;
 			}
 
-                    if (opers.remove()) {
-                        sender.sendMessage(ChatColor.AQUA + "You have permakilled Persona " + ChatColor.WHITE + opers.getName() + ChatColor.AQUA + " belonging to " + ChatColor.WHITE + opers.getPlayerName());
-                    }
-
+                    opers.remove();
+                    sender.sendMessage(ChatColor.AQUA + "You have permakilled Persona " + ChatColor.WHITE + opers.getName() + ChatColor.AQUA + " belonging to " + ChatColor.WHITE + opers.getPlayerName());
                     return true;
                 }
             } else {
