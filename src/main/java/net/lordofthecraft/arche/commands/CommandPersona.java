@@ -402,8 +402,7 @@ public class CommandPersona implements CommandExecutor {
                         sender.sendMessage(ChatColor.AQUA + "Set visible race of " + pers.getName() + " to: " + ChatColor.RESET + race);
                         return true;
                     } else if (cmd == PersonaCommand.ASSIGNGENDER) {
-                    	int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
-                        String gender = StringUtils.join(args, ' ', 1, parseTo);
+                        String gender = args[1];
                         pers.setGender(gender);
                         sender.sendMessage(ChatColor.AQUA + "Set gender of " + pers.getName() + " to: " + ChatColor.RESET + gender);
                         return true;
