@@ -10,6 +10,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -36,6 +37,17 @@ public class EconomyListener implements Listener {
 			economy.withdrawPersona(p, penalty, new ArcheCoreTransaction(MessageUtil.identifyPersona(p) + " received a death penalty"));
 			ItemStack i = economy.getPhysical(penalty);
 			p.getPlayer().getWorld().dropItemNaturally(p.getPlayer().getLocation(), i);
+		}
+	}
+	
+	@EventHandler
+	public void onMinaHopper(InventoryPickupItemEvent e) {
+		if (e.getItem().getItemStack().getType() == Material.GOLD_NUGGET) {
+			ItemStack is = e.getItem().getItemStack();
+			String s = CustomTag.getTagValue(is, "mina");
+			if (s != null) {
+				e.setCancelled(true);
+			}
 		}
 	}
 
