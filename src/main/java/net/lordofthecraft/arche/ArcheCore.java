@@ -477,10 +477,12 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
                 + ChatColor.BLUE + "" + ChatColor.ITALIC + "$/persona$" + ChatColor.BLUE + ": See others' Personas and modify your own.\n"
                 + ChatColor.DARK_GREEN+ "" + ChatColor.ITALIC + "$/me$"+ChatColor.DARK_GREEN+": Opens the Persona selection menu";
 
+        /*
         String profession = ChatColor.GRAY + "/persona profession [skill]: " + ChatColor.GOLD + "Select a profession.\n"
                 + ChatColor.GREEN + "You can select only a single profession and only ONCE, so choose very carefully.\n"
                 + ChatColor.BLUE  + "Depending on your Persona's race, some professions may come easier to you than others.\n"
                 + ChatColor.GRAY + "You receive special perks for your chosen profession, but beware, as these perks cause @@Fatigue@@.";
+                */
 
         String attributes = ChatColor.GRAY + "Attributes are the various base stats of your Persona. These stats can be anything from how fast your Persona runs to how much fatigue they accumulate. \n"
         		+ ChatColor.GREEN + "Various modifiers on items, spells and foodstuffs can affect these attributes for better or worse.\n"
@@ -494,7 +496,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
         
         addHelp("Persona", persHelp, Material.REDSTONE_COMPARATOR, "archecore.mayuse");
         addHelp("Commands", commandHelp, Material.COMMAND);
-        addHelp("Professions", profession, Material.BEDROCK);
+        //addHelp("Professions", profession, Material.BEDROCK);
         addHelp("Attributes", attributes, Material.GOLDEN_APPLE);   
         addHelp("Fatigue", fatigue, Material.BED);        
         
