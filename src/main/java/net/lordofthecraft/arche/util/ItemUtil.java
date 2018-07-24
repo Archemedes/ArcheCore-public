@@ -28,8 +28,6 @@ import net.md_5.bungee.api.chat.TranslatableComponent;
 public class ItemUtil {
 	private ItemUtil() {}
 	
-	private final static UUID SKULL_ID= UUID.fromString("4fd01eb9-b99f-417c-bde4-3cb21f1a88ad");
-	
 	/**
 	 * Method to easily make Minecraft skulls from arbitrary skin files
 	 * @param theTexture A base-64 encoded nbt compound containing skin info
@@ -41,8 +39,12 @@ public class ItemUtil {
 		NbtCompound properties = NbtFactory.ofCompound("Properties");
 		NbtCompound property = NbtFactory.ofCompound("");
 		
+		char[] uid = UUID.nameUUIDFromBytes(theTexture.getBytes()).toString().toCharArray();
+		uid[14] = '4';
+		uid[19] = 'a';
+		
 		property.put("Value", theTexture);
-		skullOwner.put("Id", SKULL_ID.toString());
+		skullOwner.put("Id", String.valueOf(uid));
 		NbtList<NbtCompound> list = NbtFactory.ofList("textures", property);
 		properties.put(list);
 		skullOwner.put(properties);
