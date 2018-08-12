@@ -85,7 +85,7 @@ public class CommandMoney implements CommandExecutor {
 					econ.withdrawPersona(from, amt, new ArcheCoreTransaction(MessageUtil.identifyPersona(from) + " dropped through command"));
 					ItemStack coins = econ.getPhysical(amt);
 					Item dropped = p.getWorld().dropItem(p.getEyeLocation(), coins);
-					dropped.setVelocity(p.getLocation().getDirection().multiply(0.1));
+					dropped.setVelocity(p.getLocation().getDirection().multiply(0.25));
 				}
 			} 
 			return true;

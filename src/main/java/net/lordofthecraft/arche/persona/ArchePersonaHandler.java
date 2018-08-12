@@ -339,13 +339,14 @@ public class ArchePersonaHandler implements PersonaHandler {
         	String gender = op.getGender();
         	if (gender != null && !"Other".equals(gender)) subresult.add(new TextComponent(c + "Gender: " + r + op.getGender()));
 
+        	String race = op.getRaceString(mod);
+    		if (race != null && !race.isEmpty()) {
+    			subresult.add(new TextComponent(c + "Race: " + r + race));
+    		}
+        	
         	if (op.isLoaded()) {
         		Persona p = op.getPersona();
-        		String race = p.getRaceString(mod);
-        		if (race != null && !race.isEmpty()) {
-        			subresult.add(new TextComponent(c + "Race: " + r + race));
-        		}
-
+        		
         		BaseComponent profession = getProfessionWhois(p);
         		if (profession != null) subresult.add(profession);
 

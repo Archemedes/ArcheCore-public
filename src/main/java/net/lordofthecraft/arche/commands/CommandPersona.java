@@ -515,8 +515,7 @@ public class CommandPersona implements CommandExecutor {
 	}
 
 	private boolean doRaceChange(CommandSender sender, Persona pers, Race race) {
-		ArchePersona apers = (ArchePersona) pers;
-		apers.setRace(race);
+		pers.setRace(race);
 		sender.sendMessage(ChatColor.AQUA + "Underlying race for " + pers.getName()+ " has been changed to: " + ChatColor.RESET+ race.getName());
 		Player p = pers.getPlayer();
 		if (sender != p && p != null) {

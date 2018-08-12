@@ -59,7 +59,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger charactersSpoken;
-	String raceHeader = null;
 	int pastPlayTime; //stat_playtime_past
 	double money = ArcheCore.getEconomyControls().getBeginnerAllowance();
 	int food = 20;
@@ -244,24 +243,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		return personaKey.getPlayerUUID();
 	}
 
-	@Override
-	public String getRaceString(boolean mod) {
-		StringBuilder sb = new StringBuilder();
-		if (raceHeader != null && !raceHeader.isEmpty()) {
-			if (mod) {
-				sb.append(raceHeader).append(ChatColor.GRAY).append(" (").append(race.getName()).append(")");
-			} else {
-				sb.append(raceHeader);
-			}
-		} else {
-			if (race != Race.UNSET) {
-				sb.append(race.getName());
-			} else if (mod) {
-				sb.append(ChatColor.GRAY).append(race.getName());
-			}
-		}
-		return sb.toString();
-	}
+	
 
 	@Override
 	public String getChatName(){
@@ -299,7 +281,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 		consumer.queueRow(new UpdatePersonaRow(this, PersonaField.TYPE, type));
 	}
-
+	
+	@Override
 	public void setRace(Race r) {
 		this.race = r;
 		if (ArcheCore.getControls().areRacialBonusesEnabled()) {
@@ -312,16 +295,9 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
     	}
     	consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE_REAL, race.name()));
     	consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE, ""));
-    	this.raceHeader = null;
+    	this.raceString = null;
     }
-
-    @Override
-    public void setApparentRace(String race){
-    	raceHeader = race;
-
-    	consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE, race));
-    }
-
+	
 	@Override
 	public void clearDescription(){
 		description = null;

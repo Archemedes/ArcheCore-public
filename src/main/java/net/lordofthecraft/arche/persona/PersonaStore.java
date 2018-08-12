@@ -323,7 +323,7 @@ public class PersonaStore {
 
         String rheader = res.getString(PersonaField.RACE.field());
         if (rheader != null && !rheader.equals("null") && !rheader.isEmpty()) {
-            persona.raceHeader = rheader;
+            persona.raceString = rheader;
         }
 
         persona.description = res.getString(PersonaField.DESCRIPTION.field());

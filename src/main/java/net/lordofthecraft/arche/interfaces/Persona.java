@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche.interfaces;
 
 import net.lordofthecraft.arche.enums.PersonaType;
+import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.PersonaAttributes;
 import net.lordofthecraft.arche.persona.PersonaSkills;
 import net.lordofthecraft.arche.skin.ArcheSkin;
@@ -11,7 +12,7 @@ import java.sql.Timestamp;
 import java.util.Set;
 
 public interface Persona extends OfflinePersona {
-	
+
 	/**
 	 * Take money from a Persona. Negative amounts possible, but consider using {@link #deposit(double, Transaction)} instead.
 	 *
@@ -29,18 +30,18 @@ public interface Persona extends OfflinePersona {
 	 */
 	double deposit(double amount, Transaction cause);
 
-    /**
-     * The PersonaSkills objects hold the fields and methods related to a particular persona's skills
-     * @return The PersonaSkills object
-     */
-    PersonaSkills skills();
-    
-    /**
-     * The PersonaAttributes objects hold the fields and methods related to a particular persona's attributes
-     * @return The personaAttributes object
-     */
-    PersonaAttributes attributes();
-    
+	/**
+	 * The PersonaSkills objects hold the fields and methods related to a particular persona's skills
+	 * @return The PersonaSkills object
+	 */
+	PersonaSkills skills();
+
+	/**
+	 * The PersonaAttributes objects hold the fields and methods related to a particular persona's attributes
+	 * @return The personaAttributes object
+	 */
+	PersonaAttributes attributes();
+
 	/**
 	 * A method that retrieves the Persona's 'main' skill or profession, which they can set for RP purposes.
 	 * @return A player's self-set 'main' skill.
@@ -53,36 +54,36 @@ public interface Persona extends OfflinePersona {
 	 */
 	void setMainSkill(Skill profession);
 
-    /**
-     * Set a Persona's year of birth
-     */
-    void setDateOfBirth(int birthdate);
-    
-    /**
-     * Assign a persona's gender to the specified gender.
-     *
-     * @param gender The persona's new gender.
-     */
-    void setGender(String gender);
+	/**
+	 * Set a Persona's year of birth
+	 */
+	void setDateOfBirth(int birthdate);
 
-    /**
-     * Set the new RP name of this Persona. This also updates the time at which this Persona was last renamed
-     *
-     * @param name The new RP name.
-     */
-    void setName(String name);
+	/**
+	 * Assign a persona's gender to the specified gender.
+	 *
+	 * @param gender The persona's new gender.
+	 */
+	void setGender(String gender);
 
-    /**
-     * @return All previous names this Persona has had
-     */
+	/**
+	 * Set the new RP name of this Persona. This also updates the time at which this Persona was last renamed
+	 *
+	 * @param name The new RP name.
+	 */
+	void setName(String name);
+
+	/**
+	 * @return All previous names this Persona has had
+	 */
 	Set<String> getPastNames();
-    
-    /**
-     * Set the underlying type of this persona
-     *
-     * @param type The type of persona it should be.
-     */
-    void setPersonaType(PersonaType type);
+
+	/**
+	 * Set the underlying type of this persona
+	 *
+	 * @param type The type of persona it should be.
+	 */
+	void setPersonaType(PersonaType type);
 
 	/**
 	 * Gets a Personas prefix.
@@ -103,20 +104,20 @@ public interface Persona extends OfflinePersona {
 	 */
 	boolean hasPrefix();
 
-    /**
-     * Gets the current level of Fatigue this persona has, between 0 and 100ish
-     *
-     * @return The current level of fatigue
-     * @see net.lordofthecraft.arche.ArcheFatigueHandler
-     */
-    double getFatigue();
+	/**
+	 * Gets the current level of Fatigue this persona has, between 0 and 100ish
+	 *
+	 * @return The current level of fatigue
+	 * @see net.lordofthecraft.arche.ArcheFatigueHandler
+	 */
+	double getFatigue();
 
-    /**
-     * Sets the current level of Fatigue for this persona and performs a quick {@link net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow}
-     *
-     * @param fatigue The new level of fatigue
-     */
-    void setFatigue(double fatigue);
+	/**
+	 * Sets the current level of Fatigue for this persona and performs a quick {@link net.lordofthecraft.arche.save.rows.persona.update.PersonaUpdateRow}
+	 *
+	 * @param fatigue The new level of fatigue
+	 */
+	void setFatigue(double fatigue);
 
 	/**
 	 * Clears a Personas prefix. If Prefixes are disabled, calling this will change
@@ -136,32 +137,17 @@ public interface Persona extends OfflinePersona {
 	 */
 	Player getPlayer();
 
-    /**
-     * Gets the player-readable string of the current state of this Persona's races.
-     *
-     * @param mod Whether or not the string should be tailored around a moderator (and include hidden elements)
-     * @return The formatted String with {@link org.bukkit.Color}s, or an empty string if the persona is {@link net.lordofthecraft.arche.enums.Race#UNSET} with nothing else
-     */
-    String getRaceString(boolean mod);
-
-    /**
-     * Retrieves the Persona's qualified Chat name. That is, it returns a proper concatenation of the prefix and Persona name
+	/**
+	 * Retrieves the Persona's qualified Chat name. That is, it returns a proper concatenation of the prefix and Persona name
 	 * @return The name of the Player used for chat
 	 */
 	String getChatName();
 
 	/**
-	 * Override the Persona's visible Race with a Custom String. This does not remove
-	 * the actual race of the Persona, but displays only the newly set 'apparent' race.
-	 * @param race The string to be displayed as Race.
-	 */
-	void setApparentRace(String race);
-
-	/**
 	 * Get the time this Persona was last renamed (as fetched by the System's currentTimeMillis on the time of the last rename)
 	 * @return The moment of this Persona's last renaming.
 	 */
-    Timestamp getRenamed();
+	Timestamp getRenamed();
 
 	/**
 	 * Clear the biopgraphy of this Persona.
@@ -186,49 +172,57 @@ public interface Persona extends OfflinePersona {
 	 */
 	void setDescription(String description);
 
-    /**
-     * @return The EnderChest inventory for this persona
-     */
-    Inventory getEnderChest();
+	/**
+	 * @return The EnderChest inventory for this persona
+	 */
+	Inventory getEnderChest();
 
-    /**
-     * @return the inventory of this persona as an Inventory object
-     */
-    Inventory getInventory();
+	/**
+	 * @return the inventory of this persona as an Inventory object
+	 */
+	Inventory getInventory();
 
 	/**
 	 * @return if the player is below the new persona timer
-     */
-    boolean isNewbie();
+	 */
+	boolean isNewbie();
 
-    /**
-     * Sets the skin of this persona to use
-     *
-     * @param skin The skin this persona will be using
-     */
-    void setSkin(ArcheSkin skin);
+	/**
+	 * Sets the skin of this persona to use
+	 *
+	 * @param skin The skin this persona will be using
+	 */
+	void setSkin(ArcheSkin skin);
 
-    /**
-     * Removes the current {@link net.lordofthecraft.arche.skin.ArcheSkin} from the persona, regardless of if one is present or not. Extra dead.
-     */
-    void removeSkin();
+	/**
+	 * Removes the current {@link net.lordofthecraft.arche.skin.ArcheSkin} from the persona, regardless of if one is present or not. Extra dead.
+	 */
+	void removeSkin();
 
-    /**
-     * Get the current skin on this persona
-     *
-     * @return The skin of this persona. Will be null if there is no skin.
-     */
-    ArcheSkin getSkin();
+	/**
+	 * Get the current skin on this persona
+	 *
+	 * @return The skin of this persona. Will be null if there is no skin.
+	 */
+	ArcheSkin getSkin();
 
-    /**
-     * Checks to see if this persona has an assigned skin
-     *
-     * @return Returns whether or not this persona has an {@link net.lordofthecraft.arche.skin.ArcheSkin}
-     */
-    boolean hasSkin();
+	/**
+	 * Checks to see if this persona has an assigned skin
+	 *
+	 * @return Returns whether or not this persona has an {@link net.lordofthecraft.arche.skin.ArcheSkin}
+	 */
+	boolean hasSkin();
 
-    /**
-     * @return the total playtime of this persona(all maps added)
-     */
-    int getTotalPlaytime();
+	/**
+	 * @return the total playtime of this persona(all maps added)
+	 */
+	int getTotalPlaytime();
+
+	/**
+	 * Assign a persona's race to the specified race.
+	 *
+	 * @param race The persona's new race
+	 */
+
+	void setRace(Race race);
 }

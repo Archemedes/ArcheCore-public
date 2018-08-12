@@ -154,4 +154,20 @@ public interface OfflinePersona {
      * @return The Player this Persona belongs to
      */
     OfflinePlayer getOfflinePlayer();
+    
+    /**
+     * Gets the player-readable string of the current state of this Persona's races.
+     *
+     * @param mod Whether or not the string should be tailored around a moderator (and include hidden elements)
+     * @return The formatted String with {@link org.bukkit.Color}s, or an empty string if the persona is {@link net.lordofthecraft.arche.enums.Race#UNSET} with nothing else
+     */
+    String getRaceString(boolean mod);
+    
+	/**
+	 * Override the Persona's visible Race with a Custom String. This does not remove
+	 * the actual race of the Persona, but displays only the newly set 'apparent' race.
+	 * @param race The string to be displayed as Race.
+	 */
+	void setApparentRace(String race);
+    
 }

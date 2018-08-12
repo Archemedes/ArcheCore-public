@@ -9,8 +9,11 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Player;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,7 +26,9 @@ import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.PersonaTags;
+import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
+import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
 
@@ -42,6 +47,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	String gender;
 	PersonaType personaType;
 	String name;
+	String raceString = null;
 
 	WeakBlock location;
 	Timestamp lastPlayed;
@@ -190,4 +196,30 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	public String toString() { //Also works for ArchePersona
 		return this.getClass().getSimpleName() + ": " + MessageUtil.identifyPersona(this);
 	}
+	
+	@Override
+	public String getRaceString(boolean mod) {
+		StringBuilder sb = new StringBuilder();
+		if (raceString != null && !raceString.isEmpty()) {
+			if (mod) {
+				sb.append(raceString).append(ChatColor.GRAY).append(" (").append(race.getName()).append(")");
+			} else {
+				sb.append(raceString);
+			}
+		} else {
+			if (race != Race.UNSET) {
+				sb.append(race.getName());
+			} else if (mod) {
+				sb.append(ChatColor.GRAY).append(race.getName());
+			}
+		}
+		return sb.toString();
+	}
+
+    @Override
+    public void setApparentRace(String race){
+    	raceString = race;
+
+    	consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE, race));
+    }
 }
