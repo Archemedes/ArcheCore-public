@@ -207,7 +207,7 @@ public class CommandPersona implements CommandExecutor {
 
 			return true;
 		} else {
-            PersonaCommand cmd = PersonaCommand.getCommand(args[0]);
+            PersonaCommand cmd = PersonaCommand.getCommand(args[0].toLowerCase());
             if (cmd == null || cmd == PersonaCommand.HELP) {
                 if (sender instanceof Player) helpdesk.outputHelp("persona command", (Player) sender);
                 else sender.sendMessage(helpdesk.getHelpText("persona command"));
