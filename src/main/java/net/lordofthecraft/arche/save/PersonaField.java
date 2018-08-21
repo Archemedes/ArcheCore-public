@@ -10,7 +10,7 @@ public enum PersonaField {
     SLOT("slot", MASTER, INTEGER, true),
     PREFIX("prefix", MASTER, VARCHAR),
     NAME("name", MASTER, VARCHAR, true),
-    RACE("race_header", MASTER, VARCHAR),
+    RACE("race_header", MASTER, VARCHAR, true),
     RACE_REAL("race", MASTER, VARCHAR, true),
     DESCRIPTION("descr", MASTER, VARCHAR),
     SKILL_SELECTED("profession", MASTER, VARCHAR),

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -40,6 +41,14 @@ public class PlayerJoinListener implements Listener {
 	public void onJoin(PlayerJoinEvent e){
 		e.setJoinMessage(null);
 		Player p = e.getPlayer();
+		
+		if (ArcheCore.getPlugin().isDevModeEnabled()) {
+			if (!p.hasPermission("archecore.arsql"))
+				p.kickPlayer(ChatColor.RED + "An error has occured.\n" 
+					+ (p.hasPermission("archecore.mod") ? ChatColor.GOLD + "Contact a Developer immidiately." 
+							: ChatColor.GRAY + "We are looking into it, please login later.")); 
+		}
+		
 		p.setExhaustion(3.5f);
 		if (timer != null) timer.startTiming("login " + p.getName());
 		if(!handler.getPersonaStore().isLoadedThisSession(p)) {

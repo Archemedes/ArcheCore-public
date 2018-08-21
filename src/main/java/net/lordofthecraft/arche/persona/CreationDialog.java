@@ -538,7 +538,7 @@ public class CreationDialog {
 
         	CoreLog.debug("New persona created in the world " + p.getWorld().getName() + " with the uuid of " + p.getWorld().getUID());
 
-        	ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, 0, gender, new Timestamp(creationTimeMS), new Timestamp(System.currentTimeMillis()), 0);
+        	ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, 0, gender, new Timestamp(creationTimeMS), new Timestamp(System.currentTimeMillis()), 0, null);
 
         	ArchePersonaHandler.getInstance().registerPersona(persona);
         	p.sendMessage(ChatColor.GOLD + "" + ChatColor.UNDERLINE + "Created your new Persona: " + ChatColor.GREEN + name + ChatColor.GOLD + "!");

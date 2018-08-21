@@ -181,6 +181,9 @@ public class PersonaStore {
             }
         } catch (SQLException e1) {
             e1.printStackTrace();
+            if (e1.getMessage().contains("The database file is locked")) {
+            	ArcheCore.getPlugin().setDevMode(true);
+            }
         } finally {
             SQLUtil.close(res);
             SQLUtil.close(statement);
@@ -274,6 +277,7 @@ public class PersonaStore {
         String type = res.getString(PersonaField.TYPE.field());
         int birthdate = res.getInt(PersonaField.DATE_OF_BIRTH.field());
         String gender = res.getString(PersonaField.GENDER.field());
+        String raceString = res.getString(PersonaField.RACE.field());
         Timestamp creationTimeMS = res.getTimestamp(PersonaField.STAT_CREATION.field());
         Timestamp lastPlayed = res.getTimestamp(PersonaField.STAT_LAST_PLAYED.field());
         int played = res.getInt(PersonaField.STAT_PLAYED.field());
@@ -282,7 +286,7 @@ public class PersonaStore {
         ArcheOfflinePersona persona = new ArcheOfflinePersona(
         		new ArchePersonaKey(persona_id, pUUID, slot), 
         		creationTimeMS, lastPlayed, played, current, race, 
-        		birthdate, gender, ptype, name);
+        		birthdate, gender, ptype, name, raceString);
 
         String wstr = res.getString(PersonaField.WORLD.field());
         if (!res.wasNull()) {
@@ -315,16 +319,12 @@ public class PersonaStore {
                 op.getCreationTime(),
                 op.lastPlayed,
                 op.getTimePlayed(),
-                op.getPersonaType()
+                op.getPersonaType(),
+                op.getRaceString()
         );
 
         persona.location = op.location;
         persona.current = op.current;
-
-        String rheader = res.getString(PersonaField.RACE.field());
-        if (rheader != null && !rheader.equals("null") && !rheader.isEmpty()) {
-            persona.raceString = rheader;
-        }
 
         persona.description = res.getString(PersonaField.DESCRIPTION.field());
         persona.prefix = res.getString(PersonaField.PREFIX.field());

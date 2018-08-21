@@ -73,13 +73,13 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 	
 	public ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
-			String gender, Timestamp creationTimeMS, Timestamp lastPlayed, int played) {
-		this(persona_id, player, slot, name, race, birthdate, gender, creationTimeMS, lastPlayed, played, PersonaType.NORMAL);
+			String gender, Timestamp creationTimeMS, Timestamp lastPlayed, int played, String raceString) {
+		this(persona_id, player, slot, name, race, birthdate, gender, creationTimeMS, lastPlayed, played, PersonaType.NORMAL, raceString);
 	}
 
 	ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
-			String gender, Timestamp creationTimeMS, Timestamp lastPlayed, int played, PersonaType type) {
-		super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, lastPlayed, played, false, race, birthdate, gender, type, name);
+			String gender, Timestamp creationTimeMS, Timestamp lastPlayed, int played, PersonaType type, String raceString) {
+		super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, lastPlayed, played, false, race, birthdate, gender, type, name, raceString);
 		charactersSpoken = new AtomicInteger();
 		renamed = new Timestamp(0);
 		pastPlayTime = 0;

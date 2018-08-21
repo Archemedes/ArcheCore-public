@@ -36,6 +36,13 @@ public class CommandSql implements CommandExecutor {
 
 		Player p = (Player) sender;
 		if(p.hasPermission("archecore.arsql")){
+			
+			if (args.length > 0 && args[0].equalsIgnoreCase("devmode")) {
+				ArcheCore.getPlugin().setDevMode(!ArcheCore.getPlugin().isDevModeEnabled());
+				p.sendMessage(ChatColor.YELLOW + "ArcheCore devmode: " + ArcheCore.getPlugin().isDevModeEnabled());
+				return true;
+			}
+			
 			String statement = StringUtils.join(args, ' ');
 			//TODO further injection prevention
 			//This removes comments from the SQL command.

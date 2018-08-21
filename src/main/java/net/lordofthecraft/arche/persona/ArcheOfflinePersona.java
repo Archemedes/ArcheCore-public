@@ -54,7 +54,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	final AtomicInteger timePlayed;
 	
 	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, int played,
-			boolean current, Race race, int birthdate, String gender, PersonaType type, String name) {
+			boolean current, Race race, int birthdate, String gender, PersonaType type, String name, String raceString) {
 		this.personaKey = personaKey;
 		this.creationTime = creation;
 		this.current = current;
@@ -67,7 +67,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	}
 
 	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, int played,
-			boolean current, Race race, int birthdate, String gender, PersonaType type, String name) {
+			boolean current, Race race, int birthdate, String gender, PersonaType type, String name, String raceString) {
 		this.personaKey = personaKey;
 		this.creationTime = creation;
 		this.lastPlayed = lastPlayed;
@@ -78,6 +78,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 		this.personaType = type;
 		this.name = name;
 		timePlayed = new AtomicInteger(played);
+		this.raceString = raceString;
 	}
 
 	@Override
