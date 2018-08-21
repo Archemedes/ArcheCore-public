@@ -75,4 +75,11 @@ public enum Race {
         }
         return false;
     }
+
+	public static Race fromName(String race) {
+		for (Race r : values()) 
+			if (r.getName().equalsIgnoreCase(race))
+				return r;
+		return null;
+	}
 }

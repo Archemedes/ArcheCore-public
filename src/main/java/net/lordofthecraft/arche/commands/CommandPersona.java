@@ -307,6 +307,50 @@ public class CommandPersona implements CommandExecutor {
                     m2.addExtra(extra);
                     MessageUtil.send(m2, sender);
                     return true;*/
+                } else if (cmd == PersonaCommand.REALRACE) {
+                    sender.sendMessage(ChatColor.AQUA + "Underlying for " + pers.getName() + " is: " + ChatColor.GOLD + pers.getRace().getName());
+                    sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "(Visible: " + pers.getRaceString(sender.hasPermission("archecore.mod.persona")) + ")");
+                    return true;
+                } else if (cmd == PersonaCommand.WIPERACE) {
+                    sender.sendMessage(ChatColor.AQUA + "Visible race of " + pers.getName() + " has been reset to from '" + pers.getRaceString(sender.hasPermission("archecore.mod.persona")) + "' to: " + ChatColor.RESET + pers.getRace().getName());
+                    pers.setApparentRace(null);
+                    return true;
+                } else if (cmd == PersonaCommand.OPENINV) {
+                    if (sender instanceof Player) {
+                        Player pl = (Player) sender;
+                        pl.closeInventory();
+                        sender.sendMessage(ChatColor.AQUA + "Opening inventory contents for " + pers.getName() + ".");
+                        pl.openInventory(pers.getInventory());
+
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
+                    }
+                    return true;
+                } else if (cmd == PersonaCommand.OPENENDER) {
+                    if (sender instanceof Player) {
+                        Player pl = (Player) sender;
+                        pl.closeInventory();
+                        Inventory inv = pers.getEnderChest();
+                        sender.sendMessage(ChatColor.AQUA + "Opening enderchest contents for " + pers.getName() + ".");
+                        pl.openInventory(inv);
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
+                    }
+                    return true;
+                } else if (cmd == PersonaCommand.READTAG) {
+                    sender.sendMessage("");
+                    sender.sendMessage("~~~~ " + ChatColor.GOLD + pers.getName() + "" + ChatColor.RESET + "'s tags. ~~~~");
+                    if (pers.tags().getTags().size() == 0) {
+                        sender.sendMessage(ChatColor.RED + "None!");
+                    } else {
+                        for (Map.Entry<String, TagAttachment> ent : pers.tags().getTagMap().entrySet()) {
+                            sender.sendMessage(ChatColor.BLUE + ent.getKey() + ": \"" + ChatColor.GRAY + ent.getValue().getValue() + '"') ;
+                        }
+                    }
+                    return true;
+                } else if (cmd == PersonaCommand.FATIGUEVIEW) {
+                    sender.sendMessage(ChatColor.AQUA + "The persona " + pers.getName() + ChatColor.GRAY + " (" + pers.getPlayerName() + ")" + ChatColor.AQUA + " has " + ChatColor.GOLD + pers.getFatigue() + ChatColor.AQUA + "/" + pers.attributes().getAttributeValue(AttributeRegistry.MAX_FATIGUE) + " fatigue");
+                    return true;
                 } else if (args.length > 1) {
                     if (cmd == PersonaCommand.NAME) {
                         int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
@@ -399,6 +443,17 @@ public class CommandPersona implements CommandExecutor {
                     } else if (cmd == PersonaCommand.SETRACE) {
                         int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
                         String race = StringUtils.join(args, ' ', 1, parseTo);
+                        Race realrace = Race.fromName(race);
+                        if (realrace != null) {
+                        	if (realrace == pers.getRace()) {
+                        		sender.sendMessage(ChatColor.RED + "Error: Please use 'wiperace' to reset the persona's race to the mechanical one.");
+                        		return true;
+                        	}
+                        	if (!realrace.getParentRace().equalsIgnoreCase(pers.getRace().getName())) {
+                        		sender.sendMessage(ChatColor.RED + "Error: You may not set a visible race to a mechanical race unless it is a subrace of that race. Please inform the player they must purchase a race-change with Crowns in our /store.");
+                        		return true;
+                        	}
+                        }
                         pers.setApparentRace(race);
                         sender.sendMessage(ChatColor.AQUA + "Set visible race of " + pers.getName() + " to: " + ChatColor.RESET + race);
                         return true;
@@ -407,14 +462,6 @@ public class CommandPersona implements CommandExecutor {
                         String gender = StringUtils.join(args, ' ', 1, parseTo);
                         pers.setGender(gender);
                         sender.sendMessage(ChatColor.AQUA + "Set gender of " + pers.getName() + " to: " + ChatColor.RESET + gender);
-                        return true;
-                    } else if (cmd == PersonaCommand.REALRACE) {
-                        sender.sendMessage(ChatColor.AQUA + "Underlying for " + pers.getName() + " is: " + ChatColor.GOLD + pers.getRace().getName());
-                        sender.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "(Visible: " + pers.getRaceString(sender.hasPermission("archecore.mod.persona")) + ")");
-                        return true;
-                    } else if (cmd == PersonaCommand.WIPERACE) {
-                        sender.sendMessage(ChatColor.AQUA + "Visible race of " + pers.getName() + " has been reset to from '" + pers.getRaceString(sender.hasPermission("archecore.mod.persona")) + "' to: " + ChatColor.RESET + pers.getRace().getName());
-                        pers.setApparentRace(null);
                         return true;
                     } else if (cmd == PersonaCommand.ASSIGNRACE) {
                         int parseTo = (args.length > 3 && args[args.length - 2].equals("-p")) ? args.length - 2 : args.length;
@@ -436,39 +483,6 @@ public class CommandPersona implements CommandExecutor {
                             sender.sendMessage(ChatColor.RED + "Error! Could not set the persona type of " + pers.getName() + "! Acceptable values are: " + ChatColor.RESET + " NORMAL, LORE, EVENT, STAFF");
                         }
                         return true;
-                    } else if (cmd == PersonaCommand.OPENINV) {
-                        if (sender instanceof Player) {
-                            Player pl = (Player) sender;
-                            pl.closeInventory();
-                            sender.sendMessage(ChatColor.AQUA + "Opening inventory contents for " + pers.getName() + ".");
-                            pl.openInventory(pers.getInventory());
-
-                        } else {
-                            sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
-                        }
-                        return true;
-                    } else if (cmd == PersonaCommand.OPENENDER) {
-                        if (sender instanceof Player) {
-                            Player pl = (Player) sender;
-                            pl.closeInventory();
-                            Inventory inv = pers.getEnderChest();
-                            sender.sendMessage(ChatColor.AQUA + "Opening enderchest contents for " + pers.getName() + ".");
-                            pl.openInventory(inv);
-                        } else {
-                            sender.sendMessage(ChatColor.RED + "This command can only be run from in game!");
-                        }
-                        return true;
-                    } else if (cmd == PersonaCommand.READTAG) {
-                        sender.sendMessage("");
-                        sender.sendMessage("~~~~ " + ChatColor.GOLD + pers.getName() + "" + ChatColor.RESET + "'s tags. ~~~~");
-                        if (pers.tags().getTags().size() == 0) {
-                            sender.sendMessage(ChatColor.RED + "None!");
-                        } else {
-                            for (Map.Entry<String, TagAttachment> ent : pers.tags().getTagMap().entrySet()) {
-                                sender.sendMessage(ChatColor.BLUE + ent.getKey() + ": \"" + ChatColor.GRAY + ent.getValue().getValue() + '"') ;
-                            }
-                        }
-                        return true;
                     } else if (cmd == PersonaCommand.SETTAG) {
                         if (args.length >= 3 && !args[1].equalsIgnoreCase("-p") && !args[2].equalsIgnoreCase("-p")) {
                             String key = args[1];
@@ -488,9 +502,6 @@ public class CommandPersona implements CommandExecutor {
                                 sender.sendMessage(ChatColor.GREEN + "Success! Removed the tag " + args[1] + " from " + MessageUtil.identifyPersona(pers));
                             }
                         }
-                        return true;
-                    } else if (cmd == PersonaCommand.FATIGUEVIEW) {
-                        sender.sendMessage(ChatColor.AQUA + "The persona " + pers.getName() + ChatColor.GRAY + " (" + pers.getPlayerName() + ")" + ChatColor.AQUA + " has " + ChatColor.GOLD + pers.getFatigue() + ChatColor.AQUA + "/" + pers.attributes().getAttributeValue(AttributeRegistry.MAX_FATIGUE) + " fatigue");
                         return true;
                     } else if (cmd == PersonaCommand.FATIGUESET) {
                         if (NumberUtils.isNumber(args[1])) {
