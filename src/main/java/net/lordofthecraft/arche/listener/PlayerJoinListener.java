@@ -47,6 +47,7 @@ public class PlayerJoinListener implements Listener {
 				p.kickPlayer(ChatColor.RED + "An error has occured.\n" 
 					+ (p.hasPermission("archecore.mod") ? ChatColor.GOLD + "Contact a Developer immidiately." 
 							: ChatColor.GRAY + "We are looking into it, please login later.")); 
+			return;
 		}
 		
 		p.setExhaustion(3.5f);
