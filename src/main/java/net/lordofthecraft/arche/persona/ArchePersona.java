@@ -71,6 +71,10 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	final Set<String> namelog = Sets.newHashSet();
 	private WeakReference<Player> playerObject;
 
+	public ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
+			String gender, Timestamp creationTimeMS, Timestamp lastPlayed, int played) {
+		this(persona_id, player, slot, name, race, birthdate, gender, creationTimeMS, lastPlayed, played, PersonaType.NORMAL, null);
+	}
 	
 	public ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
 			String gender, Timestamp creationTimeMS, Timestamp lastPlayed, int played, String raceString) {
