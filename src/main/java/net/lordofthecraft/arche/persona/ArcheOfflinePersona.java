@@ -38,7 +38,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	protected static final ArchePersonaHandler handler = ArchePersonaHandler.getInstance();
 
 	@Getter(AccessLevel.NONE) final ArchePersonaTags tags = new ArchePersonaTags(this);
-	
+
 	final PersonaKey personaKey;
 	final Timestamp creationTime;
 	boolean current = false;
@@ -52,7 +52,12 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	WeakBlock location;
 	Timestamp lastPlayed;
 	final AtomicInteger timePlayed;
-	
+
+	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, int played,
+			boolean current, Race race, int birthdate, String gender, PersonaType type, String name) {
+		this(personaKey, creation, played, current, race, birthdate, gender, type, name, null);
+	}
+
 	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, int played,
 			boolean current, Race race, int birthdate, String gender, PersonaType type, String name, String raceString) {
 		this.personaKey = personaKey;
@@ -64,6 +69,11 @@ public class ArcheOfflinePersona implements OfflinePersona {
 		this.personaType = type;
 		this.name = name;
 		timePlayed = new AtomicInteger(played);
+	}
+
+	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, int played,
+			boolean current, Race race, int birthdate, String gender, PersonaType type, String name) {
+		this(personaKey, creation, lastPlayed, played, current, race, birthdate, gender, type, name, null);
 	}
 
 	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, int played,
@@ -197,7 +207,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	public String toString() { //Also works for ArchePersona
 		return this.getClass().getSimpleName() + ": " + MessageUtil.identifyPersona(this);
 	}
-	
+
 	@Override
 	public String getRaceString(boolean mod) {
 		StringBuilder sb = new StringBuilder();
@@ -217,10 +227,10 @@ public class ArcheOfflinePersona implements OfflinePersona {
 		return sb.toString();
 	}
 
-    @Override
-    public void setApparentRace(String race){
-    	raceString = race;
+	@Override
+	public void setApparentRace(String race){
+		raceString = race;
 
-    	consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE, race));
-    }
+		consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE, race));
+	}
 }
