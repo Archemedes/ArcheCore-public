@@ -158,7 +158,7 @@ public class CommandPersona implements CommandExecutor {
 
         String modOutput = ChatColor.DARK_PURPLE + l + "How to use Persona Moderator Commands\n" +
                 d + "[M]" + i + " $</persona setrace >setrace [visiblerace]$: " + a + "Chance the apparent race of a persona. Changes the visible race but not the mechanical race. \n" +
-                "(view real race with $</persona realrace >realrace$ or wipe this race with $</persona wiperace >wiperace$)\n" +
+                "(view real race with $</persona realrace >realrace$"+a+" or wipe this race with $</persona wiperace >wiperace$)\n" +
                 d + "[M]" + i + " $</persona openinv >openinv {player}@{personaid}$: " + a + "Open the inventory of a persona/player.\n" +
                 d + "[M]" + i + " $</persona openender>openender {player}@{personaid}$: " + a + "Open the enderchest of this persona/player.\n" +
                 d + "[M] @@<Persona Target>Click to view@@ how to run commands on other players.\n" +
