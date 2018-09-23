@@ -2,6 +2,7 @@ name: ArcheCore
 main: net.lordofthecraft.arche.ArcheCore
 author: Arche
 version: ${project.version}
+api-version: 1.13
 
 commands:
    archehelp:

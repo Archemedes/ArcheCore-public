@@ -50,7 +50,7 @@ public class ItemUtil {
 		skullOwner.put(properties);
 		tag.put(skullOwner);
 		
-		ItemStack is = MinecraftReflection.getBukkitItemStack(new ItemStack(Material.SKULL_ITEM, 1, (short) 3));
+		ItemStack is = MinecraftReflection.getBukkitItemStack(new ItemStack(Material.PLAYER_HEAD, 1));
 		NbtFactory.setItemTag(is, tag);
 		return is;
 	}

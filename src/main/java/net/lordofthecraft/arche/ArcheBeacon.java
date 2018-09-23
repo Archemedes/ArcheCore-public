@@ -193,7 +193,7 @@ public class ArcheBeacon {
 			ItemUtil.decorate(is, r + "Help", g + "Receive help on", g + "various topics.");
 			inv.setItem(0, is);
 
-			is = new ItemStack(Material.REDSTONE_COMPARATOR);
+			is = new ItemStack(Material.COMPARATOR);
 			ItemUtil.decorate(is, r + "Your Personas to the right", ChatColor.GRAY + "Max Personas: " + ChatColor.LIGHT_PURPLE + max,
                     g + "Left Click to select", (ArcheCore.getControls().canCreatePersonas() ? g + "SHIFT + Left Click: Create new" : ChatColor.RED + "Creating new personas is disabled on this server"),
                     g + "SHIFT + Right Click: Permakill Persona",
@@ -221,20 +221,20 @@ public class ArcheBeacon {
 				ArchePersona a = prs[i];
 				if(a == null){
 					if(mayMakeMore) {
-						is = new ItemStack(Material.SKULL_ITEM, 1, (short) 0);
+						is = new ItemStack(Material.SKELETON_SKULL, 1);
 						ItemUtil.decorate(is, "Empty Persona", ChatColor.GREEN+""+ChatColor.ITALIC + "Click here", g + "To create a new Persona");
                         mayMakeMore = false;
                         freeSlots--;
                     } else if (freeSlots-- > 0) {
-                        is = new ItemStack(Material.SKULL_ITEM, 1, (short) 2);
+                        is = new ItemStack(Material.ZOMBIE_HEAD, 1);
                         ItemUtil.decorate(is, "Empty Persona", ChatColor.GREEN+""+ChatColor.ITALIC + "Slot is available", g + "");
 					}else {
-						is = new ItemStack(Material.SKULL_ITEM, 1, (short) 1);
+						is = new ItemStack(Material.WITHER_SKELETON_SKULL, 1);
 						ItemUtil.decorate(is, "Locked Slot", g + "Please " + ChatColor.GREEN+""+ChatColor.ITALIC + "Purchase", g + "You may purchase more personas in the store");
                     }
                 } else {
                     ArcheSkin sk = a.getSkin();
-                    is = (sk != null ? sk.getHeadItem() : new ItemStack(Material.SKULL_ITEM, 1, (short) 3));
+                    is = (sk != null ? sk.getHeadItem() : new ItemStack(Material.PLAYER_HEAD, 1));
                     String name = ChatColor.YELLOW + "" + ChatColor.ITALIC + a.getName();
 					String gender = a.getGender() == null? "" : a.getGender();
                     String desc = ChatColor.GRAY + a.getRaceString(false) + " " + gender;

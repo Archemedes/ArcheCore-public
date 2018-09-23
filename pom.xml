@@ -9,7 +9,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.bukkitVersion>1.12-R0.1-SNAPSHOT</project.bukkitVersion>
+        <project.bukkitVersion>1.13.1-R0.1-SNAPSHOT</project.bukkitVersion>
     </properties>
 
     <distributionManagement>
@@ -24,10 +24,6 @@
         <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository>
-        <repository>
-            <id>bungeecord-repo</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
         <!-- ProtocolLib -->
         <repository>
@@ -62,7 +58,7 @@
         <dependency>
         	<groupId>io.github.archemedes</groupId>
         	<artifactId>customitem</artifactId>
-        	<version>2.1</version>
+        	<version>2.2</version>
         </dependency>
 		    <dependency>
           <groupId>org.projectlombok</groupId>

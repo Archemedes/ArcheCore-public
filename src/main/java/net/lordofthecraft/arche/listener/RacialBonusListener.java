@@ -406,11 +406,11 @@ public class RacialBonusListener implements Listener {
 			ItemStack is = le.getEquipment().getItemInMainHand();
 			if(is != null){
 				switch(is.getType()){
-				case GOLD_SWORD:
-				case GOLD_AXE:
-				case GOLD_PICKAXE:
-				case GOLD_SPADE:
-				case GOLD_HOE:
+				case GOLDEN_SWORD:
+				case GOLDEN_AXE:
+				case GOLDEN_PICKAXE:
+				case GOLDEN_SHOVEL:
+				case GOLDEN_HOE:
 				case GOLD_INGOT:
 				case GOLD_BLOCK:
 				case GOLD_NUGGET:

@@ -76,11 +76,27 @@ public class BlockRegistryListener implements Listener {
 					registry.removeBlock(b);
 				}
 				break;
-			case LONG_GRASS: case DEAD_BUSH: case YELLOW_FLOWER: case RED_ROSE: case BROWN_MUSHROOM: case RED_MUSHROOM:
-			case SAPLING: case CARROT: case POTATO: case MELON_STEM: case PUMPKIN_STEM: case SUGAR_CANE_BLOCK:
-			case DOUBLE_PLANT: case CROPS: 
+				case TALL_GRASS:
+				case DEAD_BUSH:
+				case DANDELION:
+				case POPPY:
+				case BROWN_MUSHROOM:
+				case RED_MUSHROOM:
+				case SPRUCE_SAPLING:
+				case ACACIA_SAPLING:
+				case BIRCH_SAPLING:
+				case DARK_OAK_SAPLING:
+				case JUNGLE_SAPLING:
+				case OAK_SAPLING:
+				case CARROT:
+				case POTATO:
+				case MELON_STEM:
+				case PUMPKIN_STEM:
+				case SUGAR_CANE:
+				case LARGE_FERN:
+				case WHEAT:
 				Material x = b.getRelative(BlockFace.DOWN).getType();
-				if(x != Material.SOIL && x != Material.DIRT && x != Material.GRASS) registry.removeBlock(b);
+				if(x != Material.FARMLAND && x != Material.DIRT && x != Material.GRASS) registry.removeBlock(b);
 				break;
 			default: break;
 			}

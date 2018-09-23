@@ -28,7 +28,7 @@ public class OpenEnderRunnable implements Runnable {
                     return;
                 }
                 OpenEnderRunnable r = new OpenEnderRunnable(pers, pers.getPlayer().getLocation());
-                p.getWorld().playSound(pers.getPlayer().getLocation(), Sound.BLOCK_NOTE_PLING, 1, 1);
+                p.getWorld().playSound(pers.getPlayer().getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
                 p.sendMessage(ChatColor.AQUA + "Opening your enderchest. Don't move or you will interrupt the process.");
                 Bukkit.getScheduler().runTaskLater(ArcheCore.getPlugin(), r, 5 * 20);
             } else {

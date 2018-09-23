@@ -59,11 +59,11 @@ public class LocationUtil {
 	
 	public static boolean isInLava(LivingEntity le) {
 		Block b = le.getLocation().getBlock();
-		return b.getType() == Material.LAVA || b.getType() == Material.STATIONARY_LAVA;
+		return b.getType() == Material.LAVA;
 	}
 	
 	public static boolean isInWater(LivingEntity le) {
 		Block b = le.getLocation().getBlock();
-		return b.getType() == Material.STATIONARY_WATER || b.getType() == Material.WATER;
+		return b.getType() == Material.WATER;
 	}
 }

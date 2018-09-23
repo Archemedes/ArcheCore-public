@@ -165,7 +165,7 @@ public class SkinCache {
 		Bukkit.getOnlinePlayers().stream()
 		.filter(x -> (x != p))
 		.filter(x -> x.canSee(p))
-		.forEach(x -> {x.hidePlayer(p); x.showPlayer(p);});
+		.forEach(x -> {x.hidePlayer(ArcheCore.getPlugin(), p); x.showPlayer(ArcheCore.getPlugin(), p);});
 		
 		final ProtocolManager manager = ProtocolLibrary.getProtocolManager();
 		

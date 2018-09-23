@@ -495,11 +495,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 				+ ChatColor.LIGHT_PURPLE  + "your fatigue will reset over time, so it's best to simply take a break and wait it out. "
 				+ "If you are inpatient, having a drink at a tavern will also reduce a Persona's fatigue.\n";
 
-		addHelp("Persona", persHelp, Material.REDSTONE_COMPARATOR, "archecore.mayuse");
-		addHelp("Commands", commandHelp, Material.COMMAND);
+		addHelp("Persona", persHelp, Material.COMPARATOR, "archecore.mayuse");
+		addHelp("Commands", commandHelp, Material.COMMAND_BLOCK);
 		//addHelp("Professions", profession, Material.BEDROCK);
 		addHelp("Attributes", attributes, Material.GOLDEN_APPLE);   
-		addHelp("Fatigue", fatigue, Material.BED);        
+		addHelp("Fatigue", fatigue, Material.RED_BED);
 
 		//Create config-set Help Files
 		if(!(new File(getDataFolder(), "helpfiles.yml").exists()))

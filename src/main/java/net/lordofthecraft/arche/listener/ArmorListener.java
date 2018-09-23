@@ -104,14 +104,14 @@ public class ArmorListener implements Listener {
 	
 	public static EquipmentSlot isArmor(Material m){
 		switch(m){
-		case LEATHER_HELMET: case CHAINMAIL_HELMET: case IRON_HELMET: case GOLD_HELMET: case DIAMOND_HELMET:
+		case LEATHER_HELMET: case CHAINMAIL_HELMET: case IRON_HELMET: case GOLDEN_HELMET: case DIAMOND_HELMET:
 			return EquipmentSlot.HEAD;
 		case LEATHER_CHESTPLATE: case CHAINMAIL_CHESTPLATE: case IRON_CHESTPLATE:
-		case GOLD_CHESTPLATE: case DIAMOND_CHESTPLATE: case ELYTRA:
+		case GOLDEN_CHESTPLATE: case DIAMOND_CHESTPLATE: case ELYTRA:
 			return EquipmentSlot.CHEST;
-		case LEATHER_LEGGINGS: case CHAINMAIL_LEGGINGS: case IRON_LEGGINGS: case GOLD_LEGGINGS: case DIAMOND_LEGGINGS:
+		case LEATHER_LEGGINGS: case CHAINMAIL_LEGGINGS: case IRON_LEGGINGS: case GOLDEN_LEGGINGS: case DIAMOND_LEGGINGS:
 			return EquipmentSlot.LEGS;
-		case LEATHER_BOOTS: case CHAINMAIL_BOOTS: case IRON_BOOTS: case GOLD_BOOTS: case DIAMOND_BOOTS:
+		case LEATHER_BOOTS: case CHAINMAIL_BOOTS: case IRON_BOOTS: case GOLDEN_BOOTS: case DIAMOND_BOOTS:
 			return EquipmentSlot.FEET;
 		default: return null;
 		}
