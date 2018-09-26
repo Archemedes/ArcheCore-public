@@ -1,3 +1,5 @@
+image: maven:latest
+
 build:
   script: "mvn -V -B -s settings.xml clean package"
   artifacts: 
@@ -9,5 +11,3 @@ deploy:
   script:
     - mvn clean deploy --settings settings.xml -V -B -U
   when: on_success
-  only:
-  - master
