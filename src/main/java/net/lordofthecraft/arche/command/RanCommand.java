@@ -82,7 +82,6 @@ public class RanCommand implements CommandHandle {
 	}
 	
 	public void msgFormat(String message, Object... format) {
-		//XXX maybe MessageFormatter?
 		String formatted = String.format(message, format);
 		sender.sendMessage(formatted);
 	}

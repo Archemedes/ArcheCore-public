@@ -131,11 +131,13 @@ public class AnnotatedCommandParser {
 			}
 			resolveArgType(method, param, arg);
 		}
+		
+		subbo.build();
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" }) //For enum casting
 	private void resolveArgType(Method m, Parameter param, ArgBuilder arg) {
-		Class<?> c = param.getClass();
+		Class<?> c = param.getType();
 		if( c == String.class) {
 			arg.asString();
 		}else if(c==int.class || c==Integer.class) {

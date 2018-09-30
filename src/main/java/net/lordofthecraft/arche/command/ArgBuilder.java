@@ -19,6 +19,7 @@ import lombok.Setter;
 import lombok.val;
 import lombok.experimental.Accessors;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.util.CommandUtil;
@@ -208,6 +209,8 @@ public class ArgBuilder {
 	}
 	
 	private <T> CmdArg<T> build(Class<T> clazz){
+		CoreLog.debug("Building arg for class: " + clazz.getSimpleName());
+		
 		CmdArg<T> arg = new CmdArg<>(name, errorMessage, defaultInput, description);
 		if(flag == null) command.addArg(arg);
 		else flag.setArg(arg);

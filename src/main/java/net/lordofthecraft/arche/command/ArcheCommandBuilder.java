@@ -17,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.command.CommandPart.Execution;
 
 //We're reaching levels of Telanir that shouldn't be even possible
@@ -198,6 +199,8 @@ public class ArcheCommandBuilder {
 			firstPart = CommandPart.run($->{}, Execution.SYNC);
 		}
 		
+		CoreLog.debug("Now Building ArcheCommand: " + mainCommand + " it has " + subCommands.size()
+			+ " subcommands and parent: " +(parentBuilder == null? "none":parentBuilder.mainCommand));
 		ArcheCommand built = new ArcheCommand(
 				mainCommand,
 				Collections.unmodifiableSet(aliases),

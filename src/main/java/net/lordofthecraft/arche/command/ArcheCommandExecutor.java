@@ -1,9 +1,9 @@
 package net.lordofthecraft.arche.command;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -25,7 +25,8 @@ public class ArcheCommandExecutor implements TabExecutor {
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		List<String> listArgs = Arrays.asList(args);
+		List<String> listArgs = new ArrayList<>();
+		for (String arg : args) listArgs.add(arg);
 		runCommand(sender, rootCommand, label, listArgs);
 		return true;
 	}
@@ -38,6 +39,8 @@ public class ArcheCommandExecutor implements TabExecutor {
 
 	private void runCommand(CommandSender sender, ArcheCommand command, String usedAlias, List<String> args) {
 		ArcheCommand subCommand = wantsSubCommand(command, args);
+		CoreLog.debug("catching alias " + usedAlias + ". SubCommand found: " + subCommand);
+		CoreLog.debug("These are its arguments: " + StringUtils.join(args, ", "));
 		if(subCommand != null) {
 			runSubCommand(sender, subCommand, usedAlias, args);
 		} else if (!command.hasPermission(sender)) {

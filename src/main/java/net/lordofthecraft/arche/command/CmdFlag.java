@@ -40,7 +40,7 @@ public class CmdFlag {
 		if(flag.collidesWithAny(target.flags())) throw new IllegalStateException("Flag aliases are overlapping for command: " + target.mainCommand());
 		
 		target.addFlag(flag);
-		ArgBuilder builder = new ArgBuilder(target).name(name);
+		ArgBuilder builder = new ArgBuilder(target, flag).name(name);
 		return builder;
 	}
 
