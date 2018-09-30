@@ -1,7 +1,9 @@
 package net.lordofthecraft.arche.command;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,7 +22,7 @@ import net.lordofthecraft.arche.interfaces.Persona;
 
 @RequiredArgsConstructor
 public class AnnotatedCommandParser {
-	private final CommandTemplate template;
+	private final Supplier<CommandTemplate> template;
 	private final PluginCommand bukkitCommand;
 	
 	
@@ -29,13 +31,13 @@ public class AnnotatedCommandParser {
 		return parse(template, acb);
 	}
 	
-	private ArcheCommandBuilder parse(CommandTemplate currentTemplate, ArcheCommandBuilder acb) {
-		Class<? extends CommandTemplate> c = currentTemplate.getClass();
+	private ArcheCommandBuilder parse(Supplier<CommandTemplate> template, ArcheCommandBuilder acb) {
+		Class<? extends CommandTemplate> c = template.get().getClass();
 		
 		var cmds = Stream.of(c.getMethods()).filter(m->m.isAnnotationPresent(Cmd.class)).collect(Collectors.toList());
 		
-		for(Method method : cmds) checkForSubLayers(method, currentTemplate, acb); //Note this recurses
-		for(Method method: cmds) parseCommands(method, currentTemplate, acb);
+		for(Method method : cmds) checkForSubLayer(method, template, acb); //Note this recurses
+		for(Method method : cmds) parseCommand(method, template, acb);
 		
 		return acb; //this::parse is recursive. So is ArcheCommandBuilder::build. Perfect synergy :)
 	}
@@ -55,22 +57,46 @@ public class AnnotatedCommandParser {
 	}
 	
 	@SneakyThrows
-	private void checkForSubLayers(Method method, CommandTemplate currentTemplate, ArcheCommandBuilder acb) {
+	private void checkForSubLayer(Method method, Supplier<CommandTemplate> template, ArcheCommandBuilder acb) {
 		if(!CommandTemplate.class.isAssignableFrom(method.getReturnType())) return;
 		if(method.getParameterCount() > 0) throw new IllegalStateException("Methods returning CommandTemplate can't also have parameters");
 		
 		ArcheCommandBuilder subbo = constructSubBuilder(method, acb);
-		CommandTemplate lowerLayer = (CommandTemplate) method.invoke(currentTemplate);
-		
-		parse(lowerLayer, subbo).build(); //We need to go deeper
+		Supplier<CommandTemplate> chained = ()-> chainSupplier(method, template);
+		parse(chained, subbo).build(); //We need to go deeper
 	}
 	
-	private void parseCommands(Method method, CommandTemplate currentTemplate, ArcheCommandBuilder acb) {
+	@SneakyThrows
+	private CommandTemplate chainSupplier(Method templateGetter, Supplier<CommandTemplate> theOldSupplier) {
+		//Makes a NEW supplier which invokes the old supplier (which is one higher in the chain)
+		//The supplied CommandTemplate has a particular method called via reflection
+		//A method which we know to return CommandTemplate (checked above), so we cast it
+		//This supplier is then used for subsequent checking.
+		//Yes this is an abysmal piece of code. Let's never speak of it.
+		return (CommandTemplate) templateGetter.invoke(theOldSupplier.get());
+	}
+	
+	private void parseCommand(Method method, Supplier<CommandTemplate> template, ArcheCommandBuilder acb) {
 		if(method.getGenericReturnType() != Void.TYPE) return;
 
 		var subbo = constructSubBuilder(method, acb);
-		var params = method.getParameters();
+		//Make command actually do stuff
+		subbo.run(rc->{
+			try {
+				CommandTemplate t = template.get();
+				t.setRanCommand(rc);
+				Object[] args = rc.getArgResults().toArray();
+				
+				if(rc.getCommand().requiresPersona()) method.invoke(t, rc.getPersona(), args);
+				else if(rc.getCommand().requiresPlayer()) method.invoke(t, rc.getPlayer(), args);
+				else method.invoke(t, args);
+			} catch (Exception e) {
+				e.printStackTrace();
+				rc.error("An unhandled exception occurred. Contact a developer.");
+			}
+		});
 		
+		var params = method.getParameters();
 		for (int i = 0; i < params.length; i++) {
 			var param = params[i];
 			var c = param.getClass();

@@ -7,43 +7,38 @@ import lombok.Setter;
 import net.lordofthecraft.arche.interfaces.CommandHandle;
 import net.md_5.bungee.api.chat.BaseComponent;
 
+//Decorator class around RanCommand for the purposes of annotated command handling
 public abstract class CommandTemplate implements CommandHandle {
 	@Setter(AccessLevel.PACKAGE) RanCommand ranCommand;
 	
 	@Override
 	public CommandSender getSender() {
-		// TODO Auto-generated method stub
-		return null;
+		return ranCommand.getSender();
 	}
 
 	@Override
 	public void msg(String message, Object... format) {
-		// TODO Auto-generated method stub
-
+		ranCommand.msg(message, format);
 	}
 
 	@Override
 	public void msg(BaseComponent message) {
-		// TODO Auto-generated method stub
-
+		ranCommand.msg(message);
 	}
 
 	@Override
 	public void msgRaw(String message) {
-		// TODO Auto-generated method stub
-
+		ranCommand.msgRaw(message);
 	}
 
 	@Override
 	public void error(String err) {
-		// TODO Auto-generated method stub
-
+		ranCommand.error(err);
 	}
 
 	@Override
 	public void validate(boolean condition, String error) {
-		// TODO Auto-generated method stub
-
+		ranCommand.validate(condition, error);
 	}
 
 }
