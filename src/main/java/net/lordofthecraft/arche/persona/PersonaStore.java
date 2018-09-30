@@ -52,7 +52,7 @@ public class PersonaStore {
     private int max_persona_id = 0;
 
     private final Map<Integer, ArcheOfflinePersona> allPersonas = new HashMap<>();
-    private final Multimap<UUID, ArcheOfflinePersona> offlinePersonas = 
+    private final Multimap<UUID, ArcheOfflinePersona> offlinePersonas =
     		MultimapBuilder.hashKeys().arrayListValues(ArcheCore.getControls().personaSlots()).build();
     private final Map<UUID, ArchePersona[]> onlinePersonas = new HashMap<>();
 
@@ -284,8 +284,8 @@ public class PersonaStore {
         
         PersonaType ptype = PersonaType.valueOf(type);
         ArcheOfflinePersona persona = new ArcheOfflinePersona(
-        		new ArchePersonaKey(persona_id, pUUID, slot), 
-        		creationTimeMS, lastPlayed, played, current, race, 
+        		new ArchePersonaKey(persona_id, pUUID, slot),
+        		creationTimeMS, lastPlayed, played, current, race,
         		birthdate, gender, ptype, name, raceString);
 
         String wstr = res.getString(PersonaField.WORLD.field());
@@ -394,12 +394,12 @@ public class PersonaStore {
                 ExtendedAttributeModifier.Decay decaytype = ExtendedAttributeModifier.Decay.valueOf(rs.getString("decaytype"));
                 boolean lostondeath = rs.getBoolean("lostondeath");
                 
-                boolean decayOffline = decaytype == ExtendedAttributeModifier.Decay.OFFLINE; 
+                boolean decayOffline = decaytype == ExtendedAttributeModifier.Decay.OFFLINE;
                 if(decayOffline) ticks -= (System.currentTimeMillis() - created) / 50;
                 ExtendedAttributeModifier eam = new ExtendedAttributeModifier(id, name, amount, op, decaytype, ticks, lostondeath);
                 
                 if(decayOffline) {
-                	if(ticks > 200) { 
+                	if(ticks > 200) {
                 		eam.setupTask(att, persona);
                 	} else { //Don't bother doing all this nonsense on logged in Personas for <10 seconds of mod
                 		ArcheCore.getConsumerControls().queueRow(new AttributeRemoveRow(eam, att, persona));
@@ -491,10 +491,10 @@ public class PersonaStore {
         allPersonas.put(persona.getPersonaId(), persona);
         
         UUID uuid = persona.getPlayerUUID();
-        offlinePersonas.remove(uuid, 
+        offlinePersonas.remove(uuid,
         		offlinePersonas.get(uuid).stream()
         		.filter(op -> op.getPersonaId() == persona.getPersonaId())
-        		.findAny().get() 
+        		.findAny().get()
         		);
         offlinePersonas.put(uuid, persona);
         return persona;

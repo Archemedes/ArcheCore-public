@@ -303,6 +303,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		debugMode = config.getBoolean("enable.debug.mode");
 		//Make sure all our future logging messages show at the right times
 		if(debugMode) getLogger().setLevel(Level.FINER);
+		CoreLog.debug("Debug mode is enabled!");
 
 		maxPersonaSlots = Math.max(1, Math.min(17, config.getInt("persona.slots.maximum")));
 		helpOverriden = config.getBoolean("override.help.command");
@@ -423,8 +424,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("skin").setExecutor(new CommandSkin(this));
 		
 		//Commands, ACB method, Annotated:
-		ArcheCommand.buildfromTemplate(getCommand("date"), ()->new CommandDate(this));
-		ArcheCommand.buildfromTemplate(getCommand("durabilityboost"), ()->new CommandDurability());
+		ArcheCommand.buildFromTemplate(getCommand("date"), ()->new CommandDate(this));
+		ArcheCommand.buildFromTemplate(getCommand("durabilityboost"), ()->new CommandDurability());
 	}
 
 	private void initListeners(){
