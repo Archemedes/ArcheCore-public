@@ -11,6 +11,10 @@ import net.md_5.bungee.api.chat.BaseComponent;
 public abstract class CommandTemplate implements CommandHandle {
 	@Setter(AccessLevel.PACKAGE) RanCommand ranCommand;
 	
+	protected void runArgless() {
+		ranCommand.getCommand().getHelp().execute(ranCommand);
+	}
+	
 	@Override
 	public CommandSender getSender() {
 		return ranCommand.getSender();

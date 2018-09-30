@@ -1,6 +1,5 @@
 package net.lordofthecraft.arche.command;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.function.Supplier;
@@ -32,6 +31,12 @@ public class AnnotatedCommandParser {
 	}
 	
 	private ArcheCommandBuilder parse(Supplier<CommandTemplate> template, ArcheCommandBuilder acb) {
+		acb.run(rc->{ //This is default behavior when no arguments are given, usually refers to help file
+			CommandTemplate t = template.get();
+			t.setRanCommand(rc);
+			t.runArgless();
+		});
+		
 		Class<? extends CommandTemplate> c = template.get().getClass();
 		
 		var cmds = Stream.of(c.getMethods()).filter(m->m.isAnnotationPresent(Cmd.class)).collect(Collectors.toList());
