@@ -2,11 +2,14 @@ package net.lordofthecraft.arche.command;
 
 import org.bukkit.command.CommandSender;
 
+import lombok.AccessLevel;
+import lombok.Setter;
 import net.lordofthecraft.arche.interfaces.CommandHandle;
 import net.md_5.bungee.api.chat.BaseComponent;
 
 public abstract class CommandTemplate implements CommandHandle {
-
+	@Setter(AccessLevel.PACKAGE) RanCommand ranCommand;
+	
 	@Override
 	public CommandSender getSender() {
 		// TODO Auto-generated method stub

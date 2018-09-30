@@ -63,6 +63,7 @@ public class ArcheCommandBuilder {
 		parentBuilder = dad;
 		command = dad.command;
 		this.mainCommand = name;
+		this.permission = dad.permission;
 		aliases.add(name.toLowerCase());
 		if(inheritOptions) {
 			this.buildHelpFile = dad.buildHelpFile;

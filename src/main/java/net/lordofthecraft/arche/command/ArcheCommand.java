@@ -50,14 +50,17 @@ public class ArcheCommand {
 	}
 	
 	/**
-	 * 
 	 * @param command The PluginCommand to wrap, defined by your plugin through YML or annotation
-	 * @param template Object that creates instances of your CommandTemplate implementation. This MUST return distinct instances
-	 * or you will have issues when calling utility methods of the class from BukkitRunnables.
-	 * @return
+	 * @param template Object that creates instances of your CommandTemplate implementation. This should return distinct instances if you plan on using BukkitRunnables at all
 	 */
-	public static void template(PluginCommand command, Supplier<CommandTemplate> template) {
-		//TODO
+	public static void buildfromTemplate(PluginCommand command, Supplier<CommandTemplate> template) {
+		CommandTemplate sample = template.get();
+		new AnnotatedCommandParser(sample, command).invokeParse().build();
+	}
+	
+	public static ArcheCommandBuilder getfromTemplate(PluginCommand command, Supplier<CommandTemplate> template) {
+		CommandTemplate sample = template.get();
+		return new AnnotatedCommandParser(sample, command).invokeParse();
 	}
 	
 	void execute(RanCommand rc) {
