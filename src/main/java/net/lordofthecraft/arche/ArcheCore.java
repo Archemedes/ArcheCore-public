@@ -302,7 +302,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		debugMode = config.getBoolean("enable.debug.mode");
 		//Make sure all our future logging messages show at the right times
-		if(debugMode) getLogger().setLevel(Level.FINER);
 		CoreLog.debug("Debug mode is enabled!");
 
 		maxPersonaSlots = Math.max(1, Math.min(17, config.getInt("persona.slots.maximum")));

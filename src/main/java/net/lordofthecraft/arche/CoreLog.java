@@ -29,7 +29,8 @@ public class CoreLog {
 	}
 	
 	public static void debug(String msg) {
-		get().fine("[DEBUG] " + msg);
+		if(ArcheCore.getPlugin().debugMode())
+			get().info("[DEBUG] " + msg);
 	}
 	
 	private static Logger get() {
