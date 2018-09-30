@@ -54,13 +54,11 @@ public class ArcheCommand {
 	 * @param template Object that creates instances of your CommandTemplate implementation. This should return distinct instances if you plan on using BukkitRunnables at all
 	 */
 	public static void buildfromTemplate(PluginCommand command, Supplier<CommandTemplate> template) {
-		CommandTemplate sample = template.get();
-		new AnnotatedCommandParser(sample, command).invokeParse().build();
+		new AnnotatedCommandParser(template, command).invokeParse().build();
 	}
 	
 	public static ArcheCommandBuilder getfromTemplate(PluginCommand command, Supplier<CommandTemplate> template) {
-		CommandTemplate sample = template.get();
-		return new AnnotatedCommandParser(sample, command).invokeParse();
+		return new AnnotatedCommandParser(template, command).invokeParse();
 	}
 	
 	void execute(RanCommand rc) {

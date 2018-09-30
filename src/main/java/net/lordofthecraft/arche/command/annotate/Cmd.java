@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @Target(METHOD)
 public @interface Cmd {
 	String value();
-	String permission();
+	String permission() default "";
 }

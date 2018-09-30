@@ -3,6 +3,7 @@ package net.lordofthecraft.arche;
 import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
+import net.lordofthecraft.arche.command.ArcheCommand;
 import net.lordofthecraft.arche.commands.*;
 import net.lordofthecraft.arche.commands.tab.CommandAttributeTabCompleter;
 import net.lordofthecraft.arche.commands.tab.CommandHelpTabCompleter;
@@ -163,6 +164,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		return instance;
 	}
 
+	@Override
 	public void onDisable() {
 
 		Bukkit.getOnlinePlayers().forEach(p -> {
@@ -300,7 +302,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		debugMode = config.getBoolean("enable.debug.mode");
 		//Make sure all our future logging messages show at the right times
-		if(debugMode) getLogger().setLevel(Level.FINER); 
+		if(debugMode) getLogger().setLevel(Level.FINER);
 
 		maxPersonaSlots = Math.max(1, Math.min(17, config.getInt("persona.slots.maximum")));
 		helpOverriden = config.getBoolean("override.help.command");
@@ -419,8 +421,10 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("attribute").setExecutor(new CommandAttribute());
 		getCommand("attribute").setTabCompleter(new CommandAttributeTabCompleter());
 		getCommand("skin").setExecutor(new CommandSkin(this));
-		getCommand("date").setExecutor(new CommandDate(this));
-		getCommand("durabilityboost").setExecutor(new CommandDurability());
+		
+		//Commands, ACB method, Annotated:
+		ArcheCommand.buildfromTemplate(getCommand("date"), ()->new CommandDate(this));
+		ArcheCommand.buildfromTemplate(getCommand("durabilityboost"), ()->new CommandDurability());
 	}
 
 	private void initListeners(){
@@ -500,7 +504,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		//addHelp("Professions", profession, Material.BEDROCK);
 		addHelp("Attributes", attributes, Material.GOLDEN_APPLE);   
 		addHelp("Fatigue", fatigue, Material.RED_BED);
-
 		//Create config-set Help Files
 		if(!(new File(getDataFolder(), "helpfiles.yml").exists()))
 			saveResource("helpfiles.yml", false);
@@ -787,9 +790,9 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		this.devMode = devMode;
 		if (devMode) {
 			this.getServer().getOnlinePlayers().stream().filter(p -> !p.hasPermission("archecore.arsql"))
-			.forEach(p -> p.kickPlayer(ChatColor.RED + "An error has occured.\n" 
-					+ (p.hasPermission("archecore.mod") ? ChatColor.GOLD + "Contact a Developer immidiately." 
-							: ChatColor.GRAY + "We are looking into it, please login later."))); 
+			.forEach(p -> p.kickPlayer(ChatColor.RED + "An error has occured.\n"
+					+ (p.hasPermission("archecore.mod") ? ChatColor.GOLD + "Contact a Developer immidiately."
+							: ChatColor.GRAY + "We are looking into it, please login later.")));
 		}
 	}
 

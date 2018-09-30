@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.PluginCommand;
@@ -56,7 +57,7 @@ public class AnnotatedCommandParser {
 		
 		var result = parent.subCommand(name, false);
 		if(desc !=  null) result.description(desc);
-		if(pex != null) result.permission(pex);
+		if(StringUtils.isNotEmpty(pex)) result.permission(pex);
 		
 		return result;
 	}
