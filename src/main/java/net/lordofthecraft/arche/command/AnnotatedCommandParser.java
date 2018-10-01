@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.command;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.function.Supplier;
@@ -15,6 +16,7 @@ import org.bukkit.entity.Player;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.var;
+import net.lordofthecraft.arche.command.RanCommand.CmdParserException;
 import net.lordofthecraft.arche.command.annotate.Cmd;
 import net.lordofthecraft.arche.command.annotate.DefaultInput;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
@@ -35,7 +37,7 @@ public class AnnotatedCommandParser {
 		acb.run(rc->{ //This is default behavior when no arguments are given, usually refers to help file
 			CommandTemplate t = template.get();
 			t.setRanCommand(rc);
-			t.runArgless();
+			t.invoke();
 		});
 		
 		Class<? extends CommandTemplate> c = template.get().getClass();
@@ -93,9 +95,21 @@ public class AnnotatedCommandParser {
 				t.setRanCommand(rc);
 				Object[] args = rc.getArgResults().toArray();
 				
-				if(rc.getCommand().requiresPersona()) method.invoke(t, rc.getPersona(), args);
-				else if(rc.getCommand().requiresPlayer()) method.invoke(t, rc.getPlayer(), args);
-				else method.invoke(t, args);
+				if(rc.getCommand().requiresPersona() || rc.getCommand().requiresPlayer()) {
+					Object[] newArgs = new Object[args.length+1];
+					System.arraycopy(args, 0, newArgs, 1, args.length);
+					newArgs[0] = rc.getCommand().requiresPersona()? rc.getPersona() : rc.getPlayer();
+					method.invoke(t, newArgs);
+				}else {
+					method.invoke(t, args);
+				}
+			} catch (InvocationTargetException ite) {
+				if(ite.getCause() instanceof CmdParserException) {
+					rc.error(ite.getCause().getMessage());
+				} else {
+					ite.printStackTrace();
+					rc.error("An unhandled exception occurred. Contact a developer.");
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				rc.error("An unhandled exception occurred. Contact a developer.");
@@ -105,18 +119,17 @@ public class AnnotatedCommandParser {
 		var params = method.getParameters();
 		for (int i = 0; i < params.length; i++) {
 			var param = params[i];
-			var c = param.getClass();
-			
+			var c = param.getType();
+
 			if(i == 0) {
 				//If first param is player/persona, it is taken as
 				//the sender (or flagged player) rather than argument
 				//The continue statements prevent the parameter to being resolved as an argument
 				if(Persona.class.isAssignableFrom(c)){
-					acb.requiresPersona();
-					acb.requiresPlayer();
+					subbo.requiresPersona().requiresPlayer();
 					continue;
 				} else if(Player.class.isAssignableFrom(c)) {
-					acb.requiresPlayer();
+					subbo.requiresPlayer();
 					continue;
 				}
 			}

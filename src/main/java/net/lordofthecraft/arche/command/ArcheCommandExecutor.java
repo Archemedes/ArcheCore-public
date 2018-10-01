@@ -40,7 +40,7 @@ public class ArcheCommandExecutor implements TabExecutor {
 	private void runCommand(CommandSender sender, ArcheCommand command, String usedAlias, List<String> args) {
 		ArcheCommand subCommand = wantsSubCommand(command, args);
 		CoreLog.debug("catching alias " + usedAlias + ". SubCommand found: " + subCommand);
-		CoreLog.debug("These are its arguments: " + StringUtils.join(args, ", "));
+		if(!args.isEmpty()) CoreLog.debug("These are its arguments: " + StringUtils.join(args, ", "));
 		if(subCommand != null) {
 			runSubCommand(sender, subCommand, usedAlias, args);
 		} else if (!command.hasPermission(sender)) {

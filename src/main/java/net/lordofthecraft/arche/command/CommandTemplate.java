@@ -11,7 +11,8 @@ import net.md_5.bungee.api.chat.BaseComponent;
 public abstract class CommandTemplate implements CommandHandle {
 	@Setter(AccessLevel.PACKAGE) RanCommand ranCommand;
 	
-	protected void runArgless() {
+	protected void invoke() {
+		ranCommand.getArgResults().add(0); //Dummy help page argument. Prevents error
 		ranCommand.getCommand().getHelp().execute(ranCommand);
 	}
 	

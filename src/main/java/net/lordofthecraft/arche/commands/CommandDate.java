@@ -14,7 +14,7 @@ public class CommandDate extends CommandTemplate
     }
     
     @Override
-		public void runArgless() {
+		public void invoke() {
     	msg(calendar.toPrettyString());
     }
     

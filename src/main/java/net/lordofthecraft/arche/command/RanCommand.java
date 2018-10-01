@@ -183,7 +183,7 @@ public class RanCommand implements CommandHandle {
 			if(i >= args.size()) o = arg.resolveDefault();
 			else o = arg.resolve(args, i);
 			
-			if(o == null) error("at argument" + i + ": " + arg.getErrorMessage());
+			if(o == null) error("at argument " + (i+1) + ": " + arg.getErrorMessage());
 			else argResults.add(o);
 		}
 	}
@@ -198,7 +198,7 @@ public class RanCommand implements CommandHandle {
 		if(!condition) error(error);
 	}
 	
-	private static class CmdParserException extends RuntimeException{
+	static class CmdParserException extends RuntimeException{
 		private static final long serialVersionUID = 5283812808389224035L;
 
 		private CmdParserException(String err) {
