@@ -223,7 +223,7 @@ public class ArcheCommandBuilder {
 		if(buildHelpFile) {
 			HelpCommand help = new HelpCommand(built);
 			this.subCommands.add(help);
-			if(noneSpecified) firstPart.setNext(CommandPart.run(c->help.outputSubcommands(c, 1), Execution.SYNC));
+			if(noneSpecified) firstPart.setNext(CommandPart.run(c->help.runHelp(c, 0), Execution.SYNC));
 			flag("h").defaultInput("0").asInt();
 		}
 		

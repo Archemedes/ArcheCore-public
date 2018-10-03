@@ -2,13 +2,11 @@ package net.lordofthecraft.arche.command;
 
 import static org.bukkit.ChatColor.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -57,76 +55,75 @@ public class HelpCommand extends ArcheCommand {
 	}
 	
 	public void runHelp(RanCommand c, int page) {
-		if(page > 0) outputSubcommands(c, page);
-		else outputBaseHelp(c);
+
+		if(page > 0) {
+			int min = 6 + (page-1)*7;
+			if(parent.hasDescription()) min--;
+			int max = min + 7;
+			outputSubcommands(c, min, max);
+		}
+		else {
+			outputBaseHelp(c);
+		}
 	}
 	
 	private void outputBaseHelp(RanCommand c) {
 		CommandSender s = c.getSender();
-		commandHeadline(c).send(s);
+		ChatBuilder b = MessageUtil.builder();
+		if(parent.getPermission() != null) b.append("[P]").color(YELLOW).hover("Permission required: " + GREEN + parent.getPermission()).append(" ");
+		if(!parent.getFlags().isEmpty()) {
+			b.append("[F]").color(LIGHT_PURPLE);
+			StringBuilder b2 = new StringBuilder();
+			b2.append(YELLOW).append("Accepted Command Flags:");
+			for (CmdFlag flag : parent.getFlags()) {
+				b2.append('\n');
+				b2.append(WHITE).append("-").append(flag.getName());
+				String flagPex = flag.getPermission();
+				String flagDesc = flag.getArg().getDescription();
+				
+				if(flagDesc != null) b2.append(": ").append(GRAY).append(flagDesc);
+				if(flagPex != null) b2.append(' ').append(YELLOW).append('(').append(flagPex).append(')');
+			}
+			b.hover(b2.toString()).append(" ");
+			b.reset();
+		}
 		
-		Object desc = ObjectUtils.defaultIfNull(parent.getDescription(), "--None given--");
-		s.sendMessage("Description: " + GRAY + "" + ITALIC + desc);
+		commandHeadline(b,c).send(s);
 		
-		String perm = parent.getPermission();
-		if(perm != null) s.sendMessage(GREEN + "Permission: " + YELLOW + perm);
+		if(parent.hasDescription()) c.msg(GRAY+""+ITALIC+parent.getDescription());
 		
-		val argHelp = getArgumentHelp(c);
-		if(!argHelp.isEmpty()) s.sendMessage(ChatColor.DARK_GRAY + "-=== Takes the following parameters: ===-");
-		argHelp.forEach(s::sendMessage);
+		int max = parent.hasDescription()? 5:6;
+		outputSubcommands(c, 0, max);
 	}
 	
-	private ChatBuilder commandHeadline(RanCommand c) {
+	private ChatBuilder commandHeadline(ChatBuilder b, RanCommand c) {
 		String alias = "/" + c.getUsedAlias();
 		if(alias.endsWith("help")) alias = alias.substring(0, alias.length() - 5);
-		ChatBuilder b = MessageUtil.builder(alias);
+		b.append(alias);
 		b.color(ChatColor.GOLD).suggest(alias);
-		fillArgs(b, true);
+		fillArgs(alias, b, true);
 		return b;
 	}
 	
-	private void fillArgs(ChatBuilder b, boolean useColor) {
+	private void fillArgs(String alias, ChatBuilder b, boolean useColor) {
 		int i = 0;
 		for(CmdArg<?> a : parent.getArgs()) {
 			boolean optional = a.hasDefaultInput();
 			b.append(" ");
 			if(useColor) b.color(colorCoded(i++));
-			b.append(optional? "{":"[")
-			 .append(a.getName())
-			 .append(optional? "}":"]");
+			b.append(optional? "{":"[");
+			if(a.hasDescription()) b.hover(a.getDescription());
+			else b.retainColors().suggest(alias);
+			b.append(a.getName())
+			.append(optional? "}":"]");
 		}
 	}
-	
-	private List<String> getArgumentHelp(RanCommand c) {
-		CommandSender s = c.getSender();
-		val result = new ArrayList<String>();
-		
-		int i = 0;
-		for(CmdArg<?> a : parent.getArgs()) {
-			if(a.hasDescription()) result.add( colorCoded(i) + a.getName() + ": " + GRAY + a.getDescription());
-			i++;
-		}
-		
-		for(CmdFlag flag : parent.getFlags()) {
-			if(!flag.needsPermission() || s.hasPermission(flag.getPermission())){
-				StringBuilder b = new StringBuilder(flag.getName());
-				if(flag.getArg().hasDescription())
-					b.append(": ").append(GRAY).append(flag.getArg().getDescription());
-				if(flag.needsPermission())
-					b.append(GREEN).append(" (perm: ").append(flag.getPermission()).append(")");
-				
-				result.add(b.toString());
-			}
-		}
-		
-		return result;
-	}
-	
+
 	private ChatColor colorCoded(int i) {
 		return colors[i%colors.length];
 	}
 	
-	void outputSubcommands(RanCommand c, int page) {
+	void outputSubcommands(RanCommand c, int min, int max) {
 		CommandSender s = c.getSender();
 		List<ArcheCommand> subs = parent.getSubCommands().stream()
 				.filter(sub->sub!=this)
@@ -136,40 +133,42 @@ public class HelpCommand extends ArcheCommand {
 		String alias = "/" + c.getUsedAlias();
 		if(alias.endsWith("help")) alias = alias.substring(0, alias.length() - 5);
 		
-		
-		if(subs.size() < page*6) {
-			s.sendMessage(RanCommand.ERROR_PREFIX + "Invalid help page!");
+		if(subs.size() <= min) {
+			//No error message when on main help file :)
+			if(min > 0) s.sendMessage(RanCommand.ERROR_PREFIX + "Invalid help page!");
 			return; //haha fuck you readability
 		} else {
-			s.sendMessage(GOLD + "-== Possible sub-commands for " + GRAY + alias + GOLD + " ==-");
+			String trailing = alias.substring(alias.lastIndexOf(" ")+1);
+			ChatBuilder b = MessageUtil.builder("-== Possible sub-commands for ").color(DARK_AQUA)
+					.append(trailing).color(GRAY).append(" ==-").color(DARK_AQUA);
+			
+			if(min > 0) b.append(" [").hover("Previous Page").color(RED).command(alias + " -h " + (min/7)).append('\u2190').append("]");
+			if(subs.size() >= max) b.append(" [").hover("Next Page").color(RED).command(alias + " -h " + (min/7+2)).append('\u2192').append("]");
+			
+			c.msg(b.build());
 		}
 		
 		//Arrays start at 1 fight me
-		for(int i = page*6; i < page*6+6; i++) {
+		for(int i = min; i < max; i++) {
 			if(subs.size() <= i) break;
 			ArcheCommand sub = subs.get(i);
 			String subber = sub.getMainCommand();
-			ChatBuilder b = MessageUtil.builder(subber)
-					.color(GOLD)
-					.command(alias + ' ' + subber + " -h 0")
-					.hover(GRAY + "Click for help on this subcommand!");
-			fillArgs(b, false);
+			
+			ChatBuilder b = MessageUtil.builder(subber).color(GOLD);
+			if(sub.getHelp() != null) b.command(alias + ' ' + subber + " -h 0").hover("Click for help on this subcommand!");
+			else b.suggest(alias + ' ' + subber).hover("Click to run this command");
+			fillArgs(alias + ' ' + subber, b, false);
 			
 			if(sub.hasDescription()) {
 				b.append(": ");
 				int room = 60 - b.toPlainText().length();
 				String desc = sub.getDescription();
 				if(desc.length() > room) desc = desc.substring(0, room) + '\u2026';
-				b.append(desc);
+				b.append(desc).color(GRAY);
 			}
 			
 			b.send(s);
 		}
-		
-		ChatBuilder b = MessageUtil.builder();
-		if(page > 1) b.appendButton("Prev Page", alias+" -h " + (page-1)).append(" ");
-		b.append(subs.size()).color(DARK_GRAY).append(" available subcommands");
-		if( (page+1)*6<subs.size() )  b.append(" ").appendButton("Prev Page", alias+" -h " + (page+1));
-		b.send(s);
+
 	}
 }
