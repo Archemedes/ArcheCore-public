@@ -2,7 +2,6 @@ package net.lordofthecraft.arche.command;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,6 +18,7 @@ import lombok.experimental.var;
 import net.lordofthecraft.arche.command.RanCommand.CmdParserException;
 import net.lordofthecraft.arche.command.annotate.Cmd;
 import net.lordofthecraft.arche.command.annotate.DefaultInput;
+import net.lordofthecraft.arche.command.annotate.Flag;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 
@@ -88,8 +88,45 @@ public class AnnotatedCommandParser {
 		if(method.getGenericReturnType() != Void.TYPE) return;
 
 		var subbo = constructSubBuilder(method, acb);
+		makeCommandDoStuff(template, subbo, method);
+		
+		var flagsAnno = method.getAnnotation(Flag.List.class);
+		if(flagsAnno != null) addFlags(subbo, flagsAnno);
+		
+		var params = method.getParameters();
+		for (int i = 0; i < params.length; i++) {
+			var param = params[i];
+			var c = param.getType();
+
+			if(i == 0) {
+				//If first param is player/persona, it is taken as
+				//the sender (or flagged player) rather than argument
+				//The continue statements prevent the parameter to being resolved as an argument
+				if(Persona.class.isAssignableFrom(c)){
+					subbo.requiresPersona().requiresPlayer();
+					continue;
+				} else if(Player.class.isAssignableFrom(c)) {
+					subbo.requiresPlayer();
+					continue;
+				}
+			}
+			
+			ArgBuilder arg = subbo.arg();
+			DefaultInput defaultInput = param.getAnnotation(DefaultInput.class);
+			if(defaultInput != null) {
+				String def = defaultInput.value();
+				Validate.notNull(def);
+				arg.defaultInput(def);
+			}
+			resolveArgType(method, param.getType(), arg);
+		}
+		
+		subbo.build();
+	}
+	
+	private void makeCommandDoStuff(Supplier<CommandTemplate> template, ArcheCommandBuilder acb, Method method) {
 		//Make command actually do stuff
-		subbo.run(rc->{
+		acb.run(rc->{
 			try {
 				CommandTemplate t = template.get();
 				t.setRanCommand(rc);
@@ -115,42 +152,19 @@ public class AnnotatedCommandParser {
 				rc.error("An unhandled exception occurred. Contact a developer.");
 			}
 		});
-		
-		var params = method.getParameters();
-		for (int i = 0; i < params.length; i++) {
-			var param = params[i];
-			var c = param.getType();
-
-			if(i == 0) {
-				//If first param is player/persona, it is taken as
-				//the sender (or flagged player) rather than argument
-				//The continue statements prevent the parameter to being resolved as an argument
-				if(Persona.class.isAssignableFrom(c)){
-					subbo.requiresPersona().requiresPlayer();
-					continue;
-				} else if(Player.class.isAssignableFrom(c)) {
-					subbo.requiresPlayer();
-					continue;
-				}
-			}
-			
-			ArgBuilder arg = subbo.arg(param.getName());
-
-			DefaultInput defaultInput = param.getAnnotation(DefaultInput.class);
-			if(defaultInput != null) {
-				String def = defaultInput.value();
-				Validate.notNull(def);
-				arg.defaultInput(def);
-			}
-			resolveArgType(method, param, arg);
+	}
+	
+	private void addFlags(ArcheCommandBuilder acb, Flag.List flags) {
+		for(Flag flag : flags.value()) {
+			ArgBuilder flarg = acb.flag(flag.value(), flag.aliases());
+			String desc = flag.desc();
+			if(!desc.isEmpty()) flarg.description(desc);
+			resolveArgType(null, flag.type(), flarg);
 		}
-		
-		subbo.build();
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" }) //For enum casting
-	private void resolveArgType(Method m, Parameter param, ArgBuilder arg) {
-		Class<?> c = param.getType();
+	private void resolveArgType(Method m, Class<?> c, ArgBuilder arg) {
 		if( c == String.class) {
 			arg.asString();
 		}else if(c==int.class || c==Integer.class) {
@@ -168,7 +182,7 @@ public class AnnotatedCommandParser {
 		} else if(OfflinePlayer.class.isAssignableFrom(c)) {  //Must go AFTER the Player check
 			arg.asOfflinePlayer();
 		} else {
-			throw new IllegalStateException(String.format("Parameter %s of Method %s is of unrecognied type %s", param.getName(), m.getName(), c.getSimpleName()));
+			throw new IllegalStateException(String.format("Method %s has unrecognied type %s", m == null? "Flag":m.getName(), c.getSimpleName()));
 		}
 	}
 	

@@ -9,9 +9,14 @@ import java.lang.annotation.Target;
 
 @Retention(RUNTIME)
 @Target(METHOD)
-@Repeatable(Flags.class)
+@Repeatable(Flag.List.class)
 public @interface Flag {
-	//TODO
 	String value();
-	String description() default "A flag";
+	String[] aliases() default {};
+	String desc() default "";
+	Class<?> type();
+	
+	@Retention(RUNTIME)
+	@Target(METHOD)
+  @interface List { Flag[] value(); }
 }
