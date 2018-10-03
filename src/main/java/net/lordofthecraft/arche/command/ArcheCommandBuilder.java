@@ -224,7 +224,7 @@ public class ArcheCommandBuilder {
 			HelpCommand help = new HelpCommand(built);
 			this.subCommands.add(help);
 			if(noneSpecified) firstPart.setNext(CommandPart.run(c->help.runHelp(c, 0), Execution.SYNC));
-			flag("h").defaultInput("0").asInt();
+			flag("h").description("Get help and subcommands").defaultInput("0").asInt();
 		}
 		
 		//If there's no more builders up the chain we've reached the top. Means we're done and we can make an executor

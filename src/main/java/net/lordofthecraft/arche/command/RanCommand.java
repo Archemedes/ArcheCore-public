@@ -188,8 +188,8 @@ public class RanCommand implements CommandHandle {
 		
 		HelpCommand help = command.getHelp();
 		if(args.size() == 0 && cmdArgs.size() > 0 && help != null) {
-			help.runHelp(this,0);
 			CoreLog.debug("Found 0 args for a command that takes more. Defaulting to help output.");
+			flags.put("h", 0);
 			return;
 		}
 		

@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -123,11 +124,32 @@ public class ArgBuilder {
 		return command;
 	}
 	
+	
+	public ArcheCommandBuilder asMaterial() {
+		defaults("Material", "Please specify a valid item name");
+		val arg = build(Material.class);
+		arg.setMapper(s->{
+			Material m = Material.matchMaterial(s);
+/*			if(m == null) {
+				Stream.of(Material.values())
+					.map(ItemStack::new)
+					.map(ItemUtil::getItemEnglishName)
+					.map(xx->xx.replace(' ', '_'))
+					.filter(s::equalsIgnoreCase)
+					.findFirst().orElse(null);
+			}*/
+			return m;
+		});
+		return command;
+	}
+	
 	public <T extends Enum<T>> ArcheCommandBuilder asEnum(Class<T>  clazz) {
+		if(clazz == Material.class) return asMaterial();
+		
 		defaults(clazz.getSimpleName(),"Not a valid " + clazz.getSimpleName());
 		val arg = build(clazz);
 		arg.setMapper(s->{
-			try{ return Enum.valueOf(clazz, s); }
+			try{ return Enum.valueOf(clazz, s.toUpperCase()); }
 			catch(IllegalArgumentException e) {return null;}
 		});
 		return command;
