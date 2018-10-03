@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 public @interface Flag {
 	String value();
 	String[] aliases() default {};
-	String desc() default "";
+	String description() default "";
 	Class<?> type();
 	
 	@Retention(RUNTIME)

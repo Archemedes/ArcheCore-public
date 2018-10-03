@@ -166,7 +166,7 @@ public class AnnotatedCommandParser {
 	private void addFlags(ArcheCommandBuilder acb, Flag.List flags) {
 		for(Flag flag : flags.value()) {
 			ArgBuilder flarg = acb.flag(flag.value(), flag.aliases());
-			String desc = flag.desc();
+			String desc = flag.description();
 			if(!desc.isEmpty()) flarg.description(desc);
 			resolveArgType(null, flag.type(), flarg);
 		}
