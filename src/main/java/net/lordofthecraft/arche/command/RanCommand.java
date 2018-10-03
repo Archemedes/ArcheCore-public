@@ -93,8 +93,14 @@ public class RanCommand implements CommandHandle {
 	
 	void parseAll(List<String> args) {
 			parseFlags(args);
+			if(hasFlag("h") && command.getHelp() != null) {
+				CoreLog.debug("Found a help flag! No further parsing needed!");
+				return;
+			}
 			getSenders();
 			parseArgs(args);
+			
+			CoreLog.debug("Parsed " + argResults.size() + " args and " + flags.size() + " flags.");
 	}
 	
 	private void getSenders() throws CmdParserException {
@@ -177,6 +183,14 @@ public class RanCommand implements CommandHandle {
 	
 	private void parseArgs(List<String> args) throws CmdParserException {
 		List<CmdArg<?>> cmdArgs = command.getArgs();
+		
+		HelpCommand help = command.getHelp();
+		if(args.size() == 0 && cmdArgs.size() > 0 && help != null) {
+			help.runHelp(this,0);
+			CoreLog.debug("Found 0 args for a command that takes more. Defaulting to help output.");
+			return;
+		}
+		
 		for(int i = 0; i < cmdArgs.size(); i++) {
 			CmdArg<?> arg = cmdArgs.get(i);
 			Object o = null;
