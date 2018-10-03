@@ -46,4 +46,14 @@ public abstract class CommandTemplate implements CommandHandle {
 		ranCommand.validate(condition, error);
 	}
 
+	@Override
+	public boolean hasFlag(String flagName) {
+		return ranCommand.hasFlag(flagName);
+	}
+	
+	@Override
+	public <T> T getFlag(String flagName) {
+		return ranCommand.getFlag(flagName);
+	}
+	
 }
