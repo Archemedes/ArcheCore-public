@@ -1,28 +1,15 @@
 package net.lordofthecraft.arche;
 
-import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
-import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.WhySQLHandler;
-import net.lordofthecraft.arche.command.ArcheCommand;
-import net.lordofthecraft.arche.commands.*;
-import net.lordofthecraft.arche.commands.tab.CommandAttributeTabCompleter;
-import net.lordofthecraft.arche.commands.tab.CommandHelpTabCompleter;
-import net.lordofthecraft.arche.commands.tab.CommandPersonaTabCompleter;
-import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.help.HelpFile;
-import net.lordofthecraft.arche.interfaces.*;
-import net.lordofthecraft.arche.listener.*;
-import net.lordofthecraft.arche.persona.ArcheEconomy;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.FatigueDecreaser;
-import net.lordofthecraft.arche.save.Consumer;
-import net.lordofthecraft.arche.save.DumpedDBReader;
-import net.lordofthecraft.arche.seasons.LotcianCalendar;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory;
-import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
-import net.lordofthecraft.arche.skin.SkinCache;
-import net.lordofthecraft.arche.util.SQLUtil;
-import net.lordofthecraft.arche.util.WeakBlock;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Timer;
+import java.util.UUID;
+import java.util.logging.Level;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -37,15 +24,69 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Timer;
-import java.util.UUID;
-import java.util.logging.Level;
+import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
+import net.lordofthecraft.arche.commands.CommandArchehelp;
+import net.lordofthecraft.arche.commands.CommandAttribute;
+import net.lordofthecraft.arche.commands.CommandBeaconme;
+import net.lordofthecraft.arche.commands.CommandDate;
+import net.lordofthecraft.arche.commands.CommandDurability;
+import net.lordofthecraft.arche.commands.CommandHelpMenu;
+import net.lordofthecraft.arche.commands.CommandMoney;
+import net.lordofthecraft.arche.commands.CommandNamelog;
+import net.lordofthecraft.arche.commands.CommandNewbies;
+import net.lordofthecraft.arche.commands.CommandPersona;
+import net.lordofthecraft.arche.commands.CommandRaceSpawn;
+import net.lordofthecraft.arche.commands.CommandRealname;
+import net.lordofthecraft.arche.commands.CommandSkin;
+import net.lordofthecraft.arche.commands.CommandSql;
+import net.lordofthecraft.arche.commands.CommandSqlClone;
+import net.lordofthecraft.arche.commands.tab.CommandAttributeTabCompleter;
+import net.lordofthecraft.arche.commands.tab.CommandHelpTabCompleter;
+import net.lordofthecraft.arche.commands.tab.CommandPersonaTabCompleter;
+import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.help.HelpFile;
+import net.lordofthecraft.arche.interfaces.CommandHandle;
+import net.lordofthecraft.arche.interfaces.Economy;
+import net.lordofthecraft.arche.interfaces.IArcheCore;
+import net.lordofthecraft.arche.interfaces.IConsumer;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.interfaces.PersonaHandler;
+import net.lordofthecraft.arche.interfaces.PersonaKey;
+import net.lordofthecraft.arche.interfaces.Skill;
+import net.lordofthecraft.arche.interfaces.SkillFactory;
+import net.lordofthecraft.arche.listener.AfkListener;
+import net.lordofthecraft.arche.listener.ArcheAttributeListener;
+import net.lordofthecraft.arche.listener.ArmorListener;
+import net.lordofthecraft.arche.listener.ArmorPreventionListener;
+import net.lordofthecraft.arche.listener.AttributeItemListener;
+import net.lordofthecraft.arche.listener.BeaconMenuListener;
+import net.lordofthecraft.arche.listener.BlockRegistryListener;
+import net.lordofthecraft.arche.listener.EconomyListener;
+import net.lordofthecraft.arche.listener.ExperienceOrbListener;
+import net.lordofthecraft.arche.listener.HelpMenuListener;
+import net.lordofthecraft.arche.listener.HelpOverrideListener;
+import net.lordofthecraft.arche.listener.LegacyCommandsListener;
+import net.lordofthecraft.arche.listener.NewbieProtectListener;
+import net.lordofthecraft.arche.listener.PersonaInventoryListener;
+import net.lordofthecraft.arche.listener.PlayerChatListener;
+import net.lordofthecraft.arche.listener.PlayerInteractListener;
+import net.lordofthecraft.arche.listener.PlayerJoinListener;
+import net.lordofthecraft.arche.listener.RacialBonusListener;
+import net.lordofthecraft.arche.listener.SeasonListener;
+import net.lordofthecraft.arche.persona.ArcheEconomy;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.FatigueDecreaser;
+import net.lordofthecraft.arche.save.Consumer;
+import net.lordofthecraft.arche.save.DumpedDBReader;
+import net.lordofthecraft.arche.seasons.LotcianCalendar;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory;
+import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
+import net.lordofthecraft.arche.skin.SkinCache;
+import net.lordofthecraft.arche.util.SQLUtil;
+import net.lordofthecraft.arche.util.WeakBlock;
 
 public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private static ArcheCore instance;
@@ -423,8 +464,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("skin").setExecutor(new CommandSkin(this));
 		
 		//Commands, ACB method, Annotated:
-		ArcheCommand.buildFromTemplate(getCommand("date"), ()->new CommandDate(this));
-		ArcheCommand.buildFromTemplate(getCommand("durabilityboost"), ()->new CommandDurability());
+		CommandHandle.build(getCommand("date"), ()->new CommandDate(this));
+		CommandHandle.build(getCommand("durabilityboost"), ()->new CommandDurability());
 	}
 
 	private void initListeners(){

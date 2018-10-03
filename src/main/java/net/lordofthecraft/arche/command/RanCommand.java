@@ -53,6 +53,7 @@ public class RanCommand implements CommandHandle {
 	}
 	
 	@SuppressWarnings("unchecked")
+	@Override
 	public <T> T getFlag(String flagName) {
 		return (T) flags.get(flagName);
 	}
@@ -62,6 +63,7 @@ public class RanCommand implements CommandHandle {
 		return (T) context.get(key);
 	}
 	
+	@Override
 	public boolean hasFlag(String flagName) {
 		return flags.containsKey(flagName);
 	}

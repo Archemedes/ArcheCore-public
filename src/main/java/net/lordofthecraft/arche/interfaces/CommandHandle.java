@@ -1,16 +1,50 @@
 package net.lordofthecraft.arche.interfaces;
 
-import org.bukkit.command.CommandSender;
+import java.util.function.Supplier;
 
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
+
+import net.lordofthecraft.arche.command.AnnotatedCommandParser;
+import net.lordofthecraft.arche.command.ArcheCommandBuilder;
+import net.lordofthecraft.arche.command.CommandTemplate;
 import net.md_5.bungee.api.chat.BaseComponent;
 
 public interface CommandHandle {
 
 	/**
+	 * Makes an entirely new Command Builder for your given PluginCommand
+	 * @param command The PluginCommand to wrap, defined by your plugin through YML or annotation
+	 * @return a chainable builder that will construct a CommandExecutor
+	 */
+	static ArcheCommandBuilder builder(PluginCommand command) {
+		return new ArcheCommandBuilder(command);
+	}
+
+	/**
+	 * Creates an ArcheCommandBuilder for you that parses an annotated class into a CommandExecutor
+	 * @param command The PluginCommand you intend to wrap
+	 * @param template A supplier for the CommandTemplate subclass you wish to use. Should Supply unique instances if intending to use Runnables
+	 * @return
+	 */
+	static ArcheCommandBuilder builder(PluginCommand command, Supplier<CommandTemplate> template) {
+		return new AnnotatedCommandParser(template, command).invokeParse();
+	}
+	
+	/**
+	 * Calls {{@link #build(PluginCommand, Supplier)} .build(), finalizing the command build process
+	 */
+	static void build(PluginCommand command, Supplier<CommandTemplate> template) {
+		builder(command, template).build();
+	}
+	
+	//// END OF STATICS ////
+	
+	
+	/**
 	 * @return whoever issued the command, which may not be the Player/Persona target
 	 */
 	CommandSender getSender();
-	
 	
 	/**
 	 * Send a formatted message to the command issuer
@@ -43,4 +77,16 @@ public interface CommandHandle {
 	 * @param error the error message the commandSender will see if the condition fails
 	 */
 	void validate(boolean condition, String error);
+	 
+	/**
+	 * @param flagName The Flag Name to check
+	 * @return if the Flag exists or not
+	 */
+	boolean hasFlag(String flagName);
+	
+	/**
+	 * @param flagName the Flag Name to check
+	 * @return The argument sender provided with the flag, or some default
+	 */
+	<T> T getFlag(String flagName);
 }

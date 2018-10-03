@@ -48,7 +48,7 @@ public class ArcheCommandBuilder {
 	boolean buildHelpFile = true;
 	
 	
-	ArcheCommandBuilder(PluginCommand command) {
+	public ArcheCommandBuilder(PluginCommand command) {
 		parentBuilder = null;
 		this.command = command;
 		

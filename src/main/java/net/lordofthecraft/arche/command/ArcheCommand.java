@@ -39,35 +39,6 @@ public class ArcheCommand {
 	List<ArcheCommand> subCommands;
 
 	@Getter(AccessLevel.NONE) CommandPart sequenceStart;
-
-
-	/**
-	 * @param command The PluginCommand to wrap, defined by your plugin through YML or annotation
-	 * @return a chainable builder that will construct a CommandExecutor
-	 */
-	public static ArcheCommandBuilder builder(PluginCommand command) {
-		return new ArcheCommandBuilder(command);
-	}
-
-	public static void buildFromTemplate(String command, Supplier<CommandTemplate> template) {
-		buildFromTemplate(ArcheCore.getPlugin().getCommand(command), template);
-	}
-	
-	/**
-	 * @param command The PluginCommand to wrap, defined by your plugin through YML or annotation
-	 * @param template Object that creates instances of your CommandTemplate implementation. This should return distinct instances if you plan on using BukkitRunnables at all
-	 */
-	public static void buildFromTemplate(PluginCommand command, Supplier<CommandTemplate> template) {
-		new AnnotatedCommandParser(template, command).invokeParse().build();
-	}
-	
-	public static ArcheCommandBuilder getFromTemplate(String command, Supplier<CommandTemplate> template) {
-		return getFromTemplate(ArcheCore.getPlugin().getCommand(command), template);
-	}
-	
-	public static ArcheCommandBuilder getFromTemplate(PluginCommand command, Supplier<CommandTemplate> template) {
-		return new AnnotatedCommandParser(template, command).invokeParse();
-	}
 	
 	void execute(RanCommand rc) {
 		sequenceStart.execute(rc);
