@@ -100,7 +100,7 @@ public class HelpCommand extends ArcheCommand {
 		String alias = "/" + c.getUsedAlias();
 		if(alias.endsWith("help")) alias = alias.substring(0, alias.length() - 5);
 		b.append(alias);
-		b.color(ChatColor.GOLD).suggest(alias);
+		b.color(ChatColor.GOLD).suggest(alias + ' ');
 		fillArgs(alias, b, true);
 		return b;
 	}
@@ -113,7 +113,7 @@ public class HelpCommand extends ArcheCommand {
 			if(useColor) b.color(colorCoded(i++));
 			b.append(optional? "{":"[");
 			if(a.hasDescription()) b.hover(a.getDescription());
-			else b.retainColors().suggest(alias);
+			else b.retainColors().suggest(alias + ' ');
 			b.append(a.getName())
 			.append(optional? "}":"]");
 		}
@@ -156,7 +156,7 @@ public class HelpCommand extends ArcheCommand {
 			
 			ChatBuilder b = MessageUtil.builder(subber).color(GOLD);
 			if(sub.getHelp() != null) b.command(alias + ' ' + subber + " -h 0").hover("Click for help on this subcommand!");
-			else b.suggest(alias + ' ' + subber).hover("Click to run this command");
+			else b.suggest(alias + ' ' + subber + ' ').hover("Click to run this command");
 			fillArgs(alias + ' ' + subber, b, false);
 			
 			if(sub.hasDescription()) {
