@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.var;
 import net.lordofthecraft.arche.command.RanCommand.CmdParserException;
+import net.lordofthecraft.arche.command.annotate.Arg;
 import net.lordofthecraft.arche.command.annotate.Cmd;
 import net.lordofthecraft.arche.command.annotate.DefaultInput;
 import net.lordofthecraft.arche.command.annotate.Flag;
@@ -112,13 +113,17 @@ public class AnnotatedCommandParser {
 				}
 			}
 			
-			ArgBuilder arg = subbo.arg();
+			var argAnno = param.getAnnotation(Arg.class);
+			ArgBuilder arg = argAnno == null? subbo.arg() : subbo.arg(argAnno.value());
+			if(argAnno != null && !argAnno.description().isEmpty()) arg.description(argAnno.description());
+			
 			DefaultInput defaultInput = param.getAnnotation(DefaultInput.class);
 			if(defaultInput != null) {
 				String def = defaultInput.value();
 				Validate.notNull(def);
 				arg.defaultInput(def);
 			}
+			
 			if(param.isAnnotationPresent(JoinedString.class))
 				if(param.getType() == String.class) arg.asJoinedString();
 				else throw new IllegalArgumentException("All JoinedString annotations must affect a String type parameter");
