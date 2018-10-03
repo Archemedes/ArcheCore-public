@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 
@@ -21,6 +22,7 @@ import net.lordofthecraft.arche.command.annotate.Cmd;
 import net.lordofthecraft.arche.command.annotate.DefaultInput;
 import net.lordofthecraft.arche.command.annotate.Flag;
 import net.lordofthecraft.arche.command.annotate.JoinedString;
+import net.lordofthecraft.arche.interfaces.CommandHandle;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 
@@ -29,9 +31,10 @@ public class AnnotatedCommandParser {
 	private final Supplier<CommandTemplate> template;
 	private final PluginCommand bukkitCommand;
 	
+	private boolean wantsCommandSenderAsFirstArg = false;
 	
 	public ArcheCommandBuilder invokeParse() {
-		ArcheCommandBuilder acb = ArcheCommand.builder(bukkitCommand);
+		ArcheCommandBuilder acb = CommandHandle.builder(bukkitCommand);
 		return parse(template, acb);
 	}
 	
@@ -90,8 +93,6 @@ public class AnnotatedCommandParser {
 		if(method.getGenericReturnType() != Void.TYPE) return;
 
 		var subbo = constructSubBuilder(method, acb);
-		makeCommandDoStuff(template, subbo, method);
-		
 		var flagsAnno = method.getAnnotation(Flag.List.class);
 		if(flagsAnno != null) addFlags(subbo, flagsAnno);
 		
@@ -109,6 +110,9 @@ public class AnnotatedCommandParser {
 					continue;
 				} else if(Player.class.isAssignableFrom(c)) {
 					subbo.requiresPlayer();
+					continue;
+				} else if(CommandSender.class.isAssignableFrom(c)) {
+					wantsCommandSenderAsFirstArg = true;
 					continue;
 				}
 			}
@@ -130,6 +134,7 @@ public class AnnotatedCommandParser {
 			else resolveArgType(method, param.getType(), arg);
 		}
 		
+		makeCommandDoStuff(template, subbo, method);
 		subbo.build();
 	}
 	
@@ -142,9 +147,10 @@ public class AnnotatedCommandParser {
 				Object[] args = rc.getArgResults().toArray();
 				
 				if(rc.getCommand().requiresPersona() || rc.getCommand().requiresPlayer()) {
-					Object[] newArgs = new Object[args.length+1];
-					System.arraycopy(args, 0, newArgs, 1, args.length);
-					newArgs[0] = rc.getCommand().requiresPersona()? rc.getPersona() : rc.getPlayer();
+					Object[] newArgs = insertFirst(args, rc.getCommand().requiresPersona()? rc.getPersona() : rc.getPlayer());
+					method.invoke(t, newArgs);
+				} else if (wantsCommandSenderAsFirstArg) {
+					Object[] newArgs = insertFirst(args, rc.getSender());
 					method.invoke(t, newArgs);
 				}else {
 					method.invoke(t, args);
@@ -161,6 +167,13 @@ public class AnnotatedCommandParser {
 				rc.error("An unhandled exception occurred. Contact a developer.");
 			}
 		});
+	}
+	
+	private Object[] insertFirst(Object[] args, Object toAdd) {
+		Object[] newArgs = new Object[args.length+1];
+		System.arraycopy(args, 0, newArgs, 1, args.length);
+		newArgs[0] = toAdd;
+		return newArgs;
 	}
 	
 	private void addFlags(ArcheCommandBuilder acb, Flag.List flags) {
