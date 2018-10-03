@@ -19,6 +19,7 @@ import net.lordofthecraft.arche.command.RanCommand.CmdParserException;
 import net.lordofthecraft.arche.command.annotate.Cmd;
 import net.lordofthecraft.arche.command.annotate.DefaultInput;
 import net.lordofthecraft.arche.command.annotate.Flag;
+import net.lordofthecraft.arche.command.annotate.JoinedString;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 
@@ -118,7 +119,10 @@ public class AnnotatedCommandParser {
 				Validate.notNull(def);
 				arg.defaultInput(def);
 			}
-			resolveArgType(method, param.getType(), arg);
+			if(param.isAnnotationPresent(JoinedString.class))
+				if(param.getType() == String.class) arg.asJoinedString();
+				else throw new IllegalArgumentException("All JoinedString annotations must affect a String type parameter");
+			else resolveArgType(method, param.getType(), arg);
 		}
 		
 		subbo.build();
@@ -162,6 +166,7 @@ public class AnnotatedCommandParser {
 			resolveArgType(null, flag.type(), flarg);
 		}
 	}
+	
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" }) //For enum casting
 	private void resolveArgType(Method m, Class<?> c, ArgBuilder arg) {
