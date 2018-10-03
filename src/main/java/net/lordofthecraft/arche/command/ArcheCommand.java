@@ -2,26 +2,15 @@ package net.lordofthecraft.arche.command;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.PluginCommand;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Value;
 import lombok.val;
 import lombok.experimental.NonFinal;
-import net.lordofthecraft.arche.ArcheCore;
-
-//TODO XXX
-// completions
-// annotation stuff
-// joint interface MEHHHH
-// other stuff idk
-// subcommand overloading DONE
-// make sure the errors are properly caught MAYBE DONE
 
 @Value
 @NonFinal
