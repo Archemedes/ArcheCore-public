@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Target(METHOD)
 @Repeatable(Flag.List.class)
 public @interface Flag {
-	String value();
+	String name();
 	String[] aliases() default {};
 	String description() default "";
 	Class<?> type() default Void.class;

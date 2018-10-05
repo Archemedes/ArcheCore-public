@@ -19,9 +19,9 @@ import lombok.experimental.var;
 import net.lordofthecraft.arche.command.RanCommand.CmdParserException;
 import net.lordofthecraft.arche.command.annotate.Arg;
 import net.lordofthecraft.arche.command.annotate.Cmd;
-import net.lordofthecraft.arche.command.annotate.DefaultInput;
+import net.lordofthecraft.arche.command.annotate.Default;
 import net.lordofthecraft.arche.command.annotate.Flag;
-import net.lordofthecraft.arche.command.annotate.JoinedString;
+import net.lordofthecraft.arche.command.annotate.Joined;
 import net.lordofthecraft.arche.interfaces.CommandHandle;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -121,14 +121,14 @@ public class AnnotatedCommandParser {
 			ArgBuilder arg = argAnno == null? subbo.arg() : subbo.arg(argAnno.value());
 			if(argAnno != null && !argAnno.description().isEmpty()) arg.description(argAnno.description());
 			
-			DefaultInput defaultInput = param.getAnnotation(DefaultInput.class);
+			Default defaultInput = param.getAnnotation(Default.class);
 			if(defaultInput != null) {
 				String def = defaultInput.value();
 				Validate.notNull(def);
 				arg.defaultInput(def);
 			}
 			
-			if(param.isAnnotationPresent(JoinedString.class))
+			if(param.isAnnotationPresent(Joined.class))
 				if(param.getType() == String.class) arg.asJoinedString();
 				else throw new IllegalArgumentException("All JoinedString annotations must affect a String type parameter");
 			else resolveArgType(method, param.getType(), arg);
@@ -178,7 +178,7 @@ public class AnnotatedCommandParser {
 	
 	private void addFlags(ArcheCommandBuilder acb, Flag.List flags) {
 		for(Flag flag : flags.value()) {
-			ArgBuilder flarg = acb.flag(flag.value(), flag.aliases());
+			ArgBuilder flarg = acb.flag(flag.name(), flag.aliases());
 			String desc = flag.description();
 			if(!desc.isEmpty()) flarg.description(desc);
 			resolveArgType(null, flag.type(), flarg);
