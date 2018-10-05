@@ -188,7 +188,9 @@ public class AnnotatedCommandParser {
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" }) //For enum casting
 	private void resolveArgType(Method m, Class<?> c, ArgBuilder arg) {
-		if( c == String.class) {
+		if( c == Void.class) {
+			arg.asVoid(); //Flags only
+		}else if( c == String.class) {
 			arg.asString();
 		}else if(c==int.class || c==Integer.class) {
 			arg.asInt();

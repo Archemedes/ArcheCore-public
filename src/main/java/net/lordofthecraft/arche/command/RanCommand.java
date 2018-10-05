@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
@@ -148,19 +149,24 @@ public class RanCommand implements CommandHandle {
 	
 	private void parseFlags(List<String> args) throws CmdParserException {
 	//Father forgive me for I have sinned
-		List<CmdFlag> f = new ArrayList<>(command.getFlags());
+		List<CmdFlag> f = command.getFlags().stream().filter(fl->fl.mayUse(sender))
+				.collect(Collectors.toCollection(ArrayList::new));
 		for(int i = 0; i < args.size(); i++) {
 			String a = args.get(i);
 			if(a.startsWith("-")) {
 				CmdFlag flag = matchFlag(a, f);
 				if(flag != null) {
-					if(!flag.mayUse(sender))
-					f.remove(flag);
-					args.remove(i);
+					args.remove(i--); //this shortens the list of args so we shift index accordingly
+					
+					//Some flags cant possibly take any arguments. Give special treatment for client flexibility
+					if(flag.isVoid()) {
+						flags.put(flag.getName(), "I_EXIST");
+						continue;
+					}
+					
 					String flagArg;
 					if(i < args.size() && !args.get(i).startsWith("-")) {
-						flagArg = args.remove(i);
-						i -= 1; //NB
+						flagArg = args.remove(i--); //another index shift
 					} else {
 						flagArg = flag.getArg().getDefaultInput();
 					}

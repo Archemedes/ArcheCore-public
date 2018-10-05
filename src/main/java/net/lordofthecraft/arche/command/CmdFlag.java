@@ -63,10 +63,12 @@ public class CmdFlag {
 		return false;
 	}
 	
-	
-	
 	boolean mayUse(CommandSender s) {
 		return StringUtils.isEmpty(permission) || s.hasPermission(permission);
+	}
+	
+	boolean isVoid() {
+		return this.arg instanceof VoidArg;
 	}
 	
 	

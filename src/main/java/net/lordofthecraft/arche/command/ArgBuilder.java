@@ -214,6 +214,13 @@ public class ArgBuilder {
 		return command;
 	}
 	
+	public ArcheCommandBuilder asVoid() {
+		if(flag == null) throw new IllegalStateException("This makes no sense to use for anything but flags");
+		VoidArg arg = new VoidArg(name, errorMessage, description);
+		flag.setArg(arg);
+		return command;
+	}
+	
 	public ArcheCommandBuilder asJoinedString() {
 		if(flag != null) throw new IllegalStateException("Cannot use joined arguments for parameters/flags");
 		

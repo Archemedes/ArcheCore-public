@@ -14,7 +14,7 @@ public @interface Flag {
 	String value();
 	String[] aliases() default {};
 	String description() default "";
-	Class<?> type();
+	Class<?> type() default Void.class;
 	
 	@Retention(RUNTIME)
 	@Target(METHOD)
