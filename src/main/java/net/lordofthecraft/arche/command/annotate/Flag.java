@@ -15,6 +15,7 @@ public @interface Flag {
 	String[] aliases() default {};
 	String description() default "";
 	Class<?> type() default Void.class;
+	String permission() default "";
 	
 	@Retention(RUNTIME)
 	@Target(METHOD)

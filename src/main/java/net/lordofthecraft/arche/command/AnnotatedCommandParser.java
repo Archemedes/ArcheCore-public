@@ -202,9 +202,15 @@ public class AnnotatedCommandParser {
 	}
 	
 	private void addFlag(ArcheCommandBuilder acb, Flag flag) {
-		ArgBuilder flarg = acb.flag(flag.name(), flag.aliases());
+		ArgBuilder flarg;
+		
+		String pex = flag.permission();
+		if(!pex.isEmpty()) flarg = acb.restrictedFlag(flag.name(), pex, flag.aliases());
+		else flarg = acb.flag(flag.name(), flag.aliases());
+		
 		String desc = flag.description();
 		if(!desc.isEmpty()) flarg.description(desc);
+
 		resolveArgType(null, flag.type(), flarg);
 	}
 	
