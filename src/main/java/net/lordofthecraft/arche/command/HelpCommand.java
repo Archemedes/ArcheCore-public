@@ -101,13 +101,13 @@ public class HelpCommand extends ArcheCommand {
 		if(alias.endsWith("help")) alias = alias.substring(0, alias.length() - 5);
 		b.append(alias);
 		b.color(ChatColor.GOLD).suggest(alias + ' ');
-		fillArgs(alias, b, true);
+		fillArgs(parent, alias, b, true);
 		return b;
 	}
 	
-	private void fillArgs(String alias, ChatBuilder b, boolean useColor) {
+	private void fillArgs(ArcheCommand whichFriendo, String alias, ChatBuilder b, boolean useColor) {
 		int i = 0;
-		for(CmdArg<?> a : parent.getArgs()) {
+		for(CmdArg<?> a : whichFriendo.getArgs()) {
 			boolean optional = a.hasDefaultInput();
 			b.append(" ");
 			if(useColor) b.color(colorCoded(i++));
@@ -157,7 +157,7 @@ public class HelpCommand extends ArcheCommand {
 			ChatBuilder b = MessageUtil.builder(subber).color(GOLD);
 			if(sub.getHelp() != null) b.command(alias + ' ' + subber + " -h 0").hover("Click for help on this subcommand!");
 			else b.suggest(alias + ' ' + subber + ' ').hover("Click to run this command");
-			fillArgs(alias + ' ' + subber, b, false);
+			fillArgs(sub, alias + ' ' + subber, b, false);
 			
 			if(sub.hasDescription()) {
 				b.append(": ");

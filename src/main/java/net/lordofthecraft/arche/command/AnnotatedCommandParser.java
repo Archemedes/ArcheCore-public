@@ -118,7 +118,8 @@ public class AnnotatedCommandParser {
 
 	private void parseCommandMethod(Method method, Supplier<CommandTemplate> template, ArcheCommandBuilder acb) {
 		var flagsAnno = method.getAnnotation(Flag.List.class);
-		if(flagsAnno != null) addFlags(acb, flagsAnno);
+		if(flagsAnno != null) for(Flag flag : flagsAnno.value()) addFlag(acb, flag);
+		else if(method.isAnnotationPresent(Flag.class)) addFlag(acb, method.getAnnotation(Flag.class));
 		
 		var params = method.getParameters();
 		for (int i = 0; i < params.length; i++) {
@@ -200,15 +201,12 @@ public class AnnotatedCommandParser {
 		return newArgs;
 	}
 	
-	private void addFlags(ArcheCommandBuilder acb, Flag.List flags) {
-		for(Flag flag : flags.value()) {
-			ArgBuilder flarg = acb.flag(flag.name(), flag.aliases());
-			String desc = flag.description();
-			if(!desc.isEmpty()) flarg.description(desc);
-			resolveArgType(null, flag.type(), flarg);
-		}
+	private void addFlag(ArcheCommandBuilder acb, Flag flag) {
+		ArgBuilder flarg = acb.flag(flag.name(), flag.aliases());
+		String desc = flag.description();
+		if(!desc.isEmpty()) flarg.description(desc);
+		resolveArgType(null, flag.type(), flarg);
 	}
-	
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" }) //For enum casting
 	private void resolveArgType(Method m, Class<?> c, ArgBuilder arg) {

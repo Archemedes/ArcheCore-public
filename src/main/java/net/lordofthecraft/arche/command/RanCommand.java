@@ -34,6 +34,7 @@ public class RanCommand implements CommandHandle {
 	public  static final String ERROR_PREFIX = DARK_RED + "Error: " + RED;
 	public  static final String ERROR_UNSPECIFIED = " An unhandled error occurred when processing the command.";
 	private static final String ERROR_FLAG_ARG = "Not a valid flag argument provided for: " + WHITE;
+	private static final String DUPLICATE_FLAG = "You've provided a duplicate flag: " + WHITE;
 	private static final String ERROR_NEEDS_PLAYER = "This command can only be run by players.";
 	private static final String ERROR_NEEDS_PERSONA = "You need a valid Persona to run this command";
 	
@@ -155,28 +156,32 @@ public class RanCommand implements CommandHandle {
 			String a = args.get(i);
 			if(a.startsWith("-")) {
 				CmdFlag flag = matchFlag(a, f);
-				if(flag != null) {
-					args.remove(i--); //this shortens the list of args so we shift index accordingly
+				if(flag != null) { //Weird shit happens to i here. Plan accordingly.
+					args.remove(i--); //this shortens the list of args. Index shift
 					
-					//Some flags cant possibly take any arguments. Give special treatment for client flexibility
-					if(flag.isVoid()) {
-						flags.put(flag.getName(), "I_EXIST");
+					if(flag.isVoid()) { //Some flags cant possibly take any arguments. Give special treatment for client flexibility
+						putFlag(flag, "I_EXIST");
 						continue;
 					}
 					
 					String flagArg;
-					if(i < args.size() && !args.get(i).startsWith("-")) {
-						flagArg = args.remove(i--); //another index shift
+					if((i+1) < args.size() && !args.get(i+1).startsWith("-")) { //next arg is now under the cursor
+						flagArg = args.remove(1+i); //Additional index shift since we took 2 args now
 					} else {
 						flagArg = flag.getArg().getDefaultInput();
 					}
 					
 					Object resolved = Optional.of(flagArg).map(flag.getArg()::resolve).orElse(null);
 					if(resolved == null) error(ERROR_FLAG_ARG + flag.getName());
-					else flags.put(flag.getName(), resolved);
+					else putFlag(flag, resolved);
 				}
 			}
 		}
+	}
+	
+	private void putFlag(CmdFlag flag, Object resolved) {
+		if(flags.containsKey(flag.getName())) error(DUPLICATE_FLAG + flag.getName());
+		else flags.put(flag.getName(), resolved);
 	}
 	
 	private CmdFlag matchFlag(String input, List<CmdFlag> flags) {
