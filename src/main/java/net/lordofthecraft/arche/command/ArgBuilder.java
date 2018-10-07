@@ -12,7 +12,9 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Floats;
 import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -81,6 +83,14 @@ public class ArgBuilder {
 		return arg;
 	}
 	
+	public ArcheCommandBuilder asLong() {
+		defaults("#l","Not an accepted longinteger");
+		CmdArg<Long> arg = build(Long.class);
+		arg.setMapper(Longs::tryParse);
+		return command;
+	}
+	
+
 	public ArcheCommandBuilder asDouble() {
 		asDoubleInternal();
 		return command;
@@ -109,6 +119,13 @@ public class ArgBuilder {
 		CmdArg<Double> arg = build(Double.class);
 		arg.setMapper(Doubles::tryParse);
 		return arg;
+	}
+	
+	public ArcheCommandBuilder asFloat() {
+		defaults("#.#","Not an accepted number");
+		CmdArg<Float> arg = build(Float.class);
+		arg.setMapper(Floats::tryParse);
+		return command;
 	}
 	
 	public ArcheCommandBuilder asString(){

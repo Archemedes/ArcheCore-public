@@ -216,7 +216,11 @@ public class AnnotatedCommandParser {
 			arg.asString();
 		}else if(c==int.class || c==Integer.class) {
 			arg.asInt();
-		} else if(c==Double.class || c ==double.class) {
+		}else if(c==long.class || c==Long.class) {
+			arg.asLong();
+		} else if(c==Float.class || c==float.class) {
+			arg.asFloat();
+		} else if(c==Double.class || c==double.class) {
 			arg.asDouble();
 		} else if(c.isEnum()) { //This is likely where it all goes to hell
 			arg.asEnum((Class<Enum>) c);
