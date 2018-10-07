@@ -105,10 +105,9 @@ public class ArgBuilder {
 	}
 	
 	private CmdArg<Double> asDoubleInternal(){
-		defaults("#","Not an accepted number");
+		defaults("#.#","Not an accepted number");
 		CmdArg<Double> arg = build(Double.class);
 		arg.setMapper(Doubles::tryParse);
-		if(command != null) command.addArg(arg);
 		return arg;
 	}
 	
@@ -238,7 +237,7 @@ public class ArgBuilder {
 	}
 	
 	private <T> CmdArg<T> build(Class<T> clazz){
-		CoreLog.debug("Building arg for class: " + clazz.getSimpleName());
+		CoreLog.debug("Building arg for class: " + clazz.getSimpleName() + " for command: " + command.mainCommand());
 		
 		CmdArg<T> arg = new CmdArg<>(name, errorMessage, defaultInput, description);
 		if(flag == null) command.addArg(arg);

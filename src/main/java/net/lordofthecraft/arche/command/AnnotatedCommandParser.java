@@ -2,6 +2,7 @@ package net.lordofthecraft.arche.command;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,6 +17,7 @@ import org.bukkit.entity.Player;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.var;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.command.RanCommand.CmdParserException;
 import net.lordofthecraft.arche.command.annotate.Arg;
 import net.lordofthecraft.arche.command.annotate.Cmd;
@@ -39,13 +41,9 @@ public class AnnotatedCommandParser {
 	}
 	
 	private ArcheCommandBuilder parse(Supplier<CommandTemplate> template, ArcheCommandBuilder acb) {
-		acb.run(rc->{ //This is default behavior when no arguments are given, usually refers to help file
-			CommandTemplate t = template.get();
-			t.setRanCommand(rc);
-			t.invoke();
-		});
-		
 		Class<? extends CommandTemplate> c = template.get().getClass();
+		
+		addInvoke(c, template, acb);
 		
 		var cmds = Stream.of(c.getMethods()).filter(m->m.isAnnotationPresent(Cmd.class)).collect(Collectors.toList());
 		
@@ -53,6 +51,25 @@ public class AnnotatedCommandParser {
 		for(Method method : cmds) parseCommand(method, template, acb);
 		
 		return acb; //this::parse is recursive. So is ArcheCommandBuilder::build. Perfect synergy :)
+	}
+	
+	private void addInvoke(Class<? extends CommandTemplate> c, Supplier<CommandTemplate> template, ArcheCommandBuilder acb) {
+		//This breaks polymorphism but whatever
+		for(Method m : c.getDeclaredMethods()) {
+			if(m.getParameterCount() > 0 && Modifier.isPublic(m.getModifiers()) && m.getName().equals("invoke") && m.getReturnType() == Void.TYPE) {
+				//This is a invoke method declared in the class, assumed this is what we want for the default invocation of the command
+				//Due to logic of the ArcheCommandExecutor this still makes the no-argument default a help command
+				parseCommandMethod(m, template, acb);
+				return;
+			}
+		}
+		
+		//Fallback option, which does use polymorphism, specifically the CommandTemplate.invoke() method
+		acb.run(rc->{ //This is default behavior when no arguments are given, usually refers to help file
+			CommandTemplate t = template.get();
+			t.setRanCommand(rc);
+			t.invoke();
+		});
 	}
 	
 	private ArcheCommandBuilder constructSubBuilder(Method method, ArcheCommandBuilder parent) {
@@ -73,6 +90,7 @@ public class AnnotatedCommandParser {
 	private void checkForSubLayer(Method method, Supplier<CommandTemplate> template, ArcheCommandBuilder acb) {
 		if(!CommandTemplate.class.isAssignableFrom(method.getReturnType())) return;
 		if(method.getParameterCount() > 0) throw new IllegalStateException("Methods returning CommandTemplate can't also have parameters");
+		if(method.getName().equals("invoke")) throw new IllegalArgumentException("Don't annotate your invoke() methods. The method name is reserved!");
 		
 		ArcheCommandBuilder subbo = constructSubBuilder(method, acb);
 		Supplier<CommandTemplate> chained = ()-> chainSupplier(method, template);
@@ -90,11 +108,17 @@ public class AnnotatedCommandParser {
 	}
 	
 	private void parseCommand(Method method, Supplier<CommandTemplate> template, ArcheCommandBuilder acb) {
-		if(method.getGenericReturnType() != Void.TYPE) return;
-
+		if(method.getReturnType() != Void.TYPE) return;
+		if(method.getName().equals("invoke")) throw new IllegalArgumentException("Don't annotate your invoke() methods. The method name is reserved!");
+		
 		var subbo = constructSubBuilder(method, acb);
+		parseCommandMethod(method, template, subbo);
+		subbo.build();
+	}
+
+	private void parseCommandMethod(Method method, Supplier<CommandTemplate> template, ArcheCommandBuilder acb) {
 		var flagsAnno = method.getAnnotation(Flag.List.class);
-		if(flagsAnno != null) addFlags(subbo, flagsAnno);
+		if(flagsAnno != null) addFlags(acb, flagsAnno);
 		
 		var params = method.getParameters();
 		for (int i = 0; i < params.length; i++) {
@@ -106,19 +130,20 @@ public class AnnotatedCommandParser {
 				//the sender (or flagged player) rather than argument
 				//The continue statements prevent the parameter to being resolved as an argument
 				if(Persona.class.isAssignableFrom(c)){
-					subbo.requiresPersona().requiresPlayer();
+					acb.requiresPersona().requiresPlayer();
 					continue;
 				} else if(Player.class.isAssignableFrom(c)) {
-					subbo.requiresPlayer();
+					acb.requiresPlayer();
 					continue;
 				} else if(CommandSender.class.isAssignableFrom(c)) {
+					CoreLog.debug("Method " + method.getName() + " for cmd " + acb.mainCommand() + " has explicit sender arg");
 					wantsCommandSenderAsFirstArg = true;
 					continue;
 				}
 			}
 			
 			var argAnno = param.getAnnotation(Arg.class);
-			ArgBuilder arg = argAnno == null? subbo.arg() : subbo.arg(argAnno.value());
+			ArgBuilder arg = argAnno == null? acb.arg() : acb.arg(argAnno.value());
 			if(argAnno != null && !argAnno.description().isEmpty()) arg.description(argAnno.description());
 			
 			Default defaultInput = param.getAnnotation(Default.class);
@@ -134,8 +159,7 @@ public class AnnotatedCommandParser {
 			else resolveArgType(method, param.getType(), arg);
 		}
 		
-		makeCommandDoStuff(template, subbo, method);
-		subbo.build();
+		makeCommandDoStuff(template, acb, method);
 	}
 	
 	private void makeCommandDoStuff(Supplier<CommandTemplate> template, ArcheCommandBuilder acb, Method method) {

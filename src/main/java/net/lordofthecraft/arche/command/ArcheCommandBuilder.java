@@ -114,6 +114,7 @@ public class ArcheCommandBuilder {
 	}
 	
 	public ArcheCommandBuilder requiresPlayer() {
+		CoreLog.debug("cmd " + mainCommand() + " requires Player");
 		if(senderParam == null) {
 			ArgBuilder b = CmdFlag.make(this, "p", "archecore.mod", new String[0]);
 			senderParam = b.flag();
@@ -124,6 +125,7 @@ public class ArcheCommandBuilder {
 	}
 	
 	public ArcheCommandBuilder requiresPersona() {
+		CoreLog.debug("cmd " + mainCommand() + " requires Persona");
 		if(senderParam == null || (requirePlayer && !requirePersona)) {
 			ArgBuilder b = CmdFlag.make(this, "p", "archecore.mod.persona", new String[0]);
 			senderParam = b.flag();
