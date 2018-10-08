@@ -17,7 +17,7 @@ public class CommandShowItem extends CommandTemplate {
 	
 	public void invoke(Persona source, Player target) {
 		ItemStack is = source.getPlayer().getInventory().getItemInMainHand();
-		validate(ItemUtil.exists(is), "You need to hold an item in yor hand to show!");
+		validate(ItemUtil.exists(is), "You need to hold an item in your hand to show!");
 		validate(LocationUtil.isClose(source.getPlayer(), target, 16), "Can only show items to nearby players!");
 		ChatBuilder b = MessageUtil.builder(source.getName()).color(GOLD)
 				.append(" is showing you ").color(AQUA)
