@@ -39,6 +39,7 @@ import net.lordofthecraft.arche.commands.CommandNewbies;
 import net.lordofthecraft.arche.commands.CommandPersona;
 import net.lordofthecraft.arche.commands.CommandRaceSpawn;
 import net.lordofthecraft.arche.commands.CommandRealname;
+import net.lordofthecraft.arche.commands.CommandShowItem;
 import net.lordofthecraft.arche.commands.CommandSkin;
 import net.lordofthecraft.arche.commands.CommandSql;
 import net.lordofthecraft.arche.commands.CommandSqlClone;
@@ -466,6 +467,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		//Commands, ACB method, Annotated:
 		CommandHandle.build(getCommand("date"), ()->new CommandDate(this));
 		CommandHandle.build(getCommand("durabilityboost"), ()->new CommandDurability());
+		CommandHandle.build(getCommand("showitem"), CommandShowItem::new);
 	}
 
 	private void initListeners(){

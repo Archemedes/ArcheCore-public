@@ -58,6 +58,9 @@ commands:
       description: Set the spawn of a race.
       permission: archecore.mod.persona
       permission-message: §4Insufficient Permission for this command
+   showitem:
+      permission: archecore.mayuse
+      description: show item in hand to player
    wikisign:
       usage: /<command>
       description: Make a wikisign?
