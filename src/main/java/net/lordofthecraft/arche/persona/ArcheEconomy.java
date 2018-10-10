@@ -1,5 +1,11 @@
 package net.lordofthecraft.arche.persona;
 
+import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import io.github.archemedes.customitem.CustomTag;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.IConsumer;
@@ -9,14 +15,6 @@ import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.logging.TransactionRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.md_5.bungee.api.ChatColor;
-
-import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
-import io.github.archemedes.customitem.CustomItem;
-import io.github.archemedes.customitem.CustomTag;
 
 public class ArcheEconomy implements Economy {
 	public enum TransactionType {

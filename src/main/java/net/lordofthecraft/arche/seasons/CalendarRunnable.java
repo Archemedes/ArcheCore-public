@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -19,7 +20,7 @@ public class CalendarRunnable extends BukkitRunnable
     private final LotcianCalendar calendar;
     private final Map<String, World> worlds;
     
-    private long lastUpdate;    
+    private long lastUpdate;
     
     CalendarRunnable( LotcianCalendar calendar, final long initTime, List<String> trackedWorlds) {
         this.calendar = calendar;
@@ -66,7 +67,7 @@ public class CalendarRunnable extends BukkitRunnable
 
     	List<World> myWorlds = worlds.values().stream()
     			.filter(Objects::nonNull)
-    			.filter(w->"true".equals(w.getGameRuleValue("doDaylightCycle")))
+    			.filter(w->w.getGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE))
     			.collect(Collectors.toList());
 
     	if(myWorlds.isEmpty()) return;
@@ -84,7 +85,7 @@ public class CalendarRunnable extends BukkitRunnable
     	}
     }
     
-    private int elongateDay(final int mctick) {        
+    private int elongateDay(final int mctick) {
         if (mctick > 22000) {
             return mctick;
         }

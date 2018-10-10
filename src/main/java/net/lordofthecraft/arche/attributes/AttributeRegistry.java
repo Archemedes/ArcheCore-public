@@ -3,14 +3,9 @@ package net.lordofthecraft.arche.attributes;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.Player;
-
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.persona.ArchePersona;
 
 public class AttributeRegistry {
 
@@ -65,7 +60,7 @@ public class AttributeRegistry {
         register(BLAST_RESISTANCE);
         register(PROJECTILE_RESISTANCE);
         register(LIGHTNING_RESISTANCE);
-        register(FALL_RESISTANCE); 
+        register(FALL_RESISTANCE);
         
         for (Attribute a : Attribute.values()) {
             register(new VanillaAttribute(a.toString(), 0.0, a));

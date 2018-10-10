@@ -13,6 +13,7 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 
@@ -129,13 +130,21 @@ public class ItemUtil {
 
 	public static ItemStack make(Material mat, short durability, String displayName, String... lore) {
 		ItemStack is = new ItemStack(mat);
-		is.setDurability(durability);
+		ItemMeta m = is.getItemMeta();
+		if(m instanceof Damageable) {
+			((Damageable) m).setDamage(durability);
+			is.setItemMeta(m);
+		}
 		return decorate(is, displayName, lore);
 	}
 
 	public static ItemStack make(Material mat, short durability, int amount, String displayName, String... lore) {
 		ItemStack is = new ItemStack(mat);
-		is.setDurability(durability);
+		ItemMeta m = is.getItemMeta();
+		if(m instanceof Damageable) {
+			((Damageable) m).setDamage(durability);
+			is.setItemMeta(m);
+		}
 		is.setAmount(amount);
 		return decorate(is, displayName, lore);
 	}
