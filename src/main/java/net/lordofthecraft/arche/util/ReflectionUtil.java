@@ -10,7 +10,7 @@ import com.comphenix.protocol.utility.MinecraftReflection;
 public class ReflectionUtil {
 	private ReflectionUtil() {}
 	
-	final public static String PATH = "net.minecraft.server." + Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3] + "."; 
+	final public static String PATH = "net.minecraft.server." + Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3] + ".";
 
 	//NBT Compound tag construction
 	private static Class<?> NBTTagCompound;
@@ -26,7 +26,7 @@ public class ReflectionUtil {
 			compoundConstructor = NBTTagCompound.getConstructor();
 			
 			saveToJson = MinecraftReflection.getItemStackClass().getMethod("save", NBTTagCompound);
-			itemNameMethod = MinecraftReflection.getItemStackClass().getMethod("a");
+			itemNameMethod = MinecraftReflection.getItemStackClass().getMethod("j");
 			
 		}catch(Throwable t){t.printStackTrace();}
 	}

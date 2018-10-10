@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -58,7 +59,7 @@ public class ItemUtil {
 	/**
 	 * Method to easily make Minecraft skulls from arbitrary skin files
 	 * @param profile The profile to get a skin from
-	 * @return a textured Minecraft SKULL_ITEM 
+	 * @return a textured Minecraft SKULL_ITEM
 	 */
 	public static ItemStack getSkullFromProfile(WrappedGameProfile profile) {
 		String value = profile.getProperties().get("textures").iterator().next().getValue();
@@ -113,11 +114,8 @@ public class ItemUtil {
 	 * @return The internal ItemStack translatable name
 	 */
 	public static String getItemLocaleName(ItemStack is){
-		try{
-			Object nmsItemStack =  MinecraftReflection.getMinecraftItemStack(is);
-			return itemNameMethod().invoke(nmsItemStack).toString() + ".name";
-		}catch(Throwable t){t.printStackTrace();}
-		return null;
+		NamespacedKey k = is.getType().getKey();
+		return "item." + k.getNamespace() + '.' + k.getKey();
 	}
 
 	/**

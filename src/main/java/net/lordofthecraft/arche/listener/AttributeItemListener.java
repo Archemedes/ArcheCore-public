@@ -86,7 +86,7 @@ public class AttributeItemListener implements Listener {
 				double floatdamage = newDamage - intdamage;
 				if(Math.random() < floatdamage) intdamage++;
 				e.setDamage(intdamage);
-			}	
+			}
 		} catch(Exception exception) {
 			CoreLog.warning("During Item Damage Event, Could not handle the durability CustomTag on an item:");
 			CoreLog.warning("Affected Player: " + e.getPlayer().getName());
@@ -135,6 +135,21 @@ public class AttributeItemListener implements Listener {
 				}
 			}
 		});
+		
+		ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(ArcheCore.getPlugin(), PacketType.Play.Client.ITEM_NAME) {
+			@Override
+			public void onPacketReceiving(final PacketEvent event) {
+				PacketContainer packet = event.getPacket();
+
+				String read = packet.getStrings().read(0);
+				System.out.println("rr: " + read);
+				String tr = org.bukkit.ChatColor.translateAlternateColorCodes('&', read);
+				
+				packet.getStrings().write(0, tr);
+				event.setPacket(packet);
+			}
+		});
+		
 	}
 	
 	@EventHandler(priority=EventPriority.MONITOR)
