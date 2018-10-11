@@ -53,6 +53,13 @@ public class ArcheCommand {
 		return aliases.contains(param);
 	}
 	
+	public String getBestAlias(String param) {
+		for(String alias : aliases) {
+			if(alias.startsWith(param)) return alias;
+		}
+		return null;
+	}
+	
 	private boolean aliasOverlaps(ArcheCommand other) {
 		return aliases.stream().anyMatch(other::isAlias);
 	}

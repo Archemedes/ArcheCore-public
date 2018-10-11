@@ -2,6 +2,8 @@ package net.lordofthecraft.arche.command;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
@@ -24,7 +26,7 @@ public class ArcheCommandExecutor implements TabExecutor {
 	
 	
 	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+	public boolean onCommand(CommandSender sender, Command $, String label, String[] args) {
 		List<String> listArgs = new ArrayList<>();
 		for (String arg : args) listArgs.add(arg);
 		runCommand(sender, rootCommand, label, listArgs);
@@ -32,9 +34,26 @@ public class ArcheCommandExecutor implements TabExecutor {
 	}
 	
 	@Override
-	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<String> onTabComplete(CommandSender sender, Command $, String alias, String[] args) {
+		List<String> listArgs = new ArrayList<>();
+		for (String arg : args) listArgs.add(arg);
+		
+		return getCompletions(sender, rootCommand, listArgs);
+	}
+	
+	private List<String> getCompletions(CommandSender sender, ArcheCommand command, List<String> args) {
+		ArcheCommand subCommand = wantsSubCommand(command, args);
+		if(subCommand != null && subCommand.hasPermission(sender)) {
+			args.remove(0);
+			return getCompletions(sender, subCommand, args);
+		} else {
+			List<String> options;
+			String last = args.get(args.size() - 1).toLowerCase();
+			if(args.size() == 1) options = subCompletions(sender, command, last);
+			else options = new ArrayList<>();
+			
+			return options.stream().filter(s->s.toLowerCase().startsWith(last)).collect(Collectors.toList());
+		}
 	}
 
 	private void runCommand(CommandSender sender, ArcheCommand command, String usedAlias, List<String> args) {
@@ -91,6 +110,18 @@ public class ArcheCommandExecutor implements TabExecutor {
       c.rectifySenders(otherPersona);
       executeCommand(ac, c);
 		});
+	}
+	
+	private List<String> subCompletions(CommandSender sender, ArcheCommand cmd, String argZero){
+		List<String> result = new ArrayList<>();
+		String lower = argZero.toLowerCase();
+		cmd.getSubCommands().stream()
+			.filter(s->s.hasPermission(sender))
+			.map(s->s.getBestAlias(lower))
+			.filter(Objects::nonNull)
+			.forEach(result::add);
+
+		return result;
 	}
 	
 	private ArcheCommand wantsSubCommand(ArcheCommand cmd, List<String> args) {
