@@ -230,7 +230,11 @@ public class ArcheCommandBuilder {
 		}
 		
 		//If there's no more builders up the chain we've reached the top. Means we're done and we can make an executor
-		if(parentBuilder == null) command.setExecutor(new ArcheCommandExecutor(built));
+		if(parentBuilder == null) {
+			ArcheCommandExecutor executor = new ArcheCommandExecutor(built);
+			command.setExecutor(executor);
+			command.setTabCompleter(executor);
+		}
 		return parentBuilder;
 	}
 	
