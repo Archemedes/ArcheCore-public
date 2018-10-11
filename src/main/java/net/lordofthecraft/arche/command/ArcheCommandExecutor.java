@@ -11,6 +11,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 
+import com.google.common.collect.Lists;
+
 import lombok.RequiredArgsConstructor;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
@@ -48,9 +50,13 @@ public class ArcheCommandExecutor implements TabExecutor {
 			return getCompletions(sender, subCommand, args);
 		} else {
 			List<String> options;
-			String last = args.get(args.size() - 1).toLowerCase();
+			int index = args.size() - 1;
+			String last = args.get(index).toLowerCase();
+			if(args.isEmpty()) return Lists.newArrayList();
 			if(args.size() == 1) options = subCompletions(sender, command, last);
 			else options = new ArrayList<>();
+			
+			command.getArgs().get(index).getCompleter().get().forEach(options::add);
 			
 			return options.stream().filter(s->s.toLowerCase().startsWith(last)).collect(Collectors.toList());
 		}
