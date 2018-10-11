@@ -1,8 +1,10 @@
 package net.lordofthecraft.arche.command;
 
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.function.DoublePredicate;
 import java.util.function.IntPredicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
@@ -137,6 +139,7 @@ public class ArgBuilder {
 		defaults("*","Must be one of these: " + ChatColor.WHITE + StringUtils.join(options, ", "));
 		val arg = build(String.class);
 		arg.setFilter( s-> Stream.of(options).filter(s2->s2.equalsIgnoreCase(s)).findAny().isPresent() );
+		arg.completeMe(options);
 		return command;
 	}
 	
@@ -146,16 +149,12 @@ public class ArgBuilder {
 		val arg = build(Material.class);
 		arg.setMapper(s->{
 			Material m = Material.matchMaterial(s);
-/*			if(m == null) {
-				Stream.of(Material.values())
-					.map(ItemStack::new)
-					.map(ItemUtil::getItemEnglishName)
-					.map(xx->xx.replace(' ', '_'))
-					.filter(s::equalsIgnoreCase)
-					.findFirst().orElse(null);
-			}*/
 			return m;
 		});
+		arg.setCompleter(()->Arrays.stream(Material.values())
+				.map(Enum::name)
+				.map(String::toLowerCase)
+				.collect(Collectors.toList()));
 		return command;
 	}
 	
@@ -168,6 +167,10 @@ public class ArgBuilder {
 			try{ return Enum.valueOf(clazz, s.toUpperCase()); }
 			catch(IllegalArgumentException e) {return null;}
 		});
+		arg.setCompleter(()->Arrays.stream(clazz.getEnumConstants())
+				.map(Enum::name)
+				.map(String::toLowerCase)
+				.collect(Collectors.toList()));
 		return command;
 	}
 	
@@ -182,6 +185,7 @@ public class ArgBuilder {
 				return Bukkit.getPlayer(s);
 			}
 		});
+		arg.playerCompleter();
 		return command;
 	}
 	
@@ -196,6 +200,7 @@ public class ArgBuilder {
 				return Bukkit.getOfflinePlayer( ArcheCore.getControls().getPlayerUUIDFromName(s) );
 			}
 		});
+		arg.playerCompleter();
 		return command;
 	}
 	
@@ -203,6 +208,7 @@ public class ArgBuilder {
 		defaults("persona","You must provide a valid Persona");
 		val arg = build(Persona.class);
 		arg.setMapper(CommandUtil::personaFromArg);
+		arg.playerCompleter();
 		return command;
 	}
 	
@@ -210,6 +216,7 @@ public class ArgBuilder {
 		defaults("persona","You must provide a valid Persona (online or offline)");
 		val arg = build(OfflinePersona.class);
 		arg.setMapper(CommandUtil::offlinePersonaFromArg);
+		arg.playerCompleter();
 		return command;
 	}
 	
@@ -226,7 +233,7 @@ public class ArgBuilder {
 			else if(Stream.of("false","no","n").anyMatch(s::equalsIgnoreCase)) return false;
 			else return null;
 		});
-		
+		arg.completeMe("yes","no","true","false");
 		return command;
 	}
 	
@@ -261,5 +268,4 @@ public class ArgBuilder {
 		else flag.setArg(arg);
 		return arg;
 	}
-	
 }
