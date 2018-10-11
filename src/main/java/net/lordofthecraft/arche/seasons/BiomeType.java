@@ -11,7 +11,7 @@ public enum BiomeType {
 	SWAMPLAND(6),
 	RIVER(7),
 	HELL(8),
-	SKY(9),	
+	SKY(9),
 	FROZEN_OCEAN(10),
 	FROZEN_RIVER(11),
 	ICE_PLAINS(12),
@@ -58,20 +58,20 @@ public enum BiomeType {
 	COLD_TAIGA_MOUNTAINS(158),
 	MEGA_SPRUCE_TAIGA(160),
 	MEGA_SPRUCE_TAIGA_HILLS(161),
-	EXTREME_HILLS_PLUS_MOUNTAINS(162),	
+	EXTREME_HILLS_PLUS_MOUNTAINS(162),
 	SAVANNA_MOUNTAINS(163),
 	SAVANNA_PLATEAU_MOUNTAINS(164),
 	MESA_BRYCE(165),
 	MESA_PLATEAU_FOREST_MOUNTAINS(166),
 	MESA_PLATEAU_MOUNTAINS(167);
 
-	private final byte id;
+	private final int id;
 
 	BiomeType(int i) {
-		this.id = (byte) i;
+		this.id = i;
 	}
 
-	public static BiomeType getBiomeFromId(byte biomeId) {
+	public static BiomeType getBiomeFromId(int biomeId) {
 
 		for (BiomeType bt : BiomeType.values()) {
 			if (bt.getId() == biomeId) return bt;
@@ -81,7 +81,7 @@ public enum BiomeType {
 
 	}
 
-	public static BiomeType getWinterBiome(byte biomeId) {
+	public static BiomeType getWinterBiome(int biomeId) {
 		if (biomeId < 0) {
 			biomeId += 128;
 		}
@@ -90,7 +90,7 @@ public enum BiomeType {
 
 		switch (type) {
 		case OCEAN:
-		case DEEP_OCEAN: 
+		case DEEP_OCEAN:
 			return FROZEN_OCEAN;
 
 		case BEACH:
@@ -99,7 +99,7 @@ public enum BiomeType {
 
 		case BIRCH_FOREST:
 		case FLOWER_FOREST:
-		case FOREST:		
+		case FOREST:
 		case MEGA_SPRUCE_TAIGA:
 		case ROOFED_FOREST:
 		case SWAMPLAND:
@@ -111,13 +111,13 @@ public enum BiomeType {
 		case FOREST_HILLS:
 		case EXTREME_HILLS:
 		case MEGA_SPRUCE_TAIGA_HILLS:
-		case EXTREME_HILLS_EDGE:	
+		case EXTREME_HILLS_EDGE:
 		case EXTREME_HILLS_PLUS:
 		case MEGA_TAIGA_HILLS:
 		case TAIGA_HILLS:
 			return COLD_TAIGA_HILLS;
 
-		case BIRCH_FOREST_HILLS_MOUNTAINS:		
+		case BIRCH_FOREST_HILLS_MOUNTAINS:
 		case BIRCH_FOREST_MOUNTAINS:
 		case TAIGA_MOUNTAINS:
 		case EXTREME_HILLS_MOUNTAINS:
@@ -139,7 +139,7 @@ public enum BiomeType {
 		}
 	}
 
-	public byte getId() {
+	public int getId() {
 		return id;
 	}
 }

@@ -1,5 +1,9 @@
 package net.lordofthecraft.arche.seasons;
 
+import static org.bukkit.Material.BLUE_GLAZED_TERRACOTTA;
+
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.bukkit.entity.Player;
@@ -20,6 +24,8 @@ public class BiomeSwitcher{
 	private final LotcianCalendar calendar;
 	private final boolean switchBiomes;
 
+	boolean t = false;
+	
 	BiomeSwitcher(final ArcheCore plugin,  final LotcianCalendar calendar, boolean switchBiomes) {
 		this.plugin = plugin;
 		this.calendar = calendar;
@@ -32,6 +38,7 @@ public class BiomeSwitcher{
 		CoreLog.info("Starting up into Winter: " + winter.get());
 		if(switchBiomes) ProtocolLibrary.getProtocolManager().getAsynchronousManager().registerAsyncHandler(
 				new PacketAdapter(plugin, PacketType.Play.Server.MAP_CHUNK) {
+					@Override
 					public void onPacketSending(final PacketEvent event) {
 						if (winter.get()) {
 							PacketContainer packet = event.getPacket();
@@ -40,12 +47,13 @@ public class BiomeSwitcher{
 							if(!groundUpContinuous) return; //Don't change this chunk
 							ChunkInfo info = new ChunkInfo(event.getPlayer(), packet.getIntegers().readSafely(2), 0, true, packet.getByteArrays().readSafely(0), 0);
 							BiomeSwitcher.this.translateChunkInfo(info);
-						}		
+						}
 					}
 				}).start();
 		
 		ProtocolLibrary.getProtocolManager().getAsynchronousManager().registerAsyncHandler(
 				new PacketAdapter(plugin, PacketType.Play.Server.UPDATE_TIME) {
+					@Override
 					public void onPacketSending(final PacketEvent event) {
 						String worldname = event.getPlayer().getWorld().getName();
 						if(calendar.getRunnable().getTrackedWorlds().contains(worldname)) {
@@ -67,14 +75,16 @@ public class BiomeSwitcher{
 
 	protected final boolean translateChunkInfo(final ChunkInfo info) {
 		if (info.hasContinous) {
-			for (int i = info.data.length - 256; i < info.data.length; ++i) {
-				final byte biome = info.data[i];
-				final byte replacement = BiomeType.getWinterBiome(biome).getId();
-				if (replacement >= 0) {
-					info.data[i] = replacement;
-				}
-
+			ByteBuffer buf = ByteBuffer.wrap(info.data, info.data.length - 1024, 1024);
+			IntBuffer out = buf.asIntBuffer();
+			for(int i = 0; i < 256; i++) {
+				int biome = buf.getInt();
+				int replacement = BiomeType.getWinterBiome(biome).getId();
+				if(!t)System.out.println(biome + "-->" + replacement);
+				if(replacement >= 0) out.put(replacement);
+				else out.get();
 			}
+			t=true;
 			return true;
 		}
 		return false;
@@ -99,7 +109,7 @@ public class BiomeSwitcher{
 		public ChunkInfo(final Player player, final int chunkMask, final int extraMask, final boolean hasContinous, final byte[] data, final int startIndex) {
 			super();
 			this.player = player;
-			this.chunkMask = chunkMask;	
+			this.chunkMask = chunkMask;
 			this.extraMask = extraMask;
 			this.hasContinous = hasContinous;
 			this.data = data;

@@ -4,12 +4,12 @@ import org.bukkit.ChatColor;
 
 public enum Month
 {
-    SNOWMAIDEN("Snow's Maiden", ChatColor.BLUE, "The snow of the Deep Cold breaks, leaving a slight chill in the air as time steps into\nthe Winter month of ", Season.WINTER), 
-    FIRSTSEED("The First Seed", ChatColor.DARK_GREEN, "plants begin to grow once more as the gripping cold departs the world, harbinging Spring;\nthe month is ", Season.SPRING), 
-    MALINWELCOME("Malin's Welcome", ChatColor.GOLD, "The world seems to smile as the heat of the Summer months begins and the world prospers.\nThis is the Summer month of ", Season.SUMMER), 
-    GRANDHARVEST("The Grand Harvest", ChatColor.GOLD, "The seeds from the former months have grown. The fields are bountiful and the sky is clear.\nThis is the Summer month of ", Season.SUMMER), 
-    SUNSMILE("Sun's Smile", ChatColor.GOLD, "As summer comes to a close the sun presents a delightful glow, giving its last light to illuminate the Summer month of ", Season.SUMMER), 
-    AMBERCOLD("The Amber Cold", ChatColor.BLUE, "The skies have turned to gray and a chill travels on the wind.\nThis is the Autumn month of ", Season.AUTUMN), 
+    SNOWMAIDEN("Snow's Maiden", ChatColor.BLUE, "The snow of the Deep Cold breaks, leaving a slight chill in the air as time steps into\nthe Winter month of ", Season.WINTER),
+    FIRSTSEED("The First Seed", ChatColor.DARK_GREEN, "plants begin to grow once more as the gripping cold departs the world, harbinging Spring;\nthe month is ", Season.SPRING),
+    MALINWELCOME("Malin's Welcome", ChatColor.GOLD, "The world seems to smile as the heat of the Summer months begins and the world prospers.\nThis is the Summer month of ", Season.SUMMER),
+    GRANDHARVEST("The Grand Harvest", ChatColor.GOLD, "The seeds from the former months have grown. The fields are bountiful and the sky is clear.\nThis is the Summer month of ", Season.SUMMER),
+    SUNSMILE("Sun's Smile", ChatColor.GOLD, "As summer comes to a close the sun presents a delightful glow, giving its last light to illuminate the Summer month of ", Season.SUMMER),
+    AMBERCOLD("The Amber Cold", ChatColor.BLUE, "The skies have turned to gray and a chill travels on the wind.\nThis is the Autumn month of ", Season.AUTUMN),
     DEEPCOLD("The Deep Cold", ChatColor.BLUE, "Winter is at it's harshest, winds howl and blow as each day passes. Spring shall begin soon, but not soon enough.\nThis is ", Season.WINTER);
     
     private final String name;
