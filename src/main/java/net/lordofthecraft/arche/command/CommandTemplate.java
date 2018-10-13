@@ -30,6 +30,11 @@ public abstract class CommandTemplate implements CommandHandle {
 	public void msg(BaseComponent message) {
 		ranCommand.msg(message);
 	}
+	
+	@Override
+	public void msg(Object o) {
+		ranCommand.msg(o);
+	}
 
 	@Override
 	public void msgRaw(String message) {

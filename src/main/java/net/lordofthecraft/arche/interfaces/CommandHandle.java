@@ -58,6 +58,8 @@ public interface CommandHandle {
 	 */
 	void msg(String message, Object... format);
 	
+	void msg(Object message);
+	
 	/**
 	 * Send a Json-formatted message to the command issuer (Json features only work on players)
 	 * @param message The message in a bungee BaseComponent format

@@ -85,6 +85,12 @@ public class RanCommand implements CommandHandle {
 		MessageUtil.send(message, sender);
 	}
 	
+	@Override
+	public void msg(Object o) {
+		msg(String.valueOf(o));
+	}
+	
+	
 	public void msgFormat(String message, Object... format) {
 		String formatted = String.format(message, format);
 		sender.sendMessage(formatted);
