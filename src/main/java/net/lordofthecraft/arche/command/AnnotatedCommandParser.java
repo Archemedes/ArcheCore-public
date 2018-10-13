@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
@@ -25,7 +24,6 @@ import net.lordofthecraft.arche.command.annotate.Default;
 import net.lordofthecraft.arche.command.annotate.Flag;
 import net.lordofthecraft.arche.command.annotate.Joined;
 import net.lordofthecraft.arche.interfaces.CommandHandle;
-import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 
 @RequiredArgsConstructor

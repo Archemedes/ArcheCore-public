@@ -259,7 +259,7 @@ public class ArgBuilder {
 		return command;
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <X> ArcheCommandBuilder asType(Class<X> c) {
 		if( c == Void.class) {
 			asVoid(); //Flags only
