@@ -31,10 +31,14 @@ public class ArgTypeTemplate<T> {
 		if(mapper != null) arg.setMapper(mapper);
 	}
 	
+	Class<T> getTargetType() {
+		return forClass;
+	}
+	
 	public void register() {
 		Validate.notNull(forClass, "There is no class specified for this argument type");
 		Validate.isTrue(isClassValid(), "The class to specify as an argument type was already handled");
-		//XXX
+		ArgBuilder.registerCustomType(this);
 	}
 	
 	private boolean isClassValid() {
@@ -48,6 +52,7 @@ public class ArgTypeTemplate<T> {
 		if(forClass == Double.class) return false;
 		if(forClass == String.class) return false;
 		if(forClass == Boolean.class) return false;
+		if(ArgBuilder.customTypeExists(forClass)) return false;
 		
 		return true;
 	}

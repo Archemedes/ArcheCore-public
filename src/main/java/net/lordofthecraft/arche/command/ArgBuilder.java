@@ -1,6 +1,8 @@
 package net.lordofthecraft.arche.command;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.DoublePredicate;
 import java.util.function.IntPredicate;
@@ -32,6 +34,9 @@ import net.md_5.bungee.api.ChatColor;
 
 @Accessors(fluent= true)
 public class ArgBuilder {
+	private final static Map<Class<?>, ArgTypeTemplate<?>> customTypes = new HashMap<>();
+	static void registerCustomType(ArgTypeTemplate<?> template) { customTypes.put(template.getTargetType(), template);}
+	static boolean customTypeExists(Class<?> clazz) { return customTypes.containsKey(clazz);}
 	
 	//Either one of these is set, depending on what kind of arg
 	private final ArcheCommandBuilder command;
@@ -254,6 +259,18 @@ public class ArgBuilder {
 		return command;
 	}
 	
+	public <X> ArcheCommandBuilder asCustomType(Class<X> clazz) {
+		if(!customTypes.containsKey(clazz)) throw new IllegalArgumentException("This class was not registered as a CUSTOM argument type: " + clazz.getSimpleName());
+		@SuppressWarnings("unchecked")
+		ArgTypeTemplate<X> result = (ArgTypeTemplate<X>) customTypes.get(clazz);
+		String defaultName = result.defaultName == null? clazz.getSimpleName() : result.defaultName;
+		String defaultError = result.defaultError == null? "Please provide a valid " + clazz.getSimpleName() : result.defaultError;
+		defaults(defaultName, defaultError);
+		
+		CmdArg<X> arg = build(clazz);
+		result.settle(arg);
+		return command;
+	}
 	
 	private void defaults(String name, String err, Object... formats) {
 		if(this.name == null) this.name = name;
