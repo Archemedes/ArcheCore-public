@@ -7,6 +7,7 @@ import org.bukkit.command.PluginCommand;
 
 import net.lordofthecraft.arche.command.AnnotatedCommandParser;
 import net.lordofthecraft.arche.command.ArcheCommandBuilder;
+import net.lordofthecraft.arche.command.ArgTypeTemplate;
 import net.lordofthecraft.arche.command.CommandTemplate;
 import net.md_5.bungee.api.chat.BaseComponent;
 
@@ -36,6 +37,10 @@ public interface CommandHandle {
 	 */
 	static void build(PluginCommand command, Supplier<CommandTemplate> template) {
 		builder(command, template).build();
+	}
+
+	static <T> ArgTypeTemplate<T> defineArgumentType(Class<T> forClass){
+		return new ArgTypeTemplate<>(forClass);
 	}
 	
 	//// END OF STATICS ////
