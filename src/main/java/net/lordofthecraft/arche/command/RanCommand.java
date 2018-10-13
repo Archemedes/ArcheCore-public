@@ -87,7 +87,7 @@ public class RanCommand implements CommandHandle {
 	
 	@Override
 	public void msg(Object o) {
-		msg(String.valueOf(o));
+		msgRaw(String.valueOf(o));
 	}
 	
 	
