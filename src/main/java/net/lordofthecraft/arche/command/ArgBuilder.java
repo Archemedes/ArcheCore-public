@@ -259,7 +259,38 @@ public class ArgBuilder {
 		return command;
 	}
 	
-	public <X> ArcheCommandBuilder asCustomType(Class<X> clazz) {
+	@SuppressWarnings("unchecked")
+	public <X> ArcheCommandBuilder asType(Class<X> c) {
+		if( c == Void.class) {
+			asVoid(); //Flags only
+		}else if( c == String.class) {
+			asString();
+		}else if(c==int.class || c==Integer.class) {
+			asInt();
+		}else if(c==long.class || c==Long.class) {
+			asLong();
+		} else if(c==Float.class || c==float.class) {
+			asFloat();
+		} else if(c==Double.class || c==double.class) {
+			asDouble();
+		} else if(c.isEnum()) { //This is likely where it all goes to hell
+			asEnum((Class<Enum>) c);
+		} else if(Persona.class.isAssignableFrom(c)) {
+			asPersona();
+		} else if(OfflinePersona.class.isAssignableFrom(c)) { //Must go AFTER the Persona check
+			asOfflinePersona();
+		} else if(Player.class.isAssignableFrom(c)) {
+			asPlayer();
+		} else if(OfflinePlayer.class.isAssignableFrom(c)) {  //Must go AFTER the Player check
+			asOfflinePlayer();
+		} else {
+			asCustomType(c);
+		}
+		
+		return command;
+	}
+	
+	private <X> ArcheCommandBuilder asCustomType(Class<X> clazz) {
 		if(!customTypes.containsKey(clazz)) throw new IllegalArgumentException("This class was not registered as a CUSTOM argument type: " + clazz.getSimpleName());
 		@SuppressWarnings("unchecked")
 		ArgTypeTemplate<X> result = (ArgTypeTemplate<X>) customTypes.get(clazz);

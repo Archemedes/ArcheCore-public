@@ -157,7 +157,7 @@ public class AnnotatedCommandParser {
 			if(param.isAnnotationPresent(Joined.class))
 				if(param.getType() == String.class) arg.asJoinedString();
 				else throw new IllegalArgumentException("All JoinedString annotations must affect a String type parameter");
-			else resolveArgType(method, param.getType(), arg);
+			else arg.asType(param.getType());
 		}
 		
 		makeCommandDoStuff(template, acb, method);
@@ -211,37 +211,6 @@ public class AnnotatedCommandParser {
 		String desc = flag.description();
 		if(!desc.isEmpty()) flarg.description(desc);
 
-		resolveArgType(null, flag.type(), flarg);
+		flarg.asType(flag.type());
 	}
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" }) //For enum casting
-	private void resolveArgType(Method m, Class<?> c, ArgBuilder arg) {
-		if( c == Void.class) {
-			arg.asVoid(); //Flags only
-		}else if( c == String.class) {
-			arg.asString();
-		}else if(c==int.class || c==Integer.class) {
-			arg.asInt();
-		}else if(c==long.class || c==Long.class) {
-			arg.asLong();
-		} else if(c==Float.class || c==float.class) {
-			arg.asFloat();
-		} else if(c==Double.class || c==double.class) {
-			arg.asDouble();
-		} else if(c.isEnum()) { //This is likely where it all goes to hell
-			arg.asEnum((Class<Enum>) c);
-		} else if(Persona.class.isAssignableFrom(c)) {
-			arg.asPersona();
-		} else if(OfflinePersona.class.isAssignableFrom(c)) { //Must go AFTER the Persona check
-			arg.asOfflinePersona();
-		} else if(Player.class.isAssignableFrom(c)) {
-			arg.asPlayer();
-		} else if(OfflinePlayer.class.isAssignableFrom(c)) {  //Must go AFTER the Player check
-			arg.asOfflinePlayer();
-		} else {
-			throw new IllegalStateException(String.format("Method %s has unrecognied type %s", m == null? "Flag":m.getName(), c.getSimpleName()));
-		}
-	}
-	
-	
 }
