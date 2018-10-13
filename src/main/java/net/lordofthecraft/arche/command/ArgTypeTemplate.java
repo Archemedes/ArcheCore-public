@@ -22,14 +22,13 @@ public class ArgTypeTemplate<T> {
 	private Function<String, T> mapper;
 	private Predicate<T> filter;
 	private Supplier<Collection<String>> completer;
+	String defaultName;
+	String defaultError;
 	
-	
-	CmdArg<T> provide(String name, String errorMessage, String defaultInput, String description) {
-		CmdArg<T> arg = new CmdArg<>(name, errorMessage, defaultInput, description);
+	void settle(CmdArg<T> arg) {
 		if(completer != null) arg.setCompleter(completer);
 		if(filter != null) arg.setFilter(filter);
 		if(mapper != null) arg.setMapper(mapper);
-		return arg;
 	}
 	
 	public void register() {
