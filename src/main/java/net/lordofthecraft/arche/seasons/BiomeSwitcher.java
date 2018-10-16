@@ -80,7 +80,6 @@ public class BiomeSwitcher{
 			for(int i = 0; i < 256; i++) {
 				int biome = buf.getInt();
 				int replacement = BiomeType.getWinterBiome(biome).getId();
-				if(!t)System.out.println(biome + "-->" + replacement);
 				if(replacement >= 0) out.put(replacement);
 				else out.get();
 			}
