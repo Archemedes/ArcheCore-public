@@ -8,10 +8,6 @@ public class TagAttachment {
 	private final String key, value;
 	private final boolean offline;
 
-	public TagAttachment(String key, String value) {
-		this(key, value, false);
-	}
-
 	public TagAttachment(String key, String value, boolean offline) {
 		this.key = key;
 		this.value = value;

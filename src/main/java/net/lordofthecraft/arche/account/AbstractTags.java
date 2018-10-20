@@ -56,26 +56,33 @@ public abstract class AbstractTags<T> implements Tags<T> {
       if (tags.containsKey(key)) return tags.get(key).getValue();
       else return null;
   }
+  
+  @Override
+  public Object getValue(String key, Class<?> type) {
+    TagAttachment tag = getTag(key);
+    if(tag == null) return null;
+    return tag.getAs(type);
+  }
 
   @Override
   public TagAttachment getTag(String key) {
       return tags.get(key);
   }
-
+  
   @Override
-  public void giveTag(String name, String value) {
+  public void giveTag(String name, Object value) {
       giveTag(name, value, false);
   }
 
   @Override
-  public void giveTag(String name, String value, boolean offline) {
-      giveTag(new TagAttachment(name, value, offline));
+  public void giveTag(String key, Object value, boolean offline) {
+  	giveTag(TagAttachment.build(key, value, offline));
   }
-
+  
   @Override
   public void giveTag(TagAttachment tag) {
       if (forOffline && !tag.isAvailableOffline())
-          throw new IllegalArgumentException("Trying to add online-only tags to an Offline Persona");
+          throw new IllegalArgumentException("Trying to add online-only tags to an object in offline state");
 
       String k = tag.getKey();
       
@@ -89,8 +96,6 @@ public abstract class AbstractTags<T> implements Tags<T> {
       tags.put(k, tag);
       commitTag(tag);
   }
-  
-
 
   @Override
   public boolean removeTag(String key) {

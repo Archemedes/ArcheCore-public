@@ -20,6 +20,13 @@ public interface Tags<T> {
 
 	/**
 	 * @param key the tag key
+	 * @param type The type of object to attempt to cast/deserialize to
+	 * @return The associated tag value as from a gson deserialization attempt, or null if key not found.
+	 */
+	Object getValue(String key, Class<?> type);
+	
+	/**
+	 * @param key the tag key
 	 * @return the related TagAttachment, if found
 	 */
 	TagAttachment getTag(String key);
@@ -49,12 +56,12 @@ public interface Tags<T> {
 	/**
 	 * see {@link #giveTag(TagAttachment)}
 	 */
-	void giveTag(String name, String value);
+	void giveTag(String name, Object value);
 
 	/**
 	 * see {@link #giveTag(TagAttachment)}
 	 */
-	void giveTag(String name, String value, boolean offline);
+	void giveTag(String name, Object value, boolean offline);
 
 	/**
 	 * Give a Tag to be attached and saved with the Persona.
