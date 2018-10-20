@@ -17,7 +17,6 @@ import javax.sql.DataSource;
 
 import org.bukkit.plugin.Plugin;
 
-import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.util.SQLUtil;
 
@@ -35,11 +34,11 @@ public class ArcheSQLiteHandler extends SQLHandler {
     	sqlite = new SQLite(plugin.getLogger(), identifier, plugin.getDataFolder().getAbsolutePath(), identifier, timeout);
     	this.folder = plugin.getDataFolder();
     	name = identifier;
-    	try 
+    	try
     	{
     		sqlite.open();
-    	} 
-    	catch (Exception e) 
+    	}
+    	catch (Exception e)
     	{
     		CoreLog.log(Level.SEVERE, e.getMessage(), e);
     	}
