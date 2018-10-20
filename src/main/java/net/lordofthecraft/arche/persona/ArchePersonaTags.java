@@ -80,7 +80,7 @@ public class ArchePersonaTags implements PersonaTags {
         
         if(tags.containsKey(k)) {
         	TagAttachment othertag = tags.get(k);
-        	if(tag.isAvailableOffline() == othertag.isAvailableOffline() 
+        	if(tag.isAvailableOffline() == othertag.isAvailableOffline()
         			&& Objects.equal(othertag.getValue(), tag.getValue()))
         		return; //Tag already exists fully
         }
@@ -113,11 +113,6 @@ public class ArchePersonaTags implements PersonaTags {
     @Override
     public Map<String, TagAttachment> getTagMap() {
         return Collections.unmodifiableMap(tags);
-    }
-
-    @Override
-    public int getPersonaid() {
-        return persona.getPersonaId();
     }
 
     @Override

@@ -5,7 +5,7 @@ public interface PersonaExtension {
     /**
      * @return numerical id of Persona this extension is for
      */
-    int getPersonaid();
+    default int getPersonaid() { return getPersona().getPersonaId(); }
 
     /**
      * @return Persona this extension is for
