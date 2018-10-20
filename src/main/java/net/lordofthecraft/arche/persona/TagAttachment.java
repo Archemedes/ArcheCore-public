@@ -8,11 +8,11 @@ public class TagAttachment {
 	private final String key, value;
 	private final boolean offline;
 
-	TagAttachment(String key, String value) {
+	public TagAttachment(String key, String value) {
 		this(key, value, false);
 	}
 
-	TagAttachment(String key, String value, boolean offline) {
+	public TagAttachment(String key, String value, boolean offline) {
 		this.key = key;
 		this.value = value;
 		this.offline = offline;
