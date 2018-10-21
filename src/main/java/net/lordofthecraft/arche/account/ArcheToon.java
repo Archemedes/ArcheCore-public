@@ -4,15 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class ArcheToon { //Implements Toon at some point?
+import net.lordofthecraft.arche.interfaces.Tags;
+import net.lordofthecraft.arche.interfaces.Toon;
+
+public class ArcheToon implements Toon {
 	private final ArcheAccount account;
 	private final UUID uuid;
 	private final List<String> usedNames = new ArrayList<>();
 	
-	//Probably some handy indexing of Personas here at some point
+	private final Tags<Toon> tags;
 	
 	public ArcheToon(ArcheAccount account, UUID uuid) {//XXX
 		this.account = account;
 		this.uuid = uuid;
+		tags = new AgnosticTags<>(this, "toon_tags", "player_fk", uuid);
 	}
+
 }

@@ -12,6 +12,8 @@ import org.apache.commons.lang.Validate;
 import com.google.common.base.Objects;
 import com.google.gson.Gson;
 
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.Tags;
 import net.lordofthecraft.arche.persona.TagAttachment;
 
@@ -21,7 +23,9 @@ public abstract class AbstractTags<T> implements Tags<T> {
 	
 	private static final Gson gson = new Gson();
 	public static Gson getGson() { return gson; }
-
+	
+	protected static IConsumer getConsumer() { return ArcheCore.getConsumerControls();}
+	
 	protected final Map<String, TagAttachment> tags = new HashMap<>();
 	protected boolean forOffline;
 	protected boolean wasInit = false;
