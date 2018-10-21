@@ -12,7 +12,7 @@ public class ArcheAccount implements Account {
 	@Getter private int forumId; //e.g. 22277 = sporadic
 	@Getter private long discordId; //e.g 69173255004487680=Telanir
 
-	private final Tags<Account> tags;
+	@Getter private final Tags<Account> tags;
 	
 	List<ArcheToon> toons;
 	List<String> ips;
