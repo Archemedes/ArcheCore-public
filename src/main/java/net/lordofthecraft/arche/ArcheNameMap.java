@@ -15,7 +15,9 @@ import net.lordofthecraft.arche.save.rows.player.ReplacePlayerRow;
 import net.lordofthecraft.arche.util.AsyncRunner;
 import net.lordofthecraft.arche.util.MojangCommunicator;
 
+//TODO from now on player_names will hold all names, so update me
 public class ArcheNameMap {
+	
     private final BiMap<UUID, CaseString> playerNameMap = HashBiMap.create();
     private final ArcheCore plugin;
     
@@ -86,7 +88,7 @@ public class ArcheNameMap {
     			plugin.getConsumer().queueRow(new ReplacePlayerRow(u,n));
    
 
-    			//This is done async and not instant. 
+    			//This is done async and not instant.
     			//Might lead to MySQL desyncs. This is why we sanitize during onEnable
     			updateMapFromMojang(o);
     		} else {//u == o. UUID u has the right name. Don't update.
@@ -111,7 +113,7 @@ public class ArcheNameMap {
     	new AsyncRunner(plugin) { //Here we async update the new name
 			String newName;
 			
-			@Override 
+			@Override
 			protected void doAsync() {
 				try{
 					newName = MojangCommunicator.requestCurrentUsername(uuid);
@@ -122,7 +124,7 @@ public class ArcheNameMap {
 				}
 			}
 
-			@Override 
+			@Override
 			protected void andThen() {
 				if(newName != null) updateNameMap(newName, uuid); //NB: Recursive
 			}

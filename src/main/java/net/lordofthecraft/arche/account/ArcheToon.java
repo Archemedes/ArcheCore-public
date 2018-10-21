@@ -19,5 +19,4 @@ public class ArcheToon implements Toon {
 		this.uuid = uuid;
 		tags = new AgnosticTags<>(this, "toon_tags", "player_fk", uuid);
 	}
-
 }
