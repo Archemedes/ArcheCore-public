@@ -59,6 +59,30 @@ public class ArcheAccountHandler implements AccountHandler {
 		}
 	}
 	
+	public void logMeIn(String playerName, UUID uuid) {
+		ResultSet rs;
+		//Okay bear the fuck with me cuz this is going to be fun.
+		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
+			rs = s.executeQuery("SELECT account_id_fk FROM minecraft_toons WHERE player='" + uuid.toString()+"';");
+			if(rs.next()) { //This means the Minecraft account is known to us (should be exactly 1 entry)
+				int id = rs.getInt(1);
+				s.close();
+				rs = s.executeQuery("SELECT * FROM accounts WHERE account_id="+id); //Should exist
+				rs.next(); //Always true
+				
+				
+				s.close();
+			} else { //This means the Minecraft account is NOT known. Associate this with Soul status
+
+			}
+			
+			rs = s.executeQuery("SELECT account_id_fk FROM minecraft_toons");
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void initTags() {
 		ResultSet rs;
 		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
