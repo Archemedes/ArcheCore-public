@@ -10,6 +10,7 @@ import org.bukkit.plugin.Plugin;
 
 import net.lordofthecraft.arche.BlockRegistry;
 import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.account.ArcheAccountHandler;
 import net.lordofthecraft.arche.help.HelpFile;
 import net.lordofthecraft.arche.seasons.LotcianCalendar;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
@@ -22,6 +23,13 @@ public interface IArcheCore {
 	 * @return The PersonaHandler singleton
 	 */
 	PersonaHandler getPersonaHandler();
+	
+	/**
+	 * Accounts are a single human being who might have multiple Minecraft accounts
+	 * Toons are 1 minecraft account
+	 * @return The AccountHandler singleton
+	 */
+	ArcheAccountHandler getAccountHandler();
 	
 	/**
 	 * Fatigue of Personas ties into skills and is done by the FatigueHandler
@@ -65,8 +73,8 @@ public interface IArcheCore {
 
     /**
      * Adds a Topic to the HelpDesk, revealing it to all players via the GUI and command
-	 * If already instantiated, you can add a HelpFile object directly 
-	 * rather than have the HelpDesk construct it. 
+	 * If already instantiated, you can add a HelpFile object directly
+	 * rather than have the HelpDesk construct it.
 	 * @param helpfile the HelpFile object that you want to add
 	 */
 	void addHelp(HelpFile helpfile);
@@ -160,8 +168,8 @@ public interface IArcheCore {
      */
 	boolean isCloning();
 
-	/** 
-	 * If enabled, ArcheCore gives each of the races defined in its Method some 
+	/**
+	 * If enabled, ArcheCore gives each of the races defined in its Method some
 	 * unique stat bonuses to make each race unique.
 	 * @return Whether or not racial bonuses are enabled.
 	 */
@@ -176,7 +184,7 @@ public interface IArcheCore {
 
 	/**
 	 * If enabled, new Personas receive Newbie protection which exempts them from mechanical PvP for a set period of playtime
-	 * @return Minutes of PvP invulnerability time, in minutes 
+	 * @return Minutes of PvP invulnerability time, in minutes
 	 */
 	int getNewbieProtectDelay();
 
@@ -194,7 +202,7 @@ public interface IArcheCore {
 	boolean isBlockPlayerPlaced(Block b);
 	
 	/**
-	 * ArcheCore optionally has functionality for money tied to specific Personas. This boolean tells you if it is used 
+	 * ArcheCore optionally has functionality for money tied to specific Personas. This boolean tells you if it is used
 	 * @return Whether Economy is enabled
 	 */
 	boolean usesEconomy();
@@ -275,7 +283,7 @@ public interface IArcheCore {
 
     /**
      * @param p Player to check for afk status
-     * @return If player p is afk 
+     * @return If player p is afk
      */
     boolean isAfk(Player p);
     
@@ -285,4 +293,6 @@ public interface IArcheCore {
      * @return If the SQLhandler is an instance of {@link net.lordofthecraft.arche.SQL.ArcheSQLiteHandler}
      */
     boolean isUsingSQLite();
+
+		
 }

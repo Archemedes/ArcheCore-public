@@ -14,9 +14,12 @@ import org.bukkit.entity.Player;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Account;
+import net.lordofthecraft.arche.interfaces.AccountHandler;
 import net.lordofthecraft.arche.interfaces.Toon;
 
-public class ArcheAccountHandler {
+public class ArcheAccountHandler implements AccountHandler {
+	private static final ArcheAccountHandler instance = new ArcheAccountHandler();
+	
 	private final Map<UUID, ArcheAccount> accounts = new HashMap<>();
 	private final Map<Integer, ArcheAccount> accountsById = new HashMap<>();
 	private final Map<UUID, ArcheToon> toons = new HashMap<>();
@@ -25,6 +28,14 @@ public class ArcheAccountHandler {
 	private final Map<UUID, AgnosticTags<Toon>> toonTags = new HashMap<>();
 	
 	private final Map<UUID, ArcheAccount> pendingBlobs = new ConcurrentHashMap<>();
+	
+	public static ArcheAccountHandler getInstance() {
+		return instance;
+	}
+	
+	private ArcheAccountHandler() {
+		//Do nothing
+	}
 	
 	public void implement(Player player) {
 		UUID uuid = player.getUniqueId();

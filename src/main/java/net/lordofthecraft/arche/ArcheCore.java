@@ -27,6 +27,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
+import net.lordofthecraft.arche.account.ArcheAccountHandler;
 import net.lordofthecraft.arche.commands.CommandArchehelp;
 import net.lordofthecraft.arche.commands.CommandAttribute;
 import net.lordofthecraft.arche.commands.CommandBeaconme;
@@ -94,6 +95,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 	private SQLHandler sqlHandler;
 	private BlockRegistry blockRegistry;
+	private ArcheAccountHandler accountHandler;
 	private ArchePersonaHandler personaHandler;
 	private ArcheFatigueHandler fatigueHandler;
 	private HelpDesk helpdesk;
@@ -282,6 +284,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		//Find our Singletons and assign them.
 		nameMap = new ArcheNameMap(this);
 		blockRegistry = new BlockRegistry();
+		accountHandler = ArcheAccountHandler.getInstance();
 		personaHandler = ArchePersonaHandler.getInstance();
 		fatigueHandler = ArcheFatigueHandler.getInstance();
 		helpdesk = HelpDesk.getInstance();
@@ -627,6 +630,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	@Override
 	public ArchePersonaHandler getPersonaHandler(){
 		return personaHandler;
+	}
+	
+	@Override
+	public ArcheAccountHandler getAccountHandler(){
+		return accountHandler;
 	}
 
 	@Override
