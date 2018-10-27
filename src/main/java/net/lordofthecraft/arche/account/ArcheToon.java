@@ -4,19 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.Getter;
 import net.lordofthecraft.arche.interfaces.Tags;
 import net.lordofthecraft.arche.interfaces.Toon;
 
 public class ArcheToon implements Toon {
-	private final ArcheAccount account;
-	private final UUID uuid;
+	@Getter private final ArcheAccount account;
+	@Getter private final UUID uniqueId;
 	private final List<String> usedNames = new ArrayList<>();
 	
-	private final Tags<Toon> tags;
+	@Getter private final Tags<Toon> tags;
 	
 	public ArcheToon(ArcheAccount account, UUID uuid) {//XXX
 		this.account = account;
-		this.uuid = uuid;
+		this.uniqueId = uuid;
 		tags = new AgnosticTags<>(this, "toon_tags", "player_fk", uuid);
 	}
 }
