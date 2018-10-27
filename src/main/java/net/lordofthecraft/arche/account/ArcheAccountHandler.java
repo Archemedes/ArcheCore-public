@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.entity.Player;
 
+import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.Toon;
@@ -33,7 +34,17 @@ public class ArcheAccountHandler {
 			accountsById.put(account.getId(), account);
 			account.getToons().forEach(t->toons.put(uuid, t));
 			
-			if(accountTags.containsKey(account.getId()));
+			int aid = account.getId();
+			var tags_acc = (AgnosticTags<Account>) account.getTags();
+			if(accountTags.containsKey(aid)) tags_acc.merge(accountTags.get(aid));
+			accountTags.put(aid, tags_acc);
+			
+			for(Toon t : account.getToons()) {
+				UUID tid = t.getUniqueId();
+				var tags_toon = (AgnosticTags<Toon>) t.getTags();
+				if(toonTags.containsKey(tid)) tags_toon.merge(toonTags.get(tid));
+				toonTags.put(tid, tags_toon);
+			}
 		}
 	}
 	
@@ -46,6 +57,7 @@ public class ArcheAccountHandler {
 				AgnosticTags<Account> t = accountTags.get(id);
 				if(t == null) {
 					t = new AgnosticTags<>(null, "account_tags", "account_id_fk", id);
+					t.forOffline = true;
 					accountTags.put(id, t);
 				}
 				t.putInternal(rs.getString(AbstractTags.TAG_KEY), rs.getString(AbstractTags.TAG_VALUE));
