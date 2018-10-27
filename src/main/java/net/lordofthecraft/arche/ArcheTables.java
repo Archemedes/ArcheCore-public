@@ -130,7 +130,7 @@ public final class ArcheTables {
 				"account_id_fk INT UNSIGNED," +
 				"tag_key VARCHAR(255) NOT NULL," +
 				"tag_value TEXT," +
-				"offline BOOLEAN DEFAULT FALSE," +
+				"offline BOOLEAN DEFAULT TRUE," +
 				"PRIMARY KEY (account_id_fk,tag_key)," +
 				"FOREIGN KEY (account_id_fk) REFERENCES account (account_id) ON UPDATE CASCADE" +
 				")" +
@@ -142,7 +142,7 @@ public final class ArcheTables {
 				"player_fk CHAR(36)," +
 				"tag_key VARCHAR(255) NOT NULL," +
 				"tag_value TEXT," +
-				"offline BOOLEAN DEFAULT FALSE," +
+				"offline BOOLEAN DEFAULT TRUE," +
 				"PRIMARY KEY (player_fk,tag_key)," +
 				"FOREIGN KEY (player_fk) REFERENCES minecraft_toons (player)" +
 				")" +

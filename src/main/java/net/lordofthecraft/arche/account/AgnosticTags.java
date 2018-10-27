@@ -11,6 +11,10 @@ public class AgnosticTags<T> extends AbstractTags<T> {
 	private final String holderKeyName;
 	private final Object holderKey;
 	
+	{
+		this.forOffline = true;
+	}
+	
 	@Override
 	protected void commitTag(TagAttachment tag) {
 		getConsumer().replace(tableName)
@@ -26,6 +30,10 @@ public class AgnosticTags<T> extends AbstractTags<T> {
 		.where(holderKeyName, holderKey)
 		.where(TAG_KEY, tagKey)
 		.queue();
+	}
+	
+	void putInternal(String key, String value) {
+		this.tags.put(key, new TagAttachment(key, value, true));
 	}
 
 }
