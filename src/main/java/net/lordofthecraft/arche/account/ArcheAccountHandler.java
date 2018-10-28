@@ -133,7 +133,7 @@ public class ArcheAccountHandler implements AccountHandler {
 		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
 			rs = s.executeQuery("SELECT account_id FROM accounts");
 			boolean weHaveAccounts = rs.next();
-			if(weHaveAccounts) {
+			if(!weHaveAccounts) {
 				CoreLog.warning("There were NO accounts found in ArcheCore. Either you have no players or we just upgraded. "
 						+ "Let's find out which by going through the namelog file (table name 'players')");
 				s.close();
@@ -151,9 +151,6 @@ public class ArcheAccountHandler implements AccountHandler {
 				}
 				CoreLog.info("We've made new accounts for players, some of which might be alts. Handled in total: " + handled);
 			}
-			
-			
-			
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
