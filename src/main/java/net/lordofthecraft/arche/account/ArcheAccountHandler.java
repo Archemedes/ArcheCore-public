@@ -24,6 +24,7 @@ public class ArcheAccountHandler implements AccountHandler {
 	private final Map<UUID, ArcheAccount> accounts = new HashMap<>();
 	private final Map<Integer, ArcheAccount> accountsById = new HashMap<>();
 	
+	//These will hold only for offline by the end :)
 	private final Map<Integer, AgnosticTags<Account>> accountTags = new HashMap<>();
 	private final Map<UUID, AgnosticTags<Toon>> toonTags = new HashMap<>();
 	
@@ -35,6 +36,10 @@ public class ArcheAccountHandler implements AccountHandler {
 	
 	private ArcheAccountHandler() {
 		//Do nothing
+	}
+	
+	private int nextId() {
+		return -1; //implemented
 	}
 	
 	public void implement(Player player) {
@@ -136,7 +141,13 @@ public class ArcheAccountHandler implements AccountHandler {
 				int handled = 0;
 				while(rs.next()) {
 					handled++;
-					//TODO
+					UUID uuid = UUID.fromString(rs.getString("player"));
+					String name = rs.getString("player_name");
+					ArcheAccount acc = new ArcheAccount(nextId());
+					acc.addToon(uuid, name);
+					
+					accounts.put(uuid, acc);
+					accountsById.put(acc.getId(), acc);
 				}
 				CoreLog.info("We've made new accounts for players, some of which might be alts. Handled in total: " + handled);
 			}

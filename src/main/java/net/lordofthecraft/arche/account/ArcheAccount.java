@@ -2,8 +2,10 @@ package net.lordofthecraft.arche.account;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import lombok.Getter;
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.Tags;
 import net.lordofthecraft.arche.interfaces.Toon;
@@ -27,4 +29,16 @@ public class ArcheAccount implements Account {
 	public List<Toon> getToons(){
 		return Collections.unmodifiableList(toons);
 	}
+	
+	void addToon(UUID uuid, String name) {
+		ArcheToon toon = new ArcheToon(this, uuid);
+		toon.usedNames.add(name);
+		ArcheCore.getConsumerControls()
+			.insert("minecraft_toons")
+			.set("account_id_fk", this.id)
+			.set("player", uuid.toString())
+			.queue();
+		this.toons.add(toon);
+	}
 }
+

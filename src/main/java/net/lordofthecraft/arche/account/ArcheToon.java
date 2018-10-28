@@ -13,7 +13,7 @@ import net.lordofthecraft.arche.interfaces.Toon;
 public class ArcheToon implements Toon {
 	@Getter ArcheAccount account; //Not final for merging reasons
 	@Getter private final UUID uniqueId;
-	private final List<String> usedNames = new ArrayList<>();
+	final List<String> usedNames = new ArrayList<>();
 	
 	@Getter private final Tags<Toon> tags;
 	
