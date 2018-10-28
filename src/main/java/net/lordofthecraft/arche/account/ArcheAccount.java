@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.Getter;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.Tags;
+import net.lordofthecraft.arche.interfaces.Toon;
 
 public class ArcheAccount implements Account {
 	@Getter private final int id; //Something to make sql happy
@@ -22,7 +23,8 @@ public class ArcheAccount implements Account {
 		tags = new AgnosticTags<>(this, "account_tags", "account_id_fk", id);
 	}
 	
-	public List<ArcheToon> getToons(){
+	@Override
+	public List<Toon> getToons(){
 		return Collections.unmodifiableList(toons);
 	}
 }

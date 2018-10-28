@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.AccountHandler;
 import net.lordofthecraft.arche.interfaces.Toon;
@@ -22,7 +23,6 @@ public class ArcheAccountHandler implements AccountHandler {
 	
 	private final Map<UUID, ArcheAccount> accounts = new HashMap<>();
 	private final Map<Integer, ArcheAccount> accountsById = new HashMap<>();
-	private final Map<UUID, ArcheToon> toons = new HashMap<>();
 	
 	private final Map<Integer, AgnosticTags<Account>> accountTags = new HashMap<>();
 	private final Map<UUID, AgnosticTags<Toon>> toonTags = new HashMap<>();
@@ -43,7 +43,6 @@ public class ArcheAccountHandler implements AccountHandler {
 		if(account != null){ //Had something to be implemented (first login time only)
 			accounts.put(uuid, account);
 			accountsById.put(account.getId(), account);
-			account.getToons().forEach(t->toons.put(uuid, t));
 			
 			int aid = account.getId();
 			var tags_acc = (AgnosticTags<Account>) account.getTags();
@@ -83,7 +82,74 @@ public class ArcheAccountHandler implements AccountHandler {
 		}
 	}
 	
-	public void initTags() {
+	public void merge(Account from, Account to) {
+		ArcheAccount to2 = (ArcheAccount) to;
+		
+		//Must merge all names, tags, toons to new account_id_fk
+		from.getToons().stream()
+			.map(ArcheToon.class::cast)
+			.forEach(t->{
+				accounts.put(t.getUniqueId(), to2);
+				t.account = to2;
+			});
+		
+		from.getTags().getTags().stream()
+			.filter(ta->!to.getTags().hasTag(ta.getKey()))
+			.forEach(ta->to.getTags().giveTag(ta));
+		
+		accountsById.remove(from.getId());
+		accountTags.remove(from.getId());
+		
+		var consumer = ArcheCore.getConsumerControls();
+		consumer.update("minecraft_toons")
+		.where("account_id_fk", from.getId())
+		.set("account_id_fk", to.getId())
+		.queue();
+
+		consumer.delete("account_tags")
+		.where("account_id_fk", from.getId())
+		.queue();
+		
+		consumer.delete("accounts")
+		.where("account_id", from.getId())
+		.queue();
+			
+	}
+	
+	
+	public void init() {
+		transition();
+		initTags();
+	}
+	
+	private void transition() {
+	//Check if we're functioning from previous setup:
+		ResultSet rs;
+		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
+			rs = s.executeQuery("SELECT account_id FROM accounts");
+			boolean weHaveAccounts = rs.next();
+			if(weHaveAccounts) {
+				CoreLog.warning("There were NO accounts found in ArcheCore. Either you have no players or we just upgraded. "
+						+ "Let's find out which by going through the namelog file (table name 'players')");
+				s.close();
+				rs = s.executeQuery("SELECT * FROM players");
+				int handled = 0;
+				while(rs.next()) {
+					handled++;
+					//TODO
+				}
+				CoreLog.info("We've made new accounts for players, some of which might be alts. Handled in total: " + handled);
+			}
+			
+			
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	private void initTags() {
 		ResultSet rs;
 		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
 			rs = s.executeQuery("SELECT * FROM account_tags");
