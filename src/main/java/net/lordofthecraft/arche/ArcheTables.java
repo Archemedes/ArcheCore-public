@@ -32,12 +32,9 @@ public final class ArcheTables {
 			String end = getEndingString(sqlHandler);
 
 			Logger l = ArcheCore.getPlugin().getLogger();
-			l.fine("Creating player and account tables...");
+			l.fine("Creating player account tables...");
 			createAccountTable(statement, end);
-			createToonTable(statement, end);
-			l.fine("Creating player and account respective tags tables...");
 			createAccountTagsTable(statement, end);
-			createToonTagsTable(statement, end);
 			l.fine("Creating name and ip logging tables...");
 			createPlayerTable(statement, end);
 			createIpTable(statement, end);
@@ -115,16 +112,6 @@ public final class ArcheTables {
 				end);
 	}
 	
-	protected static void createToonTable(Statement statement, String end) throws SQLException {
-		statement.execute("CREATE TABLE IF NOT EXISTS minecraft_toons (" +
-				"account_id_fk INT UNSIGNED," +
-				"player CHAR(36)," +
-				"PRIMARY KEY (account_id_fk,player)," +
-				"FOREIGN KEY (account_id_fk) REFERENCES account (account_id) ON UPDATE CASCADE" +
-				")" +
-				end);
-	}
-	
 	protected static void createAccountTagsTable(Statement statement, String end) throws SQLException {
 		statement.execute("CREATE TABLE IF NOT EXISTS account_tags (" +
 				"account_id_fk INT UNSIGNED," +
@@ -133,18 +120,6 @@ public final class ArcheTables {
 				"offline BOOLEAN DEFAULT TRUE," +
 				"PRIMARY KEY (account_id_fk,tag_key)," +
 				"FOREIGN KEY (account_id_fk) REFERENCES account (account_id) ON UPDATE CASCADE" +
-				")" +
-				end);
-	}
-	
-	protected static void createToonTagsTable(Statement statement, String end) throws SQLException {
-		statement.execute("CREATE TABLE IF NOT EXISTS toon_tags (" +
-				"player_fk CHAR(36)," +
-				"tag_key VARCHAR(255) NOT NULL," +
-				"tag_value TEXT," +
-				"offline BOOLEAN DEFAULT TRUE," +
-				"PRIMARY KEY (player_fk,tag_key)," +
-				"FOREIGN KEY (player_fk) REFERENCES minecraft_toons (player)" +
 				")" +
 				end);
 	}
