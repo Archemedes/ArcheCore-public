@@ -284,7 +284,7 @@ public class ArchePersonaHandler implements PersonaHandler {
     	Bukkit.getPluginManager().callEvent(event3);
 
     	Player p = persona.getPlayer();
-    	boolean forceSwitch = oldPersona != null && oldPersona.isCurrent(); 
+    	boolean forceSwitch = oldPersona != null && oldPersona.isCurrent();
     	//Expected switch restoreMinecraftSpecifics behavior:
     	//health, saturation, hunger set to persona defaults
     	//Inventories, potion effects cleared.
@@ -302,8 +302,8 @@ public class ArchePersonaHandler implements PersonaHandler {
     	Location to = racespawns.get(persona.getRace());
     	if(to == null) {
     		World w = ArcheCore.getControls().getNewPersonaWorld();
-    		to = w != null? w.getSpawnLocation() : 
-    			p != null? p.getWorld().getSpawnLocation() : 
+    		to = w != null? w.getSpawnLocation() :
+    			p != null? p.getWorld().getSpawnLocation() :
     				Bukkit.getWorlds().get(0).getSpawnLocation();
     	}
 
@@ -538,7 +538,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		
 		RaceBonusHandler.apply(ps);
 		ps.attributes().handleSwitch(false);
-		ps.updateDisplayName();
+		Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->ps.updateDisplayName());
 		ArcheCore.getControls().getFatigueHandler().showFatigueBar(ps);
 	}
 
