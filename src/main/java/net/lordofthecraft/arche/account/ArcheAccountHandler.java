@@ -16,6 +16,7 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.AccountHandler;
+import net.lordofthecraft.arche.interfaces.Tags;
 import net.lordofthecraft.arche.interfaces.Toon;
 
 public class ArcheAccountHandler implements AccountHandler {
@@ -52,13 +53,13 @@ public class ArcheAccountHandler implements AccountHandler {
 			int aid = account.getId();
 			var tags_acc = (AgnosticTags<Account>) account.getTags();
 			if(accountTags.containsKey(aid)) tags_acc.merge(accountTags.get(aid));
-			accountTags.put(aid, tags_acc);
+			accountTags.remove(aid);
 			
 			for(Toon t : account.getToons()) {
 				UUID tid = t.getUniqueId();
 				var tags_toon = (AgnosticTags<Toon>) t.getTags();
 				if(toonTags.containsKey(tid)) tags_toon.merge(toonTags.get(tid));
-				toonTags.put(tid, tags_toon);
+				toonTags.remove(tid);
 			}
 		}
 	}
@@ -121,7 +122,19 @@ public class ArcheAccountHandler implements AccountHandler {
 			
 	}
 	
+/*	public Tags<Account> getAccountTags(int id){
+		accountsById.containsKey(id) return accountsById.get(key)
+	}
+
+	public Tags<Account> getAccountTags(UUID uuid){
+
+	}
 	
+	public Tags<Toon> getToonTags(UUID uuid){
+
+	}*/
+
+
 	public void init() {
 		transition();
 		initTags();
