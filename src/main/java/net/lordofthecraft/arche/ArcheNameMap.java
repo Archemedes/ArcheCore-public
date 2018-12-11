@@ -3,22 +3,25 @@ package net.lordofthecraft.arche;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import org.apache.commons.lang.Validate;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
 
-import net.lordofthecraft.arche.save.rows.player.ReplacePlayerRow;
-import net.lordofthecraft.arche.util.AsyncRunner;
-import net.lordofthecraft.arche.util.MojangCommunicator;
+import lombok.NonNull;
+import lombok.var;
 
-//TODO from now on player_names will hold all names, so update me
 public class ArcheNameMap {
 	
-    private final BiMap<UUID, CaseString> playerNameMap = HashBiMap.create();
+		
+		private final ListMultimap<UUID, String> idToName = MultimapBuilder.hashKeys().linkedListValues().build();
+		private final Map<String, UUID> nameToId = new LinkedHashMap<>();
     private final ArcheCore plugin;
     
     ArcheNameMap(ArcheCore plugin){
@@ -27,141 +30,51 @@ public class ArcheNameMap {
     
     void onEnable(Connection c) throws SQLException {
     	ArcheTimer timer = plugin.getMethodTimer();
-        if (timer != null) timer.startTiming("Loading player UUID/name map");
-     	ResultSet res = c.createStatement().executeQuery("SELECT player,player_name FROM players");
-     	while(res.next()) {
-     		UUID uuid = UUID.fromString(res.getString("player"));
-     		CaseString name = new CaseString(res.getString("player_name"));
-     		
-     		if(playerNameMap.containsValue(name)) {
-     			getLogger().warning("Duplicate UUID entries exist for username: " + name.value);
-     			UUID otheruuid = playerNameMap.inverse().get(name);
-     			getLogger().warning( String.format("Affected UUIDS: %s and %s", uuid, otheruuid) );
-     			getLogger().warning("Talking to Mojang to update names. This is a one-time process");
-     			try {
-     				CaseString n1 = new CaseString(MojangCommunicator.requestCurrentUsername(uuid));
-     				CaseString n2 = new CaseString(MojangCommunicator.requestCurrentUsername(otheruuid));
-
-     				if(!name.equals(n2)) { //This replacement must be done first or it will still conflict with next insert.
-     					getLogger().info(otheruuid + " was outdated. Setting new name: " + n2.value);
-     					playerNameMap.put(otheruuid, n2);
-     					plugin.getConsumer().queueRow(new ReplacePlayerRow(otheruuid, n2.value));
-     				}
-     				playerNameMap.put(uuid, n1); //Due to conflict we never mapped a name value to this uuid. So do this regardless
-     				if(!name.equals(n1)) {
-     					getLogger().info(uuid + " was outdated. Setting new name: " + n1.value);
-     					plugin.getConsumer().queueRow(new ReplacePlayerRow(uuid, n1.value));
-     				}
-     			} catch(Exception e) {
-     				e.printStackTrace();
-     			}
-     			
-     		} else {
-     			playerNameMap.put(uuid, name);
-     		}
-     		
-     		
-     	}
+    	if (timer != null) timer.startTiming("Loading player UUID/name map");
+    	ResultSet res = c.createStatement().executeQuery("SELECT player,player_name FROM players");
+    	while(res.next()) {
+    		UUID uuid = UUID.fromString(res.getString("player"));
+    		String name = res.getString("player_name");
+    		idToName.put(uuid, name);
+    		String lower = name.toLowerCase();
+    		nameToId.put(lower, uuid); //This can override previous instances of the mapping
+    	}
      	res.close();
      	res.getStatement().close();
-     	if (timer != null) timer.stopTiming("Loading player UUID/name map");
     }
     
-    String getPlayerNameFromUUID(UUID playerUUID) {
-    	CaseString w = playerNameMap.get(playerUUID);
-    	return w==null? null : w.getValue();
+    String getPlayerNameFromUUID(@NonNull UUID playerUUID) {
+    	List<String> list = idToName.get(playerUUID);
+    	if(list.isEmpty()) return null;
+    	return list.get(list.size() - 1);
+    }
+    
+    List<String> getKnownAliases(@NonNull UUID playerUUID){
+    	return Collections.unmodifiableList(idToName.get(playerUUID));
     }
     
     UUID getPlayerUUIDFromName(String playerName) {
-    	CaseString w = new CaseString(playerName);
-    	return playerNameMap.inverse().get(w);
+    	String lower = playerName.toLowerCase();
+    	return nameToId.get(lower);
     }
     
-    void updateNameMap(String n, UUID u) {
-    	CaseString caseString = new CaseString(n);
+    void updateNameMap(@NonNull String n, @NonNull UUID u) {
+    	Validate.notNull(n);
+    	Validate.notNull(u);
     	
-    	if(playerNameMap.containsValue(caseString)) {
-    		UUID o = playerNameMap.inverse().get(caseString);
-    		if(!u.equals(o)) { //This name was used by a player with other UUID. We must update both
-         		CoreLog.debug("Updating CONFLICTING Player Name Map: " + u + "=" + n);
-         		playerNameMap.forcePut(u, caseString); //Force-put means old entry is wiped
-    			plugin.getConsumer().queueRow(new ReplacePlayerRow(u,n));
-   
-
-    			//This is done async and not instant.
-    			//Might lead to MySQL desyncs. This is why we sanitize during onEnable
-    			updateMapFromMojang(o);
-    		} else {//u == o. UUID u has the right name. Don't update.
-    			return;
-    		}
-    	} else {
-    		//There is no value linked to this name.
-    		//Either this uuid is linked to a different name, or player uuid is not in map
-    		//In both cases an update for this uuid is going to be needed
-    		CoreLog.debug("Updating Player Name Map: " + u + "=" + n);
-    		playerNameMap.put(u, caseString);
-        	plugin.getConsumer().queueRow(new ReplacePlayerRow(u, n));
-    	}
-    }
-    
-    //// Util Methods
-    private Logger getLogger() {
-    	return plugin.getLogger();
-    }
-    
-    private void updateMapFromMojang(UUID uuid) {
-    	new AsyncRunner(plugin) { //Here we async update the new name
-			String newName;
-			
-			@Override
-			protected void doAsync() {
-				try{
-					newName = MojangCommunicator.requestCurrentUsername(uuid);
-					CoreLog.debug("New name obtained from mojang for " + uuid + ": " + newName);
-				}catch(Exception e) {
-					e.printStackTrace();
-					newName = null;
-				}
-			}
-
-			@Override
-			protected void andThen() {
-				if(newName != null) updateNameMap(newName, uuid); //NB: Recursive
-			}
-		}.go();
-    }
-    
-    //// Util class
-    public class CaseString {
-    	public final String value;
-    	private final String value_lowercase;
+    	var lower = n.toLowerCase();
+    	if(u.equals(nameToId.get(lower))) return; //Up to date
+    	nameToId.put(lower, u);
     	
-    	public CaseString(String value) {
-    		Validate.notNull(value);
-    		this.value = value;
-    		this.value_lowercase = value.toLowerCase();
+    	var l1 = idToName.get(u);
+    	if(l1.contains(n)) { //Probably means player changed name to something else, then back
+    		//Change ordering in the linked list AND in the SQLite table (by deleting and re-inserting... yeah its dumb)
+    		l1.remove(n);
+    		plugin.getConsumer().delete("players").where("player", u).where("player_name", n).queue();
     	}
     	
-    	@Override
-    	public int hashCode() {
-    		return value_lowercase.hashCode();
-    	}
-    	
-    	@Override
-    	public boolean equals(Object other) {
-    		if(other == null || other.getClass() != this.getClass())
-    			return false;
-    		
-    		return value_lowercase.equals(((CaseString) other).value_lowercase);
-    	}
-    	
-    	public String getValue() {
-    		return value;
-    	}
-    	
-    	@Override
-    	public String toString() {
-    		return value;
-    	}
+    	l1.add(n);
+    	plugin.getConsumer().insert("players").where("player", u).where("player_name", n).queue();
+    	//This doesn't update other players that might currently also have name "n" as their last known name.
     }
 }
