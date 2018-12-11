@@ -53,9 +53,19 @@ public class ArcheNameMap {
     	return Collections.unmodifiableList(idToName.get(playerUUID));
     }
     
-    UUID getPlayerUUIDFromName(String playerName) {
+    UUID getPlayerUUIDFromAlias(@NonNull String playerName) {
     	String lower = playerName.toLowerCase();
     	return nameToId.get(lower);
+    }
+    
+    UUID getPlayerUUIDFromName(@NonNull String playerName) {
+    	UUID u = getPlayerUUIDFromAlias(playerName);
+    	if(u == null) return null;
+    	//We have a uuid linked but it might be outdated!
+    	//only return it if it matches the most recent name of this uuid
+    	String currentName = getPlayerNameFromUUID(u);
+    	if(playerName.equalsIgnoreCase(currentName)) return u;
+    	else return null;
     }
     
     void updateNameMap(@NonNull String n, @NonNull UUID u) {
