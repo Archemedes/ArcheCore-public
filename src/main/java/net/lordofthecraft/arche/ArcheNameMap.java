@@ -36,8 +36,7 @@ public class ArcheNameMap {
     		UUID uuid = UUID.fromString(res.getString("player"));
     		String name = res.getString("player_name");
     		idToName.put(uuid, name);
-    		String lower = name.toLowerCase();
-    		nameToId.put(lower, uuid); //This can override previous instances of the mapping
+    		nameToId.put(name.toLowerCase(), uuid); //This can override previous instances of the mapping
     	}
      	res.close();
      	res.getStatement().close();
@@ -54,8 +53,7 @@ public class ArcheNameMap {
     }
     
     UUID getPlayerUUIDFromAlias(@NonNull String playerName) {
-    	String lower = playerName.toLowerCase();
-    	return nameToId.get(lower);
+    	return nameToId.get(playerName.toLowerCase());
     }
     
     UUID getPlayerUUIDFromName(@NonNull String playerName) {
