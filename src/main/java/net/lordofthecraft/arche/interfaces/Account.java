@@ -12,4 +12,8 @@ public interface Account {
 	Tags<Account> getTags();
 	
 	int getId();
+	
+	long getForumId();
+	
+	long getDiscordId();
 }
