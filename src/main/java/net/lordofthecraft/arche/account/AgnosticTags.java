@@ -33,7 +33,7 @@ public class AgnosticTags<T> extends AbstractTags<T> {
 	}
 	
 	void putInternal(String key, String value) {
-		this.tags.put(key, new TagAttachment(key, value, true));
+		this.tags.put(key, new TagAttachment(key, value, false));
 	}
 
 }

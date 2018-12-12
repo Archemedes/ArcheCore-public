@@ -12,7 +12,7 @@ public class ArcheAccount implements Account {
 	@Getter private final int id; //Something to make sql happy
 	@Getter private final UUID uniqueId;
 	
-	@Getter private int forumId; //e.g. 22277 = sporadic
+	@Getter private long forumId; //e.g. 22277 = sporadic
 	@Getter private long discordId; //e.g 69173255004487680=Telanir
 	
 	@Getter private final Tags<Account> tags;

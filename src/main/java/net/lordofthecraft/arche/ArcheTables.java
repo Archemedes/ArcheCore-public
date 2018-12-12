@@ -105,6 +105,7 @@ public final class ArcheTables {
 	protected static void createAccountTable(Statement statement, String end) throws SQLException {
 		statement.execute("CREATE TABLE IF NOT EXISTS accounts (" +
 				"account_id INT UNSIGNED," +
+				"player CHAR(36)," +
 				"forum_id INT UNSIGNED UNIQUE," +
 				"discord_id INT UNSIGNED UNIQUE," +
 				"PRIMARY KEY (account_id)" +
@@ -117,7 +118,7 @@ public final class ArcheTables {
 				"account_id_fk INT UNSIGNED," +
 				"tag_key VARCHAR(255) NOT NULL," +
 				"tag_value TEXT," +
-				"offline BOOLEAN DEFAULT TRUE," +
+				"offline BOOLEAN DEFAULT FALSE," +
 				"PRIMARY KEY (account_id_fk,tag_key)," +
 				"FOREIGN KEY (account_id_fk) REFERENCES account (account_id) ON UPDATE CASCADE" +
 				")" +

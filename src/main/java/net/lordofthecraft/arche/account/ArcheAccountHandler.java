@@ -17,19 +17,12 @@ import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.AccountHandler;
 import net.lordofthecraft.arche.interfaces.Tags;
-import net.lordofthecraft.arche.interfaces.Toon;
 
 public class ArcheAccountHandler implements AccountHandler {
 	private static final ArcheAccountHandler instance = new ArcheAccountHandler();
 	
-	private final Map<UUID, ArcheAccount> accounts = new HashMap<>();
-	private final Map<Integer, ArcheAccount> accountsById = new HashMap<>();
-	
-	//These will hold only for offline by the end :)
-	private final Map<Integer, AgnosticTags<Account>> accountTags = new HashMap<>();
-	private final Map<UUID, AgnosticTags<Toon>> toonTags = new HashMap<>();
-	
-	private final Map<UUID, ArcheAccount> pendingBlobs = new ConcurrentHashMap<>();
+	private final Map<UUID, ArcheAccount> accounts = new ConcurrentHashMap<>();
+	private final Map<Integer, ArcheAccount> accountsById = new ConcurrentHashMap<>();
 	
 	public static ArcheAccountHandler getInstance() {
 		return instance;
@@ -66,9 +59,8 @@ public class ArcheAccountHandler implements AccountHandler {
 	
 	public void logMeIn(String playerName, UUID uuid) {
 		ResultSet rs;
-		//Okay bear the fuck with me cuz this is going to be fun.
 		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
-			rs = s.executeQuery("SELECT account_id_fk FROM minecraft_toons WHERE player='" + uuid.toString()+"';");
+			rs = s.executeQuery("SELECT * FROM ");
 			if(rs.next()) { //This means the Minecraft account is known to us (should be exactly 1 entry)
 				int id = rs.getInt(1);
 				s.close();
