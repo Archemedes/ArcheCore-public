@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,13 +15,11 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.AccountHandler;
-import net.lordofthecraft.arche.interfaces.Tags;
 
 public class ArcheAccountHandler implements AccountHandler {
 	private static final ArcheAccountHandler instance = new ArcheAccountHandler();
 	
 	private final Map<UUID, ArcheAccount> accounts = new ConcurrentHashMap<>();
-	private final Map<Integer, ArcheAccount> accountsById = new ConcurrentHashMap<>();
 	
 	public static ArcheAccountHandler getInstance() {
 		return instance;
@@ -32,8 +29,8 @@ public class ArcheAccountHandler implements AccountHandler {
 		//Do nothing
 	}
 	
-	private int nextId() {
-		return -1; //implemented
+	private int nextId() { //TODO
+		return -1;
 	}
 	
 	public void implement(Player player) {
@@ -57,27 +54,58 @@ public class ArcheAccountHandler implements AccountHandler {
 		}
 	}
 	
-	public void logMeIn(String playerName, UUID uuid) {
+	public ArcheAccount fetchAccount(UUID uuid, boolean createIfAbsent) {
+		//If Account was already loaded, just return it from cache
+		if(accounts.containsKey(uuid)) return accounts.get(uuid);
+		
+		ArcheAccount account = null;
+		boolean mustInsert = false;
+		
 		ResultSet rs;
 		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
-			rs = s.executeQuery("SELECT * FROM ");
-			if(rs.next()) { //This means the Minecraft account is known to us (should be exactly 1 entry)
-				int id = rs.getInt(1);
-				s.close();
-				rs = s.executeQuery("SELECT * FROM accounts WHERE account_id="+id); //Should exist
-				rs.next(); //Always true
+			rs = s.executeQuery("SELECT * FROM accounts WHERE player='" + uuid.toString() + "'");
+			if(rs.next()) { //Account exists (should be 1 at most). Load it
+				var id = rs.getInt("account_id");
+				var forumId = rs.getLong("forum_id");
+				var discordId = rs.getLong("discord_id");
+				account = new ArcheAccount(id, uuid, forumId, discordId);
+				account.lastSeen = rs.getDate("last_seen");
+				account.timePlayed = rs.getLong("time_played");
+				rs.close();
 				
+				//Tags added
+				rs = s.executeQuery("SELECT * FROM account_tags WHERE account_id_fk="+id);
+				AgnosticTags<Account> t = (AgnosticTags<Account>) account.getTags();
+				while(rs.next()) t.putInternal(rs.getString(AbstractTags.TAG_KEY), rs.getString(AbstractTags.TAG_VALUE));
+				rs.close();
 				
-				s.close();
-			} else { //This means the Minecraft account is NOT known. Associate this with Soul status
-
+				//IPs added
+				rs = s.executeQuery("SELECT ip_address FROM account_ips WHERE account_id_fk="+id);
+				while(rs.next()) account.ips.add(rs.getString("ip_address"));
+				rs.close();
+				
+			} else if(createIfAbsent){ //Account doesn't exist. We must create it?
+				account = new ArcheAccount(nextId(), uuid, 0, 0);
+				mustInsert = true;
 			}
-			
-			rs = s.executeQuery("SELECT account_id_fk FROM minecraft_toons");
-			
-		} catch(SQLException e) {
-			e.printStackTrace();
+		}catch(SQLException e) {
+			throw new RuntimeException(e);
 		}
+		
+		//Check if other threads beat us to loading the account
+		ArcheAccount other = accounts.putIfAbsent(uuid, account);
+		if(other != null) account = other;
+		else if(mustInsert) ArcheCore.getConsumerControls()
+			.insert("accounts")
+			.set("account_id", account.getId())
+			.set("player", account.getUniqueId())
+			.queue();
+			
+		return account;
+	}
+	
+	private void implement(ArcheAccount acc) {
+		ArcheAccount prev = accounts.put(acc.getUniqueId(), arg1)
 	}
 	
 	public void merge(Account from, Account to) {

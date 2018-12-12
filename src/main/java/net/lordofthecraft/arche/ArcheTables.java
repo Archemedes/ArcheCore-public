@@ -106,8 +106,10 @@ public final class ArcheTables {
 		statement.execute("CREATE TABLE IF NOT EXISTS accounts (" +
 				"account_id INT UNSIGNED," +
 				"player CHAR(36)," +
-				"forum_id INT UNSIGNED UNIQUE," +
-				"discord_id INT UNSIGNED UNIQUE," +
+				"forum_id INT UNSIGNED UNIQUE DEFAULT 0," +
+				"discord_id INT UNSIGNED UNIQUE DEFAULT 0," +
+				"time_played INT UNSIGNED DEFAULT 0," +
+				"last_seen DATETIME(3)," +
 				"PRIMARY KEY (account_id)" +
 				")" +
 				end);
@@ -138,8 +140,6 @@ public final class ArcheTables {
 		statement.execute("CREATE TABLE IF NOT EXISTS account_ips (" +
 				"account_id_fk INT UNSIGNED," +
 				"ip_address VARCHAR(64) NOT NULL," +
-				"time_played INT UNSIGNED DEFAULT 0," +
-				"last_seen DATETIME(3)," +
 				"PRIMARY KEY (account_id_fk,ip_address)," +
 				"FOREIGN KEY (account_id_fk) REFERENCES account (account_id) ON UPDATE CASCADE" +
 				")" +
