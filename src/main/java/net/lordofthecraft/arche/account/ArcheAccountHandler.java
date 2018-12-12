@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche.account;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -20,6 +21,7 @@ public class ArcheAccountHandler implements AccountHandler {
 	private static final ArcheAccountHandler instance = new ArcheAccountHandler();
 	
 	private final Map<UUID, ArcheAccount> accounts = new ConcurrentHashMap<>();
+	private int max_account_id = 0;
 	
 	public static ArcheAccountHandler getInstance() {
 		return instance;
@@ -29,29 +31,12 @@ public class ArcheAccountHandler implements AccountHandler {
 		//Do nothing
 	}
 	
-	private int nextId() { //TODO
-		return -1;
+	private int getNextAccountId() {
+		return max_account_id++;
 	}
 	
-	public void implement(Player player) {
-		UUID uuid = player.getUniqueId();
-		ArcheAccount account = pendingBlobs.remove(uuid);
-		if(account != null){ //Had something to be implemented (first login time only)
-			accounts.put(uuid, account);
-			accountsById.put(account.getId(), account);
-			
-			int aid = account.getId();
-			var tags_acc = (AgnosticTags<Account>) account.getTags();
-			if(accountTags.containsKey(aid)) tags_acc.merge(accountTags.get(aid));
-			accountTags.remove(aid);
-			
-			for(Toon t : account.getToons()) {
-				UUID tid = t.getUniqueId();
-				var tags_toon = (AgnosticTags<Toon>) t.getTags();
-				if(toonTags.containsKey(tid)) tags_toon.merge(toonTags.get(tid));
-				toonTags.remove(tid);
-			}
-		}
+	public void joinPlayer(Player player) {
+		player.get
 	}
 	
 	public ArcheAccount fetchAccount(UUID uuid, boolean createIfAbsent) {
@@ -85,7 +70,7 @@ public class ArcheAccountHandler implements AccountHandler {
 				rs.close();
 				
 			} else if(createIfAbsent){ //Account doesn't exist. We must create it?
-				account = new ArcheAccount(nextId(), uuid, 0, 0);
+				account = new ArcheAccount(getNextAccountId(), uuid, 0, 0);
 				mustInsert = true;
 			}
 		}catch(SQLException e) {
@@ -102,10 +87,6 @@ public class ArcheAccountHandler implements AccountHandler {
 			.queue();
 			
 		return account;
-	}
-	
-	private void implement(ArcheAccount acc) {
-		ArcheAccount prev = accounts.put(acc.getUniqueId(), arg1)
 	}
 	
 	public void merge(Account from, Account to) {
@@ -156,8 +137,25 @@ public class ArcheAccountHandler implements AccountHandler {
 
 
 	public void init() {
+		getMaxId();
 		transition();
-		initTags();
+	}
+	
+	private void getMaxId() {
+		try(Connection connection = ArcheCore.getSQLControls().getConnection();
+				PreparedStatement statement = connection.prepareStatement("SELECT MAX(persona_id) AS 'max_persona_id' FROM persona");
+				ResultSet rs = statement.executeQuery();)
+		{
+			if (rs.next()) {
+				max_account_id = rs.getInt(1);
+				max_account_id++;
+			} else {
+        CoreLog.warning("There are no accounts or there is an error talking to database.");
+        CoreLog.warning(" We'll be starting at 0. This will cause errors if there are any pre-existing accounts");
+			}
+		}catch(SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void transition() {
@@ -183,40 +181,6 @@ public class ArcheAccountHandler implements AccountHandler {
 					accountsById.put(acc.getId(), acc);
 				}
 				CoreLog.info("We've made new accounts for players, some of which might be alts. Handled in total: " + handled);
-			}
-		} catch(SQLException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	
-	private void initTags() {
-		ResultSet rs;
-		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
-			rs = s.executeQuery("SELECT * FROM account_tags");
-			while(rs.next()) {
-				int id = rs.getInt("account_id_fk");
-				AgnosticTags<Account> t = accountTags.get(id);
-				if(t == null) {
-					t = new AgnosticTags<>(null, "account_tags", "account_id_fk", id);
-					t.forOffline = true;
-					accountTags.put(id, t);
-				}
-				t.putInternal(rs.getString(AbstractTags.TAG_KEY), rs.getString(AbstractTags.TAG_VALUE));
-				
-			}
-			
-			s.close();
-			
-			rs = s.executeQuery("SELECT * FROM toon_tags");
-			while(rs.next()) {
-				UUID id = UUID.fromString(rs.getString("player_fk"));
-				AgnosticTags<Toon> t = toonTags.get(id);
-				if(t == null) {
-					t = new AgnosticTags<>(null, "account_tags", "account_id_fk", id);
-					toonTags.put(id, t);
-				}
-				t.putInternal(rs.getString(AbstractTags.TAG_KEY), rs.getString(AbstractTags.TAG_VALUE));
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();

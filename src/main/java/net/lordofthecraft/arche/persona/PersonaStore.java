@@ -216,8 +216,7 @@ public class PersonaStore {
                 max_persona_id = rs.getInt(1);
                 max_persona_id++;
             } else {
-                CoreLog.warning("We could not retrieve the LAST_INSERT_ID for persona,"
-                        + " either there are no personas or there is an error."
+                CoreLog.warning("There are no personas or there is an error talking to database."
                         + " We'll be starting at 0. This will throw errors if there are actually personas in the Database.");
             }
             rs.close();
