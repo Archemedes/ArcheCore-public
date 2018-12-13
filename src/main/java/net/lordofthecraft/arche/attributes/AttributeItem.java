@@ -3,6 +3,8 @@ package net.lordofthecraft.arche.attributes;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.EquipmentSlot;
@@ -100,9 +102,19 @@ public class AttributeItem {
 		long most = m.getUniqueId().getMostSignificantBits();
 		while(iter.hasNext()) {
 			Map<String, NbtBase<?>> att = iter.next();
-			Long wrappedLeast = (Long) att.get("UUIDLeast").getValue();
-			Long wrappedMost = (Long) att.get("UUIDMost").getValue();
-			if(wrappedLeast.longValue() == least && wrappedMost.longValue() == most) {
+			if (att.get("UUIDLeast").getValue() instanceof Integer || att.get("UUIDMost").getValue() instanceof Integer) {
+				iter.remove();
+				CoreLog.warning("UUID for attribute modifier marked as Integer instead of Long");
+				CoreLog.warning("AttributeName: " + att.get("AttributeName").getValue());
+				CoreLog.warning("Name: " + att.get("Name").getValue());
+				return;
+			}
+
+			// Despite the error in IntelliJ. This actually compiles fine.
+			// Eclipse - 1  IntelliJ - 0
+			long wrappedLeast = (long) att.get("UUIDLeast").getValue();
+			long wrappedMost = (long) att.get("UUIDMost").getValue();
+			if(wrappedLeast == least && wrappedMost == most) {
 				iter.remove();
 				return;
 			}
