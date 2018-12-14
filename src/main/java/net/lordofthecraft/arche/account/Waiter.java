@@ -10,20 +10,29 @@ import net.lordofthecraft.arche.ArcheCore;
 public class Waiter<T> {
 	private Consumer<T> whatToDo;
 	
+	private T result = null;
+	
 	private final UUID uuid;
 	private final int id;
 	private	final boolean sync;
 	
+	public Waiter(T fulfilled) { //Constructor when the Persona or Account is already loaded
+		result = fulfilled;
+		uuid = null;
+		id = -1;
+		sync = true;
+	}
+	
 	Waiter(UUID uuid) { this(uuid, true); }
 	Waiter(int id) { this(id, true); }
 	
-	Waiter(UUID uuid, boolean sync){
+	Waiter(UUID uuid, boolean sync){ //For Accounts
 		this.uuid = uuid;
 		this.id = -1;
 		this.sync = sync;
 	}
 	
-	Waiter(int id, boolean sync){
+	Waiter(int id, boolean sync){ //For Personas
 		this.uuid = null;
 		this.id = id;
 		this.sync = sync;
@@ -31,6 +40,8 @@ public class Waiter<T> {
 	
 	public void then(Consumer<T> what) {
 		whatToDo = what;
+		if(result != null) fulfil(result);
+		else Bukkit.getScheduler().runTaskAsynchronously(ArcheCore.getPlugin(), ()->{}); //TODO
 	}
 	
 	boolean isUUID(UUID uuid) {

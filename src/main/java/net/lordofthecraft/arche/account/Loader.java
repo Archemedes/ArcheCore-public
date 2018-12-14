@@ -13,11 +13,10 @@ import net.lordofthecraft.arche.interfaces.Persona;
 public class Loader {
 	private final Set<UUID> confirmed = new HashSet<>();
 	
-	private final List<Future<Persona>> personas = new ArrayList<>();
-	private final List<Future<Account>> accounts = new ArrayList<>();
-	
+	private final List<Waiter<Account>> accounts = new ArrayList<>();
+	private final List<Waiter<Persona>> personas = new ArrayList<>();
 
-	public synchronized void check() {
+	public synchronized void check(UUID u) {
 		
 	}
 	
