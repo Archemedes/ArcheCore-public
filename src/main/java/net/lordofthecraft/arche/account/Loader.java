@@ -10,6 +10,8 @@ import lombok.var;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.persona.ArchePersona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 
 public class Loader {
 	private final Set<UUID> confirmed = new HashSet<>();
@@ -40,7 +42,19 @@ public class Loader {
 				.findAny().ifPresent(p->prs.fulfil(p));
 		}
 		
+		//TODO add to stores
 		blob.getAccount().getUUIDs().forEach(u -> confirmed.add(u));
+	}
+	
+	AccountBlob loadFromDisk(UUID u, boolean createIfAbsent) {
+		
+		ArcheAccount acc = ArcheAccountHandler.getInstance().fetchAccount(u, createIfAbsent);
+		List<ArchePersona> prs = new ArrayList<>();
+		for(UUID u2 : acc.getUUIDs()) {
+			ArchePersonaHandler.getInstance().getPersonaStore().loadPersonas(u2);
+		}
+		
+		return new AccountBlob(acc, prs);
 	}
 	
 }

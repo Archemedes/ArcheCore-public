@@ -33,8 +33,12 @@ public class Waiter<T> {
 	
 	public void then(Consumer<T> what) {
 		whatToDo = what;
-		if(result != null) fulfil(result);
-		else Bukkit.getScheduler().runTaskAsynchronously(ArcheCore.getPlugin(), ()->{}); //TODO
+		if(result != null) {
+			if(Bukkit.isPrimaryThread()) whatToDo.accept(result);
+			else fulfil(result);
+		} else {
+			Bukkit.getScheduler().runTaskAsynchronously(ArcheCore.getPlugin(), ()->{}); //TODO
+		}
 	}
 	
 	boolean isUUID(UUID uuid) {

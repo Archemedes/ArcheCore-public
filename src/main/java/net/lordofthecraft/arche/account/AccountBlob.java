@@ -2,10 +2,11 @@ package net.lordofthecraft.arche.account;
 
 import java.util.List;
 
-import lombok.Getter;
+import lombok.Value;
 import net.lordofthecraft.arche.persona.ArchePersona;
 
+@Value
 public class AccountBlob {
-		@Getter private ArcheAccount account;
-		@Getter private List<ArchePersona> personas;
+		private ArcheAccount account;
+		private List<ArchePersona> personas;
 }

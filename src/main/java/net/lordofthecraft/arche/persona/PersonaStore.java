@@ -141,7 +141,7 @@ public class PersonaStore {
         else return prs;
     }
 
-    public void loadPersonas(String playerName, UUID uuid) { //Run this async
+    public void loadPersonas(UUID uuid) { //Run this async
         //We don't unload personas for players once loaded since we have memory for miles
         //So instead once a player logged in, they remain loaded for the session
         //We obviously won't have to bother reloading their personas another time then
@@ -149,7 +149,7 @@ public class PersonaStore {
         loginThrottle.acquireUninterruptibly();
         
         ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
-        if (timer != null) timer.startTiming("Loading Personas of " + playerName);
+        if (timer != null) timer.startTiming("Loading Personas of " + uuid);
 
         ArchePersona[] prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
         boolean hasCurrent = false;
@@ -174,7 +174,7 @@ public class PersonaStore {
                     if (!hasCurrent) {
                         hasCurrent = true;
                     } else {
-                        CoreLog.warning("Multiple Current Personas for " + playerName);
+                        CoreLog.warning("Multiple Current Personas for " + uuid);
                         blob.current = false;
                     }
                 }
@@ -194,7 +194,7 @@ public class PersonaStore {
         }
         
         loginThrottle.release();
-        if (timer != null) timer.stopTiming("Loading Personas of " + playerName);
+        if (timer != null) timer.stopTiming("Loading Personas of " + uuid);
     }
     
     public boolean isLoadedThisSession(Player p) {
