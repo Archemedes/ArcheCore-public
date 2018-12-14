@@ -36,7 +36,7 @@ public class ArcheAccountHandler implements AccountHandler {
 	}
 	
 	public void joinPlayer(Player player) {
-		player.get
+		
 	}
 	
 	public ArcheAccount fetchAccount(UUID uuid, boolean createIfAbsent) {
@@ -48,14 +48,23 @@ public class ArcheAccountHandler implements AccountHandler {
 		
 		ResultSet rs;
 		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
-			rs = s.executeQuery("SELECT * FROM accounts WHERE player='" + uuid.toString() + "'");
+			rs = s.executeQuery("SELECT * FROM playeraccounts WHERE player='" + uuid.toString() + "' LIMIT 1");
 			if(rs.next()) { //Account exists (should be 1 at most). Load it
-				var id = rs.getInt("account_id");
+				var id = rs.getInt("account_id_fk");
+				rs.close();
+				
+				//Make the account itself
+				rs = s.executeQuery("SELECT * FROM accounts WHERE account_id="+id);
 				var forumId = rs.getLong("forum_id");
 				var discordId = rs.getLong("discord_id");
-				account = new ArcheAccount(id, uuid, forumId, discordId);
+				account = new ArcheAccount(id, forumId, discordId);
 				account.lastSeen = rs.getDate("last_seen");
 				account.timePlayed = rs.getLong("time_played");
+				rs.close();
+				
+				//UUIDs added
+				rs = s.executeQuery("SELECT player FROM playeraccounts WHERE account_id_fk="+id);
+				while(rs.next()) account.alts.add(UUID.fromString(rs.getString("player")));
 				rs.close();
 				
 				//Tags added
@@ -70,7 +79,8 @@ public class ArcheAccountHandler implements AccountHandler {
 				rs.close();
 				
 			} else if(createIfAbsent){ //Account doesn't exist. We must create it?
-				account = new ArcheAccount(getNextAccountId(), uuid, 0, 0);
+				account = new ArcheAccount(getNextAccountId(), 0, 0);
+				account.alts.add(uuid);
 				mustInsert = true;
 			}
 		}catch(SQLException e) {
@@ -80,16 +90,16 @@ public class ArcheAccountHandler implements AccountHandler {
 		//Check if other threads beat us to loading the account
 		ArcheAccount other = accounts.putIfAbsent(uuid, account);
 		if(other != null) account = other;
-		else if(mustInsert) ArcheCore.getConsumerControls()
-			.insert("accounts")
-			.set("account_id", account.getId())
-			.set("player", account.getUniqueId())
-			.queue();
-			
+		else if(mustInsert) {
+			var c = ArcheCore.getConsumerControls();
+			int id = account.getId();
+			c.insert("accounts").set("account_id", id).queue();
+			c.insert("playeraccounts").set("player", uuid).set("account_id_fk", id).queue();
+		}
 		return account;
 	}
 	
-	public void merge(Account from, Account to) {
+/*	public void merge(Account from, Account to) {
 		ArcheAccount to2 = (ArcheAccount) to;
 		
 		//Must merge all names, tags, toons to new account_id_fk
@@ -121,7 +131,7 @@ public class ArcheAccountHandler implements AccountHandler {
 		.where("account_id", from.getId())
 		.queue();
 			
-	}
+	}*/
 	
 /*	public Tags<Account> getAccountTags(int id){
 		accountsById.containsKey(id) return accountsById.get(key)
@@ -138,7 +148,7 @@ public class ArcheAccountHandler implements AccountHandler {
 
 	public void init() {
 		getMaxId();
-		transition();
+		//transition();
 	}
 	
 	private void getMaxId() {
@@ -158,7 +168,7 @@ public class ArcheAccountHandler implements AccountHandler {
 		}
 	}
 	
-	private void transition() {
+/*	private void transition() {
 	//Check if we're functioning from previous setup:
 		ResultSet rs;
 		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
@@ -185,5 +195,5 @@ public class ArcheAccountHandler implements AccountHandler {
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
-	}
+	}*/
 }

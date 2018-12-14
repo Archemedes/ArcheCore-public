@@ -1,13 +1,12 @@
 package net.lordofthecraft.arche.interfaces;
 
+import java.util.Set;
 import java.util.UUID;
 
 /**
  * a simple account which can have multiple Minecraft characters
  */
 public interface Account {
-
-	UUID getUniqueId();
 	
 	Tags<Account> getTags();
 	
@@ -16,4 +15,8 @@ public interface Account {
 	long getForumId();
 	
 	long getDiscordId();
+	
+	Set<UUID> getUUIDs();
+	
+	Set<String> getIPs();
 }
