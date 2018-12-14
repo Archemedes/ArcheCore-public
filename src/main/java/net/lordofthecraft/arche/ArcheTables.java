@@ -3,12 +3,16 @@ package net.lordofthecraft.arche;
 import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
+import net.lordofthecraft.arche.util.extension.ArcheExtension;
+import net.lordofthecraft.arche.util.extension.UtilExtension;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import lombok.experimental.ExtensionMethod;
 
 public final class ArcheTables {
 
@@ -116,12 +120,15 @@ public final class ArcheTables {
 	}
 	
 	protected static void createAccountPlayerTable(Statement statement, String end) throws SQLException {
-		statement.execute("CREATE TABLE IF NOT EXISTS players (" +
+		statement.execute("CREATE TABLE IF NOT EXISTS playeraccounts (" +
 				"player CHAR(36)," +
 				"account_id_fk INT UNSIGNED," +
 				"PRIMARY KEY (player)" +
 				")" +
 				end);
+		
+		statement.execute("CREATE INDEX IF NOT EXISTS idx_player_accountid ON playeraccounts (account_id_fk)" + end);
+		
 	}
 	
 	protected static void createAccountTagsTable(Statement statement, String end) throws SQLException {
