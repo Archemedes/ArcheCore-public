@@ -35,6 +35,7 @@ public final class ArcheTables {
 			l.fine("Creating player account tables...");
 			createAccountTable(statement, end);
 			createAccountTagsTable(statement, end);
+			createAccountPlayerTable(statement, end);
 			l.fine("Creating name and ip logging tables...");
 			createPlayerTable(statement, end);
 			createIpTable(statement, end);
@@ -105,12 +106,20 @@ public final class ArcheTables {
 	protected static void createAccountTable(Statement statement, String end) throws SQLException {
 		statement.execute("CREATE TABLE IF NOT EXISTS accounts (" +
 				"account_id INT UNSIGNED," +
-				"player CHAR(36)," +
 				"forum_id INT UNSIGNED UNIQUE DEFAULT 0," +
 				"discord_id INT UNSIGNED UNIQUE DEFAULT 0," +
 				"time_played INT UNSIGNED DEFAULT 0," +
 				"last_seen DATETIME(3)," +
 				"PRIMARY KEY (account_id)" +
+				")" +
+				end);
+	}
+	
+	protected static void createAccountPlayerTable(Statement statement, String end) throws SQLException {
+		statement.execute("CREATE TABLE IF NOT EXISTS players (" +
+				"player CHAR(36)," +
+				"account_id_fk INT UNSIGNED," +
+				"PRIMARY KEY (player)" +
 				")" +
 				end);
 	}
