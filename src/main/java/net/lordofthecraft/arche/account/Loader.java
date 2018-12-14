@@ -46,7 +46,7 @@ public class Loader {
 			if(confirmed.contains(anyUUID)) return; //Our work has been done already
 			 
 			ArcheAccountHandler.getInstance().implement(blob.getAccount());
-			//TODO implement personas too
+			ArchePersonaHandler.getInstance().getPersonaStore().implement(blob.getPersonas());
 			blob.getAccount().getUUIDs().forEach(u -> confirmed.add(u));
 			
 			//Extract the Waiter objects we can solve
