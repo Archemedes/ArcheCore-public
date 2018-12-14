@@ -30,7 +30,7 @@ public class Loader {
 		return null;
 	}
 	
-	public synchronized Waiter<Persona> check(OfflinePersona pers){ //
+	public synchronized Waiter<Persona> check(OfflinePersona pers){
 		
 		return null;
 	}
@@ -80,8 +80,8 @@ public class Loader {
 	}
 	
 	AccountBlob loadFromDisk(UUID u, boolean createIfAbsent) {
-		
 		ArcheAccount acc = ArcheAccountHandler.getInstance().fetchAccount(u, createIfAbsent);
+		//TODO what if no account?
 		List<ArchePersona> prs = new ArrayList<>();
 		for(UUID u2 : acc.getUUIDs()) {
 			var personas = ArchePersonaHandler.getInstance().getPersonaStore().loadPersonas(u2);
