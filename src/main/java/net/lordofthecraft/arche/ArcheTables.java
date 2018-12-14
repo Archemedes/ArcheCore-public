@@ -1,18 +1,14 @@
 package net.lordofthecraft.arche;
 
-import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
-import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.SQL.WhySQLHandler;
-import net.lordofthecraft.arche.util.extension.ArcheExtension;
-import net.lordofthecraft.arche.util.extension.UtilExtension;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import lombok.experimental.ExtensionMethod;
+import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
+import net.lordofthecraft.arche.SQL.SQLHandler;
+import net.lordofthecraft.arche.SQL.WhySQLHandler;
 
 public final class ArcheTables {
 
