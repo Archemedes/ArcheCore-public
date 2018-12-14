@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.bukkit.entity.Player;
-
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
@@ -35,8 +33,8 @@ public class ArcheAccountHandler implements AccountHandler {
 		return max_account_id++;
 	}
 	
-	public void joinPlayer(Player player) {
-		
+	public void implement(ArcheAccount account) {
+		account.getUUIDs().stream().forEach(u->accounts.put(u, account));
 	}
 	
 	public ArcheAccount fetchAccount(UUID uuid, boolean createIfAbsent) {

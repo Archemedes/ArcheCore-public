@@ -1,10 +1,15 @@
 package net.lordofthecraft.arche.account;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import org.bukkit.Bukkit;
 
 import lombok.var;
 import net.lordofthecraft.arche.interfaces.Account;
@@ -24,26 +29,50 @@ public class Loader {
 		return null;
 	}
 	
-	public synchronized Waiter<Persona> check(OfflinePersona pers){
+	public synchronized Waiter<Persona> check(OfflinePersona pers){ //
 		
 		return null;
 	}
 	
-	public synchronized void deliver(AccountBlob blob) {
-		for(var acc : accounts) {
-			blob.getAccount().getUUIDs().stream()
+	public void deliver(AccountBlob blob) {
+		if(!Bukkit.isPrimaryThread()) throw new ConcurrentModificationException("Please deliver personas and accounts from main");
+		
+		List<Waiter<Account>> ats = new ArrayList<>();
+		Map<Waiter<Persona>, ArchePersona> pts = new HashMap<>();
+		
+		synchronized(this) {
+			ArcheAccountHandler.getInstance().implement(blob.getAccount());
+			//TODO implement personas too
+			blob.getAccount().getUUIDs().forEach(u -> confirmed.add(u));
+			
+			//Extract the Waiter objects we can solve
+			//These lists must be accessed sync only
+			var it1 = accounts.iterator();
+			while(it1.hasNext()) {
+				var acc = it1.next();
+				blob.getAccount().getUUIDs().stream()
 				.filter(acc::isUUID)
-				.findAny().ifPresent($->acc.fulfil(blob.getAccount()));
-		}
-		
-		for(var prs : personas) {
-			blob.getPersonas().stream()
+				.findAny().ifPresent(p->{
+					it1.remove();
+					ats.add(acc);
+				});
+			}
+			
+			var it2 = personas.iterator();
+			while(it2.hasNext()) {
+				var prs = it2.next();
+				blob.getPersonas().stream()
 				.filter(p->prs.isId(p.getPersonaId()))
-				.findAny().ifPresent(p->prs.fulfil(p));
+				.findAny().ifPresent(p->{
+					it2.remove();
+					pts.put(prs,p);
+				});
+			}
 		}
 		
-		//TODO add to stores
-		blob.getAccount().getUUIDs().forEach(u -> confirmed.add(u));
+		//Fulfil the waiter objects
+		ats.forEach(acc->acc.fulfil(blob.getAccount()));
+		pts.forEach((prs,p)->prs.fulfil(p));
 	}
 	
 	AccountBlob loadFromDisk(UUID u, boolean createIfAbsent) {

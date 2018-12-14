@@ -50,6 +50,6 @@ public class Waiter<T> {
 	}
 	
 	void fulfil(T packet) {
-		if(whatToDo != null) Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->whatToDo.accept(packet));
+		if(whatToDo != null) whatToDo.accept(packet);
 	}
 }
