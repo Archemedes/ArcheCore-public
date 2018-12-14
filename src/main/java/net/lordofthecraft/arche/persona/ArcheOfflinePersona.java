@@ -225,6 +225,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 		return sb.toString();
 	}
 
+	//TODO this needs to go
 	@Override
 	public void setApparentRace(String race){
 		raceString = race;
