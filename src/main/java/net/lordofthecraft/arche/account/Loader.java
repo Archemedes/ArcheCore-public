@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import org.bukkit.Bukkit;
 
 import lombok.var;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
@@ -43,7 +44,10 @@ public class Loader {
 		
 		synchronized(this) {
 			UUID anyUUID = blob.getAccount().getUUIDs().stream().findAny().get();
-			if(confirmed.contains(anyUUID)) return; //Our work has been done already
+			if(confirmed.contains(anyUUID)) {
+				CoreLog.warning("Interleaved loading detected when trying to deliver Account for " + anyUUID);
+				return; //Our work has been done already
+			}
 			 
 			ArcheAccountHandler.getInstance().implement(blob.getAccount());
 			ArchePersonaHandler.getInstance().getPersonaStore().implement(blob.getPersonas());
