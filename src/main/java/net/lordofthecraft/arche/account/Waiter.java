@@ -14,28 +14,21 @@ public class Waiter<T> {
 	
 	private final UUID uuid;
 	private final int id;
-	private	final boolean sync;
 	
 	public Waiter(T fulfilled) { //Constructor when the Persona or Account is already loaded
 		result = fulfilled;
 		uuid = null;
 		id = -1;
-		sync = true;
 	}
 	
-	Waiter(UUID uuid) { this(uuid, true); }
-	Waiter(int id) { this(id, true); }
-	
-	Waiter(UUID uuid, boolean sync){ //For Accounts
+	Waiter(UUID uuid){ //For Accounts
 		this.uuid = uuid;
 		this.id = -1;
-		this.sync = sync;
 	}
 	
-	Waiter(int id, boolean sync){ //For Personas
+	Waiter(int id){ //For Personas
 		this.uuid = null;
 		this.id = id;
-		this.sync = sync;
 	}
 	
 	public void then(Consumer<T> what) {
@@ -53,9 +46,6 @@ public class Waiter<T> {
 	}
 	
 	void fulfil(T packet) {
-		if(whatToDo == null) throw new IllegalStateException("The callback was never set. We have nothing to do!");
-		
-		if(sync) Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->whatToDo.accept(packet));
-		else whatToDo.accept(packet);
+		if(whatToDo != null) Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->whatToDo.accept(packet));
 	}
 }
