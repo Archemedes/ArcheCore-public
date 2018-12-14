@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 
@@ -41,6 +42,9 @@ public class Loader {
 		Map<Waiter<Persona>, ArchePersona> pts = new HashMap<>();
 		
 		synchronized(this) {
+			UUID anyUUID = blob.getAccount().getUUIDs().stream().findAny().get();
+			if(confirmed.contains(anyUUID)) return; //Our work has been done already
+			 
 			ArcheAccountHandler.getInstance().implement(blob.getAccount());
 			//TODO implement personas too
 			blob.getAccount().getUUIDs().forEach(u -> confirmed.add(u));
@@ -80,7 +84,8 @@ public class Loader {
 		ArcheAccount acc = ArcheAccountHandler.getInstance().fetchAccount(u, createIfAbsent);
 		List<ArchePersona> prs = new ArrayList<>();
 		for(UUID u2 : acc.getUUIDs()) {
-			ArchePersonaHandler.getInstance().getPersonaStore().loadPersonas(u2);
+			var personas = ArchePersonaHandler.getInstance().getPersonaStore().loadPersonas(u2);
+			Stream.of(personas).forEach(prs::add);
 		}
 		
 		return new AccountBlob(acc, prs);

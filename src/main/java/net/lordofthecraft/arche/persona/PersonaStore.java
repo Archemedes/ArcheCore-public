@@ -1,7 +1,38 @@
 package net.lordofthecraft.arche.persona;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.ConcurrentModificationException;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.CoreLog;
@@ -24,20 +55,6 @@ import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.SQLUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-
-import java.sql.*;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 public class PersonaStore {
     final String personaSelect;
@@ -56,9 +73,6 @@ public class PersonaStore {
     		MultimapBuilder.hashKeys().arrayListValues(ArcheCore.getControls().personaSlots()).build();
     private final Map<UUID, ArchePersona[]> onlinePersonas = new HashMap<>();
 
-    private final Set<UUID> loadedThisSession = ConcurrentHashMap.newKeySet();
-    private final Map<UUID, ArchePersona[]> pendingBlobs = new ConcurrentHashMap<>();
-    
     public Collection<ArcheOfflinePersona> getPersonas() {
         return Collections.unmodifiableCollection(allPersonas.values());
     }
@@ -141,11 +155,10 @@ public class PersonaStore {
         else return prs;
     }
 
-    public void loadPersonas(UUID uuid) { //Run this async
+    public ArchePersona[] loadPersonas(UUID uuid) { //Run this async
         //We don't unload personas for players once loaded since we have memory for miles
         //So instead once a player logged in, they remain loaded for the session
         //We obviously won't have to bother reloading their personas another time then
-        if (loadedThisSession.contains(uuid)) return;
         loginThrottle.acquireUninterruptibly();
         
         ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
@@ -154,16 +167,13 @@ public class PersonaStore {
         ArchePersona[] prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
         boolean hasCurrent = false;
 
-        ResultSet res = null;
-        Connection connection = null;
-        PreparedStatement statement = null;
-
-        try {
-            connection = ArcheCore.getSQLControls().getConnection();
+        try(Connection connection = ArcheCore.getSQLControls().getConnection();
+        		PreparedStatement statement = connection.prepareStatement(personaSelect);
+        		ResultSet res = statement.executeQuery(); ) {
             CoreLog.debug("personaSelect: " + personaSelect);
-            statement = connection.prepareStatement(personaSelect);
+            
             statement.setString(1, uuid.toString());
-            res = statement.executeQuery();
+            
 
             while (res.next()) {
                 ArcheOfflinePersona op = buildOfflinePersona(res, uuid);
@@ -184,21 +194,11 @@ public class PersonaStore {
             if (e1.getMessage().contains("The database file is locked")) {
             	ArcheCore.getPlugin().setDevMode(true);
             }
-        } finally {
-            SQLUtil.close(res);
-            SQLUtil.close(statement);
-            SQLUtil.close(connection);
-
-            pendingBlobs.put(uuid, prs);
-            loadedThisSession.add(uuid);
         }
         
-        loginThrottle.release();
         if (timer != null) timer.stopTiming("Loading Personas of " + uuid);
-    }
-    
-    public boolean isLoadedThisSession(Player p) {
-    	return loadedThisSession.contains(p.getUniqueId());
+        loginThrottle.release();
+        return prs;
     }
 
     public int getNextPersonaId() {
@@ -444,48 +444,13 @@ public class PersonaStore {
         }
     }
 
-    public ArchePersona[] implementPersonas(Player player) {
-        UUID uuid = player.getUniqueId();
-        ArchePersona[] prs = pendingBlobs.remove(uuid);
-        
-        if (prs == null) {
-        	CoreLog.debug("Player " + player.getName() + " logged in without pending Personas." );
-        	prs = onlinePersonas.get(uuid);
-        	if(prs != null) {
-        		CoreLog.debug("Player had online personas files. Likely he rejoined from earlier this session" );
-        	} else {
-        		CoreLog.severe("Player " + player.getName() + " DOES NOT have a Personas file anywhere! Dependent plugin might be to blame!");
-        	}
-        } else {
-        	onlinePersonas.put(uuid, prs);
-        	
-            //Pre-populate based on offlinePersonas that are already loaded
-            //Pre-loaded personas may come from plugins loading personas
-            //Or from personas being newly created while player is offline
-            ArchePersona[] preloaded = new ArchePersona[ArcheCore.getControls().personaSlots()];
-            offlinePersonas.get(uuid).stream()
-            	.filter(OfflinePersona::isLoaded).map(ArcheOfflinePersona::getPersona)
-            	.forEach(x->preloaded[x.getSlot()] = x);
-        	
-            for (int i = 0; i < prs.length; i++) {
-            	if(preloaded[i] != null) {
-            		prs[i] = preloaded[i];
-            		continue;
-            	}
-                if (prs[i] == null) continue;
-                //Method returns input Persona IF input Persona has been used by store as the Persona on record
-                //In this case prs[i] is replaced by itself, no actual change
-                //Returns other persona if allPersonas already had an online Persona on file
-                //In this case the prs[] array takes this on-file one instead of the one that was loaded from SQL
-                prs[i] = addOnlinePersona(prs[i]);
-            }
-        }
-        return prs;
+    public void implement(List<ArchePersona> personas) {
+    	personas.forEach(this::addOnlinePersona);
     }
 
-    public ArchePersona addOnlinePersona(ArchePersona persona) {
+    private void addOnlinePersona(final ArchePersona persona) {
         ArcheOfflinePersona old = allPersonas.get(persona.getPersonaId());
-        if (old.isLoaded()) return old.getPersona(); //Persona was force-loaded by ways that isn't player joining
+        if (old.isLoaded()) throw new ConcurrentModificationException("Persona was already added as online!");
         persona.tags.merge(old.tags);
         allPersonas.put(persona.getPersonaId(), persona);
         
@@ -496,7 +461,9 @@ public class PersonaStore {
         		.findAny().get()
         		);
         offlinePersonas.put(uuid, persona);
-        return persona;
+        
+        ArchePersona[] onlines = onlinePersonas.computeIfAbsent(uuid, $->new ArchePersona[ ArcheCore.getControls().personaSlots() ]);
+        onlines[persona.getSlot()] = persona;
     }
 
     public ArcheOfflinePersona registerPersona(ArchePersona persona) {
