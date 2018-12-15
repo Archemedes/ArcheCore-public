@@ -1,19 +1,18 @@
 package net.lordofthecraft.arche;
 
-import com.google.common.collect.Maps;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.commons.lang.Validate;
 import org.bukkit.plugin.Plugin;
 
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.logging.Logger;
+import com.google.common.collect.Maps;
 
 public class ArcheTimer {
-	private final Logger logger;
 	private final Map<String, Long> timings = Maps.newConcurrentMap();
 	
 	ArcheTimer(Plugin plugin){
-		logger = plugin.getLogger();
+
 	}
 	
 	public void startTiming(String why){
@@ -39,5 +38,5 @@ public class ArcheTimer {
 			CoreLog.debug("timed action '" + t.getKey() + "' taking " + (time - t.getValue())/1000 + "μs");
 		
 		timings.clear();
-	}	
+	}
 }
