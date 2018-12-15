@@ -29,7 +29,7 @@ public interface IArcheCore {
 	 * Accounts are a single human being who might have multiple Minecraft accounts
 	 * @return The AccountHandler singleton
 	 */
-	ArcheAccountHandler getAccountHandler();
+	AccountHandler getAccountHandler();
 	
 	/**
 	 * Fatigue of Personas ties into skills and is done by the FatigueHandler
