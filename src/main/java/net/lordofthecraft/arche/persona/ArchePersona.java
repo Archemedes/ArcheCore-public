@@ -295,11 +295,17 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 				RaceBonusHandler.apply(this);
 				p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 			}
-    	}
-    	consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE_REAL, race.name()));
-    	consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE, ""));
-    	this.raceString = null;
-    }
+		}
+		consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE_REAL, race.name()));
+		consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE, ""));
+		this.raceString = null;
+	}
+
+	@Override
+	public void setApparentRace(String race){
+		raceString = race;
+		consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE, race));
+	}
 	
 	@Override
 	public void clearDescription(){

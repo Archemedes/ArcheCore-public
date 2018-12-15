@@ -21,9 +21,7 @@ import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.PersonaTags;
-import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
-import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.WeakBlock;
 
@@ -209,13 +207,5 @@ public class ArcheOfflinePersona implements OfflinePersona {
 			}
 		}
 		return sb.toString();
-	}
-
-	//TODO this needs to go
-	@Override
-	public void setApparentRace(String race){
-		raceString = race;
-
-		consumer.queueRow(new UpdatePersonaRow(this, PersonaField.RACE, race));
 	}
 }

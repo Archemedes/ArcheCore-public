@@ -9,6 +9,8 @@ import net.lordofthecraft.arche.account.Waiter;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 
+//Strictly no setters to be added to this interface.
+//It fucks up persona loading. thanks. -Sporadic
 public interface OfflinePersona {
 
     /**
@@ -161,12 +163,4 @@ public interface OfflinePersona {
      * @return The formatted String with {@link org.bukkit.Color}s, or an empty string if the persona is {@link net.lordofthecraft.arche.enums.Race#UNSET} with nothing else
      */
     String getRaceString(boolean mod);
-    
-	/**
-	 * Override the Persona's visible Race with a Custom String. This does not remove
-	 * the actual race of the Persona, but displays only the newly set 'apparent' race.
-	 * @param race The string to be displayed as Race.
-	 */
-	void setApparentRace(String race);
-    
 }
