@@ -7,8 +7,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import lombok.var;
@@ -87,6 +90,20 @@ public class ArcheAccountHandler implements AccountHandler {
 		ArcheAccount acc = getAccount(p);
 		acc.registerIp(p.getAddress().getAddress().getHostAddress());
 		acc.updateLastSeen();
+		
+		Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->checkDoubleLogin(acc));
+	}
+	
+	private void checkDoubleLogin(Account acc) {
+		var players = acc.getUUIDs().stream()
+			.map(Bukkit::getPlayer)
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList());
+		
+		if(players.size() > 1) {
+			boolean admin = players.stream().anyMatch(p->p.hasPermission("archecore.multilogin"));
+			if(!admin) players.forEach(p->p.kickPlayer("Please use only 1 Minecraft account simultaneously"));
+		}
 	}
 	
 	public void leavePlayer(Player p) {

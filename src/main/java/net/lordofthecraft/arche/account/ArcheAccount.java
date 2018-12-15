@@ -52,7 +52,7 @@ public class ArcheAccount implements Account {
 	public Player getPlayer(){
 		Player play;
 		if(playerObject == null || (play = playerObject.get()) == null || play.isDead()){
-			var op = alts.stream().map(Bukkit::getPlayer).findAny();
+			var op = alts.stream().map(Bukkit::getPlayer).filter(Objects::nonNull).findAny();
 			if(op.isPresent()) {
 				play = op.get();
 				playerObject = new WeakReference<>(play);
