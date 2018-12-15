@@ -80,15 +80,15 @@ public class ArchePersonaHandler implements PersonaHandler {
 		return instance;
 	}
 
-    public PersonaStore getPersonaStore() {
-        return store;
-    }
+	public PersonaStore getPersonaStore() {
+		return store;
+	}
 
-    public void onEnable() {
-        store.initMaxPersonaId();
-        store.preload();
-        this.initRacespawns();
-    }
+	public void onEnable() {
+		store.initMaxPersonaId();
+		store.preload();
+		this.initRacespawns();
+	}
 
 	@Override
 	public void setModifyDisplayNames(boolean will){
