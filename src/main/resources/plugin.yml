@@ -101,6 +101,7 @@ permissions:
       archecore.persona.switchprofession: true
       archecore.exempt: true
       archecore.personas.15: true
+      archecore.multilogin: true
   archecore.exempt:
     description: Exempts a player from being required to have a persona. Dangerous, high-level permission - use with caution
   archecore.mod:
@@ -115,6 +116,8 @@ permissions:
       archecore.persona.setrace: true
       archecore.persona.realrace: true
       archecore.mayuse: true
+  archecore.multilogin:
+    description: Can use multiple Minecraft toons linked to the same account
   archecore.command.skin.nocooldown:
     description: Removes the cooldown on being able to switch skins
   archecore.command.skin.4:
