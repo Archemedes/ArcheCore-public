@@ -95,8 +95,6 @@ public abstract class AsyncRunner {
  			sync.accept(fetched);
  		}
 	}
-
-	
 	
 	private static class SupplierRunner<T> extends ConsumerRunner<T>{
 		private SupplierRunner(Plugin plugin, Consumer<T> sync, Supplier<T> async) {

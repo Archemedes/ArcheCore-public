@@ -105,15 +105,8 @@ public class ArcheCommandExecutor implements TabExecutor {
 	
 	private void getPersonaAndExecute( CommandSender sender, ArcheCommand ac, RanCommand c, List<String> args, OfflinePersona o) {
 		sender.sendMessage(ChatColor.LIGHT_PURPLE + "Persona not loaded. Will try to load it now. Please wait...");
-		AsyncRunner.doAsync(ArcheCore.getPlugin(), ()->o.loadPersona())
-		.andThen(persona->{
-			ArchePersona otherPersona = ArchePersonaHandler.getInstance().getPersonaStore()
-					.addOnlinePersona((ArchePersona)persona);
-      if(otherPersona != persona) {
-      	CoreLog.warning("Interleaved Persona loading: Persona " + MessageUtil.identifyPersona(persona)
-      	+ " has come online while " + sender.getName() +  " also tried to load it.");
-      }
-      c.rectifySenders(otherPersona);
+		o.load().then(persona->{
+      c.rectifySenders(persona);
       executeCommand(ac, c);
 		});
 	}

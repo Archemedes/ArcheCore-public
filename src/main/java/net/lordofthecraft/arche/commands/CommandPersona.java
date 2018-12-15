@@ -1,29 +1,12 @@
 package net.lordofthecraft.arche.commands;
 
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.CoreLog;
-import net.lordofthecraft.arche.attributes.AttributeRegistry;
-import net.lordofthecraft.arche.enums.PersonaType;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.interfaces.OfflinePersona;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.persona.ArcheOfflinePersona;
-import net.lordofthecraft.arche.persona.ArchePersona;
-import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.persona.TagAttachment;
-import net.lordofthecraft.arche.util.AsyncRunner;
-import net.lordofthecraft.arche.util.CommandUtil;
-import net.lordofthecraft.arche.util.MessageUtil;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
@@ -33,6 +16,23 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+
+import com.google.common.collect.Lists;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.attributes.AttributeRegistry;
+import net.lordofthecraft.arche.enums.PersonaType;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.help.HelpDesk;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.persona.ArcheOfflinePersona;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.persona.TagAttachment;
+import net.lordofthecraft.arche.util.CommandUtil;
+import net.lordofthecraft.arche.util.MessageUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class CommandPersona implements CommandExecutor {
 	private final HelpDesk helpdesk;
@@ -230,37 +230,35 @@ public class CommandPersona implements CommandExecutor {
             }
 
 			//Go through process to find the Persona we want
-			Persona pers = null;
-			if ((args[0].equalsIgnoreCase("view") || args[0].equalsIgnoreCase("more") ||
-					args[0].equalsIgnoreCase("list"))
-					&& args.length > 1) {
-				pers = CommandUtil.personaFromArg(args[1]);
-			} else if ((args[0].equalsIgnoreCase("permakill")
-					|| args[0].equalsIgnoreCase("time")
-					|| args[0].equalsIgnoreCase("construct")
-					|| args[0].equalsIgnoreCase("spectre")
-					|| args[0].equalsIgnoreCase("necrolyte")
-					|| args[0].equalsIgnoreCase("golem")
-					|| args[0].equalsIgnoreCase("spectral")
-					|| args[0].equalsIgnoreCase("specter")
-					|| args[0].equalsIgnoreCase("necro")
-					|| args[0].equalsIgnoreCase("ascended")
-					|| args[0].equalsIgnoreCase("aengulbound")
-					|| args[0].equalsIgnoreCase("keeper")
-					|| args[0].equalsIgnoreCase("realrace")
-					|| args[0].equalsIgnoreCase("wiperace")
-					|| args[0].equalsIgnoreCase("openinv")
-					|| args[0].equalsIgnoreCase("head")
-					|| args[0].equalsIgnoreCase("icon")
-					|| args[0].equalsIgnoreCase("created"))
-					&& args.length > 1
-					&& (sender.hasPermission("archecore.mod.persona") || sender.hasPermission("archecore.mod.other"))) {
-				pers = CommandUtil.personaFromArg(args[1]);
-			} else if (args.length > 2 && args[args.length - 2].equalsIgnoreCase("-p") && (sender.hasPermission("archecore.admin") || sender.hasPermission("archecore.mod.persona"))) {
-				pers = CommandUtil.personaFromArg(args[args.length - 1]);
-			} else if (sender instanceof Player) {
-				pers = handler.getPersona((Player) sender);
-			}
+            OfflinePersona opers = null;
+            boolean willTryToLoad = false;
+            if (cmd.acceptsOffline && args.length > 1) {
+                opers = CommandUtil.offlinePersonaFromArg(args[1]);
+            } else if (cmd.onearg
+                    && args.length > 1
+                    && sender.hasPermission("archecore.mod.other")) {
+                opers = CommandUtil.personaFromArg(args[1]);
+                if (opers == null && sender instanceof Player)
+                    willTryToLoad = loadAndReexecute(args[1], (Player) sender, command, args);
+            } else if (args.length > 2 && args[args.length - 2].equalsIgnoreCase("-p")
+            		&& (sender.hasPermission("archecore.mod.other"))) {
+                opers = CommandUtil.personaFromArg(args[args.length - 1]);
+                if (opers == null && sender instanceof Player)
+                    willTryToLoad = loadAndReexecute(args[args.length - 1], (Player) sender, command, args);
+            } else if (sender instanceof Player) {
+                opers = handler.getPersona((Player) sender);
+            }
+
+            if (opers == null) {
+                if (willTryToLoad)
+                    sender.sendMessage(ChatColor.LIGHT_PURPLE + "Error: Persona not loaded. Will try to load it now. Please wait...");
+                else sender.sendMessage(ChatColor.RED + "Error: No persona found to modify");
+                return true;
+            }
+
+            if (cmd.acceptsOffline) {
+                if (cmd == PersonaCommand.VIEW || cmd == PersonaCommand.MORE) {
+                    boolean extendedInfo = args[0].equalsIgnoreCase("more");
 
 			if (pers == null) {
 				sender.sendMessage(ChatColor.RED + "Error: No persona found to modify");
@@ -360,7 +358,7 @@ public class CommandPersona implements CommandExecutor {
                         long timeLeft = (pers.getRenamed().getTime() / 60000) - (System.currentTimeMillis() / 60000) + delay;
                         if (timeLeft > 0 && !sender.hasPermission("archecore.persona.quickrename")) {
                         	sender.sendMessage(ChatColor.RED + "You must wait " + timeLeft + " minutes before renaming again");
-                        } else if (name.matches(".*[^A-Za-zÀ-ÿ \\-'\"].*") && !sender.hasPermission("archecore.mod.persona")) {	
+                        } else if (name.matches(".*[^A-Za-zÀ-ÿ \\-'\"].*") && !sender.hasPermission("archecore.mod.persona")) {
                         	sender.sendMessage(ChatColor.RED + "Invalid Character in name. Can only use letters, quotes(\"') and dash (-)");
                         } else if (name.length() <= 32 || (name.length() <= 64 && longname) ) {
                         	pers.setName(name);
@@ -396,8 +394,8 @@ public class CommandPersona implements CommandExecutor {
                         	}
                         	
                         	pers.setDateOfBirth(birthyear);
-                        	sender.sendMessage(ChatColor.AQUA + "Set birthyear of " + pers.getName() + " to: " + ChatColor.RESET + birthyear 
-                        			+ ChatColor.AQUA + " (age: " + ChatColor.RESET + age + ChatColor.AQUA + ")");                    		
+                        	sender.sendMessage(ChatColor.AQUA + "Set birthyear of " + pers.getName() + " to: " + ChatColor.RESET + birthyear
+                        			+ ChatColor.AQUA + " (age: " + ChatColor.RESET + age + ChatColor.AQUA + ")");
                         	return true;
                         } catch(NumberFormatException e) {
                         	return false;
@@ -574,22 +572,7 @@ public class CommandPersona implements CommandExecutor {
         if (offlinePersona == null) return false; //Nothing we can do at this point
         if (offlinePersona.isLoaded()) throw new IllegalStateException("Persona is already loaded!");
 
-        new AsyncRunner(ArcheCore.getPlugin()) {
-			ArchePersona persona = null;
-			
-			public void doAsync() { persona = (ArchePersona) offlinePersona.loadPersona();}
-
-			@Override
-			public void andThen() {
-                ArchePersona otherPersona = ArchePersonaHandler.getInstance().getPersonaStore().addOnlinePersona(persona);
-                if(otherPersona != persona) {
-                	CoreLog.warning("Interleaved Persona loading: Persona " + MessageUtil.identifyPersona(persona)
-                	+ " has come online while " + caller.getName() +  " also tried to load it.");
-                }
-                caller.performCommand(command.getName() + ' ' + StringUtils.join(args, ' '));
-			}
-        }.go();
-
+        offlinePersona.load().then($-> caller.performCommand(command.getName() + ' ' + StringUtils.join(args, ' ')));
         return true;
     }
 
