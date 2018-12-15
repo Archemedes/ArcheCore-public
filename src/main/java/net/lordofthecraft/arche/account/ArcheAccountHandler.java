@@ -111,13 +111,8 @@ public class ArcheAccountHandler implements AccountHandler {
 				rs = s.executeQuery("SELECT ip_address FROM account_ips WHERE account_id_fk="+id);
 				while(rs.next()) account.ips.add(rs.getString("ip_address"));
 				
-			} else { //Account doesn't exist. We must create it?
-				account = new ArcheAccount(getNextAccountId(), 0, 0);
-				account.alts.add(uuid);
-				var cons = ArcheCore.getConsumerControls();
-				int id = account.getId();
-				cons.insert("accounts").set("account_id", id).queue();
-				cons.insert("playeraccounts").set("player", uuid).set("account_id_fk", id).queue();
+			} else { //Account doesn't exist. We must create it
+				account = makeAccount(uuid);
 			}
 			rs.close();
 		}catch(SQLException e) {
@@ -127,9 +122,19 @@ public class ArcheAccountHandler implements AccountHandler {
 		return account;
 	}
 
+	private ArcheAccount makeAccount(UUID uuid) {
+		ArcheAccount account = new ArcheAccount(getNextAccountId());
+		account.alts.add(uuid);
+		var cons = ArcheCore.getConsumerControls();
+		int id = account.getId();
+		cons.insert("accounts").set("account_id", id).queue();
+		cons.insert("playeraccounts").set("player", uuid).set("account_id_fk", id).queue();
+		return account;
+	}
+	
 	public void init() {
 		getMaxId();
-		//transition();
+		transition();
 	}
 	
 	private void getMaxId() {
@@ -155,7 +160,7 @@ public class ArcheAccountHandler implements AccountHandler {
 		accountsById.remove(from.getId());
 	}
 	
-/*	private void transition() {
+	private void transition() {
 	//Check if we're functioning from previous setup:
 		ResultSet rs;
 		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
@@ -167,20 +172,21 @@ public class ArcheAccountHandler implements AccountHandler {
 				s.close();
 				rs = s.executeQuery("SELECT * FROM players");
 				int handled = 0;
+				int made = 0;
 				while(rs.next()) {
 					handled++;
 					UUID uuid = UUID.fromString(rs.getString("player"));
-					String name = rs.getString("player_name");
-					ArcheAccount acc = new ArcheAccount(nextId());
-					acc.addToon(uuid, name);
-					
-					accounts.put(uuid, acc);
-					accountsById.put(acc.getId(), acc);
+					if(!accounts.containsKey(uuid)) {
+						made++;
+						ArcheAccount acc = makeAccount(uuid);
+						accounts.put(uuid, acc);
+						accountsById.put(acc.getId(), acc);
+					}
 				}
-				CoreLog.info("We've made new accounts for players, some of which might be alts. Handled in total: " + handled);
+				CoreLog.info("We've made new accounts for players, some of which might be alts. Names scanned: " + handled + ". Accounts made: " + made);
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
-	}*/
+	}
 }

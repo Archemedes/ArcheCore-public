@@ -25,6 +25,10 @@ public class ArcheAccount implements Account {
 	final Set<UUID> alts = new HashSet<>();
 	final Set<String> ips = new HashSet<>();
 	
+	public ArcheAccount(int id) {
+		this(id, 0, 0);
+	}
+	
 	public ArcheAccount(int id, long forumId, long discordId) {
 		this.id = id;
 		this.forumId = forumId;
