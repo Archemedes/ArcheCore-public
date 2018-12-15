@@ -27,6 +27,7 @@ import org.bukkit.entity.Player;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import lombok.NonNull;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.SQL.SQLHandler;
@@ -224,30 +225,31 @@ public class ArchePersonaHandler implements PersonaHandler {
 	@Override
 	public boolean switchPersona(final Player p, int id, boolean force){
 		int slots = ArcheCore.getControls().personaSlots();
-        Validate.isTrue(id >= 0 && id < slots, "Only Persona IDs at least 0 and at most " + slots + " are allowed.");
+		Validate.isTrue(id >= 0 && id < slots, "Only Persona IDs at least 0 and at most " + slots + " are allowed.");
 
-        ArchePersona[] prs = getAllPersonas(p.getUniqueId());
-        ArchePersona after = prs[id];
-
-		PersonaSwitchEvent event = new PersonaSwitchEvent(prs[id], force);
+		ArchePersona[] prs = getAllPersonas(p.getUniqueId());
+		ArchePersona after = prs[id];
+		Validate.notNull(after);
+		
+		PersonaSwitchEvent event = new PersonaSwitchEvent(after, force);
 		Bukkit.getPluginManager().callEvent(event);
 
 		if(event.isCancelled() && !force) return false;
 
 		after.setCurrent(true);
-        
-        ArchePersona before = (ArchePersona) event.getOriginPersona();
-        if (before != null) {
-            Validate.isTrue(before != after, "Player tried to switch to same persona!");
-            before.setCurrent(false);
-            before.endSession();
-            Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(before, PersonaDeactivateEvent.Reason.SWITCH));
-            ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(before, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
-            
-            //Store and switch Persona-related specifics: Location and Inventory.
-            before.saveMinecraftSpecifics(p);
-            before.attributes().handleSwitch(false);
-            
+
+		ArchePersona before = (ArchePersona) event.getOriginPersona();
+		if (before != null) {
+			Validate.isTrue(before != after, "Player tried to switch to same persona!");
+			before.setCurrent(false);
+			before.endSession();
+			Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(before, PersonaDeactivateEvent.Reason.SWITCH));
+			ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(before, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
+
+			//Store and switch Persona-related specifics: Location and Inventory.
+			before.saveMinecraftSpecifics(p);
+			before.attributes().handleSwitch(false);
+
 			//Transfer fatigue from previous persona to new persona IF previous value was higher
 			//This should prevent some alt abuse where players chain their fatigue bars to grind
 			if(before.getFatigue() > after.getFatigue()) {
@@ -257,68 +259,68 @@ public class ArchePersonaHandler implements PersonaHandler {
 			}
 		}
 
-        activate(after);
-        after.restoreMinecraftSpecifics(p);
+		activate(after);
+		after.restoreMinecraftSpecifics(p);
 
-        //Check if switched-to Persona will require a different skin from storage
-        SkinCache cache = ArcheCore.getControls().getSkinCache();
-        ArcheSkin skBefore = (before == null ? null : before.getSkin());
-        ArcheSkin skAfter = after.getSkin();
-        if( skBefore != skAfter ) {
+		//Check if switched-to Persona will require a different skin from storage
+		SkinCache cache = ArcheCore.getControls().getSkinCache();
+		ArcheSkin skBefore = (before == null ? null : before.getSkin());
+		ArcheSkin skAfter = after.getSkin();
+		if( skBefore != skAfter ) {
 			cache.refreshPlayer(p);
 		}
 
 		return true;
 	}
 
-    public int getNextPersonaId() {
-        return store.getNextPersonaId();
-    }
-    
-    @Override
-    public Waiter<Persona> loadPersona(OfflinePersona op) {
-    	ArcheAccountHandler aah = ArcheAccountHandler.getInstance();
-    	return aah.loadPersona(op);
-    }
+	public int getNextPersonaId() {
+		return store.getNextPersonaId();
+	}
 
-    @Override
-    public void registerPersona(Persona pers) {
-    	ArchePersona persona = (ArchePersona) pers;
-    	CoreLog.debug("Persona is being created: " + MessageUtil.identifyPersona(persona));
+	@Override
+	public Waiter<Persona> loadPersona(OfflinePersona op) {
+		ArcheAccountHandler aah = ArcheAccountHandler.getInstance();
+		return aah.loadPersona(op);
+	}
 
-    	ArcheOfflinePersona oldPersona = store.registerPersona(persona);
+	@Override
+	public void registerPersona(@NonNull Persona pers) {
+		ArchePersona persona = (ArchePersona) pers;
+		CoreLog.debug("Persona is being created: " + MessageUtil.identifyPersona(persona));
 
-    	PersonaCreateEvent event3 = new PersonaCreateEvent(persona, oldPersona);
-    	Bukkit.getPluginManager().callEvent(event3);
+		ArcheOfflinePersona oldPersona = store.registerPersona(persona);
 
-    	Player p = persona.getPlayer();
-    	boolean forceSwitch = oldPersona != null && oldPersona.isCurrent();
-    	//Expected switch restoreMinecraftSpecifics behavior:
-    	//health, saturation, hunger set to persona defaults
-    	//Inventories, potion effects cleared.
-    	//This teleport will fail due to the Location being null still
-    	boolean couldSwitch = p == null? false : switchPersona(p, persona.getSlot(), forceSwitch);
+		PersonaCreateEvent event3 = new PersonaCreateEvent(persona, oldPersona);
+		Bukkit.getPluginManager().callEvent(event3);
 
-    	if (oldPersona != null) {
-    		PersonaRemoveEvent event2 = new PersonaRemoveEvent(oldPersona, true);
-    		Bukkit.getPluginManager().callEvent(event2);
+		Player p = persona.getPlayer();
+		boolean forceSwitch = oldPersona != null && oldPersona.isCurrent();
+		//Expected switch restoreMinecraftSpecifics behavior:
+		//health, saturation, hunger set to persona defaults
+		//Inventories, potion effects cleared.
+		//This teleport will fail due to the Location being null still
+		boolean couldSwitch = p == null? false : switchPersona(p, persona.getSlot(), forceSwitch);
 
-    		consumer.queueRow(new DeletePersonaRow(oldPersona));
-    		if(oldPersona.isLoaded()) SkinCache.getInstance().clearSkin(oldPersona.getPersona());
-    	}
+		if (oldPersona != null) {
+			PersonaRemoveEvent event2 = new PersonaRemoveEvent(oldPersona, true);
+			Bukkit.getPluginManager().callEvent(event2);
 
-    	Location to = racespawns.get(persona.getRace());
-    	if(to == null) {
-    		World w = ArcheCore.getControls().getNewPersonaWorld();
-    		to = w != null? w.getSpawnLocation() :
-    			p != null? p.getWorld().getSpawnLocation() :
-    				Bukkit.getWorlds().get(0).getSpawnLocation();
-    	}
+			consumer.queueRow(new DeletePersonaRow(oldPersona));
+			if(oldPersona.isLoaded()) SkinCache.getInstance().clearSkin(oldPersona.getPersona());
+		}
 
-    	consumer.queueRow(new InsertPersonaRow(persona, to));
-    	persona.location = new WeakBlock(to);
-    	if(couldSwitch && ArcheCore.getControls().teleportNewPersonas()) p.teleport(to);
-    }
+		Location to = racespawns.get(persona.getRace());
+		if(to == null) {
+			World w = ArcheCore.getControls().getNewPersonaWorld();
+			to = w != null? w.getSpawnLocation() :
+				p != null? p.getWorld().getSpawnLocation() :
+					Bukkit.getWorlds().get(0).getSpawnLocation();
+		}
+
+		consumer.queueRow(new InsertPersonaRow(persona, to));
+		persona.location = new WeakBlock(to);
+		if(couldSwitch && ArcheCore.getControls().teleportNewPersonas()) p.teleport(to);
+	}
 
 	@Override
     public List<BaseComponent> whois(OfflinePersona op, CommandSender whosAsking) {

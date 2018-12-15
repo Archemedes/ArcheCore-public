@@ -33,6 +33,7 @@ import org.bukkit.event.Event;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 
+import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.CoreLog;
@@ -155,7 +156,7 @@ public class PersonaStore {
         else return prs;
     }
 
-    public ArchePersona[] loadPersonas(UUID uuid) { //Run this async
+    public List<ArchePersona> loadPersonas(UUID uuid) { //Run this async
         //We don't unload personas for players once loaded since we have memory for miles
         //So instead once a player logged in, they remain loaded for the session
         //We obviously won't have to bother reloading their personas another time then
@@ -164,31 +165,33 @@ public class PersonaStore {
         ArcheTimer timer = ArcheCore.getPlugin().getMethodTimer();
         if (timer != null) timer.startTiming("Loading Personas of " + uuid);
 
-        ArchePersona[] prs = new ArchePersona[ArcheCore.getControls().personaSlots()];
+        var prs = new ArrayList<ArchePersona>();
         boolean hasCurrent = false;
 
         try(Connection connection = ArcheCore.getSQLControls().getConnection();
-        		PreparedStatement statement = connection.prepareStatement(personaSelect);
-        		ResultSet res = statement.executeQuery(); ) {
-            CoreLog.debug("personaSelect: " + personaSelect);
-            
-            statement.setString(1, uuid.toString());
-            
+        		PreparedStatement statement = connection.prepareStatement(personaSelect);) {
+        	statement.setString(1, uuid.toString());
+        	ResultSet res = statement.executeQuery();
 
-            while (res.next()) {
-                ArcheOfflinePersona op = buildOfflinePersona(res, uuid);
-                ArchePersona blob = buildPersona(res, op);
-                prs[blob.getSlot()] = blob;
+        	CoreLog.debug("personaSelect: " + personaSelect);
 
-                if (blob.current) {
-                    if (!hasCurrent) {
-                        hasCurrent = true;
-                    } else {
-                        CoreLog.warning("Multiple Current Personas for " + uuid);
-                        blob.current = false;
-                    }
-                }
-            }
+        	statement.setString(1, uuid.toString());
+
+
+        	while (res.next()) {
+        		ArcheOfflinePersona op = buildOfflinePersona(res, uuid);
+        		ArchePersona blob = buildPersona(res, op);
+        		prs.add(blob);
+
+        		if (blob.current) {
+        			if (!hasCurrent) {
+        				hasCurrent = true;
+        			} else {
+        				CoreLog.warning("Multiple Current Personas for " + uuid);
+        				blob.current = false;
+        			}
+        		}
+        	}
         } catch (SQLException e1) {
             e1.printStackTrace();
             if (e1.getMessage().contains("The database file is locked")) {
@@ -444,7 +447,8 @@ public class PersonaStore {
         }
     }
 
-    public void implement(List<ArchePersona> personas) {
+    public void implement(Collection<UUID> uuids, Collection<ArchePersona> personas) {
+    	uuids.forEach(u->onlinePersonas.put(u, new ArchePersona[ArcheCore.getControls().personaSlots()]));
     	personas.forEach(this::addOnlinePersona);
     }
 
@@ -462,7 +466,7 @@ public class PersonaStore {
         		);
         offlinePersonas.put(uuid, persona);
         
-        ArchePersona[] onlines = onlinePersonas.computeIfAbsent(uuid, $->new ArchePersona[ ArcheCore.getControls().personaSlots() ]);
+        ArchePersona[] onlines = onlinePersonas.get(uuid);
         onlines[persona.getSlot()] = persona;
     }
 

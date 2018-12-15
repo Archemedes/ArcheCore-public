@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 
@@ -73,7 +72,7 @@ public class Loader {
 			}
 			 
 			aHandler.implement(blob.getAccount());
-			pHandler.getPersonaStore().implement(blob.getPersonas());
+			pHandler.getPersonaStore().implement(blob.getAccount().getUUIDs(), blob.getPersonas());
 			blob.getAccount().getUUIDs().forEach(u -> confirmed.add(u));
 			
 			//Extract the Waiter objects we can solve
@@ -117,7 +116,7 @@ public class Loader {
 		List<ArchePersona> prs = new ArrayList<>();
 		for(UUID u2 : acc.getUUIDs()) {
 			var personas = pHandler.getPersonaStore().loadPersonas(u2);
-			Stream.of(personas).forEach(prs::add);
+			personas.forEach(prs::add);
 		}
 		
 		return new AccountBlob(acc, prs);
