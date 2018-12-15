@@ -17,6 +17,9 @@ public class PlaySession {
 	
 	void endSession() {
 		WeakBlock wb = new WeakBlock(persona.getPlayer().getLocation());
+		long elapsed = persona.getTimePlayed() - startPlaytime;
+		if(elapsed < 2) return;
+		
 		ArcheCore.getConsumerControls().insert("persona_sessions")
 			.set("persona_id_fk", persona.getPersonaId())
 			.set("login", startTime)
@@ -25,7 +28,7 @@ public class PlaySession {
 			.set("x", wb.getX())
 			.set("y", wb.getY())
 			.set("z", wb.getZ())
-			.set("time_played", persona.getTimePlayed() - startPlaytime)
+			.set("time_played", elapsed)
 			.queue();
 	}
 	
