@@ -64,10 +64,6 @@ public class CommandPersona implements CommandExecutor {
         OPENINV("archecore.command.persona.openinv", true, "openinv", "inv", "viewinv"),
         OPENENDER("archecore.command.persona.openender", true, "openender", "ender", "viewender"),
         CREATED("archecore.command.persona.created", true, true, "created", "viewcreateddate", "viewcreation"),
-        CONSTRUCT("archecore.command.persona.construct", true, "construct", "setconstruct"),
-        NECROLYTE("archecore.command.persona.necrolyte", true, "necrolyte", "setnecrolyte"),
-        SPECTRE("archecore.command.persona.spectre", true, "spectre", "setspectre"),
-        ASCENDED("archecore.command.persona.ascended", true, "aengulbound", "setaengulbound"),
         ASSIGNRACE("archecore.admin.command.persona.assignrace", false, "assignrace", "setunderlyingrace", "setunder"),
         ASSIGNGENDER("archecore.admin.command.persona.assigngender", false, "assigngender", "setgender"),
         SETTYPE("archecore.admin.command.persona.settype", false, "settype", "type", "assigntype"),
@@ -508,14 +504,6 @@ public class CommandPersona implements CommandExecutor {
                             return true;
                         }
                         return false;
-                    } else if (cmd == PersonaCommand.CONSTRUCT) {
-                        return doRaceChange(sender, pers, Race.CONSTRUCT);
-                    } else if (cmd == PersonaCommand.SPECTRE) {
-                        return doRaceChange(sender, pers, Race.SPECTRE);
-                    } else if (cmd == PersonaCommand.NECROLYTE) {
-                        return doRaceChange(sender, pers, Race.NECROLYTE);
-                    } else if (cmd == PersonaCommand.ASCENDED) {
-                        return doRaceChange(sender, pers, Race.ASCENDED);
                     }
                 }
             }

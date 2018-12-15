@@ -62,7 +62,6 @@ import net.lordofthecraft.arche.interfaces.SkillFactory;
 import net.lordofthecraft.arche.listener.AfkListener;
 import net.lordofthecraft.arche.listener.ArcheAttributeListener;
 import net.lordofthecraft.arche.listener.ArmorListener;
-import net.lordofthecraft.arche.listener.ArmorPreventionListener;
 import net.lordofthecraft.arche.listener.AttributeItemListener;
 import net.lordofthecraft.arche.listener.BeaconMenuListener;
 import net.lordofthecraft.arche.listener.BlockRegistryListener;
@@ -505,7 +504,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		if(racialBonuses){
 			pm.registerEvents(new RacialBonusListener(this,getPersonaHandler()), this);
-			pm.registerEvents(new ArmorPreventionListener(), this);
 		}
 
 		if(newbieProtectDelay > 0)
