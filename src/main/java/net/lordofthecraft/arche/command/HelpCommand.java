@@ -13,13 +13,9 @@ import org.bukkit.command.CommandSender;
 import com.google.common.primitives.Ints;
 
 import lombok.val;
-import lombok.experimental.ExtensionMethod;
 import net.lordofthecraft.arche.util.ChatBuilder;
 import net.lordofthecraft.arche.util.MessageUtil;
-import net.lordofthecraft.arche.util.extension.ArcheExtension;
-import net.lordofthecraft.arche.util.extension.UtilExtension;
 
-@ExtensionMethod({ArcheExtension.class,UtilExtension.class})
 public class HelpCommand extends ArcheCommand {
 	private static final ChatColor[] colors = new ChatColor[] {BLUE, LIGHT_PURPLE, AQUA, GREEN, YELLOW, DARK_GRAY, GOLD, RED, DARK_AQUA};
 	
