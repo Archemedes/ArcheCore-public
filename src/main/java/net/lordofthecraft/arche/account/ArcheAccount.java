@@ -39,8 +39,29 @@ public class ArcheAccount implements Account {
 	@Override
 	public Set<String> getIPs() { return Collections.unmodifiableSet(ips); }
 	
-	public void registerAlt(UUID uuid) {
-		//TODO
+	void merge(ArcheAccount alt) {
+		alt.remove();
+		
+		alt.getUUIDs().forEach(this::registerAlt);
+		alt.getIPs().forEach(this::registerIp);
+		alt.getTags().getTagMap().forEach((k,v) -> {if(!tags.hasTag(k)) tags.giveTag(k, v);});
+	}
+	
+	private void remove() {
+		cleanseTable("playeraccounts");
+		cleanseTable("account_ips");
+		cleanseTable("account_tags");
+		cleanseTable("accounts");
+	}
+	
+	private void cleanseTable(String tableName) {
+		ArcheCore.getConsumerControls().delete(tableName).where("account_id_fk", getId()).queue();
+	}
+	
+	private void registerAlt(UUID uuid) {
+		if(alts.contains(uuid)) throw new IllegalStateException("Alt was already registered to " + id + ". UUID=" + uuid);
+		ArcheCore.getConsumerControls().insert("playeraccounts").set("player", uuid).set("account_id_fk", id).queue();
+		alts.add(uuid);
 	}
 	
 	public void registerIp(String ip) {

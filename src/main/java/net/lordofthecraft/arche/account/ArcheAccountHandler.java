@@ -149,6 +149,12 @@ public class ArcheAccountHandler implements AccountHandler {
 		}
 	}
 	
+	public void merge(ArcheAccount from, ArcheAccount to) {
+		to.merge(from);
+		from.getUUIDs().forEach(u->accounts.put(u, to));
+		accountsById.remove(from.getId());
+	}
+	
 /*	private void transition() {
 	//Check if we're functioning from previous setup:
 		ResultSet rs;
