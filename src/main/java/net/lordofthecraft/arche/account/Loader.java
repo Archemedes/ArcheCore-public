@@ -32,18 +32,31 @@ public class Loader {
 	private final List<Waiter<Account>> accounts = new ArrayList<>();
 	private final List<Waiter<Persona>> personas = new ArrayList<>();
 
-	public synchronized boolean wasLoaded(UUID u) {
+	public synchronized boolean isLoaded(UUID u) {
 		return confirmed.contains(u);
 	}
 	
 	public synchronized Waiter<Account> check(UUID u) {
-		
-		return null;
+		if(isLoaded(u)) {
+			Account acc = aHandler.getAccount(u);
+			return new Waiter<>(acc);
+		} else {
+			var r = new Waiter<Account>(u);
+			accounts.add(r);
+			return r;
+		}
 	}
 	
-	public synchronized Waiter<Persona> check(OfflinePersona pers){
-		
-		return null;
+	public synchronized Waiter<Persona> check(OfflinePersona p){
+		var u = p.getPlayerUUID();
+		if(isLoaded(u)) {
+			Persona op = pHandler.getPersona(u,p.getSlot());
+			return new Waiter<>(op);
+		} else {
+			var r = new Waiter<Persona>(u, p.getPersonaId());
+			personas.add(r);
+			return r;
+		}
 	}
 	
 	public void deliver(AccountBlob blob) {
@@ -95,10 +108,7 @@ public class Loader {
 	
 	void initialize(UUID player, boolean createIfAbsent) {
 		AccountBlob blob = loadFromDisk(player, createIfAbsent);
-		if(blob == null) return;
-		
-		if(Bukkit.isPrimaryThread()) deliver(blob);
-		else Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->deliver(blob));
+		if(blob != null) sync(()->deliver(blob));
 	}
 	
 	private AccountBlob loadFromDisk(UUID u, boolean createIfAbsent) {
@@ -111,6 +121,11 @@ public class Loader {
 		}
 		
 		return new AccountBlob(acc, prs);
+	}
+	
+	private void sync(Runnable r) {
+		if(Bukkit.isPrimaryThread()) r.run();
+		else Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), r);
 	}
 	
 }

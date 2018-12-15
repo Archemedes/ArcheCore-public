@@ -35,6 +35,15 @@ public class ArcheAccountHandler implements AccountHandler {
 		return max_account_id++;
 	}
 	
+	
+	public Account getAccount(UUID u) {
+		return accounts.get(u);
+	}
+	
+	public boolean isLoaded(UUID u) {
+		return loader.isLoaded(u);
+	}
+	
 	public void load(UUID uuid, boolean createIfAbsent) {
 		loader.initialize(uuid, createIfAbsent);
 	}

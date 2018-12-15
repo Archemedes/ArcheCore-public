@@ -25,9 +25,9 @@ public class Waiter<T> {
 		this(uuid, -1);
 	}
 	
-	Waiter(UUID uuid, int id){ //For Personas
+	Waiter(UUID uuid, int personaId){ //For Personas. Very deceptive constructor maybe but the id is NOT slot
 		this.uuid = uuid;
-		this.id = id;
+		this.id = personaId;
 	}
 	
 	public boolean isDone() {
@@ -52,8 +52,8 @@ public class Waiter<T> {
 		return uuid.equals(this.uuid);
 	}
 	
-	boolean isId(int id) {
-		return this.id == id;
+	boolean isId(int personaId) {
+		return id == personaId;
 	}
 	
 	void fulfil(T packet) {
