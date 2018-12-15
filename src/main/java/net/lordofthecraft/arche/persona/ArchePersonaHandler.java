@@ -65,8 +65,8 @@ import net.md_5.bungee.api.chat.TextComponent;
 public class ArchePersonaHandler implements PersonaHandler {
 	private static final ArchePersonaHandler instance = new ArchePersonaHandler();
 
-    private final PersonaStore store = new PersonaStore();
-    private final IConsumer consumer = ArcheCore.getControls().getConsumer();
+	private final PersonaStore store = new PersonaStore();
+	private final IConsumer consumer = ArcheCore.getControls().getConsumer();
 	private boolean displayName = false;
 	private Map<Race, Location> racespawns = Maps.newHashMap();
 
