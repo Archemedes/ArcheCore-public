@@ -23,6 +23,8 @@ public interface Account {
 	
 	List<Persona> getPersonas();
 	
+	List<String> getUsernames();
+	
 	Set<UUID> getUUIDs();
 	
 	Set<String> getIPs();

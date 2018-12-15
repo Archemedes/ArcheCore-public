@@ -66,12 +66,22 @@ public class ArcheAccount implements Account {
 		return play;
 	}
 	
+	@Override
 	public List<Persona> getPersonas(){
 		var aph = ArcheCore.getPersonaControls();
 		
 		return alts.stream()
 		.flatMap( u-> Stream.of(aph.getAllPersonas(u)) )
 		.filter(Objects::nonNull)
+		.collect(Collectors.toList());
+	}
+	
+	@Override
+	public List<String> getUsernames(){
+		var ac = ArcheCore.getControls();
+		
+		return alts.stream()
+		.flatMap(u->ac.getKnownAliases(u).stream())
 		.collect(Collectors.toList());
 	}
 	
