@@ -17,16 +17,19 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.CoreLog;
+import net.lordofthecraft.arche.account.ArcheAccountHandler;
 import net.lordofthecraft.arche.persona.ArcheOfflinePersona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 
 public class PlayerJoinListener implements Listener {
 	private final ArchePersonaHandler handler;
+	private final ArcheAccountHandler accounts;
 	private final ArcheTimer timer;
 
-	public PlayerJoinListener(ArchePersonaHandler handler){
+	public PlayerJoinListener(ArchePersonaHandler handler, ArcheAccountHandler accounts){
 		this.handler = handler;
+		this.accounts = accounts;
 		timer = ArcheCore.getPlugin().getMethodTimer();
 	}
 
@@ -34,8 +37,9 @@ public class PlayerJoinListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onJoin(AsyncPlayerPreLoginEvent e) {
 		if (e.getLoginResult() == Result.ALLOWED)
-			handler.loadPlayer(e.getUniqueId(), e.getName());
+			accounts.load(e.getUniqueId(), true);
 	}
+	
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onDevmodeJoin(PlayerJoinEvent e){
 		Player p = e.getPlayer();

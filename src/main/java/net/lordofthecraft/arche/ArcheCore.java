@@ -479,7 +479,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		afkListener = new AfkListener(this);
 		pm.registerEvents(afkListener, this);
 
-		pm.registerEvents(new PlayerJoinListener(personaHandler), this);
+		pm.registerEvents(new PlayerJoinListener(personaHandler, accountHandler), this);
 		pm.registerEvents(new PlayerInteractListener(this), this);
 		pm.registerEvents(new BeaconMenuListener(this, personaChangeDelay), this);
 		pm.registerEvents(new HelpMenuListener(this, helpdesk), this);

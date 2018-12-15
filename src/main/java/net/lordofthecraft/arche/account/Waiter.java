@@ -22,22 +22,21 @@ public class Waiter<T> {
 	}
 	
 	Waiter(UUID uuid){ //For Accounts
-		this.uuid = uuid;
-		this.id = -1;
+		this(uuid, -1);
 	}
 	
-	Waiter(int id){ //For Personas
-		this.uuid = null;
+	Waiter(UUID uuid, int id){ //For Personas
+		this.uuid = uuid;
 		this.id = id;
 	}
 	
 	public void then(Consumer<T> what) {
 		whatToDo = what;
 		if(result != null) {
-			if(Bukkit.isPrimaryThread()) whatToDo.accept(result);
-			else fulfil(result);
+			if(Bukkit.isPrimaryThread()) fulfil(result);
+			else Bukkit.getScheduler().runTask(ArcheCore.getPlugin(), ()-> fulfil(result));
 		} else {
-			Bukkit.getScheduler().runTaskAsynchronously(ArcheCore.getPlugin(), ()->{}); //TODO
+			Bukkit.getScheduler().runTaskAsynchronously(ArcheCore.getPlugin(), ()->ArcheAccountHandler.getInstance().load(uuid, false));
 		}
 	}
 	

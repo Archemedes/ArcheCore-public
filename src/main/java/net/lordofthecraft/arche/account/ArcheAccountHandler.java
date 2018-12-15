@@ -20,6 +20,7 @@ public class ArcheAccountHandler implements AccountHandler {
 	
 	private final Map<UUID, ArcheAccount> accounts = new ConcurrentHashMap<>();
 	private int max_account_id = 0;
+	private final Loader loader = new Loader();
 	
 	public static ArcheAccountHandler getInstance() {
 		return instance;
@@ -31,6 +32,10 @@ public class ArcheAccountHandler implements AccountHandler {
 	
 	private int getNextAccountId() {
 		return max_account_id++;
+	}
+	
+	public void load(UUID uuid, boolean createIfAbsent) {
+		loader.initialize(uuid, createIfAbsent);
 	}
 	
 	public void implement(ArcheAccount account) {

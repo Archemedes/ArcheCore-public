@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import org.bukkit.Bukkit;
 
 import lombok.var;
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
@@ -83,7 +84,15 @@ public class Loader {
 		pts.forEach((prs,p)->prs.fulfil(p));
 	}
 	
-	AccountBlob loadFromDisk(UUID u, boolean createIfAbsent) {
+	void initialize(UUID player, boolean createIfAbsent) {
+		AccountBlob blob = loadFromDisk(player, createIfAbsent);
+		if(blob == null) return;
+		
+		if(Bukkit.isPrimaryThread()) deliver(blob);
+		else Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->deliver(blob));
+	}
+	
+	private AccountBlob loadFromDisk(UUID u, boolean createIfAbsent) {
 		ArcheAccount acc = ArcheAccountHandler.getInstance().fetchAccount(u, createIfAbsent);
 		//TODO what if no account?
 		List<ArchePersona> prs = new ArrayList<>();

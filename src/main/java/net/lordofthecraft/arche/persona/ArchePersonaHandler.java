@@ -494,10 +494,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 		return result;
 	}
 
-	public void loadPlayer(UUID uuid, String playerName) {
-		store.loadPersonas(playerName, uuid);
-	}
-
 	public void joinPlayer(Player p) {
 		ArchePersona[] prs = store.implementPersonas(p);
 		RaceBonusHandler.reset(p);
