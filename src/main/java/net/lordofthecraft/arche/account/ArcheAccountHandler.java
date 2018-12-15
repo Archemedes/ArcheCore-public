@@ -132,7 +132,7 @@ public class ArcheAccountHandler implements AccountHandler {
 		return account;
 	}
 	
-	public void init() {
+	public void onEnable() {
 		getMaxId();
 		transition();
 	}

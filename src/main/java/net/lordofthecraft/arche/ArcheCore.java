@@ -312,6 +312,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		finally {SQLUtil.closeStatement(res);}
 
 		personaHandler.onEnable();
+		accountHandler.onEnable();
 		economy.onEnable();
 
 		fatigueHandler.fatigueDecreaseHours = this.fullFatigueRestore;
