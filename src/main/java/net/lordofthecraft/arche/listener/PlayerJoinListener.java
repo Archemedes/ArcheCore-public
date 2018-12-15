@@ -60,10 +60,11 @@ public class PlayerJoinListener implements Listener {
 
 		p.setExhaustion(3.5f);
 		if (timer != null) timer.startTiming("login " + p.getName());
-		if(!handler.getPersonaStore().isLoadedThisSession(p)) {
+		if(!accounts.isLoaded(p.getUniqueId())) {
 			CoreLog.warning("Player " + p.getName() + " was NOT loaded Async. This is likely a late-bind issue");
-			handler.loadPlayer(p.getUniqueId(), p.getName());
+			accounts.load(p.getUniqueId(), true);
 		}
+		
 		handler.joinPlayer(p);
 		if (timer != null) timer.stopTiming("login " + p.getName());
 		if (ArcheCore.getPlugin().debugMode()) {
@@ -73,7 +74,6 @@ public class PlayerJoinListener implements Listener {
 			int playerCount = handler.getPersonaStore().getOnlineImplementedPersonas().size();
 			CoreLog.info("[Login] " + personas.size() + " persona files (" + offlines + " offl. / " + onlines + "onl.) for "+Bukkit.getOnlinePlayers().size()+" (" + playerCount + ") players.");
 		}
-
 	}
 
 	@EventHandler(priority = EventPriority.LOW)
