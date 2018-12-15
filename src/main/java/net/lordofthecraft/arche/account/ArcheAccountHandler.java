@@ -5,9 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
@@ -19,7 +19,8 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 public class ArcheAccountHandler implements AccountHandler {
 	private static final ArcheAccountHandler instance = new ArcheAccountHandler();
 	
-	private final Map<UUID, ArcheAccount> accounts = new ConcurrentHashMap<>();
+	private final Map<UUID, ArcheAccount> accounts = new HashMap<>();
+	private final Map<Integer, ArcheAccount> accountsById = new HashMap<>();
 	private int max_account_id = 0;
 	private final Loader loader = new Loader(this, ArchePersonaHandler.getInstance());
 	
@@ -40,6 +41,10 @@ public class ArcheAccountHandler implements AccountHandler {
 		return accounts.get(u);
 	}
 	
+	public Account getAccount(int id) {
+		return accountsById.get(id);
+	}
+	
 	public boolean isLoaded(UUID u) {
 		return loader.isLoaded(u);
 	}
@@ -50,6 +55,7 @@ public class ArcheAccountHandler implements AccountHandler {
 	
 	public void implement(ArcheAccount account) {
 		account.getUUIDs().stream().forEach(u->accounts.put(u, account));
+		accountsById.put(account.getId(), account);
 	}
 	
 	public ArcheAccount fetchAccount(UUID uuid) { //Thread-safe
