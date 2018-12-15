@@ -65,7 +65,8 @@ public class PlayerJoinListener implements Listener {
 			accounts.load(p.getUniqueId(), true);
 		}
 		
-		handler.joinPlayer(p);
+		ArcheCore.getPlugin().joinPlayer(p);
+
 		if (timer != null) timer.stopTiming("login " + p.getName());
 		if (ArcheCore.getPlugin().debugMode()) {
 			Collection<ArcheOfflinePersona> personas = handler.getPersonas();

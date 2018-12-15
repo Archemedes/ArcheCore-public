@@ -81,6 +81,7 @@ import net.lordofthecraft.arche.listener.SeasonListener;
 import net.lordofthecraft.arche.persona.ArcheEconomy;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.FatigueDecreaser;
+import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import net.lordofthecraft.arche.save.Consumer;
 import net.lordofthecraft.arche.save.DumpedDBReader;
 import net.lordofthecraft.arche.seasons.LotcianCalendar;
@@ -321,7 +322,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		//Incase of a reload, load all Personas for currently logged in players
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			accountHandler.load(p.getUniqueId(), true);
-			personaHandler.joinPlayer(p);
+			joinPlayer(p);
 		}
 
 		//Start tracking Personas and their playtime.
@@ -608,7 +609,15 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	public ArcheTimer getMethodTimer(){
 		return timer;
 	}
-
+	
+	public void joinPlayer(Player p) {
+		RaceBonusHandler.reset(p);
+		nameMap.updateNameMap(p.getName(), p.getUniqueId());
+		
+		accountHandler.joinPlayer(p);
+		personaHandler.joinPlayer(p);
+	}
+	
 	void setUseDeleteProcedure(boolean toset) {
 		this.useDeleteProcedure = toset;
 	}
@@ -744,11 +753,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	public boolean getWikiUsage(){
 		return useWiki;
 	}
-
-	public void updateNameMap(Player player) {
-		nameMap.updateNameMap(player.getName(), player.getUniqueId());
-	}
-
+	
 	@Override
   public List<String> getKnownAliases(UUID playerUUID){
   	return nameMap.getKnownAliases(playerUUID);

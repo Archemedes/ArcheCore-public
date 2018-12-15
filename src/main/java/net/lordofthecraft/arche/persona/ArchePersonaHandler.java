@@ -504,8 +504,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	public void joinPlayer(Player p) {
 		ArchePersona[] prs = store.getAllPersonas(p.getUniqueId());
-		RaceBonusHandler.reset(p);
-		ArcheCore.getPlugin().updateNameMap(p);
 
 		if (countPersonas(prs) == 0) {
 			if (p.hasPermission("archecore.mayuse")) {
