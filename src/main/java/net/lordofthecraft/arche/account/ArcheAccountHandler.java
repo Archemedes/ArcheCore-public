@@ -14,13 +14,14 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.AccountHandler;
+import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 
 public class ArcheAccountHandler implements AccountHandler {
 	private static final ArcheAccountHandler instance = new ArcheAccountHandler();
 	
 	private final Map<UUID, ArcheAccount> accounts = new ConcurrentHashMap<>();
 	private int max_account_id = 0;
-	private final Loader loader = new Loader();
+	private final Loader loader = new Loader(this, ArchePersonaHandler.getInstance());
 	
 	public static ArcheAccountHandler getInstance() {
 		return instance;

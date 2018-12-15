@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 
+import lombok.AllArgsConstructor;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
@@ -21,12 +22,20 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 
+@AllArgsConstructor
 public class Loader {
+	private final ArcheAccountHandler aHandler;
+	private final ArchePersonaHandler pHandler;
+	
 	private final Set<UUID> confirmed = new HashSet<>();
 	
 	private final List<Waiter<Account>> accounts = new ArrayList<>();
 	private final List<Waiter<Persona>> personas = new ArrayList<>();
 
+	public synchronized boolean wasLoaded(UUID u) {
+		return confirmed.contains(u);
+	}
+	
 	public synchronized Waiter<Account> check(UUID u) {
 		
 		return null;
@@ -50,8 +59,8 @@ public class Loader {
 				return; //Our work has been done already
 			}
 			 
-			ArcheAccountHandler.getInstance().implement(blob.getAccount());
-			ArchePersonaHandler.getInstance().getPersonaStore().implement(blob.getPersonas());
+			aHandler.implement(blob.getAccount());
+			pHandler.getPersonaStore().implement(blob.getPersonas());
 			blob.getAccount().getUUIDs().forEach(u -> confirmed.add(u));
 			
 			//Extract the Waiter objects we can solve
@@ -93,11 +102,11 @@ public class Loader {
 	}
 	
 	private AccountBlob loadFromDisk(UUID u, boolean createIfAbsent) {
-		ArcheAccount acc = ArcheAccountHandler.getInstance().fetchAccount(u, createIfAbsent);
+		ArcheAccount acc = aHandler.fetchAccount(u, createIfAbsent);
 		//TODO what if no account?
 		List<ArchePersona> prs = new ArrayList<>();
 		for(UUID u2 : acc.getUUIDs()) {
-			var personas = ArchePersonaHandler.getInstance().getPersonaStore().loadPersonas(u2);
+			var personas = pHandler.getPersonaStore().loadPersonas(u2);
 			Stream.of(personas).forEach(prs::add);
 		}
 		
