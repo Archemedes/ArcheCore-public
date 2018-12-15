@@ -92,7 +92,12 @@ public class AttributeItem {
 		if(!tag.containsKey("AttributeModifiers")) return is;
 
 		NbtList<Map<String, NbtBase<?>>> attList = tag.getList("AttributeModifiers");
-		removeDuplicates(attList, m);
+
+		try {
+			removeDuplicates(attList, m);
+		} catch (ClassCastException e) {
+			CoreLog.warning("Item: " + is.toString());
+		}
 		return craft;
 	}
 
@@ -107,7 +112,8 @@ public class AttributeItem {
 				CoreLog.warning("UUID for attribute modifier marked as Integer instead of Long");
 				CoreLog.warning("AttributeName: " + att.get("AttributeName").getValue());
 				CoreLog.warning("Name: " + att.get("Name").getValue());
-				return;
+
+				throw new ClassCastException();
 			}
 
 			// Despite the error in IntelliJ. This actually compiles fine.
