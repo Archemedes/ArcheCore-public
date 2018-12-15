@@ -4,8 +4,12 @@ import java.lang.ref.WeakReference;
 import java.sql.Date;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -14,6 +18,7 @@ import lombok.Getter;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Account;
+import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Tags;
 
 public class ArcheAccount implements Account {
@@ -59,6 +64,15 @@ public class ArcheAccount implements Account {
 		}
 
 		return play;
+	}
+	
+	public List<Persona> getPersonas(){
+		var aph = ArcheCore.getPersonaControls();
+		
+		return alts.stream()
+		.flatMap( u-> Stream.of(aph.getAllPersonas(u)) )
+		.filter(Objects::nonNull)
+		.collect(Collectors.toList());
 	}
 	
 	@Override

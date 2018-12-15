@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.interfaces;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -19,6 +20,8 @@ public interface Account {
 	long getDiscordId();
 	
 	Player getPlayer();
+	
+	List<Persona> getPersonas();
 	
 	Set<UUID> getUUIDs();
 	
