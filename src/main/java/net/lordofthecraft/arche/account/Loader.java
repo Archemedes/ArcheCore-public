@@ -39,7 +39,7 @@ public class Loader {
 	public synchronized Waiter<Account> check(UUID u) {
 		if(isLoaded(u)) {
 			Account acc = aHandler.getAccount(u);
-			return new Waiter<>(acc);
+			return Waiter.wrap(acc);
 		} else {
 			var r = new Waiter<Account>(u);
 			accounts.add(r);
@@ -51,7 +51,7 @@ public class Loader {
 		var u = p.getPlayerUUID();
 		if(isLoaded(u)) {
 			Persona op = pHandler.getPersona(u,p.getSlot());
-			return new Waiter<>(op);
+			return Waiter.wrap(op);
 		} else {
 			var r = new Waiter<Persona>(u, p.getPersonaId());
 			personas.add(r);

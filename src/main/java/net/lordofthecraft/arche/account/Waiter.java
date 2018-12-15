@@ -15,7 +15,11 @@ public class Waiter<T> {
 	private final UUID uuid;
 	private final int id;
 	
-	public Waiter(T fulfilled) { //Constructor when the Persona or Account is already loaded
+	public static <E> Waiter<E> wrap(E fulfilled){
+		return new Waiter<>(fulfilled);
+	}
+	
+	private Waiter(T fulfilled) { //Constructor when the Persona or Account is already loaded
 		result = fulfilled;
 		uuid = null;
 		id = -1;

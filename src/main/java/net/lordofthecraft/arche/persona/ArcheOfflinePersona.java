@@ -139,6 +139,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 
 	@Override
 	public Waiter<Persona> load(){
+		if(isLoaded()) return Waiter.wrap(getPersona());
 		return handler.loadPersona(this);
 	}
 	
