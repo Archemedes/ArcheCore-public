@@ -1,12 +1,17 @@
 package net.lordofthecraft.arche.account;
 
+import java.lang.ref.WeakReference;
 import java.sql.Date;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import lombok.Getter;
+import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.Tags;
@@ -18,6 +23,8 @@ public class ArcheAccount implements Account {
 	@Getter private long discordId; //e.g 69173255004487680=Telanir
 	
 	@Getter private final Tags<Account> tags;
+	
+	private WeakReference<Player> playerObject;
 	
 	long timePlayed;
 	Date lastSeen;
@@ -34,6 +41,24 @@ public class ArcheAccount implements Account {
 		this.forumId = forumId;
 		this.discordId = discordId;
 		tags = new AgnosticTags<>(this, "account_tags", "account_id_fk", id);
+	}
+	
+	@Override
+	public Player getPlayer(){
+		Player play;
+		if(playerObject == null || (play = playerObject.get()) == null || play.isDead()){
+			var op = alts.stream().map(Bukkit::getPlayer).findAny();
+			if(op.isPresent()) {
+				play = op.get();
+				playerObject = new WeakReference<>(play);
+				return play;
+			} else {
+				playerObject = null;
+				return null;
+			}
+		}
+
+		return play;
 	}
 	
 	@Override

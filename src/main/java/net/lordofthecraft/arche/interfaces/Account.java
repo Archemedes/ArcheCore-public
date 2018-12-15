@@ -3,6 +3,8 @@ package net.lordofthecraft.arche.interfaces;
 import java.util.Set;
 import java.util.UUID;
 
+import org.bukkit.entity.Player;
+
 /**
  * a simple account which can have multiple Minecraft characters
  */
@@ -15,6 +17,8 @@ public interface Account {
 	long getForumId();
 	
 	long getDiscordId();
+	
+	Player getPlayer();
 	
 	Set<UUID> getUUIDs();
 	
