@@ -101,53 +101,6 @@ public class ArcheAccountHandler implements AccountHandler {
 		}
 		return account;
 	}
-	
-/*	public void merge(Account from, Account to) {
-		ArcheAccount to2 = (ArcheAccount) to;
-		
-		//Must merge all names, tags, toons to new account_id_fk
-		from.getToons().stream()
-			.map(ArcheToon.class::cast)
-			.forEach(t->{
-				accounts.put(t.getUniqueId(), to2);
-				t.account = to2;
-			});
-		
-		from.getTags().getTags().stream()
-			.filter(ta->!to.getTags().hasTag(ta.getKey()))
-			.forEach(ta->to.getTags().giveTag(ta));
-		
-		accountsById.remove(from.getId());
-		accountTags.remove(from.getId());
-		
-		var consumer = ArcheCore.getConsumerControls();
-		consumer.update("minecraft_toons")
-		.where("account_id_fk", from.getId())
-		.set("account_id_fk", to.getId())
-		.queue();
-
-		consumer.delete("account_tags")
-		.where("account_id_fk", from.getId())
-		.queue();
-		
-		consumer.delete("accounts")
-		.where("account_id", from.getId())
-		.queue();
-			
-	}*/
-	
-/*	public Tags<Account> getAccountTags(int id){
-		accountsById.containsKey(id) return accountsById.get(key)
-	}
-
-	public Tags<Account> getAccountTags(UUID uuid){
-
-	}
-	
-	public Tags<Toon> getToonTags(UUID uuid){
-
-	}*/
-
 
 	public void init() {
 		getMaxId();
