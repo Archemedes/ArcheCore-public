@@ -218,7 +218,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			//Players may shift inventories around and dupe items they shouldn't dupe
 			p.closeInventory();
 
-			personaHandler.leavePlayer(p);
+			leavePlayer(p);
 		});
 
 		if (archeTimer != null) {
@@ -616,6 +616,12 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		
 		accountHandler.joinPlayer(p);
 		personaHandler.joinPlayer(p);
+	}
+	
+	public void leavePlayer(Player p) {
+		RaceBonusHandler.reset(p);
+		accountHandler.leavePlayer(p);
+		personaHandler.leavePlayer(p);
 	}
 	
 	void setUseDeleteProcedure(boolean toset) {

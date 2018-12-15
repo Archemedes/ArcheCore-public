@@ -92,6 +92,13 @@ public class ArcheAccount implements Account {
 	@Override
 	public Set<String> getIPs() { return Collections.unmodifiableSet(ips); }
 	
+	
+	void updateLastSeen() {
+		lastSeen = new Date(System.currentTimeMillis());
+		var c = ArcheCore.getConsumerControls();
+		c.update("accounts").set("last_seen", lastSeen).where("account_id", getId()).queue();
+	}
+	
 	void merge(ArcheAccount alt) {
 		alt.remove();
 		

@@ -83,7 +83,7 @@ public class PlayerJoinListener implements Listener {
 		if (timer != null) timer.startTiming("logout");
 
 		Player p = e.getPlayer();
-		handler.leavePlayer(p);
+		ArcheCore.getPlugin().leavePlayer(p);
 
 		if(timer != null){
 			timer.stopTiming("logout");

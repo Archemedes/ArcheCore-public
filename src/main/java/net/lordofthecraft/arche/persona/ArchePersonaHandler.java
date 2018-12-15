@@ -549,9 +549,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 	public void leavePlayer(Player p) {
 		ArchePersona ps = getPersona(p);
 
-		//Attribute Bonuses stick around forever. To prevent lingering ones, just in
-		//case the plugin is to be removed, we perform this method.
-		RaceBonusHandler.reset(p);
 		if (ps != null) {
 			Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(ps, PersonaDeactivateEvent.Reason.LOGOUT));
 			ps.endSession(); //Causes Persona play session to be put in the log
