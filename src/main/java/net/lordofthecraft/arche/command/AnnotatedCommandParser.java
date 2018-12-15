@@ -15,7 +15,7 @@ import org.bukkit.entity.Player;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.experimental.var;
+import lombok.var;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.command.RanCommand.CmdParserException;
 import net.lordofthecraft.arche.command.annotate.Arg;
