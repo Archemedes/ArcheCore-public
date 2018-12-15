@@ -1,9 +1,5 @@
 package net.lordofthecraft.arche.persona;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -141,23 +137,6 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	public Waiter<Persona> load(){
 		if(isLoaded()) return Waiter.wrap(getPersona());
 		return handler.loadPersona(this);
-	}
-	
-	@Override
-	public Persona loadPersona() {
-		PersonaStore store = handler.getPersonaStore();
-		String select = store.personaSelect + " AND persona_id=?";
-
-		try (Connection connection = ArcheCore.getSQLControls().getConnection();
-				PreparedStatement statement = connection.prepareStatement(select)) {
-			statement.setString(1, getPlayerUUID().toString());
-			statement.setInt(2, getPersonaId());
-			ResultSet rs = statement.executeQuery(); //closed when PrepStat is closed
-
-			return store.buildPersona(rs, this);
-		} catch (SQLException e) {
-			throw new RuntimeException(e); //zero fucks given
-		}
 	}
 
 	@Override

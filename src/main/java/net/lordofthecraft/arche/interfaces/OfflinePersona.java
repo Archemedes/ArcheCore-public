@@ -141,14 +141,6 @@ public interface OfflinePersona {
     void remove();
 
     /**
-     * Load persona from SQL. This makes no attempt to register the Persona inside PersonaHandler
-     * as a result there is no guarantee any save-to-db methods on Persona will be updated in time
-     * if the Persona is requested for loading by another resource or by ArcheCore itself.
-     * @return The loaded persona
-     */
-    Persona loadPersona();
-
-    /**
      * Persona tags are additional data that is automatically made persistent by ArcheCore's SQL backend
      * Dependent plugins can set and check tags for each Persona. Tags can also be modified by command.
      * Persona must be loaded (i.e. instanceof ArchePersona) for modifying methods to be successful.
