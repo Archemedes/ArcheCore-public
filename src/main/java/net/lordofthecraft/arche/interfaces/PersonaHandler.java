@@ -10,6 +10,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import net.lordofthecraft.arche.account.Waiter;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.persona.ArcheOfflinePersona;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -36,7 +37,7 @@ public interface PersonaHandler {
 	boolean mayUse(Player p);
 
 	/**
-	 * Check the maximum amount of Personas a Player is allowed to have. 
+	 * Check the maximum amount of Personas a Player is allowed to have.
 	 * This can be between 0 and 17 but depends on the config setting for max personas.
 	 * @param p Player to check for
 	 * @return Amount of Personas Player may have, based on Permission Nodes
@@ -193,6 +194,12 @@ public interface PersonaHandler {
 	 */
 	boolean switchPersona(Player p, int id, boolean force);
 
+	/**
+	 * @param op Take a wild fucking guess
+	 * @return Object with callback possibility, which might execute instantly if the Persona already exists
+	 */
+	Waiter<Persona> loadPersona(OfflinePersona op);
+	
 	/**
 	 * Method that provides a human-readable list of information about a Persona, to be used in prints
 	 * @param p the Persona to be looked up

@@ -14,6 +14,8 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.AccountHandler;
+import net.lordofthecraft.arche.interfaces.OfflinePersona;
+import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 
 public class ArcheAccountHandler implements AccountHandler {
@@ -37,16 +39,33 @@ public class ArcheAccountHandler implements AccountHandler {
 	}
 	
 	
+	@Override
 	public Account getAccount(UUID u) {
 		return accounts.get(u);
 	}
 	
+	@Override
 	public Account getAccount(int id) {
 		return accountsById.get(id);
 	}
 	
+	@Override
 	public boolean isLoaded(UUID u) {
 		return loader.isLoaded(u);
+	}
+	
+	@Override
+	public Waiter<Account> loadAccount(UUID u){
+		if(ArcheCore.getControls().getPlayerNameFromUUID(u) != null) {
+			//This player is KNOWN to ArcheCore --> account should therefore exist
+			return loader.check(u);
+		} else {
+			throw new IllegalArgumentException("UUID is not known to ArcheCore: " + u);
+		}
+	}
+	
+	public Waiter<Persona> loadPersona(OfflinePersona op){
+		return loader.check(op);
 	}
 	
 	public void load(UUID uuid, boolean createIfAbsent) {

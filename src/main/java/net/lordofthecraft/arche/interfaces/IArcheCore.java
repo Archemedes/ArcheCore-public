@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.interfaces;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Material;
@@ -26,7 +27,6 @@ public interface IArcheCore {
 	
 	/**
 	 * Accounts are a single human being who might have multiple Minecraft accounts
-	 * Toons are 1 minecraft account
 	 * @return The AccountHandler singleton
 	 */
 	ArcheAccountHandler getAccountHandler();
@@ -282,6 +282,16 @@ public interface IArcheCore {
     UUID getPlayerUUIDFromName(String playerName);
 
     /**
+     * @return All usernames this player once logged into ArcheCore server with
+     */
+    List<String> getKnownAliases(UUID playerUUID);
+    
+    /**
+     * @return ArcheCore's best guess what UUID belongs to a username, either current or previous
+     */
+    UUID getPlayerUUIDFromAlias(String playerName);
+    
+    /**
      * @param p Player to check for afk status
      * @return If player p is afk
      */
@@ -293,6 +303,4 @@ public interface IArcheCore {
      * @return If the SQLhandler is an instance of {@link net.lordofthecraft.arche.SQL.ArcheSQLiteHandler}
      */
     boolean isUsingSQLite();
-
-		
 }

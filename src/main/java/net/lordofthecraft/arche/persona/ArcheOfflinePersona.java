@@ -16,6 +16,7 @@ import org.bukkit.OfflinePlayer;
 import lombok.AccessLevel;
 import lombok.Getter;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.account.Waiter;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.persona.PersonaRemoveEvent;
@@ -136,6 +137,11 @@ public class ArcheOfflinePersona implements OfflinePersona {
 		return this instanceof ArchePersona;
 	}
 
+	@Override
+	public Waiter<Persona> load(){
+		return handler.loadPersona(this);
+	}
+	
 	@Override
 	public Persona loadPersona() {
 		PersonaStore store = handler.getPersonaStore();

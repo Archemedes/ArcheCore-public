@@ -31,6 +31,8 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
+import net.lordofthecraft.arche.account.ArcheAccountHandler;
+import net.lordofthecraft.arche.account.Waiter;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
@@ -271,6 +273,12 @@ public class ArchePersonaHandler implements PersonaHandler {
 
     public int getNextPersonaId() {
         return store.getNextPersonaId();
+    }
+    
+    @Override
+    public Waiter<Persona> loadPersona(OfflinePersona op) {
+    	ArcheAccountHandler aah = ArcheAccountHandler.getInstance();
+    	return aah.loadPersona(op);
     }
 
     @Override

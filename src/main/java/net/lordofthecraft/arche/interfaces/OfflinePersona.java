@@ -1,11 +1,13 @@
 package net.lordofthecraft.arche.interfaces;
 
-import net.lordofthecraft.arche.enums.PersonaType;
-import net.lordofthecraft.arche.enums.Race;
-import org.bukkit.OfflinePlayer;
-
 import java.sql.Timestamp;
 import java.util.UUID;
+
+import org.bukkit.OfflinePlayer;
+
+import net.lordofthecraft.arche.account.Waiter;
+import net.lordofthecraft.arche.enums.PersonaType;
+import net.lordofthecraft.arche.enums.Race;
 
 public interface OfflinePersona {
 
@@ -121,6 +123,11 @@ public interface OfflinePersona {
      */
     boolean isLoaded();
 
+    /**
+     * @return Object with callback possibility, which might execute instantly if the Persona already exists
+     */
+    Waiter<Persona> load();
+    
     /**
      * Get the loaded persona object, if applicable.
      * @see #isLoaded()

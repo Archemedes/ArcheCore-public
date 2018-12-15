@@ -749,6 +749,16 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	}
 
 	@Override
+  public List<String> getKnownAliases(UUID playerUUID){
+  	return nameMap.getKnownAliases(playerUUID);
+  }
+  
+	@Override
+  public UUID getPlayerUUIDFromAlias(String playerName) {
+  	return nameMap.getPlayerUUIDFromAlias(playerName);
+  }
+	
+	@Override
 	public String getPlayerNameFromUUID(UUID playerUUID) {
 		return nameMap.getPlayerNameFromUUID(playerUUID);
 	}

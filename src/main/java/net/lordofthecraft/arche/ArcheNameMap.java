@@ -18,8 +18,6 @@ import lombok.NonNull;
 import lombok.var;
 
 public class ArcheNameMap {
-	
-		
 		private final ListMultimap<UUID, String> idToName = MultimapBuilder.hashKeys().linkedListValues().build();
 		private final Map<String, UUID> nameToId = new LinkedHashMap<>();
     private final ArcheCore plugin;
