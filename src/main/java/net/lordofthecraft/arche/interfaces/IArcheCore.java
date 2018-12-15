@@ -11,7 +11,6 @@ import org.bukkit.plugin.Plugin;
 
 import net.lordofthecraft.arche.BlockRegistry;
 import net.lordofthecraft.arche.SQL.SQLHandler;
-import net.lordofthecraft.arche.account.ArcheAccountHandler;
 import net.lordofthecraft.arche.help.HelpFile;
 import net.lordofthecraft.arche.seasons.LotcianCalendar;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
