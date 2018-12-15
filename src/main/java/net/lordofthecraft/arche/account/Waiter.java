@@ -30,6 +30,14 @@ public class Waiter<T> {
 		this.id = id;
 	}
 	
+	public boolean isDone() {
+		return result != null;
+	}
+	
+	public T get() {
+		return result;
+	}
+	
 	public void then(Consumer<T> what) {
 		whatToDo = what;
 		if(result != null) {
@@ -49,6 +57,7 @@ public class Waiter<T> {
 	}
 	
 	void fulfil(T packet) {
-		if(whatToDo != null) whatToDo.accept(packet);
+		this.result = packet;
+		whatToDo.accept(packet);
 	}
 }
