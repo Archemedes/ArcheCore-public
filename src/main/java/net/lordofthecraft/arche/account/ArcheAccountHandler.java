@@ -45,19 +45,15 @@ public class ArcheAccountHandler implements AccountHandler {
 	}
 	
 	public void load(UUID uuid, boolean createIfAbsent) {
-		loader.initialize(uuid, createIfAbsent);
+		loader.initialize(uuid);
 	}
 	
 	public void implement(ArcheAccount account) {
 		account.getUUIDs().stream().forEach(u->accounts.put(u, account));
 	}
 	
-	public ArcheAccount fetchAccount(UUID uuid, boolean createIfAbsent) {
-		//If Account was already loaded, just return it from cache
-		if(accounts.containsKey(uuid)) return accounts.get(uuid);
-		
+	public ArcheAccount fetchAccount(UUID uuid) { //Thread-safe
 		ArcheAccount account = null;
-		boolean mustInsert = false;
 		
 		ResultSet rs;
 		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
@@ -89,26 +85,20 @@ public class ArcheAccountHandler implements AccountHandler {
 				//IPs added
 				rs = s.executeQuery("SELECT ip_address FROM account_ips WHERE account_id_fk="+id);
 				while(rs.next()) account.ips.add(rs.getString("ip_address"));
-				rs.close();
 				
-			} else if(createIfAbsent){ //Account doesn't exist. We must create it?
+			} else { //Account doesn't exist. We must create it?
 				account = new ArcheAccount(getNextAccountId(), 0, 0);
 				account.alts.add(uuid);
-				mustInsert = true;
+				var cons = ArcheCore.getConsumerControls();
+				int id = account.getId();
+				cons.insert("accounts").set("account_id", id).queue();
+				cons.insert("playeraccounts").set("player", uuid).set("account_id_fk", id).queue();
 			}
+			rs.close();
 		}catch(SQLException e) {
 			throw new RuntimeException(e);
 		}
 		
-		//Check if other threads beat us to loading the account
-		ArcheAccount other = accounts.putIfAbsent(uuid, account);
-		if(other != null) account = other;
-		else if(mustInsert) {
-			var c = ArcheCore.getConsumerControls();
-			int id = account.getId();
-			c.insert("accounts").set("account_id", id).queue();
-			c.insert("playeraccounts").set("player", uuid).set("account_id_fk", id).queue();
-		}
 		return account;
 	}
 

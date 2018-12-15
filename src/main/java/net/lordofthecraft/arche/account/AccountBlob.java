@@ -7,6 +7,6 @@ import net.lordofthecraft.arche.persona.ArchePersona;
 
 @Value
 public class AccountBlob {
-		private ArcheAccount account;
-		private List<ArchePersona> personas;
+		ArcheAccount account;
+		List<ArchePersona> personas;
 }

@@ -106,14 +106,14 @@ public class Loader {
 		pts.forEach((prs,p)->prs.fulfil(p));
 	}
 	
-	void initialize(UUID player, boolean createIfAbsent) {
-		AccountBlob blob = loadFromDisk(player, createIfAbsent);
+	void initialize(UUID player) {
+		AccountBlob blob = loadFromDisk(player);
 		if(blob != null) sync(()->deliver(blob));
 	}
 	
-	private AccountBlob loadFromDisk(UUID u, boolean createIfAbsent) {
-		ArcheAccount acc = aHandler.fetchAccount(u, createIfAbsent);
-		//TODO what if no account?
+	private AccountBlob loadFromDisk(UUID u) {
+		ArcheAccount acc = aHandler.fetchAccount(u);
+				
 		List<ArchePersona> prs = new ArrayList<>();
 		for(UUID u2 : acc.getUUIDs()) {
 			var personas = pHandler.getPersonaStore().loadPersonas(u2);
