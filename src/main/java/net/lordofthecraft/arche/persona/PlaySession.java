@@ -20,7 +20,8 @@ public class PlaySession {
 		long elapsed = persona.getTimePlayed() - startPlaytime;
 		if(elapsed < 2) return;
 		
-		ArcheCore.getConsumerControls().insert("persona_sessions")
+		ArcheCore.getConsumerControls().insert("account_sessions")
+			.set("account_id_fk", persona.getAccount().getId())
 			.set("persona_id_fk", persona.getPersonaId())
 			.set("login", startTime)
 			.set("logout", System.currentTimeMillis())
