@@ -197,9 +197,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	 * @param timePlayed The amount of minutes to add
 	 */
 	public void addTimePlayed(int timePlayed){
-		int val = this.timePlayed.addAndGet(timePlayed);
-
-		consumer.queueRow(new UpdatePersonaRow(this, PersonaField.STAT_PLAYED, val));
+		this.timePlayed += timePlayed;
+		consumer.queueRow(new UpdatePersonaRow(this, PersonaField.STAT_PLAYED, this.timePlayed));
 	}
 
 	@Override

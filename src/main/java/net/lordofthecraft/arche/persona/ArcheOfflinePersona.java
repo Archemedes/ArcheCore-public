@@ -2,7 +2,6 @@ package net.lordofthecraft.arche.persona;
 
 import java.sql.Timestamp;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -44,7 +43,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 
 	WeakBlock location;
 	Timestamp lastPlayed;
-	final AtomicInteger timePlayed;
+	int timePlayed;
 
 	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, int played,
 			boolean current, Race race, int birthdate, String gender, PersonaType type, String name) {
@@ -61,7 +60,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 		this.gender = gender;
 		this.personaType = type;
 		this.name = name;
-		timePlayed = new AtomicInteger(played);
+		this.timePlayed = played;
 	}
 
 	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, int played,
@@ -80,7 +79,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 		this.gender = gender;
 		this.personaType = type;
 		this.name = name;
-		timePlayed = new AtomicInteger(played);
+		timePlayed = played;
 		this.raceString = raceString;
 	}
 
@@ -106,7 +105,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 
 	@Override
 	public int getTimePlayed() {
-		return timePlayed.get();
+		return timePlayed;
 	}
 
 	@Override
