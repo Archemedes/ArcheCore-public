@@ -89,7 +89,7 @@ public class ArcheAccountHandler implements AccountHandler {
 	public void joinPlayer(Player p) {
 		ArcheAccount acc = getAccount(p);
 		acc.registerIp(p.getAddress().getAddress().getHostAddress());
-		acc.updateLastSeen();
+		acc.updateTimes();
 		
 		Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->checkDoubleLogin(acc));
 	}
@@ -108,7 +108,7 @@ public class ArcheAccountHandler implements AccountHandler {
 	
 	public void leavePlayer(Player p) {
 		ArcheAccount acc = getAccount(p);
-		acc.updateLastSeen();
+		acc.updateTimes();
 	}
 	
 	public ArcheAccount fetchAccount(UUID uuid) { //Thread-safe

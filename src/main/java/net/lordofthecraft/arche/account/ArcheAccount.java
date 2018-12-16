@@ -93,10 +93,17 @@ public class ArcheAccount implements Account {
 	public Set<String> getIPs() { return Collections.unmodifiableSet(ips); }
 	
 	
-	void updateLastSeen() {
+	void updateTimes() {
 		lastSeen = System.currentTimeMillis();
 		var c = ArcheCore.getConsumerControls();
-		c.update("accounts").set("last_seen", new Date(lastSeen)).where("account_id", getId()).queue();
+		c.update("accounts")
+			.set("last_seen", new Date(lastSeen))
+			.set("time_played", timePlayed)
+			.where("account_id", getId()).queue();
+	}
+	
+	public void addTimePlayed(long mins) {
+		timePlayed += mins;
 	}
 	
 	void merge(ArcheAccount alt) {
