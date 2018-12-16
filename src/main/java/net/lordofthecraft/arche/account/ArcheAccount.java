@@ -32,6 +32,7 @@ public class ArcheAccount implements Account {
 	private WeakReference<Player> playerObject;
 	
 	@Getter long timePlayed;
+	@Getter long timePlayedThisWeek;
 	@Getter long lastSeen;
 	
 	final Set<UUID> alts = new HashSet<>();
@@ -104,6 +105,7 @@ public class ArcheAccount implements Account {
 	
 	public void addTimePlayed(long mins) {
 		timePlayed += mins;
+		timePlayedThisWeek += mins;
 	}
 	
 	void merge(ArcheAccount alt) {

@@ -21,6 +21,8 @@ public interface Account {
 	
 	long getTimePlayed();
 	
+	long getTimePlayedThisWeek();
+	
 	long getLastSeen();
 	
 	Player getPlayer();

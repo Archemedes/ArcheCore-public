@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -119,6 +120,7 @@ public class ArcheAccountHandler implements AccountHandler {
 			rs = s.executeQuery("SELECT * FROM playeraccounts WHERE player='" + uuid.toString() + "' LIMIT 1");
 			if(rs.next()) { //Account exists (should be 1 at most). Load it
 				var id = rs.getInt("account_id_fk");
+				CoreLog.debug("Loading account " + id + " for player " + uuid);
 				rs.close();
 				
 				//Make the account itself
@@ -140,12 +142,19 @@ public class ArcheAccountHandler implements AccountHandler {
 				AgnosticTags<Account> t = (AgnosticTags<Account>) account.getTags();
 				while(rs.next()) t.putInternal(rs.getString(AbstractTags.TAG_KEY), rs.getString(AbstractTags.TAG_VALUE));
 				rs.close();
-				
+
 				//IPs added
 				rs = s.executeQuery("SELECT ip_address FROM account_ips WHERE account_id_fk="+id);
 				while(rs.next()) account.ips.add(rs.getString("ip_address"));
+				rs.close();
+				
+				long week = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
+				rs = s.executeQuery("SELECT SUM(time_played) FROM account_sessions WHERE account_id_fk="+ id +" AND logout > " + week);
+				rs.next();
+				account.timePlayedThisWeek = rs.getLong(0);
 				
 			} else { //Account doesn't exist. We must create it
+				CoreLog.debug("Making a new account for player " + uuid);
 				account = makeAccount(uuid);
 			}
 			rs.close();
