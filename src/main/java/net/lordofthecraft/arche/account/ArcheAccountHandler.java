@@ -126,7 +126,7 @@ public class ArcheAccountHandler implements AccountHandler {
 				var forumId = rs.getLong("forum_id");
 				var discordId = rs.getLong("discord_id");
 				account = new ArcheAccount(id, forumId, discordId);
-				account.lastSeen = rs.getDate("last_seen");
+				account.lastSeen = rs.getDate("last_seen").getTime();
 				account.timePlayed = rs.getLong("time_played");
 				rs.close();
 				

@@ -31,8 +31,8 @@ public class ArcheAccount implements Account {
 	
 	private WeakReference<Player> playerObject;
 	
-	long timePlayed;
-	Date lastSeen;
+	@Getter long timePlayed;
+	@Getter long lastSeen;
 	
 	final Set<UUID> alts = new HashSet<>();
 	final Set<String> ips = new HashSet<>();
@@ -94,9 +94,9 @@ public class ArcheAccount implements Account {
 	
 	
 	void updateLastSeen() {
-		lastSeen = new Date(System.currentTimeMillis());
+		lastSeen = System.currentTimeMillis();
 		var c = ArcheCore.getConsumerControls();
-		c.update("accounts").set("last_seen", lastSeen).where("account_id", getId()).queue();
+		c.update("accounts").set("last_seen", new Date(lastSeen)).where("account_id", getId()).queue();
 	}
 	
 	void merge(ArcheAccount alt) {

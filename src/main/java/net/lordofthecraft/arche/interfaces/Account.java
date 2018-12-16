@@ -19,6 +19,10 @@ public interface Account {
 	
 	long getDiscordId();
 	
+	long getTimePlayed();
+	
+	long getLastSeen();
+	
 	Player getPlayer();
 	
 	List<Persona> getPersonas();
