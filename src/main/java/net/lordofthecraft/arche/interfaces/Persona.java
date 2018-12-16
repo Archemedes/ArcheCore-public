@@ -138,6 +138,11 @@ public interface Persona extends OfflinePersona {
 	Player getPlayer();
 
 	/**
+	 * @return Their Account
+	 */
+	Account getAccount();
+	
+	/**
 	 * Retrieves the Persona's qualified Chat name. That is, it returns a proper concatenation of the prefix and Persona name
 	 * @return The name of the Player used for chat
 	 */

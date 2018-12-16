@@ -33,6 +33,7 @@ import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.persona.PersonaFatigueEvent;
 import net.lordofthecraft.arche.event.persona.PersonaRenameEvent;
+import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaTags;
 import net.lordofthecraft.arche.interfaces.Skill;
@@ -216,6 +217,11 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		consumer.queueRow(new UpdatePersonaRow(this, PersonaField.STAT_CHARS, val));
 	}
 
+	@Override
+	public Account getAccount() {
+		return ArcheCore.getControls().getAccountHandler().getAccount(this.getPlayerUUID());
+	}
+	
 	@Override
 	public Player getPlayer(){
 		Player play;
