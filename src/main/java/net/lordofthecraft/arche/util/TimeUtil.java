@@ -5,32 +5,34 @@ import static org.bukkit.ChatColor.*;
 
 import org.bukkit.ChatColor;
 
+import net.md_5.bungee.api.chat.BaseComponent;
+
 public final class TimeUtil {
 
 	private TimeUtil() {}
 	
 	
-	public ChatBuilder printTicks(long ticks) {
+	public static BaseComponent printTicks(long ticks) {
 		return printMillis(ticks * 50l);
 	}
 	
-	public ChatBuilder printTicksRaw(long ticks) {
+	public static BaseComponent printTicksRaw(long ticks) {
 		return printMillisRaw(ticks * 50l);
 	}
 	
-	public ChatBuilder printMillis(long millis) {
+	public static BaseComponent printMillis(long millis) {
 		return print(millis, false, WHITE, GRAY);
 	}
 	
-	public ChatBuilder printMillisRaw(long millis) {
+	public static BaseComponent printMillisRaw(long millis) {
 		return print(millis, false, null, null);
 	}
 	
-	public ChatBuilder printBrief(long millis) {
+	public static BaseComponent printBrief(long millis) {
 		return print(millis, true, null, null);
 	}
 	
-	public ChatBuilder print(long ms, boolean brief, ChatColor numColor, ChatColor unitColor) {
+	public static BaseComponent print(long ms, boolean brief, ChatColor numColor, ChatColor unitColor) {
 		ChatBuilder sb = MessageUtil.builder();
 		
 		long days = MILLISECONDS.toDays(ms);
@@ -43,10 +45,10 @@ public final class TimeUtil {
 		append(sb, minutes, brief, "minutes", "m", numColor, unitColor);
 		append(sb, seconds, brief, "seconds", "s", numColor, unitColor);
 		
-		return sb;
+		return sb.build();
 	}
 
-	private void append(ChatBuilder sb, long val, boolean brief, String big, String small, ChatColor c1, ChatColor c2) {
+	private static void append(ChatBuilder sb, long val, boolean brief, String big, String small, ChatColor c1, ChatColor c2) {
 		if(val == 0) return;
 		
 		sb.append(val);
