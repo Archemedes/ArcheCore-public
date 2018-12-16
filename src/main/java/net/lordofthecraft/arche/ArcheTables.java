@@ -252,6 +252,9 @@ public final class ArcheTables {
 				")" +
 				end);
 		
+		//This is needed because we traverse this table to compute a "played last week" value
+		//For this we obviously need either one of the ids, but each can have many entries
+		//Locally this caused 100x performance gain for selections of this kind on Atlas data
 		statement.execute("CREATE INDEX IF NOT EXISTS idx_sessions_accountid ON account_sessions (account_id_fk)" + end);
 		statement.execute("CREATE INDEX IF NOT EXISTS idx_sessions_personaid ON account_sessions (persona_id_fk)" + end);
 	}
