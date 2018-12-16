@@ -108,8 +108,6 @@ public final class ArcheTables {
 				"account_id INT UNSIGNED," +
 				"forum_id INT UNSIGNED UNIQUE DEFAULT 0," +
 				"discord_id INT UNSIGNED UNIQUE DEFAULT 0," +
-				"time_played INT UNSIGNED DEFAULT 0," +
-				"last_seen DATETIME(3)," +
 				"PRIMARY KEY (account_id)" +
 				")" +
 				end);

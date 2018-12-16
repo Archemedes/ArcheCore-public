@@ -1,7 +1,6 @@
 package net.lordofthecraft.arche.account;
 
 import java.lang.ref.WeakReference;
-import java.sql.Date;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -92,16 +91,6 @@ public class ArcheAccount implements Account {
 	
 	@Override
 	public Set<String> getIPs() { return Collections.unmodifiableSet(ips); }
-	
-	
-	void updateTimes() {
-		lastSeen = System.currentTimeMillis();
-		var c = ArcheCore.getConsumerControls();
-		c.update("accounts")
-			.set("last_seen", new Date(lastSeen))
-			.set("time_played", timePlayed)
-			.where("account_id", getId()).queue();
-	}
 	
 	public void addTimePlayed(long mins) {
 		timePlayed += mins;

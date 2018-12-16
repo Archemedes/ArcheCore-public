@@ -90,7 +90,6 @@ public class ArcheAccountHandler implements AccountHandler {
 	public void joinPlayer(Player p) {
 		ArcheAccount acc = getAccount(p);
 		acc.registerIp(p.getAddress().getAddress().getHostAddress());
-		acc.updateTimes();
 		
 		Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->checkDoubleLogin(acc));
 	}
@@ -107,11 +106,6 @@ public class ArcheAccountHandler implements AccountHandler {
 		}
 	}
 	
-	public void leavePlayer(Player p) {
-		ArcheAccount acc = getAccount(p);
-		acc.updateTimes();
-	}
-	
 	public ArcheAccount fetchAccount(UUID uuid) { //Thread-safe
 		ArcheAccount account = null;
 		
@@ -120,16 +114,15 @@ public class ArcheAccountHandler implements AccountHandler {
 			rs = s.executeQuery("SELECT * FROM playeraccounts WHERE player='" + uuid.toString() + "' LIMIT 1");
 			if(rs.next()) { //Account exists (should be 1 at most). Load it
 				var id = rs.getInt("account_id_fk");
-				CoreLog.debug("Loading account " + id + " for player " + uuid);
 				rs.close();
+				
+				CoreLog.debug("Loading account " + id + " for player " + uuid);
 				
 				//Make the account itself
 				rs = s.executeQuery("SELECT * FROM accounts WHERE account_id="+id);
 				var forumId = rs.getLong("forum_id");
 				var discordId = rs.getLong("discord_id");
 				account = new ArcheAccount(id, forumId, discordId);
-				account.lastSeen = rs.getDate("last_seen").getTime();
-				account.timePlayed = rs.getLong("time_played");
 				rs.close();
 				
 				//UUIDs added
@@ -148,22 +141,42 @@ public class ArcheAccountHandler implements AccountHandler {
 				while(rs.next()) account.ips.add(rs.getString("ip_address"));
 				rs.close();
 				
-				long week = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
-				rs = s.executeQuery("SELECT SUM(time_played) FROM account_sessions WHERE account_id_fk="+ id +" AND logout > " + week);
-				rs.next();
-				account.timePlayedThisWeek = rs.getLong(0);
-				
+				initTimes(s, account);
 			} else { //Account doesn't exist. We must create it
 				CoreLog.debug("Making a new account for player " + uuid);
 				account = makeAccount(uuid);
 			}
-			rs.close();
+			
 		}catch(SQLException e) {
 			throw new RuntimeException(e);
 		}
 		
 		return account;
 	}
+	
+	private void initTimes(Statement s, ArcheAccount account) throws SQLException {
+		long lastSeen = 0;
+		long played = 0;
+		long playedWeek = 0;
+		
+		long week = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
+		
+		ResultSet rs = s.executeQuery("SELECT logout,time_played FROM account_sessions WHERE account_id_fk="+account.getId());
+		while(rs.next()) {
+			long logout = rs.getLong(1);
+			long time_played = rs.getLong(2);
+			
+			lastSeen = Math.max(lastSeen, logout);
+			played += time_played;
+			if(logout > week) playedWeek +=time_played;
+		}
+		rs.close();
+		
+		account.lastSeen = lastSeen;
+		account.timePlayed = played;
+		account.timePlayedThisWeek = playedWeek;
+	}
+	
 
 	private ArcheAccount makeAccount(UUID uuid) {
 		ArcheAccount account = new ArcheAccount(getNextAccountId());
