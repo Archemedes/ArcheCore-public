@@ -1,6 +1,6 @@
 package net.lordofthecraft.arche.commands;
 
-import static org.bukkit.ChatColor.RESET;
+import static org.bukkit.ChatColor.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +16,8 @@ import net.lordofthecraft.arche.command.CommandTemplate;
 import net.lordofthecraft.arche.command.annotate.Flag;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.util.MessageUtil;
+import net.lordofthecraft.arche.util.TimeUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
 
 public class CommandSeen extends CommandTemplate {
 
@@ -46,8 +48,19 @@ public class CommandSeen extends CommandTemplate {
 	}
 	
 	private void printout(Account account) {
-		MessageUtil.builder()
-			.
+		long elapsed = System.currentTimeMillis() - account.getLastSeen();
+		BaseComponent lastSeen = TimeUtil.printMillis(elapsed);
+		
+		var b = MessageUtil.builder();
+		Player p = account.getPlayer();
+		
+		if(p != null) b.append("Online").color(GREEN);
+		else b.append("Offline").append(RED);
+		b.append(" Since ").color(GRAY).append(lastSeen);
+		
+		for(var ps : account.getPersonas()) {
+			ps.
+		}
 	}
 
 }
