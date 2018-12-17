@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Timer;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
@@ -28,6 +29,7 @@ import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.account.ArcheAccountHandler;
+import net.lordofthecraft.arche.command.CommandTemplate;
 import net.lordofthecraft.arche.commands.CommandArchehelp;
 import net.lordofthecraft.arche.commands.CommandAttribute;
 import net.lordofthecraft.arche.commands.CommandBeaconme;
@@ -40,6 +42,7 @@ import net.lordofthecraft.arche.commands.CommandNewbies;
 import net.lordofthecraft.arche.commands.CommandPersona;
 import net.lordofthecraft.arche.commands.CommandRaceSpawn;
 import net.lordofthecraft.arche.commands.CommandRealname;
+import net.lordofthecraft.arche.commands.CommandSeen;
 import net.lordofthecraft.arche.commands.CommandShowItem;
 import net.lordofthecraft.arche.commands.CommandSkin;
 import net.lordofthecraft.arche.commands.CommandSql;
@@ -469,11 +472,16 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("skin").setExecutor(new CommandSkin(this));
 		
 		//Commands, ACB method, Annotated:
-		CommandHandle.build(getCommand("date"), ()->new CommandDate(this));
-		CommandHandle.build(getCommand("durabilityboost"), ()->new CommandDurability());
-		CommandHandle.build(getCommand("showitem"), CommandShowItem::new);
+		newCommand("data", CommandDate::new);
+		newCommand("durabilityboost", CommandDurability::new);
+		newCommand("showitem", CommandShowItem::new);
+		newCommand("seen", CommandSeen::new);
 	}
 
+	private void newCommand(String name, Supplier<CommandTemplate> sup) {
+		CommandHandle.build(getCommand(name), sup);
+	}
+	
 	private void initListeners(){
 		PluginManager pm = Bukkit.getPluginManager();
 

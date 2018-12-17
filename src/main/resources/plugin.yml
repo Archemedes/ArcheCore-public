@@ -79,11 +79,12 @@ commands:
       aliases: [currentdate, lotcdate, calendar]
       description: Displays calendar date.
    durabilityboost:
-      usage: /<command>
-      description: Add a modded durability boost for the held item
-      permission: archecore.mod
+      description: Add a modddurabilityboosted durability boost for the held item
+      permission: archecore.command.durabilityboost
       aliases: [duraboost, dub]
-      permission-message: §4Insufficient Permission for this command
+   seen:
+      description: Show information about the player
+      permission: archecore.command.seen
 
 permissions:
   archecore.arsql:
@@ -113,6 +114,7 @@ permissions:
       archecore.money.seeother: true
       archecore.command.newbies: true
       archecore.command.beaconme: true
+      archecore.command.seen: true
       archecore.persona.setrace: true
       archecore.persona.realrace: true
       archecore.mayuse: true

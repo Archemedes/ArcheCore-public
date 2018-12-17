@@ -9,8 +9,8 @@ public class CommandDate extends CommandTemplate
 {
     private final LotcianCalendar calendar;
     
-    public CommandDate(ArcheCore plugin) {
-        calendar = plugin.getCalendar();
+    public CommandDate() {
+        calendar = ArcheCore.getControls().getCalendar();
     }
     
     @Override

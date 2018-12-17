@@ -15,10 +15,12 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.command.CommandTemplate;
 import net.lordofthecraft.arche.command.annotate.Flag;
 import net.lordofthecraft.arche.interfaces.Account;
+import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.util.ChatBuilder;
 import net.lordofthecraft.arche.util.Hastebin;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.TimeUtil;
+import net.lordofthecraft.arche.util.WeakBlock;
 import net.md_5.bungee.api.chat.BaseComponent;
 
 public class CommandSeen extends CommandTemplate {
@@ -103,11 +105,12 @@ public class CommandSeen extends CommandTemplate {
 		if(weekMs > 0) b.append(" played ").append(TimeUtil.printMillis(weekMs)).append(" in the last week.").append('\n');
 		
 		b.append("Personas: ").append('\n');
-		for(var ps : account.getPersonas()) {
+		for(var psx : account.getPersonas()) {
+			var ps = (ArchePersona) psx;
 			b.append(ps.getName());
-			if(ps.isCurrent()) b.append(": Active.");
-			else b.append(": Last seen ").append(TimeUtil.printMillis(ps.getLastSeen())).append( " ago.");
-			b.append('\n');
+			if(ps.isCurrent()) b.append(": active ");
+			else b.append(": since ").append(TimeUtil.printBrief(ps.getLastSeen()));
+			b.append(" at ").append(new WeakBlock(ps.getLocation()).toString()).append('\n');
 		}
 		
 		b.append("UUIDs:").append('\n');
