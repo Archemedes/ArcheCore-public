@@ -57,7 +57,7 @@ public class CommandPersona implements CommandExecutor {
         LIST("archecore.command.persona.list", true, true, "list", "listpersonas", "viewpersonas"),
         //PROFESSION("archecore.command.persona.profession", false, "profession", "setprofession", "setprof", "skill", "setskill", "sk"),
         PERMAKILL("archecore.admin.command.persona.permakill", true, true, "permakill", "pk", "remove", "delete"),
-        TIME("archecore.command.persona.time", true, true, "time", "timeplayed", "played", "viewtime", "viewplayed"),
+        TIME("archecore.command.persona.time", true, "time", "timeplayed", "played", "viewtime", "viewplayed"),
         SETRACE("archecore.command.persona.setrace", false, "setrace", "setvisiblerace", "setapparentrace"),
         REALRACE("archecore.command.persona.realrace", false, "realrace", "viewrealrace", "underlyingrace", "viewunderrace"),
         WIPERACE("archecore.command.persona.wiperace", false, "wiperace", "clearrace", "clearvisrace", "clearoverlying"),
@@ -256,10 +256,35 @@ public class CommandPersona implements CommandExecutor {
                 if (cmd == PersonaCommand.VIEW || cmd == PersonaCommand.MORE) {
                     boolean extendedInfo = args[0].equalsIgnoreCase("more");
 
-			if (pers == null) {
-				sender.sendMessage(ChatColor.RED + "Error: No persona found to modify");
-				return true;
-			}
+                    Player t = Bukkit.getPlayer(opers.getPlayerUUID());
+                    if (t != null && !handler.mayUse(t)) {
+                        sender.sendMessage(ChatColor.DARK_AQUA + "This player is a Wandering Soul (may not use Personas)");
+                    } else {
+                        //If the persona is found the Whois should always succeed
+                        //We have assured the persona is found earlier
+                        (extendedInfo ? handler.whoisMore(opers,sender) : handler.whois(opers,sender))
+                                .forEach(o -> MessageUtil.send(o, sender));
+                    }
+                    return true;
+                } else if (cmd == PersonaCommand.CREATED) {
+                    String time = millsToDaysHours(System.currentTimeMillis() - opers.getCreationTime().getTime());
+                    sender.sendMessage(ChatColor.AQUA + "Created " + opers.getName() + " " + ChatColor.GOLD.toString() + ChatColor.BOLD + time + ChatColor.AQUA + " ago.");
+                    return true;
+                } else if (cmd == PersonaCommand.LIST) {
+                    ArcheOfflinePersona[] personas = handler.getAllOfflinePersonas(opers.getPlayerUUID());
+                    sender.sendMessage(ChatColor.AQUA + opers.getPlayerName() + "'s personas:");
+                    boolean mod = sender.hasPermission("archecore.mod.other") || sender.hasPermission("archecore.admin");
+                    for (int i = 0; i < personas.length; i++) {
+                        OfflinePersona persona = personas[i];
+                        if (persona != null)sender.sendMessage(ChatColor.GRAY + "[" + i + "] " + ChatColor.AQUA + persona.getName() + (mod? (ChatColor.DARK_GRAY + " (id:"+persona.getPersonaId()+")" ) : "") );
+                        else sender.sendMessage(ChatColor.GRAY + "[" + i + "] " + ChatColor.WHITE + "Empty");
+                    }
+                    return true;
+                } else if (cmd == PersonaCommand.PERMAKILL) {
+                    if (!(args.length > 1)) {
+                        sender.sendMessage(ChatColor.RED + "Don't delete yourself by mistake friend!");
+                        return true;
+                    }
 
                     opers.remove();
                     sender.sendMessage(ChatColor.AQUA + "You have permakilled Persona " + ChatColor.WHITE + opers.getName() + ChatColor.AQUA + " belonging to " + ChatColor.WHITE + opers.getPlayerName());
@@ -283,6 +308,9 @@ public class CommandPersona implements CommandExecutor {
                     pers.setDateOfBirth(0);
                     sender.sendMessage(ChatColor.AQUA + "Persona age was cleared for " + pers.getName() + ".");
                     return true;
+                } else if (cmd == PersonaCommand.TIME) {
+                  sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + pers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
+                  return true;
                 /*} else if (cmd == PersonaCommand.PROFESSION && args.length == 1 && sender instanceof Player) {
                     sender.sendMessage(ChatColor.BLUE + "Available Professions: " + ChatColor.DARK_GRAY + "[Click for Info]");
                     final BaseComponent m = new TextComponent();

@@ -28,6 +28,7 @@ import com.google.common.collect.Maps;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
+import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
@@ -330,8 +331,6 @@ public class CreationDialog {
             context.setSessionData("gender", input);
             return new PickRacePrompt();
         }
-
-
     }
 
     private class PickRacePrompt extends ValidatingPrompt {
@@ -530,7 +529,7 @@ public class CreationDialog {
         protected Prompt getNextPrompt(ConversationContext context) {
         	Player p = (Player) context.getForWhom();
 
-        	int id = (Integer) context.getSessionData("slot");
+        	int slot = (Integer) context.getSessionData("slot");
         	String name = (String) context.getSessionData("name");
         	String gender = (String) context.getSessionData("gender");
         	Race race = (Race) context.getSessionData("race");
@@ -538,7 +537,8 @@ public class CreationDialog {
 
         	CoreLog.debug("New persona created in the world " + p.getWorld().getName() + " with the uuid of " + p.getWorld().getUID());
 
-        	ArchePersona persona = new ArchePersona(ArchePersonaHandler.getInstance().getNextPersonaId(), p.getUniqueId(), id, name, race, 0, gender, new Timestamp(creationTimeMS), new Timestamp(System.currentTimeMillis()), 0, null);
+        	int nextId = ArchePersonaHandler.getInstance().getNextPersonaId();
+        	ArchePersona persona = new ArchePersona(nextId, p.getUniqueId(), slot, name, race, 0, gender, new Timestamp(creationTimeMS), PersonaType.NORMAL, null);
 
         	ArchePersonaHandler.getInstance().registerPersona(persona);
         	p.sendMessage(ChatColor.GOLD + "" + ChatColor.UNDERLINE + "Created your new Persona: " + ChatColor.GREEN + name + ChatColor.GOLD + "!");

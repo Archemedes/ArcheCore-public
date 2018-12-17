@@ -44,11 +44,6 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	WeakBlock location;
 
 	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, boolean current,
-			Race race, int birthdate, String gender, PersonaType type, String name) {
-		this(personaKey, creation, current, race, birthdate, gender, type, name, null);
-	}
-
-	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, boolean current,
 			Race race, int birthdate, String gender, PersonaType type, String name, String raceString) {
 		this.personaKey = personaKey;
 		this.creationTime = creation;

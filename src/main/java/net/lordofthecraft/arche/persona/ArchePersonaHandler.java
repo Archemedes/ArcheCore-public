@@ -3,7 +3,6 @@ package net.lordofthecraft.arche.persona;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,10 +49,8 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
 import net.lordofthecraft.arche.interfaces.PersonaTags;
 import net.lordofthecraft.arche.interfaces.Skill;
-import net.lordofthecraft.arche.save.PersonaField;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.InsertPersonaRow;
-import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.MessageUtil;
@@ -244,7 +241,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 			before.setCurrent(false);
 			before.endSession();
 			Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(before, PersonaDeactivateEvent.Reason.SWITCH));
-			ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(before, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
 
 			//Store and switch Persona-related specifics: Location and Inventory.
 			before.saveMinecraftSpecifics(p);
@@ -537,7 +533,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 	private void activate(ArchePersona ps) {
 		Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
-		ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
 		ps.initSession();
 		
 		RaceBonusHandler.apply(ps);
@@ -557,10 +552,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			//We want these cleanly removed from Players on shutdown
 			//As a side-effect, this is also a good time to save them for current Personas
 			ps.attributes().handleSwitch(true);
-
 			ps.saveMinecraftSpecifics(p);
-
-			ArcheCore.getConsumerControls().queueRow(new UpdatePersonaRow(ps, PersonaField.STAT_LAST_PLAYED, new Timestamp(System.currentTimeMillis())));
 		}
 	}
 

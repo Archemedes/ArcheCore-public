@@ -23,7 +23,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import lombok.Getter;
@@ -57,11 +56,9 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	@Getter double fatigue = 0;
 	@Getter ArcheSkin skin;
 	
-	final Map<String,Object> sqlCriteria;
 	final AtomicInteger charactersSpoken;
-	
-	Timestamp lastPlayed;
-	int timePlayed;
+	long lastPlayed;
+	long timePlayed;
 	int pastPlayTime; //stat_playtime_past
 	
 	double money = ArcheCore.getEconomyControls().getBeginnerAllowance();
@@ -76,24 +73,14 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	private WeakReference<Player> playerObject;
 
 	public ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
-			String gender, Timestamp creationTimeMS, Timestamp lastPlayed, int played) {
-		this(persona_id, player, slot, name, race, birthdate, gender, creationTimeMS, lastPlayed, played, PersonaType.NORMAL, null);
-	}
-	
-	public ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
-			String gender, Timestamp creationTimeMS, Timestamp lastPlayed, int played, String raceString) {
-		this(persona_id, player, slot, name, race, birthdate, gender, creationTimeMS, lastPlayed, played, PersonaType.NORMAL, raceString);
-	}
-
-	ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
-			String gender, Timestamp creationTimeMS, Timestamp lastPlayed, int played, PersonaType type, String raceString) {
+			String gender, Timestamp creationTimeMS, PersonaType type, String raceString) {
 		super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, false, race, birthdate, gender, type, name, raceString);
 		charactersSpoken = new AtomicInteger();
 		renamed = new Timestamp(0);
-		pastPlayTime = 0;
-
-		sqlCriteria = Maps.newConcurrentMap();
-		sqlCriteria.put("persona_id", persona_id);
+		
+		lastPlayed = System.currentTimeMillis(); //AccountBlob can set this to be lower
+		timePlayed = 0; //AccountBlob can set this to be higher
+		pastPlayTime = 0; //PersonaStore might set this higher
 	}
 
 	@Override
@@ -161,11 +148,13 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	}
 
 	void initSession() {
+		this.lastPlayed = System.currentTimeMillis();
 		this.session = new PlaySession(this);
 	}
 
 	void endSession() {
 		this.session.endSession();
+		this.lastPlayed = System.currentTimeMillis();
 		this.session = null;
 	}
 
@@ -206,7 +195,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	
 	@Override
 	public int getTimePlayed() {
-		return timePlayed;
+		return (int) timePlayed;
 	}
 
 	@Override

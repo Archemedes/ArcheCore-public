@@ -283,10 +283,8 @@ public class PersonaStore {
         Timestamp creationTimeMS = res.getTimestamp(PersonaField.STAT_CREATION.field());
         
         PersonaType ptype = PersonaType.valueOf(type);
-        ArcheOfflinePersona persona = new ArcheOfflinePersona(
-        		new ArchePersonaKey(persona_id, pUUID, slot),
-        		creationTimeMS, lastPlayed, played, current, race,
-        		birthdate, gender, ptype, name, raceString);
+        ArcheOfflinePersona persona = new ArcheOfflinePersona(new ArchePersonaKey(persona_id, pUUID, slot),
+        		creationTimeMS, current, race, birthdate, gender, ptype, name, raceString);
 
         String wstr = res.getString(PersonaField.WORLD.field());
         if (!res.wasNull()) {
@@ -307,7 +305,6 @@ public class PersonaStore {
     }
 
     ArchePersona buildPersona(ResultSet res, ArcheOfflinePersona op) throws SQLException {
-
         ArchePersona persona = new ArchePersona(
                 op.getPersonaId(),
                 op.getPlayerUUID(),
@@ -317,8 +314,6 @@ public class PersonaStore {
                 op.getDateOfBirth(),
                 op.getGender(),
                 op.getCreationTime(),
-                op.lastPlayed,
-                op.getTimePlayed(),
                 op.getPersonaType(),
                 op.getRaceString()
         );
