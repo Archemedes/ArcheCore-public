@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -140,8 +139,6 @@ public class ArcheAccountHandler implements AccountHandler {
 				rs = s.executeQuery("SELECT ip_address FROM account_ips WHERE account_id_fk="+id);
 				while(rs.next()) account.ips.add(rs.getString("ip_address"));
 				rs.close();
-				
-				initTimes(s, account);
 			} else { //Account doesn't exist. We must create it
 				CoreLog.debug("Making a new account for player " + uuid);
 				account = makeAccount(uuid);
@@ -154,27 +151,21 @@ public class ArcheAccountHandler implements AccountHandler {
 		return account;
 	}
 	
-	private void initTimes(Statement s, ArcheAccount account) throws SQLException {
-		long lastSeen = 0;
-		long played = 0;
-		long playedWeek = 0;
-		
-		long week = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
-		
-		ResultSet rs = s.executeQuery("SELECT logout,time_played FROM account_sessions WHERE account_id_fk="+account.getId());
-		while(rs.next()) {
-			long logout = rs.getLong(1);
-			long time_played = rs.getLong(2);
-			
-			lastSeen = Math.max(lastSeen, logout);
-			played += time_played;
-			if(logout > week) playedWeek +=time_played;
+	void initTimes(AccountBlob blob){
+		ArcheAccount account = blob.getAccount();
+
+		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
+			ResultSet rs = s.executeQuery("SELECT persona_id_fk,logout,time_played FROM account_sessions WHERE account_id_fk="+account.getId());
+			while(rs.next()) {
+				int personaId = rs.getInt(1);
+				long logout = rs.getLong(2);
+				long time_played = rs.getLong(3);
+				blob.integrateSession(personaId, logout, time_played);
+			}
+			rs.close();
+		} catch(SQLException e) {
+			e.printStackTrace();
 		}
-		rs.close();
-		
-		account.lastSeen = lastSeen;
-		account.timePlayed = played;
-		account.timePlayedThisWeek = playedWeek;
 	}
 	
 
