@@ -56,10 +56,10 @@ public class CommandSeen extends CommandTemplate {
 		
 		if(p != null) b.append("Online").color(GREEN);
 		else b.append("Offline").append(RED);
-		b.append(" Since ").color(GRAY).append(lastSeen);
+		b.append(" since ").color(GRAY).append(lastSeen);
 		
 		for(var ps : account.getPersonas()) {
-			ps.
+			
 		}
 	}
 
