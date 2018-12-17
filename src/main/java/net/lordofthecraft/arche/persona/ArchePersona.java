@@ -78,8 +78,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		charactersSpoken = new AtomicInteger();
 		renamed = new Timestamp(0);
 		
-		lastPlayed = System.currentTimeMillis(); //AccountBlob can set this to be lower
-		timePlayed = 0; //AccountBlob can set this to be higher
+		lastPlayed = System.currentTimeMillis(); //PersonaStore sets this to 0, then AccountBlob sets this based on sessions
+		timePlayed = 0; //AccountBlob sets this based on sum of sessions
 		pastPlayTime = 0; //PersonaStore might set this higher
 	}
 
@@ -185,13 +185,14 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		}
 	}
 
-	/**
-	 * Atomically adds minutes to the total amount of this Persona's playtime.
-	 * @param timePlayed The amount of minutes to add
-	 */
-	public void addTimePlayed(int timePlayed){
+	public void addTimePlayed(long timePlayed){
 		this.timePlayed += timePlayed;
 	}
+	
+	public void compareLastPlayed(long lastPlayed) {
+		this.lastPlayed = Math.max(lastPlayed, this.lastPlayed);
+	}
+	
 	
 	@Override
 	public int getTimePlayed() {

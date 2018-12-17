@@ -24,8 +24,9 @@ public class AccountBlob {
 			if(logout > week) account.timePlayedThisWeek += time_played;
 			
 			//For persona
-			long[] pair = timeBlob.computeIfAbsent(personaId, $->new long[2]);
-			pair[0] = Math.max(pair[0], logout);
-			pair[1] += time_played;
+			personas.stream().filter(ps->ps.getPersonaId() == personaId).findAny().ifPresent(ps->{
+				ps.compareLastPlayed(logout);
+				ps.addTimePlayed(time_played);
+			});
 		}
 }

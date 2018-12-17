@@ -318,6 +318,8 @@ public class PersonaStore {
                 op.getRaceString()
         );
 
+        persona.lastPlayed = 0; //Last Played is UNKNOWN until an account_playsession is registered
+        
         persona.location = op.location;
         persona.current = op.current;
 

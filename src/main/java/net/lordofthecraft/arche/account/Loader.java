@@ -121,7 +121,6 @@ public class Loader {
 		
 		AccountBlob blob = new AccountBlob(acc, prs);
 		aHandler.initTimes(blob);
-		
 		return blob;
 	}
 	

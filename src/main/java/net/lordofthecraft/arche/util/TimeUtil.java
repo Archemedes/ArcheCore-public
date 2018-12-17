@@ -35,6 +35,12 @@ public final class TimeUtil {
 	public static BaseComponent print(long ms, boolean brief, ChatColor numColor, ChatColor unitColor) {
 		ChatBuilder sb = MessageUtil.builder();
 		
+		if(ms == 0) {
+			sb.append("UNKNOWN");
+			if(numColor != null) sb.color(numColor);
+			return sb.build();
+		}
+		
 		long days = MILLISECONDS.toDays(ms);
 		long hours = MILLISECONDS.toHours(ms) - days*24;
 		long minutes = MILLISECONDS.toMinutes(ms) - DAYS.toMinutes(days) - hours*60;
