@@ -125,6 +125,11 @@ public interface Persona extends OfflinePersona {
 	 */
 	void clearPrefix();
 
+	/**
+	 * @return Last time this Persona was switched to or from
+	 */
+	long getLastSeen();
+	
   /**
    * Retrieve the total Playtime this Persona has seen since the last reset
    *

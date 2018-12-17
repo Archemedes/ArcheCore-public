@@ -84,11 +84,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	}
 
 	@Override
-	public int getTotalPlaytime() {
-		return pastPlayTime + getTimePlayed();
-	}
-
-	@Override
 	public PersonaSkills skills() {
 		return skills;
 	}
@@ -193,6 +188,14 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		this.lastPlayed = Math.max(lastPlayed, this.lastPlayed);
 	}
 	
+	public long getLastSeen() {
+		return this.lastPlayed;
+	}
+	
+	@Override
+	public int getTotalPlaytime() {
+		return pastPlayTime + getTimePlayed();
+	}
 	
 	@Override
 	public int getTimePlayed() {
