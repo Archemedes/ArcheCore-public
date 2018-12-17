@@ -15,6 +15,8 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.command.CommandTemplate;
 import net.lordofthecraft.arche.command.annotate.Flag;
 import net.lordofthecraft.arche.interfaces.Account;
+import net.lordofthecraft.arche.util.ChatBuilder;
+import net.lordofthecraft.arche.util.Hastebin;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.TimeUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -25,13 +27,24 @@ public class CommandSeen extends CommandTemplate {
 	
 	@Flag(name = "m", description="Perform full Moderator printout.", permission="archecore.mod")
 	public void invoke(CommandSender s, String someName) {
-		validate(cooldown(), "This command has a 15s cooldown. Please wait a bit");
+		validate(cooldown(), "This command has a 10s cooldown. Please wait a bit");
 		UUID u = ArcheCore.getControls().getPlayerUUIDFromAlias(someName);
 		validate(u != null, "We don't know anyone with the username " + RESET + someName);
 		
 		var aah = ArcheCore.getControls().getAccountHandler();
-		aah.loadAccount(u).then(this::printout);
-		
+		aah.loadAccount(u).then(acc->{
+			if(hasFlag("m")) {
+				Bukkit.getScheduler().runTaskAsynchronously(ArcheCore.getPlugin(), ()->{
+					String link = Hastebin.upload(this.printoutMod(acc));
+					s.sendMessage(BLUE + "Your command result has been prepared into a hastebin prinout.");
+					s.sendMessage(BLUE + "These expire quickly, so copy-paste for any logging purposes.");
+					s.sendMessage(BLUE + "Also do not share any sensitive information contained therein.");
+					s.sendMessage(link);
+				});
+			} else {
+				printout(acc).send(s);
+			}
+		});
 	}
 	
 	private boolean cooldown() {
@@ -43,24 +56,72 @@ public class CommandSeen extends CommandTemplate {
 		if(cd.contains(u)) return false;
 		
 		cd.add(u);
-		Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->cd.remove(u), 300l);
+		Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->cd.remove(u), 200l);
 		return true;
 	}
 	
-	private void printout(Account account) {
-		long elapsed = System.currentTimeMillis() - account.getLastSeen();
+	private ChatBuilder printout(Account account) {
+		var b = MessageUtil.builder();
+		
+		long ls = account.getLastSeen();
+		long elapsed = ls == 0? 0 : System.currentTimeMillis() - account.getLastSeen();
 		BaseComponent lastSeen = TimeUtil.printMillis(elapsed);
 		
-		var b = MessageUtil.builder();
 		Player p = account.getPlayer();
-		
 		if(p != null) b.append("Online").color(GREEN);
 		else b.append("Offline").append(RED);
-		b.append(" since ").color(GRAY).append(lastSeen);
+		b.append(" since ").color(GRAY).append(lastSeen).newline();
 		
+		long weekMs = account.getTimePlayedThisWeek() * 60 * 1000;
+		if(weekMs > 0) b.append(" played ").append(TimeUtil.printMillis(weekMs)).append(" in the last week.").newline();
+		
+		b.append("Has the following personas:").color(BLUE).newline();
 		for(var ps : account.getPersonas()) {
+			b.append(ps.getName());
+			if(ps.isCurrent()) b.color(GREEN).append(": Active persona!");
+			else b.color(YELLOW).append(": Last seen ").color(GRAY).append(TimeUtil.printMillis(ps.getLastSeen())).append( " ago.");
+			b.color(GRAY).newline();
 			
 		}
+		
+		return b;
 	}
+	
+	private String printoutMod(Account account) {
+		var b = new StringBuilder(1024);
+		
+		long ls = account.getLastSeen();
+		long elapsed = ls == 0? 0 : System.currentTimeMillis() - account.getLastSeen();
+		String lastSeen = TimeUtil.printMillisRaw(elapsed).toPlainText();
+		
+		Player p = account.getPlayer();
+		if(p != null) b.append("Online");
+		else b.append("Offline");
+		b.append(" since ").append(lastSeen).append('\n');
+		
+		long weekMs = account.getTimePlayedThisWeek() * 60 * 1000;
+		if(weekMs > 0) b.append(" played ").append(TimeUtil.printMillis(weekMs)).append(" in the last week.").append('\n');
+		
+		b.append("Personas: ").append('\n');
+		for(var ps : account.getPersonas()) {
+			b.append(ps.getName());
+			if(ps.isCurrent()) b.append(": Active.");
+			else b.append(": Last seen ").append(TimeUtil.printMillis(ps.getLastSeen())).append( " ago.");
+			b.append('\n');
+		}
+		
+		b.append("UUIDs:").append('\n');
+		account.getUUIDs().forEach(u->b.append(u.toString()).append('\n'));
+		
+		b.append("Aliases:").append('\n');
+		account.getUsernames().forEach(u->b.append(u).append('\n'));
+		
+		b.append("IP Addresses:").append('\n');
+		account.getIPs().forEach(u->b.append(u).append('\n'));
+		
+		
+		return b.toString();
+	}
+	
 
 }

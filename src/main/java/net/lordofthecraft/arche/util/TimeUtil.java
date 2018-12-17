@@ -36,7 +36,7 @@ public final class TimeUtil {
 		ChatBuilder sb = MessageUtil.builder();
 		
 		if(ms == 0) {
-			sb.append("UNKNOWN");
+			sb.append("unknown");
 			if(numColor != null) sb.color(numColor);
 			return sb.build();
 		}
