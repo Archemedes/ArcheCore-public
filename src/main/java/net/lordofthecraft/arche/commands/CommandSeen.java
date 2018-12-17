@@ -36,9 +36,10 @@ public class CommandSeen extends CommandTemplate {
 		var aah = ArcheCore.getControls().getAccountHandler();
 		aah.loadAccount(u).then(acc->{
 			if(hasFlag("m")) {
+				String modStuff = this.printoutMod(acc);
 				Bukkit.getScheduler().runTaskAsynchronously(ArcheCore.getPlugin(), ()->{
-					String link = Hastebin.upload(this.printoutMod(acc));
-					s.sendMessage(BLUE + "Your command result has been prepared into a hastebin prinout.");
+					String link = Hastebin.upload(modStuff);
+					s.sendMessage(BLUE + "Your command result has been uploaded to hastebin.");
 					s.sendMessage(BLUE + "These expire quickly, so copy-paste for any logging purposes.");
 					s.sendMessage(BLUE + "Also do not share any sensitive information contained therein.");
 					s.sendMessage(link);
