@@ -125,6 +125,13 @@ public interface Persona extends OfflinePersona {
 	 */
 	void clearPrefix();
 
+  /**
+   * Retrieve the total Playtime this Persona has seen since the last reset
+   *
+   * @return Playtime in minutes
+   */
+  int getTimePlayed();
+	
 	/**
 	 * Get the amount of characters this player has entered into chat, while playing this Persona, since creation
 	 * @return Amount of characters spoken.

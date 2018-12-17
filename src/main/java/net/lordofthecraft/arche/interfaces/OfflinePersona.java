@@ -105,13 +105,6 @@ public interface OfflinePersona {
      * @return the Player's unique id.
      */
     UUID getPlayerUUID();
-
-    /**
-     * Retrieve the total Playtime this Persona has seen since the last reset
-     *
-     * @return Playtime in minutes
-     */
-    int getTimePlayed();
     
     /**
      * @return the creation time of this persona in milliseconds

@@ -190,7 +190,6 @@ public final class ArcheTables {
 				"money DOUBLE DEFAULT " + ArcheCore.getEconomyControls().getBeginnerAllowance() + "," +
 				"profession VARCHAR(255) DEFAULT NULL," +
 				"fatigue DOUBLE DEFAULT 0.0," +
-				"last_played DATETIME(3)," +
 				"skin_slot INT DEFAULT -1," +
 				"PRIMARY KEY (persona_id)," +
 				"FOREIGN KEY (player_fk) REFERENCES players (player) ON UPDATE CASCADE ON DELETE RESTRICT," +
@@ -275,7 +274,6 @@ public final class ArcheTables {
 				"persona_id_fk INT UNSIGNED," +
 				//TODO Update
 				"date_created DATETIME(3)," +
-				"played INT UNSIGNED DEFAULT 0," +
 				"chars INT UNSIGNED DEFAULT 0," +
 				//TODO update
 				"renamed DATETIME(3)," +

@@ -42,16 +42,14 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	String raceString = null;
 
 	WeakBlock location;
-	Timestamp lastPlayed;
-	int timePlayed;
 
-	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, int played,
-			boolean current, Race race, int birthdate, String gender, PersonaType type, String name) {
-		this(personaKey, creation, played, current, race, birthdate, gender, type, name, null);
+	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, boolean current,
+			Race race, int birthdate, String gender, PersonaType type, String name) {
+		this(personaKey, creation, current, race, birthdate, gender, type, name, null);
 	}
 
-	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, int played,
-			boolean current, Race race, int birthdate, String gender, PersonaType type, String name, String raceString) {
+	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, boolean current,
+			Race race, int birthdate, String gender, PersonaType type, String name, String raceString) {
 		this.personaKey = personaKey;
 		this.creationTime = creation;
 		this.current = current;
@@ -60,26 +58,6 @@ public class ArcheOfflinePersona implements OfflinePersona {
 		this.gender = gender;
 		this.personaType = type;
 		this.name = name;
-		this.timePlayed = played;
-	}
-
-	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, int played,
-			boolean current, Race race, int birthdate, String gender, PersonaType type, String name) {
-		this(personaKey, creation, lastPlayed, played, current, race, birthdate, gender, type, name, null);
-	}
-
-	ArcheOfflinePersona(PersonaKey personaKey, Timestamp creation, Timestamp lastPlayed, int played,
-			boolean current, Race race, int birthdate, String gender, PersonaType type, String name, String raceString) {
-		this.personaKey = personaKey;
-		this.creationTime = creation;
-		this.lastPlayed = lastPlayed;
-		this.current = current;
-		this.race = race;
-		this.dateOfBirth = birthdate;
-		this.gender = gender;
-		this.personaType = type;
-		this.name = name;
-		timePlayed = played;
 		this.raceString = raceString;
 	}
 
@@ -101,11 +79,6 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	@Override
 	public UUID getPlayerUUID() {
 		return personaKey.getPlayerUUID();
-	}
-
-	@Override
-	public int getTimePlayed() {
-		return timePlayed;
 	}
 
 	@Override

@@ -281,8 +281,6 @@ public class PersonaStore {
         String gender = res.getString(PersonaField.GENDER.field());
         String raceString = res.getString(PersonaField.RACE.field());
         Timestamp creationTimeMS = res.getTimestamp(PersonaField.STAT_CREATION.field());
-        Timestamp lastPlayed = res.getTimestamp(PersonaField.STAT_LAST_PLAYED.field());
-        int played = res.getInt(PersonaField.STAT_PLAYED.field());
         
         PersonaType ptype = PersonaType.valueOf(type);
         ArcheOfflinePersona persona = new ArcheOfflinePersona(

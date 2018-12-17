@@ -59,7 +59,11 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	
 	final Map<String,Object> sqlCriteria;
 	final AtomicInteger charactersSpoken;
+	
+	Timestamp lastPlayed;
+	int timePlayed;
 	int pastPlayTime; //stat_playtime_past
+	
 	double money = ArcheCore.getEconomyControls().getBeginnerAllowance();
 	int food = 20;
 	float saturation = 0;
@@ -83,7 +87,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 	ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
 			String gender, Timestamp creationTimeMS, Timestamp lastPlayed, int played, PersonaType type, String raceString) {
-		super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, lastPlayed, played, false, race, birthdate, gender, type, name, raceString);
+		super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, false, race, birthdate, gender, type, name, raceString);
 		charactersSpoken = new AtomicInteger();
 		renamed = new Timestamp(0);
 		pastPlayTime = 0;
@@ -198,7 +202,11 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	 */
 	public void addTimePlayed(int timePlayed){
 		this.timePlayed += timePlayed;
-		consumer.queueRow(new UpdatePersonaRow(this, PersonaField.STAT_PLAYED, this.timePlayed));
+	}
+	
+	@Override
+	public int getTimePlayed() {
+		return timePlayed;
 	}
 
 	@Override
