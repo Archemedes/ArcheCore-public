@@ -41,7 +41,7 @@ public class CommandSeen extends CommandTemplate {
 					String link = Hastebin.upload(modStuff);
 					s.sendMessage(BLUE + "Your command result has been uploaded to hastebin.");
 					s.sendMessage(BLUE + "These expire quickly, so copy-paste for any logging purposes.");
-					s.sendMessage(BLUE + "Also do not share any sensitive information contained therein.");
+					s.sendMessage(BLUE + "Do not share any sensitive information contained here.");
 					s.sendMessage(link);
 				});
 			} else {
