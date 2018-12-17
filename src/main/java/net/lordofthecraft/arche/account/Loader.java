@@ -112,14 +112,17 @@ public class Loader {
 	
 	private AccountBlob loadFromDisk(UUID u) {
 		ArcheAccount acc = aHandler.fetchAccount(u);
-				
+		
 		List<ArchePersona> prs = new ArrayList<>();
 		for(UUID u2 : acc.getUUIDs()) {
 			var personas = pHandler.getPersonaStore().loadPersonas(u2);
 			personas.forEach(prs::add);
 		}
 		
-		return new AccountBlob(acc, prs);
+		AccountBlob blob = new AccountBlob(acc, prs);
+		aHandler.initTimes(blob);
+		
+		return blob;
 	}
 	
 	private void sync(Runnable r) {
