@@ -7,7 +7,8 @@ public enum Race {
     ORC("Orc", "Orc"),
 
     HALFLING("Halfling", "Human", 200),
-
+    GOBLIN("Goblin", "Orc"),
+    
     HIGH_ELF("High Elf", "Elf", 1000),
     DARK_ELF("Dark Elf", "Elf", 1000),
     WOOD_ELF("Wood Elf", "Elf", 1000),
@@ -17,8 +18,7 @@ public enum Race {
     MOUNTAIN_DWARF("Mountain Dwarf", "Dwarf"),
     DARK_DWARF("Dark Dwarf", "Dwarf"),
 
-    OLOG("Olog", "Orc", 500),
-    GOBLIN("Goblin", "Orc"),
+    
 
     UNSET("Unset", "Unset", 1000);
 
