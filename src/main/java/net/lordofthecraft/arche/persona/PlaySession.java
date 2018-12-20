@@ -1,7 +1,9 @@
 package net.lordofthecraft.arche.persona;
 
+import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.save.rows.persona.PruneSessionsRow;
 import net.lordofthecraft.arche.util.WeakBlock;
 
 public class PlaySession {
@@ -18,9 +20,10 @@ public class PlaySession {
 	void endSession() {
 		WeakBlock wb = new WeakBlock(persona.getPlayer().getLocation());
 		long elapsed = persona.getTimePlayed() - startPlaytime;
-		if(elapsed < 3) return;
 		
-		ArcheCore.getConsumerControls().insert("account_sessions")
+		var c = ArcheCore.getConsumerControls();
+		c.queueRow(new PruneSessionsRow(persona.getPersonaId()));
+		c.insert("account_sessions")
 			.set("account_id_fk", persona.getAccount().getId())
 			.set("persona_id_fk", persona.getPersonaId())
 			.set("login", startTime)
