@@ -82,8 +82,9 @@ public class CommandSeen extends CommandTemplate {
 		b.append("Has the following personas:").color(BLUE).newline();
 		for(var ps : account.getPersonas()) {
 			b.append(ps.getName());
+			long since = System.currentTimeMillis() - ps.getLastSeen();
 			if(ps.isCurrent()) b.color(GREEN).append(": Active persona!");
-			else b.color(YELLOW).append(": Last seen ").color(GRAY).append(TimeUtil.printMillis(ps.getLastSeen())).append( " ago.");
+			else b.color(YELLOW).append(": Last seen ").color(GRAY).append(TimeUtil.printMillis(since)).append( " ago.");
 			b.color(GRAY).newline();
 			
 		}
@@ -110,8 +111,9 @@ public class CommandSeen extends CommandTemplate {
 		for(var psx : account.getPersonas()) {
 			var ps = (ArchePersona) psx;
 			b.append(ps.getName());
+			long since = System.currentTimeMillis() - ps.getLastSeen();
 			if(ps.isCurrent()) b.append(": active ");
-			else b.append(": since ").append(TimeUtil.printBrief(ps.getLastSeen()));
+			else b.append(": since ").append(TimeUtil.printBrief(since));
 			b.append(" at ").append(new WeakBlock(ps.getLocation()).toString()).append('\n');
 		}
 		
