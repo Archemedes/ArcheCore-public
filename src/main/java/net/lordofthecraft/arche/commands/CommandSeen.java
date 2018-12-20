@@ -105,7 +105,7 @@ public class CommandSeen extends CommandTemplate {
 		b.append(" since ").append(lastSeen).append('\n');
 		
 		long weekMs = account.getTimePlayedThisWeek() * 60 * 1000;
-		if(weekMs > 0) b.append(" played ").append(TimeUtil.printMillis(weekMs)).append(" in the last week.").append('\n');
+		if(weekMs > 0) b.append(" played ").append(TimeUtil.printMillis(weekMs).toPlainText()).append(" in the last week.").append('\n');
 		
 		b.append('\n').append("Personas: ").append('\n');
 		for(var psx : account.getPersonas()) {
@@ -113,17 +113,17 @@ public class CommandSeen extends CommandTemplate {
 			b.append(ps.getName());
 			long since = System.currentTimeMillis() - ps.getLastSeen();
 			if(ps.isCurrent()) b.append(": active ");
-			else b.append(": since ").append(TimeUtil.printBrief(since));
+			else b.append(": since ").append(TimeUtil.printBrief(since).toPlainText());
 			b.append(" at ").append(new WeakBlock(ps.getLocation()).toString()).append('\n');
 		}
 		
-		b.append('\n').append("UUIDs:").append('\n');
+		b.append("===\n").append("UUIDs:").append('\n');
 		account.getUUIDs().forEach(u->b.append(u.toString()).append('\n'));
 		
-		b.append('\n').append("Aliases:").append('\n');
+		b.append("===\n").append("Aliases:").append('\n');
 		account.getUsernames().forEach(u->b.append(u).append('\n'));
 		
-		b.append('\n').append("IP Addresses:").append('\n');
+		b.append("===\n").append("IP Addresses:").append('\n');
 		account.getIPs().forEach(u->b.append(u).append('\n'));
 		
 		
