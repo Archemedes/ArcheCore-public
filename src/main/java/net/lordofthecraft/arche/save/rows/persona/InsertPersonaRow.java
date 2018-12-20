@@ -38,7 +38,7 @@ public class InsertPersonaRow extends MultiStatementRow {
     @Override
     protected String[] getStatements() {
         return new String[]{
-                "INSERT INTO persona(persona_id,player_fk,slot,race,name,gender,curr,last_played) VALUES (?,?,?,?,?,?,?,?)",
+                "INSERT INTO persona(persona_id,player_fk,slot,race,name,gender,curr) VALUES (?,?,?,?,?,?,?)",
                 "INSERT INTO persona_stats(persona_id_fk,renamed,date_created) VALUES (?,?,?)",
                 "INSERT INTO persona_vitals(persona_id_fk,world,x,y,z) VALUES (?,?,?,?,?)"
         };
