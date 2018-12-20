@@ -67,6 +67,8 @@ public class CommandSeen extends CommandTemplate {
 	private ChatBuilder printout(Account account) {
 		var b = MessageUtil.builder();
 		
+		
+		b.append(account.getName()).color(DARK_AQUA).bold().append(" is ").reset().color(GRAY);
 		long ls = account.getLastSeen();
 		long elapsed = ls == 0? 0 : System.currentTimeMillis() - account.getLastSeen();
 		BaseComponent lastSeen = TimeUtil.printMillis(elapsed);
@@ -77,15 +79,15 @@ public class CommandSeen extends CommandTemplate {
 		b.append(" since ").color(GRAY).append(lastSeen).newline();
 		
 		long weekMs = account.getTimePlayedThisWeek() * 60 * 1000;
-		if(weekMs > 0) b.append("Played ").color(GRAY).append(TimeUtil.printMillis(weekMs)).append(" in the last week.").newline();
+		if(weekMs > 0) b.append("Played ").color(GRAY).append(TimeUtil.printMillis(weekMs)).append(" in the last week.");
 		
-		b.append("Has the following personas:").color(BLUE).newline();
+		
 		for(var ps : account.getPersonas()) {
-			b.append(ps.getName());
+			b.newline().append(" - ").color(GRAY).append(ps.getName());
 			long since = System.currentTimeMillis() - ps.getLastSeen();
 			if(ps.isCurrent()) b.color(GREEN).append(": Active persona!");
 			else b.color(YELLOW).append(": Last seen ").color(GRAY).append(TimeUtil.printMillis(since)).append( " ago.");
-			b.color(GRAY).newline();
+			b.color(GRAY);
 			
 		}
 		
@@ -107,7 +109,7 @@ public class CommandSeen extends CommandTemplate {
 		long weekMs = account.getTimePlayedThisWeek() * 60 * 1000;
 		if(weekMs > 0) b.append("Played ").append(TimeUtil.printMillis(weekMs).toPlainText()).append(" in the last week.").append('\n');
 		
-		b.append('\n').append("Personas: ").append('\n');
+		b.append('\n').append("Personas:").append('\n');
 		for(var psx : account.getPersonas()) {
 			var ps = (ArchePersona) psx;
 			b.append(ps.getName());
