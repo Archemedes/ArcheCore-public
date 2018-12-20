@@ -49,6 +49,15 @@ public class ArcheAccount implements Account {
 	}
 	
 	@Override
+	public String getName() {
+		var p = getPlayer();
+		if(p != null) return p.getName();
+		
+		//Poorly defined behavior but whatever
+		return ArcheCore.getControls().getPlayerNameFromUUID(alts.stream().findAny().get());
+	}
+	
+	@Override
 	public Player getPlayer(){
 		Player play;
 		if(playerObject == null || (play = playerObject.get()) == null || play.isDead()){

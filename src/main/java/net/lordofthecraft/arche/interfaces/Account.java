@@ -25,6 +25,11 @@ public interface Account {
 	
 	long getLastSeen();
 	
+	/**
+	 * @return Name of the online player, or a best-guess by randomly picking among alt uuids.
+	 */
+	String getName();
+	
 	Player getPlayer();
 	
 	List<Persona> getPersonas();
