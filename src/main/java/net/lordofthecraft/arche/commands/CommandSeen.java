@@ -105,7 +105,7 @@ public class CommandSeen extends CommandTemplate {
 		long weekMs = account.getTimePlayedThisWeek() * 60 * 1000;
 		if(weekMs > 0) b.append(" played ").append(TimeUtil.printMillis(weekMs)).append(" in the last week.").append('\n');
 		
-		b.append("Personas: ").append('\n');
+		b.append('\n').append("Personas: ").append('\n');
 		for(var psx : account.getPersonas()) {
 			var ps = (ArchePersona) psx;
 			b.append(ps.getName());
@@ -114,13 +114,13 @@ public class CommandSeen extends CommandTemplate {
 			b.append(" at ").append(new WeakBlock(ps.getLocation()).toString()).append('\n');
 		}
 		
-		b.append("UUIDs:").append('\n');
+		b.append('\n').append("UUIDs:").append('\n');
 		account.getUUIDs().forEach(u->b.append(u.toString()).append('\n'));
 		
-		b.append("Aliases:").append('\n');
+		b.append('\n').append("Aliases:").append('\n');
 		account.getUsernames().forEach(u->b.append(u).append('\n'));
 		
-		b.append("IP Addresses:").append('\n');
+		b.append('\n').append("IP Addresses:").append('\n');
 		account.getIPs().forEach(u->b.append(u).append('\n'));
 		
 		

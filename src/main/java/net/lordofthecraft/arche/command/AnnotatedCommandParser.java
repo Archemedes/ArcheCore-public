@@ -123,7 +123,8 @@ public class AnnotatedCommandParser {
 		for (int i = 0; i < params.length; i++) {
 			var param = params[i];
 			var c = param.getType();
-
+			CoreLog.debug("Param " + i + " in method " + method.getName() + " has type " + c);
+			
 			if(i == 0) {
 				//If first param is player/persona, it is taken as
 				//the sender (or flagged player) rather than argument
@@ -152,10 +153,12 @@ public class AnnotatedCommandParser {
 				arg.defaultInput(def);
 			}
 			
-			if(param.isAnnotationPresent(Joined.class))
+			if(param.isAnnotationPresent(Joined.class)) {
 				if(param.getType() == String.class) arg.asJoinedString();
 				else throw new IllegalArgumentException("All JoinedString annotations must affect a String type parameter");
-			else arg.asType(param.getType());
+			} else {
+				arg.asType(c);
+			}
 		}
 		
 		makeCommandDoStuff(template, acb, method);

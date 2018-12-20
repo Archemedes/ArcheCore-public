@@ -15,6 +15,7 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import com.google.common.base.Functions;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Floats;
 import com.google.common.primitives.Ints;
@@ -24,6 +25,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
+import lombok.var;
 import lombok.experimental.Accessors;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
@@ -136,7 +138,9 @@ public class ArgBuilder {
 	}
 	
 	public ArcheCommandBuilder asString(){
-		build(String.class);
+		defaults("*","How the FUCK did you mess up parsing a string as a string?????");
+		val arg = build(String.class);
+		arg.setMapper(Functions.identity());
 		return command;
 	}
 	
@@ -144,6 +148,7 @@ public class ArgBuilder {
 		defaults("*","Must be one of these: " + ChatColor.WHITE + StringUtils.join(options, ", "));
 		val arg = build(String.class);
 		arg.setFilter( s-> Stream.of(options).filter(s2->s2.equalsIgnoreCase(s)).findAny().isPresent() );
+		arg.setMapper(Functions.identity());
 		arg.completeMe(options);
 		return command;
 	}

@@ -472,7 +472,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("skin").setExecutor(new CommandSkin(this));
 		
 		//Commands, ACB method, Annotated:
-		newCommand("data", CommandDate::new);
+		newCommand("date", CommandDate::new);
 		newCommand("durabilityboost", CommandDurability::new);
 		newCommand("showitem", CommandShowItem::new);
 		newCommand("seen", CommandSeen::new);
