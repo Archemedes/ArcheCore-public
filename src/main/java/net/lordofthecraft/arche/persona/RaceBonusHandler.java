@@ -64,10 +64,6 @@ public class RaceBonusHandler {
 			player.getAttribute(GENERIC_LUCK).addModifier(new AttributeModifier(UUID_ARCHE, "501_moreluck", 0.10, AttributeModifier.Operation.ADD_NUMBER));
 			player.getAttribute(GENERIC_MOVEMENT_SPEED).addModifier(new AttributeModifier(UUID_ARCHE, "arche_morespeed", 0.10, AttributeModifier.Operation.ADD_SCALAR));
 			break;
-		case OLOG:
-			player.getAttribute(GENERIC_MAX_HEALTH).addModifier(new AttributeModifier(UUID_ARCHE, "arche_healthboost", 0.2, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
-			player.getAttribute(GENERIC_ATTACK_SPEED).addModifier(new AttributeModifier(UUID_ARCHE, "501_lessaspeed", -0.10, AttributeModifier.Operation.ADD_SCALAR));
-			break;
 		default: //Basic Humans, Default/Unset
 			break;
 		}

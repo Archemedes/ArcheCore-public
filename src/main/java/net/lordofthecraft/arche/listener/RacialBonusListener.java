@@ -70,7 +70,6 @@ public class RacialBonusListener implements Listener {
 
 	private boolean hasTogglePower(Race race){
 		switch(race){
-		case OLOG:
 		case ORC:
 		case DARK_ELF:
 			return true;
@@ -102,7 +101,7 @@ public class RacialBonusListener implements Listener {
 			if(pers != null){
 				Race race = pers.getRace();
 
-				if(race == Race.ORC || race == Race.OLOG || race == Race.GOBLIN){
+				if(race == Race.ORC || race == Race.GOBLIN){
 					//Allows eating of rotten food
 					p.removePotionEffect(PotionEffectType.HUNGER);
 
@@ -132,19 +131,8 @@ public class RacialBonusListener implements Listener {
 					} else { //Shift pressed down twice in short time
 						if (pers.getRace() == Race.DARK_ELF) {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 120, 1, true), true);
-						}else if (pers.getRace().getParentRace().equalsIgnoreCase("Kharajyr")) {
-							p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 450, 2, true), true);
-							p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 240, 1, true), true);
-						}else if(pers.getRace() == Race.OLOG || pers.getRace() == Race.ORC) {
+						}else if(pers.getRace() == Race.ORC) {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION,100,1),true);
-						}else if (pers.getRace().getParentRace().equalsIgnoreCase("hou-zi")) {
-							AreaEffectCloud ae = (AreaEffectCloud) p.getWorld().spawnEntity(p.getLocation().clone().add(0, 0.5, 0), EntityType.AREA_EFFECT_CLOUD);
-							ae.setParticle(Particle.CLOUD);
-							ae.setDuration(5);
-							ae.setRadius(3);
-							ae.setWaitTime(0);
-
-							Bukkit.getScheduler().runTaskLater(ArcheCore.getPlugin(), () -> p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 100, 0, true)), 2);
 						}
 
 						p.playSound(p.getLocation(), Sound.AMBIENT_CAVE, 0.8f, 2f);
@@ -228,7 +216,6 @@ public class RacialBonusListener implements Listener {
 						}
 						break;
 					case ORC:
-					case OLOG:
 						if (e.getDamage() > 2) {
 							e.setDamage(dmg + 2);
 						}
