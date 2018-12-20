@@ -47,8 +47,11 @@ public final class TimeUtil {
 		long seconds = MILLISECONDS.toSeconds(ms) - DAYS.toSeconds(days) - hours*3600 - minutes*60;
 		
 		append(sb, days, brief, "days", "d", numColor, unitColor);
+		sb.append(" ");
 		append(sb, hours, brief, "hours", "h", numColor, unitColor);
+		sb.append(" ");
 		append(sb, minutes, brief, "minutes", "m", numColor, unitColor);
+		sb.append(" ");
 		append(sb, seconds, brief, "seconds", "s", numColor, unitColor);
 		
 		return sb.build();
@@ -61,7 +64,7 @@ public final class TimeUtil {
 		if(c1 != null) sb.color(c1);
 		
 		if(brief) sb.append(small);
-		else sb.append(' ' + big + ' ');
+		else sb.append(' ' + big);
 		if(c2!=null) sb.color(c2);
 	}
 }
