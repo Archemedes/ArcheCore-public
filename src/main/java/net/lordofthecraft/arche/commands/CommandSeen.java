@@ -77,7 +77,7 @@ public class CommandSeen extends CommandTemplate {
 		b.append(" since ").color(GRAY).append(lastSeen).newline();
 		
 		long weekMs = account.getTimePlayedThisWeek() * 60 * 1000;
-		if(weekMs > 0) b.append(" played ").append(TimeUtil.printMillis(weekMs)).append(" in the last week.").newline();
+		if(weekMs > 0) b.append("Played ").color(GRAY).append(TimeUtil.printMillis(weekMs)).append(" in the last week.").newline();
 		
 		b.append("Has the following personas:").color(BLUE).newline();
 		for(var ps : account.getPersonas()) {
@@ -105,14 +105,14 @@ public class CommandSeen extends CommandTemplate {
 		b.append(" since ").append(lastSeen).append('\n');
 		
 		long weekMs = account.getTimePlayedThisWeek() * 60 * 1000;
-		if(weekMs > 0) b.append(" played ").append(TimeUtil.printMillis(weekMs).toPlainText()).append(" in the last week.").append('\n');
+		if(weekMs > 0) b.append("Played ").append(TimeUtil.printMillis(weekMs).toPlainText()).append(" in the last week.").append('\n');
 		
 		b.append('\n').append("Personas: ").append('\n');
 		for(var psx : account.getPersonas()) {
 			var ps = (ArchePersona) psx;
 			b.append(ps.getName());
 			long since = System.currentTimeMillis() - ps.getLastSeen();
-			if(ps.isCurrent()) b.append(": active ");
+			if(ps.isCurrent()) b.append(": active");
 			else b.append(": since ").append(TimeUtil.printBrief(since).toPlainText());
 			b.append(" at ").append(new WeakBlock(ps.getLocation()).toString()).append('\n');
 		}

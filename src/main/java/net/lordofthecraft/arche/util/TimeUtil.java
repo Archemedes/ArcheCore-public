@@ -46,25 +46,25 @@ public final class TimeUtil {
 		long minutes = MILLISECONDS.toMinutes(ms) - DAYS.toMinutes(days) - hours*60;
 		long seconds = MILLISECONDS.toSeconds(ms) - DAYS.toSeconds(days) - hours*3600 - minutes*60;
 		
-		append(sb, days, brief, "days", "d", numColor, unitColor);
-		sb.append(" ");
-		append(sb, hours, brief, "hours", "h", numColor, unitColor);
-		sb.append(" ");
-		append(sb, minutes, brief, "minutes", "m", numColor, unitColor);
-		sb.append(" ");
-		append(sb, seconds, brief, "seconds", "s", numColor, unitColor);
-		
+		boolean space = false;
+		space = append(sb, days, brief, "days", "d", numColor, unitColor, space);
+		space = append(sb, hours, brief, "hours", "h", numColor, unitColor, space);
+		space = append(sb, minutes, brief, "minutes", "m", numColor, unitColor, space);
+		append(sb, seconds, brief, "seconds", "s", numColor, unitColor, space);
 		return sb.build();
 	}
 
-	private static void append(ChatBuilder sb, long val, boolean brief, String big, String small, ChatColor c1, ChatColor c2) {
-		if(val == 0) return;
+	private static boolean append(ChatBuilder sb, long val, boolean brief, String big, String small, ChatColor c1, ChatColor c2, boolean space) {
+		if(val == 0) return false;
 		
+		if(space) sb.append(' ');
 		sb.append(val);
 		if(c1 != null) sb.color(c1);
 		
 		if(brief) sb.append(small);
 		else sb.append(' ' + big);
 		if(c2!=null) sb.color(c2);
+		
+		return true;
 	}
 }
