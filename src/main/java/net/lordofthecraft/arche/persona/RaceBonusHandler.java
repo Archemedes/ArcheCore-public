@@ -50,7 +50,6 @@ public class RaceBonusHandler {
 		case CAVE_DWARF:
 		case DWARF:
 		case MOUNTAIN_DWARF:
-		case DARK_DWARF:
 			player.getAttribute(GENERIC_MAX_HEALTH).addModifier(new AttributeModifier(UUID_ARCHE, "arche_healthboost", 0.2, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
 			player.getAttribute(GENERIC_LUCK).addModifier(new AttributeModifier(UUID_ARCHE, "501_moreluck", 0.1, AttributeModifier.Operation.ADD_NUMBER));
 			player.getAttribute(GENERIC_MOVEMENT_SPEED).addModifier(new AttributeModifier(UUID_ARCHE, "arche_lessspeed", -0.10, AttributeModifier.Operation.ADD_SCALAR));

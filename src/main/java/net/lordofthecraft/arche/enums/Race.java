@@ -16,9 +16,6 @@ public enum Race {
     CAVE_DWARF("Cave Dwarf", "Dwarf"),
     FOREST_DWARF("Forest Dwarf", "Dwarf"),
     MOUNTAIN_DWARF("Mountain Dwarf", "Dwarf"),
-    DARK_DWARF("Dark Dwarf", "Dwarf"),
-
-    
 
     UNSET("Unset", "Unset", 1000);
 
