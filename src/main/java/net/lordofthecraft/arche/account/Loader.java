@@ -106,8 +106,12 @@ public class Loader {
 	}
 	
 	void initialize(UUID player) {
-		AccountBlob blob = loadFromDisk(player);
-		if(blob != null) sync(()->deliver(blob));
+		if(!isLoaded(player)) {
+			AccountBlob blob = loadFromDisk(player);
+			if(blob != null) sync(()->deliver(blob));
+		} else {
+			CoreLog.debug("User logged in that was already loaded: " + player);
+		}
 	}
 	
 	private AccountBlob loadFromDisk(UUID u) {
