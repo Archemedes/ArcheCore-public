@@ -97,6 +97,10 @@ public class ArcheAccount implements Account {
 		timePlayedThisWeek += mins;
 	}
 	
+	void initTimes() {
+		lastSeen = System.currentTimeMillis();
+	}
+	
 	void merge(ArcheAccount alt) {
 		alt.remove();
 		

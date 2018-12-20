@@ -88,9 +88,15 @@ public class ArcheAccountHandler implements AccountHandler {
 	
 	public void joinPlayer(Player p) {
 		ArcheAccount acc = getAccount(p);
+		acc.initTimes();
 		acc.registerIp(p.getAddress().getAddress().getHostAddress());
 		
 		Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->checkDoubleLogin(acc));
+	}
+	
+	public void leavePlayer(Player p) {
+		ArcheAccount acc = getAccount(p);
+		acc.initTimes();
 	}
 	
 	private void checkDoubleLogin(Account acc) {

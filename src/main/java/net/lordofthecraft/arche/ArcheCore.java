@@ -626,6 +626,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	
 	public void leavePlayer(Player p) {
 		RaceBonusHandler.reset(p);
+		accountHandler.leavePlayer(p);
 		personaHandler.leavePlayer(p);
 	}
 	
