@@ -42,7 +42,7 @@ public class CommandIPSearch extends CommandTemplate {
 	}
 	
 	private Set<UUID> uuids(Set<String> ips){
-		Validate.isTrue(!ips.isEmpty());
+		if(ips.isEmpty()) return Collections.emptySet();
 		Set<UUID> result = new HashSet<>();
 
 		String clause = "WHERE " + IntStream.range(0, ips.size())
