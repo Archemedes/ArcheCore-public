@@ -13,7 +13,6 @@ import org.bukkit.entity.Player;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.command.CommandTemplate;
-import net.lordofthecraft.arche.command.annotate.Arg;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.util.ChatBuilder;
 import net.lordofthecraft.arche.util.MessageUtil;
@@ -24,10 +23,8 @@ public class CommandSeen extends CommandTemplate {
 
 	private final Set<UUID> cd = new HashSet<>();
 	
-	public void invoke(CommandSender s, @Arg("player") String someName) {
+	public void invoke(CommandSender s, UUID u) {
 		validate(cooldown(), "This command has a 10s cooldown. Please wait a bit");
-		UUID u = ArcheCore.getControls().getPlayerUUIDFromAlias(someName);
-		validate(u != null, "We don't know anyone with the username " + RESET + someName);
 		
 		var aah = ArcheCore.getControls().getAccountHandler();
 		aah.loadAccount(u).then(acc->printout(s,acc).send(s));
