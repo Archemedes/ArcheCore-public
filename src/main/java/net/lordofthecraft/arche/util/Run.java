@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche.util;
 
 import java.sql.Connection;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -50,6 +51,14 @@ public class Run {
 	
 	public void async(Runnable r) {
 		scheduler().runTaskAsynchronously(plugin, r);
+	}
+	
+	public CompletableFuture<Void> future(Runnable r) {
+		return CompletableFuture.runAsync(r, asyncExecutor());
+	}
+	
+	public <T> CompletableFuture<T> future(Supplier<T> r) {
+		return CompletableFuture.supplyAsync(r, asyncExecutor());
 	}
 	
 	public <T> AsyncRunner<T> async(Supplier<T> s) {
