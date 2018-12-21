@@ -25,7 +25,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
-import lombok.var;
 import lombok.experimental.Accessors;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
@@ -199,19 +198,39 @@ public class ArgBuilder {
 		return command;
 	}
 	
+	public ArcheCommandBuilder asUUID() {
+		defaults("alias","We do not know any player with that alias!");
+		val arg = build(UUID.class);
+		arg.setMapper(s->{
+			UUID u = uuidFromString(s);
+			if(u != null) return u;
+			return ArcheCore.getControls().getPlayerUUIDFromAlias(s);
+		});
+		arg.playerCompleter();
+		return command;
+	}
+	
 	public ArcheCommandBuilder asOfflinePlayer() {
 		defaults("player","You must provide a Player");
 		val arg = build(OfflinePlayer.class);
 		arg.setMapper(s->{
-			if(s.length() == 36) {
-				try {return Bukkit.getOfflinePlayer(UUID.fromString(s));}
-				catch(IllegalArgumentException e) {return null;}
-			} else {
-				return Bukkit.getOfflinePlayer( ArcheCore.getControls().getPlayerUUIDFromName(s) );
-			}
+			UUID u = uuidFromString(s);
+			if(u != null) return Bukkit.getOfflinePlayer(u);
+			return Bukkit.getOfflinePlayer( ArcheCore.getControls().getPlayerUUIDFromName(s) );
 		});
 		arg.playerCompleter();
 		return command;
+	}
+	
+	private UUID uuidFromString(String s) {
+		if(s.length() == 32)
+			s = s.replaceFirst("(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5");
+			
+		if(s.length() == 36) {
+			try {return UUID.fromString(s);}
+			catch(IllegalArgumentException e) {return null;}
+		}
+		return null;
 	}
 	
 	public ArcheCommandBuilder asPersona() {
@@ -284,6 +303,8 @@ public class ArgBuilder {
 			asPersona();
 		} else if(OfflinePersona.class.isAssignableFrom(c)) { //Must go AFTER the Persona check
 			asOfflinePersona();
+		} else if(UUID.class.isAssignableFrom(c)) {
+			asUUID();
 		} else if(Player.class.isAssignableFrom(c)) {
 			asPlayer();
 		} else if(OfflinePlayer.class.isAssignableFrom(c)) {  //Must go AFTER the Player check
