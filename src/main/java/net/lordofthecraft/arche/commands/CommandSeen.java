@@ -14,41 +14,23 @@ import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.command.CommandTemplate;
 import net.lordofthecraft.arche.command.annotate.Arg;
-import net.lordofthecraft.arche.command.annotate.Flag;
 import net.lordofthecraft.arche.interfaces.Account;
-import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.util.ChatBuilder;
-import net.lordofthecraft.arche.util.Hastebin;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.TimeUtil;
-import net.lordofthecraft.arche.util.WeakBlock;
 import net.md_5.bungee.api.chat.BaseComponent;
 
 public class CommandSeen extends CommandTemplate {
 
 	private final Set<UUID> cd = new HashSet<>();
 	
-	@Flag(name = "m", description="Perform full Moderator printout.", permission="archecore.mod")
 	public void invoke(CommandSender s, @Arg("player") String someName) {
 		validate(cooldown(), "This command has a 10s cooldown. Please wait a bit");
 		UUID u = ArcheCore.getControls().getPlayerUUIDFromAlias(someName);
 		validate(u != null, "We don't know anyone with the username " + RESET + someName);
 		
 		var aah = ArcheCore.getControls().getAccountHandler();
-		aah.loadAccount(u).then(acc->{
-			if(hasFlag("m")) {
-				String modStuff = this.printoutMod(acc);
-				Bukkit.getScheduler().runTaskAsynchronously(ArcheCore.getPlugin(), ()->{
-					String link = Hastebin.upload(modStuff);
-					s.sendMessage(BLUE + "Your command result has been uploaded to hastebin.");
-					s.sendMessage(BLUE + "These expire quickly, so copy-paste for any logging purposes.");
-					s.sendMessage(BLUE + "Do not share any sensitive information contained here.");
-					s.sendMessage(link);
-				});
-			} else {
-				printout(s,acc).send(s);
-			}
-		});
+		aah.loadAccount(u).then(acc->printout(s,acc).send(s));
 	}
 	
 	private boolean cooldown() {
@@ -101,44 +83,4 @@ public class CommandSeen extends CommandTemplate {
 		Player o = (Player) s;
 		return o.canSee(p);
 	}
-	
-	private String printoutMod(Account account) {
-		var b = new StringBuilder(1024);
-		
-		long ls = account.getLastSeen();
-		long elapsed = ls == 0? 0 : System.currentTimeMillis() - account.getLastSeen();
-		String lastSeen = TimeUtil.printMillisRaw(elapsed).toPlainText();
-		
-		Player p = account.getPlayer();
-		if(p != null) b.append("Online");
-		else b.append("Offline");
-		b.append(" since ").append(lastSeen).append('\n');
-		
-		long weekMs = account.getTimePlayedThisWeek() * 60 * 1000;
-		if(weekMs > 0) b.append("Played ").append(TimeUtil.printMillis(weekMs).toPlainText()).append(" in the last week.").append('\n');
-		
-		b.append('\n').append("Personas:").append('\n');
-		for(var psx : account.getPersonas()) {
-			var ps = (ArchePersona) psx;
-			b.append(ps.getName());
-			long since = System.currentTimeMillis() - ps.getLastSeen();
-			if(ps.isCurrent()) b.append(": active");
-			else b.append(": since ").append(TimeUtil.printBrief(since).toPlainText());
-			b.append(" at ").append(new WeakBlock(ps.getLocation()).toString()).append('\n');
-		}
-		
-		b.append("===\n").append("UUIDs:").append('\n');
-		account.getUUIDs().forEach(u->b.append(u.toString()).append('\n'));
-		
-		b.append("===\n").append("Aliases:").append('\n');
-		account.getUsernames().forEach(u->b.append(u).append('\n'));
-		
-		b.append("===\n").append("IP Addresses:").append('\n');
-		account.getIPs().forEach(u->b.append(u).append('\n'));
-		
-		
-		return b.toString();
-	}
-	
-
 }
