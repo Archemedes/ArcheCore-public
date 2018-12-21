@@ -46,7 +46,7 @@ public class CommandSeen extends CommandTemplate {
 					s.sendMessage(link);
 				});
 			} else {
-				printout(acc).send(s);
+				printout(s,acc).send(s);
 			}
 		});
 	}
@@ -64,7 +64,7 @@ public class CommandSeen extends CommandTemplate {
 		return true;
 	}
 	
-	private ChatBuilder printout(Account account) {
+	private ChatBuilder printout(CommandSender s, Account account) {
 		var b = MessageUtil.builder();
 		
 		
@@ -73,8 +73,7 @@ public class CommandSeen extends CommandTemplate {
 		long elapsed = ls == 0? 0 : System.currentTimeMillis() - account.getLastSeen();
 		BaseComponent lastSeen = TimeUtil.printMillis(elapsed);
 		
-		Player p = account.getPlayer();
-		if(p != null) b.append("Online").color(GREEN);
+		if(canSeeOnline(s,account.getPlayer())) b.append("Online").color(GREEN);
 		else b.append("Offline").append(RED);
 		b.append(" since ").color(GRAY).append(lastSeen).newline();
 		
@@ -92,6 +91,15 @@ public class CommandSeen extends CommandTemplate {
 		}
 		
 		return b;
+	}
+	
+	private boolean canSeeOnline(CommandSender s, Player p) {
+		if(p == null) return false;
+		if(!(s instanceof Player)) return true;
+		if(s.hasPermission("archecore.mod")) return true;
+		
+		Player o = (Player) s;
+		return o.canSee(p);
 	}
 	
 	private String printoutMod(Account account) {
