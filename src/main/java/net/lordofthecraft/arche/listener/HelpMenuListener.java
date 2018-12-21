@@ -25,7 +25,7 @@ public class HelpMenuListener implements Listener {
 	@EventHandler(ignoreCancelled = true)
 	public void onDrag(InventoryDragEvent e){
 		Inventory inv = e.getInventory();
-		if(inv.getTitle() == HelpDesk.HELP_HEADER){
+		if(HelpDesk.HELP_HEADER.equals(inv.getTitle())){
 			e.setCancelled(true);
 		}
 	}
@@ -33,7 +33,7 @@ public class HelpMenuListener implements Listener {
 	@EventHandler(ignoreCancelled = true)
 	public void onClick(InventoryClickEvent e){
 		Inventory inv = e.getInventory();
-		if(inv.getTitle() == HelpDesk.HELP_HEADER){
+		if(HelpDesk.HELP_HEADER.equals(inv.getTitle())){
 			e.setCancelled(true);
 			
 			int slot = e.getSlot();
@@ -44,14 +44,14 @@ public class HelpMenuListener implements Listener {
 					String topic = meta.getDisplayName().substring(2);
 					final Player p = (Player) e.getWhoClicked();
 					
-					if(meta.hasLore()) 
-						helpdesk.outputSkillHelp(topic, p); 
-					else 
+					if(meta.hasLore())
+						helpdesk.outputSkillHelp(topic, p);
+					else
 						helpdesk.outputHelp(topic,p);
 					
 					
 					new BukkitRunnable(){
-						@Override 
+						@Override
 						public void run(){
 							p.closeInventory();}
 					}.runTask(plugin);
