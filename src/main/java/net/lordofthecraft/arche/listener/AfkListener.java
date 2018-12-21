@@ -9,7 +9,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -56,7 +58,7 @@ public class AfkListener implements Listener {
 	
 	public boolean isAfk(Player p) {
 		return theAfks.contains(p.getUniqueId());
-	}		
+	}
 		
 	@EventHandler
 	public void j(PlayerJoinEvent e) {
@@ -87,6 +89,16 @@ public class AfkListener implements Listener {
 	@EventHandler
 	public void c(InventoryInteractEvent e) {
 		go((Player) e.getWhoClicked());
+	}
+	
+	@EventHandler
+	public void c(InventoryOpenEvent e) {
+		go((Player) e.getPlayer());
+	}
+	
+	@EventHandler
+	public void c(InventoryCloseEvent e) {
+		go((Player) e.getPlayer());
 	}
 	
 	@EventHandler
