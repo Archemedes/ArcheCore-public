@@ -72,8 +72,14 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	final Set<String> namelog = Sets.newHashSet();
 	private WeakReference<Player> playerObject;
 
+	
+	public ArchePersona(UUID player, int slot, String name, Race race, int birthdate, String gender) { //For NEW personas
+		this(handler.getNextPersonaId(), player, slot, name, race, birthdate, gender,
+				new Timestamp(System.currentTimeMillis()), PersonaType.NORMAL, null);
+	}
+	
 	public ArchePersona(int persona_id, UUID player, int slot, String name, Race race, int birthdate,
-			String gender, Timestamp creationTimeMS, PersonaType type, String raceString) {
+			String gender, Timestamp creationTimeMS, PersonaType type, String raceString) { //For EXISTING personas loaded from drive
 		super(new ArchePersonaKey(persona_id, player, slot), creationTimeMS, false, race, birthdate, gender, type, name, raceString);
 		charactersSpoken = new AtomicInteger();
 		renamed = new Timestamp(0);
@@ -188,6 +194,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		this.lastPlayed = Math.max(lastPlayed, this.lastPlayed);
 	}
 	
+	@Override
 	public long getLastSeen() {
 		return this.lastPlayed;
 	}

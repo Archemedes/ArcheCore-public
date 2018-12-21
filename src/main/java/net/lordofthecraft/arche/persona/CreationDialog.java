@@ -1,7 +1,6 @@
 package net.lordofthecraft.arche.persona;
 
 import java.lang.reflect.Field;
-import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
@@ -28,7 +27,6 @@ import com.google.common.collect.Maps;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
-import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
@@ -533,12 +531,10 @@ public class CreationDialog {
         	String name = (String) context.getSessionData("name");
         	String gender = (String) context.getSessionData("gender");
         	Race race = (Race) context.getSessionData("race");
-        	long creationTimeMS = System.currentTimeMillis();
 
         	CoreLog.debug("New persona created in the world " + p.getWorld().getName() + " with the uuid of " + p.getWorld().getUID());
 
-        	int nextId = ArchePersonaHandler.getInstance().getNextPersonaId();
-        	ArchePersona persona = new ArchePersona(nextId, p.getUniqueId(), slot, name, race, 0, gender, new Timestamp(creationTimeMS), PersonaType.NORMAL, null);
+        	ArchePersona persona = new ArchePersona(p.getUniqueId(), slot, name, race, 0, gender);
 
         	ArchePersonaHandler.getInstance().registerPersona(persona);
         	p.sendMessage(ChatColor.GOLD + "" + ChatColor.UNDERLINE + "Created your new Persona: " + ChatColor.GREEN + name + ChatColor.GOLD + "!");
