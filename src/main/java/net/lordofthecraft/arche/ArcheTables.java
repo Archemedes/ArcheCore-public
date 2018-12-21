@@ -106,8 +106,8 @@ public final class ArcheTables {
 	protected static void createAccountTable(Statement statement, String end) throws SQLException {
 		statement.execute("CREATE TABLE IF NOT EXISTS accounts (" +
 				"account_id INT UNSIGNED," +
-				"forum_id INT UNSIGNED UNIQUE DEFAULT 0," +
-				"discord_id INT UNSIGNED UNIQUE DEFAULT 0," +
+				"forum_id INT UNSIGNED DEFAULT 0," +
+				"discord_id INT UNSIGNED DEFAULT 0," +
 				"PRIMARY KEY (account_id)" +
 				")" +
 				end);
