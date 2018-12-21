@@ -85,6 +85,9 @@ commands:
    seen:
       description: Show information about the player
       permission: archecore.command.seen
+   ipsearch:
+      description: Searches matches for provided IP
+      permission: archecore.command.ipsearch
 
 permissions:
   archecore.arsql:
