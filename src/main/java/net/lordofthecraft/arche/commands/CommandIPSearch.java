@@ -33,7 +33,7 @@ public class CommandIPSearch extends CommandTemplate {
 	
 	@Cmd("Find alts based on a alias")
 	public void alts(@Arg("player") UUID u) {
-		msg(GOLD + " Looking for matching players for the ip " + RESET + plugin.getPlayerNameFromUUID(u));
+		msg(GOLD + " Looking for matching players for the user " + RESET + plugin.getPlayerNameFromUUID(u));
 		var aah = plugin.getAccountHandler();
 		aah.loadAccount(u).then(acc->{
 			val ips = acc.getIPs();
