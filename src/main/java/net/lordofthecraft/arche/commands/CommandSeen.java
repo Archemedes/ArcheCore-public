@@ -62,9 +62,14 @@ public class CommandSeen extends CommandTemplate {
 		
 		for(var ps : account.getPersonas()) {
 			b.newline().append(" - ").color(GRAY).append(ps.getName());
-			long since = System.currentTimeMillis() - ps.getLastSeen();
+			
 			if(ps.isCurrent()) b.color(GREEN).append(": Active persona!");
-			else b.color(YELLOW).append(": Last seen ").color(GRAY).append(TimeUtil.printMillis(since)).append( " ago.");
+			else {
+				long since = System.currentTimeMillis() - ps.getLastSeen();
+				b.color(YELLOW).append(": Last seen ").color(GRAY);
+				if(ps.getLastSeen() == 0) b.append("never").color(WHITE);
+				else b.append(TimeUtil.printMillis(since)).append( " ago");
+			}
 			b.color(GRAY);
 			
 		}
