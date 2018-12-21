@@ -32,10 +32,13 @@ public class ArcheCommandExecutor implements TabExecutor {
 	
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command $, String alias, String[] args) {
-		List<String> listArgs = new ArrayList<>();
-		for (String arg : args) listArgs.add(arg);
-		
-		return getCompletions(sender, rootCommand, listArgs);
+		try{List<String> listArgs = new ArrayList<>();
+			for (String arg : args) listArgs.add(arg);
+			return getCompletions(sender, rootCommand, listArgs);
+		} catch(ArrayIndexOutOfBoundsException e) {
+			e.printStackTrace();
+			return Lists.newArrayList();
+		}
 	}
 	
 	private List<String> getCompletions(CommandSender sender, ArcheCommand command, List<String> args) {
@@ -45,9 +48,9 @@ public class ArcheCommandExecutor implements TabExecutor {
 			return getCompletions(sender, subCommand, args);
 		} else {
 			List<String> options;
+			if(args.isEmpty()) return Lists.newArrayList();
 			int index = args.size() - 1;
 			String last = args.get(index).toLowerCase();
-			if(args.isEmpty()) return Lists.newArrayList();
 			if(args.size() == 1) options = subCompletions(sender, command, last);
 			else options = new ArrayList<>();
 			
