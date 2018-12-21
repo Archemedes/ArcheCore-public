@@ -22,6 +22,7 @@ import net.lordofthecraft.arche.interfaces.AccountHandler;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
+import net.lordofthecraft.arche.util.Run;
 
 public class ArcheAccountHandler implements AccountHandler {
 	private static final ArcheAccountHandler instance = new ArcheAccountHandler();
@@ -236,6 +237,7 @@ public class ArcheAccountHandler implements AccountHandler {
 						accountsById.put(acc.getId(), acc);
 					}
 				}
+				if(made > 0) Run.as(ArcheCore.getPlugin()).sync(()->ArcheCore.getConsumerControls().runForced());
 				CoreLog.info("We've made new accounts for players, some of which might be alts. Names scanned: " + handled + ". Accounts made: " + made);
 			}
 		} catch(SQLException e) {
