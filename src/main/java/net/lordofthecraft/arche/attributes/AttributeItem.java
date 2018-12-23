@@ -118,8 +118,8 @@ public class AttributeItem {
 
 			// Despite the error in IntelliJ. This actually compiles fine.
 			// Eclipse - 1  IntelliJ - 0
-			long wrappedLeast = (long) att.get("UUIDLeast").getValue();
-			long wrappedMost = (long) att.get("UUIDMost").getValue();
+			long wrappedLeast = (Long) att.get("UUIDLeast").getValue();
+			long wrappedMost = (Long) att.get("UUIDMost").getValue();
 			if(wrappedLeast == least && wrappedMost == most) {
 				iter.remove();
 				return;
