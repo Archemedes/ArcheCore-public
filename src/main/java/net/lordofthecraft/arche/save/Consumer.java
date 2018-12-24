@@ -116,7 +116,7 @@ public final class Consumer extends TimerTask implements IConsumer {
 			PreparedStatement[] pending = null;
 
 			while (bypassForce || System.currentTimeMillis() - starttime < timePerRun|| count < forceToProcess*(pending == null? 1:1.5) ) {
-				ArcheRow row = queue.peek();
+				ArcheRow row = queue.poll();
 				if (row == null) break;
 
 				if (debugConsumer) try {
@@ -160,20 +160,15 @@ public final class Consumer extends TimerTask implements IConsumer {
 						}
 					}
 				} catch (SQLException e) {
-					if (e.getErrorCode() == 5 || e.getErrorCode() == 6) { // SQL_BUSY, SQL_LOCKED
-						pl.getLogger().log(Level.WARNING, "[Consumer] SQL database is locked, retrying...");
-					} else {
-						pl.getLogger().log(Level.SEVERE, "[Consumer] SQL exception on " + row.getClass().getSimpleName() + ": ", e);
-						pl.getLogger().log(Level.SEVERE, "[Consumer] Statement body: " + row.toString());
-						if(pending != null) {
-							Arrays.stream(pending).forEach(ps -> {
-								pl.getLogger().severe("Lost Statement: " + String.valueOf(ps));
-								SQLUtil.close(ps);
-							});
-							pending = null;
-						}
-						queue.poll(); // bad statement, remove from queue
-					}
+                    pl.getLogger().log(Level.SEVERE, "[Consumer] SQL exception on " + row.getClass().getSimpleName() + ": ", e);
+                    pl.getLogger().log(Level.SEVERE, "[Consumer] Statement body: " + row.toString());
+                    if(pending != null) {
+                        Arrays.stream(pending).forEach(ps -> {
+                            pl.getLogger().severe("Lost Statement: " + String.valueOf(ps));
+                            SQLUtil.close(ps);
+                        });
+                        pending = null;
+                    }
 
 					continue;
 				} finally {
@@ -188,7 +183,6 @@ public final class Consumer extends TimerTask implements IConsumer {
 						pl.getLogger().warning("[Consumer] Connection auto commit: " + row.getClass().getSimpleName());
 						conn.setAutoCommit(false);
 					}
-					queue.poll();
 				}
 
 				count++;
