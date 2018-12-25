@@ -13,16 +13,28 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.bukkit.command.PluginCommand;
+
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.var;
 import lombok.experimental.Accessors;
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.command.CommandPart.Execution;
+import net.lordofthecraft.arche.command.brigadier.BrigadierProvider;
+import net.lordofthecraft.arche.util.Run;
 
 //We're reaching levels of Telanir that shouldn't be even possible
 @Accessors(fluent=true)
 public class ArcheCommandBuilder {
+	private static final BrigadierProvider brigadierProvider = new BrigadierProvider();
+	
 	private final ArcheCommandBuilder parentBuilder;
 	private final PluginCommand command;
 	
@@ -43,6 +55,7 @@ public class ArcheCommandBuilder {
 	private CommandPart tailPart;
 	
 	//Builder state booleans
+	boolean brigadier = true; //Can turn brigadier control off, defaults to spigot completions
 	boolean argsHaveDefaults = false; //When arg is added that has default input
 	boolean noMoreArgs = false; //When an unity argument is used
 	boolean buildHelpFile = true;
@@ -140,6 +153,12 @@ public class ArcheCommandBuilder {
 		return this;
 	}
 	
+	public ArcheCommandBuilder noBrigadier() {
+		brigadier = false;
+		if(parentBuilder != null) parentBuilder.noBrigadier();
+		return this;
+	}
+	
 	public ArcheCommandBuilder message(String message, Object... format) {
 		sequence(CommandPart.messager(message, Execution.SYNC));
 		return this;
@@ -233,9 +252,47 @@ public class ArcheCommandBuilder {
 		if(parentBuilder == null) {
 			ArcheCommandExecutor executor = new ArcheCommandExecutor(built);
 			command.setExecutor(executor);
-			command.setTabCompleter(executor);
+			//command.setTabCompleter(executor);
 		}
+		addBrigadier();
 		return parentBuilder;
+		
 	}
 	
+	private void addBrigadier() {
+		if(!brigadierProvider.isFunctional()) return;
+		if(parentBuilder != null) return; //Brigadier goes from the top down...
+		
+		
+					
+		var mainNode = LiteralArgumentBuilder.literal(mainCommand).build();
+		CommandNode<Object> node = mainNode;
+
+		
+		for(var arg : args) {
+			CommandNode<Object> kid =  RequiredArgumentBuilder.argument(arg.getName(), IntegerArgumentType.integer(0)).build();
+			node.addChild(kid);
+			node = kid;
+		}
+		
+		Run.as(ArcheCore.getPlugin()).sync(()->{
+			var b = brigadierProvider.getBrigadier();
+			
+			var iter = b.getRoot().getChild(mainCommand).getChildren().iterator();
+			while(iter.hasNext()) {
+				var kid = iter.next();
+				System.out.println(kid);
+				System.out.println(kid.getName());
+				if(kid.getName().equals("args")) iter.remove();
+			}
+			b.getRoot().addChild(mainNode);
+			
+			for(var alias : aliases) {
+				if(mainCommand.equals(alias)) continue;
+				b.getRoot().addChild(LiteralArgumentBuilder.literal(alias).redirect(mainNode).build());
+			}
+			
+		});
+		
+	}
 }

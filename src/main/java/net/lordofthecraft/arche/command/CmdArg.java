@@ -12,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import com.google.common.base.Supplier;
+import com.mojang.brigadier.arguments.ArgumentType;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class CmdArg<T> {
 	@Setter private Function<String, T> mapper;
 	@Setter private Predicate<T> filter = $->true;
 	@Setter private Supplier<Collection<String>> completer = ArrayList::new;
+	@Setter private ArgumentType<T> brigadierType = null;
 	
 	private final String name, errorMessage, defaultInput, description;
 	
