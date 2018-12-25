@@ -1,17 +1,18 @@
 package net.lordofthecraft.arche.command.brigadier;
 
-import static net.lordofthecraft.arche.command.brigadier.BrigadierUtil.literal;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.command.ArcheCommandBuilder;
+import net.lordofthecraft.arche.command.ArcheCommand;
+import net.lordofthecraft.arche.command.HelpCommand;
 import net.lordofthecraft.arche.util.Run;
 
 /**
@@ -20,21 +21,43 @@ import net.lordofthecraft.arche.util.Run;
 @RequiredArgsConstructor
 public class Kommandant {
 	private static final BrigadierProvider provider = new BrigadierProvider();
-	private final ArcheCommandBuilder builder;
+	private final ArcheCommand head;
 	private final List<CommandNode<Object>> rootNodes = new ArrayList<>();
 	
 	public void addBrigadier() {
 		if(!provider.isFunctional()) return;
-		
+				
+		rootNodes.add(buildNode(head, null));
 		
 		runDelayedTasks();
 	}
 	
+	private CommandNode<Object> buildNode(ArcheCommand cmd, CommandNode<Object> dad) {
+		var node = LiteralArgumentBuilder.literal(cmd.getMainCommand()).build();
+		
+		for(var sub : cmd.getSubCommands()) {
+			if(sub instanceof HelpCommand) continue;
+			var subNode = buildNode(sub, node); //Recurses
+			node.addChild(subNode);
+		}
+		
+		CommandNode<Object> argument = null;
+		for (var arg : cmd.getArgs()) {
+			CommandNode<Object> nextArg = RequiredArgumentBuilder.argument(arg.getName(), arg.getBrigadierType()).build();
+			if(argument == null) node.addChild(nextArg);
+			else argument.addChild(nextArg);
+			
+			argument = nextArg;
+		}
+		
+		redirectAliases(cmd, dad, node);
+		return node;
+	}
 	
-	private void redirectAliases(CommandNode<Object> parent, CommandNode<Object> theOneTrueNode) {
-		for(String alias : builder.aliases()) {
-			if(alias.equalsIgnoreCase(builder.mainCommand())) continue;
-			var node = literal(alias).redirect(theOneTrueNode).build();
+	private void redirectAliases(ArcheCommand cmd, CommandNode<Object> parent, CommandNode<Object> theOneTrueNode) {
+		for(String alias : cmd.getAliases()) {
+			if(alias.equalsIgnoreCase(cmd.getMainCommand())) continue;
+			var node = LiteralArgumentBuilder.literal(alias).redirect(theOneTrueNode).build();
 			if(parent == null) rootNodes.add(node);
 			else parent.addChild(node);
 		}
@@ -47,6 +70,7 @@ public class Kommandant {
 				String name = node.getName();
 				despigot(brigadier, name);
 				brigadier.getRoot().addChild(node);
+				System.out.println("CAN YOU HEAR ME????????????????");
 			}
 		};
 		Run.as(ArcheCore.getPlugin()).sync(r);

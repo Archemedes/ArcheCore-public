@@ -36,10 +36,10 @@ public class ArcheCommandBuilder {
 	private boolean requirePersona = false;
 	private CmdFlag senderParam = null;
 	
-	@Getter(AccessLevel.PUBLIC) private final Set<String> aliases = new HashSet<>();
+	@Getter(AccessLevel.PACKAGE) private final Set<String> aliases = new HashSet<>();
 	@Getter(AccessLevel.PACKAGE) private final List<CmdArg<?>> args = new ArrayList<>();
 	@Getter(AccessLevel.PACKAGE) private final List<CmdFlag> flags = new ArrayList<>();
-	private final List<ArcheCommand> subCommands = new ArrayList<>();
+	@Getter(AccessLevel.PACKAGE) private final List<ArcheCommand> subCommands = new ArrayList<>();
 	
 	private CommandPart firstPart;
 	private CommandPart tailPart;
@@ -242,10 +242,12 @@ public class ArcheCommandBuilder {
 		if(parentBuilder == null) {
 			ArcheCommandExecutor executor = new ArcheCommandExecutor(built);
 			command.setExecutor(executor);
-			//command.setTabCompleter(executor);
 		}
 		
-		if(brigadier && parentBuilder == null) new Kommandant(this).addBrigadier();
+		if(brigadier && parentBuilder == null) {
+			new Kommandant(built).addBrigadier();
+		}
+		
 		return parentBuilder;
 	}
 	
