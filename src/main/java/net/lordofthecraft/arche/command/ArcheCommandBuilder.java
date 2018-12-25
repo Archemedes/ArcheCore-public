@@ -14,27 +14,17 @@ import java.util.function.Predicate;
 
 import org.bukkit.command.PluginCommand;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.tree.CommandNode;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.var;
 import lombok.experimental.Accessors;
-import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.command.CommandPart.Execution;
-import net.lordofthecraft.arche.command.brigadier.BrigadierProvider;
-import net.lordofthecraft.arche.util.Run;
+import net.lordofthecraft.arche.command.brigadier.Kommandant;
 
 //We're reaching levels of Telanir that shouldn't be even possible
 @Accessors(fluent=true)
 public class ArcheCommandBuilder {
-	private static final BrigadierProvider brigadierProvider = new BrigadierProvider();
-	
 	private final ArcheCommandBuilder parentBuilder;
 	private final PluginCommand command;
 	
@@ -46,7 +36,7 @@ public class ArcheCommandBuilder {
 	private boolean requirePersona = false;
 	private CmdFlag senderParam = null;
 	
-	private final Set<String> aliases = new HashSet<>();
+	@Getter(AccessLevel.PUBLIC) private final Set<String> aliases = new HashSet<>();
 	@Getter(AccessLevel.PACKAGE) private final List<CmdArg<?>> args = new ArrayList<>();
 	@Getter(AccessLevel.PACKAGE) private final List<CmdFlag> flags = new ArrayList<>();
 	private final List<ArcheCommand> subCommands = new ArrayList<>();
@@ -254,12 +244,12 @@ public class ArcheCommandBuilder {
 			command.setExecutor(executor);
 			//command.setTabCompleter(executor);
 		}
-		addBrigadier();
-		return parentBuilder;
 		
+		if(brigadier && parentBuilder == null) new Kommandant(this).addBrigadier();
+		return parentBuilder;
 	}
 	
-	private void addBrigadier() {
+/*	private void addBrigadier() {
 		if(!brigadierProvider.isFunctional()) return;
 		if(parentBuilder != null) return; //Brigadier goes from the top down...
 		
@@ -294,5 +284,5 @@ public class ArcheCommandBuilder {
 			
 		});
 		
-	}
+	}*/
 }
