@@ -137,7 +137,7 @@ public class ArgBuilder {
 	}
 	
 	public ArcheCommandBuilder asString(){
-		defaults("*","How the FUCK did you mess up parsing a string as a string?????");
+		defaults("*","Provide an argument");
 		val arg = build(String.class);
 		arg.setMapper(Functions.identity());
 		return command;
