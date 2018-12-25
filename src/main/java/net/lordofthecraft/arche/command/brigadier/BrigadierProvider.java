@@ -1,6 +1,8 @@
-package net.lordofthecraft.arche.command;
+package net.lordofthecraft.arche.command.brigadier;
 
 import java.lang.reflect.Method;
+
+import org.apache.commons.lang.Validate;
 
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.mojang.brigadier.CommandDispatcher;
@@ -11,21 +13,18 @@ import net.lordofthecraft.arche.CoreLog;
 
 public class BrigadierProvider {
 	@Getter private boolean functional = true;
-	@Getter private CommandDispatcher<?> brigadier;
 
 	private Method getServer;
 	private Method getMCDispatcher;
 	private Method getBrigadier;
 	
-	BrigadierProvider() {
+	public BrigadierProvider() {
 		try {
 			var serverClass = MinecraftReflection.getMinecraftServerClass();
 			getServer = serverClass.getMethod("getServer");
 			getMCDispatcher = serverClass.getDeclaredMethod("getCommandDispatcher");
 			getMCDispatcher.setAccessible(true);
 			getBrigadier = reflectBrigadierGetter();
-			
-			brigadier = reflectBrigadier();
 		} catch(Exception e) {
 			CoreLog.severe("We were unable to set up the BrigadierProvider. Likely a reflection error!");
 			functional = false;
@@ -43,11 +42,18 @@ public class BrigadierProvider {
 		throw new NoSuchMethodError("Fuck");
 	}
 	
-	
-	private CommandDispatcher<?> reflectBrigadier() throws Exception {
-		var server = getServer.invoke(null); //Static MinecraftServer getter
-		var dispatch = getMCDispatcher.invoke(server);
-		return (CommandDispatcher<?>) getBrigadier.invoke(dispatch);
+	@SuppressWarnings("unchecked")
+	public CommandDispatcher<Object> getBrigadier() {
+		Validate.isTrue(functional);
+		try {
+			var server = getServer.invoke(null); //Static MinecraftServer getter
+			var dispatch = getMCDispatcher.invoke(server);
+			return (CommandDispatcher<Object>) getBrigadier.invoke(dispatch);
+		} catch(Exception e) {
+			CoreLog.severe("Brigadier Decided to crash on us after startup time");
+			functional = false;
+			return null;
+		}
 	}
 	
 
