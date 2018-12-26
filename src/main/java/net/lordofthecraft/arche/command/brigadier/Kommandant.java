@@ -57,7 +57,8 @@ public class Kommandant {
 	private void redirectAliases(ArcheCommand cmd, CommandNode<Object> parent, CommandNode<Object> theOneTrueNode) {
 		for(String alias : cmd.getAliases()) {
 			if(alias.equalsIgnoreCase(cmd.getMainCommand())) continue;
-			var node = LiteralArgumentBuilder.literal(alias).redirect(theOneTrueNode).build();
+			var node = LiteralArgumentBuilder.literal(alias).build();
+			theOneTrueNode.getChildren().forEach(node::addChild);
 			if(parent == null) rootNodes.add(node);
 			else parent.addChild(node);
 		}
@@ -70,7 +71,6 @@ public class Kommandant {
 				String name = node.getName();
 				despigot(brigadier, name);
 				brigadier.getRoot().addChild(node);
-				System.out.println("CAN YOU HEAR ME????????????????");
 			}
 		};
 		Run.as(ArcheCore.getPlugin()).sync(r);
