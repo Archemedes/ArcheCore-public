@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche.command.brigadier;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -34,7 +35,9 @@ public class Kommandant {
 	}
 	
 	private CommandNode<Object> buildNode(ArcheCommand cmd, CommandNode<Object> dad) {
-		var node = LiteralArgumentBuilder.literal(cmd.getMainCommand()).build();
+		var builder = LiteralArgumentBuilder.literal(cmd.getMainCommand());
+		if(!cmd.hasArgs() && !cmd.isEmptyCommand()) builder.executes($->0);
+		var node = builder.build();
 		
 		for(var sub : cmd.getSubCommands()) {
 			if(sub instanceof HelpCommand) continue;
@@ -43,8 +46,13 @@ public class Kommandant {
 		}
 		
 		CommandNode<Object> argument = null;
-		for (var arg : cmd.getArgs()) {
-			CommandNode<Object> nextArg = buildNodeForArg(arg);
+
+		var queue = new LinkedList<>(cmd.getArgs());
+		while(!queue.isEmpty()) {
+			var arg = queue.poll();
+			var next = queue.peek();
+			boolean executes = next == null || next.hasDefaultInput();
+			CommandNode<Object> nextArg = buildNodeForArg(arg, executes);
 			if(argument == null) node.addChild(nextArg);
 			else argument.addChild(nextArg);
 			
@@ -56,10 +64,10 @@ public class Kommandant {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private CommandNode<Object> buildNodeForArg(CmdArg<?> arg){
+	private CommandNode<Object> buildNodeForArg(CmdArg<?> arg, boolean executes){
 		var builder = RequiredArgumentBuilder.argument(arg.getName(), arg.getBrigadierType());
+		if(executes) builder.executes( $->0 );
 		if(arg.hasCustomCompleter()) builder.suggests(new ArcheSuggestionProvider<>(arg));
-		//if(arg.hasCustomCompleter()) builder.suggests(provider.suggestions(command));
 		return builder.build();
 	}
 	

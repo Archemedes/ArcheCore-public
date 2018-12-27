@@ -36,6 +36,10 @@ public class ArcheCommand {
 	public boolean isEmptyCommand() {
 		return sequenceStart == CommandPart.NULL_COMMAND;
 	}
+	
+	public boolean hasArgs() {
+		return !args.isEmpty();
+	}
 
 	public boolean requiresPlayer() {
 		return requirePlayer;
