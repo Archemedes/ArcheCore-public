@@ -17,7 +17,7 @@ import net.lordofthecraft.arche.util.ChatBuilder;
 import net.lordofthecraft.arche.util.MessageUtil;
 
 public class HelpCommand extends ArcheCommand {
-	private static final ChatColor[] colors = new ChatColor[] {BLUE, LIGHT_PURPLE, AQUA, GREEN, YELLOW, DARK_GRAY, GOLD, RED, DARK_AQUA};
+	private static final ChatColor[] colors = new ChatColor[] {AQUA, YELLOW, GREEN, LIGHT_PURPLE, GOLD};
 	
 	private final ArcheCommand parent;
 	
@@ -107,11 +107,11 @@ public class HelpCommand extends ArcheCommand {
 			boolean optional = a.hasDefaultInput();
 			b.append(" ");
 			if(useColor) b.color(colorCoded(i++));
-			b.append(optional? "{":"[");
+			b.append(optional? "[":"<");
 			if(a.hasDescription()) b.hover(a.getDescription());
 			else b.retainColors().suggest(alias + ' ');
 			b.append(a.getName())
-			.append(optional? "}":"]");
+			.append(optional? "]":">");
 		}
 	}
 
