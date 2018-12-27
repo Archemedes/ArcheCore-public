@@ -45,7 +45,6 @@ public class ArcheCommandBuilder {
 	private CommandPart tailPart;
 	
 	//Builder state booleans
-	boolean brigadier = true; //Can turn brigadier control off, defaults to spigot completions
 	boolean argsHaveDefaults = false; //When arg is added that has default input
 	boolean noMoreArgs = false; //When an unity argument is used
 	boolean buildHelpFile = true;
@@ -140,12 +139,6 @@ public class ArcheCommandBuilder {
 	
 	public ArcheCommandBuilder noHelp() {
 		buildHelpFile = false;
-		return this;
-	}
-	
-	public ArcheCommandBuilder noBrigadier() {
-		brigadier = false;
-		if(parentBuilder != null) parentBuilder.noBrigadier();
 		return this;
 	}
 	
@@ -244,7 +237,7 @@ public class ArcheCommandBuilder {
 			command.setExecutor(executor);
 		}
 		
-		if(brigadier && parentBuilder == null) {
+		if(parentBuilder == null) {
 			new Kommandant(built).addBrigadier();
 		}
 		
