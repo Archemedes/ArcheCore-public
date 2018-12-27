@@ -23,6 +23,7 @@ import net.lordofthecraft.arche.command.annotate.Cmd;
 import net.lordofthecraft.arche.command.annotate.Default;
 import net.lordofthecraft.arche.command.annotate.Flag;
 import net.lordofthecraft.arche.command.annotate.Joined;
+import net.lordofthecraft.arche.command.annotate.Range;
 import net.lordofthecraft.arche.interfaces.CommandHandle;
 import net.lordofthecraft.arche.interfaces.Persona;
 
@@ -155,6 +156,26 @@ public class AnnotatedCommandParser {
 			if(param.isAnnotationPresent(Joined.class)) {
 				if(param.getType() == String.class) arg.asJoinedString();
 				else throw new IllegalArgumentException("All JoinedString annotations must affect a String type parameter");
+			} else if (param.isAnnotationPresent(Range.class)) {
+				Range rangeInput = param.getAnnotation(Range.class);
+				//Retarded magical numbers bs is here. Sorry.
+				boolean hasMin = rangeInput.min() != Integer.MIN_VALUE;
+				boolean hasMax = rangeInput.max() != Integer.MAX_VALUE;
+				if(c == int.class || c == Integer.class) {
+					if(hasMin && hasMax) arg.asInt((int)rangeInput.min(), (int)rangeInput.max());
+					else if(hasMin && !hasMax) arg.asInt((int) rangeInput.min());
+					else throw new IllegalArgumentException("Use @Range by specifying either a min or a min and max");
+				} else if(c == float.class || c == Float.class) {
+					if(hasMin && hasMax) arg.asFloat((float)rangeInput.min(), (float) rangeInput.max());
+					else if(hasMin && !hasMax) arg.asFloat((float) rangeInput.min());
+					else throw new IllegalArgumentException("Use @Range by specifying either a min or a min and max");
+				} else if(c == double.class || c == Double.class) {
+					if(hasMin && hasMax) arg.asDouble(rangeInput.min(), rangeInput.max());
+					else if(hasMin && !hasMax) arg.asDouble( rangeInput.min());
+					else throw new IllegalArgumentException("Use @Range by specifying either a min or a min and max");
+				} else {
+					throw new IllegalArgumentException("Use @Range annotation only on integer, float or double!");
+				}
 			} else {
 				arg.asType(c);
 			}
@@ -162,7 +183,7 @@ public class AnnotatedCommandParser {
 		
 		makeCommandDoStuff(template, acb, method, wantsCommandSenderAsFirstArg);
 	}
-	
+
 	private void makeCommandDoStuff(Supplier<CommandTemplate> template, ArcheCommandBuilder acb, Method method, boolean wantsCommandSenderAsFirstArg) {
 		//Make command actually do stuff
 		acb.run(rc->{
