@@ -287,7 +287,7 @@ public class ArgBuilder {
 	
 	public ArcheCommandBuilder asBoolean(boolean def) {
 		this.defaultInput = def? "y":"n";
-		defaults("y/n","Please provide either yes/no.");
+		defaults("y/n","Please provide either true/false.");
 		val arg = build(Boolean.class);
 		arg.setMapper(s -> {
 			if(Stream.of("true","yes","y").anyMatch(s::equalsIgnoreCase)) return true;
