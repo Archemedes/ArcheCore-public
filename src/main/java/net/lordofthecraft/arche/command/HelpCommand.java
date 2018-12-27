@@ -156,11 +156,13 @@ public class HelpCommand extends ArcheCommand {
 			fillArgs(sub, alias + ' ' + subber, b, false);
 			
 			if(sub.hasDescription()) {
-				b.append(": ");
-				int room = 60 - b.toPlainText().length();
-				String desc = sub.getDescription();
-				if(desc.length() > room) desc = desc.substring(0, room) + '\u2026';
-				b.append(desc).color(GRAY);
+				int room = 59 - b.toPlainText().length();
+				if(room > 0)  {
+					b.append(": ");
+					String desc = sub.getDescription();
+					if(desc.length() > room) desc = desc.substring(0, room-1) + '\u2026';
+					b.append(desc).color(GRAY);
+				}
 			}
 			
 			b.send(s);
