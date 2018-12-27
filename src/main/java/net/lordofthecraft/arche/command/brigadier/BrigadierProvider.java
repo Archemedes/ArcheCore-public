@@ -1,18 +1,13 @@
 package net.lordofthecraft.arche.command.brigadier;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
 
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 
 import lombok.Getter;
-import lombok.SneakyThrows;
 import lombok.var;
 import net.lordofthecraft.arche.CoreLog;
 
@@ -22,7 +17,6 @@ public class BrigadierProvider {
 	private Method getServer;
 	private Method getMCDispatcher;
 	private Method getBrigadier;
-	private Constructor<?> makeCommandWrapper;
 	
 	public BrigadierProvider() {
 		try {
@@ -32,8 +26,6 @@ public class BrigadierProvider {
 			getMCDispatcher.setAccessible(true);
 			getBrigadier = reflectBrigadierGetter();
 			
-      var wrapperClass = MinecraftReflection.getCraftBukkitClass("command.BukkitCommandWrapper");
-      makeCommandWrapper = wrapperClass.getConstructor(Bukkit.getServer().getClass(), Command.class);
 		} catch(Exception e) {
 			CoreLog.severe("We were unable to set up the BrigadierProvider. Likely a reflection error!");
 			functional = false;
@@ -63,12 +55,6 @@ public class BrigadierProvider {
 			functional = false;
 			return null;
 		}
-	}
-	
-	@SuppressWarnings("rawtypes")
-	@SneakyThrows
-	public SuggestionProvider suggestions(Command command) {
-		return (SuggestionProvider) makeCommandWrapper.newInstance(Bukkit.getServer(), command);
 	}
 	
 
