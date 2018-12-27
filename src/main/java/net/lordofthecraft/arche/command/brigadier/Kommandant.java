@@ -1,8 +1,10 @@
 package net.lordofthecraft.arche.command.brigadier;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -46,13 +48,19 @@ public class Kommandant {
 		}
 		
 		CommandNode<Object> argument = null;
-
+		Map<String, Integer> namesUsed = new HashMap<>();
 		var queue = new LinkedList<>(cmd.getArgs());
 		while(!queue.isEmpty()) {
 			var arg = queue.poll();
 			var next = queue.peek();
 			boolean executes = next == null || next.hasDefaultInput();
-			CommandNode<Object> nextArg = buildNodeForArg(arg, executes);
+			
+			//Adds numbers to duplicate names: prevents crashes and gray-text rubbish
+			String name = arg.getName();
+			Integer value = namesUsed.compute(name, (k,v)->v==null? 1 : v+1);
+			if(value > 1) name = name+value;
+			
+			CommandNode<Object> nextArg = buildNodeForArg(name, arg, executes);
 			if(argument == null) node.addChild(nextArg);
 			else argument.addChild(nextArg);
 			
@@ -64,8 +72,8 @@ public class Kommandant {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private CommandNode<Object> buildNodeForArg(CmdArg<?> arg, boolean executes){
-		var builder = RequiredArgumentBuilder.argument(arg.getName(), arg.getBrigadierType());
+	private CommandNode<Object> buildNodeForArg(String name, CmdArg<?> arg, boolean executes){
+		var builder = RequiredArgumentBuilder.argument(name, arg.getBrigadierType());
 		if(executes) builder.executes( $->0 );
 		if(arg.hasCustomCompleter()) builder.suggests(new ArcheSuggestionProvider<>(arg));
 		return builder.build();
