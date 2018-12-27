@@ -21,6 +21,7 @@ import net.lordofthecraft.arche.save.rows.RunnerRow;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal=true)
 @RequiredArgsConstructor
 final class CommandPart {
+	public static final CommandPart NULL_COMMAND = run($->{}, Execution.SYNC);
 	static enum Execution{ SYNC, ASYNC, CONSUMER, ANY}
 	
 	BiConsumer<RanCommand, Connection> runner;

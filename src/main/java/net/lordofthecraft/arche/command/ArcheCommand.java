@@ -32,6 +32,10 @@ public class ArcheCommand {
 	void execute(RanCommand rc) {
 		sequenceStart.execute(rc);
 	}
+	
+	public boolean isEmptyCommand() {
+		return sequenceStart == CommandPart.NULL_COMMAND;
+	}
 
 	public boolean requiresPlayer() {
 		return requirePlayer;

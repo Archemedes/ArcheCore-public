@@ -200,7 +200,7 @@ public class ArcheCommandBuilder {
 				throw new IllegalStateException("Found no execution sequence for command: " + this.mainCommand
 						+ ". This is only possible if the command has subcommands and no arguments specified."
 						+ " It is VERY likely the command was built incorrectly.");
-			firstPart = CommandPart.run($->{}, Execution.SYNC);
+			firstPart = CommandPart.NULL_COMMAND;
 		}
 		
 		CoreLog.debug("Now Building ArcheCommand: " + mainCommand + " it has " + subCommands.size()
