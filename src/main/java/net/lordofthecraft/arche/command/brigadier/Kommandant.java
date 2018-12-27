@@ -82,8 +82,7 @@ public class Kommandant {
 	private void redirectAliases(ArcheCommand cmd, CommandNode<Object> parent, CommandNode<Object> theOneTrueNode) {
 		for(String alias : cmd.getAliases()) {
 			if(alias.equalsIgnoreCase(cmd.getMainCommand())) continue;
-			var node = LiteralArgumentBuilder.literal(alias).build();
-			theOneTrueNode.getChildren().forEach(node::addChild);
+			var node = LiteralArgumentBuilder.literal(alias).redirect(theOneTrueNode).build();
 			if(parent == null) rootNodes.add(node);
 			else parent.addChild(node);
 		}
@@ -102,11 +101,11 @@ public class Kommandant {
 	}
 	
 	private void despigot(CommandDispatcher<Object> brigadier, String alias) {
-		var iter = brigadier.getRoot().getChild(alias).getChildren().iterator();
+		var iter = brigadier.getRoot().getChildren().iterator();
 		while(iter.hasNext()) {
-			var kid = iter.next(); //Search spigot's overruling Greedy String argument
-			if(kid.getName().equals("args"))
-				iter.remove(); //Removing it allows Brigadier's completion to show up
+			var kid = iter.next(); //Search spigot's attempt at registering the argument
+			if(kid.getName().equals(alias))
+				iter.remove(); //Killing the skeletal framework of spigot gives us full Brigadier power
 		}
 	}
 }
