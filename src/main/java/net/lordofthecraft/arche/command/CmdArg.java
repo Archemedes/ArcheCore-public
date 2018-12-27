@@ -29,7 +29,7 @@ public class CmdArg<T> {
 	@Setter private Predicate<T> filter = $->true;
 	@Setter private Supplier<Collection<String>> completer = NULL_COMPLETER;
 	@SuppressWarnings("rawtypes")
-	@Setter private ArgumentType brigadierType = StringArgumentType.string();
+	@Setter private ArgumentType brigadierType = StringArgumentType.word();
 	
 	private final String name, errorMessage, defaultInput, description;
 	

@@ -20,6 +20,9 @@ import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Floats;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -66,6 +69,7 @@ public class ArgBuilder {
 		defaults("#","Must be a valid integer of %d or higher", min);
 		val arg = asIntInternal();
 		arg.setFilter(i->i>=min);
+		arg.setBrigadierType(IntegerArgumentType.integer(min));
 		return command;
 	}
 	
@@ -73,6 +77,7 @@ public class ArgBuilder {
 		defaults("#","Must be a valid integer between %d ad %d", min, max);
 		val arg = asIntInternal();
 		arg.setFilter(i->(i>=min && i <= max));
+		arg.setBrigadierType(IntegerArgumentType.integer(min, max));
 		return command;
 	}
 	
@@ -87,18 +92,22 @@ public class ArgBuilder {
 		defaults("#","Not an accepted integer");
 		CmdArg<Integer> arg = build(Integer.class);
 		arg.setMapper(Ints::tryParse);
-		
+		arg.setBrigadierType(IntegerArgumentType.integer());
 		return arg;
 	}
 	
-	public ArcheCommandBuilder asLong() {
-		defaults("#l","Not an accepted longinteger");
-		CmdArg<Long> arg = build(Long.class);
-		arg.setMapper(Longs::tryParse);
+	public ArcheCommandBuilder asLong(){
+		asLongInternal();
 		return command;
 	}
 	
-
+	private CmdArg<Long> asLongInternal() {
+		defaults("#l","Not an accepted longinteger");
+		CmdArg<Long> arg = build(Long.class);
+		arg.setMapper(Longs::tryParse);
+		return arg;
+	}
+	
 	public ArcheCommandBuilder asDouble() {
 		asDoubleInternal();
 		return command;
@@ -107,12 +116,14 @@ public class ArgBuilder {
 	public ArcheCommandBuilder asDouble(double min){
 		val arg = asDoubleInternal();
 		arg.setFilter(d->d>=min);
+		arg.setBrigadierType(DoubleArgumentType.doubleArg(min));
 		return command;
 	}
 	
 	public ArcheCommandBuilder asDouble(double min, double max){
 		val arg = asDoubleInternal();
 		arg.setFilter(d->(d>=min && d <= max));
+		arg.setBrigadierType(DoubleArgumentType.doubleArg(min,max));
 		return command;
 	}
 	
@@ -126,14 +137,35 @@ public class ArgBuilder {
 		defaults("#.#","Not an accepted number");
 		CmdArg<Double> arg = build(Double.class);
 		arg.setMapper(Doubles::tryParse);
+		arg.setBrigadierType(DoubleArgumentType.doubleArg());
 		return arg;
 	}
 	
 	public ArcheCommandBuilder asFloat() {
+		asFloatInternal();
+		return command;
+	}
+	
+	public ArcheCommandBuilder asFloat(float min) {
+		val arg = asFloatInternal();
+		arg.setFilter(d->d>=min);
+		arg.setBrigadierType(FloatArgumentType.floatArg(min));
+		return command;
+	}
+	
+	public ArcheCommandBuilder asFloat(float min, float max) {
+		val arg = asFloatInternal();
+		arg.setFilter(d->(d>=min && d <= max));
+		arg.setBrigadierType(FloatArgumentType.floatArg(min, max));
+		return command;
+	}
+	
+	public CmdArg<Float> asFloatInternal() {
 		defaults("#.#","Not an accepted number");
 		CmdArg<Float> arg = build(Float.class);
 		arg.setMapper(Floats::tryParse);
-		return command;
+		arg.setBrigadierType(FloatArgumentType.floatArg());
+		return arg;
 	}
 	
 	public ArcheCommandBuilder asString(){
