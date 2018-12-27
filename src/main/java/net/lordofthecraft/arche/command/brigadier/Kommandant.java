@@ -3,6 +3,8 @@ package net.lordofthecraft.arche.command.brigadier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.command.Command;
+
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -12,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.command.ArcheCommand;
+import net.lordofthecraft.arche.command.CmdArg;
 import net.lordofthecraft.arche.command.HelpCommand;
 import net.lordofthecraft.arche.util.Run;
 
@@ -21,6 +24,7 @@ import net.lordofthecraft.arche.util.Run;
 @RequiredArgsConstructor
 public class Kommandant {
 	private static final BrigadierProvider provider = new BrigadierProvider();
+	private final Command command;
 	private final ArcheCommand head;
 	private final List<CommandNode<Object>> rootNodes = new ArrayList<>();
 	
@@ -43,15 +47,23 @@ public class Kommandant {
 		
 		CommandNode<Object> argument = null;
 		for (var arg : cmd.getArgs()) {
-			CommandNode<Object> nextArg = RequiredArgumentBuilder.argument(arg.getName(), arg.getBrigadierType()).build();
+			CommandNode<Object> nextArg = buildNodeForArg(arg);
 			if(argument == null) node.addChild(nextArg);
 			else argument.addChild(nextArg);
 			
 			argument = nextArg;
 		}
-		
+		 
 		redirectAliases(cmd, dad, node);
 		return node;
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private CommandNode<Object> buildNodeForArg(CmdArg<?> arg){
+		var builder = RequiredArgumentBuilder.argument(arg.getName(), arg.getBrigadierType());
+		//if(arg.hasCustomCompleter()) builder.suggests(new ArcheSuggestionProvider<>(arg));
+		if(arg.hasCustomCompleter()) builder.suggests(provider.suggestions(command));
+		return builder.build();
 	}
 	
 	private void redirectAliases(ArcheCommand cmd, CommandNode<Object> parent, CommandNode<Object> theOneTrueNode) {

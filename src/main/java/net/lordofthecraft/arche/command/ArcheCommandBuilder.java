@@ -245,46 +245,9 @@ public class ArcheCommandBuilder {
 		}
 		
 		if(brigadier && parentBuilder == null) {
-			new Kommandant(built).addBrigadier();
+			new Kommandant(command, built).addBrigadier();
 		}
 		
 		return parentBuilder;
 	}
-	
-/*	private void addBrigadier() {
-		if(!brigadierProvider.isFunctional()) return;
-		if(parentBuilder != null) return; //Brigadier goes from the top down...
-		
-		
-					
-		var mainNode = LiteralArgumentBuilder.literal(mainCommand).build();
-		CommandNode<Object> node = mainNode;
-
-		
-		for(var arg : args) {
-			CommandNode<Object> kid =  RequiredArgumentBuilder.argument(arg.getName(), IntegerArgumentType.integer(0)).build();
-			node.addChild(kid);
-			node = kid;
-		}
-		
-		Run.as(ArcheCore.getPlugin()).sync(()->{
-			var b = brigadierProvider.getBrigadier();
-			
-			var iter = b.getRoot().getChild(mainCommand).getChildren().iterator();
-			while(iter.hasNext()) {
-				var kid = iter.next();
-				System.out.println(kid);
-				System.out.println(kid.getName());
-				if(kid.getName().equals("args")) iter.remove();
-			}
-			b.getRoot().addChild(mainNode);
-			
-			for(var alias : aliases) {
-				if(mainCommand.equals(alias)) continue;
-				b.getRoot().addChild(LiteralArgumentBuilder.literal(alias).redirect(mainNode).build());
-			}
-			
-		});
-		
-	}*/
 }

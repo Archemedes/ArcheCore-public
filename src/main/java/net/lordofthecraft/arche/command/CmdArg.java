@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import com.mojang.brigadier.arguments.StringArgumentType;
+
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import com.google.common.base.Supplier;
 import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +23,13 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @Getter
 public class CmdArg<T> {
+	private static final Supplier<Collection<String>> NULL_COMPLETER = ArrayList::new;
+	
 	@Setter private Function<String, T> mapper;
 	@Setter private Predicate<T> filter = $->true;
-	@Setter private Supplier<Collection<String>> completer = ArrayList::new;
-	@Setter private ArgumentType<String> brigadierType = StringArgumentType.string();
+	@Setter private Supplier<Collection<String>> completer = NULL_COMPLETER;
+	@SuppressWarnings("rawtypes")
+	@Setter private ArgumentType brigadierType = StringArgumentType.string();
 	
 	private final String name, errorMessage, defaultInput, description;
 	
@@ -51,6 +55,10 @@ public class CmdArg<T> {
 	
 	void playerCompleter() {
 		setCompleter(()->Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList()) );
+	}
+	
+	public boolean hasCustomCompleter() {
+		return this.completer != NULL_COMPLETER;
 	}
 	
 	public boolean hasDefaultInput() {
