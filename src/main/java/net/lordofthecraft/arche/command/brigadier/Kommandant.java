@@ -24,7 +24,7 @@ import net.lordofthecraft.arche.util.Run;
  */
 @RequiredArgsConstructor
 public class Kommandant {
-	private static final BrigadierProvider provider = new BrigadierProvider();
+	private static final BrigadierProvider provider = BrigadierProvider.get();
 	private final ArcheCommand head;
 	private final List<CommandNode<Object>> rootNodes = new ArrayList<>();
 	
