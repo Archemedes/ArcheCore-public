@@ -42,6 +42,7 @@ public class ArgTypeTemplate<T> {
 	}
 	
 	private boolean isClassValid() {
+		if(forClass.isPrimitive()) return false;
 		if(forClass.isEnum()) return false;
 		if(OfflinePersona.class.isAssignableFrom(forClass)) return false;
 		if(OfflinePlayer.class.isAssignableFrom(forClass)) return false;
