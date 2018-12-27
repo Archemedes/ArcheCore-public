@@ -1,18 +1,14 @@
 package net.lordofthecraft.arche.commands;
 
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 
-import lombok.var;
 import net.lordofthecraft.arche.command.CommandTemplate;
 import net.lordofthecraft.arche.command.annotate.Arg;
 import net.lordofthecraft.arche.command.annotate.Cmd;
-import net.lordofthecraft.arche.command.brigadier.BrigadierProvider;
 
 public class CommandTestudo extends CommandTemplate {
 
@@ -29,9 +25,9 @@ public class CommandTestudo extends CommandTemplate {
 	}
 	
 	@Cmd("b-baka")
-	public void manga(Material xxx, int i, Material jx) {
+	public void manga(CommandSender s, Player xxx, int i, int i2, @Arg("AnotherPlayer") Player x) {
 		msg(xxx);
-		msg(jx);
+		msg(x);
 	}
 	
 	private void printOrGo(CommandNode<Object> node) {

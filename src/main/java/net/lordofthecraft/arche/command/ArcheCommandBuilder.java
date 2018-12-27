@@ -245,7 +245,7 @@ public class ArcheCommandBuilder {
 		}
 		
 		if(brigadier && parentBuilder == null) {
-			new Kommandant(command, built).addBrigadier();
+			new Kommandant(built).addBrigadier();
 		}
 		
 		return parentBuilder;
