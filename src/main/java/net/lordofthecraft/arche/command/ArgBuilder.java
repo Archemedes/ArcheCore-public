@@ -294,7 +294,6 @@ public class ArgBuilder {
 			else if(Stream.of("false","no","n").anyMatch(s::equalsIgnoreCase)) return false;
 			else return null;
 		});
-		arg.completeMe("yes","no","true","false");
 		return command;
 	}
 	
