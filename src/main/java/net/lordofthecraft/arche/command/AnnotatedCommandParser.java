@@ -31,8 +31,6 @@ public class AnnotatedCommandParser {
 	private final Supplier<CommandTemplate> template;
 	private final PluginCommand bukkitCommand;
 	
-	private boolean wantsCommandSenderAsFirstArg = false;
-	
 	public ArcheCommandBuilder invokeParse() {
 		ArcheCommandBuilder acb = CommandHandle.builder(bukkitCommand);
 		return parse(template, acb);
@@ -120,6 +118,7 @@ public class AnnotatedCommandParser {
 		else if(method.isAnnotationPresent(Flag.class)) addFlag(acb, method.getAnnotation(Flag.class));
 		
 		var params = method.getParameters();
+		boolean wantsCommandSenderAsFirstArg = false;
 		for (int i = 0; i < params.length; i++) {
 			var param = params[i];
 			var c = param.getType();
@@ -161,10 +160,10 @@ public class AnnotatedCommandParser {
 			}
 		}
 		
-		makeCommandDoStuff(template, acb, method);
+		makeCommandDoStuff(template, acb, method, wantsCommandSenderAsFirstArg);
 	}
 	
-	private void makeCommandDoStuff(Supplier<CommandTemplate> template, ArcheCommandBuilder acb, Method method) {
+	private void makeCommandDoStuff(Supplier<CommandTemplate> template, ArcheCommandBuilder acb, Method method, boolean wantsCommandSenderAsFirstArg) {
 		//Make command actually do stuff
 		acb.run(rc->{
 			try {
