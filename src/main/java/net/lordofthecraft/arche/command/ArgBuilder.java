@@ -297,6 +297,8 @@ public class ArgBuilder {
 			asFloat();
 		} else if(c==Double.class || c==double.class) {
 			asDouble();
+		} else if(c==Boolean.class || c==boolean.class) {
+			asBoolean();
 		} else if(c.isEnum()) { //This is likely where it all goes to hell
 			asEnum((Class<Enum>) c);
 		} else if(Persona.class.isAssignableFrom(c)) {
