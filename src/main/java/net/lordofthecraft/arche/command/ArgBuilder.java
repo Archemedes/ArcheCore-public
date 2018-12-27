@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import com.google.common.base.Functions;
 import com.google.common.primitives.Doubles;
@@ -31,6 +32,7 @@ import lombok.val;
 import lombok.experimental.Accessors;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
+import net.lordofthecraft.arche.command.brigadier.ItemArg;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.util.CommandUtil;
@@ -184,18 +186,21 @@ public class ArgBuilder {
 		return command;
 	}
 	
+	public ArcheCommandBuilder asItemStack() {
+		defaults("itemstack", "Please specify a valid item stack");
+		CmdArg<ItemStack> arg = ItemArg.item(name, errorMessage, defaultInput, description);
+		if(flag == null) command.addArg(arg);
+		else flag.setArg(arg);
+
+		return command;
+	}
 	
 	public ArcheCommandBuilder asMaterial() {
-		defaults("Material", "Please specify a valid item name");
-		val arg = build(Material.class);
-		arg.setMapper(s->{
-			Material m = Material.matchMaterial(s);
-			return m;
-		});
-		arg.setCompleter(()->Arrays.stream(Material.values())
-				.map(Enum::name)
-				.map(String::toLowerCase)
-				.collect(Collectors.toList()));
+		defaults("item", "Please specify a valid item name");
+		CmdArg<Material> arg = ItemArg.material(name, errorMessage, defaultInput, description);
+		if(flag == null) command.addArg(arg);
+		else flag.setArg(arg);
+
 		return command;
 	}
 	
@@ -330,6 +335,10 @@ public class ArgBuilder {
 			asDouble();
 		} else if(c==Boolean.class || c==boolean.class) {
 			asBoolean();
+		} else if(c == Material.class) {
+			asMaterial();
+		} else if(ItemStack.class.isAssignableFrom(c)) {
+			asItemStack();
 		} else if(c.isEnum()) { //This is likely where it all goes to hell
 			asEnum((Class<Enum>) c);
 		} else if(Persona.class.isAssignableFrom(c)) {
