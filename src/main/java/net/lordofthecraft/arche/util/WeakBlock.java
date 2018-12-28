@@ -10,13 +10,15 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
+import lombok.Getter;
+
 /**
  * Represents a block that does not keep strong references to any CraftBukkit or Minecraft objects, allowing for
  * worry-free storage of them into Collections.
  */
 public class WeakBlock implements ConfigurationSerializable {
-	private final String world;
-	private final int x,y,z;
+	@Getter private final String world;
+	@Getter private final int x,y,z;
 
 	public WeakBlock(World world, int x, int y, int z){
 		this.world = world.getName();
@@ -38,7 +40,7 @@ public class WeakBlock implements ConfigurationSerializable {
 	}
 	
 	public static WeakBlock deserialize(Map<String, Object> map) {
-		return new WeakBlock(map.get("world").toString(), 
+		return new WeakBlock(map.get("world").toString(),
 				(int) map.get("x"),
 				(int) map.get("y"),
 				(int) map.get("z")
@@ -49,11 +51,14 @@ public class WeakBlock implements ConfigurationSerializable {
 		this(location.getBlock());
 	}
 
-	public String getWorld(){return world;}
-	public int getX(){return x;}
-	public int getY(){return y;}
-	public int getZ(){return z;}
-
+	public int getChunkX() {
+		return x>>4;
+	}
+	
+	public int getChunkZ() {
+		return z>>4;
+	}
+	
 	@Override
 	public int hashCode(){
 		return (this.y << 24 ^ this.x ^ this.z) + (world == null? 0 : 31 * world.hashCode());
