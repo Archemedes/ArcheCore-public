@@ -88,9 +88,6 @@ commands:
    ipsearch:
       description: Searches matches for provided IP
       permission: archecore.command.ipsearch
-   testudo:
-      description: I am a testy boye
-      aliases: [interest,testficiate,tst,ts]
 
 permissions:
   archecore.arsql:

@@ -48,7 +48,6 @@ import net.lordofthecraft.arche.commands.CommandShowItem;
 import net.lordofthecraft.arche.commands.CommandSkin;
 import net.lordofthecraft.arche.commands.CommandSql;
 import net.lordofthecraft.arche.commands.CommandSqlClone;
-import net.lordofthecraft.arche.commands.CommandTestudo;
 import net.lordofthecraft.arche.commands.tab.CommandAttributeTabCompleter;
 import net.lordofthecraft.arche.commands.tab.CommandHelpTabCompleter;
 import net.lordofthecraft.arche.commands.tab.CommandPersonaTabCompleter;
@@ -479,7 +478,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		newCommand("showitem", CommandShowItem::new);
 		newCommand("seen", CommandSeen::new);
 		newCommand("ipsearch", CommandIPSearch::new);
-		newCommand("testudo", CommandTestudo::new);
 	}
 
 	private void newCommand(String name, Supplier<CommandTemplate> sup) {
