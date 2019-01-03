@@ -122,30 +122,7 @@ public class ArcheAccountHandler implements AccountHandler {
 				var id = rs.getInt("account_id_fk");
 				rs.close();
 				
-				CoreLog.debug("Loading account " + id + " for player " + uuid);
-				
-				//Make the account itself
-				rs = s.executeQuery("SELECT * FROM accounts WHERE account_id="+id);
-				var forumId = rs.getLong("forum_id");
-				var discordId = rs.getLong("discord_id");
-				account = new ArcheAccount(id, forumId, discordId);
-				rs.close();
-				
-				//UUIDs added
-				rs = s.executeQuery("SELECT player FROM playeraccounts WHERE account_id_fk="+id);
-				while(rs.next()) account.alts.add(UUID.fromString(rs.getString("player")));
-				rs.close();
-				
-				//Tags added
-				rs = s.executeQuery("SELECT * FROM account_tags WHERE account_id_fk="+id);
-				AgnosticTags<Account> t = (AgnosticTags<Account>) account.getTags();
-				while(rs.next()) t.putInternal(rs.getString(AbstractTags.TAG_KEY), rs.getString(AbstractTags.TAG_VALUE));
-				rs.close();
-
-				//IPs added
-				rs = s.executeQuery("SELECT ip_address FROM account_ips WHERE account_id_fk="+id);
-				while(rs.next()) account.ips.add(rs.getString("ip_address"));
-				rs.close();
+				account = fetchAccount(s, id);
 			} else { //Account doesn't exist. We must create it
 				CoreLog.debug("Making a new account for player " + uuid);
 				account = makeAccount(uuid);
@@ -154,6 +131,33 @@ public class ArcheAccountHandler implements AccountHandler {
 		}catch(SQLException e) {
 			throw new RuntimeException(e);
 		}
+		
+		return account;
+	}
+	
+	public ArcheAccount fetchAccount(Statement s, int id) throws SQLException {
+		CoreLog.debug("Loading account: " + id);
+		ResultSet rs = s.executeQuery("SELECT * FROM accounts WHERE account_id="+id);
+		var forumId = rs.getLong("forum_id");
+		var discordId = rs.getLong("discord_id");
+		ArcheAccount account = new ArcheAccount(id, forumId, discordId);
+		rs.close();
+		
+		//UUIDs added
+		rs = s.executeQuery("SELECT player FROM playeraccounts WHERE account_id_fk="+id);
+		while(rs.next()) account.alts.add(UUID.fromString(rs.getString("player")));
+		rs.close();
+		
+		//Tags added
+		rs = s.executeQuery("SELECT * FROM account_tags WHERE account_id_fk="+id);
+		AgnosticTags<Account> t = (AgnosticTags<Account>) account.getTags();
+		while(rs.next()) t.putInternal(rs.getString(AbstractTags.TAG_KEY), rs.getString(AbstractTags.TAG_VALUE));
+		rs.close();
+
+		//IPs added
+		rs = s.executeQuery("SELECT ip_address FROM account_ips WHERE account_id_fk="+id);
+		while(rs.next()) account.ips.add(rs.getString("ip_address"));
+		rs.close();
 		
 		return account;
 	}
@@ -209,6 +213,8 @@ public class ArcheAccountHandler implements AccountHandler {
 	}
 	
 	public void merge(ArcheAccount from, ArcheAccount to) {
+		if(to.getId() == from.getId()) return;
+		
 		to.merge(from);
 		from.getUUIDs().forEach(u->accounts.put(u, to));
 		accountsById.remove(from.getId());

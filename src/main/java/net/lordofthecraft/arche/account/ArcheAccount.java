@@ -152,7 +152,7 @@ public class ArcheAccount implements Account {
 		cleanseTable("playeraccounts");
 		cleanseTable("account_ips");
 		cleanseTable("account_tags");
-		cleanseTable("accounts");
+		ArcheCore.getConsumerControls().delete("accounts").where("account_id", getId()).queue();
 	}
 	
 	private void cleanseTable(String tableName) {
