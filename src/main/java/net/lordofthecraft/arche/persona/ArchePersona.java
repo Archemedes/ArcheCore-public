@@ -39,9 +39,9 @@ import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
 import net.lordofthecraft.arche.save.PersonaField;
+import net.lordofthecraft.arche.save.PersonaTable;
 import net.lordofthecraft.arche.save.rows.persona.NamelogRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
-import net.lordofthecraft.arche.save.rows.persona.UpdateVitalsRow;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.util.WeakBlock;
 
@@ -350,7 +350,20 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		location = new WeakBlock(p.getLocation());
 		String pots = savePotionEffects(p);
 		CoreLog.debug("Player world is " + p.getWorld().getName() + " which has a UID of " + p.getWorld().getUID().toString());
-		consumer.queueRow(new UpdateVitalsRow(this, p.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), health, saturation, food, inv, pots));
+		
+		consumer.replace(PersonaTable.VITALS.getTable())
+			.set("persona_id_fk", this.getPersonaId())
+			.set("world", p.getWorld().getUID())
+			.set("x", location.getX())
+			.set("y", location.getY())
+			.set("z", location.getZ())
+			.set("inv", inv == null? null : inv.getInvAsString())
+			.set("ender_inv", inv == null? null: inv.getEnderInvAsString())
+			.set("potions", pots)
+			.set("health", health)
+			.set("hunger", food)
+			.set("saturation", saturation)
+			.queue();
 	}
 
 	private String savePotionEffects(Player pl) {
