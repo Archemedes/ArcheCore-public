@@ -37,7 +37,7 @@ public class PlayerJoinListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onJoin(AsyncPlayerPreLoginEvent e) {
 		if (e.getLoginResult() == Result.ALLOWED)
-			accounts.load(e.getUniqueId(), true);
+			accounts.load(e.getUniqueId());
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -62,7 +62,7 @@ public class PlayerJoinListener implements Listener {
 		if (timer != null) timer.startTiming("login " + p.getName());
 		if(!accounts.isLoaded(p.getUniqueId())) {
 			CoreLog.warning("Player " + p.getName() + " was NOT loaded Async. This is likely a late-bind issue");
-			accounts.load(p.getUniqueId(), true);
+			accounts.load(p.getUniqueId());
 		}
 		
 		ArcheCore.getPlugin().joinPlayer(p);

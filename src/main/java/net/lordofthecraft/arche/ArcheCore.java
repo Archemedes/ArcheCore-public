@@ -324,7 +324,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		//Incase of a reload, load all Personas for currently logged in players
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			accountHandler.load(p.getUniqueId(), true);
+			accountHandler.load(p.getUniqueId());
 			joinPlayer(p);
 		}
 

@@ -48,7 +48,7 @@ public class Waiter<T> {
 			if(Bukkit.isPrimaryThread()) fulfil(result);
 			else Bukkit.getScheduler().runTask(ArcheCore.getPlugin(), ()-> fulfil(result));
 		} else {
-			Bukkit.getScheduler().runTaskAsynchronously(ArcheCore.getPlugin(), ()->ArcheAccountHandler.getInstance().load(uuid, false));
+			Bukkit.getScheduler().runTaskAsynchronously(ArcheCore.getPlugin(), ()->ArcheAccountHandler.getInstance().load(uuid));
 		}
 	}
 	

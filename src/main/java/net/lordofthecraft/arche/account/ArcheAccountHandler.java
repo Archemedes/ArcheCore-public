@@ -78,7 +78,7 @@ public class ArcheAccountHandler implements AccountHandler {
 		return loader.check(op);
 	}
 	
-	public void load(UUID uuid, boolean createIfAbsent) {
+	public void load(UUID uuid) {
 		loader.initialize(uuid);
 	}
 	

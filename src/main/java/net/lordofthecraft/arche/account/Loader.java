@@ -26,11 +26,12 @@ public class Loader {
 	private final ArcheAccountHandler aHandler;
 	private final ArchePersonaHandler pHandler;
 	
+	//These must only be done from synchronized blocks
 	private final Set<UUID> confirmed = new HashSet<>();
-	
 	private final List<Waiter<Account>> accounts = new ArrayList<>();
 	private final List<Waiter<Persona>> personas = new ArrayList<>();
-
+	//End synchronized warning
+	
 	public synchronized boolean isLoaded(UUID u) {
 		return confirmed.contains(u);
 	}
