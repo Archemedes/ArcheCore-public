@@ -15,9 +15,13 @@ public interface Account {
 	
 	int getId();
 	
+	void setForumId(long forumId);
 	long getForumId();
+	boolean hasForumId();
 	
+	void setDiscordId(long discordId);
 	long getDiscordId();
+	boolean hasDiscordId();
 	
 	long getTimePlayed();
 	

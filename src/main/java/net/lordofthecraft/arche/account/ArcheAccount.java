@@ -76,6 +76,36 @@ public class ArcheAccount implements Account {
 	}
 	
 	@Override
+	public boolean hasForumId() {
+		return forumId > 0;
+	}
+	
+	@Override
+	public void setForumId(long forumId) {
+		this.forumId = forumId;
+		ArcheCore.getConsumerControls()
+		.update("accounts")
+		.where("account_id", getId())
+		.set("forum_id", forumId)
+		.queue();
+	}
+	
+	@Override
+	public boolean hasDiscordId() {
+		return discordId > 0;
+	}
+	
+	@Override
+	public void setDiscordId(long discordId) {
+		this.discordId = discordId;
+		ArcheCore.getConsumerControls()
+		.update("accounts")
+		.where("account_id", getId())
+		.set("discord_id", discordId)
+		.queue();
+	}
+	
+	@Override
 	public List<Persona> getPersonas(){
 		var aph = ArcheCore.getPersonaControls();
 		
