@@ -156,7 +156,7 @@ public class HelpCommand extends ArcheCommand {
 			fillArgs(sub, alias + ' ' + subber, b, false);
 			
 			if(sub.hasDescription()) {
-				int room = 59 - b.toPlainText().length();
+				int room = 57 - b.toPlainText().length();
 				if(room > 0)  {
 					b.append(": ");
 					String desc = sub.getDescription();
