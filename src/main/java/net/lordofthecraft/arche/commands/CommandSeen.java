@@ -18,6 +18,7 @@ import net.lordofthecraft.arche.util.ChatBuilder;
 import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.TimeUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
 
 public class CommandSeen extends CommandTemplate {
 
@@ -46,7 +47,6 @@ public class CommandSeen extends CommandTemplate {
 	private ChatBuilder printout(CommandSender s, Account account) {
 		var b = MessageUtil.builder();
 		
-		
 		b.append(account.getName()).color(DARK_AQUA).bold().append(" is ").reset().color(GRAY);
 		long ls = account.getLastSeen();
 		long elapsed = ls == 0? 0 : System.currentTimeMillis() - account.getLastSeen();
@@ -55,6 +55,11 @@ public class CommandSeen extends CommandTemplate {
 		if(canSeeOnline(s,account.getPlayer())) b.append("Online").color(GREEN);
 		else b.append("Offline").append(RED);
 		b.append(" since ").color(GRAY).append(lastSeen).newline();
+		
+		if(account.hasForumId()) b.append("Forum Account: ").color(GRAY)
+			.append(account.getForumId()).color(WHITE).event(ClickEvent.Action.OPEN_URL, "https://lotc.co/profile/"+account.getForumId()+"--")
+			.newline();
+		
 		
 		long weekMs = account.getTimePlayedThisWeek() * 60 * 1000;
 		if(weekMs > 0) b.append("Played ").color(GRAY).append(TimeUtil.printMillis(weekMs)).append(" in the last week.");
