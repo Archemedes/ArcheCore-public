@@ -68,11 +68,19 @@ public class ArcheAccountHandler implements AccountHandler {
 	public Waiter<Account> loadAccount(UUID u){
 		if(ArcheCore.getControls().getPlayerNameFromUUID(u) != null) {
 			//This player is KNOWN to ArcheCore --> account should therefore exist
-			return loader.check(u);
+			return loadOrMakeAccount(u);
 		} else {
 			throw new IllegalArgumentException("UUID is not known to ArcheCore: " + u);
 		}
 	}
+	
+	//This is an unsafe method making NO check if the account exists
+	//It might return either an already loaded account, an account from disk
+	//Or make a new account for this uuid entirely.
+	public Waiter<Account> loadOrMakeAccount(UUID u){
+		return loader.check(u);
+	}
+	
 	
 	public Waiter<Persona> loadPersona(OfflinePersona op){
 		return loader.check(op);
