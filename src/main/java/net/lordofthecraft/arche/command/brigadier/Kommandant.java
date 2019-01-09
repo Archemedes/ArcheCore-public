@@ -83,7 +83,9 @@ public class Kommandant {
 		for(String alias : cmd.getAliases()) {
 			if(alias.equalsIgnoreCase(cmd.getMainCommand())) continue;
 			var node = LiteralArgumentBuilder.literal(alias).redirect(theOneTrueNode).build();
-			if(parent == null) rootNodes.add(node);
+			if(parent == null) {
+				rootNodes.add(node);
+			}
 			else parent.addChild(node);
 		}
 	}
