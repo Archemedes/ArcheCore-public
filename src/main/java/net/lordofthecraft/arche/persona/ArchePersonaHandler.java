@@ -328,7 +328,7 @@ public class ArchePersonaHandler implements PersonaHandler {
         String c = ChatColor.BLUE + "";
         String u = ChatColor.DARK_GRAY + "";
         boolean mod = whosAsking.hasPermission("archecore.admin") || whosAsking.hasPermission("archecore.mod.other");
-        result.add(getPersonaHeader(op, mod));
+        result.add(getPersonaHeader(op));
         result.add(getPersonaTypeHeader(op, whosAsking));
 
         //Now we add all the actual relevant Persona tags in a list called subresult.
@@ -397,13 +397,12 @@ public class ArchePersonaHandler implements PersonaHandler {
 		return whois(getPersona(p), whosAsking);
 	}
 
-	private BaseComponent getPersonaHeader(OfflinePersona op, boolean mod) {
-        String r = ChatColor.RESET + "";
-        String l = ChatColor.GRAY + "";
-        String u = ChatColor.DARK_GRAY + "";
+	private BaseComponent getPersonaHeader(OfflinePersona op) {
+		String r = ChatColor.RESET + "";
+		String l = ChatColor.GRAY + "";
+		String u = ChatColor.DARK_GRAY + "";
 		
-		return new TextComponent(l + "~~~~ " + r + op.getPlayerName()
-        		+ "'s Roleplay Persona" + (mod? u+"(id:"+op.getPersonaId()+")" : "") + l + " ~~~~");
+		return new TextComponent(l + "~~~~~~ Persona" + u + "#"+op.getPersonaId()+ l + " of " + r + op.getPlayerName() + l + " ~~~~~~");
 	}
 	
 	private boolean canPerceive(Persona hider, CommandSender viewer) {
@@ -486,7 +485,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		List<BaseComponent> result = Lists.newArrayList();
 
-		result.add(getPersonaHeader(p, mod));
+		result.add(getPersonaHeader(p));
 		result.add(getPersonaTypeHeader(p, whosAsking));
 
 		result.addAll(event.getSent());
