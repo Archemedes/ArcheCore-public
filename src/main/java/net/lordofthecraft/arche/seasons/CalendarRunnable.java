@@ -23,13 +23,13 @@ public class CalendarRunnable extends BukkitRunnable
     private long lastUpdate;
     
     CalendarRunnable( LotcianCalendar calendar, final long initTime, List<String> trackedWorlds) {
-        this.calendar = calendar;
+    	this.calendar = calendar;
     	this.lastUpdate = initTime;
-    	
-        final List<String> l = trackedWorlds;
-        
-        this.worlds = Maps.newHashMap();
-        l.forEach(w->worlds.put(w, Bukkit.getWorld(w)));
+
+    	final List<String> l = trackedWorlds;
+
+    	this.worlds = Maps.newHashMap();
+    	l.forEach(w->worlds.put(w, Bukkit.getWorld(w)));
     }
     
     public void loadWorld(World w) {

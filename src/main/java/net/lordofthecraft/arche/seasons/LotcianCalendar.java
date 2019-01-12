@@ -18,26 +18,28 @@ public class LotcianCalendar {
     
     public LotcianCalendar(List<String> trackedWorlds, boolean switchBiomes, int offsetYears) {
     	long millis = System.currentTimeMillis();
-        millis += (DateUtils.MILLIS_PER_DAY/2);
-        long MILLIS_PER_WEEK = 7 * DateUtils.MILLIS_PER_DAY;
-        int year = (int)(millis / MILLIS_PER_WEEK) - 860;
-        millis %= MILLIS_PER_WEEK;
-        Month month = Month.valueOf((int)(millis / DateUtils.MILLIS_PER_DAY));
-        millis %= DateUtils.MILLIS_PER_DAY;
-        int day = (int)(millis / DateUtils.MILLIS_PER_HOUR) + 1;
-        this.daytick = (int)(millis % DateUtils.MILLIS_PER_HOUR) / 150;
-        if (this.daytick >= 21000 && ++day > LotcianDate.DAYS_PER_MONTH) {
-            day = 1;
-            month = month.nextMonth();
-            if (month == Month.SNOWMAIDEN) {
-                ++year;
-            }
-        }
-        
-        date = new LotcianDate(year, month, day);
-        
-        runnable = new CalendarRunnable(this,  millis, trackedWorlds);
-        switcher = new BiomeSwitcher(ArcheCore.getPlugin(), this, switchBiomes);
+
+    	millis += (DateUtils.MILLIS_PER_DAY/2);
+    	long initTime = millis;
+    	long MILLIS_PER_WEEK = 7 * DateUtils.MILLIS_PER_DAY;
+    	int year = (int)(millis / MILLIS_PER_WEEK) - 860;
+    	millis %= MILLIS_PER_WEEK;
+    	Month month = Month.valueOf((int)(millis / DateUtils.MILLIS_PER_DAY));
+    	millis %= DateUtils.MILLIS_PER_DAY;
+    	int day = (int)(millis / DateUtils.MILLIS_PER_HOUR) + 1;
+    	this.daytick = (int)(millis % DateUtils.MILLIS_PER_HOUR) / 150;
+    	if (this.daytick >= 21000 && ++day > LotcianDate.DAYS_PER_MONTH) {
+    		day = 1;
+    		month = month.nextMonth();
+    		if (month == Month.SNOWMAIDEN) {
+    			++year;
+    		}
+    	}
+
+    	date = new LotcianDate(year, month, day);
+
+    	runnable = new CalendarRunnable(this,  initTime, trackedWorlds);
+    	switcher = new BiomeSwitcher(ArcheCore.getPlugin(), this, switchBiomes);
     }
     
     public void onEnable() {
@@ -62,7 +64,7 @@ public class LotcianCalendar {
         		if(month.getSeason() == Season.WINTER && month.nextMonth().getSeason() != Season.WINTER) {
         			switcher.setWinter(false);
         			runnable.refreshAllChunks();
-        		} else if(month.getSeason() != Season.WINTER && month.nextMonth().getSeason() != Season.WINTER) {
+        		} else if(month.getSeason() != Season.WINTER && month.nextMonth().getSeason() == Season.WINTER) {
         			switcher.setWinter(true);
         			runnable.refreshAllChunks();
         		}
