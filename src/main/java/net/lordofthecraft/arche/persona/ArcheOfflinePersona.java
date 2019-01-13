@@ -153,6 +153,11 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	}
 
 	@Override
+	public String identify() {
+		return getPersonaId() + ":" + getName() + " (" + getPlayerName() + ")";
+	}
+	
+	@Override
 	public String toString() { //Also works for ArchePersona
 		return this.getClass().getSimpleName() + ": " + MessageUtil.identifyPersona(this);
 	}

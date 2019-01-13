@@ -156,4 +156,6 @@ public interface OfflinePersona {
      * @return The formatted String with {@link org.bukkit.Color}s, or an empty string if the persona is {@link net.lordofthecraft.arche.enums.Race#UNSET} with nothing else
      */
     String getRaceString(boolean mod);
+    
+    String identify();
 }
