@@ -4,7 +4,6 @@ import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.rows.SingleStatementRow;
-import net.lordofthecraft.arche.util.MessageUtil;
 
 public class AttributeUpdateRow extends SingleStatementRow {
 
@@ -47,7 +46,7 @@ public class AttributeUpdateRow extends SingleStatementRow {
     public String toString() {
         return "AttributeUpdateRow{" +
                 "mod=" + mod +
-                ", persona=" + MessageUtil.identifyPersona(persona) +
+                ", persona=" + persona.identify() +
                 ", attribute=" + attribute +
                 '}';
     }

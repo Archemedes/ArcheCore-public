@@ -33,6 +33,7 @@ import org.bukkit.event.Event;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 
+import co.lotc.core.bukkit.util.WeakBlock;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
@@ -53,9 +54,7 @@ import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
-import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.SQLUtil;
-import net.lordofthecraft.arche.util.WeakBlock;
 
 public class PersonaStore {
     final String personaSelect;
@@ -470,7 +469,7 @@ public class PersonaStore {
         ArchePersona[] prs = onlinePersonas.get(uuid);
         ArcheOfflinePersona old;
         if (prs == null) {
-        	CoreLog.debug("Registering " + MessageUtil.identifyPersona(persona) + " while player not yet implemented.");
+        	CoreLog.debug("Registering " + persona.identify() + " while player not yet implemented.");
             //No nice array available to check against unfortunately
         	//We resort to using a slightly more intensive method
         	old = offlinePersonas.get(uuid).stream()

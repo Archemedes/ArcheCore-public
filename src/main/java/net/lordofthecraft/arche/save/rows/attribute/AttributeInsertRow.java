@@ -4,7 +4,6 @@ import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.rows.SingleStatementRow;
-import net.lordofthecraft.arche.util.MessageUtil;
 
 import java.sql.Timestamp;
 
@@ -59,7 +58,7 @@ public class AttributeInsertRow extends SingleStatementRow {
     public String toString() {
         return "AttributeInsertRow{" +
                 "mod=" + mod +
-                ", persona=" + MessageUtil.identifyPersona(persona) +
+                ", persona=" + persona.identify() +
                 ", attribute=" + attribute +
                 '}';
     }

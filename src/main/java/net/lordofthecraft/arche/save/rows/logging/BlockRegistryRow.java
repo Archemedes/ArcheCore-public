@@ -1,9 +1,10 @@
 package net.lordofthecraft.arche.save.rows.logging;
 
 import net.lordofthecraft.arche.save.rows.SingleStatementRow;
-import net.lordofthecraft.arche.util.WeakBlock;
 
 import java.sql.Timestamp;
+
+import co.lotc.core.bukkit.util.WeakBlock;
 
 public class BlockRegistryRow extends SingleStatementRow {
     private final Timestamp now = now();

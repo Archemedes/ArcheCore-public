@@ -1,10 +1,10 @@
 package net.lordofthecraft.arche.persona;
 
+import co.lotc.core.bukkit.util.WeakBlock;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.rows.persona.PruneSessionsRow;
-import net.lordofthecraft.arche.util.WeakBlock;
 
 public class PlaySession {
 	private final Persona persona;

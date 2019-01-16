@@ -17,10 +17,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import co.lotc.core.bukkit.util.InventoryUtil;
+import co.lotc.core.bukkit.util.InventoryUtil.MovedItem;
 import net.lordofthecraft.arche.event.util.ArmorEquipEvent;
 import net.lordofthecraft.arche.event.util.ArmorUnequipEvent;
-import net.lordofthecraft.arche.util.InventoryUtil;
-import net.lordofthecraft.arche.util.InventoryUtil.MovedItem;
 
 public class ArmorListener implements Listener {
 
@@ -28,7 +28,7 @@ public class ArmorListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onClick(PlayerInteractEvent e) {
 		
-		if(( e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) 
+		if(( e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK)
 				&& !e.isBlockInHand() && e.getItem() != null) {
 			ItemStack item = e.getItem();
 			EquipmentSlot armorSlot = isArmor(item.getType());
@@ -44,10 +44,10 @@ public class ArmorListener implements Listener {
 	}
 	
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-	public void onInventoryClick(InventoryClickEvent e){		
+	public void onInventoryClick(InventoryClickEvent e){
 		if(e.getInventory().getType() == InventoryType.CRAFTING) { //Can only equip while in the player inv screen
 			switch(e.getAction()) {
-				case PLACE_ALL: case PLACE_SOME: case PLACE_ONE: 
+				case PLACE_ALL: case PLACE_SOME: case PLACE_ONE:
 				case SWAP_WITH_CURSOR:
 				case HOTBAR_SWAP: case HOTBAR_MOVE_AND_READD:
 				case DROP_ONE_SLOT: case DROP_ALL_SLOT:

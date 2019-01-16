@@ -2,12 +2,13 @@ package net.lordofthecraft.arche.skin;
 
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.google.common.collect.Sets;
+
+import co.lotc.core.bukkit.util.ItemUtil;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.rows.skin.DeleteSkinRow;
 import net.lordofthecraft.arche.save.rows.skin.InsertSkinRow;
 import net.lordofthecraft.arche.save.rows.skin.UpdateSkinRow;
-import net.lordofthecraft.arche.util.ItemUtil;
 import org.bukkit.inventory.ItemStack;
 
 import java.sql.ResultSet;

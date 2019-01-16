@@ -26,6 +26,8 @@ import org.bukkit.entity.Player;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import co.lotc.core.bukkit.util.WeakBlock;
+import co.lotc.core.util.MessageUtil;
 import lombok.NonNull;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
@@ -53,9 +55,7 @@ import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.InsertPersonaRow;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
-import net.lordofthecraft.arche.util.MessageUtil;
 import net.lordofthecraft.arche.util.SQLUtil;
-import net.lordofthecraft.arche.util.WeakBlock;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -282,7 +282,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 	@Override
 	public void registerPersona(@NonNull Persona pers) {
 		ArchePersona persona = (ArchePersona) pers;
-		CoreLog.debug("Persona is being created: " + MessageUtil.identifyPersona(persona));
+		CoreLog.debug("Persona is being created: " + persona.identify());
 
 		ArcheOfflinePersona oldPersona = store.registerPersona(persona);
 
@@ -381,7 +381,7 @@ public class ArchePersonaHandler implements PersonaHandler {
             
             if (!event.isCancelled() && !event.getSent().isEmpty()) {
                 result.add(new ComponentBuilder("Click for more...")
-                        .color(MessageUtil.convertColor(ChatColor.GRAY))
+                        .color(ChatColor.GRAY.asBungee())
                         .italic(true)
                         .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pers more " + op.getPlayerName() + "@" + op.getSlot()))
                         .event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to show extended persona information."))
@@ -491,7 +491,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		result.addAll(event.getSent());
 
 		result.add(new ComponentBuilder("Click for less...")
-				.color(MessageUtil.convertColor(ChatColor.GRAY))
+				.color(ChatColor.GRAY.asBungee())
 				.italic(true)
 				.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pers view " + p.getPlayerName() + "@" + p.getSlot()))
 				.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to show basic persona information."))
@@ -522,7 +522,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 				Arrays.stream(prs).filter(Objects::nonNull).findFirst().ifPresent(pers -> pers.setCurrent(true));
 				ps = getPersona(p);
 				ps.restoreMinecraftSpecifics(p);
-				CoreLog.debug("No current Persona on login, so switched to " + MessageUtil.identifyPersona(ps));
+				CoreLog.debug("No current Persona on login, so switched to " + ps.identify());
 			}
 
 			if (ps.tags().removeTag(PersonaTags.REFRESH_MC_SPECIFICS)) ps.restoreMinecraftSpecifics(p);

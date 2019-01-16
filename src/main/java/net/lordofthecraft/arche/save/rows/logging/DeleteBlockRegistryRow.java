@@ -1,7 +1,7 @@
 package net.lordofthecraft.arche.save.rows.logging;
 
+import co.lotc.core.bukkit.util.WeakBlock;
 import net.lordofthecraft.arche.save.rows.SingleStatementRow;
-import net.lordofthecraft.arche.util.WeakBlock;
 
 public class DeleteBlockRegistryRow extends SingleStatementRow {
     final WeakBlock wb;

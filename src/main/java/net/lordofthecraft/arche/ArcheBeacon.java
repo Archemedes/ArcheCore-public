@@ -18,6 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.google.common.collect.Lists;
 
+import co.lotc.core.bukkit.util.ItemUtil;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent;
 import net.lordofthecraft.arche.executables.OpenEnderRunnable;
@@ -27,7 +28,6 @@ import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.CreationDialog;
 import net.lordofthecraft.arche.skin.ArcheSkin;
-import net.lordofthecraft.arche.util.ItemUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 
@@ -35,6 +35,7 @@ public class ArcheBeacon {
 	//public static final String BEACON_HEADER = ChatColor.AQUA + "" + ChatColor.BOLD + "Your settings:";
 	public static class ArcheBeaconHolder implements InventoryHolder{
 		private Inventory inv;
+		@Override
 		public Inventory getInventory() {return inv;}
 		private void setInventory(Inventory inv) {this.inv = inv;}
 	}
@@ -54,7 +55,7 @@ public class ArcheBeacon {
 					closeAnd(p, () -> {
                         if (p.hasPermission("archecore.enderchest") && pers.getTimePlayed() >= 200)
                             OpenEnderRunnable.begin(pers);
-						else 
+						else
 							p.sendMessage(ChatColor.RED + "You do not have access to your Ender Chest.");
 					});
 				}
@@ -79,8 +80,8 @@ public class ArcheBeacon {
 				.forEach(mod->{
 					String modName = mod.getName();
 					boolean isCommented = StringUtils.isEmpty(modName) || modName.startsWith("#");
-					lore.add(	mod.asReadablePercentage(aa) + ' ' + aa.getReadableName() + 
-							(isCommented? "" : ( " " + ChatColor.GRAY + "" + ChatColor.ITALIC + '(' + mod.getName() + ')'))  
+					lore.add(	mod.asReadablePercentage(aa) + ' ' + aa.getReadableName() +
+							(isCommented? "" : ( " " + ChatColor.GRAY + "" + ChatColor.ITALIC + '(' + mod.getName() + ')'))
 							);
 				})
 						);
@@ -185,7 +186,7 @@ public class ArcheBeacon {
 				is = new ItemStack(Material.ENDER_CHEST);
 				ItemUtil.decorate(is, r + "Ender Chest", g + "Open your Ender Chest");
 				inv.setItem(1, is);
-			}	
+			}
 
 
             //Everybody gets these buttons

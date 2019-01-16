@@ -19,12 +19,12 @@ import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import co.lotc.core.bukkit.util.WeakBlock;
 import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
@@ -92,7 +92,6 @@ import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
 import net.lordofthecraft.arche.skin.SkinCache;
 import net.lordofthecraft.arche.util.SQLUtil;
-import net.lordofthecraft.arche.util.WeakBlock;
 
 public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private static ArcheCore instance;
@@ -267,8 +266,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			getLogger().warning("late-bind is set to FALSE in spigot.yml! This hinders persona loading of early joiners!");
 		}
 		instance = this;
-
-		ConfigurationSerialization.registerClass(WeakBlock.class, "WeakBlock");
 	}
 
 	@Override

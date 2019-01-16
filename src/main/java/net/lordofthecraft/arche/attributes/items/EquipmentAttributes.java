@@ -11,16 +11,16 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import co.lotc.core.bukkit.util.ItemUtil;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.attributes.ModifierBuilder;
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.util.ItemUtil;
 
 public class EquipmentAttributes {
 	private final Persona persona;
 	@SuppressWarnings("unchecked")
-	private final List<ItemAttribute>[] atts = new ArrayList[EquipmentSlot.values().length]; 
+	private final List<ItemAttribute>[] atts = new ArrayList[EquipmentSlot.values().length];
 	
 	
 	public EquipmentAttributes(Persona persona) {

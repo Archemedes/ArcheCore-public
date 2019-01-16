@@ -8,6 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 
+import co.lotc.core.bukkit.util.WeakBlock;
 import lombok.AccessLevel;
 import lombok.Getter;
 import net.lordofthecraft.arche.ArcheCore;
@@ -21,8 +22,6 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaKey;
 import net.lordofthecraft.arche.interfaces.PersonaTags;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
-import net.lordofthecraft.arche.util.MessageUtil;
-import net.lordofthecraft.arche.util.WeakBlock;
 
 @Getter
 public class ArcheOfflinePersona implements OfflinePersona {
@@ -159,7 +158,7 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	
 	@Override
 	public String toString() { //Also works for ArchePersona
-		return this.getClass().getSimpleName() + ": " + MessageUtil.identifyPersona(this);
+		return this.getClass().getSimpleName() + ": " + identify();
 	}
 
 	@Override

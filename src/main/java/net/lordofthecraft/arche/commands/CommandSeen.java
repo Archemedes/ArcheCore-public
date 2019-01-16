@@ -10,13 +10,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import co.lotc.core.bukkit.util.ChatBuilder;
+import co.lotc.core.bukkit.util.TimeUtil;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.command.CommandTemplate;
 import net.lordofthecraft.arche.interfaces.Account;
-import net.lordofthecraft.arche.util.ChatBuilder;
-import net.lordofthecraft.arche.util.MessageUtil;
-import net.lordofthecraft.arche.util.TimeUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 
@@ -45,7 +44,7 @@ public class CommandSeen extends CommandTemplate {
 	}
 	
 	private ChatBuilder printout(CommandSender s, Account account) {
-		var b = MessageUtil.builder();
+		var b = new ChatBuilder();
 		
 		b.append(account.getName()).color(DARK_AQUA).bold().append(" is ").reset().color(GRAY);
 		long ls = account.getLastSeen();

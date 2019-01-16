@@ -6,7 +6,6 @@ import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.attributes.*;
 import net.lordofthecraft.arche.attributes.items.EquipmentAttributes;
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.util.MessageUtil;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -19,7 +18,7 @@ import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 /**
- * Just fucking end me - Sporadic 2k17
+ * Just fucking end me - Sporadic 2k17-2k19
  */
 public class PersonaAttributes {
     //N.B: attributes stored here are such for the reason that they need to be saved to SQL
@@ -53,7 +52,7 @@ public class PersonaAttributes {
     }
     
     public Collection<ArcheAttribute> getExistingInstances(){
-    	return new ArrayList<ArcheAttribute>(customAttributes.keySet());
+    	return new ArrayList<>(customAttributes.keySet());
     }
     
     public double getAttributeValue(ArcheAttribute a) {
@@ -91,7 +90,7 @@ public class PersonaAttributes {
                 logger.info("[Debug] NONE!");
             }
 
-            timerWhy = "adding attribute to " + MessageUtil.identifyPersona(persona);
+            timerWhy = "adding attribute to " + persona.identify();
             timer.startTiming(timerWhy);
         }
 
@@ -127,7 +126,7 @@ public class PersonaAttributes {
     			logger.info("[Debug] NONE!");
     		}
     		
-    		timerWhy = String.format("removing attribute from " + MessageUtil.identifyPersona(persona));
+    		timerWhy = String.format("removing attribute from " + persona.identify());
     		timer.startTiming(timerWhy);
     	}
     	
@@ -181,7 +180,7 @@ public class PersonaAttributes {
 
     		if(!logoff && persona.isCurrent()) aa.tryApply(aai);
 
-    		if(aa instanceof VanillaAttribute && (logoff || !persona.isCurrent())) 
+    		if(aa instanceof VanillaAttribute && (logoff || !persona.isCurrent()))
     			deactivateVanilla((VanillaAttribute) aa);
     	}
     }

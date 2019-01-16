@@ -18,7 +18,6 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheCoreTransaction;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.util.MessageUtil;
 
 public class EconomyListener implements Listener {
 	private final Economy economy;
@@ -33,7 +32,7 @@ public class EconomyListener implements Listener {
 		if (p != null) {
 			double penalty = economy.getBalance(p) * economy.getFractionLostOnDeath();
 			if (penalty <= 0) return;
-			economy.withdrawPersona(p, penalty, new ArcheCoreTransaction(MessageUtil.identifyPersona(p) + " received a death penalty"));
+			economy.withdrawPersona(p, penalty, new ArcheCoreTransaction(p.identify() + " received a death penalty"));
 			ItemStack i = economy.getPhysical(penalty);
 			p.getPlayer().getWorld().dropItemNaturally(p.getPlayer().getLocation(), i);
 		}
@@ -68,7 +67,7 @@ public class EconomyListener implements Listener {
 			if (s != null) {
 				double amt = Double.valueOf(s)*is.getAmount();
 				Persona pers = ArcheCore.getControls().getPersonaHandler().getPersona(p);
-				ArcheCore.getControls().getEconomy().depositPersona(pers, amt, new ArcheCoreTransaction(MessageUtil.identifyPersona(pers) + " picked up off the ground"));
+				ArcheCore.getControls().getEconomy().depositPersona(pers, amt, new ArcheCoreTransaction(pers.identify() + " picked up off the ground"));
 				p.getWorld().playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 0.5f);
 				p.sendMessage(ChatColor.AQUA + "You pick up " + ChatColor.GOLD + amt + ChatColor.AQUA + " " + (amt == 1 ? economy.currencyNameSingular() : economy.currencyNamePlural()));
 				e.setCancelled(true);

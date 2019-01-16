@@ -1,7 +1,8 @@
 package net.lordofthecraft.arche.help;
 
 import com.google.common.collect.Lists;
-import net.lordofthecraft.arche.util.MessageUtil;
+
+import co.lotc.core.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;

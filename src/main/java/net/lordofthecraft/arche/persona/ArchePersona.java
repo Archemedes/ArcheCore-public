@@ -25,6 +25,7 @@ import org.bukkit.potion.PotionEffect;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import co.lotc.core.bukkit.util.WeakBlock;
 import lombok.Getter;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
@@ -43,7 +44,6 @@ import net.lordofthecraft.arche.save.PersonaTable;
 import net.lordofthecraft.arche.save.rows.persona.NamelogRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.skin.ArcheSkin;
-import net.lordofthecraft.arche.util.WeakBlock;
 
 public final class ArchePersona extends ArcheOfflinePersona implements Persona, InventoryHolder {
 

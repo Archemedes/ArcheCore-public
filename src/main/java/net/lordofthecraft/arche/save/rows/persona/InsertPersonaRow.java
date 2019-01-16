@@ -3,8 +3,9 @@ package net.lordofthecraft.arche.save.rows.persona;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.rows.MultiStatementRow;
-import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Location;
+
+import co.lotc.core.bukkit.util.WeakBlock;
 
 import java.sql.Timestamp;
 import java.util.UUID;

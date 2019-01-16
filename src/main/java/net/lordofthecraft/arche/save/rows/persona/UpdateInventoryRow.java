@@ -1,8 +1,8 @@
 package net.lordofthecraft.arche.save.rows.persona;
 
+import co.lotc.core.bukkit.util.InventoryUtil;
 import net.lordofthecraft.arche.persona.PersonaInventory;
 import net.lordofthecraft.arche.save.rows.SingleStatementRow;
-import net.lordofthecraft.arche.util.InventoryUtil;
 
 public class UpdateInventoryRow extends SingleStatementRow {
     private final PersonaInventory inv;

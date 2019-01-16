@@ -1,7 +1,6 @@
 package net.lordofthecraft.arche.help;
 
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -9,6 +8,8 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import co.lotc.core.util.MessageUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class WikiHelpFile extends HelpFile {
 			p.spigot().sendMessage(
 					new ComponentBuilder("Read more...")
 					.italic(true)
-					.color(MessageUtil.convertColor(ChatColor.YELLOW))
+					.color(ChatColor.YELLOW.asBungee())
 					.event(MessageUtil.hoverEvent("Open the wiki page"))
 					.event(new ClickEvent(ClickEvent.Action.OPEN_URL, WIKI + getTopic().substring(2).replace("\\", "").replace("/", "").replace('?', ' ').replace(' ', '_')))
 					.create()
@@ -172,6 +173,6 @@ public class WikiHelpFile extends HelpFile {
 			
 			
 			return null; //Help file can handle this although something is odd.
-		}	
+		}
 	}
 }

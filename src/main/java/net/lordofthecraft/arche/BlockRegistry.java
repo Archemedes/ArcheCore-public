@@ -2,10 +2,11 @@ package net.lordofthecraft.arche;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
+import co.lotc.core.bukkit.util.WeakBlock;
 import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.save.rows.logging.BlockRegistryRow;
 import net.lordofthecraft.arche.save.rows.logging.DeleteBlockRegistryRow;
-import net.lordofthecraft.arche.util.WeakBlock;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 

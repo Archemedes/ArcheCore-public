@@ -25,12 +25,12 @@ import org.bukkit.potion.PotionEffectType;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import co.lotc.core.util.MessageUtil;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
-import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -309,11 +309,11 @@ public class CreationDialog {
             Player p = (Player) context.getForWhom();
 
             p.spigot().sendMessage(new ComponentBuilder("Please type the desired Gender of your Persona.")
-            		.color(MessageUtil.convertColor(ChatColor.YELLOW))
+            		.color(ChatColor.YELLOW.asBungee())
             		.create()
             		);
             BaseComponent mains = new TextComponent("Available Options: ");
-            mains.setColor(MessageUtil.convertColor(ChatColor.YELLOW));
+            mains.setColor(ChatColor.YELLOW.asBungee());
 
             for (String s : new String[]{"Female", "Male", "Other"}) {
                 mains.addExtra(MessageUtil.CommandButton(s, s, "Click to select"));
@@ -338,7 +338,7 @@ public class CreationDialog {
             Player p = (Player) context.getForWhom();
 
             BaseComponent mains = new TextComponent("Main Races: ");
-            mains.setColor(MessageUtil.convertColor(ChatColor.YELLOW));
+            mains.setColor(ChatColor.YELLOW.asBungee());
 
             for(int i = 0; i < 5; i++){
                 Race race = Race.values()[i];
@@ -350,7 +350,7 @@ public class CreationDialog {
 
             mains.addExtra( new ComponentBuilder("more...")
             		.italic(true)
-            		.color(MessageUtil.convertColor(ChatColor.GRAY))
+            		.color(ChatColor.GRAY.asBungee())
             		.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "more"))
             		.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click for more races"))
             		.create()[0]
@@ -410,7 +410,7 @@ public class CreationDialog {
 
             Race selected = findRace(string);
             BaseComponent subraces = new TextComponent("Sub Race Options: ");
-            subraces.setColor(MessageUtil.convertColor(ChatColor.YELLOW));
+            subraces.setColor(ChatColor.YELLOW.asBungee());
 
             subraces.addExtra(MessageUtil.CommandButton(selected.getName(), selected.getName(), "Click to select this Race"));
 
@@ -424,7 +424,7 @@ public class CreationDialog {
 
             subraces.addExtra( new ComponentBuilder("  back...")
             		.italic(true)
-            		.color(MessageUtil.convertColor(ChatColor.GRAY))
+            		.color(ChatColor.GRAY.asBungee())
             		.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "back"))
             		.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click for more races"))
             		.create()[0]
@@ -471,7 +471,7 @@ public class CreationDialog {
         public String getPromptText(ConversationContext context) {
 
             BaseComponent m = new TextComponent("Available Races: ");
-            m.setColor(MessageUtil.convertColor(ChatColor.YELLOW));
+            m.setColor(ChatColor.YELLOW.asBungee());
             Player p = (Player) context.getForWhom();
 
             for(Race race : Race.values()){

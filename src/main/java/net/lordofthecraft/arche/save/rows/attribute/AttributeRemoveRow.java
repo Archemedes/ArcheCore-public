@@ -4,7 +4,6 @@ import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.rows.SingleStatementRow;
-import net.lordofthecraft.arche.util.MessageUtil;
 
 import java.util.UUID;
 
@@ -44,7 +43,7 @@ public class AttributeRemoveRow extends SingleStatementRow {
         return "AttributeRemoveRow{" +
                 "mod=" + mod_uuid +
                 ", attribute=" + attribute +
-                ", persona=" + MessageUtil.identifyPersona(persona) +
+                ", persona=" + persona.identify() +
                 '}';
     }
 }

@@ -12,9 +12,8 @@ import org.bukkit.command.CommandSender;
 
 import com.google.common.primitives.Ints;
 
+import co.lotc.core.bukkit.util.ChatBuilder;
 import lombok.val;
-import net.lordofthecraft.arche.util.ChatBuilder;
-import net.lordofthecraft.arche.util.MessageUtil;
 
 public class HelpCommand extends ArcheCommand {
 	private static final ChatColor[] colors = new ChatColor[] {AQUA, YELLOW, GREEN, LIGHT_PURPLE, GOLD};
@@ -65,7 +64,7 @@ public class HelpCommand extends ArcheCommand {
 	
 	private void outputBaseHelp(RanCommand c) {
 		CommandSender s = c.getSender();
-		ChatBuilder b = MessageUtil.builder();
+		ChatBuilder b = new ChatBuilder();
 		if(parent.getPermission() != null) b.append("[P]").color(YELLOW).hover("Permission required: " + GREEN + parent.getPermission()).append(" ");
 		if(!parent.getFlags().isEmpty()) {
 			b.append("[F]").color(LIGHT_PURPLE);
@@ -135,7 +134,7 @@ public class HelpCommand extends ArcheCommand {
 			return; //haha fuck you readability
 		} else {
 			String trailing = alias.substring(alias.lastIndexOf(" ")+1);
-			ChatBuilder b = MessageUtil.builder("-== Possible sub-commands for ").color(DARK_AQUA)
+			ChatBuilder b = new ChatBuilder("-== Possible sub-commands for ").color(DARK_AQUA)
 					.append(trailing).color(GRAY).append(" ==-").color(DARK_AQUA);
 			
 			if(min > 0) b.append(" [").hover("Previous Page").color(RED).command(alias + " -h " + (min/7)).append('\u2190').append("]");
@@ -150,7 +149,7 @@ public class HelpCommand extends ArcheCommand {
 			ArcheCommand sub = subs.get(i);
 			String subber = sub.getMainCommand();
 			
-			ChatBuilder b = MessageUtil.builder(subber).color(GOLD);
+			ChatBuilder b = new ChatBuilder(subber).color(GOLD);
 			if(sub.getHelp() != null) b.command(alias + ' ' + subber + " -h 0").hover("Click for help on this subcommand!");
 			else b.suggest(alias + ' ' + subber + ' ').hover("Click to run this command");
 			fillArgs(sub, alias + ' ' + subber, b, false);

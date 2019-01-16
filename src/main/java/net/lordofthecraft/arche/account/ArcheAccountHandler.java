@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import co.lotc.core.bukkit.util.Run;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
@@ -22,7 +23,6 @@ import net.lordofthecraft.arche.interfaces.AccountHandler;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
-import net.lordofthecraft.arche.util.Run;
 
 public class ArcheAccountHandler implements AccountHandler {
 	private static final ArcheAccountHandler instance = new ArcheAccountHandler();

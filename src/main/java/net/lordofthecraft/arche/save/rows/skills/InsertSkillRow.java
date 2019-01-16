@@ -3,7 +3,6 @@ package net.lordofthecraft.arche.save.rows.skills;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.rows.SingleStatementRow;
-import net.lordofthecraft.arche.util.MessageUtil;
 
 public class InsertSkillRow extends SingleStatementRow {
     final Persona persona;
@@ -42,7 +41,7 @@ public class InsertSkillRow extends SingleStatementRow {
     @Override
     public String toString() {
         return "SkillRow{" +
-                "persona=" + MessageUtil.identifyPersona(persona) +
+                "persona=" + persona.identify() +
                 ", skill=" + skill.getName() +
                 ", xp=" + xp +
                 ", visible=" + visible +
