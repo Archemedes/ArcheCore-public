@@ -24,7 +24,6 @@ import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.interfaces.CommandHandle;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -82,7 +81,7 @@ public class RanCommand implements CommandHandle {
 	
 	@Override
 	public void msg(BaseComponent message) {
-		MessageUtil.send(message, sender);
+		sender.spigot().sendMessage(message);
 	}
 	
 	@Override
