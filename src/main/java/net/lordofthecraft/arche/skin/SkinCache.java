@@ -13,14 +13,15 @@ import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+
+import co.lotc.core.util.MojangCommunicator;
+import co.lotc.core.util.MojangCommunicator.AuthenthicationData;
+import co.lotc.core.util.MojangCommunicator.AuthenticationException;
+import co.lotc.core.util.MojangCommunicator.MinecraftAccount;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.listener.PersonaSkinListener;
-import net.lordofthecraft.arche.util.MojangCommunicator;
 import net.lordofthecraft.arche.util.ProtocolUtil;
-import net.lordofthecraft.arche.util.MojangCommunicator.AuthenthicationData;
-import net.lordofthecraft.arche.util.MojangCommunicator.AuthenticationException;
-import net.lordofthecraft.arche.util.MojangCommunicator.MinecraftAccount;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -45,9 +46,9 @@ public class SkinCache {
     //private final SkinRefresher refreshTask;
 	
 	public static SkinCache getInstance() { return INSTANCE; }
-	private SkinCache() { 
+	private SkinCache() {
 		init();
-		new PersonaSkinListener().listen(); 
+		new PersonaSkinListener().listen();
 		
 		//Note: we turn this off as there doesnt seem to be an expiry date
 		//on signed skin data sent by Mojang right now. Why? IDK. But rejoice.
@@ -61,10 +62,10 @@ public class SkinCache {
 		WrappedGameProfile profile = WrappedGameProfile.fromPlayer(p); //Protocollib for version independence
 		Multimap<String, WrappedSignedProperty> properties = profile.getProperties();
 		String encodedValue = properties.get("textures").stream() //Should be only 1
-                .map(WrappedSignedProperty::getValue)
-                .findFirst()
-		.get();
-		
+				.map(WrappedSignedProperty::getValue)
+				.findFirst()
+				.get();
+
 		String actualValue = new String(Base64.getDecoder().decode(encodedValue), "UTF-8");
 		JSONParser parser = new JSONParser();
 		JSONObject topJson = (JSONObject) parser.parse(actualValue);
@@ -172,9 +173,9 @@ public class SkinCache {
 		WrappedGameProfile profile = WrappedGameProfile.fromPlayer(p); //Protocollib for version independence
 		List<PlayerInfoData> lpid = Lists.newArrayList();
 		
-		lpid.add(new PlayerInfoData(profile, 
+		lpid.add(new PlayerInfoData(profile,
 				1, //who cares honestly
-				NativeGameMode.fromBukkit(p.getGameMode()), 
+				NativeGameMode.fromBukkit(p.getGameMode()),
 				WrappedChatComponent.fromText(p.getDisplayName())));
 		
 		final PacketContainer packetDel = manager.createPacket(PacketType.Play.Server.PLAYER_INFO);
@@ -217,12 +218,11 @@ public class SkinCache {
 		if(whichOneToRefresh == null) return null;
 		AuthenthicationData auth = MojangCommunicator.authenthicate(account);
 		MojangCommunicator.setSkin(auth, whichOneToRefresh.getURL());
-        whichOneToRefresh.mojangSkinData = MojangCommunicator.requestSkin(auth.uuid);
+        whichOneToRefresh.mojangSkinData = ProtocolUtil.requestSkin(auth.uuid);
         whichOneToRefresh.timeLastRefreshed = new Timestamp(System.currentTimeMillis());
         whichOneToRefresh.updateSql();
 		
 		return whichOneToRefresh;
 	}
-
 
 }

@@ -1,18 +1,23 @@
 package net.lordofthecraft.arche.util;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.UUID;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
+import org.json.simple.parser.ParseException;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.comphenix.protocol.wrappers.EnumWrappers.Difficulty;
 import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
+import com.google.gson.JsonObject;
 
 import net.lordofthecraft.arche.ArcheFatigueHandler;
 
@@ -63,6 +68,19 @@ public class ProtocolUtil {
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static WrappedSignedProperty requestSkin(UUID uuid) throws IOException, ParseException {
+		String uuidUser = uuid.toString().replace("-", "");
+		return requestSkin(uuidUser);
+	}
+	
+	public static WrappedSignedProperty requestSkin(String uuidUser) throws IOException, ParseException {
+			JsonObject textures = co.lotc.core.util.MojangCommunicator.requestSkin(uuidUser);
+			String value = textures.get("value").getAsString();
+			String signature = textures.get("signature").getAsString();
+			WrappedSignedProperty textureProperty = new WrappedSignedProperty("textures", value, signature);
+			return textureProperty;
 	}
 	
 }
