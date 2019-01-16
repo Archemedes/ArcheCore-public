@@ -19,6 +19,7 @@ import org.bukkit.inventory.Inventory;
 
 import com.google.common.collect.Lists;
 
+import co.lotc.core.util.MessageUtil;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.enums.PersonaType;
@@ -30,7 +31,6 @@ import net.lordofthecraft.arche.persona.ArcheOfflinePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.TagAttachment;
 import net.lordofthecraft.arche.util.CommandUtil;
-import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 
@@ -263,7 +263,7 @@ public class CommandPersona implements CommandExecutor {
                         //If the persona is found the Whois should always succeed
                         //We have assured the persona is found earlier
                         (extendedInfo ? handler.whoisMore(opers,sender) : handler.whois(opers,sender))
-                                .forEach(o -> MessageUtil.send(o, sender));
+                                .forEach(sender.spigot()::sendMessage);
                     }
                     return true;
                 } else if (cmd == PersonaCommand.CREATED) {
@@ -510,7 +510,7 @@ public class CommandPersona implements CommandExecutor {
                             String key = args[1];
                             String value = args[2];
                             pers.tags().giveTag(key, value);
-                            sender.sendMessage(ChatColor.AQUA + key + " has been set to " + value + " for " + MessageUtil.identifyPersona(pers));
+                            sender.sendMessage(ChatColor.AQUA + key + " has been set to " + value + " for " + pers.identify());
                         } else {
                             sender.sendMessage(ChatColor.RED + "Use /help Persona Command to see the syntax for this.");
                         }
@@ -518,17 +518,17 @@ public class CommandPersona implements CommandExecutor {
                     } else if (cmd == PersonaCommand.DELTAG) {
                         if (!args[1].equalsIgnoreCase("-p")) {
                             if (!pers.tags().hasTag(args[1])) {
-                                sender.sendMessage(ChatColor.RED + "Error: " + MessageUtil.identifyPersona(pers) + " doesn't have a tag with the value of " + args[1]);
+                                sender.sendMessage(ChatColor.RED + "Error: " + pers.identify() + " doesn't have a tag with the value of " + args[1]);
                             } else {
                                 pers.tags().removeTag(args[1]);
-                                sender.sendMessage(ChatColor.GREEN + "Success! Removed the tag " + args[1] + " from " + MessageUtil.identifyPersona(pers));
+                                sender.sendMessage(ChatColor.GREEN + "Success! Removed the tag " + args[1] + " from " + pers.identify());
                             }
                         }
                         return true;
                     } else if (cmd == PersonaCommand.FATIGUESET) {
                         if (NumberUtils.isNumber(args[1])) {
                             pers.setFatigue(Double.valueOf(args[1]));
-                            sender.sendMessage(ChatColor.GREEN + "Success!" + ChatColor.BLUE + " The persona " + MessageUtil.identifyPersona(pers) + " has had their fatigue set to " + ChatColor.GOLD + pers.getFatigue());
+                            sender.sendMessage(ChatColor.GREEN + "Success!" + ChatColor.BLUE + " The persona " + pers.identify() + " has had their fatigue set to " + ChatColor.GOLD + pers.getFatigue());
                             return true;
                         }
                         return false;

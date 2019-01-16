@@ -14,7 +14,6 @@ import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.util.CommandUtil;
-import net.lordofthecraft.arche.util.MessageUtil;
 
 public class CommandMoney implements CommandExecutor {
 	private final static double PAYMENT_PROXIMITY = 8;
@@ -82,12 +81,12 @@ public class CommandMoney implements CommandExecutor {
 				else if (!econ.has(from, amt))
 					sender.sendMessage(ChatColor.RED + "ERROR: " + ChatColor.DARK_RED + "You do not have this amount of " + econ.currencyNamePlural());
 				else {
-					econ.withdrawPersona(from, amt, new ArcheCoreTransaction(MessageUtil.identifyPersona(from) + " dropped through command"));
+					econ.withdrawPersona(from, amt, new ArcheCoreTransaction(from.identify() + " dropped through command"));
 					ItemStack coins = econ.getPhysical(amt);
 					Item dropped = p.getWorld().dropItem(p.getEyeLocation(), coins);
 					dropped.setVelocity(p.getLocation().getDirection().multiply(0.33));
 				}
-			} 
+			}
 			return true;
 		} else if (isMod(sender) && args[0].equalsIgnoreCase("spawn")) {
 			if (args.length >= 2) {
@@ -109,7 +108,7 @@ public class CommandMoney implements CommandExecutor {
 
 				ItemStack coins = econ.getPhysical(amt);
 				p.getInventory().addItem(coins);
-			} 
+			}
 			return true;
 		} else if (args[0].equalsIgnoreCase("pay")) {
 			if (args.length >= 3) {
@@ -147,8 +146,8 @@ public class CommandMoney implements CommandExecutor {
 					sender.sendMessage(ChatColor.AQUA + "You have paid " + p2 + mn);
 					if (pt != null) pt.sendMessage(p1 + "has given you " + mn);
 
-					econ.withdrawPersona(from, amt, new ArcheCoreTransaction(MessageUtil.identifyPersona(from) + " withdrawn through command"));
-					econ.depositPersona(to, amt, new ArcheCoreTransaction(MessageUtil.identifyPersona(from) + " obtained through command"));
+					econ.withdrawPersona(from, amt, new ArcheCoreTransaction(from.identify() + " withdrawn through command"));
+					econ.depositPersona(to, amt, new ArcheCoreTransaction(from.identify() + " obtained through command"));
 				}
 			} else {
 				sendHelp(sender);
@@ -167,10 +166,10 @@ public class CommandMoney implements CommandExecutor {
 			if(lookup == null) sender.sendMessage(ChatColor.RED + "ERROR: " + ChatColor.DARK_RED + "No valid Persona found");
 			else {
 				if(args[0].equalsIgnoreCase("set"))
-					econ.setPersona(lookup, amt, 
-							new ArcheCoreTransaction(MessageUtil.identifyPersona(lookup) + " money was set by " + sender.getName()));
+					econ.setPersona(lookup, amt,
+							new ArcheCoreTransaction(lookup.identify() + " money was set by " + sender.getName()));
 				else
-					econ.depositPersona(lookup, amt, new ArcheCoreTransaction(MessageUtil.identifyPersona(lookup) + " money was granted by " + sender.getName()));
+					econ.depositPersona(lookup, amt, new ArcheCoreTransaction(lookup.identify() + " money was granted by " + sender.getName()));
 				sender.sendMessage("Successfully altered balance.");
 			}
 
@@ -200,7 +199,7 @@ public class CommandMoney implements CommandExecutor {
 			sender.sendMessage(ChatColor.DARK_AQUA + "[M]" + ChatColor.WHITE + " You can use <player>@[personaid] to modify a different Persona");
 		}
 
-		if (sender.hasPermission("archecore.admin")) 
+		if (sender.hasPermission("archecore.admin"))
 			sender.sendMessage(ChatColor.DARK_RED + "[A]" + ChatColor.WHITE + " /mn spawn <amt>: "+ChatColor.GOLD+"gives you <amt> mina items to drop");
 
 
@@ -212,7 +211,7 @@ public class CommandMoney implements CommandExecutor {
 		money = (double)((int)(money * 10)) / 10d;
 
 		return ChatColor.RED + "" + ChatColor.ITALIC + "Note: " + econ.currencyNamePlural() + " on your persona are dropped on death. Find a bank to store them.\n"
-		+ ChatColor.AQUA + p.getName() + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + " (" + p.getPlayerName() + "#" + p.getPersonaId() +") " 
+		+ ChatColor.AQUA + p.getName() + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + " (" + p.getPlayerName() + "#" + p.getPersonaId() +") "
 		+ ChatColor.AQUA + "currently has " + ChatColor.GOLD + money + " " + ChatColor.AQUA
 		+ (money >= 1 && money < 2 ? econ.currencyNameSingular() : econ.currencyNamePlural())
 		+ ChatColor.DARK_GRAY + "\n(Use /money help to see more information)";

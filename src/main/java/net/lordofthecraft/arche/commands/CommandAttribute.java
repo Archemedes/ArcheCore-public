@@ -18,6 +18,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import co.lotc.core.bukkit.util.ItemUtil;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.AttributeItem;
@@ -31,7 +32,6 @@ import net.lordofthecraft.arche.attributes.items.ItemAttribute;
 import net.lordofthecraft.arche.attributes.items.StoredAttribute;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.util.CommandUtil;
-import net.lordofthecraft.arche.util.ItemUtil;
 
 public class CommandAttribute implements CommandExecutor {
 
@@ -46,7 +46,7 @@ public class CommandAttribute implements CommandExecutor {
         	return true;
         }
         
-        if(args.length >= 2 && args[args.length - 2].equalsIgnoreCase("-p")) 
+        if(args.length >= 2 && args[args.length - 2].equalsIgnoreCase("-p"))
         	args = Arrays.copyOf(args, args.length - 2);
         
         if(args.length == 0 || args[0].equalsIgnoreCase("help")) {
@@ -62,7 +62,7 @@ public class CommandAttribute implements CommandExecutor {
         	//Meat of the exercise: Adding an attribute
        
           Target tx = null;
-        	try { tx = Target.valueOf(args[0].toUpperCase()); } 
+        	try { tx = Target.valueOf(args[0].toUpperCase()); }
         	catch(IllegalArgumentException e) { sender.sendMessage("Invalid target argument"); return false;}
         	
         	if(tx != Target.PERSONA && tx != Target.REMOVE) {
@@ -80,7 +80,7 @@ public class CommandAttribute implements CommandExecutor {
         		return true;
         	}
         	
-          ModifierBuilder b = new ModifierBuilder();          
+          ModifierBuilder b = new ModifierBuilder();
           b.name(args[2].replace('_', ' '));
           try { handleUUID(b, args[3]); } catch(IllegalArgumentException e) { sender.sendMessage("Invalid UUID argument"); return false; }
           
@@ -114,7 +114,7 @@ public class CommandAttribute implements CommandExecutor {
     
     private void h(CommandSender s) {
         s.sendMessage(ChatColor.AQUA + "usage of the /attribute command:");
-        s.sendMessage(ChatColor.GOLD + "/attribute " + ChatColor.BLUE + "[target] "  
+        s.sendMessage(ChatColor.GOLD + "/attribute " + ChatColor.BLUE + "[target] "
         		+ ChatColor.YELLOW + "[att-type] "
         		+ ChatColor.GRAY + "[name] "
         		+ ChatColor.RED + "[uuid] "
@@ -155,8 +155,8 @@ public class CommandAttribute implements CommandExecutor {
 				.forEach(mod->{
 					String modName = mod.getName();
 					boolean isCommented = StringUtils.isEmpty(modName) || modName.startsWith("#");
-					lore.add(	mod.asReadablePercentage(aa) + ' ' + aa.getName() + 
-							(isCommented? "" : ( " " + ChatColor.GRAY + "" + ChatColor.ITALIC + '(' + mod.getName() + ')'))  
+					lore.add(	mod.asReadablePercentage(aa) + ' ' + aa.getName() +
+							(isCommented? "" : ( " " + ChatColor.GRAY + "" + ChatColor.ITALIC + '(' + mod.getName() + ')'))
 							);
 				})
 			);

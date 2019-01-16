@@ -1,12 +1,13 @@
 package net.lordofthecraft.arche.commands;
 
 import com.google.common.collect.Sets;
+
+import co.lotc.core.util.MessageUtil;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.skin.ArcheSkin;
 import net.lordofthecraft.arche.skin.SkinCache;
-import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -47,7 +48,7 @@ public class CommandSkin implements CommandExecutor {
 
 		if (maxAllowed == 0) {
 			BaseComponent msg = new TextComponent("Please purchase a VIP rank to use automatic skin switching. Click here to visit the store.");
-			msg.setColor(MessageUtil.convertColor(ChatColor.GREEN));
+			msg.setColor(ChatColor.GREEN.asBungee());
 			msg.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/store"));
 			msg.setHoverEvent(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, ChatColor.GRAY + "" + ChatColor.ITALIC + "Click here to visit the store."));
 			p.spigot().sendMessage(msg);
@@ -67,7 +68,7 @@ public class CommandSkin implements CommandExecutor {
 			p.sendMessage(ChatColor.AQUA + "Now showing you your personal skin storage:");
 			for(int i = 1; i <= maxAllowed; i++) {
 				BaseComponent msg = new TextComponent("[" + i + "] ");
-				msg.setColor(MessageUtil.convertColor(ChatColor.AQUA));
+				msg.setColor(ChatColor.AQUA.asBungee());
 
 				ArcheSkin sk = cache.getSkinAtSlot(p.getUniqueId(), i);
 				if(sk == null) msg.addExtra(ChatColor.GRAY + "" + ChatColor.ITALIC + "Empty...");

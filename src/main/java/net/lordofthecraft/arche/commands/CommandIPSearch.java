@@ -10,14 +10,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import co.lotc.core.bukkit.util.ChatBuilder;
+import co.lotc.core.bukkit.util.Run;
 import lombok.val;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.command.CommandTemplate;
 import net.lordofthecraft.arche.command.annotate.Arg;
 import net.lordofthecraft.arche.command.annotate.Cmd;
-import net.lordofthecraft.arche.util.MessageUtil;
-import net.lordofthecraft.arche.util.Run;
 
 public class CommandIPSearch extends CommandTemplate {
 	ArcheCore plugin = ArcheCore.getPlugin();
@@ -64,10 +64,10 @@ public class CommandIPSearch extends CommandTemplate {
 	}
 	
 	private void callback(Set<UUID> uuids) {
-		MessageUtil.builder().append("Query Found the Following Matches: ").color(GRAY).send(getSender());
+		new ChatBuilder().append("Query Found the Following Matches: ").color(GRAY).send(getSender());
 		for(UUID uuid : uuids) {
 			String name = ArcheCore.getControls().getPlayerNameFromUUID(uuid);
-			MessageUtil.builder().append(name).color(AQUA)
+			new ChatBuilder().append(name).color(AQUA)
 			.append(" (").color(GRAY).append(uuid).append(")")
 			.send(getSender());
 		}

@@ -1,7 +1,6 @@
 package net.lordofthecraft.arche.commands;
 
 import net.lordofthecraft.arche.help.HelpDesk;
-import net.lordofthecraft.arche.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.apache.commons.lang.StringUtils;
@@ -10,6 +9,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import co.lotc.core.util.MessageUtil;
 
 import java.util.Set;
 
