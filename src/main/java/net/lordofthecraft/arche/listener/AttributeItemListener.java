@@ -29,6 +29,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 
 import co.lotc.core.bukkit.util.ItemUtil;
+import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
@@ -197,7 +198,7 @@ public class AttributeItemListener implements Listener {
 	
 	public boolean conflictUseable(Persona ps, ItemStack item) {
 		boolean maybe = false;
-		CustomTag tag = CustomTag.getFrom(item);
+		var tag = ItemUtil.getCustomTags(item);
 		
 		for(Entry<String, String> entry : tag.entrySet()) {
 			String key = entry.getKey();
@@ -220,7 +221,7 @@ public class AttributeItemListener implements Listener {
 	
 	private boolean apply(Persona ps, ItemStack is, String prefix) {
 		boolean result = false;
-		CustomTag tag = CustomTag.getFrom(is);
+		var tag = ItemUtil.getCustomTags(is);
 		for(Entry<String, String> entry : tag.entrySet()) {
 			String key = entry.getKey();
 			if(key.startsWith(prefix)) {

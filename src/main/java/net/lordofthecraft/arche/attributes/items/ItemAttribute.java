@@ -2,8 +2,8 @@ package net.lordofthecraft.arche.attributes.items;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
@@ -11,6 +11,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import co.lotc.core.bukkit.util.ItemUtil;
+import lombok.var;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.attributes.VanillaAttribute;
@@ -61,7 +62,7 @@ public final class ItemAttribute implements TagAttribute {
 	
 	public static List<ItemAttribute> get(ItemStack is){
 		List<ItemAttribute> result = new ArrayList<>();
-		CustomTag tag = CustomTag.getFrom(is);
+		var tag = ItemUtil.getCustomTags(is);
 		
 		for(Entry<String, String> entry : tag.entrySet()) {
 			String key = entry.getKey();

@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import co.lotc.core.bukkit.util.ItemUtil;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier.Decay;
 import net.md_5.bungee.api.ChatColor;
@@ -26,8 +27,7 @@ public class Decorator {
 		List<String> rightclick_atts = new ArrayList<>();
 		List<String> consumable_atts = new ArrayList<>();
 		
-		CustomTag tag = CustomTag.getFrom(is);
-		for(Entry<String, String> e : tag.entrySet()) {
+		for(Entry<String, String> e : ItemUtil.getCustomTags(is).entrySet()) {
 			String key = e.getKey();
 			if(key.startsWith("na_")) {
 				attributes.add(parseAttribute(key, e.getValue()));
