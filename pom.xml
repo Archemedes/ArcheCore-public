@@ -64,16 +64,16 @@
             <version>2.6.1</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-        	<groupId>io.github.archemedes</groupId>
-        	<artifactId>customitem</artifactId>
-        	<version>2.2</version>
-        </dependency>
 		    <dependency>
           <groupId>org.projectlombok</groupId>
           <artifactId>lombok</artifactId>
           <version>1.18.2</version>
           <scope>provided</scope>
+		    </dependency>
+		    <dependency>
+		    	<groupId>co.lotc</groupId>
+		    	<artifactId>tythan-bukkit</artifactId>
+		    	<version>0.1</version>
 		    </dependency>
     </dependencies>
 

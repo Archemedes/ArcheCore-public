@@ -14,7 +14,6 @@ import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 
-import io.github.archemedes.customitem.CustomTag;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheCoreTransaction;
 import net.lordofthecraft.arche.interfaces.Economy;
