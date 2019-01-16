@@ -5,7 +5,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import io.github.archemedes.customitem.CustomTag;
+import co.lotc.core.bukkit.util.ItemUtil;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.IConsumer;
@@ -108,7 +108,7 @@ public class ArcheEconomy implements Economy {
 		ItemMeta im = i.getItemMeta();
 		im.setDisplayName(ChatColor.GOLD + "" + amt + " " + currencyNamePlural());
 		i.setItemMeta(im);
-		return CustomTag.apply("mina", amt + "", i);
-
+		ItemUtil.setCustomTag(i, "mina", amt+"");
+		return i;
 	}
 }

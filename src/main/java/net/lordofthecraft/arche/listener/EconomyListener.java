@@ -14,6 +14,7 @@ import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 
+import co.lotc.core.bukkit.util.ItemUtil;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheCoreTransaction;
 import net.lordofthecraft.arche.interfaces.Economy;
@@ -42,10 +43,8 @@ public class EconomyListener implements Listener {
 	public void onMinaHopper(InventoryPickupItemEvent e) {
 		if (e.getItem().getItemStack().getType() == Material.GOLD_NUGGET) {
 			ItemStack is = e.getItem().getItemStack();
-			String s = CustomTag.getTagValue(is, "mina");
-			if (s != null) {
+			if(ItemUtil.hasCustomTag(is, "mina"))
 				e.setCancelled(true);
-			}
 		}
 	}
 
@@ -63,7 +62,7 @@ public class EconomyListener implements Listener {
 		Player p = (Player) e.getEntity();
 		if (e.getItem().getItemStack().getType() == Material.GOLD_NUGGET) {
 			ItemStack is = e.getItem().getItemStack();
-			String s = CustomTag.getTagValue(is, "mina");
+			String s = ItemUtil.getCustomTag(is, "mina");
 			if (s != null) {
 				double amt = Double.valueOf(s)*is.getAmount();
 				Persona pers = ArcheCore.getControls().getPersonaHandler().getPersona(p);

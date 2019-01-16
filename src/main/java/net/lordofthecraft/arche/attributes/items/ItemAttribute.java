@@ -10,7 +10,7 @@ import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import io.github.archemedes.customitem.CustomTag;
+import co.lotc.core.bukkit.util.ItemUtil;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.attributes.VanillaAttribute;
@@ -51,7 +51,7 @@ public final class ItemAttribute implements TagAttribute {
 	
 	@Override
 	public String asTagValue() {
-		return String.join("@", 
+		return String.join("@",
 				modifier.getUniqueId().toString(),
 				modifier.getName(),
 				Double.toString(modifier.getAmount()),
@@ -75,7 +75,7 @@ public final class ItemAttribute implements TagAttribute {
 	
 	public static ItemAttribute get(ItemStack is, ArcheAttribute attribute) {
 		String key = "na_" + attribute.getName();
-		String value = CustomTag.getTagValue(is, "na_" + attribute.getName());
+		String value = ItemUtil.getCustomTag(is, "na_"+ attribute.getName());
 		
 		if(value == null) return null;
 		else return fromTag(key, value);

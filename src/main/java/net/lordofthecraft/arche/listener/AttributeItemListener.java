@@ -28,7 +28,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 
-import io.github.archemedes.customitem.CustomTag;
+import co.lotc.core.bukkit.util.ItemUtil;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
@@ -73,7 +73,8 @@ public class AttributeItemListener implements Listener {
 		
 		ItemStack item = e.getItem();
 		try {
-			String dura = CustomTag.getTagValue(item, "dura_boost");
+			//String dura = CustomTag.getTagValue(item, "dura_boost");
+			String dura = ItemUtil.getCustomTag(item, "dura_boost");
 			
 			if(!StringUtils.isEmpty(dura)) {
 				int damage = e.getDamage();
