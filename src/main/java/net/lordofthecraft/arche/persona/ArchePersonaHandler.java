@@ -237,7 +237,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 
 		ArchePersona before = (ArchePersona) event.getOriginPersona();
 		if (before != null) {
-			Validate.isTrue(before != after, "Player tried to switch to same persona!");
+			Validate.isTrue(before != after, "Player " + p.getName() + " tried to switch to same persona!");
 			before.setCurrent(false);
 			before.endSession();
 			Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(before, PersonaDeactivateEvent.Reason.SWITCH));
@@ -525,7 +525,10 @@ public class ArchePersonaHandler implements PersonaHandler {
 				CoreLog.debug("No current Persona on login, so switched to " + ps.identify());
 			}
 
-			if (ps.tags().removeTag(PersonaTags.REFRESH_MC_SPECIFICS)) ps.restoreMinecraftSpecifics(p);
+			if (ps.tags().removeTag(PersonaTags.REFRESH_MC_SPECIFICS)) {
+				CoreLog.info("REFRESH minecraft specifcs onto player from Persona" + ps.identify());
+				ps.restoreMinecraftSpecifics(p);
+			}
 			activate(ps);
 		}
 	}
