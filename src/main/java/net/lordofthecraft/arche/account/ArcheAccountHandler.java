@@ -11,7 +11,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -68,7 +67,9 @@ public class ArcheAccountHandler implements AccountHandler {
 	public UUID uuidFrom(String field, long id){
 		Run.ensureAsync();
 		try(Connection connection = ArcheCore.getSQLControls().getConnection();
-				PreparedStatement statement = connection.prepareStatement("select player from accounts left join playeraccounts on account_id=account_id_fk where "+field+"="+id);
+				PreparedStatement statement = connection.prepareStatement(
+						"select player from accounts left join playeraccounts on account_id=account_id_fk where "+field+"="+id
+						);
 				ResultSet rs = statement.executeQuery();)
 		{
 			if (rs.next()) {
