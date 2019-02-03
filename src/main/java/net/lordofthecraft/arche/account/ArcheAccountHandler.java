@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -62,6 +63,22 @@ public class ArcheAccountHandler implements AccountHandler {
 	@Override
 	public boolean isLoaded(UUID u) {
 		return loader.isLoaded(u);
+	}
+	
+	public UUID uuidFrom(String field, long id){
+		Run.ensureAsync();
+		try(Connection connection = ArcheCore.getSQLControls().getConnection();
+				PreparedStatement statement = connection.prepareStatement("select player from accounts left join playeraccounts on account_id=account_id_fk where "+field+"="+id);
+				ResultSet rs = statement.executeQuery();)
+		{
+			if (rs.next()) {
+				return UUID.fromString(rs.getString(1));
+			}
+		}catch(SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return null;//Fallback: Error or not found
 	}
 	
 	@Override
