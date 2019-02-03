@@ -111,6 +111,9 @@ public final class ArcheTables {
 				"PRIMARY KEY (account_id)" +
 				")" +
 				end);
+		
+		statement.execute("CREATE INDEX IF NOT EXISTS idx_account_discordid ON accounts (discord_id)" + end);
+		statement.execute("CREATE INDEX IF NOT EXISTS idx_account_forumid ON accounts (forum_id)" + end);
 	}
 	
 	protected static void createAccountPlayerTable(Statement statement, String end) throws SQLException {
