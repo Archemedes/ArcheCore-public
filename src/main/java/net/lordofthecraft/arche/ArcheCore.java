@@ -71,7 +71,6 @@ import net.lordofthecraft.arche.listener.BeaconMenuListener;
 import net.lordofthecraft.arche.listener.BlockRegistryListener;
 import net.lordofthecraft.arche.listener.EconomyListener;
 import net.lordofthecraft.arche.listener.ExperienceOrbListener;
-import net.lordofthecraft.arche.listener.HelpMenuListener;
 import net.lordofthecraft.arche.listener.HelpOverrideListener;
 import net.lordofthecraft.arche.listener.LegacyCommandsListener;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
@@ -490,7 +489,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		pm.registerEvents(new PlayerJoinListener(personaHandler, accountHandler), this);
 		pm.registerEvents(new PlayerInteractListener(this), this);
 		pm.registerEvents(new BeaconMenuListener(this, personaChangeDelay), this);
-		pm.registerEvents(new HelpMenuListener(this, helpdesk), this);
 		pm.registerEvents(new PlayerChatListener(), this);
 		pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
 		pm.registerEvents(new PersonaInventoryListener(), this);

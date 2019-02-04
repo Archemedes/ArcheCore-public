@@ -1,19 +1,25 @@
 package net.lordofthecraft.arche.help;
 
-import com.google.common.collect.Maps;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.help.WikiHelpFile.WikiBrowser;
-import org.bukkit.Bukkit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.google.common.collect.Maps;
+
+import co.lotc.core.bukkit.menu.Menu;
+import co.lotc.core.bukkit.menu.icon.Icon;
+import co.lotc.core.bukkit.menu.icon.Pad;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.help.WikiHelpFile.WikiBrowser;
 
 public class HelpDesk {
 	public static final String HELP_HEADER = ChatColor.DARK_AQUA + "Please choose a Topic";
@@ -152,35 +158,18 @@ public class HelpDesk {
 	}
 	
 	public void openHelpMenu(Player p){
-		int sizeone = round(normalTopics.size(),9) + 9;
-		int sizetwo = round(skillTopics.size(), 9);
-
-		boolean large = sizeone+sizetwo > 54;
-		int size = large? 54:sizeone+sizetwo;
-
-		if(size == 0) return; //No help topics found so no need for any more
-
-		Inventory inv = Bukkit.createInventory(p, size, HELP_HEADER);
-		int i =  0;
-
-		for(HelpFile h : normalTopics.values()){
-            if (h.canView(p)) {
-                inv.setItem(i++, h.asItem());
-            }
-        }
-
-		//Put some space between different topics, if possible
-		if(!large){
-			i = sizeone;
+		List<Icon> topics = new ArrayList<>();
+		
+		normalTopics.values().stream().map(HelpFile::asIcon).forEach(topics::add);
+		
+		if(normalTopics.size() > 0 && skillTopics.size() > 0) {
+			int rest = topics.size() % 9;
+			int padding = 18 - (rest == 0? 9:rest);
+			IntStream.range(0, padding).forEach($->topics.add(new Pad(Material.AIR)));
+			skillTopics.values().stream().map(HelpFile::asSkillIcon).forEach(topics::add);
 		}
-
-		for(HelpFile h : skillTopics.values()){
-            if (h.canView(p)) {
-                inv.setItem(i++, h.asSkillItem());
-            }
-        }
-
-		p.openInventory(inv);
+		
+		Menu.fromIcons(HELP_HEADER, topics);
 	}
 	
 	public HelpFile findHelpFile(String topic){
@@ -197,11 +186,7 @@ public class HelpDesk {
 
 		return h;
 	}
-	
-	private int round(double i, int v){
-	    return (int) (Math.ceil(i/v) * v);
-	}
-	
+
 	private static class SingletonHolder {
 		private static final HelpDesk INSTANCE = new HelpDesk();
 	}

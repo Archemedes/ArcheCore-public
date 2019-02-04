@@ -2,6 +2,8 @@ package net.lordofthecraft.arche.help;
 
 import com.google.common.collect.Lists;
 
+import co.lotc.core.bukkit.menu.icon.Icon;
+import co.lotc.core.bukkit.menu.icon.SimpleButton;
 import co.lotc.core.util.MessageUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -18,45 +20,45 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.List;
 
 public abstract class HelpFile {
-    private final String topic;
-    private String perm = "archecore.mayuse";
-    private Material icon = Material.SIGN;
+	private final String topic;
+	private String perm = "archecore.mayuse";
+	private Material icon = Material.SIGN;
 
-    public HelpFile(String topic, String perm) {
-        this.topic = topic;
-        this.perm = perm;
-    }
-
-    public HelpFile(String topic) {
-        this.topic = WordUtils.capitalize(topic);
+	public HelpFile(String topic, String perm) {
+		this.topic = topic;
+		this.perm = perm;
 	}
 
-    public String getPerm() {
-        return perm;
-    }
+	public HelpFile(String topic) {
+		this.topic = WordUtils.capitalize(topic);
+	}
 
-    public boolean canView(CommandSender sender) {
-        return perm == null || sender.hasPermission(perm);
-    }
+	public String getPerm() {
+		return perm;
+	}
 
-    public void setPerm(String perm) {
-        this.perm = perm;
-    }
+	public boolean canView(CommandSender sender) {
+		return perm == null || sender.hasPermission(perm);
+	}
 
-    public Material getIcon() {
-        return icon;
+	public void setPerm(String perm) {
+		this.perm = perm;
+	}
+
+	public Material getIcon() {
+		return icon;
 	}
 
 	public void setIcon(Material icon) {
 		this.icon = icon;
 	}
-	
+
 	public ItemStack asItem(){
 		ItemStack i = new ItemStack(icon);
 		ItemMeta meta = i.getItemMeta();
 		meta.setDisplayName(ChatColor.RESET + topic);
 		i.setItemMeta(meta);
-		
+
 		return i;
 	}
 	
@@ -70,6 +72,22 @@ public abstract class HelpFile {
 		i.setItemMeta(meta);
 		
 		return i;
+	}
+	
+	public Icon asIcon() {
+		return asIcon(asItem());
+	}
+	
+	public Icon asSkillIcon() {
+		return asIcon(asSkillItem());
+	}
+	
+	private Icon asIcon(ItemStack item) {
+		return new SimpleButton(item, ma->{
+			Player x = ma.getPlayer();
+			HelpDesk.getInstance().outputHelp(getTopic(), x);
+			ma.getMenuAgent().close();
+		});
 	}
 	
 	public String getTopic(){
