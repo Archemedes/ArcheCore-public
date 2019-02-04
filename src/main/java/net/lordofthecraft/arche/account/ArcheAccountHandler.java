@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import co.lotc.core.bukkit.util.Run;
@@ -118,7 +119,7 @@ public class ArcheAccountHandler implements AccountHandler {
 		acc.initTimes();
 		acc.registerIp(p.getAddress().getAddress().getHostAddress());
 		
-		Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->checkDoubleLogin(acc));
+		Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->checkAltShenanigans(p,acc));
 	}
 	
 	public void leavePlayer(Player p) {
@@ -126,7 +127,13 @@ public class ArcheAccountHandler implements AccountHandler {
 		acc.initTimes();
 	}
 	
-	private void checkDoubleLogin(Account acc) {
+	private void checkAltShenanigans(Player player, Account acc) {
+		if(acc.getUUIDs().stream()
+				.map(Bukkit::getOfflinePlayer)
+				.anyMatch(OfflinePlayer::isBanned)) {
+			player.kickPlayer("You cannot play right now because one of your accounts is banned!");
+		}
+		
 		var players = acc.getUUIDs().stream()
 			.map(Bukkit::getPlayer)
 			.filter(Objects::nonNull)
