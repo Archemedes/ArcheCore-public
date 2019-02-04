@@ -169,7 +169,7 @@ public class HelpDesk {
 			skillTopics.values().stream().map(HelpFile::asSkillIcon).forEach(topics::add);
 		}
 		
-		Menu.fromIcons(HELP_HEADER, topics);
+		Menu.fromIcons(HELP_HEADER, topics).openSession(p);
 	}
 	
 	public HelpFile findHelpFile(String topic){

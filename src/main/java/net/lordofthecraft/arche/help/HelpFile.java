@@ -85,7 +85,7 @@ public abstract class HelpFile {
 	private Icon asIcon(ItemStack item) {
 		return new SimpleButton(item, ma->{
 			Player x = ma.getPlayer();
-			HelpDesk.getInstance().outputHelp(getTopic(), x);
+			HelpDesk.getInstance().outputHelp(topic, x);
 			ma.getMenuAgent().close();
 		});
 	}
