@@ -52,7 +52,8 @@
 			<groupId>com.mojang</groupId>
 			<artifactId>brigadier</artifactId>
 			<version>1.0.15</version>
-		</dependency>
+			<scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
             <artifactId>ProtocolLib-API</artifactId>
