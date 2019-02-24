@@ -6,12 +6,19 @@ public enum Race {
     DWARF("Dwarf", "Dwarf"),
     ORC("Orc", "Orc"),
 
+    NORTHENER("Highlander", "Human", 100),
+    SOUTHERON("Farfolk", "Human", 100),
+    HEARTLANDER("Heartlander", "Human", 100),
+    ADUNIAN("Adunian", "Human", 200),
+
     HALFLING("Halfling", "Human", 200),
     GOBLIN("Goblin", "Orc"),
     
     HIGH_ELF("High Elf", "Elf", 1000),
     DARK_ELF("Dark Elf", "Elf", 1000),
     WOOD_ELF("Wood Elf", "Elf", 1000),
+    SNOW_ELF("Snow Elf", "Elf", 1000), //Kill me please -501warhead
+
 
     CAVE_DWARF("Cave Dwarf", "Dwarf"),
     FOREST_DWARF("Forest Dwarf", "Dwarf"),
