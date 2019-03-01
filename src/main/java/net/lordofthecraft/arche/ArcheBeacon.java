@@ -21,7 +21,6 @@ import com.google.common.collect.Lists;
 import co.lotc.core.bukkit.util.ItemUtil;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.event.persona.PersonaWhoisEvent;
-import net.lordofthecraft.arche.executables.OpenEnderRunnable;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.persona.ArchePersona;
@@ -48,24 +47,6 @@ public class ArcheBeacon {
 	private ArcheBeacon() {}
 	
 	static {
-		FUNCTIONS[0] = (click,pers) -> { //Ender chest button
-			if(ArcheCore.getControls().showEnderchestInMenu()) {
-				if(click != null) { //open ender chest
-					Player p = pers.getPlayer();
-					closeAnd(p, () -> {
-                        if (p.hasPermission("archecore.enderchest") && pers.getTimePlayed() >= 200)
-                            OpenEnderRunnable.begin(pers);
-						else
-							p.sendMessage(ChatColor.RED + "You do not have access to your Ender Chest.");
-					});
-				}
-				ItemStack is = new ItemStack(Material.ENDER_CHEST);
-				return ItemUtil.decorate(is, ChatColor.RESET + "Ender Chest", ChatColor.GRAY + "Open your Ender Chest");
-			} else {
-				return new ItemStack(Material.AIR); //Do not draw an item now
-			}
-		};
-		
 		FUNCTIONS[1] = (click,pers) -> { //List of persona att mods
 			if(click == null) { //Make the icon
 				ItemStack icon = new ItemStack(Material.GOLDEN_APPLE);
@@ -95,8 +76,6 @@ public class ArcheBeacon {
 				return null; //
 			}
 		};
-		
-		
 	}
 
 	
