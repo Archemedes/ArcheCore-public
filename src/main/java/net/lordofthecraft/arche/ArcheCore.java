@@ -65,7 +65,6 @@ import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.interfaces.SkillFactory;
 import net.lordofthecraft.arche.listener.AfkListener;
 import net.lordofthecraft.arche.listener.ArcheAttributeListener;
-import net.lordofthecraft.arche.listener.ArmorListener;
 import net.lordofthecraft.arche.listener.AttributeItemListener;
 import net.lordofthecraft.arche.listener.BeaconMenuListener;
 import net.lordofthecraft.arche.listener.BlockRegistryListener;
@@ -492,7 +491,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		pm.registerEvents(new PlayerChatListener(), this);
 		pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
 		pm.registerEvents(new PersonaInventoryListener(), this);
-		pm.registerEvents(new ArmorListener(), this);
 		pm.registerEvents(new SeasonListener(calendar), this);
 		pm.registerEvents(new ArcheAttributeListener(), this);
 		pm.registerEvents(new AttributeItemListener(), this);
