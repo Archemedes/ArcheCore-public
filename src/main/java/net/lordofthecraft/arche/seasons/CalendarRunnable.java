@@ -50,7 +50,8 @@ public class CalendarRunnable extends BukkitRunnable
     	return worlds.keySet();
     }
     
-   void refreshAllChunks() {
+   @SuppressWarnings("deprecation")
+	void refreshAllChunks() {
 	   worlds.values().stream()
 	   .filter(Objects::nonNull)
 	   .forEach(w->Arrays.stream(w.getLoadedChunks())

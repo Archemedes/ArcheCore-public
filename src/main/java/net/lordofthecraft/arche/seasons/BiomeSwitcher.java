@@ -1,7 +1,5 @@
 package net.lordofthecraft.arche.seasons;
 
-import static org.bukkit.Material.BLUE_GLAZED_TERRACOTTA;
-
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;

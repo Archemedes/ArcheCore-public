@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
+@SuppressWarnings("deprecation")
 public class RacialBonusListener implements Listener {
 	//private final UUID random_uuid = UUID.randomUUID();
 	private final Random rnd = new Random();
