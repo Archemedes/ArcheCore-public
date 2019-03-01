@@ -86,6 +86,7 @@ public class EquipmentAttributes {
 		
 		ExtendedAttributeModifier eam = new ModifierBuilder(attribute.getModifier())
 				.shouldSave(false)
+				.slot(slot)
 				.create();
 		
 		for(List<ItemAttribute> mods : atts) {
