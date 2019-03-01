@@ -41,7 +41,7 @@ public class AttributeItem {
 	 * @param m the AttributeModifier to invoke
 	 * @param slot the equipment slot to apply to, can be null.
 	 * @param is The base ItemStack to apply a modifier to
-	 * @return The ItemStack with the modifier applied 
+	 * @return The ItemStack with the modifier applied
 	 */
 	public static ItemStack addModifier(Attribute att, AttributeModifier m, EquipmentSlot slot, ItemStack is){
 		//Object compound = compoundConstructor().newInstance();
