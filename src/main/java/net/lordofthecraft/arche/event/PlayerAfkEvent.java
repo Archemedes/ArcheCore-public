@@ -1,4 +1,4 @@
-package net.lordofthecraft.arche.event.util;
+package net.lordofthecraft.arche.event;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;

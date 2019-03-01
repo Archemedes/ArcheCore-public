@@ -26,7 +26,7 @@ import com.google.common.collect.Sets;
 
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
-import net.lordofthecraft.arche.event.util.PlayerAfkEvent;
+import net.lordofthecraft.arche.event.PlayerAfkEvent;
 
 public class AfkListener implements Listener {
 	public static final long AFK_THRESHOLD_MINUTES = 5;
