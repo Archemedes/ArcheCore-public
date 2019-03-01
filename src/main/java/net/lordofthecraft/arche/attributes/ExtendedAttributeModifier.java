@@ -6,20 +6,21 @@ import net.lordofthecraft.arche.save.rows.attribute.AttributeRemoveRow;
 import net.lordofthecraft.arche.save.rows.attribute.AttributeUpdateRow;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-/** 
+/**
  * Slightly more data for temp atts, which is not serialized through the bukkit method
  * Note that by default this is a permanent attribute
+ * Note to self 2019: This was a terrible idea
  */
 public class ExtendedAttributeModifier extends AttributeModifier implements Cloneable {
-
 	private final boolean lostOnDeath;
-	private final boolean save; 
+	private final boolean save;
 
 	//Variables to keep track of AttributeModifier removal time
 	private final Decay decay;
@@ -68,17 +69,22 @@ public class ExtendedAttributeModifier extends AttributeModifier implements Clon
     public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, Decay decay, long ticksRemaining, boolean lostOnDeath) {
     	this(uuid, name, amount, operation, true, decay, ticksRemaining, lostOnDeath);
     }
-    
+
     public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, boolean save, Decay decay, long ticksRemaining, boolean lostOnDeath) {
-        super(uuid, name, amount, operation);
-        this.save = save;
-        this.decay = decay;
-        this.ticksRemaining = ticksRemaining;
-        this.lostOnDeath = lostOnDeath;
+    	this(uuid, name, amount, operation, null, save, decay, ticksRemaining, lostOnDeath);
     }
 
-    public ExtendedAttributeModifier clone() {
-        return new ExtendedAttributeModifier(this.getUniqueId(), this.getName(), this.getAmount(), this.getOperation(), this.decay, this.ticksRemaining, this.lostOnDeath);
+    public ExtendedAttributeModifier(UUID uuid, String name, double amount, Operation operation, EquipmentSlot slot, boolean save, Decay decay, long ticksRemaining, boolean lostOnDeath) {
+    	super(uuid, name, amount, operation, slot);
+    	this.save = save;
+    	this.decay = decay;
+    	this.ticksRemaining = ticksRemaining;
+    	this.lostOnDeath = lostOnDeath;
+    }
+
+    @Override
+		public ExtendedAttributeModifier clone() {
+        return new ExtendedAttributeModifier(this.getUniqueId(), this.getName(), this.getAmount(), this.getOperation(), this.getSlot(), this.save, this.decay, this.ticksRemaining, this.lostOnDeath);
     }
 
     public boolean isLostOnDeath() {
@@ -137,7 +143,7 @@ public class ExtendedAttributeModifier extends AttributeModifier implements Clon
 		String plusle = negative? "" : "+";
 				
 		boolean addNumber = mod.getOperation() == Operation.ADD_NUMBER;
-		String value = addNumber? Double.toString(mod.getAmount()) : 
+		String value = addNumber? Double.toString(mod.getAmount()) :
 			Integer.toString( (int) (mod.getAmount() * 100 ));
 		String percent = addNumber? "" : "%";
 		return cc.toString() + plusle + value + percent;

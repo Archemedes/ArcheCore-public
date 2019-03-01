@@ -19,9 +19,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import co.lotc.core.bukkit.util.ItemUtil;
+import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.attributes.ArcheAttribute;
-import net.lordofthecraft.arche.attributes.AttributeItem;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier.Decay;
@@ -211,13 +211,18 @@ public class CommandAttribute implements CommandExecutor {
     		break;
     	default:
     		EquipmentSlot slot = EquipmentSlot.valueOf(tx.toString());
+    		var attMod = b.slot(slot).create();
+
     		i = target.getPlayer().getInventory();
 
     		if(attribute instanceof VanillaAttribute) {
     			Attribute vanilla = ((VanillaAttribute) attribute).getHandle();
-    			is = AttributeItem.addModifier(vanilla, b.create(), slot, i.getItemInMainHand());
+    			is = i.getItemInMainHand();
+    			var meta = is.getItemMeta();
+    			meta.addAttributeModifier(vanilla, attMod);
+    			is.setItemMeta(meta);
     		} else {
-    			ItemAttribute ia = new ItemAttribute(attribute, b.create(), slot);
+    			ItemAttribute ia = new ItemAttribute(attribute, attMod);
     			is = ia.apply(i.getItemInMainHand());
     			Decorator.showAttributes(is);
     		}

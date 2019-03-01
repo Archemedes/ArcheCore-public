@@ -6,21 +6,29 @@ import java.util.UUID;
 import org.apache.commons.lang.Validate;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
+import org.bukkit.inventory.EquipmentSlot;
 
+import lombok.AccessLevel;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier.Decay;
 
+@Accessors(fluent=true)
+@FieldDefaults(level=AccessLevel.PRIVATE)
 public class ModifierBuilder {
-	private UUID uuid = null;
-	private String name = "";
-	private double amount = 0.0;
-	private Operation operation = Operation.ADD_NUMBER;
+	@Setter UUID uuid = null;
+	@Setter String name = "";
+	@Setter double amount = 0.0;
+	@Setter Operation operation = Operation.ADD_NUMBER;
+	@Setter EquipmentSlot slot = null;
 	
-	private boolean save = true;
-	private Decay decay = Decay.NEVER;
-	private long ticks = 0;
-	private boolean lostOnDeath = false;
-	private boolean modifierShowsName = true;
-	private boolean modifierIsVisible = true;
+	@Setter boolean lostOnDeath = false;
+	@Setter boolean shouldSave = true;
+	Decay decay = Decay.NEVER;
+	long ticks = 0;
+	boolean modifierShowsName = true;
+	boolean modifierIsVisible = true;
 	
 	public ModifierBuilder() {}
 	
@@ -44,35 +52,8 @@ public class ModifierBuilder {
 		this.operation = operation;
 	}
 	
-	public ModifierBuilder uuid(UUID uuid) {
-		this.uuid = uuid;
-		return this;
-	}
-	
 	public ModifierBuilder randomUUID() {
 		uuid = UUID.randomUUID();
-		return this;
-	}
-	
-	public ModifierBuilder name(String name) {
-		Validate.notNull(name);
-		this.name = name;
-		return this;
-	}
-	
-	public ModifierBuilder amount(double amount) {
-		this.amount = amount;
-		return this;
-	}
-	
-	public ModifierBuilder operation(Operation op) {
-		Validate.notNull(operation);
-		operation = op;
-		return this;
-	}
-	
-	public ModifierBuilder shouldSave(boolean save) {
-		this.save = save;
 		return this;
 	}
 	
@@ -83,12 +64,7 @@ public class ModifierBuilder {
 		this.ticks = ticks;
 		return this;
 	}
-	
-	public ModifierBuilder lostOnDeath(boolean lost) {
-		lostOnDeath = lost;
-		return this;
-	}
-	
+
 	public ModifierBuilder withMenuVisibility(boolean visible) {
 		modifierIsVisible = visible;
 		return this;
@@ -118,6 +94,6 @@ public class ModifierBuilder {
 		if(!modifierIsVisible) name = "/"+name;
 		else if(!modifierShowsName && !name.isEmpty()) name = "#" + name;
 		
-		return new ExtendedAttributeModifier(uuid, name, amount, operation, save, decay, ticks, lostOnDeath);
+		return new ExtendedAttributeModifier(uuid, name, amount, operation, shouldSave, decay, ticks, lostOnDeath);
 	}
 }
