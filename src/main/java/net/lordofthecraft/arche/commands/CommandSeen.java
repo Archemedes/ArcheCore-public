@@ -1,23 +1,27 @@
 package net.lordofthecraft.arche.commands;
 
-import static org.bukkit.ChatColor.*;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import static net.md_5.bungee.api.ChatColor.*;
 
 import co.lotc.core.bukkit.util.ChatBuilder;
 import co.lotc.core.bukkit.util.TimeUtil;
+import co.lotc.core.util.DateTool;
+import java.time.Instant;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.command.CommandTemplate;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
+import org.bukkit.BanEntry;
+import org.bukkit.BanList;
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public class CommandSeen extends CommandTemplate {
 
@@ -54,7 +58,31 @@ public class CommandSeen extends CommandTemplate {
 		if(canSeeOnline(s,account.getPlayer())) b.append("Online").color(GREEN);
 		else b.append("Offline").append(RED);
 		b.append(" since ").color(GRAY).append(lastSeen).newline();
-		
+
+		if (account.getPlayer().isBanned()) {
+			BanList list = Bukkit.getBanList(BanList.Type.NAME);
+			BanEntry entry = list.getBanEntry(account.getPlayer().getName());
+			if (entry.getExpiration() == null || entry.getExpiration().after(Date.from(Instant.now()))) {
+				b.append(GRAY + "Player is " + RED + ITALIC + BOLD + "banned" + GRAY + ".").newline();
+				if (canSeeOnline(s, account.getPlayer())) {
+					b.append(GRAY + "  Executor: " + AQUA + entry.getSource()).newline();
+					b.append(GRAY + "  Reason: " + WHITE + entry.getReason()).newline();
+					b.append(GRAY + "  Filed: " + WHITE + DateTool
+						.getStringFromTime((System.currentTimeMillis() - entry.getCreated().getTime()) / 1000)
+						.setNumberFormat(AQUA)
+						.setWordFormat(WHITE) + WHITE + " ago.");
+					Date when = entry.getExpiration();
+					if (when != null) {
+						b.append(GRAY + "  Time until expiry: " + WHITE + DateTool
+							.getStringFromTime((when.getTime() - System.currentTimeMillis()) / 1000)
+							.setNumberFormat(AQUA)
+							.setWordFormat(WHITE)
+							.setDisplayShorthand() + WHITE + ".");
+					}
+				}
+			}
+		}
+
 		if(account.hasForumId()) b.append("Forum Account: ").color(GRAY)
 			.append(account.getForumId()).color(WHITE).event(ClickEvent.Action.OPEN_URL, "https://lotc.co/profile/"+account.getForumId()+"--")
 			.newline();
