@@ -4,7 +4,7 @@
   <groupId>net.lordofthecraft.arche</groupId>
   <artifactId>ArcheCore</artifactId>
   <name>ArcheCore</name>
-  <version>3.0</version>
+  <version>3.1</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
