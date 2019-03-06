@@ -1,5 +1,7 @@
 package net.lordofthecraft.arche.account;
 
+import static org.bukkit.ChatColor.*;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -128,10 +130,13 @@ public class ArcheAccountHandler implements AccountHandler {
 	}
 	
 	private void checkAltShenanigans(Player player, Account acc) {
-		if(acc.getUUIDs().stream()
+		var oop = acc.getUUIDs().stream()
 				.map(Bukkit::getOfflinePlayer)
-				.anyMatch(OfflinePlayer::isBanned)) {
-			player.kickPlayer("You cannot play right now because one of your accounts is banned!");
+				.filter(OfflinePlayer::isBanned)
+				.findFirst();
+		if(oop.isPresent()) {
+			player.kickPlayer(RED + "You cannot play right now because your account " + WHITE + oop.get().getName() + RED + " is banned");
+			return;
 		}
 		
 		var players = acc.getUUIDs().stream()
