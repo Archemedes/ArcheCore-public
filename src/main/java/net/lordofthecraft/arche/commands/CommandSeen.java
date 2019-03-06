@@ -5,7 +5,6 @@ import static net.md_5.bungee.api.ChatColor.*;
 
 import co.lotc.core.bukkit.util.ChatBuilder;
 import co.lotc.core.bukkit.util.TimeUtil;
-import co.lotc.core.util.DateTool;
 import java.time.Instant;
 import java.util.Date;
 import java.util.HashSet;
@@ -67,19 +66,12 @@ public class CommandSeen extends CommandTemplate {
 				if (entry.getExpiration() == null || entry.getExpiration().after(Date.from(Instant.now()))) {
 					b.append(GRAY + "Player is " + RED + ITALIC + BOLD + "banned" + GRAY + ".").newline();
 					if (canSeeOnline(s, account.getPlayer())) {
-						b.append(GRAY + "  Executor: " + AQUA + entry.getSource()).newline();
-						b.append(GRAY + "  Reason: " + WHITE + entry.getReason()).newline();
-						b.append(GRAY + "  Filed: " + WHITE + DateTool
-								.getStringFromTime((System.currentTimeMillis() - entry.getCreated().getTime()) / 1000)
-						.setNumberFormat(AQUA)
-						.setWordFormat(WHITE) + WHITE + " ago.");
+						b.append("  Executor: ").color(GRAY).append(entry.getSource()).color(AQUA).newline();
+						b.append("  Reason: ").color(GRAY).append(entry.getReason()).color(WHITE).newline();
+						b.append("  Filed: ").color(GRAY).append(TimeUtil.printBrief(System.currentTimeMillis()-entry.getCreated().getTime())).append( " ago.").color(WHITE);
 						Date when = entry.getExpiration();
 						if (when != null) {
-							b.append(GRAY + "  Time until expiry: " + WHITE + DateTool
-									.getStringFromTime((when.getTime() - System.currentTimeMillis()) / 1000)
-							.setNumberFormat(AQUA)
-							.setWordFormat(WHITE)
-							.setDisplayShorthand() + WHITE + ".");
+							b.append("  Time until expiry: ").color(GRAY).append(TimeUtil.printBrief(when.getTime() - System.currentTimeMillis())).newline();
 						}
 					}
 				}
