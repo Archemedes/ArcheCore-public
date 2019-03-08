@@ -29,7 +29,7 @@ public class ProtocolUtil {
 		ProtocolManager manager = ProtocolLibrary.getProtocolManager();
 		
 		PacketContainer packet = manager.createPacket(PacketType.Play.Server.RESPAWN);
-		packet.getIntegers().write(0, env.getId()); //Does matter
+		packet.getDimensions().write(0, env.getId()); //Does matter
 		packet.getDifficulties().write(0, Difficulty.valueOf(p.getWorld().getDifficulty().name()));//Doesnt matter
 		packet.getGameModes().write(0, NativeGameMode.fromBukkit(p.getGameMode()));
 		packet.getWorldTypeModifier().write(0, p.getWorld().getWorldType()); //Doesnt matter tbh
