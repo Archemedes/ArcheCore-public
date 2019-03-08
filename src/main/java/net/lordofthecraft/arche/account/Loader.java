@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.bukkit.Bukkit;
 
@@ -23,6 +27,7 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 
 @AllArgsConstructor
 public class Loader {
+	private final ArcheCore plugin = ArcheCore.getPlugin();
 	private final ArcheAccountHandler aHandler;
 	private final ArchePersonaHandler pHandler;
 	
@@ -109,7 +114,23 @@ public class Loader {
 	void initialize(UUID player) {
 		if(!isLoaded(player)) {
 			AccountBlob blob = loadFromDisk(player);
-			if(blob != null) sync(()->deliver(blob));
+			if(blob != null) { //Would this work?
+				if(Bukkit.isPrimaryThread()) {
+					deliver(blob);
+				} else { //Definitely not main thread
+					Callable<?> ccc =  ()->{deliver(blob);return null;};
+					var future = Bukkit.getScheduler().callSyncMethod(plugin, ccc);
+					try{ // This stalls main thread, notice primary thread check
+						future.get(1, TimeUnit.SECONDS); //This will fuck up if main thread stalls for 1 second
+					} catch(InterruptedException | ExecutionException | TimeoutException e) {
+						//Delivery failed likely means main thread will load account a second time
+						//This is fine in most cases, just slow. Issues when player is entirely new (new account)
+						CoreLog.severe("Async (PlayerPreLogin) thread exhausted waiting for main thread to deliver persona blob");
+						e.printStackTrace();
+					}
+				}
+					
+			}
 		} else {
 			CoreLog.debug("User logged in that was already loaded: " + player);
 		}
@@ -127,11 +148,6 @@ public class Loader {
 		AccountBlob blob = new AccountBlob(acc, prs);
 		aHandler.initTimes(blob);
 		return blob;
-	}
-	
-	private void sync(Runnable r) {
-		if(Bukkit.isPrimaryThread()) r.run();
-		else Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), r);
 	}
 	
 }
