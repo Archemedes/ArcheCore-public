@@ -235,7 +235,7 @@ public class ArcheAccountHandler implements AccountHandler {
 	
 	private void getMaxId() {
 		try(Connection connection = ArcheCore.getSQLControls().getConnection();
-				PreparedStatement statement = connection.prepareStatement("SELECT MAX(persona_id) AS 'max_persona_id' FROM persona");
+				PreparedStatement statement = connection.prepareStatement("SELECT MAX(account_id) FROM accounts");
 				ResultSet rs = statement.executeQuery();)
 		{
 			if (rs.next()) {
