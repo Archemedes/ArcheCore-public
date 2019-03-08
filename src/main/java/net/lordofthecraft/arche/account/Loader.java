@@ -71,9 +71,18 @@ public class Loader {
 		Map<Waiter<Persona>, ArchePersona> pts = new HashMap<>();
 		
 		synchronized(this) {
+			var uuids = blob.getAccount().getUUIDs();
+			if(uuids.stream().anyMatch(confirmed::contains)) {
+				int id = blob.getAccount().getId();
+				if(confirmed.containsAll(uuids)) {
+					CoreLog.warning("Interleaved loading detected when trying to deliver Account "+id+" for " + uuids.stream().findAny().get());
+				} else {
+					CoreLog.severe("Illegal/Corrupt loading state for account "+id+": Some but not all UUIDs were confirmed loaded.");
+					for(var uuid : uuids) CoreLog.severe("UUID: " + uuid + ". Confirmed: " + confirmed.contains(uuid));
+				}
+			}
 			UUID anyUUID = blob.getAccount().getUUIDs().stream().findAny().get();
 			if(confirmed.contains(anyUUID)) {
-				CoreLog.warning("Interleaved loading detected when trying to deliver Account for " + anyUUID);
 				return; //Our work has been done already
 			}
 			 
