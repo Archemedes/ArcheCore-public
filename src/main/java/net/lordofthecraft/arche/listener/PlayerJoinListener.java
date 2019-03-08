@@ -58,7 +58,7 @@ public class PlayerJoinListener implements Listener {
 		e.setJoinMessage(null);
 		Player p = e.getPlayer();
 
-		p.setExhaustion(3.5f);
+		p.setExhaustion(3.5f); //This fixes an old bug where exhaustion got set to NAN or similaly stupid
 		if (timer != null) timer.startTiming("login " + p.getName());
 		if(!accounts.isLoaded(p.getUniqueId())) {
 			CoreLog.warning("Player " + p.getName() + " was NOT loaded Async. This is likely a late-bind issue");
