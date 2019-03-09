@@ -44,7 +44,6 @@ import net.lordofthecraft.arche.commands.CommandPersona;
 import net.lordofthecraft.arche.commands.CommandRaceSpawn;
 import net.lordofthecraft.arche.commands.CommandRealname;
 import net.lordofthecraft.arche.commands.CommandSeen;
-import net.lordofthecraft.arche.commands.CommandShowItem;
 import net.lordofthecraft.arche.commands.CommandSkin;
 import net.lordofthecraft.arche.commands.CommandSql;
 import net.lordofthecraft.arche.commands.CommandSqlClone;
@@ -470,7 +469,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		//Commands, ACB method, Annotated:
 		newCommand("date", CommandDate::new);
 		newCommand("durabilityboost", CommandDurability::new);
-		newCommand("showitem", CommandShowItem::new);
 		newCommand("seen", CommandSeen::new);
 		newCommand("ipsearch", CommandIPSearch::new);
 	}
