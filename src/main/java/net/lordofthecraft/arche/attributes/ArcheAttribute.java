@@ -15,10 +15,9 @@ public class ArcheAttribute {
 	public ArcheAttribute(String name, double defaultValue) {
 		this(name, defaultValue, true);
 	}
-
 	
 	public ArcheAttribute(String name, double defaultValue, boolean higherIsBetter) {
-		this.name = name;
+		this.name = name.toLowerCase().replace(' ', '_');
 		this.defaultValue = defaultValue;
 		this.higherIsBetter = higherIsBetter;
 	}
