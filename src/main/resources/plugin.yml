@@ -53,11 +53,6 @@ commands:
       description: Set the spawn of a race.
       permission: archecore.mod.persona
       permission-message: §4Insufficient Permission for this command
-   wikisign:
-      usage: /<command>
-      description: Make a wikisign?
-      permission: archecore.mod.sign
-      permission-message: §4Insufficient Permission for this command
    attribute:
       usage: /<command> help
       description: Edit the attributes of an online player.
@@ -104,7 +99,6 @@ permissions:
     description: Gives moderator level access to facilities within archecore.
     children:
       archecore.mod.persona: true
-      archecore.mod.sign: true
       archecore.money: true
       archecore.money.seeother: true
       archecore.command.beaconme: true
