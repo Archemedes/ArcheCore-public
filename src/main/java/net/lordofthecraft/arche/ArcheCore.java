@@ -453,7 +453,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("helpmenu").setExecutor(new CommandHelpMenu(helpdesk));
 		getCommand("persona").setExecutor(new CommandPersona(helpdesk, personaHandler, nameChangeDelay, enablePrefixes));
 		getCommand("persona").setTabCompleter(new CommandPersonaTabCompleter());
-		getCommand("beaconme").setExecutor(new CommandBeaconme());
+		getCommand("me").setExecutor(new CommandBeaconme());
 		getCommand("realname").setExecutor(new CommandRealname(this));
 		getCommand("money").setExecutor(new CommandMoney(helpdesk, economy));
 		getCommand("namelog").setExecutor(new CommandNamelog());
@@ -466,7 +466,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		
 		//Commands, ACB method, Annotated:
 		newCommand("date", CommandDate::new);
-		newCommand("durabilityboost", CommandDurability::new);
+		newCommand("duraboost", CommandDurability::new);
 		newCommand("seen", CommandSeen::new);
 		newCommand("ipsearch", CommandIPSearch::new);
 	}

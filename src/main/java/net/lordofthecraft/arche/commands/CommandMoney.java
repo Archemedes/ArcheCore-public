@@ -28,12 +28,11 @@ public class CommandMoney implements CommandExecutor {
 			String i = ChatColor.DARK_GREEN + "" + ChatColor.ITALIC;
 			String a = ChatColor.AQUA+ "";
 			String output = ChatColor.DARK_AQUA +""+ ChatColor.BOLD + "Using the command: " + i + "/money (or /mn)\n"
-					+ i + "$/mn help$: " + a + "Show this help file\n"
-					+ i + "$/mn$: " + a + "Display the amount of " + econ.currencyNamePlural() +   " your Persona has.\n"
-					+ i + "$/mn top$: " + a + "Show the people with the most " + econ.currencyNamePlural() +"\n"
-					+ i + "$/mn <player>$: " + a + "See how much " + econ.currencyNamePlural() +   " <player>'s Persona has.\n"
-					+ i + "$/mn pay <player> <amt>$: " + a + "Pay <amt> to <player>'s current Persona, provided that they are nearby.\n"
-					+ i + "$/mn drop <amt> " + a + "Drop <amt> " + econ.currencyNamePlural() + " on the ground";
+					+ i + "$/money help$: " + a + "Show this help file\n"
+					+ i + "$/money$: " + a + "Display the amount of " + econ.currencyNamePlural() +   " your Persona has.\n"
+					+ i + "$/money <player>$: " + a + "See how much " + econ.currencyNamePlural() +   " <player>'s Persona has.\n"
+					+ i + "$/money pay <player> <amt>$: " + a + "Pay <amt> to <player>'s current Persona, provided that they are nearby.\n"
+					+ i + "$/money drop <amt> " + a + "Drop <amt> " + econ.currencyNamePlural() + " on the ground";
 
 			helpdesk.addInfoTopic("Money Command", output);
 		}

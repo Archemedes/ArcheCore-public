@@ -16,12 +16,11 @@ commands:
       usage: Invalid syntax! Use /<command> help for a list of commands
       permission: archecore.mayuse
       permission-message: §4Insufficient Permission for this command
-      aliases: [pers,prs,ps,p]
-   beaconme:
+      aliases: p
+   me:
       description: Open the ArcheCore Beacon menu
       permission: archecore.command.beaconme
       permission-message: §4Insufficient Permission for this command
-      aliases: [bme, me]    
    arsql:
       description: Execute SQL statements from ingame
    arclone:
@@ -36,12 +35,10 @@ commands:
       description: get the current Minecraft Username from a Persona name.
       permission: archecore.mayuse
       permission-message: §4Insufficient Permission for this command
-      aliases: [name, nick]
    money:
       description: interact with the Persona-based money balance
       permission: archecore.money
       permission-message: §4Insufficient Permission for this command
-      aliases: mn
       usage: Invalid syntax! Use /<command> help for a list of commands
    namelog:
       usage: /<command> [player name/uuid]
@@ -57,18 +54,15 @@ commands:
       usage: /<command> help
       description: Edit the attributes of an online player.
       permission: archecore.admin
-      aliases: [attr, att, attri, atr]
       permission-message: §4Insufficient Permission for this command
    skin:
       usage: Please see /<command> help for a list of commands
       description: store and load skins
    date:
-      aliases: [currentdate, lotcdate, calendar]
       description: Displays calendar date.
-   durabilityboost:
-      description: Add a modddurabilityboosted durability boost for the held item
+   duraboost:
+      description: Add a durability boost for the held item
       permission: archecore.command.durabilityboost
-      aliases: [duraboost, dub]
    seen:
       description: Show information about the player
       permission: archecore.command.seen
