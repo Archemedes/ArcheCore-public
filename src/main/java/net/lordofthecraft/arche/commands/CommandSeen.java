@@ -5,8 +5,6 @@ import static net.md_5.bungee.api.ChatColor.*;
 
 import co.lotc.core.bukkit.util.ChatBuilder;
 import co.lotc.core.bukkit.util.TimeUtil;
-import java.time.Instant;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -16,10 +14,7 @@ import net.lordofthecraft.arche.command.CommandTemplate;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
-import org.bukkit.BanEntry;
-import org.bukkit.BanList;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -58,26 +53,6 @@ public class CommandSeen extends CommandTemplate {
 		if(canSeeOnline(s,account.getPlayer())) b.append("Online").color(GREEN);
 		else b.append("Offline").append(RED);
 		b.append(" since ").color(GRAY).append(lastSeen).newline();
-		for (UUID id : account.getUUIDs()) {
-			OfflinePlayer op = Bukkit.getServer().getOfflinePlayer(id);
-			if (op.isBanned()) {
-				BanList list = Bukkit.getBanList(BanList.Type.NAME);
-				BanEntry entry = list.getBanEntry(account.getPlayer().getName());
-				if (entry.getExpiration() == null || entry.getExpiration().after(Date.from(Instant.now()))) {
-					b.append(GRAY + "Player is " + RED + ITALIC + BOLD + "banned" + GRAY + ".").newline();
-					if (canSeeOnline(s, account.getPlayer())) {
-						b.append("  Executor: ").color(GRAY).append(entry.getSource()).color(AQUA).newline();
-						b.append("  Reason: ").color(GRAY).append(entry.getReason()).color(WHITE).newline();
-						b.append("  Filed: ").color(GRAY).append(TimeUtil.printBrief(System.currentTimeMillis()-entry.getCreated().getTime())).append( " ago.").color(WHITE);
-						Date when = entry.getExpiration();
-						if (when != null) {
-							b.append("  Time until expiry: ").color(GRAY).append(TimeUtil.printBrief(when.getTime() - System.currentTimeMillis())).newline();
-						}
-					}
-				}
-				break;
-			}
-		}
 
 		if(account.hasForumId()) b.append("Forum Account: ").color(GRAY)
 		.append(account.getForumId()).color(WHITE).event(ClickEvent.Action.OPEN_URL, "https://lotc.co/profile/"+account.getForumId()+"--")
