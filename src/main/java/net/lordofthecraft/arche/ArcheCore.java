@@ -39,7 +39,6 @@ import net.lordofthecraft.arche.commands.CommandHelpMenu;
 import net.lordofthecraft.arche.commands.CommandIPSearch;
 import net.lordofthecraft.arche.commands.CommandMoney;
 import net.lordofthecraft.arche.commands.CommandNamelog;
-import net.lordofthecraft.arche.commands.CommandNewbies;
 import net.lordofthecraft.arche.commands.CommandPersona;
 import net.lordofthecraft.arche.commands.CommandRaceSpawn;
 import net.lordofthecraft.arche.commands.CommandRealname;
@@ -460,7 +459,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("namelog").setExecutor(new CommandNamelog());
 		getCommand("arsql").setExecutor(new CommandSql());
 		getCommand("arclone").setExecutor(new CommandSqlClone());
-		getCommand("newbies").setExecutor(new CommandNewbies(personaHandler));
 		getCommand("racespawn").setExecutor(new CommandRaceSpawn(personaHandler));
 		getCommand("attribute").setExecutor(new CommandAttribute());
 		getCommand("attribute").setTabCompleter(new CommandAttributeTabCompleter());

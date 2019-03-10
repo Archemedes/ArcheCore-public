@@ -17,12 +17,6 @@ commands:
       permission: archecore.mayuse
       permission-message: §4Insufficient Permission for this command
       aliases: [pers,prs,ps,p]
-   newbies:
-     description: Allows you to scan for nearby new personas
-     usage: This command can only be run from ingame.
-     permission: archecore.command.newbies
-     permission-message: §4Insufficient Permission for this command
-     aliases: [newbie, new, n, ne]
    beaconme:
       description: Open the ArcheCore Beacon menu
       permission: archecore.command.beaconme
@@ -113,7 +107,6 @@ permissions:
       archecore.mod.sign: true
       archecore.money: true
       archecore.money.seeother: true
-      archecore.command.newbies: true
       archecore.command.beaconme: true
       archecore.command.seen: true
       archecore.persona.setrace: true
