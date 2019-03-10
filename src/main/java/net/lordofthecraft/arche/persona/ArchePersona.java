@@ -494,7 +494,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 	@Override
 	public boolean isNewbie() {
-		return getTimePlayed() < ArcheCore.getControls().getNewbieDelay();
+		return getTotalPlaytime() < ArcheCore.getControls().getNewbieDelay();
 	}
 
 	@Override
