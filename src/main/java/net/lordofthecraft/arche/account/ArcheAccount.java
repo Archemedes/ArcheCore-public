@@ -146,6 +146,12 @@ public class ArcheAccount implements Account {
 		alt.getUUIDs().forEach(this::registerAlt);
 		alt.getIPs().forEach(this::registerIp);
 		alt.getTags().getTagMap().forEach((k,v) -> {if(!tags.hasTag(k)) tags.giveTag(k, v);});
+		
+		//Update sessions
+		ArcheCore.getConsumerControls().update("account_sessions")
+			.set("account_id_fk", this.id)
+			.where("account_id_fk", alt.getId())
+			.queue();
 	}
 	
 	private void remove() {
