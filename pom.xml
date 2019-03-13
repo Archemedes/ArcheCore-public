@@ -52,11 +52,13 @@
       <groupId>com.mojang</groupId>
       <artifactId>brigadier</artifactId>
       <version>1.0.15</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.comphenix.protocol</groupId>
       <artifactId>ProtocolLib-API</artifactId>
       <version>4.4.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.zaxxer</groupId>
@@ -73,7 +75,7 @@
     <dependency>
       <groupId>co.lotc</groupId>
       <artifactId>tythan-bukkit</artifactId>
-      <version>0.2</version>
+      <version>0.21</version>
     </dependency>
   </dependencies>
 
