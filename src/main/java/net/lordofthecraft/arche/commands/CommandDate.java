@@ -1,8 +1,8 @@
 package net.lordofthecraft.arche.commands;
 
+import co.lotc.core.command.CommandTemplate;
+import co.lotc.core.command.annotate.Cmd;
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.command.CommandTemplate;
-import net.lordofthecraft.arche.command.annotate.Cmd;
 import net.lordofthecraft.arche.seasons.LotcianCalendar;
 
 public class CommandDate extends CommandTemplate

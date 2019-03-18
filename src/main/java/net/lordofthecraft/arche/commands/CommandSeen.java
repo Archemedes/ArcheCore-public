@@ -3,20 +3,22 @@ package net.lordofthecraft.arche.commands;
 
 import static net.md_5.bungee.api.ChatColor.*;
 
-import co.lotc.core.bukkit.util.ChatBuilder;
-import co.lotc.core.bukkit.util.TimeUtil;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import lombok.var;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.command.CommandTemplate;
-import net.lordofthecraft.arche.interfaces.Account;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import co.lotc.core.bukkit.util.ChatBuilder;
+import co.lotc.core.bukkit.util.TimeUtil;
+import co.lotc.core.command.CommandTemplate;
+import lombok.var;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.Account;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
 
 public class CommandSeen extends CommandTemplate {
 

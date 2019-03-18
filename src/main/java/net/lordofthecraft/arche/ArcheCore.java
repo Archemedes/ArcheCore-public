@@ -24,12 +24,13 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import co.lotc.core.bukkit.command.Commands;
 import co.lotc.core.bukkit.util.WeakBlock;
+import co.lotc.core.command.CommandTemplate;
 import net.lordofthecraft.arche.SQL.ArcheSQLiteHandler;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.account.ArcheAccountHandler;
-import net.lordofthecraft.arche.command.CommandTemplate;
 import net.lordofthecraft.arche.commands.CommandArchehelp;
 import net.lordofthecraft.arche.commands.CommandAttribute;
 import net.lordofthecraft.arche.commands.CommandBeaconme;
@@ -51,7 +52,6 @@ import net.lordofthecraft.arche.commands.tab.CommandHelpTabCompleter;
 import net.lordofthecraft.arche.commands.tab.CommandPersonaTabCompleter;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.help.HelpFile;
-import net.lordofthecraft.arche.interfaces.CommandHandle;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.IArcheCore;
 import net.lordofthecraft.arche.interfaces.IConsumer;
@@ -476,7 +476,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	}
 
 	private void newCommand(String name, Supplier<CommandTemplate> sup) {
-		CommandHandle.build(getCommand(name), sup);
+		Commands.build(getCommand(name), sup);
 	}
 	
 	private void initListeners(){

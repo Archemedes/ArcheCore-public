@@ -8,9 +8,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import co.lotc.core.bukkit.util.ItemUtil;
+import co.lotc.core.command.CommandTemplate;
+import co.lotc.core.command.annotate.Cmd;
 import lombok.var;
-import net.lordofthecraft.arche.command.CommandTemplate;
-import net.lordofthecraft.arche.command.annotate.Cmd;
 
 public class CommandDurability extends CommandTemplate {
 	

@@ -12,12 +12,12 @@ import java.util.stream.IntStream;
 
 import co.lotc.core.bukkit.util.ChatBuilder;
 import co.lotc.core.bukkit.util.Run;
+import co.lotc.core.command.CommandTemplate;
+import co.lotc.core.command.annotate.Arg;
+import co.lotc.core.command.annotate.Cmd;
 import lombok.val;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.command.CommandTemplate;
-import net.lordofthecraft.arche.command.annotate.Arg;
-import net.lordofthecraft.arche.command.annotate.Cmd;
 
 public class CommandIPSearch extends CommandTemplate {
 	ArcheCore plugin = ArcheCore.getPlugin();
