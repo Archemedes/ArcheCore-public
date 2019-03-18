@@ -449,6 +449,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 	private void initCommands(){
 		ArcheCommands.registerPersonaType();
+		ArcheCommands.registerOfflinePersonaType();
+		ArcheCommands.registerUUIDType();
 		
 		getCommand("archehelp").setExecutor(new CommandArchehelp(helpdesk, helpOverriden));
 		getCommand("archehelp").setTabCompleter(new CommandHelpTabCompleter(helpdesk));
