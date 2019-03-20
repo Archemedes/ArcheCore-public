@@ -310,6 +310,7 @@ public class CommandPersona implements CommandExecutor {
                     return true;
                 } else if (cmd == PersonaCommand.TIME) {
                   sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(pers.getTimePlayed() / 60) + ChatColor.AQUA + " hours on " + pers.getName() + " in " + ArcheCore.getControls().getServerWorldName() + ".");
+                  sender.sendMessage(ChatColor.AQUA + "You have " + ChatColor.GOLD.toString() + ChatColor.BOLD + (int) Math.floor(pers.getTotalPlaytime()/ 60) + ChatColor.AQUA + " hours  in total on " + pers.getName());
                   return true;
                 /*} else if (cmd == PersonaCommand.PROFESSION && args.length == 1 && sender instanceof Player) {
                     sender.sendMessage(ChatColor.BLUE + "Available Professions: " + ChatColor.DARK_GRAY + "[Click for Info]");
