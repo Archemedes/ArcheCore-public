@@ -46,7 +46,7 @@ public class CommandIPSearch extends CommandTemplate {
 		String clause = "WHERE " + IntStream.range(0, ips.size())
 			.mapToObj($->"ip_address=?")
 			.collect(Collectors.joining(" OR "));
-		String stat = "SELECT player FROM playeraccounts WHERE account_id_fk=(SELECT account_id_fk FROM account_ips " + clause + ")";
+		String stat = "SELECT player FROM playeraccounts WHERE account_id_fk IN (SELECT account_id_fk FROM account_ips " + clause + ")";
 		try(var c = ArcheCore.getSQLControls().getConnection(); var ps = c.prepareStatement(stat)){
 			int i = 0;
 			for(String ip : ips) ps.setString(++i, ip);
