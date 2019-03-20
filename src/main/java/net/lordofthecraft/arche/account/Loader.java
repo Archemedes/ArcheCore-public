@@ -130,12 +130,12 @@ public class Loader {
 					Callable<?> ccc =  ()->{deliver(blob);return null;};
 					var future = Bukkit.getScheduler().callSyncMethod(plugin, ccc);
 					try{ // This stalls main thread, notice primary thread check
-						future.get(1, TimeUnit.SECONDS); //This will fuck up if main thread stalls for 1 second
+						future.get(5, TimeUnit.SECONDS); //This will fuck up if main thread stalls
 					} catch(InterruptedException | ExecutionException | TimeoutException e) {
 						//Delivery failed likely means main thread will load account a second time
 						//This is fine in most cases, just slow. Issues when player is entirely new (new account)
 						CoreLog.severe("Async (PlayerPreLogin) thread exhausted waiting for main thread to deliver persona blob");
-						e.printStackTrace();
+						CoreLog.severe("Error received was: " + e.getClass().getName());
 					}
 				}
 					
