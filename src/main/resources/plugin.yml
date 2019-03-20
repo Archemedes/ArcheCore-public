@@ -96,6 +96,7 @@ permissions:
       archecore.money: true
       archecore.money.seeother: true
       archecore.command.beaconme: true
+      archecore.command.ipsearch: true
       archecore.command.seen: true
       archecore.persona.setrace: true
       archecore.persona.realrace: true
