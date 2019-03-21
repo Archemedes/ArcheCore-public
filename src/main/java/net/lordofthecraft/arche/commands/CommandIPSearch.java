@@ -58,7 +58,7 @@ public class CommandIPSearch extends CommandTemplate {
 	}
 	
 	private Multimap<String, UUID> connections(Set<String> ips){
-		Multimap<String, UUID> result = MultimapBuilder.hashKeys().hashSetValues().build();
+		Multimap<String, UUID> result = MultimapBuilder.hashKeys().arrayListValues().build();
 		
 		for(var ip : ips) {
 			var uuids = uuids(Collections.singleton(ip));
@@ -93,7 +93,7 @@ public class CommandIPSearch extends CommandTemplate {
 	}
 	
 	private void callback(Account acc, Multimap<String, UUID> linkeduuids) {
-		new ChatBuilder().append("Query Found the Following Matches: ").color(GRAY).newline()
+		new ChatBuilder().append("Query Found the Following Matches: ").color(DARK_AQUA).newline()
 		.append("green").color(GREEN).append( " names are linked to account ").color(DARK_AQUA).append('#').color(DARK_GRAY).append(acc.getId())
 		.send(getSender());
 		
@@ -108,6 +108,7 @@ public class CommandIPSearch extends CommandTemplate {
 				cb.append(name);
 				if(acc.getUUIDs().contains(uuid)) cb.color(GREEN);
 				else cb.color(RED);
+				cb.send(getSender());
 			}
 		}
 		
@@ -115,15 +116,16 @@ public class CommandIPSearch extends CommandTemplate {
 	}
 
 	private void callback(Account acc, Set<UUID> uuids) {
-		var cb = new ChatBuilder().append("Query Found the Following Matches: ").color(GRAY);
+		var cb = new ChatBuilder().append("Query Found the Following Matches: ").color(DARK_AQUA);
 
 		if(acc != null) {
-			cb.newline().append("green").color(GREEN).append( " names are linked to account ").color(DARK_AQUA).append('#').color(DARK_GRAY).append(acc.getId());
+			cb.newline().append("green").color(GREEN)
+			.append( " names are linked to account ").color(DARK_AQUA)
+			.append('#').color(DARK_GRAY).append(acc.getId());
 		}
 
 		cb.send(getSender());
 		
-		new ChatBuilder().append("Query Found the Following Matches: ").color(DARK_AQUA).send(getSender());
 		for(UUID uuid : uuids) {
 			String name = ArcheCore.getControls().getPlayerNameFromUUID(uuid);
 			cb = new ChatBuilder().append(name);
