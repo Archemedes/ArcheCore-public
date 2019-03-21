@@ -98,7 +98,7 @@ public class CommandIPSearch extends CommandTemplate {
 		.send(getSender());
 		
 		for(var ip : linkeduuids.keySet()) {
-			var cb = new ChatBuilder(ip).color(WHITE).append(" → ").color(DARK_AQUA).bold();
+			var cb = new ChatBuilder(ip).color(WHITE).append(" → ").color(DARK_AQUA);
 			boolean comma = false;
 			for(var uuid : linkeduuids.get(ip)) {
 				if(comma) cb.append(", ").color(GRAY);
