@@ -58,7 +58,7 @@ public class CommandIPSearch extends CommandTemplate {
 	}
 	
 	private Multimap<String, UUID> connections(Set<String> ips){
-		Multimap<String, UUID> result = MultimapBuilder.hashKeys().arrayListValues().build();
+		Multimap<String, UUID> result = MultimapBuilder.hashKeys().hashSetValues().build();
 		
 		for(var ip : ips) {
 			var uuids = uuids(Collections.singleton(ip));
@@ -133,8 +133,8 @@ public class CommandIPSearch extends CommandTemplate {
 			else if(acc.getUUIDs().contains(uuid)) cb.color(GREEN);
 			else cb.color(RED);
 
-			cb.append(" (").color(GRAY).append(uuid).append(")")
-			.send(getSender());
+			cb.append(" (").color(GRAY).append(uuid).append(")");
 		}
+		cb.send(getSender());
 	}
 }
