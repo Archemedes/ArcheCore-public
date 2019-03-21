@@ -50,6 +50,7 @@ public class CommandSeen extends CommandTemplate {
 		b.append(account.getName()).color(DARK_AQUA).bold().append(" is ").reset().color(GRAY);
 		long ls = account.getLastSeen();
 		long elapsed = ls == 0? 0 : System.currentTimeMillis() - account.getLastSeen();
+		elapsed -= (elapsed % 60000); //this way it wont show seconds
 		BaseComponent lastSeen = TimeUtil.printMillis(elapsed);
 
 		if(canSeeOnline(s,account.getPlayer())) b.append("Online").color(GREEN);
