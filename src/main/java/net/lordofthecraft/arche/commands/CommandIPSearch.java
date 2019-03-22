@@ -108,8 +108,8 @@ public class CommandIPSearch extends CommandTemplate {
 				cb.append(name);
 				if(acc.getUUIDs().contains(uuid)) cb.color(GREEN);
 				else cb.color(RED);
-				cb.send(getSender());
 			}
+			cb.send(getSender());
 		}
 		
 		
@@ -134,7 +134,7 @@ public class CommandIPSearch extends CommandTemplate {
 			else cb.color(RED);
 
 			cb.append(" (").color(GRAY).append(uuid).append(")");
+			cb.send(getSender());
 		}
-		cb.send(getSender());
 	}
 }
