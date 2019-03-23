@@ -33,11 +33,11 @@ import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.account.ArcheAccountHandler;
 import net.lordofthecraft.arche.commands.CommandArchehelp;
 import net.lordofthecraft.arche.commands.CommandAttribute;
-import net.lordofthecraft.arche.commands.CommandBeaconme;
 import net.lordofthecraft.arche.commands.CommandDate;
 import net.lordofthecraft.arche.commands.CommandDurability;
 import net.lordofthecraft.arche.commands.CommandHelpMenu;
 import net.lordofthecraft.arche.commands.CommandIPSearch;
+import net.lordofthecraft.arche.commands.CommandMe;
 import net.lordofthecraft.arche.commands.CommandMoney;
 import net.lordofthecraft.arche.commands.CommandNamelog;
 import net.lordofthecraft.arche.commands.CommandPersona;
@@ -457,7 +457,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("helpmenu").setExecutor(new CommandHelpMenu(helpdesk));
 		getCommand("persona").setExecutor(new CommandPersona(helpdesk, personaHandler, nameChangeDelay, enablePrefixes));
 		getCommand("persona").setTabCompleter(new CommandPersonaTabCompleter());
-		getCommand("me").setExecutor(new CommandBeaconme());
 		getCommand("realname").setExecutor(new CommandRealname(this));
 		getCommand("money").setExecutor(new CommandMoney(helpdesk, economy));
 		getCommand("namelog").setExecutor(new CommandNamelog());
@@ -469,6 +468,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("skin").setExecutor(new CommandSkin(this));
 		
 		//Commands, ACB method, Annotated:
+		newCommand("me",CommandMe::new);
 		newCommand("date", CommandDate::new);
 		newCommand("duraboost", CommandDurability::new);
 		newCommand("seen", CommandSeen::new);
