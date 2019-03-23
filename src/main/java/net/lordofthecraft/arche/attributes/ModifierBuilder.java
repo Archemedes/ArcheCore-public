@@ -94,6 +94,6 @@ public class ModifierBuilder {
 		if(!modifierIsVisible) name = "/"+name;
 		else if(!modifierShowsName && !name.isEmpty()) name = "#" + name;
 		
-		return new ExtendedAttributeModifier(uuid, name, amount, operation, shouldSave, decay, ticks, lostOnDeath);
+		return new ExtendedAttributeModifier(uuid, name, amount, operation, slot, shouldSave, decay, ticks, lostOnDeath);
 	}
 }
