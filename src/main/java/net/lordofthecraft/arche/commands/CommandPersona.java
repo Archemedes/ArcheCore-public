@@ -47,7 +47,7 @@ public class CommandPersona implements CommandExecutor {
         MORE("archecore.command.persona.view.more", true, true, "more", "extrainfo", "viewmore"),
         NAME("archecore.command.persona.name", false, "name", "rename", "setname"),
         PREFIX("archecore.command.persona.prefix", false, "prefix", "setprefix"),
-        CLEARPREFIX("archcecore.command.persona.prefix.clear", false, "clearprefix", "delprefix", "rmprefix", "noprefix", "removeprefix"),
+        CLEARPREFIX("archecore.command.persona.prefix.clear", false, "clearprefix", "delprefix", "rmprefix", "noprefix", "removeprefix"),
         CLEARAGE("archecore.command.persona.age", false, "clearage", "resetage","removeage","noage"),
         AGE("archecore.command.persona.age", false, "age", "setage"),
         BIRTHDATE("archecore.command.persona.age", false, "birthdate", "setbirthdate","birthyear","setbirthyear"),

@@ -187,7 +187,7 @@ permissions:
   archecore.command.persona.prefix:
     description: Gain access to /persona prefix if prefixes are enabled.
     default: yes
-  archcecore.command.persona.prefix.clear:
+  archecore.command.persona.prefix.clear:
     description: Gain access to /persona clearprefix if prefixes are enabled
     default: yes
   archecore.command.persona.time:
