@@ -64,7 +64,6 @@ import net.lordofthecraft.arche.interfaces.SkillFactory;
 import net.lordofthecraft.arche.listener.AfkListener;
 import net.lordofthecraft.arche.listener.ArcheAttributeListener;
 import net.lordofthecraft.arche.listener.AttributeItemListener;
-import net.lordofthecraft.arche.listener.BeaconMenuListener;
 import net.lordofthecraft.arche.listener.BlockRegistryListener;
 import net.lordofthecraft.arche.listener.EconomyListener;
 import net.lordofthecraft.arche.listener.ExperienceOrbListener;
@@ -77,6 +76,7 @@ import net.lordofthecraft.arche.listener.PlayerInteractListener;
 import net.lordofthecraft.arche.listener.PlayerJoinListener;
 import net.lordofthecraft.arche.listener.RacialBonusListener;
 import net.lordofthecraft.arche.listener.SeasonListener;
+import net.lordofthecraft.arche.menu.MainMenu;
 import net.lordofthecraft.arche.persona.ArcheEconomy;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.FatigueDecreaser;
@@ -102,6 +102,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private ArcheTimer timer;
 	private ArcheEconomy economy;
 	private LotcianCalendar calendar;
+	private MainMenu mainMenu = null;
 	private Consumer archeConsumer;
 	private Timer archeTimer = null;
 	private ArcheNameMap nameMap = null;
@@ -169,7 +170,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	public static PersonaHandler getPersonaControls() {
 		return getControls().getPersonaHandler();
 	}
-
+	
 	public static Economy getEconomyControls() {
 		return getControls().getEconomy();
 	}
@@ -286,6 +287,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		fatigueHandler = ArcheFatigueHandler.getInstance();
 		helpdesk = HelpDesk.getInstance();
 		skinCache = SkinCache.getInstance();
+		mainMenu = new MainMenu(this, personaChangeDelay);
 
 		ResultSet res = null;
 		try(Connection c = sqlHandler.getConnection()){
@@ -487,7 +489,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		pm.registerEvents(new PlayerJoinListener(personaHandler, accountHandler), this);
 		pm.registerEvents(new PlayerInteractListener(this), this);
-		pm.registerEvents(new BeaconMenuListener(this, personaChangeDelay), this);
 		pm.registerEvents(new PlayerChatListener(), this);
 		pm.registerEvents(new BlockRegistryListener(blockRegistry), this);
 		pm.registerEvents(new PersonaInventoryListener(), this);
@@ -804,6 +805,11 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	@Override
 	public Economy getEconomy() {
 		return economy;
+	}
+	
+	@Override
+	public MainMenu getMainMenu() {
+		return mainMenu;
 	}
 
 	@Override

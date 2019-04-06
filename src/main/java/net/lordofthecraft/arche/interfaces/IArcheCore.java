@@ -12,6 +12,7 @@ import org.bukkit.plugin.Plugin;
 import net.lordofthecraft.arche.BlockRegistry;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.help.HelpFile;
+import net.lordofthecraft.arche.menu.MainMenu;
 import net.lordofthecraft.arche.seasons.LotcianCalendar;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skin.SkinCache;
@@ -218,6 +219,12 @@ public interface IArcheCore {
 	 * @return The Economy object
 	 */
 	Economy getEconomy();
+	
+	
+	/**
+	 * @return the Main (Persona) Menu published by ArcheCore as clickable inventory GUI
+	 */
+	MainMenu getMainMenu();
 
 	/**
 	 * @return If new Personas will be teleported to spawn after creation

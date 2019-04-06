@@ -1,6 +1,5 @@
 package net.lordofthecraft.arche.listener;
 
-import net.lordofthecraft.arche.ArcheBeacon;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -40,16 +39,7 @@ public class PlayerInteractListener implements Listener {
 		if(e.getAction() == Action.RIGHT_CLICK_BLOCK){
 			Material m = e.getClickedBlock().getType();
 			Player p = e.getPlayer();
-			if(m == Material.BEACON){
-				if(!p.isSneaking() || !p.hasPermission("archecore.vanillabeacon")){
-					e.setCancelled(true);
-					
-					if(p.hasPermission("archecore.mayuse")){
-						ArcheBeacon.openBeacon(p);
-					}
-					
-				}
-			} else if( m == Material.ENDER_CHEST){
+			if( m == Material.ENDER_CHEST){
 				if(!p.hasPermission("archecore.enderchest")){
 					e.setCancelled(true);
 					p.sendMessage(ChatColor.RED + "You do not have access to your Ender Chest.");
