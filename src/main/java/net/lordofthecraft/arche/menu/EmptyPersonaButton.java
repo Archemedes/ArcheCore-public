@@ -17,12 +17,12 @@ import net.lordofthecraft.arche.persona.CreationDialog;
 
 @RequiredArgsConstructor
 public class EmptyPersonaButton extends Button {
-	private final Player p;
 	private final int slot;
 
 	@Override
 	public void click(MenuAction ma) {
 		ma.getMenuAgent().close();
+		Player p = ma.getPlayer();
 		
 		if (!ArcheCore.getControls().canCreatePersonas()) {
 			p.sendMessage(ChatColor.RED + "Persona creation is disabled for this server, please go to the main server to create your persona.");

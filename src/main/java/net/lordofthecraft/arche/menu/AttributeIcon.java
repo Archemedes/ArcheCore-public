@@ -14,13 +14,13 @@ import co.lotc.core.bukkit.menu.MenuAction;
 import co.lotc.core.bukkit.menu.MenuAgent;
 import co.lotc.core.bukkit.menu.icon.Button;
 import lombok.RequiredArgsConstructor;
+import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
 import net.lordofthecraft.arche.help.HelpDesk;
 import net.lordofthecraft.arche.interfaces.Persona;
 
 @RequiredArgsConstructor
 public class AttributeIcon extends Button {
-	private final Persona pers;
 	
 	@Override
 	public void click(MenuAction ma) {
@@ -31,6 +31,9 @@ public class AttributeIcon extends Button {
 
 	@Override
 	public ItemStack getItemStack(MenuAgent ma) {
+		Persona pers = ArcheCore.getPersona(ma.getPlayer());
+		if(pers == null) return null;
+		
 		ItemStack icon = new ItemStack(Material.GOLDEN_APPLE);
 		ItemMeta m = icon.getItemMeta();
 		m.setDisplayName(ChatColor.AQUA + "Persona Modifiers:");
