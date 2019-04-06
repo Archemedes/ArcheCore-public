@@ -1,5 +1,6 @@
 package net.lordofthecraft.arche.attributes;
 
+import org.apache.commons.lang.WordUtils;
 import org.bukkit.entity.Player;
 
 import com.google.common.base.Objects;
@@ -27,7 +28,7 @@ public class ArcheAttribute {
 	}
 	
 	public String getReadableName() {
-		return name;
+		return WordUtils.capitalize(name.replace('_', ' '));
 	}
 	
 	public boolean isHigherBetter() {
