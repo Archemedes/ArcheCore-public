@@ -114,7 +114,7 @@ public class CreationDialog {
                 .begin();
     }
 
-    public void removePersona(ArchePersona pers){
+    public void removePersona(Persona pers){
     	Player p = Bukkit.getPlayer(pers.getPlayerUUID());
     	if(p == null){
     		CoreLog.severe("We tried to engage Persona removal Dialog while owning player was offline!");
