@@ -181,13 +181,7 @@ public interface IArcheCore {
 	 * @return Whether or not prefixes are enabled.
 	 */
 	boolean arePrefixesEnabled();
-
-	/**
-	 * If enabled, new Personas receive Newbie protection which exempts them from mechanical PvP for a set period of playtime
-	 * @return Minutes of PvP invulnerability time, in minutes
-	 */
-	int getNewbieProtectDelay();
-
+	
 	/**
 	 * If true, ArcheCore will modify display names of Players to fit their current Persona's name
 	 * @return If display names are to be modified by ArcheCore
@@ -241,7 +235,13 @@ public interface IArcheCore {
 	 */
 	int getNewbieDelay();
 
-    boolean canCreatePersonas();
+	/**
+	 * If enabled, new Personas receive Newbie protection which exempts them from mechanical PvP for a set period of playtime
+	 * @return Minutes of PvP invulnerability time, in minutes
+	 */
+	int getNewbieProtectDelay();
+
+	boolean canCreatePersonas();
 
     /**
      * @return the delay in days within which newly created Personas cannot be permakilled by their owners.

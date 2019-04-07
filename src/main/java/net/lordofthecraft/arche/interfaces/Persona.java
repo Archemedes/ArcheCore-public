@@ -204,6 +204,8 @@ public interface Persona extends OfflinePersona {
 	 */
 	boolean isNewbie();
 
+	void setNewbie(boolean newbie);
+	
 	/**
 	 * Sets the skin of this persona to use
 	 *

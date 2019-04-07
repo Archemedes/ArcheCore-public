@@ -1,21 +1,27 @@
 package net.lordofthecraft.arche.persona;
 
-import com.google.common.collect.Maps;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.ArcheTimer;
-import net.lordofthecraft.arche.attributes.*;
-import net.lordofthecraft.arche.attributes.items.EquipmentAttributes;
-import net.lordofthecraft.arche.interfaces.Persona;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.entity.Player;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
+
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.Player;
+
+import com.google.common.collect.Maps;
+
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.ArcheTimer;
+import net.lordofthecraft.arche.attributes.ArcheAttribute;
+import net.lordofthecraft.arche.attributes.ArcheAttributeInstance;
+import net.lordofthecraft.arche.attributes.AttributeRegistry;
+import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier;
+import net.lordofthecraft.arche.attributes.VanillaAttribute;
+import net.lordofthecraft.arche.attributes.items.EquipmentAttributes;
+import net.lordofthecraft.arche.interfaces.Persona;
 
 /**
  * Just fucking end me - Sporadic 2k17-2k19
@@ -74,6 +80,11 @@ public class PersonaAttributes {
 
     public void addModifier(ArcheAttribute a, AttributeModifier m) {
         addModifier(a, m, false);
+    }
+    
+    public boolean hasModifier(ArcheAttribute a, AttributeModifier m) {
+    	if(!customAttributes .containsKey(a)) return false;
+    	return customAttributes.get(a).hasModifier(m);
     }
 
     public void addModifier(ArcheAttribute a, AttributeModifier m, boolean force) {

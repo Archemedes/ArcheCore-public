@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -29,6 +31,9 @@ import co.lotc.core.bukkit.util.WeakBlock;
 import lombok.Getter;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
+import net.lordofthecraft.arche.attributes.AttributeRegistry;
+import net.lordofthecraft.arche.attributes.ModifierBuilder;
+import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier.Decay;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.persona.PersonaFatigueEvent;
@@ -492,9 +497,28 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		}
 	}
 
+	public static final UUID NEWBIE_PROTECTION_ATTRIBUTE = UUID.fromString("");
+	
 	@Override
 	public boolean isNewbie() {
-		return getTotalPlaytime() < ArcheCore.getControls().getNewbieDelay();
+		return attributes().hasModifier(AttributeRegistry.HUNGER, newbieAttribute());
+	}
+	
+	@Override
+	public void setNewbie(boolean newbie) {
+		if(newbie) attributes().addModifier(AttributeRegistry.HUNGER, newbieAttribute());
+		else attributes().removeModifier(AttributeRegistry.HUNGER, newbieAttribute());
+	}
+	
+	private AttributeModifier newbieAttribute() {
+		long timeInTicks = 20L * 60L * ArcheCore.getControls().getNewbieDelay();
+		return new ModifierBuilder()
+				.uuid(UUID.fromString("fff5713f-8da2-49e3-8ffb-57bad2a5a166"))
+				.name("Newbie Protection")
+				.amount(-0.80)
+				.operation(Operation.ADD_SCALAR)
+				.withDecayStrategy(Decay.ACTIVE, timeInTicks)
+				.create();
 	}
 
 	@Override
