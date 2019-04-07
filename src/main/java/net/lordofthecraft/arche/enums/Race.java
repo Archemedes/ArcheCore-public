@@ -19,7 +19,6 @@ public enum Race {
     WOOD_ELF("Wood Elf", "Elf", 1000),
     SNOW_ELF("Snow Elf", "Elf", 1000), //Kill me please -501warhead
 
-
     CAVE_DWARF("Cave Dwarf", "Dwarf"),
     FOREST_DWARF("Forest Dwarf", "Dwarf"),
     MOUNTAIN_DWARF("Mountain Dwarf", "Dwarf"),

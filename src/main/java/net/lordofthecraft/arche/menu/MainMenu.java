@@ -79,11 +79,11 @@ public class MainMenu {
 			int max = handler.getAllowedPersonas(p);
 			int absmax = ArcheCore.getControls().personaSlots();
 			int requiredSize = requiredSize(highestUsed, max, absmax, firstFree);
-			MenuBuilder mb = new MenuBuilder(controls.getCalendar().toPrettyString(), 2+requiredSize/9);
+			MenuBuilder mb = new MenuBuilder(controls.getCalendar().toPrettyString(), 3+requiredSize/9);
 
 			//Add the icons to the menu
 			for(int i = 0; i < icons.length; i++) {
-				mb.icon(i, icons[i]);
+				if(icons[i] != null) mb.icon(i, icons[i]);
 			}
 
 			mb.icon(18, new PersonaInfoButton(max));

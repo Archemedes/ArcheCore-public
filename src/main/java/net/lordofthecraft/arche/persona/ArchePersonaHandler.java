@@ -434,7 +434,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 				return new TextComponent(ChatColor.LIGHT_PURPLE + "((Persona was recently made and can't engage in PvP))");
 			else
 				return new TextComponent(op.getPersonaType().personaViewLine);
-		} else if (op.isLoaded() && ArcheCore.getPlugin().getNewbieNotificationDelay() > 0 && p.isNewbie()) {
+		} else if (op.isLoaded() && p.isNewbie()) {
 				return new TextComponent(ChatColor.AQUA + "((This player is new to the server))");
 		} else if(op.isLoaded() && op.getPersona().getPlayer() != whosAsking && !canPerceive(op.getPersona(), whosAsking)) {
 			return new TextComponent(ChatColor.DARK_GRAY + "((Persona is disguised and cannot be recognized by you))");
@@ -499,7 +499,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			if (p.hasPermission("archecore.mayuse")) {
 				if (p.hasPermission("archecore.exempt")) {
 					if (p.hasPermission("archecore.command.beaconme"))
-						p.sendMessage(ChatColor.LIGHT_PURPLE + "No Personas found. Maybe use " + ChatColor.ITALIC + "/beaconme");
+						p.sendMessage(ChatColor.LIGHT_PURPLE + "No Personas found. Maybe use " + ChatColor.ITALIC + "/me");
 				} else {
 					if (ArcheCore.getControls().teleportNewPersonas()) {
 						World w = ArcheCore.getControls().getNewPersonaWorld();

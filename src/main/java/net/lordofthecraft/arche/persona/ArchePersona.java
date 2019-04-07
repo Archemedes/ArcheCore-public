@@ -480,22 +480,27 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 			return inv.getEnderInventory();
 		}
 	}
-
-	public static final UUID NEWBIE_PROTECTION_ATTRIBUTE = UUID.fromString("");
 	
 	@Override
 	public boolean isNewbie() {
+		if(!doNewbie()) return false;
 		return attributes().hasModifier(AttributeRegistry.HUNGER, newbieAttribute());
 	}
 	
 	@Override
 	public void setNewbie(boolean newbie) {
+		if(!doNewbie()) return;
+		
 		if(newbie) attributes().addModifier(AttributeRegistry.HUNGER, newbieAttribute());
 		else attributes().removeModifier(AttributeRegistry.HUNGER, newbieAttribute());
 	}
 	
+	private boolean doNewbie() {
+		return ArcheCore.getPlugin().getNewbieNotificationDelay() > 0;
+	}
+	
 	private AttributeModifier newbieAttribute() {
-		long timeInTicks = 20L * 60L * ArcheCore.getControls().getNewbieDelay();
+		long timeInTicks = 20L * 60L * ArcheCore.getPlugin().getNewbieNotificationDelay();
 		return new ModifierBuilder()
 				.uuid(UUID.fromString("fff5713f-8da2-49e3-8ffb-57bad2a5a166"))
 				.name("Newbie Protection")

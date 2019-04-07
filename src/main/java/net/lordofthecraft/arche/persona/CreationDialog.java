@@ -340,7 +340,7 @@ public class CreationDialog {
             BaseComponent mains = new TextComponent("Main Races: ");
             mains.setColor(ChatColor.YELLOW.asBungee());
 
-            for(int i = 0; i < 5; i++){
+            for(int i = 0; i < 4; i++){
                 Race race = Race.values()[i];
                 if(p.hasPermission("archecore.race." + race.toString().toLowerCase())){
                 	mains.addExtra(MessageUtil.CommandButton(race.getName(), race.getName(), "Click to select this Race"));
