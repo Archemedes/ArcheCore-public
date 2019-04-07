@@ -1,19 +1,19 @@
 package net.lordofthecraft.arche.help;
 
-import net.lordofthecraft.arche.ArcheCore;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import co.lotc.core.util.MessageUtil;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.UUID;
+import net.lordofthecraft.arche.ArcheCore;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public class WikiHelpFile extends HelpFile {
 	private final static String WIKI = "https://wikia.lordofthecraft.net/index.php?title=";
@@ -75,7 +75,7 @@ public class WikiHelpFile extends HelpFile {
 				
 				@Override
 				public void run(){
-					Player p = ArcheCore.getPlayer(player);
+					Player p = Bukkit.getPlayer(player);
 					if(p != null) boss.output(p);
 				}
 				

@@ -158,11 +158,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			return null;
 		}
 	}
-
-	public static Player getPlayer(UUID uuid) {
-		return Bukkit.getPlayer(uuid);
-	}
-
+	
 	public static ArcheCore getPlugin() {
 		return instance;
 	}

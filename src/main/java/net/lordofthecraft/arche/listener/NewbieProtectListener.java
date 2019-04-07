@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class NewbieProtectListener implements Listener {
-	public static final Set<UUID> bonusProtects = Sets.newHashSet(); 
+	public static final Set<UUID> bonusProtects = Sets.newHashSet();
 	
 	private final ArchePersonaHandler handler;
 	private final int protectDuration;
@@ -59,7 +59,7 @@ public class NewbieProtectListener implements Listener {
 			Entity d = e.getDamager();
 			boolean newbieTarget = isNewbie(target);
 			
-			if(d instanceof Player){	
+			if(d instanceof Player){
 				Player p = (Player) d;
 				if(isNewbie(p)){
 					p.sendMessage(ChatColor.LIGHT_PURPLE + "You must further attune to your Persona before picking fights");
@@ -89,7 +89,7 @@ public class NewbieProtectListener implements Listener {
 	
 	public boolean isNewbie(Player p){
 		ArchePersona pers = handler.getPersona(p);
-		return (!p.hasPermission("archecore.persona.nonewbie") && pers != null && pers.getTimePlayed() < protectDuration);
+		return (!p.hasPermission("archecore.persona.nonnewbie") && pers != null && pers.getTimePlayed() < protectDuration);
 	}
 	
 	private void barrier(Player target, Player damager){

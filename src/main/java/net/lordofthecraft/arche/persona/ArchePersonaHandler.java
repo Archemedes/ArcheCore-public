@@ -14,7 +14,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -430,19 +429,13 @@ public class ArchePersonaHandler implements PersonaHandler {
 		if (op.getPersonaType() != PersonaType.NORMAL) {
 			return new TextComponent(op.getPersonaType().personaViewLine);
 		} else if (op.isLoaded() && p.getTotalPlaytime() < ArcheCore.getPlugin().getNewbieProtectDelay()) {
-			Player player = ArcheCore.getPlayer(op.getPlayerUUID());
-			if (player != null && !player.hasPermission("archecore.persona.nonewbie"))
+			Player player = p.getPlayer();
+			if (player != null && !player.hasPermission("archecore.persona.nonnewbie"))
 				return new TextComponent(ChatColor.LIGHT_PURPLE + "((Persona was recently made and can't engage in PvP))");
 			else
 				return new TextComponent(op.getPersonaType().personaViewLine);
-		} else if (op.isLoaded() && ArcheCore.getPlugin().getNewbieNotificationDelay() > 0 && p.getTotalPlaytime() < 600) {
-			OfflinePlayer player = ArcheCore.getPlayer(op.getPlayerUUID());
-			long age = player == null ? Integer.MAX_VALUE : System.currentTimeMillis() - player.getFirstPlayed();
-			int mins = (int) (age / DateUtils.MILLIS_PER_MINUTE);
-			if (ArcheCore.getPlugin().getNewbieNotificationDelay() > mins && !(player != null && player.isOnline() && player.getPlayer().hasPermission("archecore.persona.nonewbie")))
+		} else if (op.isLoaded() && ArcheCore.getPlugin().getNewbieNotificationDelay() > 0 && p.isNewbie()) {
 				return new TextComponent(ChatColor.AQUA + "((This player is new to the server))");
-			else
-				return new TextComponent(op.getPersonaType().personaViewLine);
 		} else if(op.isLoaded() && op.getPersona().getPlayer() != whosAsking && !canPerceive(op.getPersona(), whosAsking)) {
 			return new TextComponent(ChatColor.DARK_GRAY + "((Persona is disguised and cannot be recognized by you))");
 		} else if(op.isLoaded() && op.getPersona().getPlayer() != whosAsking && op.getPersona().attributes().getAttributeValue(AttributeRegistry.SHROUD) > 0) {
