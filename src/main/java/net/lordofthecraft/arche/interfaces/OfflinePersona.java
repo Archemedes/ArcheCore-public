@@ -85,6 +85,8 @@ public interface OfflinePersona {
      */
     boolean isFemale();
 
+    OfflinePlayer getPlayer();
+    
     /**
      * Retrieve the Roleplay name of this Persona
      *

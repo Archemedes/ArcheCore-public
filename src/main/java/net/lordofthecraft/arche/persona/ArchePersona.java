@@ -1,6 +1,5 @@
 package net.lordofthecraft.arche.persona;
 
-import java.lang.ref.WeakReference;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,8 +74,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	PersonaInventory inv;
 	PlaySession session;
 	final Set<String> namelog = Sets.newHashSet();
-	private WeakReference<Player> playerObject;
-
 	
 	public ArchePersona(UUID player, int slot, String name, Race race, int birthdate, String gender) { //For NEW personas
 		this(handler.getNextPersonaId(), player, slot, name, race, birthdate, gender,
@@ -236,20 +233,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	
 	@Override
 	public Player getPlayer(){
-		Player play;
-		if(playerObject == null || (play = playerObject.get()) == null || play.isDead()){
-			play = Bukkit.getPlayer(getPlayerUUID());
-
-			if(play == null){
-				playerObject = null;
-				return null;
-			}
-
-			playerObject = new WeakReference<>(play);
-
-		}
-
-		return play;
+		return Bukkit.getPlayer(getPlayerUUID());
 	}
 
 	@Override

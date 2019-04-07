@@ -64,6 +64,11 @@ public class ArcheOfflinePersona implements OfflinePersona {
 	public int getSlot() {
 		return personaKey.getPersonaSlot();
 	}
+	
+	@Override
+	public OfflinePlayer getPlayer() {
+		return Bukkit.getOfflinePlayer(getPlayerUUID());
+	}
 
 	@Override
 	public String getPlayerName() {
