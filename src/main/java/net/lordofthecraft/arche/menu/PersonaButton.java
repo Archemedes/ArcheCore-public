@@ -56,6 +56,9 @@ public class PersonaButton extends Button {
 				if (!ArcheCore.getControls().canCreatePersonas()) {
 					p.sendMessage(ChatColor.RED + "Persona creation is disabled for this server, please go to the main server to create your persona.");
 					return;
+				} else if (persona.isNewbie()) {
+					p.sendMessage(ChatColor.RED + "Let's get a bit more familliar with this server before we start creating additional personas.");
+					return;
 				}
 				dialog.addPersona(p, persona.getSlot(), false);
 			} else if(ma.getClick().isRightClick()) { //Remove
