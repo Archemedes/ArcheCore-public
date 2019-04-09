@@ -41,8 +41,9 @@ public class MainMenu {
 	}
 
 	private void addInitialIcons() {
-		icons[2] = new AttributeIcon();
+		icons[0] = new HelpButton();
 		icons[1] = new EnderChestButton();
+		icons[2] = new AttributeIcon();
 	}
 
 
