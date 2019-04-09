@@ -6,6 +6,7 @@ import static net.md_5.bungee.api.ChatColor.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -50,21 +51,21 @@ public class CommandSeen extends CommandTemplate {
 		b.append(account.getName()).color(DARK_AQUA).bold().append(" is ").reset().color(GRAY);
 		long ls = account.getLastSeen();
 		long elapsed = ls == 0? 0 : System.currentTimeMillis() - account.getLastSeen();
-		elapsed -= (elapsed % 60000); //this way it wont show seconds
+		elapsed -= (elapsed % 60000l); //this way it wont show seconds
 		BaseComponent lastSeen = TimeUtil.printMillis(elapsed);
 
 		if(canSeeOnline(s,account.getPlayer())) b.append("Online").color(GREEN);
-		else b.append("Offline").append(RED);
+		else b.append("Offline").color(DARK_PURPLE);
 		b.append(" since ").color(GRAY).append(lastSeen).newline();
 
 		if(account.hasForumId()) b.append("Forum Account: ").color(GRAY)
-		.append(account.getForumId()).color(WHITE).event(ClickEvent.Action.OPEN_URL, "https://lotc.co/profile/"+account.getForumId()+"--")
+		.hover("Click to go to forum profile")
+		.event(ClickEvent.Action.OPEN_URL, "https://lotc.co/profile/"+account.getForumId()+"--")
+		.append(account.getForumId()).color(WHITE)
 		.newline();
-
 
 		long weekMs = account.getTimePlayedThisWeek() * 60 * 1000;
 		if(weekMs > 0) b.append("Played ").color(GRAY).append(TimeUtil.printMillis(weekMs)).append(" in the last week.");
-
 
 		for(var ps : account.getPersonas()) {
 			b.newline().append(" - ").color(GRAY).append(ps.getName());
@@ -72,8 +73,14 @@ public class CommandSeen extends CommandTemplate {
 			if(ps.isCurrent()) b.color(GREEN).append(": Active persona!");
 			else {
 				long since = System.currentTimeMillis() - ps.getLastSeen();
-				b.color(YELLOW).append(": Last seen ").color(GRAY);
+				
+				//Don't make time needlessly precise
+				if(since > TimeUnit.HOURS.toMillis(1)) since -= (since % (60l*60l*1000l));
+				else since -= (since % 60000l);
+				
+				b.color(YELLOW).append(": Seen ").color(GRAY);
 				if(ps.getLastSeen() == 0) b.append("never").color(WHITE);
+				if(since == 0) b.append("just now").color(WHITE);
 				else b.append(TimeUtil.printMillis(since)).append( " ago");
 			}
 			b.color(GRAY);
