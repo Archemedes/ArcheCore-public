@@ -37,10 +37,6 @@ persona.change.delay: 30
 #This is to save them from possible danger or vastly changed terrain since their last session
 teleport.to.rescue: false
 
-#Show players their current XP values and xp needed for next level.
-#mods with 'archecore.admin' will always see these
-show.exp.values: false
-
 #Whether or not to use the packaged Racial Bonuses in this plugin
 enable.racial.bonuses: true
 

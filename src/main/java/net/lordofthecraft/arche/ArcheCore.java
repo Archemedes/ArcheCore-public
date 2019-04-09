@@ -66,7 +66,6 @@ import net.lordofthecraft.arche.listener.ArcheAttributeListener;
 import net.lordofthecraft.arche.listener.AttributeItemListener;
 import net.lordofthecraft.arche.listener.BlockRegistryListener;
 import net.lordofthecraft.arche.listener.EconomyListener;
-import net.lordofthecraft.arche.listener.ExperienceOrbListener;
 import net.lordofthecraft.arche.listener.HelpOverrideListener;
 import net.lordofthecraft.arche.listener.LegacyCommandsListener;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
@@ -113,7 +112,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	private int maxPersonaSlots;
 	private boolean helpOverriden;
 	private boolean legacyCommands;
-	private boolean showXpToPlayers; //currently unused. Reintroduce when tiers do
 	private boolean racialBonuses;
 	private boolean damageBonuses;
 	private int nameChangeDelay;
@@ -351,7 +349,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		nameChangeDelay = config.getInt("name.change.delay");
 		personaChangeDelay = config.getInt("persona.change.delay");
 		personaPermakillDelay = config.getInt("persona.permakill.delay");
-		showXpToPlayers = config.getBoolean("show.exp.values");
 		racialBonuses = config.getBoolean("enable.racial.bonuses");
 		damageBonuses = config.getBoolean("enable.racial.damage.bonuses");
 		enablePrefixes = config.getBoolean("enable.persona.prefix");
@@ -491,10 +488,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		pm.registerEvents(new SeasonListener(calendar), this);
 		pm.registerEvents(new ArcheAttributeListener(), this);
 		pm.registerEvents(new AttributeItemListener(), this);
-
-		if (showXpToPlayers) {
-			pm.registerEvents(new ExperienceOrbListener(), this);
-		}
 
 		if(helpOverriden)
 			pm.registerEvents(new HelpOverrideListener(), this);
