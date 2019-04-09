@@ -17,6 +17,9 @@ public class EnderChestButton extends Button {
 
 	@Override
 	public void click(MenuAction ma) {
+		if(!ArcheCore.getControls().showEnderchestInMenu())
+			return;
+		
 		Player p = ma.getPlayer();
 		ma.getMenuAgent().close();
 		
