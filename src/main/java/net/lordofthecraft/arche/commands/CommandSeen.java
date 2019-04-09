@@ -12,8 +12,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import co.lotc.core.bukkit.util.ChatBuilder;
-import co.lotc.core.bukkit.util.TimeUtil;
 import co.lotc.core.command.CommandTemplate;
+import co.lotc.core.util.TimeUtil;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Account;
