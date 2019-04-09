@@ -83,7 +83,12 @@ public class MainMenu {
 
 			//Add the icons to the menu
 			for(int i = 0; i < icons.length; i++) {
-				if(icons[i] != null) mb.icon(i, icons[i]);
+				try {
+					if(icons[i] != null) mb.icon(i, icons[i]);
+				}catch(Exception e) {
+					e.printStackTrace();
+					continue;
+				}
 			}
 
 			mb.icon(18, new PersonaInfoButton(max));
