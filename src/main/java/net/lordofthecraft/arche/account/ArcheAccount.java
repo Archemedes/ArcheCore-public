@@ -1,6 +1,7 @@
 package net.lordofthecraft.arche.account;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -12,7 +13,11 @@ import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
+import com.google.common.collect.Lists;
+
+import co.lotc.core.bukkit.util.InventoryUtil;
 import lombok.Getter;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
@@ -21,6 +26,8 @@ import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.Tags;
 
 public class ArcheAccount implements Account {
+	private static final String ITEMCACHE_TAG_KEY = "ac_itemcache";
+	
 	@Getter private final int id; //Something to make sql happy
 	
 	@Getter private long forumId; //e.g. 22277 = sporadic
@@ -130,6 +137,27 @@ public class ArcheAccount implements Account {
 	
 	@Override
 	public Set<String> getIPs() { return Collections.unmodifiableSet(ips); }
+	
+	public void addItemsToCache(List<ItemStack> items) {
+		List<ItemStack> merge = new ArrayList<>(getItemCache());
+		merge.addAll(items);
+		setItemCache(merge);
+	}
+	
+	public void setItemCache(List<ItemStack> items) {
+		String yaml = InventoryUtil.serializeItems(items);
+		tags.giveTag(ITEMCACHE_TAG_KEY, yaml);
+	}
+		
+	public List<ItemStack> getItemCache(){
+		if(tags.hasTag(ITEMCACHE_TAG_KEY)){
+			String value = tags.getValue(ITEMCACHE_TAG_KEY);
+			return InventoryUtil.deserializeItems(value);
+		} else {
+			return Lists.newArrayList();
+		}
+	}
+	
 	
 	public void addTimePlayed(long mins) {
 		timePlayed += mins;

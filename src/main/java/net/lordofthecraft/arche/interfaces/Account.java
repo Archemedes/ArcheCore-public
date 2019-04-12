@@ -1,10 +1,14 @@
 package net.lordofthecraft.arche.interfaces;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import co.lotc.core.bukkit.util.InventoryUtil;
 
 /**
  * a simple account which can have multiple Minecraft characters
@@ -28,6 +32,12 @@ public interface Account {
 	long getTimePlayedThisWeek();
 	
 	long getLastSeen();
+	
+	void addItemsToCache(List<ItemStack> items);
+	
+	void setItemCache(List<ItemStack> items);
+		
+	List<ItemStack> getItemCache();
 	
 	/**
 	 * @return Name of the online player, or a best-guess by randomly picking among alt uuids.
