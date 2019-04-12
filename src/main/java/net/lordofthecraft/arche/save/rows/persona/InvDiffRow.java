@@ -84,6 +84,9 @@ public class InvDiffRow implements RunnerRow {
 		List<ItemStack> invAdd = InventoryUtil.getItems(personInv);
 		List<ItemStack> endAdd = InventoryUtil.getItems(enderInv);
 		
+		if(invAdd.isEmpty() && endAdd.isEmpty() && invDel.isEmpty() && endDel.isEmpty())
+			return; //Dont queue if theres nothing to do.
+		
 		ArcheCore.getConsumerControls().insert("persona_invdiff")
 		.set("time", Instant.now().toEpochMilli())
 		.set("persona_id", personaId)
