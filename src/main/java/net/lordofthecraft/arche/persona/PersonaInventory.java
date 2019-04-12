@@ -1,7 +1,7 @@
 
 package net.lordofthecraft.arche.persona;
 
-import com.google.common.collect.Lists;
+import co.lotc.core.bukkit.util.InventoryUtil;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.save.rows.persona.InvDiffRow;
 
@@ -112,15 +112,7 @@ public class PersonaInventory {
     }
 
     private String getInvAsString(Inventory someInv) {
-        YamlConfiguration config = new YamlConfiguration();
-        ItemStack[] contents = someInv.getContents();
-        List<Map<String, Object>> contentslist = Lists.newArrayList();
-        for (ItemStack i : contents) {
-            if (i == null) contentslist.add(null);
-            else contentslist.add(i.serialize());
-        }
-        config.set("c", contentslist);
-        return config.saveToString();
+    	return InventoryUtil.serializeItems(someInv);
     }
 
     @Override
