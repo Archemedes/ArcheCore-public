@@ -81,12 +81,15 @@ public class InvDiffRow implements RunnerRow {
 	}
 	
 	void queueDiffSave(List<ItemStack> invDel, List<ItemStack> endDel) {
+		List<ItemStack> invAdd = InventoryUtil.getItems(personInv);
+		List<ItemStack> endAdd = InventoryUtil.getItems(enderInv);
+		
 		ArcheCore.getConsumerControls().insert("persona_invdiff")
 		.set("time", Instant.now().toEpochMilli())
 		.set("persona_id", personaId)
-		.set("inv_add", InventoryUtil.serializeItems(personInv))
+		.set("inv_add", InventoryUtil.serializeItems(invAdd))
 		.set("inv_del", InventoryUtil.serializeItems(invDel))
-		.set("ender_add", InventoryUtil.serializeItems(enderInv))
+		.set("ender_add", InventoryUtil.serializeItems(endAdd))
 		.set("ender_del", InventoryUtil.serializeItems(endDel))
 		.queue();
 	}
