@@ -37,6 +37,7 @@ import net.lordofthecraft.arche.commands.CommandDate;
 import net.lordofthecraft.arche.commands.CommandDurability;
 import net.lordofthecraft.arche.commands.CommandHelpMenu;
 import net.lordofthecraft.arche.commands.CommandIPSearch;
+import net.lordofthecraft.arche.commands.CommandItemCache;
 import net.lordofthecraft.arche.commands.CommandMe;
 import net.lordofthecraft.arche.commands.CommandMoney;
 import net.lordofthecraft.arche.commands.CommandNamelog;
@@ -468,6 +469,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		newCommand("duraboost", CommandDurability::new);
 		newCommand("seen", CommandSeen::new);
 		newCommand("ipsearch", CommandIPSearch::new);
+		newCommand("itemcache", CommandItemCache::new);
 	}
 
 	private void newCommand(String name, Supplier<CommandTemplate> sup) {

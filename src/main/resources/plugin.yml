@@ -69,6 +69,9 @@ commands:
    ipsearch:
       description: Searches matches for provided IP
       permission: archecore.command.ipsearch
+   itemcache:
+      description: Manage the endless mess that is people's items
+      permission: archecore.admin
 
 permissions:
   archecore.arsql:
