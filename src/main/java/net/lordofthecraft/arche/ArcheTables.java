@@ -12,7 +12,7 @@ import net.lordofthecraft.arche.SQL.WhySQLHandler;
 
 public final class ArcheTables {
 
-	protected ArcheTables() {
+	private ArcheTables() {
 		//Do nothing
 	}
 
@@ -49,6 +49,7 @@ public final class ArcheTables {
 			createPersonaTagsTable(statement, end);
 			l.fine("Done with persona tags! Creating persona vitals...");
 			createPersonaVitalsTable(statement, end);
+			createInvDiffTable(statement, end);
 			l.fine("Done with persona vitals! Creating persona attributes...");
 			createPersonaAttributes(statement, end);
 			l.fine("Done with persona attributes! Creating play sessions...");
@@ -175,6 +176,20 @@ public final class ArcheTables {
 				end);
 
 	}
+	
+	protected static void createInvDiffTable(Statement statement, String end) throws SQLException {
+		statement.execute("CREATE TABLE IF NOT EXISTS persona_invdiff (" +
+				"time DATETIME(3)," +
+				"persona_id INT," +
+				"inv_add TEXT," +
+				"inv_del TEXT," +
+				"ender_add TEXT," +
+				"ender_del TEXT" +
+				")" +
+				end);
+
+	}
+
 
 	protected static void createPersonaTable(Statement statement, String end) throws SQLException {
 		statement.execute("CREATE TABLE IF NOT EXISTS persona (" +
