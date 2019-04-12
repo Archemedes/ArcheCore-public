@@ -15,13 +15,13 @@ import com.google.common.collect.Lists;
 
 import co.lotc.core.bukkit.util.InventoryUtil;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Cleanup;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.save.rows.RunnerRow;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level=AccessLevel.PRIVATE,makeFinal=true)
 public class InvDiffRow implements RunnerRow {
 	int personaId;

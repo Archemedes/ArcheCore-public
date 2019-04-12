@@ -3,6 +3,8 @@ package net.lordofthecraft.arche.persona;
 
 import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.save.rows.persona.InvDiffRow;
+
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -27,6 +29,15 @@ public class PersonaInventory {
         inv.setContents(contents);
         enderInv = PersonaInventoryHolder.get(this, InventoryType.ENDER_CHEST);
         enderInv.setContents(enderContents);
+    }
+    
+    void saveDiff() { //Important this is run before the vitals update row
+    	Inventory prsInv = Bukkit.createInventory(null, 54);
+    	Inventory endInv = Bukkit.createInventory(null, 54);
+    	prsInv.setContents(inv.getContents());
+    	endInv.setContents(enderInv.getContents());
+    	
+    	new InvDiffRow(persona.getPersonaId(), prsInv,endInv).queue();
     }
 
     @SuppressWarnings("unchecked")
@@ -133,7 +144,8 @@ public class PersonaInventory {
         private final Inventory inv;
         private final PersonaInventory pinv;
 
-        public Inventory getInventory() {
+        @Override
+				public Inventory getInventory() {
             return inv;
         }
 
