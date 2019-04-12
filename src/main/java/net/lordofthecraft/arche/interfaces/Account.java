@@ -1,14 +1,11 @@
 package net.lordofthecraft.arche.interfaces;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-
-import co.lotc.core.bukkit.util.InventoryUtil;
 
 /**
  * a simple account which can have multiple Minecraft characters
