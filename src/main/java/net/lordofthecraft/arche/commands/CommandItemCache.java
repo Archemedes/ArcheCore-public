@@ -17,9 +17,12 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import com.google.common.collect.Lists;
 
 import co.lotc.core.CoreLog;
 import co.lotc.core.bukkit.menu.MenuAction;
@@ -36,6 +39,7 @@ import co.lotc.core.command.annotate.Cmd;
 import lombok.AllArgsConstructor;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.AccountHandler;
 import net.lordofthecraft.arche.interfaces.Persona;
 
@@ -43,33 +47,58 @@ public class CommandItemCache extends CommandTemplate {
 	private final AccountHandler accountHandler = ArcheCore.getControls().getAccountHandler();
 	
 	
+	@Cmd("Claim items from your own item cache")
+	public void claim(Player p) {
+		Account acc = accountHandler.getAccount(p);
+		
+		List<ItemStack> itemCache = acc.getItemCache();
+		validate(!itemCache.isEmpty(), "There are no items inside your Account's item cache");
+		
+		//If errors are ever thrown this makes the cache empty
+		//Players will then bitch to us about bugs instead of duping to their heart's content
+		//It's just better for the game in the long run
+		acc.setItemCache(Lists.newArrayList());
+		
+		msg(LIGHT_PURPLE + "Adding the cached items to your inventory now...");
+		var leftover = InventoryUtil.addItem(p.getInventory(), itemCache);
+		
+		if(!leftover.isEmpty()) {
+			msg(RED + "Some items could not be added due to lack of space! Make space in your inventory and rerun this command.");
+			acc.setItemCache(new ArrayList<>(leftover.values()));
+		}
+	}
+	
 	@Cmd("Modify an account's item cache")
 	public void modify(Player p, @Arg("player") UUID u) {
-		accountHandler.loadAccount(u).then(acc->{
-			List<CacheSlot> slots = acc.getItemCache().stream().map(CacheSlot::new).collect(Collectors.toCollection(ArrayList::new));
-			
-			int size = roundUp(slots.size(), 45);
-			if(size <= 45) size = 90;
-			
-			int extra = size - slots.size();
-			IntStream.range(0, extra).forEach($->slots.add(new CacheSlot(null)));
-			
-			var menus = MenuUtil.createMultiPageMenu(null, LIGHT_PURPLE + "Item Cache", slots);
-			MenuAgent agent = menus.get(0).openSession(p);
-			agent.onSessionClose(context->{
-				List<ItemStack> newCache = new ArrayList<>();
-				menus.forEach(m->{
-					for(int i = 0; i < m.getSize(); i++) {
-						Icon x = m.getIcon(i);
-						if(x instanceof CacheSlot) {
-							ItemStack is = m.getInventory().getItem(i);
-							if(ItemUtil.exists(is)) newCache.add(is);
-						}
+		accountHandler.loadAccount(u).then(acc->openCache(p, acc, true));
+	}
+	
+	private void openCache(Player p, Account acc, boolean admin) {
+		List<CacheSlot> slots = acc.getItemCache().stream()
+				.map(is->new CacheSlot(is, admin))
+				.collect(Collectors.toCollection(ArrayList::new));
+		
+		int size = roundUp(slots.size(), 45);
+		if(size <= 45) size = 90;
+		
+		int extra = size - slots.size();
+		IntStream.range(0, extra).forEach($->slots.add(new CacheSlot(null, admin)));
+		
+		var menus = MenuUtil.createMultiPageMenu(null, LIGHT_PURPLE + "Item Cache", slots);
+		MenuAgent agent = menus.get(0).openSession(p);
+		agent.onSessionClose(context->{
+			List<ItemStack> newCache = new ArrayList<>();
+			menus.forEach(m->{
+				for(int i = 0; i < m.getSize(); i++) {
+					Icon x = m.getIcon(i);
+					if(x instanceof CacheSlot) {
+						ItemStack is = m.getInventory().getItem(i);
+						if(ItemUtil.exists(is)) newCache.add(is);
 					}
-				});
-				
-				acc.setItemCache(newCache);
+				}
 			});
+			
+			acc.setItemCache(newCache);
 		});
 	}
 	
@@ -133,7 +162,8 @@ public class CommandItemCache extends CommandTemplate {
 	@AllArgsConstructor
 	private static class CacheSlot extends Slot{
 		private ItemStack item;
-
+		private boolean admin;
+		
 		@Override
 		public void click(MenuAction action) {
 			item = null;
@@ -146,8 +176,7 @@ public class CommandItemCache extends CommandTemplate {
 		
 		@Override
 		public boolean mayInteract(ItemStack moved) {
-			//TODO
-			return true;
+			return admin || moved.getType() == Material.AIR;
 		}
 
 	}

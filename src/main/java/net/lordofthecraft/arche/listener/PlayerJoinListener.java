@@ -1,5 +1,7 @@
 package net.lordofthecraft.arche.listener;
 
+import static net.md_5.bungee.api.ChatColor.*;
+
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -14,6 +16,8 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import co.lotc.core.bukkit.util.ChatBuilder;
+import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.CoreLog;
@@ -74,6 +78,12 @@ public class PlayerJoinListener implements Listener {
 			int onlines = personas.stream().filter(ps -> ps.getClass() == ArchePersona.class).collect(Collectors.toList()).size();
 			int playerCount = handler.getPersonaStore().getOnlineImplementedPersonas().size();
 			CoreLog.info("[Login] " + personas.size() + " persona files (" + offlines + " offl. / " + onlines + "onl.) for "+Bukkit.getOnlinePlayers().size()+" (" + playerCount + ") players.");
+		}
+		
+		var itemCache = accounts.getAccount(p).getItemCache();
+		if(!itemCache.isEmpty()) {
+			new ChatBuilder().append("You have items to claim. Please run ").color(LIGHT_PURPLE)
+				.append("/itemcache claim").color(WHITE).command("/itemcache claim").send(p);
 		}
 	}
 
