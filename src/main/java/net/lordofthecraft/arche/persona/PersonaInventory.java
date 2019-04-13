@@ -1,22 +1,16 @@
 
 package net.lordofthecraft.arche.persona;
 
-import com.google.common.collect.Lists;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.save.rows.persona.InvDiffRow;
-
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import co.lotc.core.bukkit.util.InventoryUtil;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.save.rows.persona.InvDiffRow;
 
 public class PersonaInventory {
     private final Persona persona;
@@ -40,40 +34,13 @@ public class PersonaInventory {
     	new InvDiffRow(persona.getPersonaId(), prsInv,endInv).queue();
     }
 
-    @SuppressWarnings("unchecked")
     public static PersonaInventory restore(Persona persona, String inv, String enderinv) {
-        YamlConfiguration config = new YamlConfiguration();
-        ItemStack[] contents, enderContents;
-        try {
-            if (inv != null) {
-                config.loadFromString(inv);
-                List<ItemStack> result = config.getList("c").stream()
-                        .map(ent -> (Map<String, Object>) ent)
-                        .map(ent -> ent == null ? null : ItemStack.deserialize(ent))
-                        .collect(Collectors.toList());
-                contents = result.toArray(new ItemStack[result.size()]);
+        ItemStack[] contents=null, enderContents=null;
+        if (inv != null) contents = InventoryUtil.deserializeItems(inv).toArray(new ItemStack[0]);
+        if (enderinv != null)	enderContents = InventoryUtil.deserializeItems(enderinv).toArray(new ItemStack[0]);
 
-            } else {
-                contents = new ItemStack[InventoryType.PLAYER.getDefaultSize()];
-            }
-
-            if (enderinv != null) {
-                config = new YamlConfiguration();
-                config.loadFromString(enderinv);
-                List<ItemStack> enderresult = config.getList("c").stream()
-                        .map(ent -> (Map<String, Object>) ent)
-                        .map(ent -> ent == null ? null : ItemStack.deserialize(ent))
-                        .collect(Collectors.toList());
-                enderContents = enderresult.toArray(new ItemStack[enderresult.size()]);
-            } else {
-                enderContents = new ItemStack[InventoryType.ENDER_CHEST.getDefaultSize()];
-            }
-
-        } catch (InvalidConfigurationException e) {
-            contents = new ItemStack[InventoryType.PLAYER.getDefaultSize()];
-            enderContents = new ItemStack[InventoryType.ENDER_CHEST.getDefaultSize()];
-            e.printStackTrace();
-        }
+        if(contents == null) contents = new ItemStack[InventoryType.PLAYER.getDefaultSize()];
+        if(enderContents == null) enderContents = new ItemStack[InventoryType.ENDER_CHEST.getDefaultSize()];
 
         return new PersonaInventory(persona, contents, enderContents);
     }
@@ -112,15 +79,7 @@ public class PersonaInventory {
     }
 
     private String getInvAsString(Inventory someInv) {
-        YamlConfiguration config = new YamlConfiguration();
-        ItemStack[] contents = someInv.getContents();
-        List<Map<String, Object>> contentslist = Lists.newArrayList();
-        for (ItemStack i : contents) {
-            if (i == null) contentslist.add(null);
-            else contentslist.add(i.serialize());
-        }
-        config.set("c", contentslist);
-        return config.saveToString();
+    	return InventoryUtil.serializeItems(someInv);
     }
 
     @Override
