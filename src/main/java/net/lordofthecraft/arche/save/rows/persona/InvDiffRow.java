@@ -56,6 +56,8 @@ public class InvDiffRow implements RunnerRow {
 	//What remains in inv is assumed to be the newly added items
 	List<ItemStack> getDiffWithStoredInventory(Inventory inv, ResultSet rs, String field) throws SQLException {
 		String invString = rs.getString(field);
+		if(invString == null) return Lists.newArrayList();
+		
 		List<ItemStack> oldItems = InventoryUtil.deserializeItems(invString)
 				.stream().filter(Objects::nonNull).collect(Collectors.toList());
 		return new ArrayList<>(inv.removeItem(oldItems.toArray(new ItemStack[0])).values());
