@@ -1,12 +1,14 @@
 package net.lordofthecraft.arche.commands;
 
-import static net.md_5.bungee.api.ChatColor.LIGHT_PURPLE;
+import static net.md_5.bungee.api.ChatColor.*;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +29,7 @@ import co.lotc.core.bukkit.menu.icon.Icon;
 import co.lotc.core.bukkit.menu.icon.Slot;
 import co.lotc.core.bukkit.util.InventoryUtil;
 import co.lotc.core.bukkit.util.ItemUtil;
+import co.lotc.core.bukkit.util.Run;
 import co.lotc.core.command.CommandTemplate;
 import co.lotc.core.command.annotate.Arg;
 import co.lotc.core.command.annotate.Cmd;
@@ -79,6 +82,23 @@ public class CommandItemCache extends CommandTemplate {
 			return numToRound;
 
 		return numToRound + multiple - remainder;
+	}
+	
+	
+	private enum Type{PLAYER,ENDER};
+	
+	@Cmd("Get a snapshot of persona inventory at a certain time")
+	public void snapshot(Player p, Type type, Persona target, Instant when) {
+		String inv = type == Type.PLAYER? "inv":"ender_inv";
+		Inventory whichInv = type == Type.PLAYER? target.getInventory() : target.getEnderChest();
+		
+		Run.as(ArcheCore.getPlugin())
+		.async(()->getInventorySnapshot(target.getPersonaId(), whichInv, when, inv))
+		.then(snapshot->{
+			p.openInventory(snapshot);
+			var date = LocalDateTime.ofInstant(when, ZoneId.systemDefault());
+			p.sendMessage(AQUA + "Showing a snapshot of " + target.identify() + " at " + date);
+		});
 	}
 	
 	private Inventory getInventorySnapshot(int personaId, Inventory whichInv, Instant when, String inv) {
