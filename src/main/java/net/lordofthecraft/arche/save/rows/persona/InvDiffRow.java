@@ -5,7 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.bukkit.inventory.Inventory;
@@ -30,43 +32,22 @@ public class InvDiffRow implements RunnerRow {
 
 	@Override
 	public void run(Connection connection) throws SQLException {
-		ResultSet rs;
-		
 		List<ItemStack> invDel;
 		List<ItemStack> endDel;
-		
-		@Cleanup
-		PreparedStatement ps1 = connection.prepareStatement("SELECT COUNT(persona_id) FROM persona_invdiff WHERE persona_id=?");
-		
-		//we want to check if this persona has any snapshots saved
-		//This is because personas from BEFORE this addition wont have logs
-		//So their stored inventory wont have been diffed before, but it must
-		//So that we can later on reconstruct snapshots properly
-		ps1.setInt(1, personaId);
-		rs = ps1.executeQuery();
-		rs.next();
-		boolean isInit = rs.getInt(1) > 0; //Logs found if more than 0
-		rs.close();
-		ps1.close();
 
-		if(!isInit) { //No previous entries, so just make all
+		@Cleanup
+		PreparedStatement ps2 = connection.prepareStatement("SELECT inv,ender_inv FROM persona_vitals WHERE persona_id_fk=?");
+		ps2.setInt(1, personaId);
+		ResultSet rs = ps2.executeQuery();
+		if(rs.next()) { //There's an entry for vitals
+			invDel = getDiffWithStoredInventory(personInv, rs, "inv");
+			endDel = getDiffWithStoredInventory(enderInv, rs, "ender_inv");
+		} else { //assume empty inv, so just do all.
 			invDel = Lists.newArrayList();
 			endDel = Lists.newArrayList();
-		} else { //make a diff of the last state of the persona inv and how it is now
-			
-			@Cleanup
-			PreparedStatement ps2 = connection.prepareStatement("SELECT inv,ender_inv FROM persona_vitals WHERE persona_id_fk=?");
-			ps2.setInt(1, personaId);
-			if(rs.next()) { //There's an entry for vitals
-				invDel = getDiffWithStoredInventory(personInv, rs, "inv");
-				endDel = getDiffWithStoredInventory(enderInv, rs, "ender_inv");
-			} else { //assume empty inv, so just do all.
-				invDel = Lists.newArrayList();
-				endDel = Lists.newArrayList();
-			}
-			rs.close();
-			ps2.close();
 		}
+		rs.close();
+		ps2.close();
 
 		queueDiffSave(invDel, endDel);
 	}
@@ -75,9 +56,9 @@ public class InvDiffRow implements RunnerRow {
 	//What remains in inv is assumed to be the newly added items
 	List<ItemStack> getDiffWithStoredInventory(Inventory inv, ResultSet rs, String field) throws SQLException {
 		String invString = rs.getString(field);
-		List<ItemStack> oldItems = InventoryUtil.deserializeItems(invString);
-		return inv.removeItem(oldItems.toArray(new ItemStack[0]))
-			.values().stream().collect(Collectors.toList());
+		List<ItemStack> oldItems = InventoryUtil.deserializeItems(invString)
+				.stream().filter(Objects::nonNull).collect(Collectors.toList());
+		return new ArrayList<>(inv.removeItem(oldItems.toArray(new ItemStack[0])).values());
 	}
 	
 	void queueDiffSave(List<ItemStack> invDel, List<ItemStack> endDel) {
