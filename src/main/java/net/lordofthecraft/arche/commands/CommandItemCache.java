@@ -68,7 +68,7 @@ public class CommandItemCache extends CommandTemplate {
 		}
 	}
 	
-	@Cmd("Modify an account's item cache")
+	@Cmd(value="Modify an account's item cache",permission="archecore.admin")
 	public void modify(Player p, @Arg("player") UUID u) {
 		accountHandler.loadAccount(u).then(acc->openCache(p, acc, true));
 	}
@@ -116,7 +116,7 @@ public class CommandItemCache extends CommandTemplate {
 	
 	private enum Type{PLAYER,ENDER};
 	
-	@Cmd("Get a snapshot of persona inventory at a certain time")
+	@Cmd(value="Get a snapshot of persona inventory at a certain time",permission="archecore.admin")
 	public void snapshot(Player p, Type type, Persona target, Instant when) {
 		String inv = type == Type.PLAYER? "inv":"ender";
 		Inventory whichInv = type == Type.PLAYER? target.getInventory() : target.getEnderChest();

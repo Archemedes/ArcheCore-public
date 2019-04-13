@@ -70,8 +70,8 @@ commands:
       description: Searches matches for provided IP
       permission: archecore.command.ipsearch
    itemcache:
-      description: Manage the endless mess that is people's items
-      permission: archecore.admin
+      description: An item lost and found service
+      permission: archecore.mayuse
 
 permissions:
   archecore.arsql:
