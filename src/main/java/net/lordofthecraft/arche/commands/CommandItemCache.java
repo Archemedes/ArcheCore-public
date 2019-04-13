@@ -89,7 +89,7 @@ public class CommandItemCache extends CommandTemplate {
 	
 	@Cmd("Get a snapshot of persona inventory at a certain time")
 	public void snapshot(Player p, Type type, Persona target, Instant when) {
-		String inv = type == Type.PLAYER? "inv":"ender_inv";
+		String inv = type == Type.PLAYER? "inv":"ender";
 		Inventory whichInv = type == Type.PLAYER? target.getInventory() : target.getEnderChest();
 		
 		Run.as(ArcheCore.getPlugin())
@@ -105,7 +105,7 @@ public class CommandItemCache extends CommandTemplate {
 		String invAdd = inv + "_add";
 		String invDel = inv + "_del";
 		
-		Inventory copy = Bukkit.createInventory(null, 54);
+		Inventory copy = Bukkit.createInventory(null, 54, "Snapshot of type: " + inv);
 		copy.setContents(whichInv.getContents());
 		
 		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
