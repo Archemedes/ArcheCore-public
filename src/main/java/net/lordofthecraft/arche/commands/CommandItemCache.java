@@ -97,7 +97,7 @@ public class CommandItemCache extends CommandTemplate {
 		.then(snapshot->{
 			p.openInventory(snapshot);
 			var date = LocalDateTime.ofInstant(when, ZoneId.systemDefault());
-			p.sendMessage(AQUA + "Showing a snapshot of " + target.identify() + " at " + date);
+			p.sendMessage(AQUA + "Snapshot of " + WHITE+ target.identify() + AQUA + " at " + WHITE + date.withNano(0).withSecond(0));
 		});
 	}
 	
