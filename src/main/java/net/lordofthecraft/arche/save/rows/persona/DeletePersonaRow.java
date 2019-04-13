@@ -19,6 +19,7 @@ public class DeletePersonaRow extends MultiStatementRow {
 	            "DELETE FROM persona_tags WHERE persona_id_fk=?",
 	            "DELETE FROM persona_names WHERE persona_id_fk=?",
 	            "DELETE FROM persona_attributes WHERE persona_id_fk=?",
+	            "DELETE FROM persona_invdiff WHERE persona_id_fk=?",
 	            "DELETE FROM persona WHERE persona_id=?"
 	    };
 	}

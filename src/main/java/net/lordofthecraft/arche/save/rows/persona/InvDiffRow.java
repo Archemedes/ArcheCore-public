@@ -70,7 +70,7 @@ public class InvDiffRow implements RunnerRow {
 		
 		ArcheCore.getConsumerControls().insert("persona_invdiff")
 		.set("time", Instant.now().toEpochMilli())
-		.set("persona_id", personaId)
+		.set("persona_id_fk", personaId)
 		.set("inv_add", InventoryUtil.serializeItems(invAdd))
 		.set("inv_del", InventoryUtil.serializeItems(invDel))
 		.set("ender_add", InventoryUtil.serializeItems(endAdd))

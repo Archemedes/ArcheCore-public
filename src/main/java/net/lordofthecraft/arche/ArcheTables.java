@@ -180,7 +180,7 @@ public final class ArcheTables {
 	protected static void createInvDiffTable(Statement statement, String end) throws SQLException {
 		statement.execute("CREATE TABLE IF NOT EXISTS persona_invdiff (" +
 				"time DATETIME(3)," +
-				"persona_id INT," +
+				"persona_id_fk INT," +
 				"inv_add TEXT," +
 				"inv_del TEXT," +
 				"ender_add TEXT," +

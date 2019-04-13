@@ -109,7 +109,7 @@ public class CommandItemCache extends CommandTemplate {
 		copy.setContents(whichInv.getContents());
 		
 		try(Connection c = ArcheCore.getSQLControls().getConnection(); Statement s = c.createStatement()){
-			ResultSet rs = s.executeQuery("SELECT "+invAdd+","+invDel + " FROM persona_invdiff WHERE persona_id="
+			ResultSet rs = s.executeQuery("SELECT "+invAdd+","+invDel + " FROM persona_invdiff WHERE persona_id_fk="
 					+ personaId + " AND time>"+ when.toEpochMilli() +" ORDER BY time DESC");
 			
 			while(rs.next()) {
