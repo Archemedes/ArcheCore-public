@@ -59,11 +59,11 @@ public class CommandItemCache extends CommandTemplate {
 		//It's just better for the game in the long run
 		acc.setItemCache(Lists.newArrayList());
 		
-		msg(LIGHT_PURPLE + "Adding the cached items to your inventory now...");
-		var leftover = InventoryUtil.addItem(p.getInventory(), itemCache);
+		msg(LIGHT_PURPLE + "Adding the cached items to your " + GOLD + "Ender Chest" + LIGHT_PURPLE + " now...");
+		var leftover = InventoryUtil.addItem(p.getEnderChest(), itemCache);
 		
 		if(!leftover.isEmpty()) {
-			msg(RED + "Some items could not be added due to lack of space! Make space in your inventory and rerun this command.");
+			msg(RED + "Some items could not be added due to lack of space! Make space in your ender chest and rerun this command.");
 			acc.setItemCache(new ArrayList<>(leftover.values()));
 		}
 	}
