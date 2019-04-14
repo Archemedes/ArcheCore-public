@@ -33,6 +33,7 @@ import net.lordofthecraft.arche.SQL.WhySQLHandler;
 import net.lordofthecraft.arche.account.ArcheAccountHandler;
 import net.lordofthecraft.arche.commands.CommandArchehelp;
 import net.lordofthecraft.arche.commands.CommandAttribute;
+import net.lordofthecraft.arche.commands.CommandCard;
 import net.lordofthecraft.arche.commands.CommandDate;
 import net.lordofthecraft.arche.commands.CommandDurability;
 import net.lordofthecraft.arche.commands.CommandHelpMenu;
@@ -68,7 +69,6 @@ import net.lordofthecraft.arche.listener.AttributeItemListener;
 import net.lordofthecraft.arche.listener.BlockRegistryListener;
 import net.lordofthecraft.arche.listener.EconomyListener;
 import net.lordofthecraft.arche.listener.HelpOverrideListener;
-import net.lordofthecraft.arche.listener.LegacyCommandsListener;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
 import net.lordofthecraft.arche.listener.PersonaInventoryListener;
 import net.lordofthecraft.arche.listener.PlayerChatListener;
@@ -112,7 +112,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	//Config settings
 	private int maxPersonaSlots;
 	private boolean helpOverriden;
-	private boolean legacyCommands;
 	private boolean racialBonuses;
 	private boolean damageBonuses;
 	private int nameChangeDelay;
@@ -346,7 +345,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		maxPersonaSlots = Math.max(1, Math.min(17, config.getInt("persona.slots.maximum")));
 		helpOverriden = config.getBoolean("override.help.command");
-		legacyCommands = config.getBoolean("enable.legacy.commands");
 		nameChangeDelay = config.getInt("name.change.delay");
 		personaChangeDelay = config.getInt("persona.change.delay");
 		personaPermakillDelay = config.getInt("persona.permakill.delay");
@@ -465,6 +463,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		
 		//Commands, ACB method, Annotated:
 		newCommand("me",CommandMe::new);
+		newCommand("card", CommandCard::new);
 		newCommand("date", CommandDate::new);
 		newCommand("duraboost", CommandDurability::new);
 		newCommand("seen", CommandSeen::new);
@@ -493,9 +492,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 		if(helpOverriden)
 			pm.registerEvents(new HelpOverrideListener(), this);
-
-		if(legacyCommands)
-			pm.registerEvents(new LegacyCommandsListener(), this);
 
 		if(racialBonuses){
 			pm.registerEvents(new RacialBonusListener(this,getPersonaHandler()), this);
