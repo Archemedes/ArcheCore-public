@@ -80,7 +80,7 @@ public class CommandSeen extends CommandTemplate {
 				
 				b.color(YELLOW).append(": Seen ").color(GRAY);
 				if(ps.getLastSeen() == 0) b.append("never").color(WHITE);
-				if(since == 0) b.append("just now").color(WHITE);
+				else if(since == 0) b.append("just now").color(WHITE);
 				else b.append(TimeUtil.printMillis(since)).append( " ago");
 			}
 			b.color(GRAY);
