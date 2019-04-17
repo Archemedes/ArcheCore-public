@@ -16,6 +16,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -24,6 +25,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import co.lotc.core.bukkit.util.WeakBlock;
+import lombok.Value;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.event.PlayerAfkEvent;
@@ -33,7 +36,7 @@ public class AfkListener implements Listener {
 	
 	private final ArcheCore plugin;
 	
-	public Map<UUID, Long> lastAction = Maps.newHashMap();
+	public Map<UUID, Seen> lastAction = Maps.newHashMap();
 	public Set<UUID> theAfks = Sets.newHashSet();
 	
 	public AfkListener(ArcheCore plugin) {
@@ -44,7 +47,7 @@ public class AfkListener implements Listener {
 					for(Player p : Bukkit.getOnlinePlayers()) {
 						if(theAfks.contains(p.getUniqueId())) continue;
 						
-						long lastSeen = lastAction.get(p.getUniqueId());
+						long lastSeen = lastAction.get(p.getUniqueId()).getWhen();
 						long minsPassed = ( System.currentTimeMillis() - lastSeen) / (DateUtils.MILLIS_PER_MINUTE);
 						if(minsPassed >= AFK_THRESHOLD_MINUTES) {
 							CoreLog.debug("Player has gone afk: " + p.getName());
@@ -62,7 +65,8 @@ public class AfkListener implements Listener {
 		
 	@EventHandler
 	public void j(PlayerJoinEvent e) {
-		lastAction.put(e.getPlayer().getUniqueId(), System.currentTimeMillis());
+		Player p = e.getPlayer();
+		lastAction.put(p.getUniqueId(), new Seen(System.currentTimeMillis(), new WeakBlock(p.getLocation())));
 	}
 	
 	@EventHandler
@@ -73,6 +77,11 @@ public class AfkListener implements Listener {
 	
 	@EventHandler
 	public void i(PlayerInteractEvent e) {
+		go(e);
+	}
+
+	@EventHandler
+	public void i(PlayerInteractEntityEvent e) {
 		go(e);
 	}
 	
@@ -103,22 +112,45 @@ public class AfkListener implements Listener {
 	
 	@EventHandler
 	public void c(AsyncPlayerChatEvent e) {
-		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, ()->go(e));
+		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, ()->go(e, false));
 	}
 	
+	
 	private void go(PlayerEvent e) {
-		go(e.getPlayer());
+		go(e,true);
+	}
+	
+	private void go(PlayerEvent e, boolean strict) {
+		go(e.getPlayer(), strict);
 	}
 	
 	private void go(Player p) {
+		go(p, true);
+	}
+	
+	private void go(Player p, boolean strict) {
 		UUID u = p.getUniqueId();
-		lastAction.put(u, System.currentTimeMillis());
+		WeakBlock wb = new WeakBlock(p.getLocation());
+		
+		if(strict) {
+			Seen seen = lastAction.get(u);
+			
+			//If player didnt move at all it doesnt count as active
+			if(wb.equals(seen.getWhere())) return;
+		}
+		
+		lastAction.put(u, new Seen(System.currentTimeMillis(), wb));
 		
 		if(theAfks.contains(u)) {
 			CoreLog.debug("Player is no longer afk: " + p.getName());
 			theAfks.remove(u);
 			Bukkit.getPluginManager().callEvent(new PlayerAfkEvent(p, false));
 		}
+	}
+	
+	@Value
+	private static class Seen{
+		long when; WeakBlock where;
 	}
 	
 }
