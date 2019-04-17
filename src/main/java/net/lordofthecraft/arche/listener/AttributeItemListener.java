@@ -55,6 +55,8 @@ public class AttributeItemListener implements Listener {
 	public void click(PlayerInteractEvent e) {
 		if(e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			ItemStack item = e.getItem();
+			if(item == null) return;
+			
 			Player p = e.getPlayer();
 			Persona ps = ArcheCore.getPersona(p);
 			if(ps != null) {
