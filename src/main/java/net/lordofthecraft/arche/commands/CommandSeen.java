@@ -3,7 +3,9 @@ package net.lordofthecraft.arche.commands;
 
 import static net.md_5.bungee.api.ChatColor.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -49,17 +51,30 @@ public class CommandSeen extends CommandTemplate {
 
 	private ChatBuilder printout(CommandSender s, Account account) {
 		var b = new ChatBuilder();
-
-		b.append(account.getName()).color(DARK_AQUA).bold().append(" is ").reset().color(GRAY);
+		String mainName = account.getName();
+		
+		b.append(mainName).color(DARK_AQUA).bold().append(" is ").reset().color(GRAY);
 		long ls = account.getLastSeen();
 		long elapsed = ls == 0? 0 : System.currentTimeMillis() - account.getLastSeen();
 		elapsed -= (elapsed % 60000l); //this way it wont show seconds
 		BaseComponent lastSeen = TimeUtil.printMillis(elapsed);
-
 		if(canSeeOnline(s,account.getPlayer())) b.append("Online").color(GREEN);
 		else b.append("Offline").color(DARK_PURPLE);
 		b.append(" since ").color(GRAY).append(lastSeen).newline();
 
+		var aka = getAka(account);
+		aka.remove(mainName);
+		if(!aka.isEmpty()) {
+			b.append("AKA: ").color(GRAY);
+			boolean j = true;
+			for(String a : aka) {
+				if(j) j = false;
+				else b.append(", ").color(WHITE);
+				b.append(a).color(YELLOW);
+			}
+			b.newline();
+		}
+		
 		if(account.hasForumId()) b.append("Forum Account: ").color(GRAY)
 		.hover("Click to go to forum profile")
 		.event(ClickEvent.Action.OPEN_URL, "https://lotc.co/profile/"+account.getForumId()+"--")
@@ -90,6 +105,22 @@ public class CommandSeen extends CommandTemplate {
 		}
 
 		return b;
+	}
+	
+	private List<String> getAka(Account acc){
+		int maxNamesPerToon = 2;
+		List<String> result = new ArrayList<>();
+		for(UUID u : acc.getUUIDs()) {
+			var aliases = ArcheCore.getControls().getKnownAliases(u);
+			int sz = aliases.size();
+			if(sz <= maxNamesPerToon) {
+				result.addAll(aliases);
+			} else for(int i = sz-maxNamesPerToon; i<sz; i++) {
+				result.add(aliases.get(i));
+			}
+		}
+		
+		return result;
 	}
 
 	private boolean canSeeOnline(CommandSender s, Player p) {
