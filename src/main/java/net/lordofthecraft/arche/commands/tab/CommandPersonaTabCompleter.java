@@ -82,7 +82,7 @@ public class CommandPersonaTabCompleter implements TabCompleter {
      * @param username The username, either full one (501warhead) or a partial one (501wa).
      * @return A list of matches for tab completion
      */
-    private List<String> getValuesForPlayer(String username) {
+    public static List<String> getValuesForPlayer(String username) {
         Player pl = Bukkit.getPlayerExact(username);
         if (pl == null) {
             return Bukkit.getOnlinePlayers().stream()
