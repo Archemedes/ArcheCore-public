@@ -14,6 +14,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 
 import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.SQL.SQLHandler;
 import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.save.rows.ArcheRow;
@@ -160,15 +161,16 @@ public final class Consumer extends TimerTask implements IConsumer {
 						}
 					}
 				} catch (SQLException e) {
-                    pl.getLogger().log(Level.SEVERE, "[Consumer] SQL exception on " + row.getClass().getSimpleName() + ": ", e);
-                    pl.getLogger().log(Level.SEVERE, "[Consumer] Statement body: " + row.toString());
-                    if(pending != null) {
-                        Arrays.stream(pending).forEach(ps -> {
-                            pl.getLogger().severe("Lost Statement: " + String.valueOf(ps));
-                            SQLUtil.close(ps);
-                        });
-                        pending = null;
-                    }
+					CoreLog.severe("[Consumer] SQL exception on " + row.getClass().getSimpleName() + ": ");
+					CoreLog.severe("[Consumer] Statement body: " + row.toString());
+					e.printStackTrace();
+					if(pending != null) {
+						Arrays.stream(pending).forEach(ps -> {
+							pl.getLogger().severe("Lost Statement: " + String.valueOf(ps));
+							SQLUtil.close(ps);
+						});
+						pending = null;
+					}
 
 					continue;
 				} finally {
