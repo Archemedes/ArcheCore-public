@@ -27,8 +27,10 @@ public class CommandSeen extends CommandTemplate {
 
 	public void invoke(CommandSender s, UUID u) {
 		validate(cooldown(), "This command has a 10s cooldown. Please wait a bit");
-
-		var aah = ArcheCore.getControls().getAccountHandler();
+		var ac = ArcheCore.getControls();
+		validate(!ac.getKnownAliases(u).isEmpty(), "Player has not logged in to this server");
+		
+		var aah = ac.getAccountHandler();
 		aah.loadAccount(u).then(acc->printout(s,acc).send(s));
 	}
 
