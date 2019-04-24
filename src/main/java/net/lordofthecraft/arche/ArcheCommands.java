@@ -15,7 +15,7 @@ public final class ArcheCommands {
 	
 	public static void registerPersonaType() {
 		Commands.defineArgumentType(Persona.class)
-			.mapper(CommandUtil::personaFromArg)
+			.mapperWithSender(CommandUtil::senderOrPersonaFromArg)
 			.senderMapper(SenderTypes.UNWRAP_PLAYER.andThen(ArcheCore::getPersona))
 			.completer( (sender, input) -> CommandPersonaTabCompleter.getValuesForPlayer(input) )
 			.register();
@@ -23,7 +23,7 @@ public final class ArcheCommands {
 	
 	public static void registerOfflinePersonaType() {
 		Commands.defineArgumentType(OfflinePersona.class)
-		.mapper(CommandUtil::offlinePersonaFromArg)
+		.mapperWithSender(CommandUtil::senderOrOfflinePersonaFromArg)
 		.senderMapper(SenderTypes.UNWRAP_PLAYER.andThen(ArcheCore::getPersona))
 		.completer( (sender, input) -> CommandPersonaTabCompleter.getValuesForPlayer(input) )
 		.register();
