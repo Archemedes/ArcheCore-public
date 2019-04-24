@@ -130,6 +130,11 @@ public class AfkListener implements Listener {
 	
 	private void go(Player p, boolean strict) {
 		UUID u = p.getUniqueId();
+		if(!lastAction.containsKey(u)) {
+			CoreLog.warning("Tried to mark as non-afk a player that was not being logged (anymore): " + p.getName());
+			return;
+		}
+		
 		WeakBlock wb = new WeakBlock(p.getLocation());
 		
 		if(strict) {
