@@ -178,7 +178,13 @@ public class AttributeItemListener implements Listener {
 		
 		if(ps != null) {
 			ItemStack item = p.getInventory().getItem(e.getNewSlot());
-			ps.attributes().getItemAttributes().newItem(item, EquipmentSlot.HAND);
+			try {
+				ps.attributes().getItemAttributes().newItem(item, EquipmentSlot.HAND);
+			}catch(NullPointerException ex) {
+				CoreLog.warning("Detected (attribute-wise) corrupt item held by: " + p.getName() + " (" + p.getUniqueId() + ")" );
+				CoreLog.warning("defunct item printout: " + item.toString());
+				p.getInventory().setItem(e.getNewSlot(), null);
+			}
 		}
 	}
 	
