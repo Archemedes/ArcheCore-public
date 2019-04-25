@@ -7,11 +7,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import lombok.Getter;
 import net.lordofthecraft.arche.util.SQLUtil;
 
 //Because duck your overcomplicated optimizations of BS that runs async
 public abstract class FlexibleRow extends SingleStatementRow {
-	protected final String table;
+	@Getter protected final String table;
 	protected final String operation;
 	
 	protected final Map<String, Object> vars = new LinkedHashMap<>();

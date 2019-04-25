@@ -8,6 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Queue;
 import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -20,6 +22,7 @@ import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.save.rows.ArcheRow;
 import net.lordofthecraft.arche.save.rows.FlexibleDeleteRow;
 import net.lordofthecraft.arche.save.rows.FlexibleInsertRow;
+import net.lordofthecraft.arche.save.rows.FlexibleRow;
 import net.lordofthecraft.arche.save.rows.FlexibleUpdateRow;
 import net.lordofthecraft.arche.save.rows.RunnerRow;
 import net.lordofthecraft.arche.save.rows.StatementRow;
@@ -107,7 +110,15 @@ public final class Consumer extends TimerTask implements IConsumer {
 
 		final long starttime = System.currentTimeMillis();
 		if (queue.size() >= warningSize) {
-			pl.getLogger().warning("[Consumer] Warning! The Consumer Queue is overloaded! The size of the queue is " + queue.size() + " which is " + (queue.size() - warningSize) + " over our set threshold of " + warningSize + "! We're still running, but this should be looked into!");
+			CoreLog.warning("[Consumer] Warning! The Consumer Queue is overloaded! The size of the queue is " + queue.size() + " which is " + (queue.size() - warningSize) + " over our set threshold of " + warningSize + "! We're still running, but this should be looked into!");
+			Map<String, Integer> counts = new HashMap<>();
+			for(ArcheRow row : queue) {
+				String name = row.getClass().getSimpleName();
+				if(row instanceof FlexibleRow) name += ":" + ((FlexibleRow)row).getTable();
+				counts.merge(name, 1, (k,v)->v+1);
+			}
+			CoreLog.warning("Here's the print of current rows in the consumer: ");
+			counts.forEach((k,v)->CoreLog.warning(k + ": " + v));
 		}
 
 		int count = 0;
