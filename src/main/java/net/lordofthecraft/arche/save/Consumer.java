@@ -121,9 +121,9 @@ public final class Consumer extends TimerTask implements IConsumer {
 				if (row == null) break;
 
 				if (debugConsumer) try {
-					pl.getLogger().info("[Consumer] Beginning process for " + row.toString());
+					CoreLog.info("[Consumer] Beginning process for " + row.toString());
 				} catch(RuntimeException e) {
-					pl.getLogger().info("[Consumer] Beginning process for FAULTY " + row.getClass().getSimpleName());
+					CoreLog.info("[Consumer] Beginning process for FAULTY " + row.getClass().getSimpleName());
 				}
 
 				long taskstart = System.currentTimeMillis();
