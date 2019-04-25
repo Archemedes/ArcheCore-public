@@ -179,10 +179,10 @@ public final class Consumer extends TimerTask implements IConsumer {
 						pl.getLogger().severe("[Consumer] Cannot recover. Will abort the saving process.");
 						break;
 					} else if (conn.isReadOnly()) {
-						pl.getLogger().warning("[Consumer] Connection found to be readOnly after handling a " + row.getClass().getSimpleName());
+						CoreLog.warning("[Consumer] Connection found to be readOnly after handling a " + row.getClass().getSimpleName());
 						conn.setReadOnly(false);
 					} else if (conn.getAutoCommit()) {
-						pl.getLogger().warning("[Consumer] Connection auto commit: " + row.getClass().getSimpleName());
+						CoreLog.warning("[Consumer] Connection auto commit: " + row.getClass().getSimpleName());
 						conn.setAutoCommit(false);
 					}
 				}
@@ -197,11 +197,11 @@ public final class Consumer extends TimerTask implements IConsumer {
 			StatementRow.close();
 
 			long time = System.currentTimeMillis() - starttime;
-			pl.getLogger().info("[Consumer] Finished handling " + count + " rows in " + time + "ms.");
+			CoreLog.info("[Consumer] Finished handling " + count + " rows in " + time + "ms.");
 			if (debugConsumer && count > 0) {
-				pl.getLogger().log(Level.INFO, "[Consumer] Total rows processed: " + count + ". " + queue.size() + " rows left in queue");
+				CoreLog.info("[Consumer] Total rows processed: " + count + ". " + queue.size() + " rows left in queue");
 			} else if (count == 0) {
-				pl.getLogger().warning("[Consumer] Ran with 0 tasks, this shouldn't happen?");
+				CoreLog.info("[Consumer] Ran with 0 tasks, this shouldn't happen?");
 			}
 		}
 
