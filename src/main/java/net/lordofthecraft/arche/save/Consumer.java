@@ -108,19 +108,19 @@ public final class Consumer extends TimerTask implements IConsumer {
 			return;
 		}
 
-		final long starttime = System.currentTimeMillis();
 		if (queue.size() >= warningSize) {
 			CoreLog.warning("[Consumer] Warning! The Consumer Queue is overloaded! The size of the queue is " + queue.size() + " which is " + (queue.size() - warningSize) + " over our set threshold of " + warningSize + "! We're still running, but this should be looked into!");
 			Map<String, Integer> counts = new HashMap<>();
 			for(ArcheRow row : queue) {
 				String name = row.getClass().getSimpleName();
 				if(row instanceof FlexibleRow) name += ":" + ((FlexibleRow)row).getTable();
-				counts.merge(name, 1, (k,v)->v+1);
+				counts.merge(name, 1, (v1,v2)->v1+v2);
 			}
 			CoreLog.warning("Here's the print of current rows in the consumer: ");
 			counts.forEach((k,v)->CoreLog.warning(k + ": " + v));
 		}
 
+		final long starttime = System.currentTimeMillis();
 		int count = 0;
 		try(Connection conn = handler.getConnection(); Statement state = conn.createStatement()) {
 			conn.setAutoCommit(false);
