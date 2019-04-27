@@ -107,15 +107,15 @@ public class CommandSkin implements CommandExecutor {
 				}
 
 				Persona pers = plugin.getPersonaHandler().getPersona(p);
-                ArcheSkin other = pers.getSkin();
-                if(other != null) {
+				ArcheSkin other = pers.getSkin();
+				if(other != null) {
 					p.sendMessage(ChatColor.RED + "Can't store skins while using a custom skin!");
 					return true;
 				}
 
 				String name = args[2];
 				int index = cache.storeSkin(p, i, name);
-                if(index > 0) {
+				if(index > 0) {
 					p.sendMessage("You already have this skin saved in slot: " + ChatColor.RESET + index);
 					return true;
 				}
