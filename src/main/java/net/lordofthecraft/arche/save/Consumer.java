@@ -22,7 +22,6 @@ import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.save.rows.ArcheRow;
 import net.lordofthecraft.arche.save.rows.FlexibleDeleteRow;
 import net.lordofthecraft.arche.save.rows.FlexibleInsertRow;
-import net.lordofthecraft.arche.save.rows.FlexibleRow;
 import net.lordofthecraft.arche.save.rows.FlexibleUpdateRow;
 import net.lordofthecraft.arche.save.rows.RunnerRow;
 import net.lordofthecraft.arche.save.rows.StatementRow;
@@ -111,11 +110,7 @@ public final class Consumer extends TimerTask implements IConsumer {
 		if (queue.size() >= warningSize) {
 			CoreLog.warning("[Consumer] Warning! The Consumer Queue is overloaded! The size of the queue is " + queue.size() + " which is " + (queue.size() - warningSize) + " over our set threshold of " + warningSize + "! We're still running, but this should be looked into!");
 			Map<String, Integer> counts = new HashMap<>();
-			for(ArcheRow row : queue) {
-				String name = row.getClass().getSimpleName();
-				if(row instanceof FlexibleRow) name += ":" + ((FlexibleRow)row).getTable();
-				counts.merge(name, 1, (v1,v2)->v1+v2);
-			}
+			for(ArcheRow row : queue) counts.merge(row.getSimpleName(), 1, (v1,v2)->v1+v2);
 			CoreLog.warning("Here's the print of current rows in the consumer: ");
 			counts.forEach((k,v)->CoreLog.warning(k + ": " + v));
 		}

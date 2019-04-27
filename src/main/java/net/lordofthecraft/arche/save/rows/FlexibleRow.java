@@ -68,4 +68,9 @@ public abstract class FlexibleRow extends SingleStatementRow {
 	public FlexibleRow set(String column, Object value) {
 		throw new UnsupportedOperationException();
 	}
+	
+	@Override
+	public String getSimpleName() {
+		return super.getSimpleName() + ":" + table;
+	}
 }

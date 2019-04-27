@@ -32,14 +32,18 @@ public interface ArcheRow {
     String[] getInserts();
     
     
-    public default void queue() {
+    default void queue() {
     	ArcheCore.getConsumerControls().queueRow(this);
     }
     
-    public default void queueAndFlush() {
+    default void queueAndFlush() {
     	IConsumer cc = ArcheCore.getConsumerControls();
     	cc.queueRow(this);
     	new BukkitRunnable() {@Override public void run() {cc.runForced();}}
     		.runTaskAsynchronously(ArcheCore.getPlugin());
+    }
+    
+    default String getSimpleName() {
+    	return getClass().getSimpleName();
     }
 }
