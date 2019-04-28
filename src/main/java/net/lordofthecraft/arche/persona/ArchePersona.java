@@ -521,6 +521,10 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 			consumer.queueRow(new UpdatePersonaRow(this, PersonaField.FATIGUE, fatigue));
 		}
 	}
+	
+	public void setFatigueRaw(double fatigue) {
+		this.fatigue = fatigue;
+	}
 
 	@Override
 	public void setSkin(ArcheSkin skin) {
