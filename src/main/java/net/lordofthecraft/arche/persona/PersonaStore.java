@@ -188,6 +188,10 @@ public class PersonaStore {
         			} else {
         				CoreLog.warning("Multiple Current Personas for " + uuid);
         				blob.current = false;
+        				ArcheCore.getConsumerControls().update("persona")
+        					.where(PersonaField.PERSONA_ID.field(), blob.getPersonaId())
+        					.set(PersonaField.CURRENT.field(), false)
+        					.queue();
         			}
         		}
         	}
