@@ -4,7 +4,7 @@
   <groupId>net.lordofthecraft.arche</groupId>
   <artifactId>ArcheCore</artifactId>
   <name>ArcheCore</name>
-  <version>3.5</version>
+  <version>3.6</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -69,7 +69,7 @@
     <dependency>
       <groupId>co.lotc</groupId>
       <artifactId>tythan-bukkit</artifactId>
-      <version>0.6</version>
+      <version>0.7</version>
     </dependency>
   </dependencies>
 
