@@ -17,8 +17,8 @@ commands:
       permission: archecore.mayuse
       permission-message: §4Insufficient Permission for this command
       aliases: p
-   me:
-      description: Open the ArcheCore Beacon menu
+   menu:
+      description: Open the ArcheCore Main menu
       permission: archecore.command.beaconme
       permission-message: §4Insufficient Permission for this command
    arsql:
