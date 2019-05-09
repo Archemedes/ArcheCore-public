@@ -42,6 +42,7 @@ import net.lordofthecraft.arche.commands.CommandItemCache;
 import net.lordofthecraft.arche.commands.CommandMe;
 import net.lordofthecraft.arche.commands.CommandMoney;
 import net.lordofthecraft.arche.commands.CommandNamelog;
+import net.lordofthecraft.arche.commands.CommandNew;
 import net.lordofthecraft.arche.commands.CommandPersona;
 import net.lordofthecraft.arche.commands.CommandRaceSpawn;
 import net.lordofthecraft.arche.commands.CommandRealname;
@@ -463,6 +464,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		
 		//Commands, ACB method, Annotated:
 		newCommand("menu",CommandMe::new);
+		newCommand("new",CommandNew::new);
 		newCommand("card", CommandCard::new);
 		newCommand("date", CommandDate::new);
 		newCommand("duraboost", CommandDurability::new);

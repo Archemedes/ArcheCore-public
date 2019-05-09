@@ -21,6 +21,9 @@ commands:
       description: Open the ArcheCore Main menu
       permission: archecore.command.beaconme
       permission-message: §4Insufficient Permission for this command
+   new:
+      description: Manage neophyte personas
+      permission: archecore.command.new
    arsql:
       description: Execute SQL statements from ingame
    arclone:
@@ -101,6 +104,7 @@ permissions:
       archecore.command.beaconme: true
       archecore.command.ipsearch: true
       archecore.command.seen: true
+      archecore.command.new: true
       archecore.persona.setrace: true
       archecore.persona.realrace: true
       archecore.mayuse: true
