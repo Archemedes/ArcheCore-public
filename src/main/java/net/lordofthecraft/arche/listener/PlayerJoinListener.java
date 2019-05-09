@@ -22,6 +22,7 @@ import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.ArcheTimer;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.account.ArcheAccountHandler;
+import net.lordofthecraft.arche.commands.CommandNew;
 import net.lordofthecraft.arche.persona.ArcheOfflinePersona;
 import net.lordofthecraft.arche.persona.ArchePersona;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
@@ -70,7 +71,8 @@ public class PlayerJoinListener implements Listener {
 		}
 		
 		ArcheCore.getPlugin().joinPlayer(p);
-
+		new CommandNew().notifyListenersIfNew(p);
+		
 		if (timer != null) timer.stopTiming("login " + p.getName());
 		if (ArcheCore.getPlugin().debugMode()) {
 			Collection<ArcheOfflinePersona> personas = handler.getPersonas();
@@ -86,6 +88,7 @@ public class PlayerJoinListener implements Listener {
 				.append("/itemcache claim").color(WHITE).command("/itemcache claim").send(p);
 		}
 	}
+	
 
 	@EventHandler(priority = EventPriority.LOW)
 	public void onLeave(PlayerQuitEvent e) {
