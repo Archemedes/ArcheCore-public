@@ -1,7 +1,6 @@
 package net.lordofthecraft.arche;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,7 +48,6 @@ import net.lordofthecraft.arche.commands.CommandRealname;
 import net.lordofthecraft.arche.commands.CommandSeen;
 import net.lordofthecraft.arche.commands.CommandSkin;
 import net.lordofthecraft.arche.commands.CommandSql;
-import net.lordofthecraft.arche.commands.CommandSqlClone;
 import net.lordofthecraft.arche.commands.tab.CommandAttributeTabCompleter;
 import net.lordofthecraft.arche.commands.tab.CommandHelpTabCompleter;
 import net.lordofthecraft.arche.commands.tab.CommandPersonaTabCompleter;
@@ -83,7 +81,6 @@ import net.lordofthecraft.arche.persona.ArchePersonaHandler;
 import net.lordofthecraft.arche.persona.FatigueDecreaser;
 import net.lordofthecraft.arche.persona.RaceBonusHandler;
 import net.lordofthecraft.arche.save.Consumer;
-import net.lordofthecraft.arche.save.DumpedDBReader;
 import net.lordofthecraft.arche.seasons.LotcianCalendar;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory;
 import net.lordofthecraft.arche.skill.ArcheSkillFactory.DuplicateSkillException;
@@ -147,7 +144,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 	private int blockregistryPurgeDelay;
 	private boolean blockregistryKillCustom;
-	private boolean shouldClone = false;
 
 	public static PersonaKey getPersonaKey(UUID uuid, int pid) {
 		Persona pers = getPersonaControls().getPersona(uuid, pid);
@@ -224,31 +220,16 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			archeConsumer.runForced();
 			if (archeConsumer.getQueueSize() > 0) {
 				int tries = 9;
-				while (archeConsumer.getQueueSize() > 0) {
-					getLogger().info("[Consumer] Remaining queue size: " + archeConsumer.getQueueSize());
-					if (tries > 0) {
-						getLogger().info("[Consumer] Remaining Tries: " + tries);
-					} else {
-						getLogger().warning("[Consumer] We failed to save the ArcheCore Database!!! This is potentially REALLY BAD!!! We're going to try to write all pending changes to a file!");
-						try {
-							archeConsumer.writeToFile();
-							getLogger().info("[Consumer] We've successfully dumped all pending DB changes into files, we will attempt to parse them on next start up.");
-						} catch (final FileNotFoundException ex) {
-							getLogger().severe("[Consumer] Well, this is ACTUALLY bad. We've failed to save the Database and failed to write to the database changes to a file. All pending changes have been lost irrevocably. Consider manual refunds, suicide, or both. FeelsAmazingMan :gun:");
-							break;
-						}
-					}
-					archeConsumer.run();
+				while (archeConsumer.getQueueSize() > 0 && tries > 0) {
 					tries--;
+					getLogger().info("[Consumer] Remaining queue size: " + archeConsumer.getQueueSize());
+					getLogger().info("[Consumer] Remaining Tries: " + tries);
+					archeConsumer.run();
 				}
 			}
-
 		}
 		if (sqlHandler != null) {
 			sqlHandler.close();
-			if (shouldClone && sqlHandler instanceof ArcheSQLiteHandler) {
-				((ArcheSQLiteHandler) sqlHandler).cloneDB();
-			}
 		}
 	}
 
@@ -415,9 +396,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 			sqlHandler = new ArcheSQLiteHandler(this, "ArcheCore", timeout);
 		}
 
-		//This will import data that might have failed to save before ArcheCore was last disabled.
-		//MUST complete before we progress so it's done on the main thread, if a persona creation or deletion is in here that is VITAL that it is performed before we load anything.
-		new DumpedDBReader(this).run();
 		archeConsumer = new Consumer(sqlHandler, this, consumerRun, consumerForceProcessMin, consumerWarningSize, debugConsumer);
 
 		if (consumerShouldUseBukkitScheduler) {
@@ -456,7 +434,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		getCommand("money").setExecutor(new CommandMoney(helpdesk, economy));
 		getCommand("namelog").setExecutor(new CommandNamelog());
 		getCommand("arsql").setExecutor(new CommandSql());
-		getCommand("arclone").setExecutor(new CommandSqlClone());
 		getCommand("racespawn").setExecutor(new CommandRaceSpawn(personaHandler));
 		getCommand("attribute").setExecutor(new CommandAttribute());
 		getCommand("attribute").setTabCompleter(new CommandAttributeTabCompleter());
@@ -716,12 +693,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 	public SkillFactory registerNewSkill(String skillName, Plugin controller) throws DuplicateSkillException {
 		return ArcheSkillFactory.registerNewSkill(skillName, controller);
 	}
-
-	@Override
-	public void setShouldClone(boolean val) { this.shouldClone = val; }
-
-	@Override
-	public boolean isCloning() { return shouldClone; }
 
 	@Override
 	public boolean areRacialBonusesEnabled(){

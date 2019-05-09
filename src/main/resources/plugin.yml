@@ -26,11 +26,6 @@ commands:
       permission: archecore.command.new
    arsql:
       description: Execute SQL statements from ingame
-   arclone:
-      description: Queue a database clone
-      usage: /<command> [true/false]
-      permission: archecore.admin
-      permission-message: §4Insufficient Permission for this command
    card: 
       description: View a player's persona
       permission: archecore.command.persona.view

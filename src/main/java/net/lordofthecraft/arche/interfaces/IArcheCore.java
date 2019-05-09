@@ -156,18 +156,6 @@ public interface IArcheCore {
      */
     SkillFactory registerNewSkill(String skillName, Plugin controller);
 
-    /**
-     * Sets if ArcheCore will attempt to clone it's database on a restart
-     * @param val The flag to clone or not
-     */
-
-	void setShouldClone(boolean val);
-
-    /**
-     * @return If ArcheCore has a DB clone scheduled
-     */
-	boolean isCloning();
-
 	/**
 	 * If enabled, ArcheCore gives each of the races defined in its Method some
 	 * unique stat bonuses to make each race unique.
