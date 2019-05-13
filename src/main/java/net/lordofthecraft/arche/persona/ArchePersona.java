@@ -39,7 +39,6 @@ import net.lordofthecraft.arche.event.persona.PersonaFatigueEvent;
 import net.lordofthecraft.arche.event.persona.PersonaRenameEvent;
 import net.lordofthecraft.arche.interfaces.Account;
 import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.interfaces.PersonaTags;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.interfaces.Transaction;
 import net.lordofthecraft.arche.listener.NewbieProtectListener;
@@ -145,8 +144,6 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		if (this.current != current) {
 			this.current = current;
 			consumer.queueRow(new UpdatePersonaRow(this, PersonaField.CURRENT, this.current));
-
-			if (current && getPlayer() == null) tags.giveTag(PersonaTags.REFRESH_MC_SPECIFICS, "true");
 		}
 	}
 
@@ -395,8 +392,9 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 	}
 
-	void restoreMinecraftSpecifics(final Player p){
-
+	void restoreMinecraftSpecifics(){
+		Player p = getPlayer();
+		
 		// Dismount them if they're mounted. Also dismount anyone on them.
 		if (p.isInsideVehicle()) {
 			p.leaveVehicle();

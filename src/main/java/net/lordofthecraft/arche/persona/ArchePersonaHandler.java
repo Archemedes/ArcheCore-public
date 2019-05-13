@@ -48,7 +48,6 @@ import net.lordofthecraft.arche.interfaces.IConsumer;
 import net.lordofthecraft.arche.interfaces.OfflinePersona;
 import net.lordofthecraft.arche.interfaces.Persona;
 import net.lordofthecraft.arche.interfaces.PersonaHandler;
-import net.lordofthecraft.arche.interfaces.PersonaTags;
 import net.lordofthecraft.arche.interfaces.Skill;
 import net.lordofthecraft.arche.save.rows.persona.DeletePersonaRow;
 import net.lordofthecraft.arche.save.rows.persona.InsertPersonaRow;
@@ -255,7 +254,6 @@ public class ArchePersonaHandler implements PersonaHandler {
 		}
 
 		activate(after);
-		after.restoreMinecraftSpecifics(p);
 
 		//Check if switched-to Persona will require a different skin from storage
 		SkinCache cache = ArcheCore.getControls().getSkinCache();
@@ -514,13 +512,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			if (ps == null) {
 				Arrays.stream(prs).filter(Objects::nonNull).findFirst().ifPresent(pers -> pers.setCurrent(true));
 				ps = getPersona(p);
-				ps.restoreMinecraftSpecifics(p);
 				CoreLog.debug("No current Persona on login, so switched to " + ps.identify());
-			}
-
-			if (ps.tags().removeTag(PersonaTags.REFRESH_MC_SPECIFICS)) {
-				CoreLog.info("REFRESH minecraft specifcs onto player from Persona" + ps.identify());
-				ps.restoreMinecraftSpecifics(p);
 			}
 			activate(ps);
 		}
@@ -530,6 +522,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		Bukkit.getPluginManager().callEvent(new PersonaActivateEvent(ps, PersonaActivateEvent.Reason.LOGIN));
 		ps.initSession();
 		
+		ps.restoreMinecraftSpecifics();
 		RaceBonusHandler.apply(ps);
 		ps.attributes().handleSwitch(false);
 		Bukkit.getScheduler().scheduleSyncDelayedTask(ArcheCore.getPlugin(), ()->ps.updateDisplayName());
