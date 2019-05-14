@@ -1,6 +1,5 @@
 package net.lordofthecraft.arche.account;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,8 +34,6 @@ public class ArcheAccount implements Account {
 	
 	@Getter private final Tags<Account> tags;
 	
-	private WeakReference<Player> playerObject;
-	
 	@Getter long timePlayed;
 	@Getter long timePlayedThisWeek;
 	@Getter long lastSeen;
@@ -66,20 +63,10 @@ public class ArcheAccount implements Account {
 	
 	@Override
 	public Player getPlayer(){
-		Player play;
-		if(playerObject == null || (play = playerObject.get()) == null || play.isDead()){
-			var op = alts.stream().map(Bukkit::getPlayer).filter(Objects::nonNull).findAny();
-			if(op.isPresent()) {
-				play = op.get();
-				playerObject = new WeakReference<>(play);
-				return play;
-			} else {
-				playerObject = null;
-				return null;
-			}
-		}
-
-		return play;
+		return getUUIDs().stream()
+				.map(Bukkit::getPlayer)
+				.filter(Objects::nonNull)
+				.findAny().orElse(null);
 	}
 	
 	@Override
@@ -138,17 +125,20 @@ public class ArcheAccount implements Account {
 	@Override
 	public Set<String> getIPs() { return Collections.unmodifiableSet(ips); }
 	
+	@Override
 	public void addItemsToCache(List<ItemStack> items) {
 		List<ItemStack> merge = new ArrayList<>(getItemCache());
 		merge.addAll(items);
 		setItemCache(merge);
 	}
 	
+	@Override
 	public void setItemCache(List<ItemStack> items) {
 		String yaml = InventoryUtil.serializeItems(items);
 		tags.giveTag(ITEMCACHE_TAG_KEY, yaml);
 	}
 		
+	@Override
 	public List<ItemStack> getItemCache(){
 		if(tags.hasTag(ITEMCACHE_TAG_KEY)){
 			String value = tags.getValue(ITEMCACHE_TAG_KEY);
