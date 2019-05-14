@@ -241,7 +241,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			Bukkit.getPluginManager().callEvent(new PersonaDeactivateEvent(before, PersonaDeactivateEvent.Reason.SWITCH));
 
 			//Store and switch Persona-related specifics: Location and Inventory.
-			before.saveMinecraftSpecifics(p);
+			before.saveMinecraftSpecifics();
 			before.attributes().handleSwitch(false);
 
 			//Transfer fatigue from previous persona to new persona IF previous value was higher
@@ -540,7 +540,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			//We want these cleanly removed from Players on shutdown
 			//As a side-effect, this is also a good time to save them for current Personas
 			ps.attributes().handleSwitch(true);
-			ps.saveMinecraftSpecifics(p);
+			ps.saveMinecraftSpecifics();
 		}
 	}
 

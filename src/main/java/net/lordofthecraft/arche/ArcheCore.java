@@ -75,6 +75,7 @@ import net.lordofthecraft.arche.listener.PlayerInteractListener;
 import net.lordofthecraft.arche.listener.PlayerJoinListener;
 import net.lordofthecraft.arche.listener.RacialBonusListener;
 import net.lordofthecraft.arche.listener.SeasonListener;
+import net.lordofthecraft.arche.listener.WorldListener;
 import net.lordofthecraft.arche.menu.MainMenu;
 import net.lordofthecraft.arche.persona.ArcheEconomy;
 import net.lordofthecraft.arche.persona.ArchePersonaHandler;
@@ -468,7 +469,8 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		pm.registerEvents(new SeasonListener(calendar), this);
 		pm.registerEvents(new ArcheAttributeListener(), this);
 		pm.registerEvents(new AttributeItemListener(), this);
-
+		pm.registerEvents(new WorldListener(), this);
+		
 		if(helpOverriden)
 			pm.registerEvents(new HelpOverrideListener(), this);
 

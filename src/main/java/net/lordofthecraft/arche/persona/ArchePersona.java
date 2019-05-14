@@ -327,7 +327,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		consumer.queueRow(new UpdatePersonaRow(this, PersonaField.DESCRIPTION, description));
 	}
 
-	void saveMinecraftSpecifics(final Player p){
+	public void saveMinecraftSpecifics(){
+		Player p = getPlayer();
 		//Store and switch Persona-related specifics: Location and Inventory.
 		food = p.getFoodLevel();
 		health = p.getHealth();
