@@ -22,6 +22,7 @@ public final class VanillaAttribute extends ArcheAttribute{
 	
 	public Attribute getHandle() { return handle;}
 	
+	@Override
 	public String getReadableName() {
 		String lame = getName().substring(8).replace('_', ' ');
 		return WordUtils.capitalizeFully(lame);
@@ -34,7 +35,10 @@ public final class VanillaAttribute extends ArcheAttribute{
 			Player player = p.getPlayer();
 			if(player != null) {
 				AttributeInstance under = player.getAttribute(handle);
-				Set<UUID> list = under.getModifiers().stream().map(AttributeModifier::getUniqueId).collect(Collectors.toSet());
+				if(under == null) return;
+				Set<UUID> list = under.getModifiers().stream()
+						.map(AttributeModifier::getUniqueId)
+						.collect(Collectors.toSet());
 						
 				instance.getModifiers().stream()
 				.forEach(a->{
