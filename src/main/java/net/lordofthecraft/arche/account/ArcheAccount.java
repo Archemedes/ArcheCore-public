@@ -134,8 +134,12 @@ public class ArcheAccount implements Account {
 	
 	@Override
 	public void setItemCache(List<ItemStack> items) {
-		String yaml = InventoryUtil.serializeItems(items);
-		tags.giveTag(ITEMCACHE_TAG_KEY, yaml);
+		if(items.isEmpty()) {
+			tags.removeTag(ITEMCACHE_TAG_KEY);
+		} else {
+			String yaml = InventoryUtil.serializeItems(items);
+			tags.giveTag(ITEMCACHE_TAG_KEY, yaml);
+		}
 	}
 		
 	@Override
