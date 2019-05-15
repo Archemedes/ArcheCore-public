@@ -201,7 +201,7 @@ public class PersonaAttributes {
     	if(p != null) {
     		ArcheAttributeInstance aai = customAttributes.get(va);
     		AttributeInstance ai = p.getAttribute(va.getHandle());
-    		if(ai != null) aai.getModifiers().forEach(ai::removeModifier);
+    		if(aai != null && ai != null) aai.getModifiers().forEach(ai::removeModifier);
         }
     }
     
