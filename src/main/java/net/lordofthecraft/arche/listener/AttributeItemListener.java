@@ -165,9 +165,7 @@ public class AttributeItemListener implements Listener {
 			 ps.attributes().getItemAttributes().queueFullCheck(true);
 		} else {
 			PlayerInventory pi = e.getPlayer().getInventory();
-			int rawSlot = pi.getHeldItemSlot() + 36;
-			ItemStack is = pi.getItem(rawSlot);
-			ps.attributes().getItemAttributes().newItem(is, EquipmentSlot.HAND);
+			ps.attributes().getItemAttributes().newItem(pi.getItemInMainHand(), EquipmentSlot.HAND);
 		}
 	}
 	
