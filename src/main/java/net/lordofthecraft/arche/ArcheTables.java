@@ -144,9 +144,7 @@ public final class ArcheTables {
 	protected static void createPlayerTable(Statement statement, String end) throws SQLException {
 		statement.execute("CREATE TABLE IF NOT EXISTS players (" +
 				"player CHAR(36)," +
-				"player_name VARCHAR(16) DEFAULT NULL," +
-				"PRIMARY KEY (player)" +
-				")" +
+				"player_name VARCHAR(16) DEFAULT NULL)" +
 				end);
 	}
 	

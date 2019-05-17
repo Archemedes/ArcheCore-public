@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.lang.Validate;
-
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 
@@ -65,22 +63,24 @@ public class ArcheNameMap {
     }
     
     void updateNameMap(@NonNull String n, @NonNull UUID u) {
-    	Validate.notNull(n);
-    	Validate.notNull(u);
-    	
     	var lower = n.toLowerCase();
-    	if(u.equals(nameToId.get(lower))) return; //Up to date
-    	nameToId.put(lower, u);
+    	boolean insert = false; //Must we update the name map
     	
-    	var l1 = idToName.get(u);
-    	if(l1.contains(n)) { //Probably means player changed name to something else, then back
-    		//Change ordering in the linked list AND in the SQLite table (by deleting and re-inserting... yeah its dumb)
-    		l1.remove(n);
-    		plugin.getConsumer().delete("players").where("player", u).where("player_name", n).queue();
+    	if(!u.equals(nameToId.get(lower))) {
+    		nameToId.put(lower, u);
+    		insert = true;
     	}
     	
-    	l1.add(n);
-    	plugin.getConsumer().insert("players").where("player", u).where("player_name", n).queue();
+    	var l1 = idToName.get(u);
+    	if( l1.indexOf(n) != (l1.size() - 1) ) { //Name is NOT in the bottom slot of the list
+    		//It must be updated
+    		insert = true;
+    		//If name was in another slot of the list we must change ordering in the SQLite table (by deleting and re-inserting)
+    		if(l1.remove(n)) plugin.getConsumer().delete("players").where("player", u).where("player_name", n).queue();
+    		l1.add(n);
+    	}
+    	
+    	if(insert) plugin.getConsumer().insert("players").where("player", u).where("player_name", n).queue();
     	//This doesn't update other players that might currently also have name "n" as their last known name.
     }
 }
