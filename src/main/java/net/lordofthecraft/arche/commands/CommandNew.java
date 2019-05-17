@@ -27,11 +27,11 @@ public class CommandNew extends CommandTemplate {
 		String ourmsg,theirmsg;
 		
 		if(newbie.isNewbie()) {
-			ourmsg = "Persona no longer marked as new: ";
-			theirmsg = "You were marked as not new by ";
-		} else {
 			ourmsg = "Persona now marked as new: ";
 			theirmsg = "You were marked as new by ";
+		} else {
+			ourmsg = "Persona no longer marked as new: ";
+			theirmsg = "You were marked as not new by ";
 		}
 		
 		msg(LIGHT_PURPLE + ourmsg + WHITE + newbie.getPlayerName());
