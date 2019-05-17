@@ -497,7 +497,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 			if (p.hasPermission("archecore.mayuse")) {
 				if (p.hasPermission("archecore.exempt")) {
 					if (p.hasPermission("archecore.command.beaconme"))
-						p.sendMessage(ChatColor.LIGHT_PURPLE + "No Personas found. Maybe use " + ChatColor.ITALIC + "/me");
+						p.sendMessage(ChatColor.LIGHT_PURPLE + "No Personas found. Maybe use " + ChatColor.ITALIC + "/menu");
 				} else {
 					if (ArcheCore.getControls().teleportNewPersonas()) {
 						World w = ArcheCore.getControls().getNewPersonaWorld();
