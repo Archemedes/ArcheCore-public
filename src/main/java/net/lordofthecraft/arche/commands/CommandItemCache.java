@@ -25,10 +25,12 @@ import org.bukkit.inventory.ItemStack;
 import com.google.common.collect.Lists;
 
 import co.lotc.core.CoreLog;
+import co.lotc.core.bukkit.menu.Menu;
 import co.lotc.core.bukkit.menu.MenuAction;
 import co.lotc.core.bukkit.menu.MenuAgent;
 import co.lotc.core.bukkit.menu.MenuUtil;
 import co.lotc.core.bukkit.menu.icon.Icon;
+import co.lotc.core.bukkit.menu.icon.SimpleSlot;
 import co.lotc.core.bukkit.menu.icon.Slot;
 import co.lotc.core.bukkit.util.InventoryUtil;
 import co.lotc.core.bukkit.util.ItemUtil;
@@ -37,6 +39,7 @@ import co.lotc.core.command.CommandTemplate;
 import co.lotc.core.command.annotate.Arg;
 import co.lotc.core.command.annotate.Cmd;
 import lombok.AllArgsConstructor;
+import lombok.val;
 import lombok.var;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Account;
@@ -45,6 +48,13 @@ import net.lordofthecraft.arche.interfaces.Persona;
 
 public class CommandItemCache extends CommandTemplate {
 	private final AccountHandler accountHandler = ArcheCore.getControls().getAccountHandler();
+	
+	@Cmd(value="Browse the ArcheCore item vault containing custom-functionality items", permission="archecore.admin")
+	public void vault(Player p) {
+		val items = ArcheCore.getControls().getItemVault();
+		Menu menu = Menu.fromIcons(GOLD+"The Item Vault", items.stream().map(SimpleSlot::new).collect(Collectors.toList()) );
+		menu.openSession(p);
+	}
 	
 	
 	@Cmd("Claim items from your own item cache")

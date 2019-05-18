@@ -4,11 +4,14 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -19,6 +22,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -808,6 +812,18 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		return enderchestInMenu;
 	}
 
+	List<ItemStack> itemVault = new ArrayList<>();
+	
+	@Override
+	public List<ItemStack> getItemVault(){
+		return Collections.unmodifiableList(itemVault);
+	}
+	
+	@Override
+	public void addItemToVault(ItemStack... items) {
+		Stream.of(items).forEach(itemVault::add);
+	}
+	
 	@Override
 	public boolean canCreatePersonas() {
 		return canCreatePersonas;

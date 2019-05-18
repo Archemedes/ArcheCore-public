@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import net.lordofthecraft.arche.BlockRegistry;
@@ -247,6 +248,17 @@ public interface IArcheCore {
 	 */
 	boolean showEnderchestInMenu();
 
+	/**
+	 * @return A list of items with custom functions that plugins have published to ArcheCore
+	 */
+	List<ItemStack> getItemVault();
+	
+	
+	/**
+	 * Give ArcheCore notice of a plugin item with custom functionality for organizational purposes
+	 */
+	void addItemToVault(ItemStack... items);
+	
 	/**
 	 * @return If damage bonuses are enabled for races
 	 */
