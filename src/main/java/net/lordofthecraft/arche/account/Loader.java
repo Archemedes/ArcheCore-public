@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -127,7 +128,8 @@ public class Loader {
 				if(Bukkit.isPrimaryThread()) {
 					deliver(blob);
 				} else { //Definitely not main thread
-					Callable<?> ccc =  ()->{deliver(blob);return null;};
+					
+					Callable<?> ccc =  Executors.callable(()->deliver(blob));
 					var future = Bukkit.getScheduler().callSyncMethod(plugin, ccc);
 					try{ // This stalls main thread, notice primary thread check
 						future.get(5, TimeUnit.SECONDS); //This will fuck up if main thread stalls

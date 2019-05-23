@@ -174,9 +174,6 @@ public class PersonaStore {
 
         	CoreLog.debug("personaSelect: " + personaSelect);
 
-        	statement.setString(1, uuid.toString());
-
-
         	while (res.next()) {
         		ArcheOfflinePersona op = buildOfflinePersona(res, uuid);
         		ArchePersona blob = buildPersona(res, op);
@@ -187,11 +184,7 @@ public class PersonaStore {
         				hasCurrent = true;
         			} else {
         				CoreLog.warning("Multiple Current Personas for " + uuid);
-        				blob.current = false;
-        				ArcheCore.getConsumerControls().update("persona")
-        					.where(PersonaField.PERSONA_ID.field(), blob.getPersonaId())
-        					.set(PersonaField.CURRENT.field(), false)
-        					.queue();
+        				blob.setCurrent(false);
         			}
         		}
         	}
