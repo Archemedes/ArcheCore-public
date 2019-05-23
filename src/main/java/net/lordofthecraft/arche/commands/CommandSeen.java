@@ -33,7 +33,7 @@ public class CommandSeen extends CommandTemplate {
 		validate(!ac.getKnownAliases(u).isEmpty(), "Player has not logged in to this server");
 		
 		var aah = ac.getAccountHandler();
-		aah.loadAccount(u).then(acc->printout(s,acc).send(s));
+		aah.loadAccount(u).then(acc->printout(s,acc,u).send(s));
 	}
 
 	private boolean cooldown() {
@@ -49,9 +49,9 @@ public class CommandSeen extends CommandTemplate {
 		return true;
 	}
 
-	private ChatBuilder printout(CommandSender s, Account account) {
+	private ChatBuilder printout(CommandSender s, Account account, UUID calledBy) {
 		var b = new ChatBuilder();
-		String mainName = account.getName();
+		String mainName = ArcheCore.getControls().getPlayerNameFromUUID(calledBy);
 		
 		b.append(mainName).color(DARK_AQUA).bold().append(" is ").reset().color(GRAY);
 		long ls = account.getLastSeen();
@@ -62,17 +62,19 @@ public class CommandSeen extends CommandTemplate {
 		else b.append("Offline").color(DARK_PURPLE);
 		b.append(" since ").color(GRAY).append(lastSeen).newline();
 
-		var aka = getAka(account);
-		aka.remove(mainName);
-		if(!aka.isEmpty()) {
-			b.append("AKA: ").color(GRAY);
-			boolean j = true;
-			for(String a : aka) {
-				if(j) j = false;
-				else b.append(", ").color(WHITE);
-				b.append(a).color(YELLOW);
+		if(s.hasPermission("archecore.mod")) {
+			var aka = getAka(account);
+			aka.remove(mainName);
+			if(!aka.isEmpty()) {
+				b.append("AKA: ").color(GRAY);
+				boolean j = true;
+				for(String a : aka) {
+					if(j) j = false;
+					else b.append(", ").color(WHITE);
+					b.append(a).color(YELLOW);
+				}
+				b.newline();
 			}
-			b.newline();
 		}
 		
 		if(account.hasForumId()) b.append("Forum Account: ").color(GRAY)
@@ -85,23 +87,24 @@ public class CommandSeen extends CommandTemplate {
 		if(weekMs > 0) b.append("Played ").color(GRAY).append(TimeUtil.printMillis(weekMs)).append(" in the last week.");
 
 		for(var ps : account.getPersonas()) {
-			b.newline().append(" - ").color(GRAY).append(ps.getName());
-
-			if(ps.isCurrent()) b.color(GREEN).append(": Active persona!");
-			else {
-				long since = System.currentTimeMillis() - ps.getLastSeen();
-				
-				//Don't make time needlessly precise
-				if(since > TimeUnit.HOURS.toMillis(1)) since -= (since % (60l*60l*1000l));
-				else since -= (since % 60000l);
-				
-				b.color(YELLOW).append(": Seen ").color(GRAY);
-				if(ps.getLastSeen() == 0) b.append("never").color(WHITE);
-				else if(since == 0) b.append("just now").color(WHITE);
-				else b.append(TimeUtil.printMillis(since)).append( " ago");
+			if(ps.getPlayerUUID().equals(calledBy) || s.hasPermission("archecore.mod.persona")) {
+				b.newline().append(" - ").color(GRAY).append(ps.getName());
+	
+				if(ps.isCurrent()) b.color(GREEN).append(": Active persona!");
+				else {
+					long since = System.currentTimeMillis() - ps.getLastSeen();
+					
+					//Don't make time needlessly precise
+					if(since > TimeUnit.HOURS.toMillis(1)) since -= (since % (60l*60l*1000l));
+					else since -= (since % 60000l);
+					
+					b.color(YELLOW).append(": Seen ").color(GRAY);
+					if(ps.getLastSeen() == 0) b.append("never").color(WHITE);
+					else if(since == 0) b.append("just now").color(WHITE);
+					else b.append(TimeUtil.printMillis(since)).append( " ago");
+				}
+				b.color(GRAY);
 			}
-			b.color(GRAY);
-
 		}
 
 		return b;
