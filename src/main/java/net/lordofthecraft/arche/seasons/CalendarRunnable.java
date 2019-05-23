@@ -51,12 +51,12 @@ public class CalendarRunnable extends BukkitRunnable
     }
     
    @SuppressWarnings("deprecation")
-	void refreshAllChunks() {
-	   worlds.values().stream()
-	   .filter(Objects::nonNull)
-	   .forEach(w->Arrays.stream(w.getLoadedChunks())
-			   .forEach(c->w.refreshChunk(c.getX(), c.getZ()))
-			   );
+   void refreshAllChunks() {
+  	 worlds.values().stream()
+  	 .filter(Objects::nonNull)
+  	 .forEach(w->Arrays.stream(w.getLoadedChunks())
+  			 .forEach(c->w.refreshChunk(c.getX(), c.getZ()))
+  			 );
    }
     
     @Override

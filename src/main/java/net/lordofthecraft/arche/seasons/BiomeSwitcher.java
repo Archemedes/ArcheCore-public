@@ -13,6 +13,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 
+import lombok.Getter;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 
@@ -66,6 +67,10 @@ public class BiomeSwitcher{
 				}).start();
 	}
 
+	boolean shouldSwitchBiomes() {
+		return switchBiomes;
+	}
+	
 	public void setWinter(final boolean winter) {
 		this.winter.set(winter);
 		CoreLog.debug("Setting us to Winter: " + winter);

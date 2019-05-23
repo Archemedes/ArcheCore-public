@@ -63,10 +63,10 @@ public class LotcianCalendar {
         		
         		if(month.getSeason() == Season.WINTER && month.nextMonth().getSeason() != Season.WINTER) {
         			switcher.setWinter(false);
-        			runnable.refreshAllChunks();
+        			if(switcher.shouldSwitchBiomes()) runnable.refreshAllChunks();
         		} else if(month.getSeason() != Season.WINTER && month.nextMonth().getSeason() == Season.WINTER) {
         			switcher.setWinter(true);
-        			runnable.refreshAllChunks();
+        			if(switcher.shouldSwitchBiomes()) runnable.refreshAllChunks();
         		}
 
         		month = month.nextMonth();
