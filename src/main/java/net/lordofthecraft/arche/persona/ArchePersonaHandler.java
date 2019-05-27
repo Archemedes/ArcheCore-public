@@ -429,11 +429,11 @@ public class ArchePersonaHandler implements PersonaHandler {
 		} else if (op.isLoaded() && p.getTotalPlaytime() < ArcheCore.getPlugin().getNewbieProtectDelay()) {
 			Player player = p.getPlayer();
 			if (player != null && !player.hasPermission("archecore.persona.nonnewbie"))
-				return new TextComponent(ChatColor.LIGHT_PURPLE + "((Persona was recently made and can't engage in PvP))");
+				return new TextComponent(ChatColor.AQUA + "((Persona was recently made and can't engage in PvP))");
 			else
 				return new TextComponent(op.getPersonaType().personaViewLine);
 		} else if (op.isLoaded() && p.isNewbie()) {
-				return new TextComponent(ChatColor.AQUA + "((This player is new to the server))");
+				return new TextComponent(ChatColor.LIGHT_PURPLE + "((This player is new to the server))");
 		} else if(op.isLoaded() && op.getPersona().getPlayer() != whosAsking && !canPerceive(op.getPersona(), whosAsking)) {
 			return new TextComponent(ChatColor.DARK_GRAY + "((Persona is disguised and cannot be recognized by you))");
 		} else if(op.isLoaded() && op.getPersona().getPlayer() != whosAsking && op.getPersona().attributes().getAttributeValue(AttributeRegistry.SHROUD) > 0) {
