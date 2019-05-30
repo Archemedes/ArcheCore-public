@@ -50,7 +50,8 @@ public class CommandNew extends CommandTemplate {
 		.filter(Persona::isNewbie)
 		.map(Persona::getPlayerName)
 		.forEach(n-> cb.append(" - ").color(GRAY).append(n).color(WHITE)
-				.command("/tp " + n).hover(GRAY+""+ITALIC+"Click to teleport"));
+				.command("/tp " + n).hover(GRAY+""+ITALIC+"Click to teleport").newline());
+		msg(cb.build());
 	}
 	
 	@Cmd("Notifies when a new player joins the server.")
