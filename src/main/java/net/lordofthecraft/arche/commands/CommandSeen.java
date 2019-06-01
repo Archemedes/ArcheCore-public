@@ -58,8 +58,15 @@ public class CommandSeen extends CommandTemplate {
 		long elapsed = ls == 0? 0 : System.currentTimeMillis() - account.getLastSeen();
 		elapsed -= (elapsed % 60000l); //this way it wont show seconds
 		BaseComponent lastSeen = TimeUtil.printMillis(elapsed);
-		if(canSeeOnline(s,account.getPlayer())) b.append("Online").color(GREEN);
-		else b.append("Offline").color(DARK_PURPLE);
+		Player them = account.getPlayer();
+		
+		if(s.hasPermission("archecore.mod") && them != null && ArcheCore.getControls().isAfk(them))
+			b.append("AFK").color(DARK_GRAY);
+		else if(canSeeOnline(s,them))
+			b.append("Online").color(GREEN);
+		else
+			b.append("Offline").color(DARK_PURPLE);
+		
 		b.append(" since ").color(GRAY).append(lastSeen).newline();
 
 		if(s.hasPermission("archecore.mod")) {
