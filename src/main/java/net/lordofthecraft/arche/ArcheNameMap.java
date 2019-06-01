@@ -72,7 +72,9 @@ public class ArcheNameMap {
     	}
     	
     	var l1 = idToName.get(u);
-    	if( l1.indexOf(n) != (l1.size() - 1) ) { //Name is NOT in the bottom slot of the list
+    	int nameIndex = l1.indexOf(n);
+    	int bottomSpot = l1.size() - 1;
+    	if( nameIndex == -1 || nameIndex != bottomSpot ) {
     		//It must be updated
     		insert = true;
     		//If name was in another slot of the list we must change ordering in the SQLite table (by deleting and re-inserting)
