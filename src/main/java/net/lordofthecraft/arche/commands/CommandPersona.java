@@ -341,6 +341,12 @@ public class CommandPersona implements CommandExecutor {
                 } else if (cmd == PersonaCommand.OPENINV) {
                     if (sender instanceof Player) {
                         Player pl = (Player) sender;
+                        
+                        if(pl.getUniqueId().equals(pers.getPlayerUUID())) {
+                        	sender.sendMessage(ChatColor.RED + "You cannot use this on one of your own personas");
+                        	return true;
+                        }
+                        
                         pl.closeInventory();
                         sender.sendMessage(ChatColor.AQUA + "Opening inventory contents for " + pers.getName() + ".");
                         pl.openInventory(pers.getInventory());
