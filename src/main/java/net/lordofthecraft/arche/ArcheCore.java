@@ -496,13 +496,13 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		String persHelp = ChatColor.YELLOW + "Your " + ChatColor.ITALIC + "Persona" + ChatColor.YELLOW + " is an uncouth sailor, fair Elven maiden or parent-slaying Orc. " +
 				"in Lord of the Craft, you speak and act as your current Persona, and know only what they know." +
 				div + ChatColor.GREEN + "Once accepted, creating your Persona is the first step of your adventure."
-				+ " You can later remove or create new Personas by using the $/me$ " + ChatColor.GREEN + " command.";
+				+ " You can later remove or create new Personas by using the $/menu$ " + ChatColor.GREEN + " command.";
 
 		String commandHelp = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Your essential commands are as follows: "
 				+ div + ChatColor.GRAY + "" + ChatColor.ITALIC +  (helpOverriden? "$/help$":"$/archehelp$") + ChatColor.GRAY + ": Provides a useful database of help topics.\n"
 				+ ChatColor.GOLD + "" + ChatColor.ITALIC + "$/helpmenu$" + ChatColor.GOLD + ": The same help topics, provided in a menu form.\n"
 				+ ChatColor.BLUE + "" + ChatColor.ITALIC + "$/persona$" + ChatColor.BLUE + ": See others' Personas and modify your own.\n"
-				+ ChatColor.DARK_GREEN+ "" + ChatColor.ITALIC + "$/me$"+ChatColor.DARK_GREEN+": Opens the Persona selection menu";
+				+ ChatColor.DARK_GREEN+ "" + ChatColor.ITALIC + "$/menu$"+ChatColor.DARK_GREEN+": Opens the Persona selection menu";
 
 		/*
         String profession = ChatColor.GRAY + "/persona profession [skill]: " + ChatColor.GOLD + "Select a profession.\n"
