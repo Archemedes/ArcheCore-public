@@ -4,8 +4,10 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 
 import co.lotc.core.bukkit.util.ItemUtil;
+import lombok.Value;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.interfaces.Economy;
 import net.lordofthecraft.arche.interfaces.IConsumer;
@@ -52,6 +54,12 @@ public class ArcheEconomy implements Economy {
 	public double getBalance(Persona p){
 		return ((ArchePersona) p).money;
 	}
+	
+	
+	@Override
+	public void setPersona(Persona p, double amount, Plugin plugin, String reason) {
+		setPersona(p, amount, new SimpleTransaction(plugin.getName(), reason));
+	}
 
 	@Override
 	public void setPersona(Persona p, double amount, Transaction transaction) {
@@ -62,6 +70,11 @@ public class ArcheEconomy implements Economy {
 	}
 
 	@Override
+	public void depositPersona(Persona p, double amount, Plugin plugin, String reason) {
+		depositPersona(p, amount, new SimpleTransaction(plugin.getName(), reason));
+	}
+	
+	@Override
 	public void depositPersona(Persona p, double amount, Transaction transaction) {
 		double before = getBalance(p);
 		((ArchePersona) p).money += amount;
@@ -69,6 +82,11 @@ public class ArcheEconomy implements Economy {
 		consumer.queueRow(new TransactionRow(p, transaction, TransactionType.DEPOSIT, amount, before, getBalance(p)));
 	}
 
+	@Override
+	public void withdrawPersona(Persona p, double amount, Plugin plugin, String reason) {
+		withdrawPersona(p, amount, new SimpleTransaction(plugin.getName(), reason));
+	}
+	
 	@Override
 	public void withdrawPersona(Persona p, double amount, Transaction transaction) {
 		double before = getBalance(p);
@@ -110,5 +128,10 @@ public class ArcheEconomy implements Economy {
 		i.setItemMeta(im);
 		ItemUtil.setCustomTag(i, "mina", amt+"");
 		return i;
+	}
+	
+	@Value
+	private static class SimpleTransaction implements Transaction {
+		String registeringPluginName, cause;
 	}
 }
