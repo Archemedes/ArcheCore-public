@@ -26,11 +26,9 @@ public class NewbieProtectListener implements Listener {
 	public static final Set<UUID> bonusProtects = Sets.newHashSet();
 	
 	private final ArchePersonaHandler handler;
-	private final int protectDuration;
 	
-	public NewbieProtectListener(ArchePersonaHandler handler, int duration){
+	public NewbieProtectListener(ArchePersonaHandler handler){
 		this.handler = handler;
-		protectDuration = duration;
 	}
 	
 	
@@ -89,7 +87,7 @@ public class NewbieProtectListener implements Listener {
 	
 	public boolean isNewbie(Player p){
 		ArchePersona pers = handler.getPersona(p);
-		return (!p.hasPermission("archecore.persona.nonnewbie") && pers != null && pers.getTimePlayed() < protectDuration);
+		return (!p.hasPermission("archecore.persona.nonnewbie") && pers.shouldProtectNewbie());
 	}
 	
 	private void barrier(Player target, Player damager){

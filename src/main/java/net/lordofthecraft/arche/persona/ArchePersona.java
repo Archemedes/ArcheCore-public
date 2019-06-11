@@ -489,23 +489,47 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	}
 	
 	@Override
+	public boolean shouldProtectNewbie() {
+		return attributes().hasModifier(AttributeRegistry.HUNGER, newbieProtectAttribute());
+	}
+	
+	@Override
 	public void setNewbie(boolean newbie) {
-		if(!doNewbie()) return;
 		
-		if(newbie) attributes().addModifier(AttributeRegistry.HUNGER, newbieAttribute());
-		else attributes().removeModifier(AttributeRegistry.HUNGER, newbieAttribute());
+		if(newbie) {
+			if(doNewbie()) attributes().addModifier(AttributeRegistry.HUNGER, newbieAttribute());
+			if(doProtectNewbie()) attributes().addModifier(AttributeRegistry.HUNGER, newbieProtectAttribute());
+		} else {
+			attributes().removeModifier(AttributeRegistry.HUNGER, newbieAttribute());
+			attributes().removeModifier(AttributeRegistry.HUNGER, newbieProtectAttribute());
+		}
+	}
+	
+	private boolean doProtectNewbie() {
+		return ArcheCore.getPlugin().getNewbieProtectDelay() > 0;
 	}
 	
 	private boolean doNewbie() {
 		return ArcheCore.getPlugin().getNewbieNotificationDelay() > 0;
 	}
 	
+	private AttributeModifier newbieProtectAttribute() {
+		long timeInTicks = 20L * 60L * ArcheCore.getPlugin().getNewbieProtectDelay();
+		return new ModifierBuilder()
+				.uuid(UUID.fromString("fff5713f-8da2-49e3-8ffb-57bad2a5a167"))
+				.name("Newbie Protection")
+				.amount(-0.75)
+				.operation(Operation.ADD_SCALAR)
+				.withDecayStrategy(Decay.ACTIVE, timeInTicks)
+				.create();
+	}
+	
 	private AttributeModifier newbieAttribute() {
 		long timeInTicks = 20L * 60L * ArcheCore.getPlugin().getNewbieNotificationDelay();
 		return new ModifierBuilder()
 				.uuid(UUID.fromString("fff5713f-8da2-49e3-8ffb-57bad2a5a166"))
-				.name("Newbie Protection")
-				.amount(-0.80)
+				.name("Newbie Indication")
+				.amount(-0.05)
 				.operation(Operation.ADD_SCALAR)
 				.withDecayStrategy(Decay.ACTIVE, timeInTicks)
 				.create();

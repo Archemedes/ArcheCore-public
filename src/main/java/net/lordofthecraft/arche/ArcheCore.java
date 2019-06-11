@@ -483,7 +483,7 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		}
 
 		if(newbieProtectDelay > 0)
-			pm.registerEvents(new NewbieProtectListener(personaHandler, newbieProtectDelay), this);
+			pm.registerEvents(new NewbieProtectListener(personaHandler), this);
 
 		if(usesEconomy() && economy.getFractionLostOnDeath() > 0.0d)
 			pm.registerEvents(new EconomyListener(economy), this);
@@ -795,11 +795,6 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 
 	public ArcheCore getInstance(){
 		return instance;
-	}
-
-	@Override
-	public int getNewbieDelay() {
-		return newbieProtectDelay;
 	}
 
 	@Override

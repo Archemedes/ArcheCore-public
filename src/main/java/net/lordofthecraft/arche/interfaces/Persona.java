@@ -147,6 +147,7 @@ public interface Persona extends OfflinePersona {
 	 * Retrieve the Player to which this Persona belongs, but only if the Player is online.
 	 * @return The Player belonging to this character, or null if the player is not online
 	 */
+	@Override
 	Player getPlayer();
 
 	/**
@@ -204,6 +205,8 @@ public interface Persona extends OfflinePersona {
 	 */
 	boolean isNewbie();
 
+	boolean shouldProtectNewbie();
+	
 	void setNewbie(boolean newbie);
 	
 	/**

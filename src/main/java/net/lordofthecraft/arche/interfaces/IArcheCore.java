@@ -220,11 +220,6 @@ public interface IArcheCore {
 	World getNewPersonaWorld();
 
 	/**
-	 * @return The new persona shield delay, if larger than 0
-	 */
-	int getNewbieDelay();
-
-	/**
 	 * If enabled, new Personas receive Newbie protection which exempts them from mechanical PvP for a set period of playtime
 	 * @return Minutes of PvP invulnerability time, in minutes
 	 */

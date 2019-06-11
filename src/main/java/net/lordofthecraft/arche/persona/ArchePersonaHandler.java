@@ -426,7 +426,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		Persona p = op.getPersona();
 		if (op.getPersonaType() != PersonaType.NORMAL) {
 			return new TextComponent(op.getPersonaType().personaViewLine);
-		} else if (op.isLoaded() && p.getTotalPlaytime() < ArcheCore.getPlugin().getNewbieProtectDelay()) {
+		} else if (op.isLoaded() && p.shouldProtectNewbie()) {
 			Player player = p.getPlayer();
 			if (player != null && !player.hasPermission("archecore.persona.nonnewbie"))
 				return new TextComponent(ChatColor.AQUA + "((Persona was recently made and can't engage in PvP))");
