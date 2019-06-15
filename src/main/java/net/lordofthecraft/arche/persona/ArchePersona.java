@@ -17,6 +17,7 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -26,6 +27,7 @@ import org.bukkit.potion.PotionEffect;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import co.lotc.core.bukkit.util.Run;
 import co.lotc.core.bukkit.util.WeakBlock;
 import lombok.Getter;
 import net.lordofthecraft.arche.ArcheCore;
@@ -404,9 +406,11 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 		//Teleport the Player to the new Persona's stored location
 		if(location != null) {
-			Bukkit.getScheduler().runTaskLater(ArcheCore.getPlugin(),
-					() -> p.teleport(location.toLocation().add(0.5, 0.5, 0.5))
-					, 3);
+			Run.as(ArcheCore.getPlugin()).delayed(2, ()->{
+				Entity vehicle = p.getVehicle();
+				if(vehicle != null) vehicle.removePassenger(p);
+				p.teleport(location.toLocation().add(0.5, 0.5, 0.5));
+			});
 		}
 
 		//Do we protect incase of bad teleport?
