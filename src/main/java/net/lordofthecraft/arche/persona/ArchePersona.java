@@ -490,6 +490,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 	
 	@Override
 	public boolean shouldProtectNewbie() {
+		if(!doProtectNewbie()) return false;
 		return attributes().hasModifier(AttributeRegistry.HUNGER, newbieProtectAttribute());
 	}
 	
@@ -500,8 +501,8 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 			if(doNewbie()) attributes().addModifier(AttributeRegistry.HUNGER, newbieAttribute());
 			if(doProtectNewbie()) attributes().addModifier(AttributeRegistry.HUNGER, newbieProtectAttribute());
 		} else {
-			attributes().removeModifier(AttributeRegistry.HUNGER, newbieAttribute());
-			attributes().removeModifier(AttributeRegistry.HUNGER, newbieProtectAttribute());
+			if(doNewbie()) attributes().removeModifier(AttributeRegistry.HUNGER, newbieAttribute());
+			if(doProtectNewbie()) attributes().removeModifier(AttributeRegistry.HUNGER, newbieProtectAttribute());
 		}
 	}
 	
