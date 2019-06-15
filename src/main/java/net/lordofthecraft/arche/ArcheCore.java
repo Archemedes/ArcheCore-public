@@ -532,22 +532,27 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		FileConfiguration c = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "helpfiles.yml"));
 		for(String key : c.getKeys(false)){
 			if(c.isConfigurationSection(key)){
-				ConfigurationSection section = c.getConfigurationSection(key);
-				String name = section.isString("topic")? section.getString("topic") : key;
-				String permission = section.isString("permission") ? section.getString("permission") : "archecore.mayuse";
+				try {
+					ConfigurationSection section = c.getConfigurationSection(key);
+					String name = section.isString("topic")? section.getString("topic") : key;
+					String permission = section.isString("permission") ? section.getString("permission") : "archecore.mayuse";
 
-				String desc = null;
-				if (section.isString("content")) desc = section.getString("content").replace('&', ChatColor.COLOR_CHAR);
-				else continue;
+					String desc = null;
+					if (section.isString("content")) desc = section.getString("content").replace('&', ChatColor.COLOR_CHAR);
+					else continue;
 
-				if(section.isString("icon")){
-					try{
-						Material m = Material.valueOf(section.getString("icon"));
-						addHelp(name, desc, m, permission);
-					}catch(IllegalArgumentException e){
-						addHelp(name, desc, permission);
-					}
-				} else addHelp(name, desc, permission);
+					if(section.isString("icon")){
+						try{
+							Material m = Material.valueOf(section.getString("icon"));
+							addHelp(name, desc, m, permission);
+						}catch(IllegalArgumentException e){
+							addHelp(name, desc, permission);
+						}
+					} else addHelp(name, desc, permission);
+				} catch(Exception e) {
+					CoreLog.severe("Couldn't parse a section from helpfiles.yaml: " + key);
+					CoreLog.severe("Reason: " + e.getMessage());
+				}
 			}
 		}
 
@@ -557,15 +562,20 @@ public class ArcheCore extends JavaPlugin implements IArcheCore {
 		c = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "infofiles.yml"));
 		for(String key : c.getKeys(false)){
 			if(c.isConfigurationSection(key)){
-				ConfigurationSection section = c.getConfigurationSection(key);
-				String name = section.isString("topic")? section.getString("topic") : key;
-				String permission = section.isString("permission") ? section.getString("permission") : "archecore.mayuse";
+				try {
+					ConfigurationSection section = c.getConfigurationSection(key);
+					String name = section.isString("topic")? section.getString("topic") : key;
+					String permission = section.isString("permission") ? section.getString("permission") : "archecore.mayuse";
 
-				String desc = null;
-				if (section.isString("content")) desc = section.getString("content").replace('&', ChatColor.COLOR_CHAR);
-				else continue;
+					String desc = null;
+					if (section.isString("content")) desc = section.getString("content").replace('&', ChatColor.COLOR_CHAR);
+					else continue;
 
-				addInfo(name, desc, permission);
+					addInfo(name, desc, permission);
+				} catch(Exception e) {
+					CoreLog.severe("Couldn't parse a section from infofiles.yaml: " + key);
+					CoreLog.severe("Reason: " + e.getMessage());
+				}
 			}
 		}
 
