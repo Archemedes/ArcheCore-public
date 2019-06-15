@@ -54,10 +54,10 @@ public class CommandSeen extends CommandTemplate {
 		String mainName = ArcheCore.getControls().getPlayerNameFromUUID(calledBy);
 		
 		b.append(mainName).color(DARK_AQUA).bold().append(" is ").reset().color(GRAY);
-		long ls = account.getLastSeen();
-		long elapsed = ls == 0? 0 : System.currentTimeMillis() - account.getLastSeen();
+		
+		long elapsed = System.currentTimeMillis() - account.getLastSeen();
 		elapsed -= (elapsed % 60000l); //this way it wont show seconds
-		BaseComponent lastSeen = TimeUtil.printMillis(elapsed);
+		BaseComponent lastSeen = TimeUtil.printMillis(elapsed); //Will show 'unknown' on very high values (>10 yrs)
 		Player them = account.getPlayer();
 		
 		if(s.hasPermission("archecore.mod") && them != null && ArcheCore.getControls().isAfk(them))
