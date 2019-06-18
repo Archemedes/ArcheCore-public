@@ -1,40 +1,15 @@
 package net.lordofthecraft.arche.persona;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.attribute.AttributeModifier.Operation;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.potion.PotionEffect;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
 import co.lotc.core.bukkit.util.Run;
 import co.lotc.core.bukkit.util.WeakBlock;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import lombok.Getter;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.CoreLog;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
-import net.lordofthecraft.arche.attributes.ModifierBuilder;
 import net.lordofthecraft.arche.attributes.ExtendedAttributeModifier.Decay;
+import net.lordofthecraft.arche.attributes.ModifierBuilder;
 import net.lordofthecraft.arche.enums.PersonaType;
 import net.lordofthecraft.arche.enums.Race;
 import net.lordofthecraft.arche.event.persona.PersonaFatigueEvent;
@@ -49,6 +24,29 @@ import net.lordofthecraft.arche.save.PersonaTable;
 import net.lordofthecraft.arche.save.rows.persona.NamelogRow;
 import net.lordofthecraft.arche.save.rows.persona.UpdatePersonaRow;
 import net.lordofthecraft.arche.skin.ArcheSkin;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.attribute.AttributeModifier.Operation;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.potion.PotionEffect;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public final class ArchePersona extends ArcheOfflinePersona implements Persona, InventoryHolder {
 
@@ -406,11 +404,9 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 
 		//Teleport the Player to the new Persona's stored location
 		if(location != null) {
-			Run.as(ArcheCore.getPlugin()).delayed(2, ()->{
-				Entity vehicle = p.getVehicle();
-				if(vehicle != null) vehicle.removePassenger(p);
-				p.teleport(location.toLocation().add(0.5, 0.5, 0.5));
-			});
+			Entity vehicle = p.getVehicle();
+			if(vehicle != null) vehicle.removePassenger(p);
+			Run.as(ArcheCore.getPlugin()).delayed(2, ()-> p.teleport(location.toLocation().add(0.5, 0.5, 0.5)));
 		}
 
 		//Do we protect incase of bad teleport?
