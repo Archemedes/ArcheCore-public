@@ -1,25 +1,9 @@
 package net.lordofthecraft.arche.commands;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-
-import com.google.common.collect.Lists;
-
+import co.lotc.core.bukkit.convo.ChatStream;
+import co.lotc.core.bukkit.util.ChatBuilder;
 import co.lotc.core.util.MessageUtil;
+import com.google.common.collect.Lists;
 import net.lordofthecraft.arche.ArcheCore;
 import net.lordofthecraft.arche.attributes.AttributeRegistry;
 import net.lordofthecraft.arche.enums.PersonaType;
@@ -33,6 +17,22 @@ import net.lordofthecraft.arche.persona.TagAttachment;
 import net.lordofthecraft.arche.util.CommandUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class CommandPersona implements CommandExecutor {
 	private final HelpDesk helpdesk;
@@ -285,10 +285,23 @@ public class CommandPersona implements CommandExecutor {
                         sender.sendMessage(ChatColor.RED + "Don't delete yourself by mistake friend!");
                         return true;
                     }
-
-                    opers.remove();
-                    sender.sendMessage(ChatColor.AQUA + "You have permakilled Persona " + ChatColor.WHITE + opers.getName() + ChatColor.AQUA + " belonging to " + ChatColor.WHITE + opers.getPlayerName());
-                    return true;
+                    if (!(sender instanceof Player)) {
+                    	return true;
+                    }
+	                OfflinePersona finalOpers = opers;
+                    BaseComponent baseComponent = new ChatBuilder("Are you sure you want to permakill ").color(ChatColor.WHITE)
+		                    .append(finalOpers.getName()).color(ChatColor.AQUA)
+		                    .append(" belonging to ").color(ChatColor.WHITE)
+		                    .append(finalOpers.getPlayerName()).color(ChatColor.WHITE)
+		                    .append("? Type ").color(ChatColor.WHITE)
+		                    .append("YES").color(ChatColor.RED)
+		                    .append(" in all caps to confirm.").color(ChatColor.WHITE)
+		                    .build();
+	                new ChatStream((Player) sender).confirmPrompt(baseComponent, "YES").activate((context -> {
+	                    finalOpers.remove();
+	                    sender.sendMessage(ChatColor.AQUA + "You have permakilled Persona " + ChatColor.WHITE + finalOpers.getName() + ChatColor.AQUA + " belonging to " + ChatColor.WHITE + finalOpers.getPlayerName());
+                    }));
+	                return true;
                 }
             } else {
                 if (!opers.isLoaded()) {
