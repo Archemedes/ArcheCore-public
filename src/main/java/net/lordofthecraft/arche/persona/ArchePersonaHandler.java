@@ -484,7 +484,7 @@ public class ArchePersonaHandler implements PersonaHandler {
 		result.add(new ComponentBuilder("Click for less...")
 				.color(ChatColor.GRAY.asBungee())
 				.italic(true)
-				.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pers view " + p.getPlayerName() + "@" + p.getSlot()))
+				.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/persona view " + p.getPlayerName() + "@" + p.getSlot()))
 				.event(MessageUtil.hoverEvent(HoverEvent.Action.SHOW_TEXT, "Click to show basic persona information."))
 				.create()[0]);
 		return result;
