@@ -336,7 +336,7 @@ public final class ArchePersona extends ArcheOfflinePersona implements Persona, 
 		inv = PersonaInventory.store(this);
 		inv.saveDiff(); //Queues row. Must be done before the replace statement below
 		
-		location = new WeakBlock(p.getLocation());
+		location = new WeakBlock(p.getLocation().add(0, 0.2, 0));
 		String pots = savePotionEffects(p);
 		CoreLog.debug("Player world is " + p.getWorld().getName() + " which has a UID of " + p.getWorld().getUID().toString());
 		
