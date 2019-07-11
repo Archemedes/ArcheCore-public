@@ -58,10 +58,10 @@ public class CommandNew extends CommandTemplate {
 	public void notify(Player p) {
 		if(willNotify(p)) {
 			NEWBIE_LISTENERS.remove(p.getUniqueId());
-			msg(LIGHT_PURPLE + "Will now notify you when new players join");
+			msg(DARK_PURPLE + "Will no longer notify you when new players join");
 		} else {
 			NEWBIE_LISTENERS.add(p.getUniqueId());
-			msg(DARK_PURPLE + "Will no longer notify you when new players join");
+			msg(LIGHT_PURPLE + "Will now notify you when new players join");
 		}
 	}
 	
@@ -77,7 +77,7 @@ public class CommandNew extends CommandTemplate {
 	
 	public void notifyListenersIfNew(Player p) {
 		if(isNew(p) && !NEWBIE_LISTENERS.isEmpty()) {
-			val cb = new ChatBuilder("The new player").color(LIGHT_PURPLE)
+			val cb = new ChatBuilder("The new player ").color(LIGHT_PURPLE)
 					.command("/tp " + p.getName()).hover(GRAY+""+ITALIC+"Click to teleport")
 					.append(p.getName()).color(WHITE).append(" has joined.").color(LIGHT_PURPLE)
 					.build();
