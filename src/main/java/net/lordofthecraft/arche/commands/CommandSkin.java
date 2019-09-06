@@ -43,8 +43,31 @@ public class CommandSkin implements CommandExecutor {
 		}
 
 		Player p = (Player) sender;
-
 		int maxAllowed = maxAllowed(p);
+
+		if(args.length == 0 || arg(args[0],"help")) {
+			help(p, "list", "Lists your stored skins.");
+			help(p, "use [id]", "Use the skin saved in slot [id].");
+			help(p, "clear", "Stop using a stored skin for this Persona.");
+			help(p, "store [id] [label]", "Store a skin in slot [id] with any label.");
+			help(p, "delete [id]", "Delete a skin from your stored skins.");
+
+			p.sendMessage(ChatColor.GRAY+""+ChatColor.ITALIC + "\nYou are allowed to store " + maxAllowed + " skins.");
+			return true;
+		} else if(arg(args[0],"delete","remove","del","rm")) {
+			try {
+				Persona pers = plugin.getPersonaHandler().getPersona(p);
+				if(pers != null) cache.clearSkin(pers);
+
+				int i = Integer.parseInt(args[1]);
+				boolean result = cache.removeSkin(p.getUniqueId(), i);
+				if(result)p.sendMessage(ChatColor.GOLD + "successfully cleared the skin file in slot: " + ChatColor.RESET + i);
+				else p.sendMessage(ChatColor.DARK_PURPLE + "There was no skin to be removed in that slot!");
+				return true;
+			} catch (NumberFormatException | IndexOutOfBoundsException e) {
+				return false;
+			}
+		}
 
 		if (maxAllowed == 0) {
 			BaseComponent msg = new TextComponent("Please purchase a VIP rank to use automatic skin switching. Click here to visit the store.");
@@ -55,16 +78,7 @@ public class CommandSkin implements CommandExecutor {
 			return true;
 		}
 		
-		if(args.length == 0 || arg(args[0],"help")) {
-			help(p, "list", "Lists your stored skins.");
-			help(p, "use [id]", "Use the skin saved in slot [id].");
-			help(p, "clear", "Stop using a stored skin for this Persona.");
-			help(p, "store [id] [label]", "Store a skin in slot [id] with any label.");
-			help(p, "delete [id]", "Delete a skin from your stored skins.");
-
-			p.sendMessage(ChatColor.GRAY+""+ChatColor.ITALIC + "\nYou are allowed to store " + maxAllowed + " skins.");
-			return true;
-		} else if( arg(args[0], "view", "list", "ls", "show")) {
+		if( arg(args[0], "view", "list", "ls", "show")) {
 			p.sendMessage(ChatColor.AQUA + "Now showing you your personal skin storage:");
 			for(int i = 1; i <= maxAllowed; i++) {
 				BaseComponent msg = new TextComponent("[" + i + "] ");
@@ -86,18 +100,6 @@ public class CommandSkin implements CommandExecutor {
 				p.spigot().sendMessage(msg);
 			}
 			return true;
-		} else if(arg(args[0],"delete","remove","del","rm")) {
-			try {
-				Persona pers = plugin.getPersonaHandler().getPersona(p);
-				if(pers != null) cache.clearSkin(pers);
-
-				int i = Integer.parseInt(args[1]);
-				boolean result = cache.removeSkin(p.getUniqueId(), i);
-				if(result)p.sendMessage(ChatColor.GOLD + "successfully cleared the skin file in slot: " + ChatColor.RESET + i);
-				else p.sendMessage(ChatColor.DARK_PURPLE + "There was no skin to be removed in that slot!");
-			} catch (NumberFormatException | IndexOutOfBoundsException e) {
-				return false;
-			}
 		} else if(arg(args[0],"save","store")) {
 			try {
 				int i = Integer.parseInt(args[1]);
