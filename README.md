@@ -1,5 +1,14 @@
-Lord of the Craft's ArcheCore. For usage on The Lord of the Craft and all LotC mediums.
+# ArcheCore
+The one true framework
 
-Depends on ProtocolLib and the Spigot API (likely the latest version). No versions of spigot are supported apart from the current one. Access to this source code does not mean you are licensed to use it.
+## About
+ArcheCore runs much of Lord of the Craft's major features, including;
+* Personas
+* Economy
+* Custom attributes for personas
+* Custom data tags for personas
+* Seasons
+* And much more
 
-Author and Owner is Sproadic on LotC. Contributers forfeit any ownership on code they commit.
+## API Access
+In order to begin retrieving data from ArcheCore much of it is available through the method `ArcheCore.getControls()`
