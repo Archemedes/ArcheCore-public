@@ -1,11 +1,18 @@
 package net.lordofthecraft.arche.persona;
 
-import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Objects;
-
+import co.lotc.core.util.MessageUtil;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import net.lordofthecraft.arche.ArcheCore;
+import net.lordofthecraft.arche.CoreLog;
+import net.lordofthecraft.arche.enums.Race;
+import net.lordofthecraft.arche.interfaces.Persona;
+import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.conversations.BooleanPrompt;
@@ -22,20 +29,11 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import co.lotc.core.util.MessageUtil;
-import net.lordofthecraft.arche.ArcheCore;
-import net.lordofthecraft.arche.CoreLog;
-import net.lordofthecraft.arche.enums.Race;
-import net.lordofthecraft.arche.interfaces.Persona;
-import net.lordofthecraft.arche.listener.PersonaCreationAbandonedListener;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Objects;
 
 public class CreationDialog {
 
@@ -135,7 +133,7 @@ public class CreationDialog {
     	data.put("persona", pers);
 
     	factory.withInitialSessionData(data)
-    	.withFirstPrompt(new ConfirmRemovalPrompt())
+    	.withFirstPrompt(new ConfirmRemovalPrompt(pers.getName()))
     	.buildConversation(p)
     	.begin();
     }
@@ -173,18 +171,22 @@ public class CreationDialog {
                 .withEscapeSequence("/bme");
     }
 
-    private class ConfirmRemovalPrompt extends BooleanPrompt{
+    private class ConfirmRemovalPrompt extends FixedSetPrompt{
+
+        ConfirmRemovalPrompt(String name) {
+            super(name);
+        }
 
         @Override
         public String getPromptText(ConversationContext context) {
             String name = ((ArchePersona) context.getSessionData("persona")).getName();
             return "Are you sure you wish to permakill poor " +
-                    ChatColor.GREEN + name + ChatColor.YELLOW + "?";
+                    ChatColor.GREEN + name + ChatColor.YELLOW + "? Enter their name to proceed.";
         }
 
         @Override
-        protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
-            if(input) return new RemoveExecutedPrompt();
+        protected Prompt acceptValidatedInput(ConversationContext context, String input) {
+            if(isInputValid(context, input)) return new RemoveExecutedPrompt();
             else return Prompt.END_OF_CONVERSATION;
         }
     }
